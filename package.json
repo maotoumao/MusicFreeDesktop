@@ -9,14 +9,22 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx,.js . --fix",
+    "lint-staged": "lint-staged",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": {
     "name": "猫头猫",
     "email": "lhx_xjtu@163.com"
   },
-  "license": "MIT",
+  "license": "GPL",
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js}": [
+      "npm run lint",
+      "git add ."
+    ]
+  },
   "devDependencies": {
     "@babel/core": "^7.22.1",
     "@babel/preset-react": "^7.22.0",
@@ -37,6 +45,8 @@
     "eslint": "^8.41.0",
     "eslint-plugin-import": "^2.27.5",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
     "node-loader": "^2.0.0",
     "node-sass": "^9.0.0",
     "sass-loader": "^13.3.0",
