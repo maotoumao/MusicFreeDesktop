@@ -1,0 +1,36 @@
+.side-bar--list-item-container {
+    $height: 3rem;
+    height: $height;
+    font-size: 1rem;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding-left: 1rem;
+    user-select: none;
+    cursor: pointer;
+    color: var(--textColor);
+
+    & svg {
+        width: 1.6rem;
+        height: 1.6rem;
+        margin-right: 0.5rem;
+    }
+
+    &[data-selected]{
+        &::before {
+            content: "";
+            position: absolute;
+            width: 4px;
+            left: 0;
+            top: 0;
+            height: $height;
+            background-color: var(--primaryColor);
+        }
+
+        & {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+    }
+}
