@@ -1,0 +1,23 @@
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  & .body-container {
+    width: 100%;
+    height: calc(100vh - 54px - 64px);
+    flex: auto;
+    display: flex;
+  }
+}
+
+// 动态主题
+:root {
+  --primaryColor: #66ccff; // 主色调
+  --backgroundColor: #fdfdfd; // 背景色
+  --dividerColor: rgba(0, 0, 0, 0.1); // 分割线颜色
+  --textColor: #333333; // 主文本颜色
+  font-size: 13px;
+}

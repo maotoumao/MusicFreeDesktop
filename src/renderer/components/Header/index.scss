@@ -1,0 +1,137 @@
+.header-container {
+  width: 100vw;
+  height: 54px;
+  background-color: var(--primaryColor);
+  display: flex;
+  box-sizing: border-box;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 16px;
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+  font-size: 1rem;
+
+  & .left-part {
+    display: flex;
+    align-items: center;
+
+    & .logo {
+      width: 142px;
+      height: 1.2rem;
+      color: white;
+      display: flex;
+      align-items: center;
+
+      & svg {
+        height: 1.1rem;
+        width: auto;
+      }
+    }
+
+    & .navigator {
+      height: 40px;
+      -webkit-app-region: none;
+      display: flex;
+      align-items: center;
+
+      & .navigator-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 22px;
+        cursor: pointer;
+        color: white;
+        border: 1px solid rgba($color: #000, $alpha: 0.1);
+
+        &[disabled] {
+            color: #aaa;
+        }
+        & svg {
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    & .search {
+      -webkit-app-region: none;
+      background-color: rgba($color: #000, $alpha: 0.2);
+      position: relative;
+      height: 28px;
+      width: 220px;
+      border-radius: 14px;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      margin-left: 14px;
+
+      & .search-input {
+        flex: auto;
+        font-size: 1rem;
+        line-height: 1.2rem;
+        outline: none;
+        border: none;
+        background-color: transparent;
+        color: white;
+
+        &::placeholder {
+          color: rgba($color: white, $alpha: 0.7);
+          user-select: none;
+        }
+      }
+
+      & .search-submit {
+        $box-size: 1.3em;
+        margin-left: 2px;
+        width: #{$box-size};
+        height: #{$box-size};
+        color: white;
+        opacity: 0.7;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover{
+            opacity: 1;
+        }
+
+        & svg{
+            width: #{$box-size};
+            height: #{$box-size};
+        }
+      }
+    }
+  }
+
+  & .right-part {
+    width: 120px;
+    height: 100%;
+    color: white;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    -webkit-app-region: none;
+    padding-right: 16px;
+
+    & .header-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 20px;
+      opacity: 0.6;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      & svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}

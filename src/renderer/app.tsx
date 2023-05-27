@@ -1,12 +1,19 @@
-import f from '@/common/index';
-import Page from './pages';
+import Page from "./pages";
+import Header from "./components/Header";
 
-export default function App(){
-    return <div>
-        👋{f} This message is being logged by "rendedddrer.js", included via webpack
+import "./app.scss";
+import MusicBar from "./components/MusicBar";
+import SideBar from "./components/SideBar";
+
+export default function App() {
+  return (
+    <div className="app-container">
+      <Header></Header>
+      <div className="body-container">
+        <SideBar></SideBar>
         <Page></Page>
+      </div>
+      <MusicBar></MusicBar>
     </div>
+  );
 }
-
-
-

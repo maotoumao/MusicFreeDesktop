@@ -1,0 +1,11 @@
+.side-bar-container {
+    width: 220px;
+    height: 100%;
+    flex-shrink: 0;
+    flex-grow: 0;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 12px 0;
+    background-color: var(--backgroundColor);
+    border-right:1px solid var(--dividerColor);
+}

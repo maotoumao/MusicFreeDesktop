@@ -1,5 +1,29 @@
-html,body {
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
+html,
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #b2b2b2;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #a0a0a0;
+}
+
+
+::-webkit-scrollbar-thumb:active {
+    background-color: #a0a0a0;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.1);
 }
