@@ -27,3 +27,8 @@ body {
 ::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.1);
 }
+
+
+.blur10 {
+  backdrop-filter: blur(10px);
+}
