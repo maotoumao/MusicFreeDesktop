@@ -1,0 +1,53 @@
+{
+  "name": "musicfree-desktop",
+  "productName": "musicfree-desktop",
+  "version": "1.0.0",
+  "description": "插件化音乐播放器",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
+  },
+  "keywords": [],
+  "author": {
+    "name": "猫头猫",
+    "email": "lhx_xjtu@163.com"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.22.1",
+    "@babel/preset-react": "^7.22.0",
+    "@electron-forge/cli": "^6.1.1",
+    "@electron-forge/maker-deb": "^6.1.1",
+    "@electron-forge/maker-rpm": "^6.1.1",
+    "@electron-forge/maker-squirrel": "^6.1.1",
+    "@electron-forge/maker-zip": "^6.1.1",
+    "@electron-forge/plugin-webpack": "^6.1.1",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.7",
+    "@typescript-eslint/parser": "^5.59.7",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "babel-loader": "^9.1.2",
+    "css-loader": "^6.7.4",
+    "electron": "24.4.0",
+    "eslint": "^8.41.0",
+    "eslint-plugin-import": "^2.27.5",
+    "fork-ts-checker-webpack-plugin": "^7.3.0",
+    "node-loader": "^2.0.0",
+    "node-sass": "^9.0.0",
+    "sass-loader": "^13.3.0",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.4.3",
+    "ts-node": "^10.9.1",
+    "typescript": "~5.0.4"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}
