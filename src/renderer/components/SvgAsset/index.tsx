@@ -1,27 +1,33 @@
 import { memo } from "react";
 
-export type SvgAssetIconNames = | "chevron-double-up"
-| "chevron-left"
-| "chevron-right"
-| "cog-8-tooth"
-| "heart-outline"
-| "heart"
-| "logo"
-| "lyric"
-| "magnifying-glass"
-| "minus"
-| "pause"
-| "play"
-| "playlist"
-| "repeat-song-1"
-| "repeat-song"
-| "shuffle"
-| "skip-left"
-| "skip-right"
-| "x-mark";
+export type SvgAssetIconNames =
+  | "array-download-tray"
+  | "chevron-double-up"
+  | "chevron-left"
+  | "chevron-right"
+  | "code-bracket-square"
+  | "cog-8-tooth"
+  | "fire"
+  | "heart-outline"
+  | "heart"
+  | "logo"
+  | "lyric"
+  | "magnifying-glass"
+  | "minus"
+  | "musical-note"
+  | "pause"
+  | "play"
+  | "playlist"
+  | "repeat-song-1"
+  | "repeat-song"
+  | "shuffle"
+  | "skip-left"
+  | "skip-right"
+  | "trophy"
+  | "x-mark";
 
 interface IProps {
-  iconName: SvgAssetIconNames
+  iconName: SvgAssetIconNames;
 }
 /**
  *

@@ -7,13 +7,13 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: #b2b2b2;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

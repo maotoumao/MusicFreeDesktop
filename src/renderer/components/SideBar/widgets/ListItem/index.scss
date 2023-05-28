@@ -11,14 +11,24 @@
     user-select: none;
     cursor: pointer;
     color: var(--textColor);
+    transition: all linear 100ms;
+
 
     & svg {
         width: 1.6rem;
         height: 1.6rem;
         margin-right: 0.5rem;
+        flex-shrink: 0;
     }
 
-    &[data-selected]{
+    & span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 0.5rem;
+    }
+
+    &[data-selected="true"]{
         &::before {
             content: "";
             position: absolute;
@@ -30,7 +40,10 @@
         }
 
         & {
+            color: var(--primaryColor);
             background-color: rgba(0, 0, 0, 0.05);
         }
+
+
     }
 }

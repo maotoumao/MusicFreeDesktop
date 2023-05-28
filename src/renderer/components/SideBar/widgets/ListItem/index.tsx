@@ -18,7 +18,7 @@ export default function ListItem(props: IProps) {
       data-selected={selected}
     >
       {iconName ? <SvgAsset iconName={iconName}></SvgAsset> : null}
-      {title ?? ""}
+      <span>{title ?? ""}</span>
     </div>
   );
 }

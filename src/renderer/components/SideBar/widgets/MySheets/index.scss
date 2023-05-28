@@ -1,0 +1,15 @@
+.side-bar-container--my-sheets {
+    & .divider {
+        margin-top: 0.5rem;
+        width: 100%;
+        height: 1px;
+        background-color: var(--dividerColor);
+
+    }
+    & .title {
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        padding-left: 1rem;
+    }
+}
