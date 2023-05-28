@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import './index.scss';
-import MusicDetail from './MusicDetail';
+import MusicDetail from '../components/MusicDetail';
 
 
 

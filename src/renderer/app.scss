@@ -10,6 +10,7 @@
     height: calc(100vh - 54px - 64px);
     flex: auto;
     display: flex;
+    position: relative;
   }
 }
 
@@ -19,5 +20,6 @@
   --backgroundColor: #fdfdfd; // 背景色
   --dividerColor: rgba(0, 0, 0, 0.1); // 分割线颜色
   --textColor: #333333; // 主文本颜色
+  --animate-duration: 300ms !important;
   font-size: 13px;
 }

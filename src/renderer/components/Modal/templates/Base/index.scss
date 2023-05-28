@@ -8,15 +8,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: modal-show 200ms linear 0s 1 forwards;
     background-color: rgba($color: #000000, $alpha: 0.2);
 }
 
-@keyframes modal-show {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}

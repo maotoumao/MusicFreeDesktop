@@ -7,6 +7,8 @@
   display: flex;
   align-items: center;
   user-select: none;
+  position: relative;
+  z-index: 1000;
 
   // 左边的信息区域
   & .music-info-container {

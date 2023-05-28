@@ -16,7 +16,7 @@ export default function Base(props: IProps) {
   return (
     <div
       id={baseId}
-      className={`components--modal-base ${withBlur ? 'blur10' : ''}`}
+      className={`components--modal-base animate__animated animate__fadeIn ${withBlur ? 'blur10' : ''}`}
       role="button"
       onClick={(e) => {
         if ((e.target as HTMLElement)?.id === baseId) {

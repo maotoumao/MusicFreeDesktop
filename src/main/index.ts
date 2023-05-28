@@ -19,7 +19,7 @@ const createWindow = (): void => {
     width: 1050,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      nodeIntegration: true
+      nodeIntegration: true,
     },
     resizable: false,
     frame: false
@@ -30,6 +30,23 @@ const createWindow = (): void => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  // mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+  //   /**
+  //    * local
+  //    */
+  //   const requestHeaders = details.requestHeaders;
+  //   if(requestHeaders['Origin']?.startsWith("http://localhost")) {
+  //     requestHeaders['Origin'] = undefined;
+  //   }
+  //   if(requestHeaders['Referer']?.startsWith("http://localhost")) {
+  //     requestHeaders['Referer'] = undefined;
+  //   }
+
+  //   callback({
+  //     requestHeaders
+  //   })
+  // })
 };
 
 // This method will be called when Electron has finished
