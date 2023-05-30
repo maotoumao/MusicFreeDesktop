@@ -28,7 +28,7 @@ export default function AnimatedDiv(props: IProps) {
     onAnimationEnd,
   } = props ?? {};
 
-  const [isMounted, setIsMounted] = useState(false);
+  const [shouldMount, setShouldMount] = useState(false);
 
   const filteredProps: Record<string, any> = useMemo(() => {
     const res = {
@@ -42,13 +42,13 @@ export default function AnimatedDiv(props: IProps) {
 
   useEffect(() => {
     if (showIf) {
-      setIsMounted(true);
+      setShouldMount(true);
     } else {
-      !unmountClassName && setIsMounted(false);
+      !unmountClassName && setShouldMount(false);
     }
   }, [showIf]);
 
-  return isMounted ? (
+  return shouldMount ? (
     <div
       {...(filteredProps)}
       className={`${className ?? ""} ${
@@ -58,9 +58,9 @@ export default function AnimatedDiv(props: IProps) {
         onAnimationEnd?.(...args);
         if (!showIf) {
           // 如果showIf是false，表示当前播放的是卸载状态的动画
-          setIsMounted(false);
+          setShouldMount(false);
         } else {
-          setIsMounted(true);
+          setShouldMount(true);
         }
       }}
     ></div>
