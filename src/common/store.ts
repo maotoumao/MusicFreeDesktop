@@ -1,3 +1,4 @@
+// 数据存储方案
 import {useEffect, useState} from 'react';
 
 export class StateMapper<T> {

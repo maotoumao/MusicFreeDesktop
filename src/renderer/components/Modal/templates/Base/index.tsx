@@ -1,17 +1,19 @@
+import { ReactNode } from "react";
+import { closeModal } from "../..";
 import "./index.scss";
 
-interface IProps {
+interface IBaseModalProps {
   // 默认区域
   onDefaultClick?: () => void;
   // 模糊
   withBlur?: boolean;
-  children: JSX.Element | JSX.Element[];
+  children: ReactNode;
 }
 
 const baseId = "components--modal-base-container";
 
-export default function Base(props: IProps) {
-  const { onDefaultClick, children, withBlur = true } = props;
+export default function Base(props: IBaseModalProps) {
+  const { onDefaultClick = closeModal, children, withBlur = true } = props;
 
   return (
     <div

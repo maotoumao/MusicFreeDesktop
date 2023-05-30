@@ -1,5 +1,7 @@
 import Base from "./Base";
+import ExitConfirm from "./ExitConfirm";
 
 export default {
-    base: Base
+    Base,
+    ExitConfirm
 }

@@ -16,7 +16,7 @@ export default function () {
       iconName="array-download-tray"
         title="下载管理"
         onClick={() => {
-          showModal("base", {
+          showModal("Base", {
             withBlur: false,
             onDefaultClick() {
               closeModal();

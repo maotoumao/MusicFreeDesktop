@@ -16,6 +16,7 @@
   "rules": {
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-var-requires": "warn",
-    "import/no-unresolved": "off"
+    "import/no-unresolved": "off",
+    "@typescript-eslint/no-empty-interface": "off"
   }
 }

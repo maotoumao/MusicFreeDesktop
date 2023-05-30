@@ -1,5 +1,7 @@
+import { ipcRendererSend } from "@/common/ipcUtil/renderer";
 import SvgAsset from "../SvgAsset";
 import "./index.scss";
+import { showModal } from "../Modal";
 
 export default function Header() {
   return (
@@ -36,7 +38,7 @@ export default function Header() {
           title="最小化"
           className="header-button"
           onClick={() => {
-            console.log("MinusSvg");
+            ipcRendererSend("min-window", {});
           }}
         >
           <SvgAsset iconName="minus"></SvgAsset>
@@ -46,6 +48,7 @@ export default function Header() {
           title="退出"
           className="header-button"
           onClick={() => {
+            showModal('ExitConfirm');
             console.log("close");
           }}
         >

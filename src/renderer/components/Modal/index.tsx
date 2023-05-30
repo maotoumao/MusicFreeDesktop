@@ -31,7 +31,7 @@ export default function ModalComponent() {
 
 export function showModal<T extends keyof ITemplate>(
   type: T,
-  payload: Parameters<ITemplate[T]>[0]
+  payload?: Parameters<ITemplate[T]>[0]
 ) {
   modalStore.setValue({
     type,
