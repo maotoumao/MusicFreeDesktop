@@ -1,4 +1,4 @@
-import Evt from "@/events";
+import Evt from "@renderer/core/events";
 import AnimatedDiv from "../AnimatedDiv";
 import "./index.scss";
 import { useState } from "react";

@@ -1,6 +1,7 @@
 import { app, BrowserWindow, screen } from "electron";
 import { createMainWindow } from "./window";
 import initIpcMain from "./ipc";
+import { initPluginManager } from "./core/plugin-manager";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -33,4 +34,9 @@ app.on("activate", () => {
 // code. You can also put them in separate files and import them here.
 app.whenReady().then(() => {
   initIpcMain();
+  initPluginManager();
 })
+
+
+console.log(app.getAppPath())
+console.log(app.getPath('appData'));

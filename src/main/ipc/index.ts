@@ -1,5 +1,7 @@
-import { ipcMainOn } from "@/common/ipcUtil/main";
+import { ipcMainHandle, ipcMainOn } from "@/common/ipc-util/main";
 import { getMainWindow } from "../window";
+import { net } from "electron";
+import axios from "axios";
 
 export default function initIpcMain(){
     ipcMainOn('min-window', ({
@@ -13,4 +15,7 @@ export default function initIpcMain(){
             mainWindow.minimize();
         }
     })
+
+
 }
+

@@ -53,6 +53,7 @@ export const rendererConfig: Configuration = {
     extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".scss"],
     alias: {
       "@": path.join(__dirname, "../src"),
+      "@renderer": path.join(__dirname, "../src/renderer"),
     },
   },
 };

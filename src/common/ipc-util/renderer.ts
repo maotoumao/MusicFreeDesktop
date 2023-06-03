@@ -27,7 +27,7 @@ export function ipcRendererOff<T extends keyof IpcEvents.Main>(
 
 
 /** 渲染进程给主进程发送消息 */
-export function ipcRendererSend<T extends keyof IpcEvents.Renderer>(channel: T, args: IpcEvents.Renderer[T]) {
+export function ipcRendererSend<T extends keyof IpcEvents.Renderer>(channel: T, args: IpcEvents.Renderer[T] = undefined) {
     window.ipcRenderer.send(channel, args);
 }
 

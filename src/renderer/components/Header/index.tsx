@@ -1,4 +1,4 @@
-import { ipcRendererSend } from "@/common/ipcUtil/renderer";
+import { ipcRendererSend } from "@/common/ipc-util/renderer";
 import SvgAsset from "../SvgAsset";
 import "./index.scss";
 import { showModal } from "../Modal";

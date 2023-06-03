@@ -29,7 +29,7 @@ export function ipcMainHandle<T extends keyof IpcInvoke.Renderer>(
   callback?: (
     args: Parameters<IpcInvoke.Renderer[T]>[0],
     evt: IpcMainInvokeEvent
-  ) => ReturnType<IpcInvoke.Renderer[T]>
+  ) => ReturnType<IpcInvoke.Renderer[T]> | PromiseLike<ReturnType<IpcInvoke.Renderer[T]>>
 ) {
   ipcMain.handle(channel, (evt, args) => {
     return callback(args, evt);

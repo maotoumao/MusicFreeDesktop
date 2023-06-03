@@ -7,7 +7,7 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 /** 主窗口创建 */
-let mainWindow: BrowserWindow | null = null
+let mainWindow: BrowserWindow | null = null;
 
 export const createMainWindow = (): BrowserWindow => {
   // Create the browser window.
@@ -17,6 +17,7 @@ export const createMainWindow = (): BrowserWindow => {
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegration: true,
+      webSecurity: false,
     },
     resizable: false,
     frame: false,
@@ -28,24 +29,36 @@ export const createMainWindow = (): BrowserWindow => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  // mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
-  //   /**
-  //    * local
-  //    */
-  //   const requestHeaders = details.requestHeaders;
-  //   if(requestHeaders['Origin']?.startsWith("http://localhost")) {
-  //     requestHeaders['Origin'] = undefined;
-  //   }
-  //   if(requestHeaders['Referer']?.startsWith("http://localhost")) {
-  //     requestHeaders['Referer'] = undefined;
-  //   }
-
-  //   callback({
-  //     requestHeaders
-  //   })
-  // })
+  mainWindow.webContents.session.webRequest.onBeforeSendHeaders(
+    (details, callback) => {
+      /** hack headers */
+      try {
+        const url = new URL(details.url);
+        const setHeadersOptions = url.searchParams.get("_setHeaders");
+        const originalRequestHeaders = details.requestHeaders ?? {};
+        let requestHeaders: Record<string, string> = {};
+        if (setHeadersOptions) {
+          const decodedHeaders = JSON.parse(decodeURIComponent(setHeadersOptions));
+          for(const k in originalRequestHeaders) {
+            requestHeaders[k.toLowerCase()] = originalRequestHeaders[k];
+          }
+          for(const k in decodedHeaders) {
+            requestHeaders[k.toLowerCase()] = decodedHeaders[k];
+          }
+        } else {
+          requestHeaders = details.requestHeaders;
+        }
+        callback({
+          requestHeaders,
+        })
+      } catch {
+        callback({
+          requestHeaders: details.requestHeaders
+        })
+      }
+    }
+  );
   return mainWindow;
 };
 
 export const getMainWindow = () => mainWindow;
-

@@ -2,7 +2,9 @@ import "./index.scss";
 import SvgAsset from "../SvgAsset";
 import PlayList from "./widgets/PlayList";
 import { useState } from "react";
-import Evt from "@/events";
+import Evt from "@renderer/core/events";
+import trackPlayer from "@/renderer/core/track-player/internal";
+import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 
 const musicItem = {
   id: "1001",
@@ -46,10 +48,19 @@ export default function MusicBar() {
         <div className="skip controller-btn" title="上一首">
           <SvgAsset iconName="skip-left"></SvgAsset>
         </div>
-        <div className="play-or-pause controller-btn">
+        <div className="play-or-pause controller-btn" onClick={() => {
+          trackPlayer.pause();
+        }}>
           <SvgAsset iconName="play"></SvgAsset>
         </div>
-        <div className="skip controller-btn" title="下一首">
+        <div className="skip controller-btn" title="下一首" onClick={() => {
+          // getTopListDetail( {
+          //   id: "eur_usa",
+          //   title: "欧美榜",
+          //   coverImg:
+          //     "https://cdnmusic.migu.cn/tycms_picture/20/08/231/200818095229556_327x327_1383.png",
+          // } as any);
+        }}>
           <SvgAsset iconName="skip-right"></SvgAsset>
         </div>
       </div>
