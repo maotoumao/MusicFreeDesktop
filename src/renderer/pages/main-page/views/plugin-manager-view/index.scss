@@ -1,0 +1,17 @@
+.plugin-manager-view-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding-left: 1rem;
+
+    & .header {
+        font-weight: 500;
+        font-size: 1.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+        letter-spacing: 0.05rem;
+        user-select: none;
+    }
+}

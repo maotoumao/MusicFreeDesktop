@@ -1,16 +1,13 @@
-import { useState } from "react";
-import { closeModal, showModal } from "../Modal";
 import ListItem from "./widgets/ListItem";
 import "./index.scss";
 import MySheets from "./widgets/MySheets";
-import { useLocation, useMatch, useNavigate } from "react-router";
+import { useMatch, useNavigate } from "react-router";
 
 export default function () {
   const navigate = useNavigate();
   const routePathMatch = useMatch("/main/:routePath");
-  const sheetIdMatch = useMatch("/main/mysheets/:sheetId");
 
-  console.log(routePathMatch, sheetIdMatch);
+  console.log(routePathMatch);
 
   const options = [
     {

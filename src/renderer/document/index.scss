@@ -1,0 +1,54 @@
+.ag-theme-alpine {
+  --ag-range-selection-border-color: var(--primaryColor);
+  --ag-borders: none;
+  --ag-header-background-color: rgba(128, 128, 128, 0.02);
+  --ag-row-hover-color: rgba(128, 128, 128, 0.06);
+  --ag-odd-row-background-color: rgba(128, 128, 128, 0.03);
+
+  & .ag-cell {
+    outline: none;
+    display: flex;
+    align-items: center;
+  }
+
+  & .ag-header {
+    border-top: 1px solid var(--dividerColor);
+    border-bottom: 1px solid var(--dividerColor);
+  }
+
+  & .ag-header-cell {
+    border-right: 1px solid var(--dividerColor);
+
+    &:last-of-type {
+      border-right: none;
+    }
+  }
+
+  & .ag-row {
+    border-bottom: none;
+  }
+
+  & .ag-header-cell-text {
+    font-weight: 600;
+  }
+
+  & .content-center {
+    justify-content: center;
+
+    & .ag-header-cell-label {
+      justify-content: center;
+    }
+  }
+
+  // 拖拽时的高亮
+  & .ag-row-highlight-above:after,
+  & .ag-row-highlight-below:after {
+    height: 1.5px;
+  }
+
+  // 选择某个cell
+  & .ag-cell-focus {
+    border-color: transparent !important;
+    outline: none !important;
+  }
+}

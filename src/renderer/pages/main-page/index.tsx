@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import "./index.scss";
 // import MusicDetail from "../components/MusicDetail";
-import SideBar from "@/renderer/components/SideBar";
+import SideBar from "./components/SideBar";
 import PluginManagerView from "./views/plugin-manager-view";
 
 export default function MainPage() {

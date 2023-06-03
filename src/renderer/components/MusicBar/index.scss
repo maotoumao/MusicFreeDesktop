@@ -24,7 +24,7 @@
     & .open-detail {
       width: 44px;
       height: 44px;
-      color: rgba($color: white, $alpha: 0.9);
+      color: rgba($color: white, $alpha: 0.5);
       position: absolute;
       left: 10px;
       top: 10px;
@@ -34,14 +34,16 @@
       align-items: center;
       justify-content: center;
       background-color: rgba($color: #000000, $alpha: 0.5);
+      border-radius: 4px;
 
       & svg {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
       }
 
       &:hover {
         opacity: 1;
+        backdrop-filter: blur(5px);
       }
     }
 
@@ -50,6 +52,7 @@
       height: 44px;
       object-fit: cover;
       flex-shrink: 0;
+      border-radius: 4px;
     }
 
     & .music-info {

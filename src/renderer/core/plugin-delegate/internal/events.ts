@@ -11,5 +11,6 @@ function onPluginLoaded(){
 
 export function registerPluginEvents(){
     onPluginLoaded();
+    refreshPlugins();
 }
 
