@@ -2,16 +2,19 @@ import { ipcRendererSend } from "@/common/ipc-util/renderer";
 import SvgAsset from "../SvgAsset";
 import "./index.scss";
 import { showModal } from "../Modal";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useRef } from "react";
+import HeaderNavigator from "./widgets/Navigator";
+
 
 export default function Header() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>();
-
+ 
   function onSearchSubmit() {
     navigate(`/main/search/${inputRef.current.value}`);
   }
+
 
   return (
     <div className="header-container">
@@ -19,14 +22,7 @@ export default function Header() {
         <div className="logo">
           <SvgAsset iconName="logo"></SvgAsset>
         </div>
-        <div className="navigator">
-          <div className="navigator-btn">
-            <SvgAsset iconName="chevron-left"></SvgAsset>
-          </div>
-          <div className="navigator-btn">
-            <SvgAsset iconName="chevron-right"></SvgAsset>
-          </div>
-        </div>
+       <HeaderNavigator></HeaderNavigator>
         <div className="search">
           <input
             ref={inputRef}

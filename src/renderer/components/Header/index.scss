@@ -28,31 +28,7 @@
       }
     }
 
-    & .navigator {
-      height: 40px;
-      -webkit-app-region: none;
-      display: flex;
-      align-items: center;
 
-      & .navigator-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 26px;
-        height: 22px;
-        cursor: pointer;
-        color: white;
-        border: 1px solid rgba($color: #000, $alpha: 0.1);
-
-        &[disabled] {
-            color: #aaa;
-        }
-        & svg {
-          width: 18px;
-          height: 18px;
-        }
-      }
-    }
 
     & .search {
       -webkit-app-region: none;
