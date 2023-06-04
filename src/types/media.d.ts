@@ -57,7 +57,6 @@ declare namespace IMusic {
 
     interface IMusicSheetItem extends IMedia.IMediaBase {
         /** 封面图 */
-        coverImg?: string;
         artwork?: string;
         /** 标题 */
         title: string;
@@ -65,9 +64,16 @@ declare namespace IMusic {
         description?: string;
         /** 作品总数 */
         worksNum?: number;
+        /** 播放次数 */
         playCount?: number;
-        musicList?: IMusicItem[]
+        /** 播放列表 */
+        musicList?: IMusicItem[];
+        /** 歌单创建日期 */
+        createAt?: number;
+        // 歌单作者
+        artist?: string;
     }
+
 
     /** 歌单集合 */
     export interface IMusicSheetGroupItem {

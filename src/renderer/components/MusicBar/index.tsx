@@ -5,6 +5,7 @@ import { useState } from "react";
 import Evt from "@renderer/core/events";
 import trackPlayer from "@/renderer/core/track-player/internal";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 
 const musicItem = {
   id: "1001",
@@ -13,7 +14,7 @@ const musicItem = {
   title: "今天猫头猫没有写代码啊啊啊啊啊啊啊啊啊",
   album: "小猫咪",
   artwork:
-    "http://i.giphy.com/l46Cs36c9HrHMExoc.gif",
+    "http://i.giphy.com/l46Cs36c9HrHMExoc.gifsd",
   url: "xxx",
   duration: 1200,
 };
@@ -30,6 +31,7 @@ export default function MusicBar() {
           className="music-cover"
           crossOrigin="anonymous"
           src={musicItem.artwork}
+          onError={setFallbackAlbum}
         ></img>
   
         <div className="open-detail" title="打开歌曲详情页">

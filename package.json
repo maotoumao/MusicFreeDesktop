@@ -61,6 +61,7 @@
     "typescript": "~5.0.4"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.15",
     "ag-grid-community": "^29.3.5",
     "ag-grid-react": "^29.3.5",
     "animate.css": "^4.1.1",
@@ -71,11 +72,13 @@
     "compare-versions": "^6.0.0-rc.1",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.7",
+    "dexie": "^3.2.4",
     "electron-squirrel-startup": "^1.0.0",
     "eventemitter3": "^5.0.1",
     "he": "^1.2.0",
     "immer": "^10.0.2",
     "lodash.shuffle": "^4.2.0",
+    "nanoid": "^4.0.2",
     "qs": "^6.11.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",

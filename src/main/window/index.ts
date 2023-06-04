@@ -25,7 +25,7 @@ export const createMainWindow = (): BrowserWindow => {
 
   // and load the index.html of the app.
   const initUrl = new URL(MAIN_WINDOW_WEBPACK_ENTRY);
-  initUrl.hash = "/main/mysheets/favorite";
+  initUrl.hash = "/main/mysheet/favorite";
   mainWindow.loadURL(initUrl.toString());
 
   // Open the DevTools.

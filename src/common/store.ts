@@ -14,6 +14,7 @@ export class StateMapper<T> {
 
     useMappedState = () => {
         const [_state, _setState] = useState<T>(this.getFun);
+
         const updateState = () => {
             _setState(this.getFun());
         };
@@ -49,6 +50,7 @@ export default class Store<T> {
     };
 
     public setValue = (value: T | UpdateFunc<T>) => {
+        console.log('set', this);
         if(typeof value === 'function') {
             this.value = (value as UpdateFunc<T>)(this.value);
         } else {

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html,
 body {
   margin: 0;
@@ -32,4 +36,12 @@ body {
 
 .blur10 {
   backdrop-filter: blur(10px);
+}
+
+div[role="button"] {
+  cursor: pointer;
+}
+
+.highlight {
+  color: var(--primaryColor);
 }

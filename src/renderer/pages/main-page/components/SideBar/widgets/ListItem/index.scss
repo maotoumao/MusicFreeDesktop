@@ -1,49 +1,50 @@
 .side-bar--list-item-container {
-    $height: 3rem;
-    height: $height;
-    font-size: 1rem;
-    width: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    padding-left: 1rem;
-    user-select: none;
-    cursor: pointer;
-    color: var(--textColor);
-    transition: all linear 100ms;
+  $height: 3rem;
+  height: $height;
+  font-size: 1rem;
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding-left: 1rem;
+  user-select: none;
+  cursor: pointer;
+  color: var(--textColor);
+  transition: all linear 100ms;
 
+  & svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
 
-    & svg {
-        width: 1.6rem;
-        height: 1.6rem;
-        margin-right: 0.5rem;
-        flex-shrink: 0;
+  & span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 0.5rem;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  &[data-selected="true"] {
+    &::before {
+      content: "";
+      position: absolute;
+      width: 4px;
+      left: 0;
+      top: 0;
+      height: $height;
+      background-color: var(--primaryColor);
     }
 
-    & span {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding-right: 0.5rem;
+    & {
+      color: var(--primaryColor);
+      background-color: rgba(0, 0, 0, 0.05);
     }
-
-    &[data-selected="true"]{
-        &::before {
-            content: "";
-            position: absolute;
-            width: 4px;
-            left: 0;
-            top: 0;
-            height: $height;
-            background-color: var(--primaryColor);
-        }
-
-        & {
-            color: var(--primaryColor);
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-
-    }
+  }
 }

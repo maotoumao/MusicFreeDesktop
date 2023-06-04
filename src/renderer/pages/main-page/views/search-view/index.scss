@@ -1,0 +1,14 @@
+.search-view-container {
+    width: 100%;
+    height: 100%;
+    padding-top: 1rem;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+
+    & .search-header{
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+}
