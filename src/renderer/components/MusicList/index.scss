@@ -1,0 +1,9 @@
+.music-list-container {
+    & .ag-header-row {
+        border-bottom: 1px solid var(--dividerColor);
+    }
+
+    & .ag-header-cell-text {
+        font-weight: normal;
+    }
+}

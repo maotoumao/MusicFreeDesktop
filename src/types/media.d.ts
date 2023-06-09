@@ -39,7 +39,7 @@ declare namespace IMusic {
          /** 歌曲标题 */
          title: string;
          /** 时长(s) */
-         duration: number;
+         duration?: number;
          /** 专辑名 */
          album: string;
          /** 专辑封面图 */
@@ -48,9 +48,9 @@ declare namespace IMusic {
          url: string;
          // todo: 格式化
          /** 歌词URL */
-         lrc: string;
+         lrc?: string;
          /** 歌词文本 */
-         rawLrc: string;
+         rawLrc?: string;
          // 其他
         [k: string | number | symbol]: any;
     }

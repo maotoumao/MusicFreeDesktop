@@ -22,6 +22,7 @@
     &:last-of-type {
       border-right: none;
     }
+
   }
 
   & .ag-row {
@@ -29,7 +30,7 @@
   }
 
   & .ag-header-cell-text {
-    font-weight: 600;
+    font-weight: normal;
   }
 
   & .content-center {

@@ -18,6 +18,7 @@ export type SvgAssetIconNames =
   | "pause"
   | "play"
   | "playlist"
+  | "plus-circle"
   | "repeat-song-1"
   | "repeat-song"
   | "shuffle"

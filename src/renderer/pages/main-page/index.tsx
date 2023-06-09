@@ -11,11 +11,25 @@ export default function MainPage() {
     <>
       <SideBar></SideBar>
       <div className="pages-container">
-        <Routes >
-          <Route path="plugin-manager-view" element={<PluginManagerView></PluginManagerView>}></Route>
-          <Route path="mysheet/:id" element={<MysheetView></MysheetView>}></Route>
-          <Route path="search/:query" element={<SearchView></SearchView>}></Route>
-          <Route path="*" element={<div>dsdsds</div>}></Route>
+        <Routes>
+          <Route
+            path="plugin-manager-view"
+            element={<PluginManagerView></PluginManagerView>}
+          ></Route>
+          <Route
+            path="mysheet/:id"
+            element={<MysheetView></MysheetView>}
+          ></Route>
+          <Route
+            path="search/:query"
+            element={<SearchView></SearchView>}
+          ></Route>
+          <Route path="*" element={<div>啥都没有
+            <div role="button" data-type="primaryButton">一个按钮</div>
+            <div role="button" data-type="primaryButton" data-disabled>一个按钮</div>
+
+
+          </div>}></Route>
         </Routes>
       </div>
     </>

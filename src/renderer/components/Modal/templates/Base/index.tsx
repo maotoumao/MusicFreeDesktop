@@ -1,10 +1,13 @@
 import { ReactNode } from "react";
 import { closeModal } from "../..";
 import "./index.scss";
+import SvgAsset from "@/renderer/components/SvgAsset";
 
 interface IBaseModalProps {
   // 默认区域
   onDefaultClick?: () => void;
+  // 点击默认区域时关闭
+  defaultClose?: boolean;
   // 模糊
   withBlur?: boolean;
   children: ReactNode;
@@ -12,17 +15,23 @@ interface IBaseModalProps {
 
 const baseId = "components--modal-base-container";
 
-export default function Base(props: IBaseModalProps) {
-  const { onDefaultClick = closeModal, children, withBlur = true } = props;
+function Base(props: IBaseModalProps) {
+  const { onDefaultClick, defaultClose = false, children, withBlur = true } = props;
 
   return (
     <div
       id={baseId}
-      className={`components--modal-base animate__animated animate__fadeIn ${withBlur ? 'blur10' : ''}`}
+      className={`components--modal-base animate__animated animate__fadeIn ${
+        withBlur ? "blur10" : ""
+      }`}
       role="button"
       onClick={(e) => {
         if ((e.target as HTMLElement)?.id === baseId) {
-          onDefaultClick?.();
+          if (defaultClose) {
+            closeModal();
+          } else {
+            onDefaultClick?.();
+          }
         }
       }}
     >
@@ -30,3 +39,28 @@ export default function Base(props: IBaseModalProps) {
     </div>
   );
 }
+
+interface IHeaderProps {
+  children: ReactNode;
+}
+function Header(props: IHeaderProps) {
+  const { children } = props;
+
+  return (
+    <div className="components--modal-base-header">
+      {children}
+      <div
+        role="button"
+        className="components--modal-base-header-close opacity-button"
+        onClick={() => {
+          closeModal();
+        }}
+      >
+        <SvgAsset iconName="x-mark"></SvgAsset>
+      </div>
+    </div>
+  );
+}
+
+Base.Header = Header;
+export default Base;

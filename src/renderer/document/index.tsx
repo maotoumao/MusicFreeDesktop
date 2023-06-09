@@ -6,6 +6,8 @@ import bootstrap from "./bootstrap";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import MainPage from "../pages/main-page";
 
+import '@/common/i18n';
+
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 

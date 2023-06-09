@@ -14,7 +14,7 @@ const musicItem = {
   title: "今天猫头猫没有写代码啊啊啊啊啊啊啊啊啊",
   album: "小猫咪",
   artwork:
-    "http://i.giphy.com/l46Cs36c9HrHMExoc.gifsd",
+    "http://i.giphy.com/l46Cs36c9HrHMExoc.gif",
   url: "xxx",
   duration: 1200,
 };
@@ -47,7 +47,10 @@ export default function MusicBar() {
       </div>
 
       <div className="music-controller">
-        <div className="skip controller-btn" title="上一首">
+        <div className="skip controller-btn" title="上一首" onClick={() => {
+
+        
+        }}>
           <SvgAsset iconName="skip-left"></SvgAsset>
         </div>
         <div className="play-or-pause controller-btn" onClick={() => {

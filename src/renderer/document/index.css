@@ -21,27 +21,62 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #a0a0a0;
+  background-color: #a0a0a0;
 }
 
-
 ::-webkit-scrollbar-thumb:active {
-    background-color: #a0a0a0;
+  background-color: #a0a0a0;
 }
 
 ::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-
 .blur10 {
   backdrop-filter: blur(10px);
 }
 
-div[role="button"] {
-  cursor: pointer;
+.opacity-button {
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .highlight {
   color: var(--primaryColor);
+}
+
+input {
+  outline: none;
+  font-size: 1rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 2px;
+  border: 1px solid var(--dividerColor);
+  box-sizing: border-box;
+
+  &::placeholder {
+    opacity: 0.6;
+  }
+}
+
+div[role="button"] {
+  cursor: pointer;
+  user-select: none;
+
+  &[data-disabled]:not([data-disabled="false"]) {
+    cursor: default;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  &[data-type="primaryButton"] {
+    background-color: var(--primaryColor);
+    font-size: 1.2rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 1.6rem;
+    letter-spacing: 0.2rem;
+    color: white;
+  }
 }

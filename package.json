@@ -37,6 +37,7 @@
     "@svgr/webpack": "^8.0.1",
     "@types/crypto-js": "^4.1.1",
     "@types/he": "^1.2.0",
+    "@types/lodash.debounce": "^4.0.7",
     "@types/lodash.shuffle": "^4.2.7",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.0",
@@ -76,12 +77,14 @@
     "electron-squirrel-startup": "^1.0.0",
     "eventemitter3": "^5.0.1",
     "he": "^1.2.0",
+    "i18next": "^22.5.1",
     "immer": "^10.0.2",
     "lodash.shuffle": "^4.2.0",
     "nanoid": "^4.0.2",
     "qs": "^6.11.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-i18next": "^12.3.1",
     "react-router-dom": "^6.11.2"
   }
 }
