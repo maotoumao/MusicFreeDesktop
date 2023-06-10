@@ -21,37 +21,31 @@ export default function MusicList(props: IMusicListProps) {
       cellRenderer: (data: any) => <i>{data.rowIndex + 1}</i>,
       lockPosition: true,
       width: 56,
+      maxWidth: 56,
+      minWidth: 56,
       headerClass: "content-center",
       cellClass: "content-center",
     },
     {
       field: "title",
       headerName: "标题",
-      lockPosition: true,
       flex: 2,
     },
     {
       field: "artist",
       headerName: "作者",
-      lockPosition: true,
-      flex: 1,
     },
     {
       field: "album",
       headerName: "专辑",
-      lockPosition: true,
-      flex: 1,
     },
     {
       field: "duration",
       headerName: "时长",
-      lockPosition: true,
-      flex: 1,
     },
     {
       colId: "extra",
       headerName: "操作",
-      flex: 1,
       cellRenderer: () => <></>,
     },
   ]);
@@ -66,6 +60,12 @@ export default function MusicList(props: IMusicListProps) {
       //     const data = item.rowNode.data;
       //     return data?.platform ?? "未命名插件";
       //   }}
+      defaultColDef={{
+        flex: 1,
+        lockPosition: true,
+        initialWidth: 0,
+      }}
+      suppressBrowserResizeObserver
       suppressMoveWhenRowDragging
       headerHeight={34}
       rowHeight={34}
@@ -74,6 +74,7 @@ export default function MusicList(props: IMusicListProps) {
       onCellContextMenu={(...e) => {
         console.log(e);
       }}
+
     ></AgGridReact>
   );
 }

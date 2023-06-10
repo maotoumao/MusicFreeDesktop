@@ -41,9 +41,9 @@ declare namespace IMusic {
          /** 时长(s) */
          duration?: number;
          /** 专辑名 */
-         album: string;
+         album?: string;
          /** 专辑封面图 */
-         artwork: string;
+         artwork?: string;
          /** 默认音源 */
          url: string;
          // todo: 格式化

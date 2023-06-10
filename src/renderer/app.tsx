@@ -1,4 +1,4 @@
-import Header from "./components/Header";
+import AppHeader from "./components/Header";
 
 import "./app.scss";
 import MusicBar from "./components/MusicBar";
@@ -8,7 +8,7 @@ import { Outlet, Router } from "react-router";
 export default function App() {
   return (
     <div className="app-container">
-      <Header></Header>
+      <AppHeader></AppHeader>
       <div className="body-container">
         <Outlet></Outlet>
       </div>

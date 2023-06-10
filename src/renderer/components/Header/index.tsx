@@ -7,7 +7,7 @@ import { useRef } from "react";
 import HeaderNavigator from "./widgets/Navigator";
 
 
-export default function Header() {
+export default function AppHeader() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>();
  

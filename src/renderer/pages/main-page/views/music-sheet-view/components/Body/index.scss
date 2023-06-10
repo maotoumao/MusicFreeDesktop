@@ -1,0 +1,7 @@
+.music-sheet-view--body-container {
+    height: 48px;
+    & .operations {
+        display: flex;
+        justify-content: space-between;
+    }
+}

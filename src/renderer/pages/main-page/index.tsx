@@ -3,7 +3,7 @@ import "./index.scss";
 // import MusicDetail from "../components/MusicDetail";
 import SideBar from "./components/SideBar";
 import PluginManagerView from "./views/plugin-manager-view";
-import MysheetView from "./views/my-sheet-view";
+import MusicSheetView from "./views/music-sheet-view";
 import SearchView from "./views/search-view";
 
 export default function MainPage() {
@@ -17,8 +17,8 @@ export default function MainPage() {
             element={<PluginManagerView></PluginManagerView>}
           ></Route>
           <Route
-            path="mysheet/:id"
-            element={<MysheetView></MysheetView>}
+            path="musicsheet/:platform/:id"
+            element={<MusicSheetView></MusicSheetView>}
           ></Route>
           <Route
             path="search/:query"

@@ -3,15 +3,24 @@ import Base from "../Base";
 import "./index.scss";
 import MusicSheet from "@/renderer/core/music-sheet";
 import debounce from "@/common/debounce";
+import { closeModal } from "../..";
 
 interface IProps {}
 
 export default function AddNewSheet() {
   const [newSheetName, setNewSheetName] = useState("");
 
-  const onCreateNewSheetClick = useCallback(debounce(() => {
-    MusicSheet.addSheet(newSheetName);
-  }, 500), [newSheetName]);
+  const onCreateNewSheetClick = useCallback(
+    debounce(async () => {
+      try {
+        await MusicSheet.addSheet(newSheetName);
+        closeModal();
+      } catch {
+        console.log("创建失败")
+      }
+    }, 500),
+    [newSheetName]
+  );
 
   return (
     <Base withBlur={false}>

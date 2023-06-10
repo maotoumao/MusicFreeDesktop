@@ -1,0 +1,13 @@
+.components--tag-container {
+  font-size: 0.9rem;
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  border-radius: 4px;
+  padding: 2px 6px;
+  max-width: 7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  flex-shrink: 0;
+}

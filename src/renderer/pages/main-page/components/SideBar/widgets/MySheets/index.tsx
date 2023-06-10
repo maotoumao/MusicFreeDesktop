@@ -1,13 +1,14 @@
 import "./index.scss";
 import ListItem from "../ListItem";
-import { useMatch, useNavigate } from "react-router-dom";
+import { useMatch, useNavigate, useParams } from "react-router-dom";
 import { Disclosure } from "@headlessui/react";
 import { defaultSheet, musicSheetsStore } from "@/renderer/core/music-sheet";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { showModal } from "@/renderer/components/Modal";
+import { localPluginName } from "@/common/constant";
 
 export default function MySheets() {
-  const sheetIdMatch = useMatch("/main/mysheet/:sheetId");
+  const sheetIdMatch = useMatch(`/main/musicsheet/${encodeURIComponent(localPluginName)}/:sheetId`);
   const currentSheetId = sheetIdMatch?.params?.sheetId;
 
   const musicSheets = musicSheetsStore.useValue();
@@ -35,7 +36,7 @@ export default function MySheets() {
               }
               onClick={() => {
                 currentSheetId !== item.id &&
-                  navigate(`/main/mysheet/${item.id}`);
+                  navigate(`/main/musicsheet/${localPluginName}/${item.id}`);
               }}
               selected={currentSheetId === item.id}
               title={item.title}
