@@ -2,12 +2,18 @@
   font-size: 0.9rem;
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
-  border-radius: 4px;
+  border-radius: 12px;
   padding: 2px 6px;
+  width: fit-content;
   max-width: 7rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
   flex-shrink: 0;
+
+  &[data-fill=true] {
+    background-color: var(--primaryColor);
+    color: white;
+  }
 }

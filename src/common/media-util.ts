@@ -31,3 +31,7 @@ export function resetMediaItem<T extends IMedia.IMediaBase>(
         });
     }
 }
+
+export function getMediaPrimaryKey(mediaItem: IMedia.IMediaBase) {
+    return `${mediaItem.platform}@${mediaItem.id}`
+}

@@ -4,11 +4,9 @@ import { RepeatMode, TrackPlayerEvent } from "./enum";
 import trackPlayerEventsEmitter from "./event";
 import shuffle from "lodash.shuffle";
 import { isSameMedia } from "@/common/media-util";
+import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
 
-// 加入播放列表的时间
-const timeStampSymbol = Symbol.for("time-stamp");
-// 加入播放列表的辅助顺序
-const sortIndexSymbol = Symbol.for("sort-index");
+
 
 /** 音乐队列 */
 const musicQueueStore = new Store<IMusic.IMusicItem[]>([]);

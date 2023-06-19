@@ -1,9 +1,29 @@
 .music-list-container {
-    & .ag-header-row {
-        border-bottom: 1px solid var(--dividerColor);
-    }
+  width: 100%;
+  min-height: 300px;
 
-    & .ag-header-cell-text {
-        font-weight: normal;
+  & .music-list-like {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    & svg {
+      width: 18px;
+      height: 18px;
     }
+  }
+
+  & th {
+    &:nth-child(2) {
+      text-align: center;
+    }
+  }
+
+  & td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    &:nth-child(2) {
+      text-align: center;
+    }
+  }
 }

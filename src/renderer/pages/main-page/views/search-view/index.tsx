@@ -118,32 +118,7 @@ export default function SearchView() {
           <Tab.Panels className={'tab-panels-container'}>
             <Tab.Panel className={'tab-panel-container'}>
               <MusicList
-                musicList={[
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                  musicItem,
-                ]}
+                musicList={Array(1000).fill(musicItem)}
               ></MusicList>
             </Tab.Panel>
             <Tab.Panel>Content 2</Tab.Panel>
