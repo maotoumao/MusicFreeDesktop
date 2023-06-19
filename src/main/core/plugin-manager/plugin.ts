@@ -8,7 +8,7 @@ import * as cheerio from 'cheerio';
 import he from 'he';
 import PluginMethods from './plugin-methods';
 
-axios.defaults.timeout = 2000;
+axios.defaults.timeout = 15000;
 
 const sha256 = CryptoJs.SHA256;
 

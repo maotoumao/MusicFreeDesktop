@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -9,10 +8,13 @@ import {
 import "./index.scss";
 import SvgAsset from "../SvgAsset";
 import Tag from "../Tag";
+import { secondsToDuration } from "@/common/time-util";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
   enablePagination?: boolean; // 分页/虚拟长列表
+  enableSort?: boolean; // 拖拽排序
+  onSortEnd?: () => void; // 排序结束
   currentPage?: number;
   pageSize?: number;
   totalPage?: number;
@@ -57,6 +59,7 @@ const columnDef = [
   columnHelper.accessor("duration", {
     header: "时长",
     size: 64,
+    cell: info => info.getValue() ? secondsToDuration(info.getValue()) : '--:--'
   }),
   columnHelper.accessor("platform", {
     header: "来源",
@@ -65,49 +68,10 @@ const columnDef = [
   }),
 ];
 
-const columns = [
-  {
-    field: "id",
-    headerName: "#",
-    cellRenderer: (data: IMusic.IMusicItem, rowIndex: number) => (
-      <i>{rowIndex + 1}</i>
-    ),
-    width: 56,
-    maxWidth: 56,
-    minWidth: 56,
-  },
-  {
-    field: "title",
-    headerName: "标题",
-    flex: 2,
-  },
-  {
-    field: "artist",
-    headerName: "作者",
-    flex: 1,
-  },
-  {
-    field: "album",
-    headerName: "专辑",
-    flex: 1,
-  },
-  {
-    field: "duration",
-    headerName: "时长",
-    flex: 1,
-  },
-  {
-    colId: "extra",
-    headerName: "操作",
-    cellRenderer: () => <></>,
-    flex: 1,
-  },
-];
 
 
 export default function MusicList(props: IMusicListProps) {
   const { musicList } = props;
-  console.log(musicList);
 
   const table = useReactTable({
     debugAll: false,

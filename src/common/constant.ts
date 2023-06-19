@@ -7,4 +7,18 @@ export const sortIndexSymbol = Symbol.for("sort-index");
 export const localPluginName = '本地';
 export const localPluginHash = "本地";
 
-export const supportedMediaType = ['music', 'album', 'artist'];
+export const supportedMediaType = ['music', 'album', 'artist'] as const;
+
+export enum RequestStateCode {
+    /** 空闲 */
+    IDLE = 0b00000000,
+    PENDING_FIRST_PAGE = 0b00000010,
+    /** 检索中 */
+    PENDING_REST_PAGE = 0b00000011,
+    /** 部分结束 */
+    PARTLY_DONE = 0b00000100,
+    /** 全部结束 */
+    FINISHED = 0b0001000,
+    /** 出错了 */
+    ERROR = 0b10000000
+}

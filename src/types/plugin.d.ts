@@ -139,7 +139,7 @@ declare namespace IPlugin {
         userEnv: Record<string, string>;
     };
 
-    export type IPluginSerializable = {
+    export type IPluginDelegate = {
         // 除去函数
         [K in keyof R as R[K] extends (...args: any) => any ? never : K]: R[K];
     } & {

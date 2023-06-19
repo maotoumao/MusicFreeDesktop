@@ -10,6 +10,8 @@ import { Tab } from "@headlessui/react";
 import { supportedMediaType } from "@/common/constant";
 import { useTranslation } from "react-i18next";
 import MusicList from "@/renderer/components/MusicList";
+import SearchResult from "./components/SearchResult";
+import useSearch from "./hooks/useSearch";
 
 const p = [
   {
@@ -89,17 +91,17 @@ export default function SearchView() {
   const match = useMatch("/main/search/:query");
   const query = match?.params?.query;
 
-  // const plugins = useSupportedPlugin("search");
-  const plugins = p;
+  const plugins = useSupportedPlugin("search");
 
   const { t } = useTranslation();
+  const search = useSearch();
 
   useEffect(() => {
-    console.log(getSupportedPlugin("search"));
-    console.log(plugins, JSON.stringify(getSupportedPlugin("search")));
+    if (query) {
+      search(query, 1);
+    }
   }, [query]);
 
-  console.log(plugins, plugins.length, getSupportedPlugin("search"));
 
   return (
     <div className="search-view-container">
@@ -115,14 +117,16 @@ export default function SearchView() {
               </Tab>
             ))}
           </Tab.List>
-          <Tab.Panels className={'tab-panels-container'}>
-            <Tab.Panel className={'tab-panel-container'}>
-              <MusicList
-                musicList={Array(1000).fill(musicItem)}
-              ></MusicList>
-            </Tab.Panel>
-            <Tab.Panel>Content 2</Tab.Panel>
-            <Tab.Panel>Content 3</Tab.Panel>
+          <Tab.Panels className={"tab-panels-container"}>
+            {supportedMediaType.map((type) => (
+              <Tab.Panel className="tab-panel-container">
+                <SearchResult
+                  type={type}
+                  plugins={plugins}
+                  query={query}
+                ></SearchResult>
+              </Tab.Panel>
+            ))}
           </Tab.Panels>
         </Tab.Group>
       ) : (

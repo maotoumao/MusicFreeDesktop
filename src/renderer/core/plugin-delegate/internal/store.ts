@@ -1,5 +1,5 @@
 import Store from "@/common/store";
 
-const serializablePluginsStore = new Store<IPlugin.IPluginSerializable[]>([])
+const delegatePluginsStore = new Store<IPlugin.IPluginDelegate[]>([])
 
-export default serializablePluginsStore;
+export default delegatePluginsStore;

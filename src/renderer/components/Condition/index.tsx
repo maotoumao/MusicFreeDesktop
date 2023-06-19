@@ -1,5 +1,3 @@
-import React, { ReactNode } from "react";
-
 interface IConditionProps {
   condition: any;
   truthy?: JSX.Element;

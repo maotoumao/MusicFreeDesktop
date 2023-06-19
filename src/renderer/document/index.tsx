@@ -13,6 +13,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 
 import "./index.css"; // 全局样式
 import './index.scss';
+import { ContextMenuComponent } from "../components/ContextMenu";
 
 bootstrap();
 
@@ -27,5 +28,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       </Routes>
     </HashRouter>
     <ModalComponent></ModalComponent>
+    <ContextMenuComponent></ContextMenuComponent>
   </>
 );

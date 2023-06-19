@@ -1,0 +1,38 @@
+.context-menu--single-column-container {
+  position: fixed;
+  overflow-y: auto;
+  z-index: 999999;
+  background-color: white;
+  box-shadow: rgba($color: #000000, $alpha: 0.2) 2px 2px 8px;
+  border-radius: 6px;
+
+  & .divider {
+    margin: 0;
+    height: 1px;
+  }
+
+  & .menu-item {
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    padding-right: 8px;
+
+    & .menu-item-icon {
+      $item-size: 1.2rem;
+      width: $item-size;
+      height: $item-size;
+      margin-right: 8px;
+
+      & svg {
+        width: $item-size;
+        height: $item-size;
+      }
+    }
+
+    &:hover {
+      background-color: rgba($color: #000000, $alpha: 0.1);
+    }
+  }
+}

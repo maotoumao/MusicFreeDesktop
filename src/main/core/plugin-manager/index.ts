@@ -8,12 +8,12 @@ import { getMainWindow } from '@/main/window';
 const pluginBasePath = path.resolve(app.getAppPath(), './plugins');
 
 let plugins: Plugin[] = [];
-let clonedPlugins: IPlugin.IPluginSerializable[] = [];
+let clonedPlugins: IPlugin.IPluginDelegate[] = [];
 
 function setPlugins(newPlugins: Plugin[]) {
     plugins = newPlugins;
     clonedPlugins = plugins.map(p => {
-        const sPlugin: IPlugin.IPluginSerializable = {} as any;
+        const sPlugin: IPlugin.IPluginDelegate = {} as any;
         sPlugin.supportedMethod = [];
         for(const k in p.instance) {
             // @ts-ignore

@@ -13,7 +13,7 @@ function renderOptions() {
   return <div>更新 卸载 导入歌单 导入单曲 分享</div>;
 }
 
-const columnHelper = createColumnHelper<IPlugin.IPluginSerializable>();
+const columnHelper = createColumnHelper<IPlugin.IPluginDelegate>();
 const columnDef = [
   columnHelper.accessor((row, index) => index + 1, {
     id: "id",

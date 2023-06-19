@@ -19,7 +19,7 @@ declare namespace IpcEvents {
 declare namespace IpcInvoke {
 
   interface Renderer {
-    "get-all-plugins": () => IPlugin.IPluginSerializable[];
+    "get-all-plugins": () => IPlugin.IPluginDelegate[];
     "call-plugin-method": <T extends keyof IPlugin.IPluginInstanceMethods>(arg: {
       // 通过hash或者platform查找插件
       hash?: string;
