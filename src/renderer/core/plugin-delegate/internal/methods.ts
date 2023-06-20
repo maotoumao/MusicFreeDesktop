@@ -26,15 +26,21 @@ export function getPluginByHash(hash: string) {
   return delegatePluginsStore.getValue().find((item) => item.hash === hash);
 }
 
+interface IPluginDelegateLike {
+  platform?: string;
+  hash?: string;
+}
+
 export async function callPluginDelegateMethod<
   T extends keyof IPlugin.IPluginInstanceMethods
 >(
-  pluginDelegate: IPlugin.IPluginDelegate,
+  pluginDelegate: IPluginDelegateLike,
   method: T,
   ...args: Parameters<IPlugin.IPluginInstanceMethods[T]>
 ) {
   return await ipcRendererInvoke("call-plugin-method", {
     hash: pluginDelegate.hash,
+    platform: pluginDelegate.platform,
     method,
     args,
   }) as ReturnType<IPlugin.IPluginInstanceMethods[T]>;

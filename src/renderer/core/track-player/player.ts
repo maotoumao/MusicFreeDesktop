@@ -5,8 +5,7 @@ import trackPlayerEventsEmitter from "./event";
 import shuffle from "lodash.shuffle";
 import { isSameMedia } from "@/common/media-util";
 import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
-
-
+import { callPluginDelegateMethod } from "../plugin-delegate";
 
 /** 音乐队列 */
 const musicQueueStore = new Store<IMusic.IMusicItem[]>([]);
@@ -26,11 +25,12 @@ function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
   musicQueueStore.setValue(musicQueue);
 }
 
+/** 设置当前播放的音乐 */
 function setCurrentMusic(music: IMusic.IMusicItem | null) {
   currentMusicStore.setValue(music);
 }
 
-function toggleRepeatMode() {
+export function toggleRepeatMode() {
   let nextRepeatMode: RepeatMode = repeatModeStore.getValue();
   switch (nextRepeatMode) {
     case RepeatMode.Shuffle:
@@ -46,7 +46,7 @@ function toggleRepeatMode() {
   setRepeatMode(nextRepeatMode);
 }
 
-function setRepeatMode(repeatMode: RepeatMode) {
+export function setRepeatMode(repeatMode: RepeatMode) {
   if (repeatMode === RepeatMode.Shuffle) {
     setMusicQueue(shuffle(musicQueueStore.getValue()));
   }
@@ -82,27 +82,57 @@ function skipToNext() {
 function splice() {}
 
 interface IPlayOptions {
-    restartOnSameMedia: boolean;
+  /** 播放相同音乐时是否从头开始 */
+  restartOnSameMedia: boolean;
 }
 
-function playIndex(nextIndex: number, options: IPlayOptions) {
+async function playIndex(nextIndex: number, options?: IPlayOptions) {
   const musicQueue = musicQueueStore.getValue();
 
   nextIndex = (nextIndex + musicQueue.length) % musicQueue.length;
   // 歌曲重复
-  if(nextIndex === currentIndex && currentIndex !== -1) {
+  if (nextIndex === currentIndex && currentIndex !== -1) {
     const restartOnSameMedia = options?.restartOnSameMedia ?? true;
-    if(restartOnSameMedia) {
-        trackPlayer.seekTo(0);
+    if (restartOnSameMedia) {
+      trackPlayer.seekTo(0);
     }
     trackPlayer.play();
   } else {
-    // 插件获取media
+    currentIndex = nextIndex;
 
+    // 插件获取media
+    const musicItem = musicQueue[currentIndex];
+    setCurrentMusic(musicItem);
+
+    try {
+      const mediaSource = await callPluginDelegateMethod(
+        {
+          platform: musicItem.platform,
+        },
+        "getMediaSource",
+        musicItem,
+        "standard"
+      );
+      console.log(
+        mediaSource,
+        musicItem,
+        musicQueueStore.getValue()[currentIndex]
+      );
+      if (isSameMedia(musicItem, musicQueueStore.getValue()[currentIndex])) {
+        trackPlayer.setTrackSource(mediaSource, musicItem);
+        console.log(mediaSource, musicItem);
+        trackPlayer.play();
+      }
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
 
-function playMusic(musicItem: IMusic.IMusicItem, options: IPlayOptions) {
+export function playMusic(
+  musicItem: IMusic.IMusicItem,
+  options?: IPlayOptions
+) {
   const musicQueue = musicQueueStore.getValue();
   const queueIndex = findMusicIndex(musicItem);
   if (queueIndex === -1) {
@@ -117,12 +147,14 @@ function playMusic(musicItem: IMusic.IMusicItem, options: IPlayOptions) {
     ];
     setMusicQueue(newQueue);
     playIndex(newQueue.length - 1, options);
+  } else {
+    playIndex(queueIndex, options);
   }
 }
 
 function clearQueue() {
-    trackPlayer.clear();
-    setMusicQueue([]);
-    setCurrentMusic(null);
-    currentIndex = -1;
+  trackPlayer.clear();
+  setMusicQueue([]);
+  setCurrentMusic(null);
+  currentIndex = -1;
 }

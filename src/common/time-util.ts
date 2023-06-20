@@ -10,7 +10,15 @@ export function secondsToDuration(seconds: number | string) {
     if (hour === 0) {
       return ms;
     } else {
-        return `${hour}:${ms}`;
+      return `${hour}:${ms}`;
     }
   }
+}
+
+export function delay(millsecond: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, millsecond);
+  });
 }

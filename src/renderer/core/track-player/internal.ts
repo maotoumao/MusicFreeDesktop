@@ -3,6 +3,8 @@
  */
 import { ErrorReason, PlayerState, TrackPlayerEvent } from "./enum";
 import trackPlayerEventsEmitter from "./event";
+import albumImg from "@/assets/imgs/album-cover.jpg";
+
 
 
 class TrackPlayerInternal {
@@ -65,7 +67,6 @@ class TrackPlayerInternal {
   }
 
 
-  // todo 更新meta
   /** 设置音源 */
   setTrackSource(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem) {
     let url = trackSource.url;
@@ -96,7 +97,7 @@ class TrackPlayerInternal {
       artist: musicItem.artist,
       album: musicItem.album,
       artwork: [{
-        src: musicItem.artwork,
+        src: musicItem.artwork ?? albumImg,
       }]
     })
     this.audio.src = url;

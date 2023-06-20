@@ -9,6 +9,10 @@ import "./index.scss";
 import SvgAsset from "../SvgAsset";
 import Tag from "../Tag";
 import { secondsToDuration } from "@/common/time-util";
+import MusicSheet from "@/renderer/core/music-sheet";
+import trackPlayer from "@/renderer/core/track-player";
+import Condition from "../Condition";
+import Empty from "../Empty";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
@@ -104,6 +108,8 @@ export default function MusicList(props: IMusicListProps) {
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} onContextMenu={(e) => {
               console.log(e);
+            }} onDoubleClick={() => {
+              trackPlayer.playMusic(row.original)
             }}>
               {row.getAllCells().map((cell) => (
                 <td
@@ -119,6 +125,9 @@ export default function MusicList(props: IMusicListProps) {
           ))}
         </tbody>
       </table>
+      <Condition condition={musicList.length === 0}>
+        <Empty></Empty>
+      </Condition>
     </div>
   );
 }

@@ -65,7 +65,8 @@ export default function useSearch() {
 
         // 是否是一次新的搜索
         const newSearch =
-          (query !== currentQueryRef.current) || prevPluginResult?.page === undefined || queryPage === 1;
+          query !== prevPluginResult?.query ||
+          prevPluginResult?.page === undefined;
 
         // 本次搜索关键词
         currentQueryRef.current = query =
@@ -74,6 +75,14 @@ export default function useSearch() {
         /** 搜索的页码 */
         const page =
           queryPage ?? newSearch ? 1 : (prevPluginResult?.page ?? 0) + 1;
+          
+        if (
+          query === prevPluginResult?.query &&
+          queryPage <= prevPluginResult?.page
+        ) {
+          // 重复请求
+          return;
+        }
 
         try {
           setSearchResults(
@@ -82,7 +91,7 @@ export default function useSearch() {
               prevMediaResult[_hash] = {
                 state: newSearch
                   ? RequestStateCode.PENDING_FIRST_PAGE
-                  : RequestStateCode.PENDING_FIRST_PAGE,
+                  : RequestStateCode.PENDING_REST_PAGE,
                 // @ts-ignore
                 data: newSearch ? [] : prevMediaResult[_hash]?.data ?? [],
                 query: query,
@@ -135,7 +144,7 @@ export default function useSearch() {
             })
           );
         } catch (e: any) {
-            console.log(e);
+          console.log(e);
           setSearchResults(
             produce((draft) => {
               const prevMediaResult = draft[searchType];
