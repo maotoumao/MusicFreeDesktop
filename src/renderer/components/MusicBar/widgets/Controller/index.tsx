@@ -3,29 +3,37 @@ import "./index.scss";
 import trackPlayer from "@/renderer/core/track-player";
 
 export default function Controller() {
+  const playerState = trackPlayer.usePlayerState();
   return (
     <div className="music-controller">
-      <div className="skip controller-btn" title="上一首" onClick={() => {}}>
+      <div className="skip controller-btn" title="上一首" onClick={() => {
+          trackPlayer.skipToPrev();
+
+      }}>
         <SvgAsset iconName="skip-left"></SvgAsset>
       </div>
       <div
-        className="play-or-pause controller-btn"
+        className="play-or-pause controller-btn primary-btn"
         onClick={() => {
-        //   trackPlayer.pause();
+          if(playerState === trackPlayer.PlayerState.Playing) {
+            trackPlayer.pause();
+          } else {
+            trackPlayer.resumePlay();
+          }
         }}
       >
-        <SvgAsset iconName="play"></SvgAsset>
+        <SvgAsset
+          iconName={
+            playerState !== trackPlayer.PlayerState.Playing ? "play" : "pause"
+          }
+        ></SvgAsset>
       </div>
       <div
         className="skip controller-btn"
         title="下一首"
         onClick={() => {
-          // getTopListDetail( {
-          //   id: "eur_usa",
-          //   title: "欧美榜",
-          //   coverImg:
-          //     "https://cdnmusic.migu.cn/tycms_picture/20/08/231/200818095229556_327x327_1383.png",
-          // } as any);
+      
+          trackPlayer.skipToNext();
         }}
       >
         <SvgAsset iconName="skip-right"></SvgAsset>

@@ -86,15 +86,7 @@
         flex-shrink: 0;
       }
 
-      & .like-or-dislike {
-        $size: 16px;
-        width: $size;
-        height: $size;
-        & svg {
-          width: $size;
-          height: $size;
-        }
-      }
+ 
     }
   }
 }

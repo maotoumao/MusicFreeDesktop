@@ -2,15 +2,7 @@
   width: 100%;
   min-height: 300px;
 
-  & .music-list-like {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    & svg {
-      width: 18px;
-      height: 18px;
-    }
-  }
+
 
   & th {
     &:nth-child(2) {

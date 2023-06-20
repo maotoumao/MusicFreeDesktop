@@ -1,26 +1,31 @@
 import Store from "@/common/store";
 import trackPlayer from "./internal";
-import { RepeatMode, TrackPlayerEvent } from "./enum";
+import { PlayerState, RepeatMode, TrackPlayerEvent } from "./enum";
 import trackPlayerEventsEmitter from "./event";
 import shuffle from "lodash.shuffle";
 import { isSameMedia, sortByTimestampAndIndex } from "@/common/media-util";
 import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
 import { callPluginDelegateMethod } from "../plugin-delegate";
 
-/** 音乐队列 */
-const musicQueueStore = new Store<IMusic.IMusicItem[]>([]);
-
-/** 当前播放 */
-
-const currentMusicStore = new Store<IMusic.IMusicItem | null>(null);
-/** 播放模式 */
-const repeatModeStore = new Store(RepeatMode.Queue);
-
 const initProgress = {
   currentTime: 0,
   duration: Infinity,
 };
+
+/** 音乐队列 */
+const musicQueueStore = new Store<IMusic.IMusicItem[]>([]);
+
+/** 当前播放 */
+const currentMusicStore = new Store<IMusic.IMusicItem | null>(null);
+
+/** 播放模式 */
+const repeatModeStore = new Store(RepeatMode.Queue);
+
+/** 进度 */
 const progressStore = new Store(initProgress);
+
+/** 播放状态 */
+const playerStateStore = new Store(PlayerState.None);
 
 /** 播放下标 */
 let currentIndex = -1;
@@ -44,6 +49,18 @@ export function setupPlayer() {
   trackPlayerEventsEmitter.on(TrackPlayerEvent.TimeUpdated, (res) => {
     progressStore.setValue(res);
   });
+
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.StateChanged, (st) => {
+    playerStateStore.setValue(st);
+  });
+
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.Error, () => {
+    // 播放错误时自动跳到下一首
+    if (musicQueueStore.getValue().length > 1) {
+      skipToNext();
+    }
+  });
+
   navigator.mediaSession.setActionHandler("previoustrack", () => {
     skipToPrev();
   });
@@ -68,6 +85,10 @@ export function useCurrentMusic() {
 export const useProgress = progressStore.useValue;
 
 export const getProgress = progressStore.getValue;
+
+export const usePlayerState = playerStateStore.useValue;
+
+export const useRepeatMode = repeatModeStore.useValue;
 
 export function toggleRepeatMode() {
   let nextRepeatMode: RepeatMode = repeatModeStore.getValue();
@@ -170,6 +191,10 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
         musicItem,
         "standard"
       );
+      if (!mediaSource?.url) {
+        throw new Error("Empty Source");
+      }
+      console.log("MEDIA SOURCE", mediaSource, musicItem);
       if (isSameMedia(musicItem, musicQueueStore.getValue()[currentIndex])) {
         setCurrentMusic(musicItem);
         setTrackAndPlay(mediaSource, musicItem);
@@ -182,7 +207,7 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
   }
 }
 
-export function playMusic(
+export async function playMusic(
   musicItem: IMusic.IMusicItem,
   options?: IPlayOptions
 ) {
@@ -199,10 +224,22 @@ export function playMusic(
       },
     ];
     setMusicQueue(newQueue);
-    playIndex(newQueue.length - 1, options);
+    await playIndex(newQueue.length - 1, options);
   } else {
-    playIndex(queueIndex, options);
+    await playIndex(queueIndex, options);
   }
+}
+
+export async function playMusicWithReplaceQueue(
+  musicItem: IMusic.IMusicItem,
+  musicList: IMusic.IMusicItem[]
+) {
+  musicQueueStore.setValue(musicList);
+  await playMusic(musicItem);
+}
+
+export function resumePlay() {
+  trackPlayer.play();
 }
 
 /** 内部播放 */
@@ -224,4 +261,8 @@ function clearQueue() {
 
 export function seekTo(position: number) {
   trackPlayer.seekTo(position);
+}
+
+export function pause() {
+  trackPlayer.pause();
 }

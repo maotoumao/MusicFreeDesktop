@@ -6,15 +6,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
 
   & .controller-btn {
     cursor: pointer;
     border-radius: 50%;
-    background-color: var(--primaryColor);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #333;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+  & .primary-btn {
+    background-color: var(--primaryColor);
+    color: white;
+
   }
 
   & .play-or-pause {
@@ -32,8 +39,8 @@
     height: 34px;
 
     & svg {
-      width: 20.4px;
-      height: 20.4px;
+      width: 28px;
+      height: 28px;
     }
   }
 }

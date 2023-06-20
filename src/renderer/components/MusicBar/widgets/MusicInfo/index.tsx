@@ -8,6 +8,7 @@ import {
 } from "@/renderer/core/track-player/player";
 import Tag from "@/renderer/components/Tag";
 import { secondsToDuration } from "@/common/time-util";
+import MusicFavorite from "@/renderer/components/MusicFavorite";
 
 export default function MusicInfo() {
   const musicItem = useCurrentMusic();
@@ -49,7 +50,7 @@ export default function MusicInfo() {
             <div className="music-artist">
               <div className="artist">{musicItem.artist}</div>
               <Progress></Progress>
-              <LikeOrDislike musicItem={musicItem}></LikeOrDislike>
+              <MusicFavorite musicItem={musicItem} size={18}></MusicFavorite>
             </div>
           </div>
         </>
@@ -65,16 +66,6 @@ function Progress() {
       {isFinite(duration)
         ? `${secondsToDuration(currentTime)}/${secondsToDuration(duration)}`
         : null}
-    </div>
-  );
-}
-
-function LikeOrDislike(props: { musicItem: IMusic.IMusicItem }) {
-  const { musicItem } = props;
-
-  return (
-    <div className="like-or-dislike" role="button">
-      <SvgAsset iconName="heart-outline"></SvgAsset>
     </div>
   );
 }

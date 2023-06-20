@@ -29,6 +29,7 @@ export type SvgAssetIconNames =
 
 interface IProps {
   iconName: SvgAssetIconNames;
+  size?: number;
 }
 /**
  *
@@ -37,8 +38,11 @@ interface IProps {
  */
 function SvgAsset(props: IProps) {
   const Svg = require(`@/assets/icons/${props.iconName}.svg`);
-
-  return <Svg.default></Svg.default>;
+  
+  return <Svg.default style={{
+    width: props.size,
+    height: props.size
+  }}></Svg.default>;
 }
 
 export default memo(SvgAsset, (prev, curr) => prev.iconName === curr.iconName);

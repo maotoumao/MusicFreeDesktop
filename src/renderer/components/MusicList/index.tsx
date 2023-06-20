@@ -13,6 +13,7 @@ import MusicSheet from "@/renderer/core/music-sheet";
 import trackPlayer from "@/renderer/core/track-player";
 import Condition from "../Condition";
 import Empty from "../Empty";
+import MusicFavorite from "../MusicFavorite";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
@@ -30,11 +31,7 @@ const columnDef = [
   columnHelper.display({
     id: "like",
     size: 32,
-    cell: () => (
-      <div className="music-list-like" role="button">
-        <SvgAsset iconName="heart-outline"></SvgAsset>
-      </div>
-    ),
+    cell: (info) => <MusicFavorite musicItem={info.row.original} size={18}></MusicFavorite>,
   }),
   columnHelper.accessor((_, index) => index + 1, {
     cell: (info) => info.getValue(),

@@ -5,6 +5,7 @@ import musicSheetStore from "./store/musicSheetStore";
 import Header from "./components/Header";
 import Loading from "@/renderer/components/Loading";
 import Body from "./components/Body";
+import { useMusicSheet } from "@/renderer/core/music-sheet/internal/sheets-method";
 
 /**
  * path: /main/musicsheet/platform/id
@@ -17,7 +18,9 @@ import Body from "./components/Body";
 export default function MusicSheetView() {
   const params = useParams();
 
-  const musicSheet = musicSheetStore.useValue();
+  console.log(params);
+  const musicSheet = useMusicSheet(params.id);
+  console.log(musicSheet, 'ms');
 
   useEffect(() => {
     const sheetInState = history.state.usr?.musicSheet ?? {};
