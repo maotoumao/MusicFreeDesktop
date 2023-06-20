@@ -13,12 +13,7 @@ export default function MusicInfo() {
   const musicItem = useCurrentMusic();
 
   return (
-    <div
-      className="music-info-container"
-      //   onClick={() => {
-      //     Evt.emit("SHOW_MUSIC_DETAIL");
-      //   }}
-    >
+    <div className="music-info-container">
       {!musicItem ? null : (
         <>
           <img
@@ -29,7 +24,14 @@ export default function MusicInfo() {
             onError={setFallbackAlbum}
           ></img>
 
-          <div className="open-detail" role="button" title="打开歌曲详情页">
+          <div
+            className="open-detail"
+            role="button"
+            title="打开歌曲详情页"
+            onClick={() => {
+              Evt.emit("SHOW_MUSIC_DETAIL");
+            }}
+          >
             <SvgAsset iconName="chevron-double-up"></SvgAsset>
           </div>
           <div className="music-info">
@@ -47,7 +49,7 @@ export default function MusicInfo() {
             <div className="music-artist">
               <div className="artist">{musicItem.artist}</div>
               <Progress></Progress>
-              {/* <SvgAsset iconName="heart-outline"></SvgAsset> */}
+              <LikeOrDislike musicItem={musicItem}></LikeOrDislike>
             </div>
           </div>
         </>
@@ -63,6 +65,16 @@ function Progress() {
       {isFinite(duration)
         ? `${secondsToDuration(currentTime)}/${secondsToDuration(duration)}`
         : null}
+    </div>
+  );
+}
+
+function LikeOrDislike(props: { musicItem: IMusic.IMusicItem }) {
+  const { musicItem } = props;
+
+  return (
+    <div className="like-or-dislike" role="button">
+      <SvgAsset iconName="heart-outline"></SvgAsset>
     </div>
   );
 }

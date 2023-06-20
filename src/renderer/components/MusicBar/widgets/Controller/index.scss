@@ -1,0 +1,39 @@
+// 控制区域
+.music-controller {
+  margin-left: 10px;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+
+  & .controller-btn {
+    cursor: pointer;
+    border-radius: 50%;
+    background-color: var(--primaryColor);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  & .play-or-pause {
+    width: 40px;
+    height: 40px;
+
+    & svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  & .skip {
+    width: 34px;
+    height: 34px;
+
+    & svg {
+      width: 20.4px;
+      height: 20.4px;
+    }
+  }
+}

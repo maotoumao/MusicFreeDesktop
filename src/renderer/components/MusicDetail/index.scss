@@ -1,9 +1,20 @@
 .music-detail-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background-color: var(--backgroundColor);
+
+  & .background {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 100;
-    background-color: var(--backgroundColor);
+    background-size: cover;
+    filter: blur(40px);
+    opacity: 0.5;
+  }
 }

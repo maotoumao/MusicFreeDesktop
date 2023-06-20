@@ -3,7 +3,6 @@ import "./index.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function HeaderNavigator() {
-  const loc = useLocation();
   const navigate = useNavigate();
   const canBack = history.state.idx > 0;
   const canGo = history.state.idx < history.length - 1;

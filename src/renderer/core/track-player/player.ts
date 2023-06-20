@@ -3,7 +3,7 @@ import trackPlayer from "./internal";
 import { RepeatMode, TrackPlayerEvent } from "./enum";
 import trackPlayerEventsEmitter from "./event";
 import shuffle from "lodash.shuffle";
-import { isSameMedia } from "@/common/media-util";
+import { isSameMedia, sortByTimestampAndIndex } from "@/common/media-util";
 import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
 import { callPluginDelegateMethod } from "../plugin-delegate";
 
@@ -25,13 +25,32 @@ const progressStore = new Store(initProgress);
 /** 播放下标 */
 let currentIndex = -1;
 
-trackPlayerEventsEmitter.on(TrackPlayerEvent.PlayEnd, () => {
-  progressStore.setValue(initProgress);
-});
+export function setupPlayer() {
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.PlayEnd, () => {
+    progressStore.setValue(initProgress);
+    switch (repeatModeStore.getValue()) {
+      case RepeatMode.Queue:
+      case RepeatMode.Shuffle: {
+        skipToNext();
+        break;
+      }
+      case RepeatMode.Loop: {
+        playIndex(currentIndex);
+        break;
+      }
+    }
+  });
 
-trackPlayerEventsEmitter.on(TrackPlayerEvent.TimeUpdated, (res) => {
-  progressStore.setValue(res);
-});
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.TimeUpdated, (res) => {
+    progressStore.setValue(res);
+  });
+  navigator.mediaSession.setActionHandler("previoustrack", () => {
+    skipToPrev();
+  });
+  navigator.mediaSession.setActionHandler("nexttrack", () => {
+    skipToNext();
+  });
+}
 
 function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
   musicQueueStore.setValue(musicQueue);
@@ -69,6 +88,8 @@ export function toggleRepeatMode() {
 export function setRepeatMode(repeatMode: RepeatMode) {
   if (repeatMode === RepeatMode.Shuffle) {
     setMusicQueue(shuffle(musicQueueStore.getValue()));
+  } else if (repeatModeStore.getValue() === RepeatMode.Shuffle) {
+    setMusicQueue(sortByTimestampAndIndex(musicQueueStore.getValue(), true));
   }
   repeatModeStore.setValue(repeatMode);
   currentIndex = findMusicIndex(currentMusicStore.getValue());
@@ -90,20 +111,33 @@ function addToEnd() {}
 
 function addNext() {}
 
-function skipToNext() {
+export function skipToPrev() {
   const musicQueue = musicQueueStore.getValue();
   if (musicQueue.length === 0) {
     currentIndex = -1;
     setCurrentMusic(null);
     return;
   }
+  playIndex(currentIndex - 1);
+}
+
+export function skipToNext() {
+  const musicQueue = musicQueueStore.getValue();
+  if (musicQueue.length === 0) {
+    currentIndex = -1;
+    setCurrentMusic(null);
+    return;
+  }
+  playIndex(currentIndex + 1);
 }
 
 function splice() {}
 
 interface IPlayOptions {
   /** 播放相同音乐时是否从头开始 */
-  restartOnSameMedia: boolean;
+  restartOnSameMedia?: boolean;
+  /** 强制更新源 */
+  refreshSource?: boolean;
 }
 
 async function playIndex(nextIndex: number, options?: IPlayOptions) {
@@ -111,7 +145,11 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
 
   nextIndex = (nextIndex + musicQueue.length) % musicQueue.length;
   // 歌曲重复
-  if (nextIndex === currentIndex && currentIndex !== -1) {
+  if (
+    !options?.refreshSource &&
+    nextIndex === currentIndex &&
+    currentIndex !== -1
+  ) {
     const restartOnSameMedia = options?.restartOnSameMedia ?? true;
     if (restartOnSameMedia) {
       trackPlayer.seekTo(0);
@@ -137,6 +175,8 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
         setTrackAndPlay(mediaSource, musicItem);
       }
     } catch (e) {
+      // 播放失败
+      trackPlayer.clear();
       console.log(e);
     }
   }

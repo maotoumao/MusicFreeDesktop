@@ -4,7 +4,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 280px;
+  width: 290px;
   height: 48px;
   /* border-right: 1px solid var(--dividerColor); */
   padding-left: 10px;
@@ -48,7 +48,7 @@
     flex-direction: column;
     justify-content: space-around;
     margin-left: 10px;
-    width: 216px;
+    width: 226px;
     padding: 8px 0;
     height: 48px;
     padding-right: 8px;
@@ -68,6 +68,7 @@
 
     & .music-artist {
       display: flex;
+      align-items: center;
 
       & div {
         opacity: 0.8;
@@ -83,6 +84,16 @@
 
       & .progress {
         flex-shrink: 0;
+      }
+
+      & .like-or-dislike {
+        $size: 16px;
+        width: $size;
+        height: $size;
+        & svg {
+          width: $size;
+          height: $size;
+        }
       }
     }
   }
