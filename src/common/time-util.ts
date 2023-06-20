@@ -6,7 +6,7 @@ export function secondsToDuration(seconds: number | string) {
     seconds = Math.floor(seconds / 60);
     const min = seconds % 60;
     const hour = Math.floor(seconds / 60);
-    const ms = `${min}`.padStart(2, "0") + ":" + `${sec}`.padStart(2, "0");
+    const ms = `${min}`.padStart(2, "0") + ":" + `${Math.round(sec)}`.padStart(2, "0");
     if (hour === 0) {
       return ms;
     } else {

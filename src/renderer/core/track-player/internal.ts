@@ -142,6 +142,8 @@ class TrackPlayerInternal {
     navigator.mediaSession.playbackState = 'none';
   }
 
+  
+
 }
 
 const trackPlayer = new TrackPlayerInternal();

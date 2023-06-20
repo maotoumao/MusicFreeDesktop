@@ -1,0 +1,34 @@
+.music-bar--slider-container {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  $height: 12px;
+  top: -($height / 2);
+  height: $height;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  --slider-height: 2px;
+
+  &:hover,
+  &:active {
+    --slider-height: 6px;
+  }
+
+  & .bar {
+    width: 100%;
+    height: var(--slider-height);
+    transition: height 80ms linear;
+    background-color: #d8d8d8;
+  }
+
+  & .active-bar {
+    position: absolute;
+    width: 100%;
+    left: -100%;
+    height: var(--slider-height);
+    background-color: var(--primaryColor);
+    transform: translateX(0);
+    transition: height linear 80ms;
+  }
+}

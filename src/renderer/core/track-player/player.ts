@@ -16,10 +16,22 @@ const currentMusicStore = new Store<IMusic.IMusicItem | null>(null);
 /** 播放模式 */
 const repeatModeStore = new Store(RepeatMode.Queue);
 
+const initProgress = {
+  currentTime: 0,
+  duration: Infinity,
+};
+const progressStore = new Store(initProgress);
+
 /** 播放下标 */
 let currentIndex = -1;
 
-trackPlayerEventsEmitter.on(TrackPlayerEvent.PlayEnd, () => {});
+trackPlayerEventsEmitter.on(TrackPlayerEvent.PlayEnd, () => {
+  progressStore.setValue(initProgress);
+});
+
+trackPlayerEventsEmitter.on(TrackPlayerEvent.TimeUpdated, (res) => {
+  progressStore.setValue(res);
+});
 
 function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
   musicQueueStore.setValue(musicQueue);
@@ -29,6 +41,14 @@ function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
 function setCurrentMusic(music: IMusic.IMusicItem | null) {
   currentMusicStore.setValue(music);
 }
+
+export function useCurrentMusic() {
+  return currentMusicStore.useValue();
+}
+
+export const useProgress = progressStore.useValue;
+
+export const getProgress = progressStore.getValue;
 
 export function toggleRepeatMode() {
   let nextRepeatMode: RepeatMode = repeatModeStore.getValue();
@@ -102,7 +122,6 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
 
     // 插件获取media
     const musicItem = musicQueue[currentIndex];
-    setCurrentMusic(musicItem);
 
     try {
       const mediaSource = await callPluginDelegateMethod(
@@ -113,15 +132,9 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
         musicItem,
         "standard"
       );
-      console.log(
-        mediaSource,
-        musicItem,
-        musicQueueStore.getValue()[currentIndex]
-      );
       if (isSameMedia(musicItem, musicQueueStore.getValue()[currentIndex])) {
-        trackPlayer.setTrackSource(mediaSource, musicItem);
-        console.log(mediaSource, musicItem);
-        trackPlayer.play();
+        setCurrentMusic(musicItem);
+        setTrackAndPlay(mediaSource, musicItem);
       }
     } catch (e) {
       console.log(e);
@@ -152,9 +165,23 @@ export function playMusic(
   }
 }
 
+/** 内部播放 */
+function setTrackAndPlay(
+  mediaSource: IPlugin.IMediaSourceResult,
+  musicItem: IMusic.IMusicItem
+) {
+  progressStore.setValue(initProgress);
+  trackPlayer.setTrackSource(mediaSource, musicItem);
+  trackPlayer.play();
+}
+
 function clearQueue() {
   trackPlayer.clear();
   setMusicQueue([]);
   setCurrentMusic(null);
   currentIndex = -1;
+}
+
+export function seekTo(position: number) {
+  trackPlayer.seekTo(position);
 }
