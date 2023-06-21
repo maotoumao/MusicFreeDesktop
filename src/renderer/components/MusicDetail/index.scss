@@ -17,8 +17,23 @@
     position: absolute;
     filter: blur(50px);
     opacity: 0.5;
+    mask-image: linear-gradient(to bottom, #fff, transparent);
     -webkit-mask-image: linear-gradient(to bottom, #fff, transparent);
     z-index: -1;
+  }
+
+  & .hide-music-detail {
+    color: rgba($color: #000000, $alpha: 0.6);
+    position: fixed;
+    right: 36px;
+    top: 36px;
+    $size: 28px;
+    width: $size;
+    height: $size;
+    & svg {
+      width: $size;
+      height: $size;
+    }
   }
 
   & .music-title {
@@ -68,6 +83,5 @@
       object-fit: cover;
       -webkit-user-drag: none;
     }
-
   }
 }

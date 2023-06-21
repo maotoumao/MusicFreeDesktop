@@ -3,5 +3,5 @@ import * as playerEnum from './enum';
 
 export default {
   ...player,
-  ...playerEnum
+  ...playerEnum,
 };

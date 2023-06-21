@@ -8,6 +8,7 @@ import Store from "@/common/store";
 import Tag from "../Tag";
 import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import Lyric from "./widgets/Lyric";
+import SvgAsset from "../SvgAsset";
 
 export const musicDetailShownStore = new Store(false);
 
@@ -39,6 +40,11 @@ export default function () {
           backgroundImage: `url(${musicItem?.artwork ?? albumImg})`,
         }}
       ></div>
+      <div className="hide-music-detail" role="button" title="关闭歌曲详情页" onClick={() => {
+        musicDetailShownStore.setValue(false);
+      }}>
+        <SvgAsset iconName='chevron-down'></SvgAsset>
+      </div>
       <div className="music-title" title={musicItem?.title}>
         {musicItem?.title}
       </div>

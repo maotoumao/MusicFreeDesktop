@@ -6,7 +6,7 @@ import shuffle from "lodash.shuffle";
 import { isSameMedia, sortByTimestampAndIndex } from "@/common/media-util";
 import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
 import { callPluginDelegateMethod } from "../plugin-delegate";
-import { prev } from "cheerio/lib/api/traversing";
+import LyricParser from "@/renderer/utils/lyric-parser";
 
 const initProgress = {
   currentTime: 0,
@@ -18,6 +18,16 @@ const musicQueueStore = new Store<IMusic.IMusicItem[]>([]);
 
 /** 当前播放 */
 const currentMusicStore = new Store<IMusic.IMusicItem | null>(null);
+
+interface ICurrentLyric {
+  parser?: LyricParser;
+  currentLrc?: {
+    lrc?: ILyric.IParsedLrcItem; // 当前时刻的歌词
+    index?: number; // 下标
+  };
+}
+/** 当前歌词解析器 */
+const currentLyricStore = new Store<ICurrentLyric | null>(null);
 
 /** 播放模式 */
 const repeatModeStore = new Store(RepeatMode.Queue);
@@ -49,6 +59,16 @@ export function setupPlayer() {
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.TimeUpdated, (res) => {
     progressStore.setValue(res);
+    const currentLyric = currentLyricStore.getValue();
+    if (currentLyric?.parser) {
+      const lrcItem = currentLyric.parser.getPosition(res.currentTime);
+      if (lrcItem?.lrc !== currentLyric.currentLrc?.lrc) {
+        currentLyricStore.setValue({
+          parser: currentLyric.parser,
+          currentLrc: lrcItem,
+        });
+      }
+    }
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.StateChanged, (st) => {
@@ -59,6 +79,54 @@ export function setupPlayer() {
     // 播放错误时自动跳到下一首
     if (musicQueueStore.getValue().length > 1) {
       skipToNext();
+    }
+  });
+
+  // 更新当前音乐的歌词
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.UpdateLyric, async () => {
+    const currentMusic = currentMusicStore.getValue();
+    // 当前没有歌曲
+    if (!currentMusic) {
+      currentLyricStore.setValue(null);
+      return;
+    }
+    console.log("here1");
+
+    const currentLyric = currentLyricStore.getValue();
+    // 已经有了
+    if (
+      currentLyric &&
+      isSameMedia(currentLyric?.parser?.getCurrentMusicItem?.(), currentMusic)
+    ) {
+      console.log("here2");
+
+      return;
+    } else {
+      try {
+        const lyric = await callPluginDelegateMethod(
+          currentMusic,
+          "getLyric",
+          currentMusic
+        );
+        console.log(lyric, "lyric");
+        if (!isSameMedia(currentMusic, currentMusicStore.getValue())) {
+          return;
+        }
+        if (!lyric?.rawLrc) {
+          currentLyricStore.setValue({});
+          return;
+        }
+        const rawLrc = lyric?.rawLrc;
+        const parser = new LyricParser(rawLrc, currentMusic);
+        currentLyricStore.setValue({
+          parser,
+        });
+      } catch (e) {
+        console.log(e, "歌词解析失败");
+        currentLyricStore.setValue({});
+
+        // 解析歌词失败
+      }
     }
   });
 
@@ -76,7 +144,13 @@ function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
 
 /** 设置当前播放的音乐 */
 function setCurrentMusic(music: IMusic.IMusicItem | null) {
-  currentMusicStore.setValue(music);
+  if (!isSameMedia(music, currentMusicStore.getValue())) {
+    currentMusicStore.setValue(music);
+    currentLyricStore.setValue(null);
+    trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
+  } else {
+    currentMusicStore.setValue(music);
+  }
 }
 
 export function useCurrentMusic() {
@@ -92,6 +166,8 @@ export const usePlayerState = playerStateStore.useValue;
 export const useRepeatMode = repeatModeStore.useValue;
 
 export const useMusicQueue = musicQueueStore.useValue;
+
+export const useLyric = currentLyricStore.useValue;
 
 export function toggleRepeatMode() {
   let nextRepeatMode: RepeatMode = repeatModeStore.getValue();

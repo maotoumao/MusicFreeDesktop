@@ -1,8 +1,9 @@
-import { isSameMedia, resetMediaItem } from "@/common/media-util";
+import { resetMediaItem } from "@/common/media-util";
 import type { Plugin } from "./plugin";
 import { localFilePathSymbol } from "@/common/constant";
 import fs from "fs/promises";
 import { delay } from "@/common/time-util";
+import axios from "axios";
 
 export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
   private plugin;
@@ -78,13 +79,13 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
         userAgent: headers?.["user-agent"],
       } as IPlugin.IMediaSourceResult;
 
-    //   if (pluginCacheControl !== CacheControl.NoStore && !notUpdateCache) {
-    //     Cache.update(musicItem, [
-    //       ["headers", result.headers],
-    //       ["userAgent", result.userAgent],
-    //       [`qualities.${quality}.url`, url],
-    //     ]);
-    //   }
+      //   if (pluginCacheControl !== CacheControl.NoStore && !notUpdateCache) {
+      //     Cache.update(musicItem, [
+      //       ["headers", result.headers],
+      //       ["userAgent", result.userAgent],
+      //       [`qualities.${quality}.url`, url],
+      //     ]);
+      //   }
 
       return result;
     } catch (e: any) {
@@ -118,45 +119,17 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
 
   /** 获取歌词 */
   async getLyric(
-    musicItem: IMusic.IMusicItem,
-    from?: IMusic.IMusicItem
+    musicItem: IMusic.IMusicItem
   ): Promise<ILyric.ILyricSource | null> {
-    // // 1.额外存储的meta信息
-    // const meta = MediaMeta.get(musicItem);
-    // if (meta && meta.associatedLrc) {
-    //     // 有关联歌词
-    //     if (
-    //         isSameMedia(musicItem, from) ||
-    //         isSameMedia(meta.associatedLrc, musicItem)
-    //     ) {
-    //         // 形成环路，断开当前的环
-    //         await MediaMeta.update(musicItem, {
-    //             associatedLrc: undefined,
-    //         });
-    //         // 无歌词
-    //         return null;
-    //     }
-    //     // 获取关联歌词
-    //     const associatedMeta = MediaMeta.get(meta.associatedLrc) ?? {};
-    //     const result = await this.getLyric(
-    //         {...meta.associatedLrc, ...associatedMeta},
-    //         from ?? musicItem,
-    //     );
-    //     if (result) {
-    //         // 如果有关联歌词，就返回关联歌词，深度优先
-    //         return result;
-    //     }
-    // }
-    // const cache = Cache.get(musicItem);
-    // let rawLrc = meta?.rawLrc || musicItem.rawLrc || cache?.rawLrc;
-    // let lrcUrl = meta?.lrc || musicItem.lrc || cache?.lrc;
-    // // 如果存在文本
-    // if (rawLrc) {
-    //     return {
-    //         rawLrc,
-    //         lrc: lrcUrl,
-    //     };
-    // }
+    let rawLrc = musicItem.rawLrc;
+    let lrcUrl = musicItem.lrc;
+    // 如果存在文本
+    if (rawLrc) {
+      return {
+        rawLrc,
+        lrc: lrcUrl,
+      };
+    }
     // // 2.本地缓存
     // const localLrc =
     //     meta?.[internalSerializeKey]?.local?.localLrc ||
@@ -168,69 +141,57 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     //         lrc: lrcUrl,
     //     };
     // }
-    // // 3.优先使用url
-    // if (lrcUrl) {
-    //     try {
-    //         // 需要超时时间 axios timeout 但是没生效
-    //         rawLrc = (await axios.get(lrcUrl, {timeout: 2000})).data;
-    //         return {
-    //             rawLrc,
-    //             lrc: lrcUrl,
-    //         };
-    //     } catch {
-    //         lrcUrl = undefined;
-    //     }
-    // }
-    // // 4. 如果地址失效
-    // if (!lrcUrl) {
-    //     // 插件获得url
-    //     try {
-    //         let lrcSource;
-    //         if (from) {
-    //             lrcSource = await PluginManager.getByMedia(
-    //                 musicItem,
-    //             )?.instance?.getLyric?.(
-    //                 resetMediaItem(musicItem, undefined, true),
-    //             );
-    //         } else {
-    //             lrcSource = await this.plugin.instance?.getLyric?.(
-    //                 resetMediaItem(musicItem, undefined, true),
-    //             );
-    //         }
+    // 3.优先使用url
+    if (lrcUrl) {
+      try {
+        rawLrc = (await axios.get(lrcUrl, { timeout: 5000 })).data;
+        return {
+          rawLrc,
+          lrc: lrcUrl,
+        };
+      } catch {
+        lrcUrl = undefined;
+      }
+    }
+    // 4. 如果地址失效
+    if (!lrcUrl) {
+      // 插件获得url
+      try {
+        // if (from) {
+        //   lrcSource = await PluginManager.getByMedia(
+        //     musicItem
+        //   )?.instance?.getLyric?.(resetMediaItem(musicItem, undefined, true));
+        // } else {
+        const lrcSource = await this.plugin.instance?.getLyric?.(
+          resetMediaItem(musicItem, undefined, true)
+        );
+        // }
 
-    //         rawLrc = lrcSource?.rawLrc;
-    //         lrcUrl = lrcSource?.lrc;
-    //     } catch (e: any) {
-    //         // trace('插件获取歌词失败', e?.message, 'error');
-    //         // devLog('error', '插件获取歌词失败', e, e?.message);
-    //     }
-    // }
-    // // 5. 最后一次请求
-    // if (rawLrc || lrcUrl) {
-    //     const filename = `${pathConst.lrcCachePath}${nanoid()}.lrc`;
-    //     if (lrcUrl) {
-    //         try {
-    //             rawLrc = (await axios.get(lrcUrl, {timeout: 2000})).data;
-    //         } catch {}
-    //     }
-    //     if (rawLrc) {
-    //         await writeFile(filename, rawLrc, 'utf8');
-    //         // 写入缓存
-    //         Cache.update(musicItem, [
-    //             [`${internalSerializeKey}.local.localLrc`, filename],
-    //         ]);
-    //         // 如果有meta
-    //         if (meta) {
-    //             MediaMeta.update(musicItem, [
-    //                 [`${internalSerializeKey}.local.localLrc`, filename],
-    //             ]);
-    //         }
-    //         return {
-    //             rawLrc,
-    //             lrc: lrcUrl,
-    //         };
-    //     }
-    // }
+        rawLrc = lrcSource?.rawLrc;
+        lrcUrl = lrcSource?.lrc;
+      } catch (e: any) {
+        // trace('插件获取歌词失败', e?.message, 'error');
+        // devLog('error', '插件获取歌词失败', e, e?.message);
+      }
+    }
+    // 5. 最后一次请求
+    if (rawLrc || lrcUrl) {
+      // const filename = `${pathConst.lrcCachePath}${nanoid()}.lrc`;
+      if (lrcUrl) {
+        try {
+          rawLrc = (await axios.get(lrcUrl, { timeout: 5000 })).data;
+        } catch {
+          console.log("first");
+        }
+      }
+      if (rawLrc) {
+        // await writeFile(filename, rawLrc, 'utf8');
+        return {
+          rawLrc,
+          lrc: lrcUrl,
+        };
+      }
+    }
     // // 6. 如果是本地文件
     // const isDownloaded = LocalMusicSheet.isLocalMusic(musicItem);
     // if (musicItem.platform !== localPluginPlatform && isDownloaded) {

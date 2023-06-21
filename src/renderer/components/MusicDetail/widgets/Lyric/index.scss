@@ -1,7 +1,30 @@
 .lyric-container {
   width: 360px;
   height: 420px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  overflow-y: auto;
+  font-size: 1rem;
+  cursor: default;
+  position: relative;
+  &::before,
+  &::after {
+    content: "";
+    height: calc(180px - 0.5rem);
+    display: block;
+  }
+
+  & .lyric-item {
+    vertical-align: middle;
+    text-align: center;
+    padding-top: 0.6em;
+    padding-bottom: 0.6em;
+    font-size: 1em;
+    opacity: 0.8;
+
+    &[data-highlight="true"] {
+      color: var(--primaryColor);
+      font-size: 1.2em;
+      font-weight: 600;
+      opacity: 1;
+    }
+  }
 }

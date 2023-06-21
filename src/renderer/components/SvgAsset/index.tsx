@@ -4,6 +4,7 @@ export type SvgAssetIconNames =
   | "array-download-tray"
   | "chevron-double-down"
   | "chevron-double-up"
+  | "chevron-down"
   | "chevron-left"
   | "chevron-right"
   | "code-bracket-square"

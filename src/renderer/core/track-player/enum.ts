@@ -36,7 +36,9 @@ export enum TrackPlayerEvent {
     /** 进度更新 */
     TimeUpdated = 'time-updated',
     /** 播放结束 */
-    PlayEnd = 'play-end'
+    PlayEnd = 'play-end',
+    /** 获取当前歌词 */
+    UpdateLyric = 'get-lyric'
 }
 
 /** 事件参数 */
@@ -45,6 +47,7 @@ export interface TrackPlayerEventParams {
     [TrackPlayerEvent.StateChanged]: PlayerState;
     [TrackPlayerEvent.TimeUpdated]: CurrentTime;
     [TrackPlayerEvent.PlayEnd]: undefined
+    [TrackPlayerEvent.UpdateLyric]: undefined
 
 }
 
