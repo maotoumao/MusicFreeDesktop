@@ -87,9 +87,11 @@ function showMusicContextMenu(
     menuItems: [
       {
         title: `ID: ${getMediaPrimaryKey(musicItem)}`,
+        icon: 'identification'
       },
       {
         title: `作者: ${musicItem.artist}`,
+        icon: 'user'
       },
       {
         title: `专辑: ${musicItem.album}`,

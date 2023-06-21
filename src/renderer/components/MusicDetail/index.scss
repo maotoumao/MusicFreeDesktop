@@ -7,14 +7,67 @@
   z-index: 100;
   background-color: var(--backgroundColor);
 
-  & .background {
-    position: absolute;
+  & .music-background {
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background-size: cover;
-    filter: blur(40px);
+    background-repeat: no-repeat;
+    position: absolute;
+    filter: blur(50px);
     opacity: 0.5;
+    -webkit-mask-image: linear-gradient(to bottom, #fff, transparent);
+    z-index: -1;
+  }
+
+  & .music-title {
+    height: 4.8rem;
+    line-height: 4.8rem;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 500;
+    margin-top: 1.5rem;
+    width: 80vw;
+    margin-left: 10vw;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  & .music-info {
+    display: flex;
+    width: 70vw;
+    margin-left: 15vw;
+    font-size: 1.2rem;
+    justify-content: center;
+
+    & span {
+      opacity: 0.8;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      margin-right: 1rem;
+      font-weight: 300;
+    }
+  }
+
+  & .music-body {
+    width: 100%;
+    margin-top: 2rem;
+    height: 440px;
+    display: flex;
+    justify-content: center;
+
+    & .music-album {
+      width: 260px;
+      height: 260px;
+      border-radius: 16px;
+      margin-top: 40px;
+      margin-right: 96px;
+      object-fit: cover;
+      -webkit-user-drag: none;
+    }
+
   }
 }
