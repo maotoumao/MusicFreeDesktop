@@ -104,7 +104,6 @@ export function ContextMenuComponent() {
       menuItemHeight / 2
     ), menuContainerMaxHeight);
     
-    console.log(isLeft + isTop);
     switch (isLeft + isTop) {
       case 0:
         return [x + offset, y + offset];

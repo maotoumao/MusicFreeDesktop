@@ -17,6 +17,8 @@ import MusicFavorite from "../MusicFavorite";
 import { RequestStateCode } from "@/common/constant";
 import SwitchCase from "../SwitchCase";
 import BottomLoadingState from "../BottomLoadingState";
+import { showContextMenu } from "../ContextMenu";
+import { getMediaPrimaryKey } from "@/common/media-util";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
@@ -74,6 +76,41 @@ const columnDef = [
   }),
 ];
 
+function showMusicContextMenu(
+  musicItem: IMusic.IMusicItem,
+  x: number,
+  y: number
+) {
+  showContextMenu({
+    x,
+    y,
+    menuItems: [
+      {
+        title: `ID: ${getMediaPrimaryKey(musicItem)}`,
+      },
+      {
+        title: `作者: ${musicItem.artist}`,
+      },
+      {
+        title: `专辑: ${musicItem.album}`,
+        show: !!musicItem.album,
+      },
+      {
+        divider: true,
+      },
+      {
+        title: "下一首播放",
+        onClick() {
+          trackPlayer.addNext(musicItem);
+        },
+      },
+      {
+        title: "添加到歌单",
+      },
+    ],
+  });
+}
+
 export default function MusicList(props: IMusicListProps) {
   const { musicList, state = RequestStateCode.FINISHED, onPageChange } = props;
 
@@ -109,7 +146,7 @@ export default function MusicList(props: IMusicListProps) {
             <tr
               key={row.id}
               onContextMenu={(e) => {
-                console.log(e);
+                showMusicContextMenu(row.original, e.clientX, e.clientY);
               }}
               onDoubleClick={() => {
                 trackPlayer.playMusic(row.original);

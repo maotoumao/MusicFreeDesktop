@@ -6,6 +6,7 @@ import shuffle from "lodash.shuffle";
 import { isSameMedia, sortByTimestampAndIndex } from "@/common/media-util";
 import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
 import { callPluginDelegateMethod } from "../plugin-delegate";
+import { prev } from "cheerio/lib/api/traversing";
 
 const initProgress = {
   currentTime: 0,
@@ -132,7 +133,59 @@ function findMusicIndex(musicItem?: IMusic.IMusicItem) {
 
 function addToEnd() {}
 
-function addNext() {}
+export function addNext(musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) {
+  let _musicItems: IMusic.IMusicItem[];
+  if (Array.isArray(musicItems)) {
+    _musicItems = musicItems;
+  } else {
+    _musicItems = [musicItems];
+  }
+
+  const now = Date.now();
+
+  const currentMusic = currentMusicStore.getValue();
+  let duplicateIndex = -1;
+  _musicItems.forEach((item, index) => {
+    item[timeStampSymbol] = now;
+    item[sortIndexSymbol] = index;
+    if (duplicateIndex === -1 && isSameMedia(item, currentMusic)) {
+      duplicateIndex = index;
+    }
+  });
+
+  if (duplicateIndex !== -1) {
+    _musicItems = [
+      _musicItems[duplicateIndex],
+      ..._musicItems.slice(0, duplicateIndex),
+      ..._musicItems.slice(duplicateIndex + 1),
+    ];
+  }
+
+  const queue = musicQueueStore.getValue();
+
+  if (!currentMusic) {
+    // 加在末尾
+    const filteredQueue = queue.filter(
+      (item) => _musicItems.findIndex((mi) => isSameMedia(item, mi)) === -1
+    );
+    setMusicQueue([...filteredQueue, ..._musicItems]);
+  } else {
+    const prevQueue = queue
+      .slice(0, currentIndex + 1)
+      .filter(
+        (item) => _musicItems.findIndex((mi) => isSameMedia(item, mi)) === -1
+      );
+    const tailQueue = queue
+      .slice(currentIndex + 1)
+      .filter(
+        (item) => _musicItems.findIndex((mi) => isSameMedia(item, mi)) === -1
+      );
+
+    const newQueue = [...prevQueue, ..._musicItems, ...tailQueue];
+    setMusicQueue(newQueue);
+    currentIndex = findMusicIndex(currentMusic);
+  }
+}
 
 export function skipToPrev() {
   const musicQueue = musicQueueStore.getValue();

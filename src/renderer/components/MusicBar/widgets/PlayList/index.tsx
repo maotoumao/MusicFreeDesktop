@@ -80,10 +80,13 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
       style={{
         color: `var(--${isPlaying ? "primaryColor" : "textColor"})`,
       }}
+      onDoubleClick={() => {
+        trackPlayer.playMusic(musicItem);
+      }}
     >
       <MusicFavorite musicItem={musicItem} size={16}></MusicFavorite>
-      <div className="playlist--title">{musicItem.title}</div>
-      <div className="playlist--artist">{musicItem.artist ?? "-"}</div>
+      <div className="playlist--title" title={musicItem.title}>{musicItem.title}</div>
+      <div className="playlist--artist" title={musicItem.artist}>{musicItem.artist ?? "-"}</div>
       <div className="playlist--platform">
         <Tag>{musicItem.platform}</Tag>
       </div>

@@ -38,6 +38,10 @@
         overflow: auto;
       }
     }
+
+    & .divider {
+      margin-bottom: 0;
+    }
   }
 }
 

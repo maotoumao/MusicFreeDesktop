@@ -2,6 +2,7 @@ import { memo } from "react";
 
 export type SvgAssetIconNames =
   | "array-download-tray"
+  | "chevron-double-down"
   | "chevron-double-up"
   | "chevron-left"
   | "chevron-right"
@@ -10,6 +11,7 @@ export type SvgAssetIconNames =
   | "fire"
   | "heart-outline"
   | "heart"
+  | "identification"
   | "logo"
   | "lyric"
   | "magnifying-glass"
@@ -25,6 +27,7 @@ export type SvgAssetIconNames =
   | "skip-left"
   | "skip-right"
   | "trophy"
+  | "user"
   | "x-mark";
 
 interface IProps {

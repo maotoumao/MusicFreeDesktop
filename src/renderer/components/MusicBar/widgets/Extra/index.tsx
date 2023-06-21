@@ -12,15 +12,25 @@ export default function Extra() {
       <div className="extra-btn">
         <SvgAsset iconName="lyric"></SvgAsset>
       </div>
-      <div className="extra-btn" onClick={() => {
-        trackPlayer.toggleRepeatMode();
-      }}>
+      <div
+        className="extra-btn"
+        onClick={() => {
+          trackPlayer.toggleRepeatMode();
+        }}
+        title={
+          repeatMode === RepeatMode.Loop
+            ? "单曲循环"
+            : repeatMode === RepeatMode.Queue
+            ? "列表循环"
+            : "随机播放"
+        }
+      >
         <SwitchCase.Switch switch={repeatMode}>
           <SwitchCase.Case case={RepeatMode.Loop}>
-            <SvgAsset iconName='repeat-song'></SvgAsset>
+            <SvgAsset iconName="repeat-song"></SvgAsset>
           </SwitchCase.Case>
           <SwitchCase.Case case={RepeatMode.Queue}>
-            <SvgAsset iconName='repeat-song-1'></SvgAsset>
+            <SvgAsset iconName="repeat-song-1"></SvgAsset>
           </SwitchCase.Case>
           <SwitchCase.Case case={RepeatMode.Shuffle}>
             <SvgAsset iconName="shuffle"></SvgAsset>
@@ -29,6 +39,7 @@ export default function Extra() {
       </div>
       <div
         className="extra-btn"
+        title="播放列表"
         role="button"
         onClick={() => {
           Evt.emit("SWITCH_PLAY_LIST");

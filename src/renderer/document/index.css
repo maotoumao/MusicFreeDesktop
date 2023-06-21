@@ -74,6 +74,7 @@ div[role="button"] {
     border-radius: 1.6rem;
     letter-spacing: 0.2rem;
     color: white;
+    width: fit-content;
   }
 }
 

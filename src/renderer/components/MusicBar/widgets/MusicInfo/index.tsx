@@ -9,9 +9,11 @@ import {
 import Tag from "@/renderer/components/Tag";
 import { secondsToDuration } from "@/common/time-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
+import { musicDetailShownStore } from "@/renderer/components/MusicDetail";
 
 export default function MusicInfo() {
   const musicItem = useCurrentMusic();
+  const musicDetailShown = musicDetailShownStore.useValue();
 
   return (
     <div className="music-info-container">
@@ -28,12 +30,20 @@ export default function MusicInfo() {
           <div
             className="open-detail"
             role="button"
-            title="打开歌曲详情页"
+            title={musicDetailShown ? "关闭歌曲详情页" : "打开歌曲详情页"}
             onClick={() => {
-              Evt.emit("SHOW_MUSIC_DETAIL");
+              if (musicDetailShown) {
+                Evt.emit("HIDE_MUSIC_DETAIL");
+              } else {
+                Evt.emit("SHOW_MUSIC_DETAIL");
+              }
             }}
           >
-            <SvgAsset iconName="chevron-double-up"></SvgAsset>
+            <SvgAsset
+              iconName={
+                musicDetailShown ? "chevron-double-down" : "chevron-double-up"
+              }
+            ></SvgAsset>
           </div>
           <div className="music-info">
             <div className="music-title">

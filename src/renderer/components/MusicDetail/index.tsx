@@ -4,40 +4,35 @@ import "./index.scss";
 import { useState } from "react";
 import navigatorHook from "@/common/navigator-hook";
 import { useCurrentMusic } from "@/renderer/core/track-player/player";
+import Store from "@/common/store";
+
+export const musicDetailShownStore = new Store(false);
 
 export default function () {
-  const [showDetail, setShowDetail] = useState(false);
   const musicItem = useCurrentMusic();
+  const musicDetailShown = musicDetailShownStore.useValue();
 
   Evt.use("SHOW_MUSIC_DETAIL", () => {
-    setShowDetail(true);
+    musicDetailShownStore.setValue(true);
     navigatorHook.setNavigateHook(() => {
-      setShowDetail(false);
+      musicDetailShownStore.setValue(false);
     });
+  });
+
+  Evt.use("HIDE_MUSIC_DETAIL", () => {
+    musicDetailShownStore.setValue(false);
+
   });
 
   return (
     <AnimatedDiv
-      showIf={showDetail}
+      showIf={musicDetailShown}
       className="music-detail-container animate__animated"
       mountClassName="animate__slideInUp"
       unmountClassName="animate__slideOutDown"
     >
-      <div
-        className="background"
-        style={{
-          backgroundImage: musicItem?.artwork
-            ? `url(${musicItem.artwork})`
-            : undefined,
-        }}
-      ></div>
-      <button
-        onClick={() => {
-          setShowDetail(false);
-        }}
-      >
-        dx
-      </button>
+      
+
     </AnimatedDiv>
   );
 }
