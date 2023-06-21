@@ -11,7 +11,7 @@ export default function LocalSheet() {
   return (
     <>
       <Header musicSheet={musicSheet}></Header>
-      <Body musicList={musicSheet?.musicList ?? []}></Body>
+      <Body musicList={musicSheet?.musicList ?? []} musicSheet={musicSheet}></Body>
     </>
   );
 }

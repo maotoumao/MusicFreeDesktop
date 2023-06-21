@@ -41,6 +41,9 @@ export async function setupSheets() {
   }
 }
 
+function forceUpdateMusicSheets() {
+  musicSheetsStore.setValue(prev => [...prev]);
+}
 /** 新建歌单 */
 export async function addSheet(sheetName: string) {
   const id = nanoid();
@@ -74,6 +77,8 @@ export async function getAllSheets() {
     console.log(e);
   }
 }
+
+export const useAllSheets = musicSheetsStore.useValue;
 
 /** 更新歌单信息 */
 export async function updateSheet(
@@ -193,6 +198,7 @@ export async function addMusicToSheet(
             ];
             targetSheet.artwork = obj.artwork;
             targetSheet.musicList = obj.musicList;
+            forceUpdateMusicSheets();
           });
       }
     );
@@ -303,6 +309,7 @@ export async function removeMusicFromSheet(
             obj.musicList = restMusic;
             targetSheet.artwork = newArtwork;
             targetSheet.musicList = obj.musicList;
+            forceUpdateMusicSheets();
           });
       }
     );

@@ -39,7 +39,7 @@ export function showModal<T extends keyof ITemplate>(
   });
 }
 
-export function closeModal() {
+export function hideModal() {
   modalStore.setValue({
     type: null,
     payload: null,

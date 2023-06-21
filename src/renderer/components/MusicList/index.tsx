@@ -20,9 +20,12 @@ import BottomLoadingState from "../BottomLoadingState";
 import { showContextMenu } from "../ContextMenu";
 import { getMediaPrimaryKey } from "@/common/media-util";
 import { memo } from "react";
+import { showModal } from "../Modal";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
+  /** 音乐列表所属的本地歌单 */
+  localMusicSheetId?: string;
   // enablePagination?: boolean; // 分页/虚拟长列表
   enableSort?: boolean; // 拖拽排序
   onSortEnd?: () => void; // 排序结束
@@ -80,7 +83,8 @@ const columnDef = [
 function showMusicContextMenu(
   musicItem: IMusic.IMusicItem,
   x: number,
-  y: number
+  y: number,
+  localMusicSheetId?: string
 ) {
   showContextMenu({
     x,
@@ -109,13 +113,30 @@ function showMusicContextMenu(
       },
       {
         title: "添加到歌单",
+        onClick() {
+          showModal("AddMusicToSheet", {
+            musicItems: musicItem,
+          });
+        },
+      },
+      {
+        title: "从歌单内删除",
+        show: !!localMusicSheetId,
+        onClick() {
+          MusicSheet.removeMusicFromSheet(musicItem, localMusicSheetId);
+        },
       },
     ],
   });
 }
 
 function _MusicList(props: IMusicListProps) {
-  const { musicList, state = RequestStateCode.FINISHED, onPageChange } = props;
+  const {
+    musicList,
+    state = RequestStateCode.FINISHED,
+    onPageChange,
+    localMusicSheetId,
+  } = props;
 
   const table = useReactTable({
     debugAll: false,
@@ -149,7 +170,12 @@ function _MusicList(props: IMusicListProps) {
             <tr
               key={row.id}
               onContextMenu={(e) => {
-                showMusicContextMenu(row.original, e.clientX, e.clientY);
+                showMusicContextMenu(
+                  row.original,
+                  e.clientX,
+                  e.clientY,
+                  localMusicSheetId
+                );
               }}
               onDoubleClick={() => {
                 trackPlayer.playMusic(row.original);

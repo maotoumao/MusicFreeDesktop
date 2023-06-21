@@ -5,12 +5,14 @@ import { useEffect, useState, useTransition } from "react";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import trackPlayer from "@/renderer/core/track-player";
+import { showModal } from "@/renderer/components/Modal";
 
 interface IProps {
+  musicSheet: IMusic.IMusicSheetItem;
   musicList: IMusic.IMusicItem[];
 }
 export default function Body(props: IProps) {
-  const { musicList = [] } = props;
+  const { musicList = [], musicSheet } = props;
 
   const [inputSearch, setInputSearch] = useState("");
   const [filterMusicList, setFilterMusicList] = useState<
@@ -43,6 +45,7 @@ export default function Body(props: IProps) {
             role="button"
             data-disabled={!musicList?.length}
             data-type="primaryButton"
+            title="播放全部"
             onClick={() => {
               if (musicList.length) {
                 trackPlayer.playMusicWithReplaceQueue(musicList);
@@ -51,7 +54,17 @@ export default function Body(props: IProps) {
           >
             播放全部
           </div>
-          <div role="button" data-type="normalButton" className="add-to-sheet">
+          <div
+            role="button"
+            data-type="normalButton"
+            className="add-to-sheet"
+            title="添加到歌单"
+            onClick={() => {
+              showModal("AddMusicToSheet", {
+                musicItems: musicList,
+              });
+            }}
+          >
             添加到歌单
           </div>
         </div>
@@ -71,7 +84,10 @@ export default function Body(props: IProps) {
         condition={!isPending || filterMusicList === null}
         falsy={<Loading></Loading>}
       >
-        <MusicList musicList={filterMusicList ?? musicList}></MusicList>
+        <MusicList
+          musicList={filterMusicList ?? musicList}
+          localMusicSheetId={musicSheet?.id}
+        ></MusicList>
       </Condition>
     </div>
   );

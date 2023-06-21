@@ -3,7 +3,7 @@ import Base from "../Base";
 import "./index.scss";
 import MusicSheet from "@/renderer/core/music-sheet";
 import debounce from "@/common/debounce";
-import { closeModal } from "../..";
+import { hideModal } from "../..";
 
 interface IProps {}
 
@@ -14,7 +14,7 @@ export default function AddNewSheet() {
     debounce(async () => {
       try {
         await MusicSheet.addSheet(newSheetName);
-        closeModal();
+        hideModal();
       } catch {
         console.log("创建失败")
       }

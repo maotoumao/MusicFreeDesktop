@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { closeModal } from "../..";
+import { hideModal } from "../..";
 import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 
@@ -28,7 +28,7 @@ function Base(props: IBaseModalProps) {
       onClick={(e) => {
         if ((e.target as HTMLElement)?.id === baseId) {
           if (defaultClose) {
-            closeModal();
+            hideModal();
           } else {
             onDefaultClick?.();
           }
@@ -53,7 +53,7 @@ function Header(props: IHeaderProps) {
         role="button"
         className="components--modal-base-header-close opacity-button"
         onClick={() => {
-          closeModal();
+          hideModal();
         }}
       >
         <SvgAsset iconName="x-mark"></SvgAsset>
