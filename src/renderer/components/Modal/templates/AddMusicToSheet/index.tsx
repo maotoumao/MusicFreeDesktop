@@ -3,7 +3,7 @@ import Base from "../Base";
 import "./index.scss";
 import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import albumImg from "@/assets/imgs/album-cover.jpg";
-import { hideModal } from "../..";
+import { hideModal, showModal } from "../..";
 
 interface IAddMusicToSheetProps {
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[];
@@ -18,6 +18,18 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
       <div className="modal--add-music-to-sheet-container">
         <Base.Header>添加到歌单</Base.Header>
         <div className="music-sheets">
+          <div
+            className="sheet-item"
+            role="button"
+            onClick={() => {
+              showModal("AddNewSheet", {
+                initMusicItems: musicItems,
+              });
+            }}
+          >
+            <img src={albumImg} onError={setFallbackAlbum}></img>
+            <span>新建歌单</span>
+          </div>
           {allSheets.map((sheet) => (
             <div
               className="sheet-item"

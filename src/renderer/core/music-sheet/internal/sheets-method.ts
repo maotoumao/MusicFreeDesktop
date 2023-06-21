@@ -66,6 +66,7 @@ export async function addSheet(sheetName: string) {
   } catch {
     throw new Error("新建失败");
   }
+  return id;
 }
 
 /** 获取所有歌单简略信息（不包含音乐列表详情） */

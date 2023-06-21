@@ -24,6 +24,7 @@
     font-weight: 600;
     user-select: none;
     border-bottom: 1px solid var(--dividerColor);
+    flex-shrink: 0;
 
     & .components--modal-base-header-close {
       $size: 18px;

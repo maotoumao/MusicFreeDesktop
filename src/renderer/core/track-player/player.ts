@@ -41,7 +41,15 @@ const playerStateStore = new Store(PlayerState.None);
 /** 播放下标 */
 let currentIndex = -1;
 
+/** 初始化 */
 export function setupPlayer() {
+
+  const _repeatMode = localStorage.getItem('repeatMode');
+  if(_repeatMode) {
+    repeatModeStore.setValue(_repeatMode as RepeatMode);
+  }
+
+
   trackPlayerEventsEmitter.on(TrackPlayerEvent.PlayEnd, () => {
     progressStore.setValue(initProgress);
     switch (repeatModeStore.getValue()) {
@@ -90,7 +98,6 @@ export function setupPlayer() {
       currentLyricStore.setValue(null);
       return;
     }
-    console.log("here1");
 
     const currentLyric = currentLyricStore.getValue();
     // 已经有了
@@ -98,8 +105,6 @@ export function setupPlayer() {
       currentLyric &&
       isSameMedia(currentLyric?.parser?.getCurrentMusicItem?.(), currentMusic)
     ) {
-      console.log("here2");
-
       return;
     } else {
       try {
@@ -108,7 +113,6 @@ export function setupPlayer() {
           "getLyric",
           currentMusic
         );
-        console.log(lyric, "lyric");
         if (!isSameMedia(currentMusic, currentMusicStore.getValue())) {
           return;
         }
@@ -124,7 +128,6 @@ export function setupPlayer() {
       } catch (e) {
         console.log(e, "歌词解析失败");
         currentLyricStore.setValue({});
-
         // 解析歌词失败
       }
     }
@@ -192,6 +195,7 @@ export function setRepeatMode(repeatMode: RepeatMode) {
     setMusicQueue(sortByTimestampAndIndex(musicQueueStore.getValue(), true));
   }
   repeatModeStore.setValue(repeatMode);
+  localStorage.setItem("repeatMode", repeatMode);
   currentIndex = findMusicIndex(currentMusicStore.getValue());
 }
 
