@@ -14,16 +14,18 @@ import trackPlayer from "@/renderer/core/track-player";
 import Condition from "../Condition";
 import Empty from "../Empty";
 import MusicFavorite from "../MusicFavorite";
+import { RequestStateCode } from "@/common/constant";
+import SwitchCase from "../SwitchCase";
+import BottomLoadingState from "../BottomLoadingState";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
-  enablePagination?: boolean; // 分页/虚拟长列表
+  // enablePagination?: boolean; // 分页/虚拟长列表
   enableSort?: boolean; // 拖拽排序
   onSortEnd?: () => void; // 排序结束
-  currentPage?: number;
-  pageSize?: number;
-  totalPage?: number;
-  onPageChange?: (page: number) => void;
+  state?: RequestStateCode;
+  isEnd?: boolean;
+  onPageChange?: (page?: number) => void;
 }
 
 const columnHelper = createColumnHelper<IMusic.IMusicItem>();
@@ -31,7 +33,9 @@ const columnDef = [
   columnHelper.display({
     id: "like",
     size: 32,
-    cell: (info) => <MusicFavorite musicItem={info.row.original} size={18}></MusicFavorite>,
+    cell: (info) => (
+      <MusicFavorite musicItem={info.row.original} size={18}></MusicFavorite>
+    ),
   }),
   columnHelper.accessor((_, index) => index + 1, {
     cell: (info) => info.getValue(),
@@ -60,7 +64,8 @@ const columnDef = [
   columnHelper.accessor("duration", {
     header: "时长",
     size: 64,
-    cell: info => info.getValue() ? secondsToDuration(info.getValue()) : '--:--'
+    cell: (info) =>
+      info.getValue() ? secondsToDuration(info.getValue()) : "--:--",
   }),
   columnHelper.accessor("platform", {
     header: "来源",
@@ -69,10 +74,8 @@ const columnDef = [
   }),
 ];
 
-
-
 export default function MusicList(props: IMusicListProps) {
-  const { musicList } = props;
+  const { musicList, state = RequestStateCode.FINISHED, onPageChange } = props;
 
   const table = useReactTable({
     debugAll: false,
@@ -103,11 +106,15 @@ export default function MusicList(props: IMusicListProps) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} onContextMenu={(e) => {
-              console.log(e);
-            }} onDoubleClick={() => {
-              trackPlayer.playMusic(row.original)
-            }}>
+            <tr
+              key={row.id}
+              onContextMenu={(e) => {
+                console.log(e);
+              }}
+              onDoubleClick={() => {
+                trackPlayer.playMusic(row.original);
+              }}
+            >
               {row.getAllCells().map((cell) => (
                 <td
                   key={cell.id}
@@ -122,7 +129,15 @@ export default function MusicList(props: IMusicListProps) {
           ))}
         </tbody>
       </table>
-      <Condition condition={musicList.length === 0}>
+      <Condition
+        condition={musicList.length === 0}
+        falsy={
+          <BottomLoadingState
+            state={state}
+            onLoadMore={onPageChange}
+          ></BottomLoadingState>
+        }
+      >
         <Empty></Empty>
       </Condition>
     </div>

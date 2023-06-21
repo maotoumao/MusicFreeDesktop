@@ -56,7 +56,7 @@ export default function SearchView() {
           </Tab.List>
           <Tab.Panels className={"tab-panels-container"}>
             {supportedMediaType.map((type) => (
-              <Tab.Panel className="tab-panel-container">
+              <Tab.Panel className="tab-panel-container" key={type}>
                 <SearchResult
                   type={type}
                   plugins={plugins}

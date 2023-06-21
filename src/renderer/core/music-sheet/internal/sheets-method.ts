@@ -14,13 +14,14 @@ import { useEffect, useState } from "react";
 // 默认歌单，快速判定是否在列表中
 const favoriteMusicListIds = new Set<string>();
 
-export async function initSheets() {
+/** 初始化 */
+export async function setupSheets() {
   try {
     const allSheets = await musicSheetDB.sheets.toArray();
-    if (
-      allSheets.length === 0 ||
-      allSheets.findIndex((item) => item.id === defaultSheet.id) === -1
-    ) {
+    const dbDefaultSheet = allSheets.find(
+      (item) => item.id === defaultSheet.id
+    );
+    if (allSheets.length === 0 || !dbDefaultSheet) {
       await musicSheetDB.transaction(
         "readwrite",
         musicSheetDB.sheets,
@@ -30,6 +31,9 @@ export async function initSheets() {
       );
       musicSheetsStore.setValue([defaultSheet, ...allSheets]);
     } else {
+      dbDefaultSheet.musicList.forEach((mi) => {
+        favoriteMusicListIds.add(getMediaPrimaryKey(mi));
+      });
       musicSheetsStore.setValue(allSheets);
     }
   } catch (e) {
@@ -37,7 +41,7 @@ export async function initSheets() {
   }
 }
 
-// 添加新歌单
+/** 新建歌单 */
 export async function addSheet(sheetName: string) {
   const id = nanoid();
   const newSheet: IMusic.IMusicSheetItem = {
@@ -61,6 +65,7 @@ export async function addSheet(sheetName: string) {
   }
 }
 
+/** 获取所有歌单简略信息（不包含音乐列表详情） */
 export async function getAllSheets() {
   try {
     const allSheets = await musicSheetDB.sheets.toArray();
@@ -70,7 +75,7 @@ export async function getAllSheets() {
   }
 }
 
-/** 更新 */
+/** 更新歌单信息 */
 export async function updateSheet(
   sheetId: string,
   newData: IMusic.IMusicSheetItem
@@ -106,6 +111,7 @@ export async function updateSheet(
   }
 }
 
+/** 移除歌单 */
 export async function removeSheet(sheetId: string) {
   try {
     if (sheetId === defaultSheet.id) {
@@ -127,6 +133,8 @@ export async function removeSheet(sheetId: string) {
 }
 
 /************* 歌曲 ************/
+
+/** 添加歌曲到歌单 */
 export async function addMusicToSheet(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
   sheetId: string
@@ -171,6 +179,9 @@ export async function addMusicToSheet(
           .where("id")
           .equals(sheetId)
           .modify((obj) => {
+            obj.artwork =
+              validMusicItems[validMusicItems.length - 1]?.artwork ??
+              obj.artwork;
             obj.musicList = [
               ...(obj.musicList ?? []),
               ...validMusicItems.map((item, index) => ({
@@ -180,6 +191,7 @@ export async function addMusicToSheet(
                 [timeStampSymbol]: timeStamp,
               })),
             ];
+            targetSheet.artwork = obj.artwork;
             targetSheet.musicList = obj.musicList;
           });
       }
@@ -197,6 +209,7 @@ export async function addMusicToSheet(
   }
 }
 
+/** 获取歌单内的歌曲详细信息 */
 export async function getSheetDetail(
   sheetId: string
 ): Promise<IMusic.IMusicSheetItem | null> {
@@ -219,12 +232,12 @@ export async function getSheetDetail(
         ...mi,
         ...musicDetailList[index],
       }));
-      console.log(_targetSheet)
       return _targetSheet as IMusic.IMusicSheetItem;
     }
   );
 }
 
+/** 从歌单内移除歌曲 */
 export async function removeMusicFromSheet(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
   sheetId: string
@@ -268,15 +281,27 @@ export async function removeMusicFromSheet(
             needUpdate.push(musicItem);
           }
         });
-        console.log(needDelete);
         await musicSheetDB.musicStore.bulkDelete(needDelete);
         await musicSheetDB.musicStore.bulkPut(needUpdate);
+
+        const lastMusic = restMusic[restMusic.length - 1];
+        let newArtwork: string;
+        if (lastMusic) {
+          newArtwork = (
+            await musicSheetDB.musicStore.get([
+              lastMusic.platform,
+              lastMusic.id,
+            ])
+          ).artwork;
+        }
 
         await musicSheetDB.sheets
           .where("id")
           .equals(sheetId)
           .modify((obj) => {
+            obj.artwork = newArtwork;
             obj.musicList = restMusic;
+            targetSheet.artwork = newArtwork;
             targetSheet.musicList = obj.musicList;
           });
       }
@@ -290,7 +315,7 @@ export async function removeMusicFromSheet(
     }
     refreshSheetState(sheetId);
   } catch {
-    console.log("error")
+    console.log("error");
   }
 }
 
@@ -299,6 +324,7 @@ function refreshFavoriteState() {
   refreshFavCbs.forEach((cb) => cb?.());
 }
 
+/** hook 某首歌曲是否被标记成喜欢 */
 export function useMusicIsFavorite(musicItem: IMusic.IMusicItem) {
   const [isFav, setIsFav] = useState(
     favoriteMusicListIds.has(getMediaPrimaryKey(musicItem))
@@ -308,9 +334,8 @@ export function useMusicIsFavorite(musicItem: IMusic.IMusicItem) {
     const cb = () => {
       setIsFav(favoriteMusicListIds.has(getMediaPrimaryKey(musicItem)));
     };
-    if (musicItem) {
-      refreshFavCbs.add(cb);
-    }
+    cb();
+    refreshFavCbs.add(cb);
     return () => {
       refreshFavCbs.delete(cb);
     };
@@ -319,12 +344,14 @@ export function useMusicIsFavorite(musicItem: IMusic.IMusicItem) {
   return isFav;
 }
 
+/** 添加到默认歌单 */
 export async function addMusicToFavorite(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]
 ) {
   return addMusicToSheet(musicItems, defaultSheet.id);
 }
 
+/** 从默认歌单中移除 */
 export async function removeMusicFromFavorite(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]
 ) {

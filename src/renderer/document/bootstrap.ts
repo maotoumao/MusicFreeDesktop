@@ -5,7 +5,7 @@ import trackPlayer from "../core/track-player";
 export default async function () {
   await Promise.all([
     registerPluginEvents(),
-    MusicSheet.initSheets(),
+    MusicSheet.setupSheets(),
     trackPlayer.setupPlayer(),
   ]);
 }

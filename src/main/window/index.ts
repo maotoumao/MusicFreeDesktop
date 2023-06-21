@@ -56,7 +56,7 @@ export const createMainWindow = (): BrowserWindow => {
         })
       } catch {
         callback({
-          requestHeaders: details.requestHeaders
+          requestHeaders: details.requestHeaders,
         })
       }
     }

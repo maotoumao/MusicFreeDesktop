@@ -6,6 +6,9 @@ import Header from "./components/Header";
 import Loading from "@/renderer/components/Loading";
 import Body from "./components/Body";
 import { useMusicSheet } from "@/renderer/core/music-sheet/internal/sheets-method";
+import Condition from "@/renderer/components/Condition";
+import { localPluginName } from "@/common/constant";
+import LocalSheet from "./local-sheet";
 
 /**
  * path: /main/musicsheet/platform/id
@@ -16,33 +19,25 @@ import { useMusicSheet } from "@/renderer/core/music-sheet/internal/sheets-metho
  *
  */
 export default function MusicSheetView() {
-  const params = useParams();
+  const { platform } = useParams() ?? {};
 
-  console.log(params);
-  const musicSheet = useMusicSheet(params.id);
-  console.log(musicSheet, 'ms');
+  // console.log(musicSheet, 'ms');
 
-  useEffect(() => {
-    const sheetInState = history.state.usr?.musicSheet ?? {};
-    musicSheetStore.setValue({
-      ...sheetInState,
-      platform: params?.platform,
-      id: params?.id,
-    } as IMusic.IMusicSheetItem);
-  }, [params]);
-  console.log(musicSheet, "musicsheet");
+  // useEffect(() => {
+  //   const sheetInState = history.state.usr?.musicSheet ?? {};
+  //   musicSheetStore.setValue({
+  //     ...sheetInState,
+  //     platform: params?.platform,
+  //     id: params?.id,
+  //   } as IMusic.IMusicSheetItem);
+  // }, [params]);
+  // console.log(musicSheet, "musicsheet");
 
   return (
     <div className="music-sheet-view-container">
-      {musicSheet ? (
-        <>
-          <Header></Header>
-          <div className="divider"></div>
-          <Body></Body>
-        </>
-      ) : (
-        <Loading></Loading>
-      )}
+      <Condition condition={platform === localPluginName}>
+        <LocalSheet></LocalSheet>
+      </Condition>
     </div>
   );
 }

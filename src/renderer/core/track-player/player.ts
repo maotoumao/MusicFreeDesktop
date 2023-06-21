@@ -90,6 +90,8 @@ export const usePlayerState = playerStateStore.useValue;
 
 export const useRepeatMode = repeatModeStore.useValue;
 
+export const useMusicQueue = musicQueueStore.useValue;
+
 export function toggleRepeatMode() {
   let nextRepeatMode: RepeatMode = repeatModeStore.getValue();
   switch (nextRepeatMode) {
@@ -251,12 +253,36 @@ function setTrackAndPlay(
   trackPlayer.setTrackSource(mediaSource, musicItem);
   trackPlayer.play();
 }
-
-function clearQueue() {
+/** 清空播放队列 */
+export function clearQueue() {
   trackPlayer.clear();
   setMusicQueue([]);
   setCurrentMusic(null);
   currentIndex = -1;
+}
+
+export function removeFromQueue(musicItem: IMusic.IMusicItem | number) {
+  let musicIndex: number;
+  if (typeof musicItem !== "number") {
+    musicIndex = findMusicIndex(musicItem);
+  } else {
+    musicIndex = musicItem;
+  }
+  if (musicIndex === -1) {
+    return;
+  }
+
+  if (musicIndex === currentIndex) {
+    trackPlayer.clear();
+    currentIndex = -1;
+    setCurrentMusic(null);
+  }
+
+  const newQueue = [...musicQueueStore.getValue()];
+  newQueue.splice(musicIndex, 1);
+
+  setMusicQueue(newQueue);
+  currentIndex = findMusicIndex(currentMusicStore.getValue());
 }
 
 export function seekTo(position: number) {

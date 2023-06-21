@@ -65,7 +65,7 @@ export default function useSearch() {
 
         // 是否是一次新的搜索
         const newSearch =
-          query !== prevPluginResult?.query ||
+          (query !== undefined && query !== prevPluginResult?.query) ||
           prevPluginResult?.page === undefined;
 
         // 本次搜索关键词

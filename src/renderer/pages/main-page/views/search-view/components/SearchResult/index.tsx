@@ -86,7 +86,7 @@ function _SearchResultBody(props: ISearchResultBodyProps) {
       >
         <SwitchCase.Switch switch={type}>
           <SwitchCase.Case case="music">
-            <MusicResult data={data}></MusicResult>
+            <MusicResult data={data} state={currentResult?.state ?? RequestStateCode.IDLE} pluginHash={pluginHash}></MusicResult>
           </SwitchCase.Case>
           <SwitchCase.Case case="album">
             <div>album</div>

@@ -10,6 +10,7 @@ interface IMusicFavoriteProps {
 export default function MusicFavorite(props: IMusicFavoriteProps) {
   const { musicItem, size } = props;
   const isFav = useMusicIsFavorite(musicItem);
+  
   return (
     <div
       role="button"
