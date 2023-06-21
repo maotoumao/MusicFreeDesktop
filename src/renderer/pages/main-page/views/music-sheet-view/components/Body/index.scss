@@ -1,7 +1,36 @@
 .music-sheet-view--body-container {
-    height: 48px;
-    & .operations {
-        display: flex;
-        justify-content: space-between;
+  & .operations {
+    height: 4rem;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    & .buttons {
+      display: flex;
+
+      font-size: 0.9rem;
+
+      & .add-to-sheet {
+        margin-left: 1rem;
+      }
     }
+
+    & .search-in-music-list-container {
+      width: 220px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      & .search-in-music-list {
+        width: 220px;
+        padding-right: 22px;
+      }
+
+      & svg {
+        color: rgba($color: #000000, $alpha: 0.2);
+        position: absolute;
+        right: 4px;
+      }
+    }
+  }
 }

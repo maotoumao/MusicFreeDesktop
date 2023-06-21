@@ -19,6 +19,7 @@ import SwitchCase from "../SwitchCase";
 import BottomLoadingState from "../BottomLoadingState";
 import { showContextMenu } from "../ContextMenu";
 import { getMediaPrimaryKey } from "@/common/media-util";
+import { memo } from "react";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
@@ -87,11 +88,11 @@ function showMusicContextMenu(
     menuItems: [
       {
         title: `ID: ${getMediaPrimaryKey(musicItem)}`,
-        icon: 'identification'
+        icon: "identification",
       },
       {
         title: `作者: ${musicItem.artist}`,
-        icon: 'user'
+        icon: "user",
       },
       {
         title: `专辑: ${musicItem.album}`,
@@ -113,7 +114,7 @@ function showMusicContextMenu(
   });
 }
 
-export default function MusicList(props: IMusicListProps) {
+function _MusicList(props: IMusicListProps) {
   const { musicList, state = RequestStateCode.FINISHED, onPageChange } = props;
 
   const table = useReactTable({
@@ -182,3 +183,13 @@ export default function MusicList(props: IMusicListProps) {
     </div>
   );
 }
+
+export default memo(
+  _MusicList,
+  (prev, curr) =>
+    prev.state === curr.state &&
+    prev.enableSort === curr.enableSort &&
+    prev.musicList === curr.musicList &&
+    prev.onPageChange === curr.onPageChange &&
+    prev.onSortEnd === curr.onSortEnd
+);

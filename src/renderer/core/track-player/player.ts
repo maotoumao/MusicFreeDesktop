@@ -299,7 +299,8 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
   // 歌曲重复
   if (
     !options?.refreshSource &&
-    nextIndex === currentIndex &&
+    currentIndex === nextIndex &&
+    isSameMedia(currentMusicStore.getValue(), musicQueue[nextIndex]) &&
     currentIndex !== -1
   ) {
     const restartOnSameMedia = options?.restartOnSameMedia ?? true;
@@ -361,10 +362,18 @@ export async function playMusic(
   }
 }
 
+/** 播放并替换列表 */
 export async function playMusicWithReplaceQueue(
-  musicItem: IMusic.IMusicItem,
-  musicList: IMusic.IMusicItem[]
+  musicList: IMusic.IMusicItem[],
+  musicItem?: IMusic.IMusicItem
 ) {
+  if (!musicList.length && !musicItem) {
+    return;
+  }
+  if (repeatModeStore.getValue() === RepeatMode.Shuffle) {
+    musicList = shuffle(musicList);
+  }
+  musicItem = musicItem ?? musicList[0];
   musicQueueStore.setValue(musicList);
   await playMusic(musicItem);
 }

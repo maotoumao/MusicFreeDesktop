@@ -69,11 +69,18 @@ div[role="button"] {
 
   &[data-type="primaryButton"] {
     background-color: var(--primaryColor);
-    font-size: 1.2rem;
-    padding: 0.6rem 1.2rem;
-    border-radius: 1.6rem;
-    letter-spacing: 0.2rem;
+    font-size: 1.2em;
+    padding: 0.4em 1em;
+    border-radius: 1.6em;
     color: white;
+    width: fit-content;
+  }
+  &[data-type="normalButton"] {
+    font-size: 1.2em;
+    padding: 0.4em 1em;
+    border-radius: 1.6em;
+    color: var(--textColor);
+    border: 1px solid var(--textColor);
     width: fit-content;
   }
 }
@@ -85,5 +92,3 @@ div[role="button"] {
   margin-top: 12px;
   margin-bottom: 12px;
 }
-
-

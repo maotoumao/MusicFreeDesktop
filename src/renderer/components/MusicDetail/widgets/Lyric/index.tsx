@@ -9,7 +9,6 @@ export default function Lyric() {
   const containerRef = useRef<HTMLDivElement>();
 
   useEffect(() => {
-    console.log("UPDATETTTT");
     if (containerRef.current) {
       const currentIndex = currentLrc?.currentLrc?.index;
       if (currentIndex >= 0) {
