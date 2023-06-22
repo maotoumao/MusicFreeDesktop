@@ -50,6 +50,7 @@ let currentIndex = -1;
 
 /** 初始化 */
 export async function setupPlayer() {
+  setupEvents();
   const _repeatMode = getUserPerference("repeatMode");
 
   if (_repeatMode) {
@@ -64,17 +65,30 @@ export async function setupPlayer() {
 
   musicQueueStore.setValue(playList);
   setCurrentMusic(currentMusic);
+  trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
   try {
-    const source = await callPluginDelegateMethod(currentMusic, 'getMediaSource', currentMusic, 'standard');
+    const source = await callPluginDelegateMethod(
+      currentMusic,
+      "getMediaSource",
+      currentMusic,
+      "standard"
+    );
     setTrackAndPlay(source, currentMusic, false);
-    if(currentProgress) {
+    if (currentProgress) {
       trackPlayer.seekTo(currentProgress);
     }
-  } catch {
-
-  }
+  } catch {}
   currentIndex = findMusicIndex(currentMusic);
 
+  navigator.mediaSession.setActionHandler("previoustrack", () => {
+    skipToPrev();
+  });
+  navigator.mediaSession.setActionHandler("nexttrack", () => {
+    skipToNext();
+  });
+}
+
+function setupEvents() {
   trackPlayerEventsEmitter.on(TrackPlayerEvent.PlayEnd, () => {
     progressStore.setValue(initProgress);
     removeUserPerference("currentProgress");
@@ -159,13 +173,6 @@ export async function setupPlayer() {
       }
     }
   });
-
-  navigator.mediaSession.setActionHandler("previoustrack", () => {
-    skipToPrev();
-  });
-  navigator.mediaSession.setActionHandler("nexttrack", () => {
-    skipToNext();
-  });
 }
 
 function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
@@ -179,11 +186,10 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
     currentMusicStore.setValue(music);
     currentLyricStore.setValue(null);
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
-    setUserPerference('currentMusic', music);
+    setUserPerference("currentMusic", music);
   } else {
     currentMusicStore.setValue(music);
   }
- 
 }
 
 export function useCurrentMusic() {
@@ -425,7 +431,7 @@ function setTrackAndPlay(
   progressStore.setValue(initProgress);
   removeUserPerference("currentProgress");
   trackPlayer.setTrackSource(mediaSource, musicItem);
-  if(autoPlay) {
+  if (autoPlay) {
     trackPlayer.play();
   }
 }

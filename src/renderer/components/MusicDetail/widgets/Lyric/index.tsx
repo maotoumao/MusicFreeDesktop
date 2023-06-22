@@ -27,7 +27,7 @@ export default function Lyric() {
   }, [currentLrc?.currentLrc]);
 
   return (
-    <div className="lyric-container" ref={containerRef}>
+    <div className="lyric-container" data-loading={currentLrc === null} ref={containerRef}>
       {
         <Condition condition={currentLrc !== null} falsy={<Loading></Loading>}>
           <Condition

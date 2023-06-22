@@ -22,7 +22,7 @@ interface ICaseProps {
   children: any;
 }
 function Case(props: ICaseProps) {
-  const { case: _case, children } = props;
+  const { children } = props;
   return children;
 }
 

@@ -5,11 +5,14 @@
   font-size: 1rem;
   cursor: default;
   position: relative;
-  &::before,
-  &::after {
-    content: "";
-    height: calc(180px - 0.5rem);
-    display: block;
+
+  &[data-loading="false"] {
+    &::before,
+    &::after {
+      content: "";
+      height: calc(180px - 0.5rem);
+      display: block;
+    }
   }
 
   & .lyric-item {
