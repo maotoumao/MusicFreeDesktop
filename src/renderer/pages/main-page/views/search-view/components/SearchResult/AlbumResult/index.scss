@@ -1,0 +1,9 @@
+.search-result--album-result-container {
+    width: 100%;
+
+    & .result-body {
+        display: grid;
+        width: 100%;
+        grid-template-columns: repeat(5, 1fr);
+    }
+}

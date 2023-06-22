@@ -1,34 +1,30 @@
 import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import "./index.scss";
 import albumImg from "@/assets/imgs/album-cover.jpg";
-import Condition from "../Condition";
-import dayjs from "dayjs";
-import SvgAsset from "../SvgAsset";
-import { normalizeNumber } from "@/common/normalize-util";
 import { memo } from "react";
 
-interface IMusicSheetlikeItemProps {
-  mediaItem: IMusic.IMusicSheetItem;
-  onClick?: (mediaItem: IMusic.IMusicSheetItem) => void;
+interface IArtistItemProps {
+  artistItem: IArtist.IArtistItem;
+  onClick?: (artistItem: IArtist.IArtistItem) => void;
 }
 
-function MusicSheetlikeItem(props: IMusicSheetlikeItemProps) {
-  const { mediaItem, onClick } = props;
+function ArtistItem(props: IArtistItemProps) {
+  const { artistItem, onClick } = props;
 
   return (
     <div
-      className="components--albumlike-item-container"
+      className="components--artist-item-container"
       role="button"
       onClick={() => {
-        onClick?.(mediaItem);
+        onClick?.(artistItem);
       }}
     >
-      <div className="album-img-wrapper">
+      <div className="artist-img-wrapper">
         <img
-          src={mediaItem?.artwork || albumImg}
+          src={artistItem?.avatar || albumImg}
           onError={setFallbackAlbum}
         ></img>
-        <Condition
+        {/* <Condition
           condition={
             mediaItem?.playCount || mediaItem?.worksNum || mediaItem?.createAt
           }
@@ -46,12 +42,16 @@ function MusicSheetlikeItem(props: IMusicSheetlikeItemProps) {
               </Condition>
             </div>
           </div>
-        </Condition>
+        </Condition> */}
       </div>
       <div className="media-info">
-        <div className="title" title={mediaItem?.title}>{mediaItem?.title}</div>
-        <div className="author" title={mediaItem?.artist}>
-          <span>{mediaItem?.artist ?? ""}</span>
+        <div className="title" title={artistItem?.name}>
+          {artistItem?.name}
+        </div>
+        <div className="desc" title={artistItem?.description?.replace?.('\\n', '\n')}>
+          {(artistItem?.description ?? "").split("\\n").map((item, index) => (
+            <div key={index}>{item}</div>
+          ))}
         </div>
       </div>
     </div>
@@ -59,7 +59,7 @@ function MusicSheetlikeItem(props: IMusicSheetlikeItemProps) {
 }
 
 export default memo(
-  MusicSheetlikeItem,
+  ArtistItem,
   (prev, curr) =>
-    prev.mediaItem === curr.mediaItem && prev.onClick === curr.onClick
+    prev.artistItem === curr.artistItem && prev.onClick === curr.onClick
 );

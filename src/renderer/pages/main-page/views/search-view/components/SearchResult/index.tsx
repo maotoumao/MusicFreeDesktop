@@ -34,6 +34,7 @@ export default function SearchResult(props: ISearchResultProps) {
           <div
             className="plugin-item"
             role="button"
+            key={plugin.hash}
             onClick={() => {
               setSelectedPlugin(plugin);
             }}
@@ -86,13 +87,25 @@ function _SearchResultBody(props: ISearchResultBodyProps) {
       >
         <SwitchCase.Switch switch={type}>
           <SwitchCase.Case case="music">
-            <MusicResult data={data} state={currentResult?.state ?? RequestStateCode.IDLE} pluginHash={pluginHash}></MusicResult>
+            <MusicResult
+              data={data}
+              state={currentResult?.state ?? RequestStateCode.IDLE}
+              pluginHash={pluginHash}
+            ></MusicResult>
           </SwitchCase.Case>
           <SwitchCase.Case case="album">
-            <div>album</div>
+            <AlbumResult
+              data={data}
+              state={currentResult?.state ?? RequestStateCode.IDLE}
+              pluginHash={pluginHash}
+            ></AlbumResult>
           </SwitchCase.Case>
           <SwitchCase.Case case="artist">
-            <div>artist</div>
+            <ArtistResult
+              data={data}
+              state={currentResult?.state ?? RequestStateCode.IDLE}
+              pluginHash={pluginHash}
+            ></ArtistResult>
           </SwitchCase.Case>
         </SwitchCase.Switch>
       </Condition>
