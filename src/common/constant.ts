@@ -4,6 +4,9 @@ export const internalDataSymbol = Symbol.for('internal');
 export const timeStampSymbol = Symbol.for("time-stamp");
 // 加入播放列表的辅助顺序
 export const sortIndexSymbol = Symbol.for("sort-index");
+/** 歌曲引用次数 */
+export const musicRefSymbol = '$$ref';
+
 /** 本地存储路径 */
 export const localFilePathSymbol = Symbol.for('local-file-path');
 export const localPluginName = '本地';

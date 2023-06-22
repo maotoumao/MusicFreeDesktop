@@ -15,6 +15,30 @@
     opacity: 0.7;
     user-select: none;
 
+    $tag-size: 4px;
+    & .my-sheets {
+      display: flex;
+      align-items: center;
+      &::after {
+        content: "";
+        width: 0;
+        height: 0;
+        margin-left: 0.5rem;
+        border: $tag-size solid transparent;
+        border-left-color: var(--textColor);
+        transform-origin: left center;
+        transition: transform linear 100ms;
+      }
+    }
+
+    &[data-headlessui-state="open"] {
+      & .my-sheets {
+        &::after {
+          transform: rotate(90deg);
+        }
+      }
+    }
+
     & .add-new-sheet {
       $size: 20px;
       width: $size;

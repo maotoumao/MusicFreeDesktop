@@ -20,7 +20,7 @@ export default function MySheets() {
       <div className="divider"></div>
       <Disclosure defaultOpen>
         <Disclosure.Button className="title" as="div" role="button">
-          <div>我的歌单</div>
+          <div className="my-sheets">我的歌单</div>
           <div role="button" className="add-new-sheet" title="新建歌单" onClick={(e) => {
             e.stopPropagation();
             showModal('AddNewSheet')

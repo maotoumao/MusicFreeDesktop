@@ -3,6 +3,7 @@ import Base from "../Base";
 import "./index.scss";
 import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import albumImg from "@/assets/imgs/album-cover.jpg";
+import addImg from "@/assets/imgs/add.png";
 import { hideModal, showModal } from "../..";
 
 interface IAddMusicToSheetProps {
@@ -27,7 +28,7 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
               });
             }}
           >
-            <img src={albumImg} onError={setFallbackAlbum}></img>
+            <img src={addImg}></img>
             <span>新建歌单</span>
           </div>
           {allSheets.map((sheet) => (

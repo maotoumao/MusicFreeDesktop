@@ -1,5 +1,6 @@
 import {
   localPluginName,
+  musicRefSymbol,
   sortIndexSymbol,
   timeStampSymbol,
 } from "@/common/constant";
@@ -17,7 +18,7 @@ const favoriteMusicListIds = new Set<string>();
 /** 初始化 */
 export async function setupSheets() {
   try {
-    const allSheets = await musicSheetDB.sheets.orderBy('createAt').toArray();
+    const allSheets = await musicSheetDB.sheets.orderBy('$$sortIndex').toArray();
     const dbDefaultSheet = allSheets.find(
       (item) => item.id === defaultSheet.id
     );
@@ -47,12 +48,14 @@ function forceUpdateMusicSheets() {
 /** 新建歌单 */
 export async function addSheet(sheetName: string) {
   const id = nanoid();
+  const allSheets = musicSheetsStore.getValue();
   const newSheet: IMusic.IMusicSheetItem = {
     id,
     title: sheetName,
     createAt: Date.now(),
     platform: localPluginName,
     musicList: [],
+    $$sortIndex: allSheets[allSheets.length - 1].$$sortIndex + 1
   };
   try {
     await musicSheetDB.transaction(
@@ -171,11 +174,11 @@ export async function addMusicToSheet(
         );
         allMusic.forEach((mi, index) => {
           if (mi) {
-            mi.$$ref += 1;
+            mi[musicRefSymbol] += 1;
           } else {
             allMusic[index] = {
               ...validMusicItems[index],
-              $$ref: 1,
+              [musicRefSymbol]: 1,
             };
           }
         });
@@ -281,8 +284,8 @@ export async function removeMusicFromSheet(
         const needDelete: any[] = [];
         const needUpdate: any[] = [];
         toBeRemovedMusicDetail.forEach((musicItem) => {
-          musicItem.$$ref--;
-          if (musicItem.$$ref === 0) {
+          musicItem[musicRefSymbol]--;
+          if (musicItem[musicRefSymbol] === 0) {
             needDelete.push([musicItem.platform, musicItem.id]);
           } else {
             needUpdate.push(musicItem);
