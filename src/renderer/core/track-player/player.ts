@@ -7,6 +7,13 @@ import { isSameMedia, sortByTimestampAndIndex } from "@/common/media-util";
 import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
 import { callPluginDelegateMethod } from "../plugin-delegate";
 import LyricParser from "@/renderer/utils/lyric-parser";
+import {
+  getUserPerference,
+  getUserPerferenceIDB,
+  removeUserPerference,
+  setUserPerference,
+  setUserPerferenceIDB,
+} from "@/renderer/utils/user-perference";
 
 const initProgress = {
   currentTime: 0,
@@ -42,16 +49,35 @@ const playerStateStore = new Store(PlayerState.None);
 let currentIndex = -1;
 
 /** 初始化 */
-export function setupPlayer() {
+export async function setupPlayer() {
+  const _repeatMode = getUserPerference("repeatMode");
 
-  const _repeatMode = localStorage.getItem('repeatMode');
-  if(_repeatMode) {
+  if (_repeatMode) {
     repeatModeStore.setValue(_repeatMode as RepeatMode);
   }
 
+  const [currentMusic, currentProgress] = [
+    getUserPerference("currentMusic"),
+    getUserPerference("currentProgress"),
+  ];
+  const playList = (await getUserPerferenceIDB("playList")) ?? [];
+
+  musicQueueStore.setValue(playList);
+  setCurrentMusic(currentMusic);
+  try {
+    const source = await callPluginDelegateMethod(currentMusic, 'getMediaSource', currentMusic, 'standard');
+    setTrackAndPlay(source, currentMusic, false);
+    if(currentProgress) {
+      trackPlayer.seekTo(currentProgress);
+    }
+  } catch {
+
+  }
+  currentIndex = findMusicIndex(currentMusic);
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.PlayEnd, () => {
     progressStore.setValue(initProgress);
+    removeUserPerference("currentProgress");
     switch (repeatModeStore.getValue()) {
       case RepeatMode.Queue:
       case RepeatMode.Shuffle: {
@@ -67,6 +93,7 @@ export function setupPlayer() {
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.TimeUpdated, (res) => {
     progressStore.setValue(res);
+    setUserPerference("currentProgress", res.currentTime);
     const currentLyric = currentLyricStore.getValue();
     if (currentLyric?.parser) {
       const lrcItem = currentLyric.parser.getPosition(res.currentTime);
@@ -143,6 +170,7 @@ export function setupPlayer() {
 
 function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
   musicQueueStore.setValue(musicQueue);
+  setUserPerferenceIDB("playList", musicQueue);
 }
 
 /** 设置当前播放的音乐 */
@@ -151,9 +179,11 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
     currentMusicStore.setValue(music);
     currentLyricStore.setValue(null);
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
+    setUserPerference('currentMusic', music);
   } else {
     currentMusicStore.setValue(music);
   }
+ 
 }
 
 export function useCurrentMusic() {
@@ -195,7 +225,7 @@ export function setRepeatMode(repeatMode: RepeatMode) {
     setMusicQueue(sortByTimestampAndIndex(musicQueueStore.getValue(), true));
   }
   repeatModeStore.setValue(repeatMode);
-  localStorage.setItem("repeatMode", repeatMode);
+  setUserPerference("repeatMode", repeatMode);
   currentIndex = findMusicIndex(currentMusicStore.getValue());
 }
 
@@ -389,11 +419,15 @@ export function resumePlay() {
 /** 内部播放 */
 function setTrackAndPlay(
   mediaSource: IPlugin.IMediaSourceResult,
-  musicItem: IMusic.IMusicItem
+  musicItem: IMusic.IMusicItem,
+  autoPlay = true
 ) {
   progressStore.setValue(initProgress);
+  removeUserPerference("currentProgress");
   trackPlayer.setTrackSource(mediaSource, musicItem);
-  trackPlayer.play();
+  if(autoPlay) {
+    trackPlayer.play();
+  }
 }
 /** 清空播放队列 */
 export function clearQueue() {

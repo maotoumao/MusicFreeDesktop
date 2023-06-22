@@ -17,7 +17,7 @@ const favoriteMusicListIds = new Set<string>();
 /** 初始化 */
 export async function setupSheets() {
   try {
-    const allSheets = await musicSheetDB.sheets.toArray();
+    const allSheets = await musicSheetDB.sheets.orderBy('createAt').toArray();
     const dbDefaultSheet = allSheets.find(
       (item) => item.id === defaultSheet.id
     );
