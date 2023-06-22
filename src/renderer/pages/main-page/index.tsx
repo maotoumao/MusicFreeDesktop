@@ -5,6 +5,7 @@ import PluginManagerView from "./views/plugin-manager-view";
 import MusicSheetView from "./views/music-sheet-view";
 import SearchView from "./views/search-view";
 import MusicDetail from "@/renderer/components/MusicDetail";
+import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
 
 export default function MainPage() {
   return (
@@ -35,6 +36,39 @@ export default function MainPage() {
                 <div role="button" data-type="primaryButton" data-disabled>
                   一个按钮
                 </div>
+                <MusicSheetlikeItem
+                  mediaItem={{
+                    title: "专辑啊",
+                    platform: "猫头",
+                    id: "sd",
+                    artist: "小猫咪",
+                    // createAt: Date.now(),
+                    playCount: 99999,
+
+
+                  }}
+                ></MusicSheetlikeItem>
+                     <MusicSheetlikeItem
+                  mediaItem={{
+                    title: "专辑啊",
+                    platform: "猫头",
+                    id: "sd",
+                    artist: "小猫咪",
+                    createAt: Date.now(),
+
+
+                  }}
+                ></MusicSheetlikeItem>
+                 <MusicSheetlikeItem
+                  mediaItem={{
+                    title: "专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊",
+                    platform: "猫头",
+                    id: "sd",
+                    artist: "小猫咪专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊",
+                    playCount: 1236,
+                    createAt: Date.now()
+                  }}
+                ></MusicSheetlikeItem>
               </div>
             }
           ></Route>

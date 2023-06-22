@@ -1,0 +1,5 @@
+<svg width="24.000000" height="24.000000" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<path id="Ellipse 86" d="M3 15L3 12C3 7.02943 7.02945 3 12 3C16.9706 3 21 7.02943 21 12L21 15" stroke="currentColor" stroke-width="2.000000"/>
+	<path id="Rectangle 22" d="M6 15C6.55228 15 7 15.4477 7 16L7 19C7 20.1046 6.10458 21 5 21C3.89542 21 3 20.1046 3 19L3 15L6 15Z" stroke="currentColor" stroke-width="2.000000" stroke-linejoin="round"/>
+	<path id="Rectangle 23" d="M21 15L21 19C21 20.1046 20.1046 21 19 21C17.8954 21 17 20.1046 17 19L17 16C17 15.4477 17.4477 15 18 15L21 15Z" stroke="currentColor" stroke-width="2.000000" stroke-linejoin="round"/>
+</svg>

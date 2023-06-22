@@ -10,6 +10,7 @@ export type SvgAssetIconNames =
   | "code-bracket-square"
   | "cog-8-tooth"
   | "fire"
+  | "headphone"
   | "heart-outline"
   | "heart"
   | "identification"

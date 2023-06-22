@@ -94,7 +94,7 @@ declare namespace IMusic {
 
 
 declare namespace IAlbum {
-    interface IAlbumItem extends IMedia.IMediaBase {
+    interface IAlbumItem extends IMusic.IMusicSheetItem {
         artwork?: string;
         title: string;
         date?: string;
