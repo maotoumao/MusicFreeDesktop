@@ -378,7 +378,7 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
     } catch (e) {
       // 播放失败
       trackPlayer.clear();
-      console.log(e);
+      trackPlayerEventsEmitter.emit(TrackPlayerEvent.Error, e);
     }
   }
 }
