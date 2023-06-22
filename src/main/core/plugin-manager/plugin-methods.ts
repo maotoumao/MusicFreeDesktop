@@ -91,7 +91,7 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     } catch (e: any) {
       if (retryCount > 0 && e?.message !== "NOT RETRY") {
         await delay(150);
-        return this.getMediaSource(musicItem, quality, --retryCount);
+        return this.plugin.methods.getMediaSource(musicItem, quality, --retryCount);
       }
       // devLog('error', '获取真实源失败', e, e?.message);
       return null;

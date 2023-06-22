@@ -1,7 +1,7 @@
-.music-sheet-view--header-container {
+.music-sheetlike-view--header-container {
   margin-top: 24px;
   display: flex;
-  height: 160px;
+  min-height: 160px;
 
   & img {
     width: 160px;

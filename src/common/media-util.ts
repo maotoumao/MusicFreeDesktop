@@ -56,3 +56,16 @@ export function sortByTimestampAndIndex(
     return a[sortIndexSymbol] - b[sortIndexSymbol];
   });
 }
+
+export function addSortProperty(mediaItems: IMedia.IMediaBase | IMedia.IMediaBase[]) {
+  const now = Date.now();
+  if(Array.isArray(mediaItems)) {
+    mediaItems.forEach((item, index) => {
+      item[timeStampSymbol] = now;
+      item[sortIndexSymbol] = index;
+    })
+  } else {
+    mediaItems[timeStampSymbol] = now;
+    mediaItems[sortIndexSymbol] = 0;
+  }
+}

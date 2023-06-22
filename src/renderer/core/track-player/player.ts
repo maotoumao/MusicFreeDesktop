@@ -3,7 +3,11 @@ import trackPlayer from "./internal";
 import { PlayerState, RepeatMode, TrackPlayerEvent } from "./enum";
 import trackPlayerEventsEmitter from "./event";
 import shuffle from "lodash.shuffle";
-import { isSameMedia, sortByTimestampAndIndex } from "@/common/media-util";
+import {
+  addSortProperty,
+  isSameMedia,
+  sortByTimestampAndIndex,
+} from "@/common/media-util";
 import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
 import { callPluginDelegateMethod } from "../plugin-delegate";
 import LyricParser from "@/renderer/utils/lyric-parser";
@@ -410,11 +414,12 @@ export async function playMusicWithReplaceQueue(
   if (!musicList.length && !musicItem) {
     return;
   }
+  addSortProperty(musicList);
   if (repeatModeStore.getValue() === RepeatMode.Shuffle) {
     musicList = shuffle(musicList);
   }
   musicItem = musicItem ?? musicList[0];
-  musicQueueStore.setValue(musicList);
+  setMusicQueue(musicList);
   await playMusic(musicItem);
 }
 
@@ -440,6 +445,10 @@ export function clearQueue() {
   trackPlayer.clear();
   setMusicQueue([]);
   setCurrentMusic(null);
+  progressStore.setValue({
+    currentTime: 0,
+    duration: Infinity,
+  });
   currentIndex = -1;
 }
 

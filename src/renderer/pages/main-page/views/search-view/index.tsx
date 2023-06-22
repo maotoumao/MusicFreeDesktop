@@ -3,7 +3,7 @@ import {
   useSupportedPlugin,
 } from "@/renderer/core/plugin-delegate";
 import { useEffect } from "react";
-import { useMatch } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import "./index.scss";
 import NoPlugin from "@/renderer/components/NoPlugin";
 import { Tab } from "@headlessui/react";
@@ -14,7 +14,6 @@ import SearchResult from "./components/SearchResult";
 import useSearch from "./hooks/useSearch";
 import { currentMediaTypeStore, resetStore } from "./store/search-result";
 
-
 export default function SearchView() {
   const match = useMatch("/main/search/:query");
   const query = match?.params?.query;
@@ -23,6 +22,8 @@ export default function SearchView() {
 
   const { t } = useTranslation();
   const search = useSearch();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (query) {
@@ -34,9 +35,8 @@ export default function SearchView() {
   useEffect(() => {
     () => {
       resetStore();
-    }
+    };
   }, []);
-
 
   return (
     <div className="search-view-container">
@@ -44,9 +44,19 @@ export default function SearchView() {
         <span className="highlight">「{query}」</span>的搜索结果
       </div>
       {plugins.length ? (
-        <Tab.Group onChange={(index) => {
-          currentMediaTypeStore.setValue(supportedMediaType[index]);
-        }}>
+        <Tab.Group
+          defaultIndex={history.state?.usr?.mediaIndex ?? 0}
+          onChange={(index) => {
+            currentMediaTypeStore.setValue(supportedMediaType[index]);
+            // 获取history
+            navigate("", {
+              replace: true,
+              state: {
+                mediaIndex: index,
+              },
+            });
+          }}
+        >
           <Tab.List className="tab-list-container">
             {supportedMediaType.map((type) => (
               <Tab key={type} as="div" className="tab-list-item">

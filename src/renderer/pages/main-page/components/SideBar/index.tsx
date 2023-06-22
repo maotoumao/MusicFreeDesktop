@@ -7,7 +7,6 @@ export default function () {
   const navigate = useNavigate();
   const routePathMatch = useMatch("/main/:routePath");
 
-  console.log(routePathMatch);
 
   const options = [
     {

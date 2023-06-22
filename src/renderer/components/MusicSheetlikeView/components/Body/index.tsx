@@ -6,13 +6,16 @@ import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import trackPlayer from "@/renderer/core/track-player";
 import { showModal } from "@/renderer/components/Modal";
+import { RequestStateCode } from "@/common/constant";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;
   musicList: IMusic.IMusicItem[];
+  state?: RequestStateCode;
+  onLoadMore?: () => void;
 }
 export default function Body(props: IProps) {
-  const { musicList = [], musicSheet } = props;
+  const { musicList = [], musicSheet, state, onLoadMore } = props;
 
   const [inputSearch, setInputSearch] = useState("");
   const [filterMusicList, setFilterMusicList] = useState<
@@ -38,7 +41,7 @@ export default function Body(props: IProps) {
   }, [inputSearch]);
 
   return (
-    <div className="music-sheet-view--body-container">
+    <div className="music-sheetlike-view--body-container">
       <div className="operations">
         <div className="buttons">
           <div
@@ -57,6 +60,7 @@ export default function Body(props: IProps) {
           <div
             role="button"
             data-type="normalButton"
+            data-disabled={!musicList?.length}
             className="add-to-sheet"
             title="添加到歌单"
             onClick={() => {
@@ -81,12 +85,14 @@ export default function Body(props: IProps) {
         </div>
       </div>
       <Condition
-        condition={!isPending || filterMusicList === null}
+        condition={(!isPending || filterMusicList === null) && state !== RequestStateCode.PENDING_FIRST_PAGE}
         falsy={<Loading></Loading>}
       >
         <MusicList
           musicList={filterMusicList ?? musicList}
-          localMusicSheetId={musicSheet?.id}
+          musicSheet={musicSheet}
+          state={state}
+          onPageChange={onLoadMore}
         ></MusicList>
       </Condition>
     </div>

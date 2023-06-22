@@ -32,11 +32,12 @@
         font-size: 1.2rem;
         font-weight: 600;
       }
-
-      & .music-list-container {
-        flex: 1;
-        overflow: auto;
-      }
+    }
+    
+    & .playlist--music-list-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     & .divider {
@@ -61,7 +62,6 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     flex-shrink: 0;
-
   }
 
   & .playlist--artist {
@@ -72,7 +72,6 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     flex-shrink: 0;
-
   }
 
   & .playlist--platform {

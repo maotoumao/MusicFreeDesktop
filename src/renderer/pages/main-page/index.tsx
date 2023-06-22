@@ -6,12 +6,14 @@ import MusicSheetView from "./views/music-sheet-view";
 import SearchView from "./views/search-view";
 import MusicDetail from "@/renderer/components/MusicDetail";
 import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
+import AlbumView from "./views/album-view";
+import ArtistView from "./views/artist-view";
 
 export default function MainPage() {
   return (
     <>
       <SideBar></SideBar>
-      <div className="pages-container">
+      <div className="pages-container" id="page-container">
         <Routes>
           <Route
             path="plugin-manager-view"
@@ -21,10 +23,19 @@ export default function MainPage() {
             path="musicsheet/:platform/:id"
             element={<MusicSheetView></MusicSheetView>}
           ></Route>
+           <Route
+            path="album/:platform/:id"
+            element={<AlbumView></AlbumView>}
+          ></Route>
+          <Route
+            path="artist/:platform/:id"
+            element={<ArtistView></ArtistView>}
+          ></Route>
           <Route
             path="search/:query"
             element={<SearchView></SearchView>}
           ></Route>
+
           <Route
             path="*"
             element={

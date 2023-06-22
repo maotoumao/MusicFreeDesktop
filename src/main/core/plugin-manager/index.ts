@@ -78,7 +78,7 @@ function callPluginMethod({
     return null;
   }
   const result = plugin.methods[method]?.apply?.({ plugin }, args);
-  console.log(plugin, method, args, result);
+  console.log(plugin, method, args);
   return result;
 }
 

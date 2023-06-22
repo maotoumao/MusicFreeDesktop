@@ -1,0 +1,58 @@
+.artist-view--header-container {
+    margin-top: 24px;
+    display: flex;
+    height: 160px;
+  
+    & img {
+      width: 160px;
+      height: 160px;
+      border-radius: 12px;
+      user-select: none;
+      -webkit-user-drag: none;
+      object-fit: cover;
+    }
+  
+    & .artist-info {
+      flex: 1;
+      padding-left: 1.2rem;
+  
+      & .title-container {
+        display: flex;
+        align-items: center;
+        -webkit-user-drag: none;
+        user-select: text;
+  
+        & .title {
+          flex: 1;
+          font-size: 1.4rem;
+          font-weight: 600;
+          margin-left: 8px;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+        }
+      }
+  
+      & .info-container {
+        margin-top: 16px;
+        font-size: 0.9rem;
+        opacity: 0.8;
+        line-height: 2;
+  
+        & span {
+          margin-right: 24px;
+        }
+      }
+  
+      & .description-container {
+        &[data-fold="true"] {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+  

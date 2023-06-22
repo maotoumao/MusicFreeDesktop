@@ -14,18 +14,18 @@ import trackPlayer from "@/renderer/core/track-player";
 import Condition from "../Condition";
 import Empty from "../Empty";
 import MusicFavorite from "../MusicFavorite";
-import { RequestStateCode } from "@/common/constant";
+import { RequestStateCode, localPluginName } from "@/common/constant";
 import SwitchCase from "../SwitchCase";
 import BottomLoadingState from "../BottomLoadingState";
 import { showContextMenu } from "../ContextMenu";
-import { getMediaPrimaryKey } from "@/common/media-util";
-import { memo } from "react";
+import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
+import { memo, useRef } from "react";
 import { showModal } from "../Modal";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
-  /** 音乐列表所属的本地歌单 */
-  localMusicSheetId?: string;
+  /** 音乐列表所属的歌单信息 */
+  musicSheet?: IMusic.IMusicSheetItem;
   // enablePagination?: boolean; // 分页/虚拟长列表
   enableSort?: boolean; // 拖拽排序
   onSortEnd?: () => void; // 排序结束
@@ -135,7 +135,7 @@ function _MusicList(props: IMusicListProps) {
     musicList,
     state = RequestStateCode.FINISHED,
     onPageChange,
-    localMusicSheetId,
+    musicSheet,
   } = props;
 
   const table = useReactTable({
@@ -145,8 +145,12 @@ function _MusicList(props: IMusicListProps) {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const tableContainerRef = useRef<HTMLDivElement>();
+
+
+
   return (
-    <div className="music-list-container">
+    <div className="music-list-container" ref={tableContainerRef}>
       <table>
         <thead>
           <tr>
@@ -166,33 +170,37 @@ function _MusicList(props: IMusicListProps) {
           </tr>
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              onContextMenu={(e) => {
-                showMusicContextMenu(
-                  row.original,
-                  e.clientX,
-                  e.clientY,
-                  localMusicSheetId
-                );
-              }}
-              onDoubleClick={() => {
-                trackPlayer.playMusic(row.original);
-              }}
-            >
-              {row.getAllCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  style={{
-                    width: cell.column.getSize(),
-                  }}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {table.getRowModel().rows.map((row) => {
+            return (
+              <tr
+                key={row.id}
+                onContextMenu={(e) => {
+                  showMusicContextMenu(
+                    row.original,
+                    e.clientX,
+                    e.clientY,
+                    musicSheet?.platform === localPluginName
+                      ? musicSheet.id
+                      : undefined
+                  );
+                }}
+                onDoubleClick={() => {
+                  trackPlayer.playMusic(row.original);
+                }}
+              >
+                {row.getAllCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    style={{
+                      width: cell.column.getSize(),
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <Condition
@@ -217,5 +225,8 @@ export default memo(
     prev.enableSort === curr.enableSort &&
     prev.musicList === curr.musicList &&
     prev.onPageChange === curr.onPageChange &&
-    prev.onSortEnd === curr.onSortEnd
+    prev.onSortEnd === curr.onSortEnd &&
+    prev.musicSheet &&
+    curr.musicSheet &&
+    isSameMedia(prev.musicSheet, curr.musicSheet)
 );

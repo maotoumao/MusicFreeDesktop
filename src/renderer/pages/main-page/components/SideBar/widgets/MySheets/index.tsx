@@ -12,7 +12,6 @@ export default function MySheets() {
   const currentSheetId = sheetIdMatch?.params?.sheetId;
 
   const musicSheets = musicSheetsStore.useValue();
-  console.log(musicSheets);
   const navigate = useNavigate();
 
   return (

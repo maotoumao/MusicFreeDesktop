@@ -4,6 +4,8 @@ import "./index.scss";
 import BottomLoadingState from "@/renderer/components/BottomLoadingState";
 import useSearch from "../../../hooks/useSearch";
 import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
+import { useNavigate } from "react-router-dom";
+import MusicSheetlikeList from "@/renderer/components/MusicSheetlikeList";
 
 interface IMediaResultProps {
   data: IAlbum.IAlbumItem[];
@@ -15,26 +17,24 @@ function AlbumResult(props: IMediaResultProps) {
   const { data, state, pluginHash } = props;
 
   const search = useSearch();
+  const navigate = useNavigate();
+  console.log(data);
 
   return (
-    <div className="search-result--album-result-container">
-      <div className="result-body">
-        {data.map((albumItem, index) => {
-          return (
-            <MusicSheetlikeItem
-              mediaItem={albumItem}
-              key={index}
-            ></MusicSheetlikeItem>
-          );
-        })}
-      </div>
-      <BottomLoadingState
-        state={state}
-        onLoadMore={() => {
-          search(undefined, undefined, "album", pluginHash);
-        }}
-      ></BottomLoadingState>
-    </div>
+    <MusicSheetlikeList
+      data={data}
+      state={state}
+      onLoadMore={() => {
+        search(undefined, undefined, "album", pluginHash);
+      }}
+      onClick={(albumItem) => {
+        navigate(`/main/album/${albumItem.platform}/${albumItem.id}`, {
+          state: {
+            albumItem,
+          },
+        });
+      }}
+    ></MusicSheetlikeList>
   );
 }
 

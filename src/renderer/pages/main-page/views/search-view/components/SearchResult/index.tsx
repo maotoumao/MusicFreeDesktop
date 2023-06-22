@@ -9,6 +9,7 @@ import { RequestStateCode } from "@/common/constant";
 import Loading from "@/renderer/components/Loading";
 import useSearch from "../../hooks/useSearch";
 import SwitchCase from "@/renderer/components/SwitchCase";
+import { useNavigate } from "react-router-dom";
 
 interface ISearchResultProps {
   type: IMedia.SupportMediaType;
@@ -19,13 +20,17 @@ interface ISearchResultProps {
 export default function SearchResult(props: ISearchResultProps) {
   const { type, plugins, query } = props;
   const [selectedPlugin, setSelectedPlugin] =
-    useState<IPlugin.IPluginDelegate | null>(null);
+    useState<IPlugin.IPluginDelegate | null>(
+      history.state?.usr?.plugin ?? null
+    );
 
   useEffect(() => {
     if (plugins.length && !selectedPlugin) {
       setSelectedPlugin(plugins[0]);
     }
   }, [plugins, selectedPlugin]);
+
+  const navigate = useNavigate();
 
   return (
     <>
@@ -37,6 +42,16 @@ export default function SearchResult(props: ISearchResultProps) {
             key={plugin.hash}
             onClick={() => {
               setSelectedPlugin(plugin);
+              const usr = history.state.usr ?? {};
+
+              // 获取history
+              navigate("", {
+                replace: true,
+                state: {
+                  ...usr,
+                  plugin: plugin,
+                },
+              });
             }}
             data-selected={selectedPlugin?.hash === plugin.hash}
           >
@@ -65,10 +80,6 @@ function _SearchResultBody(props: ISearchResultBodyProps) {
   const data = currentResult?.data ?? ([] as any[]);
 
   const search = useSearch();
-
-  function loadMore() {
-    search(query, undefined, type, pluginHash);
-  }
 
   useEffect(() => {
     if (pluginHash && type && query) {

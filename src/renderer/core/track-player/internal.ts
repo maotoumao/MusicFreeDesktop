@@ -144,7 +144,9 @@ class TrackPlayerInternal {
 
   /** 清空 */
   clear() {
-    this.audio.src = null;
+    this.setPlayerState(PlayerState.Paused)
+    this.audio.src = '';
+    this.audio.removeAttribute('src');
     navigator.mediaSession.metadata = null;
     navigator.mediaSession.playbackState = "none";
   }

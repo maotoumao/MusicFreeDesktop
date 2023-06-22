@@ -29,7 +29,6 @@ export default function PlayList() {
       id={baseId}
       className="music-bar--play-list-container"
       onClick={(e) => {
-        console.log(e);
         if ((e.target as HTMLElement)?.id === baseId) {
           setShow(false);
         }
@@ -48,11 +47,12 @@ export default function PlayList() {
           </div>
         </div>
         <div className="divider"></div>
-        <div className="music-list-container">
+        <div className="playlist--music-list-container">
           <Condition
             condition={musicQueue.length !== 0}
             falsy={<Empty></Empty>}
           >
+            {/* TODO: 长列表此处布局会有明显卡顿，需要懒加载 */}
             {musicQueue.map((item) => (
               <PlayListMusicItem
                 key={getMediaPrimaryKey(item)}

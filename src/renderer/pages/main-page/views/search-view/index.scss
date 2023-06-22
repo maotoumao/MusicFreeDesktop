@@ -13,51 +13,5 @@
         flex-shrink: 0;
     }
 
-    & .tab-list-container {
-        display: flex;
-        margin-top: 1.2rem;
-        flex-shrink: 0;
-
-        & .tab-list-item {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            font-size: 1.1rem;
-            padding: 0 2rem 0.5rem;
-            outline: none;
-            cursor: pointer;
-            opacity: 0.7;
-
-            &:hover {
-                opacity: 0.9;
-            }
-
-            &[data-headlessui-state=selected] {
-                font-weight: 600;
-                opacity: 1;
-                
-                &::after {
-                    content: '';
-                    position: absolute;
-                    width: 40%;
-                    height: 4px;
-                    border-radius: 2px;
-                    left: 50%;
-                    bottom: 0;
-                    background-color: var(--primaryColor);
-                    transform: translateX(-50%);
-                }
- 
-            }
-        }
-    }
-
-    & .tab-panels-container{
-        flex: 1;
-
-        & .tab-panel-container {
-            height: 100%;
-        }
-    }
+    
 }

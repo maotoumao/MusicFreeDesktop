@@ -75,7 +75,7 @@ export default function useSearch() {
         /** 搜索的页码 */
         const page =
           queryPage ?? newSearch ? 1 : (prevPluginResult?.page ?? 0) + 1;
-          
+
         if (
           query === prevPluginResult?.query &&
           queryPage <= prevPluginResult?.page
@@ -154,7 +154,10 @@ export default function useSearch() {
                   data: [] as any[],
                 } as any);
 
-              prevPluginResult.state = RequestStateCode.PARTLY_DONE;
+              prevPluginResult.state =
+                page === 1
+                  ? RequestStateCode.FINISHED
+                  : RequestStateCode.PARTLY_DONE;
               return draft;
             })
           );

@@ -1,11 +1,5 @@
-import { useLocation, useMatch, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import "./index.scss";
-import { useEffect, useLayoutEffect, useState } from "react";
-import musicSheetStore from "./store/musicSheetStore";
-import Header from "./components/Header";
-import Loading from "@/renderer/components/Loading";
-import Body from "./components/Body";
-import { useMusicSheet } from "@/renderer/core/music-sheet/internal/sheets-method";
 import Condition from "@/renderer/components/Condition";
 import { localPluginName } from "@/common/constant";
 import LocalSheet from "./local-sheet";
