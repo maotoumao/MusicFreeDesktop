@@ -19,6 +19,12 @@
     padding-left: 8px;
     padding-right: 8px;
 
+    & span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     & .menu-item-icon {
       $item-size: 1.2rem;
       width: $item-size;

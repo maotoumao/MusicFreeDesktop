@@ -49,6 +49,12 @@ const progressStore = new Store(initProgress);
 /** 播放状态 */
 const playerStateStore = new Store(PlayerState.None);
 
+/** 音量 */
+const currentVolumeStore = new Store(1);
+
+/** 速度 */
+const currentSpeedStore = new Store(1);
+
 /** 播放下标 */
 let currentIndex = -1;
 
@@ -69,6 +75,21 @@ export async function setupPlayer() {
 
   musicQueueStore.setValue(playList);
   setCurrentMusic(currentMusic);
+
+  const [volume, speed] = [
+    getUserPerference("volume"),
+    getUserPerference("speed"),
+  ];
+  if (volume) {
+    currentVolumeStore.setValue(volume);
+    setVolume(volume);
+  }
+
+  if (speed) {
+    currentSpeedStore.setValue(speed);
+    setSpeed(speed);
+  }
+
   trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
   try {
     const source = await callPluginDelegateMethod(
@@ -124,6 +145,16 @@ function setupEvents() {
     }
   });
 
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.VolumeChanged, (res) => {
+    setUserPerference("volume", res);
+    currentVolumeStore.setValue(res);
+  });
+
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.SpeedChanged, (res) => {
+    setUserPerference("speed", res);
+    currentSpeedStore.setValue(res);
+  });
+
   trackPlayerEventsEmitter.on(TrackPlayerEvent.StateChanged, (st) => {
     playerStateStore.setValue(st);
   });
@@ -132,6 +163,9 @@ function setupEvents() {
     // 播放错误时自动跳到下一首
     if (musicQueueStore.getValue().length > 1) {
       skipToNext();
+    } else {
+      progressStore.setValue(initProgress);
+      removeUserPerference("currentProgress");
     }
   });
 
@@ -212,6 +246,10 @@ export const useMusicQueue = musicQueueStore.useValue;
 
 export const useLyric = currentLyricStore.useValue;
 
+export const useVolume = currentVolumeStore.useValue;
+
+export const useSpeed = currentSpeedStore.useValue;
+
 export function toggleRepeatMode() {
   let nextRepeatMode: RepeatMode = repeatModeStore.getValue();
   switch (nextRepeatMode) {
@@ -250,8 +288,6 @@ function findMusicIndex(musicItem?: IMusic.IMusicItem) {
 /**
  * 歌单行为
  */
-
-function addToEnd() {}
 
 export function addNext(musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) {
   let _musicItems: IMusic.IMusicItem[];
@@ -377,6 +413,7 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
       }
     } catch (e) {
       // 播放失败
+      setCurrentMusic(musicItem);
       trackPlayer.clear();
       trackPlayerEventsEmitter.emit(TrackPlayerEvent.Error, e);
     }
@@ -482,4 +519,12 @@ export function seekTo(position: number) {
 
 export function pause() {
   trackPlayer.pause();
+}
+
+export function setVolume(volume: number) {
+  trackPlayer.setVolume(volume);
+}
+
+export function setSpeed(speed: number) {
+  trackPlayer.setSpeed(speed);
 }

@@ -1,6 +1,7 @@
 import { memo } from "react";
 
 export type SvgAssetIconNames =
+  | "album"
   | "array-download-tray"
   | "chevron-double-down"
   | "chevron-double-up"
@@ -9,6 +10,7 @@ export type SvgAssetIconNames =
   | "chevron-right"
   | "code-bracket-square"
   | "cog-8-tooth"
+  | 'document-plus'
   | "fire"
   | "headphone"
   | "heart-outline"
@@ -18,6 +20,7 @@ export type SvgAssetIconNames =
   | "lyric"
   | "magnifying-glass"
   | "minus"
+  | "motion-play"
   | "musical-note"
   | "pause"
   | "play"
@@ -28,6 +31,7 @@ export type SvgAssetIconNames =
   | "shuffle"
   | "skip-left"
   | "skip-right"
+  | 'trash'
   | "trophy"
   | "user"
   | "x-mark";
@@ -43,11 +47,15 @@ interface IProps {
  */
 function SvgAsset(props: IProps) {
   const Svg = require(`@/assets/icons/${props.iconName}.svg`);
-  
-  return <Svg.default style={{
-    width: props.size,
-    height: props.size
-  }}></Svg.default>;
+
+  return (
+    <Svg.default
+      style={{
+        width: props.size,
+        height: props.size,
+      }}
+    ></Svg.default>
+  );
 }
 
 export default memo(SvgAsset, (prev, curr) => prev.iconName === curr.iconName);

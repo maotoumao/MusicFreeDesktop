@@ -60,6 +60,20 @@ class TrackPlayerInternal {
     this.audio.onended = () => {
       trackPlayerEventsEmitter.emit(TrackPlayerEvent.PlayEnd);
     };
+
+    this.audio.onvolumechange = (evt) => {
+      trackPlayerEventsEmitter.emit(
+        TrackPlayerEvent.VolumeChanged,
+        this.audio.volume
+      );
+    };
+
+    this.audio.onratechange = () => {
+      trackPlayerEventsEmitter.emit(
+        TrackPlayerEvent.SpeedChanged,
+        this.audio.playbackRate
+      );
+    };
   }
 
   /** 设置音源 */
@@ -144,11 +158,17 @@ class TrackPlayerInternal {
 
   /** 清空 */
   clear() {
-    this.setPlayerState(PlayerState.Paused)
-    this.audio.src = '';
-    this.audio.removeAttribute('src');
+    this.setPlayerState(PlayerState.Paused);
+    this.audio.src = "";
+    this.audio.removeAttribute("src");
     navigator.mediaSession.metadata = null;
     navigator.mediaSession.playbackState = "none";
+  }
+
+  /** 设置倍速 */
+  setSpeed(speed: number) {
+    this.audio.defaultPlaybackRate = speed;
+    this.audio.playbackRate = speed;
   }
 }
 

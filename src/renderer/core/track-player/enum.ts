@@ -35,6 +35,10 @@ export enum TrackPlayerEvent {
     StateChanged = 'play-state-changed',
     /** 进度更新 */
     TimeUpdated = 'time-updated',
+    /** 音量改变 */
+    VolumeChanged = 'volume-changed',
+    /** 速度改变 */
+    SpeedChanged = 'speed-changed',
     /** 播放结束 */
     PlayEnd = 'play-end',
     /** 获取当前歌词 */
@@ -46,8 +50,10 @@ export interface TrackPlayerEventParams {
     [TrackPlayerEvent.Error]: ErrorReason;
     [TrackPlayerEvent.StateChanged]: PlayerState;
     [TrackPlayerEvent.TimeUpdated]: CurrentTime;
-    [TrackPlayerEvent.PlayEnd]: undefined
-    [TrackPlayerEvent.UpdateLyric]: undefined
+    [TrackPlayerEvent.PlayEnd]: undefined;
+    [TrackPlayerEvent.UpdateLyric]: undefined;
+    [TrackPlayerEvent.SpeedChanged]: number;
+    [TrackPlayerEvent.VolumeChanged]: number;
 
 }
 

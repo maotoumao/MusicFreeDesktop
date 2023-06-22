@@ -76,7 +76,7 @@ function SingleColumnContextMenuComponent(props: IContextMenuData) {
                   <SvgAsset iconName={item.icon}></SvgAsset>
                 </div>
               </Condition>
-              {item.title}
+              <span>{item.title}</span>
             </div>
           </Condition>
         </Condition>

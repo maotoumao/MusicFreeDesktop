@@ -5,6 +5,10 @@ declare namespace IUserPerference {
         /** 当前进度 */
         currentMusic: IMusic.IMusicItem;
         currentProgress: number;
+        /** 当前音量 */
+        volume: number;
+        /** 倍速 */
+        speed: number
     }
 
     interface IDBType {

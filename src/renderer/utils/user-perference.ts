@@ -38,6 +38,7 @@ export function getUserPerference<K extends keyof IUserPerference.IType>(
   }
 }
 
+
 /** 比较大的数据 */
 
 class UserPerferenceDB extends Dexie {

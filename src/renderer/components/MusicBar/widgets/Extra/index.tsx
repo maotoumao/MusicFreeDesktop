@@ -7,8 +7,17 @@ import { RepeatMode } from "@/renderer/core/track-player/enum";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
+  const volume = trackPlayer.useVolume();
+
   return (
     <div className="music-extra">
+      <div className="extra-btn" role="button" onClick={() => {
+        trackPlayer.setVolume(Math.random())
+        trackPlayer.setSpeed(Math.random() + 0.25);
+
+      }}>
+        {volume}
+      </div>
       <div className="extra-btn">
         <SvgAsset iconName="lyric"></SvgAsset>
       </div>
@@ -47,12 +56,6 @@ export default function Extra() {
       >
         <SvgAsset iconName="playlist"></SvgAsset>
       </div>
-      {/* <div className="extra-btn">
-          <RepeatSongSvg></RepeatSongSvg>
-        </div>
-        <div className="extra-btn">
-          <ShuffleSvg></ShuffleSvg>
-        </div> */}
     </div>
   );
 }

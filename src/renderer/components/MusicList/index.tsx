@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-table";
 
 import "./index.scss";
-import SvgAsset from "../SvgAsset";
 import Tag from "../Tag";
 import { secondsToDuration } from "@/common/time-util";
 import MusicSheet from "@/renderer/core/music-sheet";
@@ -15,7 +14,6 @@ import Condition from "../Condition";
 import Empty from "../Empty";
 import MusicFavorite from "../MusicFavorite";
 import { RequestStateCode, localPluginName } from "@/common/constant";
-import SwitchCase from "../SwitchCase";
 import BottomLoadingState from "../BottomLoadingState";
 import { showContextMenu } from "../ContextMenu";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
@@ -100,6 +98,7 @@ function showMusicContextMenu(
       },
       {
         title: `专辑: ${musicItem.album}`,
+        icon: "album",
         show: !!musicItem.album,
       },
       {
@@ -107,12 +106,14 @@ function showMusicContextMenu(
       },
       {
         title: "下一首播放",
+        icon: "motion-play",
         onClick() {
           trackPlayer.addNext(musicItem);
         },
       },
       {
         title: "添加到歌单",
+        icon: "document-plus",
         onClick() {
           showModal("AddMusicToSheet", {
             musicItems: musicItem,
@@ -121,6 +122,7 @@ function showMusicContextMenu(
       },
       {
         title: "从歌单内删除",
+        icon: "trash",
         show: !!localMusicSheetId,
         onClick() {
           MusicSheet.removeMusicFromSheet(musicItem, localMusicSheetId);
@@ -146,8 +148,6 @@ function _MusicList(props: IMusicListProps) {
   });
 
   const tableContainerRef = useRef<HTMLDivElement>();
-
-
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>
