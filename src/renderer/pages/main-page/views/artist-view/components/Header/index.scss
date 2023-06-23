@@ -1,7 +1,7 @@
 .artist-view--header-container {
     margin-top: 24px;
     display: flex;
-    height: 160px;
+    min-height: 160px;
   
     & img {
       width: 160px;
@@ -48,7 +48,7 @@
       & .description-container {
         &[data-fold="true"] {
           display: -webkit-box;
-          -webkit-line-clamp: 2;
+          -webkit-line-clamp: 5;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }

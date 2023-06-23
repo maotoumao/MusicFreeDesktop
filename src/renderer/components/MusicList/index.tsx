@@ -33,7 +33,7 @@ interface IMusicListProps {
   onPageChange?: (page?: number) => void;
   /** 虚拟滚动参数 */
   virtualProps?: {
-    offsetHeight?: number; // 距离顶部的高度
+    offsetHeight?: number | (() => number); // 距离顶部的高度
     getScrollElement?: () => HTMLElement; // 滚动
   };
 }
@@ -162,8 +162,8 @@ function _MusicList(props: IMusicListProps) {
     getScrollElement: virtualProps?.getScrollElement,
     offsetHeight: virtualProps?.offsetHeight,
     estimizeItemHeight,
+    fallbackRenderCount: 100,
   });
-
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>
@@ -189,9 +189,11 @@ function _MusicList(props: IMusicListProps) {
             ))}
           </tr>
         </thead>
-        <tbody style={{
-          transform: `translateY(${virtualController.startTop}px)`
-        }}>
+        <tbody
+          style={{
+            transform: `translateY(${virtualController.startTop}px)`,
+          }}
+        >
           {virtualController.virtualItems.map((virtualItem) => {
             const row = virtualItem.dataItem;
             return (

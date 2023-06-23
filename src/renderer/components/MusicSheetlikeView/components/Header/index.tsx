@@ -4,6 +4,9 @@ import "./index.scss";
 import Tag from "@/renderer/components/Tag";
 import dayjs from "dayjs";
 import Condition from "@/renderer/components/Condition";
+import { initValue, offsetHeightStore } from "../../store";
+import { useRef } from "react";
+import { rem } from "@/common/constant";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;
@@ -12,9 +15,10 @@ interface IProps {
 
 export default function Header(props: IProps) {
   const { musicSheet, musicList } = props;
+  const containerRef = useRef<HTMLDivElement>();
 
   return (
-    <div className="music-sheetlike-view--header-container">
+    <div className="music-sheetlike-view--header-container" ref={containerRef}>
       <img
         draggable={false}
         src={musicSheet?.artwork ?? albumImg}
@@ -51,7 +55,17 @@ export default function Header(props: IProps) {
             title={musicSheet?.description}
             onClick={(e) => {
               const dataset = e.currentTarget.dataset;
+           
               dataset.fold = dataset.fold === "true" ? "false" : "true";
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  offsetHeightStore.setValue(
+                    containerRef.current.offsetTop +
+                      containerRef.current.clientHeight +
+                      4 * rem
+                  );
+                });
+              });
             }}
           >
             简介：{musicSheet?.description}

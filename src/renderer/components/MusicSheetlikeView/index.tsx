@@ -1,9 +1,10 @@
 import { RequestStateCode } from "@/common/constant";
 import Body from "./components/Body";
 import Header from "./components/Header";
-import { useRef } from "react";
 
-import './index.scss';
+import "./index.scss";
+import { useEffect } from "react";
+import { initValue, offsetHeightStore } from "./store";
 
 interface IMusicSheetlikeViewProps {
   scrollElement?: HTMLElement;
@@ -14,12 +15,22 @@ interface IMusicSheetlikeViewProps {
 }
 
 export default function MusicSheetlikeView(props: IMusicSheetlikeViewProps) {
-  const { musicSheet, musicList, state = RequestStateCode.IDLE, onLoadMore } = props;
+  const {
+    musicSheet,
+    musicList,
+    state = RequestStateCode.IDLE,
+    onLoadMore,
+  } = props;
 
+  useEffect(() => {
+    return () => {
+      offsetHeightStore.setValue(initValue);
+    };
+  }, []);
 
   return (
-    <div className="music-sheetlike-view--container" >
-      <Header musicSheet={musicSheet} musicList={musicList??[]}></Header>
+    <div className="music-sheetlike-view--container">
+      <Header musicSheet={musicSheet} musicList={musicList ?? []}></Header>
       <Body
         musicList={musicList ?? []}
         musicSheet={musicSheet}

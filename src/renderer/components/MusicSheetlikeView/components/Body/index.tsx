@@ -13,6 +13,7 @@ import Loading from "@/renderer/components/Loading";
 import trackPlayer from "@/renderer/core/track-player";
 import { showModal } from "@/renderer/components/Modal";
 import { RequestStateCode, rem } from "@/common/constant";
+import { offsetHeightStore } from "../../store";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;
@@ -29,6 +30,7 @@ export default function Body(props: IProps) {
     IMusic.IMusicItem[] | null
   >(null);
   const [isPending, startTransition] = useTransition();
+  const offsetHeight = offsetHeightStore.useValue();
 
   useEffect(() => {
     if (inputSearch.trim() === "") {
@@ -110,7 +112,7 @@ export default function Body(props: IProps) {
             getScrollElement() {
               return document.querySelector("#page-container");
             },
-            offsetHeight: 184 + 4 * rem
+            offsetHeight: () => offsetHeightStore.getValue()
           }}
         ></MusicList>
       </Condition>

@@ -28,6 +28,10 @@ export default function Header(props: IProps) {
           <div
             className="info-container description-container"
             data-fold="true"
+            onClick={(e) => {
+              const dataset = e.currentTarget.dataset;
+              dataset.fold = dataset.fold === "true" ? "false" : "true";
+            }}
           >
             简介：{artistItem?.description}
           </div>

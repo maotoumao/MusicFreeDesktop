@@ -20,7 +20,7 @@ interface IVirtualListProps<T> {
   /** 虚拟列表失效时的渲染数目 */
   fallbackRenderCount?: number;
   /** 偏移高度 */
-  offsetHeight?: number;
+  offsetHeight?: number | (() => number);
 }
 
 interface IVirtualItem<T> {
@@ -55,7 +55,8 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
     throttle(
       () => {
         const scrollTop =
-          (scrollElementRef.current?.scrollTop ?? 0) - offsetHeight;
+          (scrollElementRef.current?.scrollTop ?? 0) -
+          (typeof offsetHeight === "number" ? offsetHeight : offsetHeight());
         const realData = dataRef.current;
         const estimizeStartIndex = Math.floor(scrollTop / estimizeItemHeight);
         const startIndex = Math.max(
