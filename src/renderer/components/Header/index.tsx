@@ -6,15 +6,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import HeaderNavigator from "./widgets/Navigator";
 
-
 export default function AppHeader() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>();
- 
+
   function onSearchSubmit() {
     navigate(`/main/search/${inputRef.current.value}`);
   }
-
 
   return (
     <div className="header-container">
@@ -22,7 +20,7 @@ export default function AppHeader() {
         <div className="logo">
           <SvgAsset iconName="logo"></SvgAsset>
         </div>
-       <HeaderNavigator></HeaderNavigator>
+        <HeaderNavigator></HeaderNavigator>
         <div className="search">
           <input
             ref={inputRef}
@@ -42,6 +40,12 @@ export default function AppHeader() {
       </div>
 
       <div className="right-part">
+        <div role="button" className="header-button sparkles-icon" onClick={() => {
+          showModal('Sparkles')
+        }}>
+          <SvgAsset iconName="sparkles"></SvgAsset>
+        </div>
+        <div className="header-divider"></div>
         <div role="button" className="header-button" title="设置">
           <SvgAsset iconName="cog-8-tooth"></SvgAsset>
         </div>

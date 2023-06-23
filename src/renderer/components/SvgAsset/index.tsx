@@ -32,6 +32,7 @@ export type SvgAssetIconNames =
   | "shuffle"
   | "skip-left"
   | "skip-right"
+  | "sparkles"
   | "speaker-wave"
   | "speaker-x-mark"
   | "trash"

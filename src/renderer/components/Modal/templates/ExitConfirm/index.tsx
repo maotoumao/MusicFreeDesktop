@@ -6,7 +6,7 @@ interface IProps {}
 export default function ExitConfirm() {
   return (
     <Base withBlur>
-      <div className="exit-confirm-container">
+      <div className="modal--exit-confirm-container">
         确认退出?
       </div>
     </Base>
