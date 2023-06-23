@@ -1,12 +1,18 @@
 import MusicList from "@/renderer/components/MusicList";
 import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { useEffect, useState, useTransition } from "react";
+import {
+  MutableRefObject,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import trackPlayer from "@/renderer/core/track-player";
 import { showModal } from "@/renderer/components/Modal";
-import { RequestStateCode } from "@/common/constant";
+import { RequestStateCode, rem } from "@/common/constant";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;
@@ -16,6 +22,7 @@ interface IProps {
 }
 export default function Body(props: IProps) {
   const { musicList = [], musicSheet, state, onLoadMore } = props;
+
 
   const [inputSearch, setInputSearch] = useState("");
   const [filterMusicList, setFilterMusicList] = useState<
@@ -41,7 +48,10 @@ export default function Body(props: IProps) {
   }, [inputSearch]);
 
   return (
-    <div className="music-sheetlike-view--body-container">
+    <div
+      className="music-sheetlike-view--body-container"
+
+    >
       <div className="operations">
         <div className="buttons">
           <div
@@ -85,7 +95,10 @@ export default function Body(props: IProps) {
         </div>
       </div>
       <Condition
-        condition={(!isPending || filterMusicList === null) && state !== RequestStateCode.PENDING_FIRST_PAGE}
+        condition={
+          (!isPending || filterMusicList === null) &&
+          state !== RequestStateCode.PENDING_FIRST_PAGE
+        }
         falsy={<Loading></Loading>}
       >
         <MusicList
@@ -93,6 +106,12 @@ export default function Body(props: IProps) {
           musicSheet={musicSheet}
           state={state}
           onPageChange={onLoadMore}
+          virtualProps={{
+            getScrollElement() {
+              return document.querySelector("#page-container");
+            },
+            offsetHeight: 184 + 4 * rem
+          }}
         ></MusicList>
       </Condition>
     </div>

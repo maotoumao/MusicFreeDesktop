@@ -19,6 +19,7 @@ import { showContextMenu } from "../ContextMenu";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import { memo, useRef } from "react";
 import { showModal } from "../Modal";
+import useVirtualList from "@/renderer/hooks/useVirtualList";
 
 interface IMusicListProps {
   musicList: IMusic.IMusicItem[];
@@ -30,6 +31,11 @@ interface IMusicListProps {
   state?: RequestStateCode;
   isEnd?: boolean;
   onPageChange?: (page?: number) => void;
+  /** 虚拟滚动参数 */
+  virtualProps?: {
+    offsetHeight?: number; // 距离顶部的高度
+    getScrollElement?: () => HTMLElement; // 滚动
+  };
 }
 
 const columnHelper = createColumnHelper<IMusic.IMusicItem>();
@@ -77,6 +83,8 @@ const columnDef = [
     cell: (info) => <Tag fill>{info.getValue()}</Tag>,
   }),
 ];
+
+const estimizeItemHeight = 2.6 * 13;
 
 function showMusicContextMenu(
   musicItem: IMusic.IMusicItem,
@@ -138,6 +146,7 @@ function _MusicList(props: IMusicListProps) {
     state = RequestStateCode.FINISHED,
     onPageChange,
     musicSheet,
+    virtualProps,
   } = props;
 
   const table = useReactTable({
@@ -148,10 +157,21 @@ function _MusicList(props: IMusicListProps) {
   });
 
   const tableContainerRef = useRef<HTMLDivElement>();
+  const virtualController = useVirtualList({
+    data: table.getRowModel().rows,
+    getScrollElement: virtualProps?.getScrollElement,
+    offsetHeight: virtualProps?.offsetHeight,
+    estimizeItemHeight,
+  });
+
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>
-      <table>
+      <table
+        style={{
+          height: virtualController.totalHeight + estimizeItemHeight,
+        }}
+      >
         <thead>
           <tr>
             {table.getHeaderGroups()[0].headers.map((header) => (
@@ -169,8 +189,11 @@ function _MusicList(props: IMusicListProps) {
             ))}
           </tr>
         </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => {
+        <tbody style={{
+          transform: `translateY(${virtualController.startTop}px)`
+        }}>
+          {virtualController.virtualItems.map((virtualItem) => {
+            const row = virtualItem.dataItem;
             return (
               <tr
                 key={row.id}
@@ -202,6 +225,13 @@ function _MusicList(props: IMusicListProps) {
             );
           })}
         </tbody>
+        <tfoot
+          style={{
+            height:
+              virtualController.totalHeight -
+              virtualController.virtualItems.length * estimizeItemHeight,
+          }}
+        ></tfoot>
       </table>
       <Condition
         condition={musicList.length === 0}

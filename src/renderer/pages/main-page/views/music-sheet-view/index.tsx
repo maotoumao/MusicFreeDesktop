@@ -28,10 +28,10 @@ export default function MusicSheetView() {
   // console.log(musicSheet, "musicsheet");
 
   return (
-    <div className="music-sheet-view-container">
+    <>
       <Condition condition={platform === localPluginName}>
         <LocalSheet></LocalSheet>
       </Condition>
-    </div>
+    </>
   );
 }

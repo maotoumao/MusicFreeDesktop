@@ -1,6 +1,6 @@
 import Evt from "@renderer/core/events";
 import "./index.scss";
-import { memo, useState } from "react";
+import { CSSProperties, memo, useEffect, useRef, useState } from "react";
 import trackPlayer from "@/renderer/core/track-player";
 import Condition from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
@@ -8,13 +8,17 @@ import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
 import Tag from "@/renderer/components/Tag";
 import SvgAsset from "@/renderer/components/SvgAsset";
+import useVirtualList from "@/renderer/hooks/useVirtualList";
+import { rem } from "@/common/constant";
 
 const baseId = "music-bar--play-list";
+const estimizeItemHeight = 2.6 * rem;
 
 export default function PlayList() {
   const [show, setShow] = useState(false);
   const musicQueue = trackPlayer.useMusicQueue();
   const currentMusic = trackPlayer.useCurrentMusic();
+  const scrollElementRef = useRef<HTMLDivElement>();
 
   Evt.use("SWITCH_PLAY_LIST", (payload) => {
     if (!payload) {
@@ -23,6 +27,21 @@ export default function PlayList() {
       setShow((_) => payload.show);
     }
   });
+
+  const virtualController = useVirtualList({
+    estimizeItemHeight,
+    data: musicQueue,
+    getScrollElement() {
+      return scrollElementRef.current;
+    },
+    fallbackRenderCount: 0,
+  });
+
+  useEffect(() => {
+    if (show) {
+      virtualController.setScrollElement(scrollElementRef.current);
+    }
+  }, [show]);
 
   return show ? (
     <div
@@ -47,19 +66,37 @@ export default function PlayList() {
           </div>
         </div>
         <div className="divider"></div>
-        <div className="playlist--music-list-container">
+        <div className="playlist--music-list-container" ref={scrollElementRef}>
           <Condition
             condition={musicQueue.length !== 0}
             falsy={<Empty></Empty>}
           >
-            {/* TODO: 长列表此处布局会有明显卡顿，需要懒加载 */}
-            {musicQueue.map((item) => (
-              <PlayListMusicItem
-                key={getMediaPrimaryKey(item)}
-                isPlaying={isSameMedia(currentMusic, item)}
-                musicItem={item}
-              ></PlayListMusicItem>
-            ))}
+            <div
+              className="playlist--music-list-scroll"
+              style={{
+                height: virtualController.totalHeight,
+              }}
+            >
+              {virtualController.virtualItems.map((virtualItem) => {
+                const item = virtualItem.dataItem;
+                return (
+                  <div
+                    key={virtualItem.rowIndex}
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      top: virtualItem.top,
+                    }}
+                  >
+                    <PlayListMusicItem
+                      key={getMediaPrimaryKey(item)}
+                      isPlaying={isSameMedia(currentMusic, item)}
+                      musicItem={item}
+                    ></PlayListMusicItem>
+                  </div>
+                );
+              })}
+            </div>
           </Condition>
         </div>
       </div>
@@ -73,6 +110,7 @@ interface IPlayListMusicItemProps {
 }
 function _PlayListMusicItem(props: IPlayListMusicItemProps) {
   const { isPlaying, musicItem } = props;
+  console.log("RERENDER", musicItem);
 
   return (
     <div
@@ -85,8 +123,12 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
       }}
     >
       <MusicFavorite musicItem={musicItem} size={16}></MusicFavorite>
-      <div className="playlist--title" title={musicItem.title}>{musicItem.title}</div>
-      <div className="playlist--artist" title={musicItem.artist}>{musicItem.artist ?? "-"}</div>
+      <div className="playlist--title" title={musicItem.title}>
+        {musicItem.title}
+      </div>
+      <div className="playlist--artist" title={musicItem.artist}>
+        {musicItem.artist ?? "-"}
+      </div>
       <div className="playlist--platform">
         <Tag>{musicItem.platform}</Tag>
       </div>

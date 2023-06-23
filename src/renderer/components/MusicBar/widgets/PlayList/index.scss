@@ -40,6 +40,11 @@
       overflow-x: hidden;
     }
 
+    & .playlist--music-list-scroll {
+      position: relative;
+      width: 100%;
+    }
+
     & .divider {
       margin-bottom: 0;
     }

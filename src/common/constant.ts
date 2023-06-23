@@ -14,6 +14,8 @@ export const localPluginHash = "本地";
 
 export const supportedMediaType = ['music', 'album', 'artist'] as const;
 
+export const rem = 13;
+
 export enum RequestStateCode {
     /** 空闲 */
     IDLE = 0b00000000,
