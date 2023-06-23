@@ -86,7 +86,7 @@ const columnDef = [
 
 const estimizeItemHeight = 2.6 * 13;
 
-function showMusicContextMenu(
+export function showMusicContextMenu(
   musicItem: IMusic.IMusicItem,
   x: number,
   y: number,

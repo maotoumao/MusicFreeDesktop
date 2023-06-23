@@ -3,6 +3,7 @@ declare namespace IMedia {
         music: IMusic.IMusicItem;
         album: IAlbum.IAlbumItem;
         artist: IArtist.IArtistItem;
+        sheet: IMusic.IMusicSheetItem
     };
 
     export type SupportMediaType = keyof SupportMediaItem;

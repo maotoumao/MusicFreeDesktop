@@ -12,7 +12,7 @@ export const localFilePathSymbol = Symbol.for('local-file-path');
 export const localPluginName = '本地';
 export const localPluginHash = "本地";
 
-export const supportedMediaType = ['music', 'album', 'artist'] as const;
+export const supportedMediaType = ['music', 'album', 'artist', 'sheet'] as const;
 
 export const rem = 13;
 

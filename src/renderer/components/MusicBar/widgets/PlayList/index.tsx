@@ -10,6 +10,7 @@ import Tag from "@/renderer/components/Tag";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import { rem } from "@/common/constant";
+import { showMusicContextMenu } from "@/renderer/components/MusicList";
 
 const baseId = "music-bar--play-list";
 const estimizeItemHeight = 2.6 * rem;
@@ -120,6 +121,9 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
       }}
       onDoubleClick={() => {
         trackPlayer.playMusic(musicItem);
+      }}
+      onContextMenu={(e) => {
+        showMusicContextMenu(musicItem, e.clientX, e.clientY);
       }}
     >
       <MusicFavorite musicItem={musicItem} size={16}></MusicFavorite>

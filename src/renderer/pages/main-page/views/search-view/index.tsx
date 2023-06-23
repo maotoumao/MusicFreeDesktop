@@ -9,7 +9,6 @@ import NoPlugin from "@/renderer/components/NoPlugin";
 import { Tab } from "@headlessui/react";
 import { supportedMediaType } from "@/common/constant";
 import { useTranslation } from "react-i18next";
-import MusicList from "@/renderer/components/MusicList";
 import SearchResult from "./components/SearchResult";
 import useSearch from "./hooks/useSearch";
 import { currentMediaTypeStore, resetStore } from "./store/search-result";

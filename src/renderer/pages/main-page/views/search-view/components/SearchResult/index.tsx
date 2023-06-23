@@ -10,6 +10,7 @@ import Loading from "@/renderer/components/Loading";
 import useSearch from "../../hooks/useSearch";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import { useNavigate } from "react-router-dom";
+import SheetResult from "./SheetResult";
 
 interface ISearchResultProps {
   type: IMedia.SupportMediaType;
@@ -117,6 +118,13 @@ function _SearchResultBody(props: ISearchResultBodyProps) {
               state={currentResult?.state ?? RequestStateCode.IDLE}
               pluginHash={pluginHash}
             ></ArtistResult>
+          </SwitchCase.Case>
+          <SwitchCase.Case case="sheet">
+            <SheetResult
+              data={data}
+              state={currentResult?.state ?? RequestStateCode.IDLE}
+              pluginHash={pluginHash}
+            ></SheetResult>
           </SwitchCase.Case>
         </SwitchCase.Switch>
       </Condition>
