@@ -131,7 +131,11 @@ export async function removeSheet(sheetId: string) {
     await musicSheetDB.transaction(
       "readwrite",
       musicSheetDB.sheets,
+      musicSheetDB.musicStore,
       async () => {
+        const targetSheet = musicSheetsStore.getValue().find(item => item.id === sheetId);
+        console.log(targetSheet);
+        await removeMusicFromSheet(targetSheet.musicList ?? [] as any, sheetId);
         musicSheetDB.sheets.delete(sheetId);
       }
     );
@@ -286,6 +290,9 @@ export async function removeMusicFromSheet(
         const needDelete: any[] = [];
         const needUpdate: any[] = [];
         toBeRemovedMusicDetail.forEach((musicItem) => {
+          if(!musicItem) {
+            return;
+          }
           musicItem[musicRefSymbol]--;
           if (musicItem[musicRefSymbol] === 0) {
             needDelete.push([musicItem.platform, musicItem.id]);
@@ -327,8 +334,9 @@ export async function removeMusicFromSheet(
       refreshFavoriteState();
     }
     refreshSheetState(sheetId);
-  } catch {
-    console.log("error");
+  } catch (e){
+    console.log(e);
+    throw e;
   }
 }
 

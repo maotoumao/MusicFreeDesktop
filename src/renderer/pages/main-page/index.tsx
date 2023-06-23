@@ -11,6 +11,7 @@ import ArtistView from "./views/artist-view";
 import ToplistView from "./views/toplist-view";
 import TopListDetailView from "./views/toplist-detail-view";
 import RecommendSheetsView from "./views/recommend-sheets-view";
+import SettingView from "./views/setting-view";
 
 export default function MainPage() {
   return (
@@ -18,7 +19,7 @@ export default function MainPage() {
       <SideBar></SideBar>
       <div className="pages-container" id="page-container">
         <Routes>
-        <Route
+          <Route
             path="search/:query"
             element={<SearchView></SearchView>}
           ></Route>
@@ -30,7 +31,7 @@ export default function MainPage() {
             path="musicsheet/:platform/:id"
             element={<MusicSheetView></MusicSheetView>}
           ></Route>
-           <Route
+          <Route
             path="album/:platform/:id"
             element={<AlbumView></AlbumView>}
           ></Route>
@@ -38,19 +39,16 @@ export default function MainPage() {
             path="artist/:platform/:id"
             element={<ArtistView></ArtistView>}
           ></Route>
-          <Route
-            path="toplist"
-            element={<ToplistView></ToplistView>}
-          ></Route>
+          <Route path="toplist" element={<ToplistView></ToplistView>}></Route>
           <Route
             path="toplist-detail/:platform"
             element={<TopListDetailView></TopListDetailView>}
           ></Route>
-           <Route
+          <Route
             path="recommend-sheets"
             element={<RecommendSheetsView></RecommendSheetsView>}
           ></Route>
-
+          <Route path="setting" element={<SettingView></SettingView>}></Route>
           <Route
             path="*"
             element={
@@ -70,29 +68,26 @@ export default function MainPage() {
                     artist: "小猫咪",
                     // createAt: Date.now(),
                     playCount: 99999,
-
-
                   }}
                 ></MusicSheetlikeItem>
-                     <MusicSheetlikeItem
+                <MusicSheetlikeItem
                   mediaItem={{
                     title: "专辑啊",
                     platform: "猫头",
                     id: "sd",
                     artist: "小猫咪",
                     createAt: Date.now(),
-
-
                   }}
                 ></MusicSheetlikeItem>
-                 <MusicSheetlikeItem
+                <MusicSheetlikeItem
                   mediaItem={{
                     title: "专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊",
                     platform: "猫头",
                     id: "sd",
-                    artist: "小猫咪专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊",
+                    artist:
+                      "小猫咪专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊",
                     playCount: 1236,
-                    createAt: Date.now()
+                    createAt: Date.now(),
                   }}
                 ></MusicSheetlikeItem>
               </div>

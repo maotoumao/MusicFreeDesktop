@@ -98,7 +98,7 @@ function VolumeBtn() {
               vertical
               min={0}
               max={1}
-              step={0.05}
+              step={0.01}
               onChange={(val) => {
                 trackPlayer.setVolume(val as number);
               }}

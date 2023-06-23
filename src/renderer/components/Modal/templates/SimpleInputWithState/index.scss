@@ -22,6 +22,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.1rem;
   }
 
   & .hint-area {
@@ -32,10 +33,10 @@
     overflow-y: auto;
 
     & li {
-        line-height: 2rem;
-        white-space: normal;
-        word-wrap: break-word;
-        word-break: break-all;
+      line-height: 2rem;
+      white-space: normal;
+      word-wrap: break-word;
+      word-break: break-all;
     }
   }
 }

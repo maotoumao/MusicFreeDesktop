@@ -2,13 +2,19 @@ import "./index.scss";
 import ListItem from "../ListItem";
 import { useMatch, useNavigate, useParams } from "react-router-dom";
 import { Disclosure } from "@headlessui/react";
-import { defaultSheet, musicSheetsStore } from "@/renderer/core/music-sheet";
+import MusicSheet, {
+  defaultSheet,
+  musicSheetsStore,
+} from "@/renderer/core/music-sheet";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { showModal } from "@/renderer/components/Modal";
 import { localPluginName } from "@/common/constant";
+import { showContextMenu } from "@/renderer/components/ContextMenu";
 
 export default function MySheets() {
-  const sheetIdMatch = useMatch(`/main/musicsheet/${encodeURIComponent(localPluginName)}/:sheetId`);
+  const sheetIdMatch = useMatch(
+    `/main/musicsheet/${encodeURIComponent(localPluginName)}/:sheetId`
+  );
   const currentSheetId = sheetIdMatch?.params?.sheetId;
 
   const musicSheets = musicSheetsStore.useValue();
@@ -20,10 +26,15 @@ export default function MySheets() {
       <Disclosure defaultOpen>
         <Disclosure.Button className="title" as="div" role="button">
           <div className="my-sheets">我的歌单</div>
-          <div role="button" className="add-new-sheet" title="新建歌单" onClick={(e) => {
-            e.stopPropagation();
-            showModal('AddNewSheet')
-          }}>
+          <div
+            role="button"
+            className="add-new-sheet"
+            title="新建歌单"
+            onClick={(e) => {
+              e.stopPropagation();
+              showModal("AddNewSheet");
+            }}
+          >
             <SvgAsset iconName="plus-circle"></SvgAsset>
           </div>
         </Disclosure.Button>
@@ -37,6 +48,31 @@ export default function MySheets() {
               onClick={() => {
                 currentSheetId !== item.id &&
                   navigate(`/main/musicsheet/${localPluginName}/${item.id}`);
+              }}
+              onContextMenu={(e) => {
+                showContextMenu({
+                  x: e.clientX,
+                  y: e.clientY,
+                  menuItems: [
+                    {
+                      title: "删除歌单",
+                      icon: "trash",
+                      show: item.id !== defaultSheet.id,
+                      onClick() {
+                        MusicSheet.removeSheet(item.id).then(() => {
+                          if (currentSheetId === item.id) {
+                            navigate(
+                              `/main/musicsheet/${localPluginName}/${defaultSheet.id}`,
+                              {
+                                replace: true,
+                              }
+                            );
+                          }
+                        });
+                      },
+                    },
+                  ],
+                });
               }}
               selected={currentSheetId === item.id}
               title={item.title}

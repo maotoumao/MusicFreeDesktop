@@ -9,6 +9,11 @@ declare namespace IUserPerference {
         volume: number;
         /** 倍速 */
         speed: number
+        /** 订阅 */
+        subscription: {
+            title?: string;
+            srcUrl: string;
+        }
     }
 
     interface IDBType {

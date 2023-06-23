@@ -46,7 +46,9 @@ export default function AppHeader() {
           <SvgAsset iconName="sparkles"></SvgAsset>
         </div>
         <div className="header-divider"></div>
-        <div role="button" className="header-button" title="设置">
+        <div role="button" className="header-button" title="设置" onClick={() => {
+          navigate('/main/setting')
+        }}>
           <SvgAsset iconName="cog-8-tooth"></SvgAsset>
         </div>
         <div

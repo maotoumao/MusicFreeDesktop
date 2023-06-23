@@ -4,15 +4,17 @@ import "./index.scss";
 interface IProps {
   selected?: boolean;
   onClick?: () => void;
+  onContextMenu?: (...args: any) => void;
   iconName?: SvgAssetIconNames;
   title?: string;
 }
 
 export default function ListItem(props: IProps) {
-  const { selected, onClick, iconName, title } = props ?? {};
+  const { selected, onClick, iconName, title, onContextMenu } = props ?? {};
   return (
     <div
       onClick={onClick}
+      onContextMenu={onContextMenu}
       role="button"
       className="side-bar--list-item-container"
       data-selected={selected}

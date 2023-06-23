@@ -69,14 +69,14 @@ div[role="button"] {
 
   &[data-type="primaryButton"] {
     background-color: var(--primaryColor);
-    font-size: 1.2em;
+    font-size: 1em;
     padding: 0.4em 1em;
     border-radius: 1.6em;
     color: white;
     width: fit-content;
   }
   &[data-type="normalButton"] {
-    font-size: 1.2em;
+    font-size: 1em;
     padding: 0.4em 1em;
     border-radius: 1.6em;
     color: var(--textColor);
@@ -85,7 +85,7 @@ div[role="button"] {
   }
 
   &[data-type="dangerButton"] {
-    font-size: 1.2em;
+    font-size: 1em;
     padding: 0.4em 1em;
     border-radius: 1.6em;
     color: #fc5f5f;
