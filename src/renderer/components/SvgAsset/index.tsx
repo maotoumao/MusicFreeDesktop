@@ -10,7 +10,8 @@ export type SvgAssetIconNames =
   | "chevron-right"
   | "code-bracket-square"
   | "cog-8-tooth"
-  | 'document-plus'
+  | "dashboard-speed"
+  | "document-plus"
   | "fire"
   | "headphone"
   | "heart-outline"
@@ -31,7 +32,9 @@ export type SvgAssetIconNames =
   | "shuffle"
   | "skip-left"
   | "skip-right"
-  | 'trash'
+  | "speaker-wave"
+  | "speaker-x-mark"
+  | "trash"
   | "trophy"
   | "user"
   | "x-mark";
@@ -39,6 +42,7 @@ export type SvgAssetIconNames =
 interface IProps {
   iconName: SvgAssetIconNames;
   size?: number;
+  title?: string;
 }
 /**
  *
@@ -50,6 +54,7 @@ function SvgAsset(props: IProps) {
 
   return (
     <Svg.default
+      title={props.title}
       style={{
         width: props.size,
         height: props.size,

@@ -15,7 +15,7 @@
     height: 540px;
     border-top-left-radius: 8px;
     background-color: var(--backgroundColor);
-    box-shadow: rgba($color: #000000, $alpha: 0.2) -2px -2px 8px;
+    box-shadow: var(--shadowColor) -2px -2px 8px;
     display: flex;
     flex-direction: column;
     padding-top: 14px;

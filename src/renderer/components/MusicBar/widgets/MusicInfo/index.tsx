@@ -10,6 +10,7 @@ import Tag from "@/renderer/components/Tag";
 import { secondsToDuration } from "@/common/time-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
 import { musicDetailShownStore } from "@/renderer/components/MusicDetail";
+import albumImg from '@/assets/imgs/album-cover.jpg';
 
 export default function MusicInfo() {
   const musicItem = useCurrentMusic();
@@ -23,7 +24,7 @@ export default function MusicInfo() {
             role="button"
             className="music-cover"
             crossOrigin="anonymous"
-            src={musicItem.artwork}
+            src={musicItem.artwork ?? albumImg}
             onError={setFallbackAlbum}
           ></img>
 

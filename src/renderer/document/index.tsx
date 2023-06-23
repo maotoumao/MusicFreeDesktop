@@ -8,7 +8,7 @@ import MainPage from "../pages/main-page";
 
 import "@/common/i18n";
 
-
+import 'rc-slider/assets/index.css';
 import "./index.css"; // 全局样式
 import "./index.scss";
 import { ContextMenuComponent } from "../components/ContextMenu";

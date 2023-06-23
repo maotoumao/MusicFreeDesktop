@@ -94,3 +94,5 @@ out/
 tmp
 
 plugins
+
+.VSCodeCounter

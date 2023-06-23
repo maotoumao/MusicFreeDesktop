@@ -12,6 +12,40 @@
     cursor: pointer;
     color: var(--textColor);
     margin-left: 10px;
+    height: 32px;
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    & .volume-bubble-container {
+      position: absolute;
+      z-index: 10;
+      width: 3rem;
+      height: 9rem;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 2px 2px 10px var(--shadowColor);
+      background-color: var(--backgroundColor);
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      & .volume-slider-container {
+        height: 6rem;
+
+        & .rc-slider-handle-dragging {
+          box-shadow: 0 0 5px 5px var(--primaryColor);
+        }
+      }
+
+      & .volume-slider-tag {
+        font-size: 0.9rem;
+        margin-top: 6px;
+      }
+    }
 
     & svg {
       width: 24px;

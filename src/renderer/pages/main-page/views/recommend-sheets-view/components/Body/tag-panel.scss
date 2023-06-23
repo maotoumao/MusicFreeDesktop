@@ -9,7 +9,7 @@
   top: calc(1rem + 25px);
   left: 0;
   background-color: var(--backgroundColor);
-  box-shadow: rgba($color: #000000, $alpha: 0.2) 2px 2px 8px;
+  box-shadow: var(--shadowColor) 2px 2px 8px;
   transition: transform 100ms ease-out;
   transform-origin: center top;
 

@@ -10,6 +10,7 @@ import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import Lyric from "./widgets/Lyric";
 import SvgAsset from "../SvgAsset";
 
+
 export const musicDetailShownStore = new Store(false);
 
 export default function () {
@@ -58,7 +59,7 @@ export default function () {
         <img
           className="music-album"
           onError={setFallbackAlbum}
-          src={musicItem?.artwork}
+          src={musicItem?.artwork ?? albumImg}
         ></img>
         <Lyric></Lyric>
       </div>
