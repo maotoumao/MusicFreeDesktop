@@ -18,7 +18,9 @@ const favoriteMusicListIds = new Set<string>();
 /** 初始化 */
 export async function setupSheets() {
   try {
-    const allSheets = await musicSheetDB.sheets.orderBy('$$sortIndex').toArray();
+    const allSheets = await musicSheetDB.sheets
+      .orderBy("$$sortIndex")
+      .toArray();
     const dbDefaultSheet = allSheets.find(
       (item) => item.id === defaultSheet.id
     );
@@ -43,7 +45,7 @@ export async function setupSheets() {
 }
 
 function forceUpdateMusicSheets() {
-  musicSheetsStore.setValue(prev => [...prev]);
+  musicSheetsStore.setValue((prev) => [...prev]);
 }
 /** 新建歌单 */
 export async function addSheet(sheetName: string) {
@@ -55,7 +57,7 @@ export async function addSheet(sheetName: string) {
     createAt: Date.now(),
     platform: localPluginName,
     musicList: [],
-    $$sortIndex: allSheets[allSheets.length - 1].$$sortIndex + 1
+    $$sortIndex: allSheets[allSheets.length - 1].$$sortIndex + 1,
   };
   try {
     await musicSheetDB.transaction(
@@ -387,10 +389,25 @@ export function useMusicSheet(sheetId: string) {
     const updateSheet = () => {
       getSheetDetail(sheetId).then(setMusicSheet);
     };
-    updateSheet();
     const cbs = updateSheetCbs.get(sheetId) ?? new Set();
     cbs.add(updateSheet);
     updateSheetCbs.set(sheetId, cbs);
+
+    const targetSheet = musicSheetsStore
+      .getValue()
+      .find((item) => item.id === sheetId);
+
+    if (targetSheet) {
+      setMusicSheet({
+        ...targetSheet,
+        musicList: [],
+      });
+    }
+
+    // TODO 长列表会有短暂卡顿
+    setTimeout(() => {
+      updateSheet();
+    }, 0);
     return () => {
       cbs?.delete(updateSheet);
     };

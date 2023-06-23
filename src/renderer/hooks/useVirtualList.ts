@@ -51,35 +51,44 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
 
   const scrollElementRef = useRef<HTMLElement>();
 
-  const scrollHandler = useCallback(throttle(() => {
-    const scrollTop = (scrollElementRef.current?.scrollTop ?? 0) - offsetHeight;
-    const realData = dataRef.current;
-    const startIndex = Math.max(
-      Math.floor(scrollTop / estimizeItemHeight) - 2,
-      0
-    );
+  const scrollHandler = useCallback(
+    throttle(
+      () => {
+        const scrollTop =
+          (scrollElementRef.current?.scrollTop ?? 0) - offsetHeight;
+        const realData = dataRef.current;
+        const estimizeStartIndex = Math.floor(scrollTop / estimizeItemHeight);
+        const startIndex = Math.max(
+          estimizeStartIndex - (estimizeStartIndex % 2 === 1 ? 3 : 2),
+          0
+        );
 
-    setVirtualItems(
-      realData
-        .slice(
-          startIndex,
-          startIndex +
-            (scrollElementRef.current
-              ? renderCount
-              : fallbackRenderCount < 0
-              ? realData.length
-              : fallbackRenderCount)
-        )
-        .map((item, index) => ({
-          rowIndex: startIndex + index,
-          dataItem: item,
-          top: (startIndex + index) * estimizeItemHeight,
-        }))
-    );
-  }, 32, {
-    trailing: true,
-    leading: true
-  }), []);
+        setVirtualItems(
+          realData
+            .slice(
+              startIndex,
+              startIndex +
+                (scrollElementRef.current
+                  ? renderCount
+                  : fallbackRenderCount < 0
+                  ? realData.length
+                  : fallbackRenderCount)
+            )
+            .map((item, index) => ({
+              rowIndex: startIndex + index,
+              dataItem: item,
+              top: (startIndex + index) * estimizeItemHeight,
+            }))
+        );
+      },
+      32,
+      {
+        trailing: true,
+        leading: true,
+      }
+    ),
+    []
+  );
 
   useEffect(() => {
     setTotalHeight(data.length * estimizeItemHeight);
