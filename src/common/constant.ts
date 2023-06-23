@@ -37,3 +37,18 @@ export const qualityKeys: IMusic.IQualityKey[] = [
     'high',
     'super',
 ];
+
+export const supportLocalMediaType = [
+    '.mp3',
+    '.mp4',
+    '.m4s',
+    '.flac',
+    '.wma',
+    '.wav',
+    '.m4a',
+    '.ogg',
+    '.acc',
+    '.aac',
+    '.ape',
+    '.opus',
+];

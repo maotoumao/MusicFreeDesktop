@@ -4,6 +4,8 @@ import path from "path";
 import { Plugin } from "./plugin";
 import { ipcMainHandle, ipcMainOn, ipcMainSend } from "@/common/ipc-util/main";
 import { getMainWindow } from "@/main/window";
+import { localPluginHash, localPluginName } from "@/common/constant";
+import localPlugin from "./local-plugin";
 
 const pluginBasePath = path.resolve(app.getAppPath(), "./plugins");
 
@@ -69,7 +71,9 @@ function callPluginMethod({
   args,
 }: ICallPluginMethodParams<keyof IPlugin.IPluginInstanceMethods>) {
   let plugin: Plugin;
-  if (hash) {
+  if (hash === localPluginHash || platform === localPluginName) {
+    plugin = localPlugin;
+  } else if (hash) {
     plugin = plugins.find((item) => item.hash === hash);
   } else if (platform) {
     plugin = plugins.find((item) => item.name === platform);

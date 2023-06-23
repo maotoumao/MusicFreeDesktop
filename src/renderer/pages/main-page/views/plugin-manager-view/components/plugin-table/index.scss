@@ -2,4 +2,15 @@
   width: calc(100% - 1rem);
   flex: 1;
 
+
+  & .action-button {
+    cursor: pointer;
+    margin-right: 0.8rem;
+   
+    &:hover {
+      font-weight: 500;
+      color: var(--primaryColor) !important;
+      border-bottom: 1px solid currentColor;
+    }
+  }
 }

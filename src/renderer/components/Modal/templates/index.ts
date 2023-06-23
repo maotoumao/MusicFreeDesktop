@@ -2,6 +2,7 @@ import AddMusicToSheet from "./AddMusicToSheet";
 import AddNewSheet from "./AddNewSheet";
 import Base from "./Base";
 import ExitConfirm from "./ExitConfirm";
+import SimpleInputWithState from "./SimpleInputWithState";
 import Sparkles from "./Sparkles";
 
 export default {
@@ -9,5 +10,6 @@ export default {
     ExitConfirm,
     AddNewSheet,
     AddMusicToSheet,
-    Sparkles
+    Sparkles,
+    SimpleInputWithState
 }

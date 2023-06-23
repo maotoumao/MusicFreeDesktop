@@ -17,7 +17,14 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
   return (
     <Base withBlur={false}>
       <div className="modal--add-music-to-sheet-container">
-        <Base.Header>添加到歌单</Base.Header>
+        <Base.Header>
+          <span>
+            添加到歌单{" "}
+            <span className="music-length">
+              (共{Array.isArray(musicItems) ? musicItems.length : 1}首)
+            </span>
+          </span>
+        </Base.Header>
         <div className="music-sheets">
           <div
             className="sheet-item"

@@ -8,12 +8,19 @@
   flex-direction: column;
   padding-bottom: 12px;
 
+  & .components--modal-base-header {
+    & .music-length {
+      font-size: 1rem;
+      font-weight: normal;
+    }
+  }
+
   & .music-sheets {
     flex: 1;
     overflow-y: auto;
 
     & .sheet-item {
-        box-sizing: border-box;
+      box-sizing: border-box;
       height: 64px;
       width: 100%;
       padding-left: 1rem;

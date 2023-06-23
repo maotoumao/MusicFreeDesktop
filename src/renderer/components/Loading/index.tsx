@@ -1,6 +1,9 @@
 import "./index.scss";
 
-export default function Loading() {
+interface ILoadingProps {
+  text?: string
+}
+export default function Loading(props: ILoadingProps) {
   return (
     <div className="loading-container">
       <div className="spinner-container">
@@ -8,7 +11,7 @@ export default function Loading() {
         <div></div>
         <div></div>
       </div>
-      <span>加载中</span>
+      <span>{props.text ?? '加载中'}</span>
     </div>
   );
 }
