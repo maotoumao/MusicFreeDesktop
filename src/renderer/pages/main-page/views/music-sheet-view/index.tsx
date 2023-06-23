@@ -3,6 +3,7 @@ import "./index.scss";
 import Condition from "@/renderer/components/Condition";
 import { localPluginName } from "@/common/constant";
 import LocalSheet from "./local-sheet";
+import RemoteSheet from "./remote-sheet";
 
 /**
  * path: /main/musicsheet/platform/id
@@ -15,21 +16,12 @@ import LocalSheet from "./local-sheet";
 export default function MusicSheetView() {
   const { platform } = useParams() ?? {};
 
-  // console.log(musicSheet, 'ms');
-
-  // useEffect(() => {
-  //   const sheetInState = history.state.usr?.musicSheet ?? {};
-  //   musicSheetStore.setValue({
-  //     ...sheetInState,
-  //     platform: params?.platform,
-  //     id: params?.id,
-  //   } as IMusic.IMusicSheetItem);
-  // }, [params]);
-  // console.log(musicSheet, "musicsheet");
-
   return (
     <>
-      <Condition condition={platform === localPluginName}>
+      <Condition
+        condition={platform === localPluginName}
+        falsy={<RemoteSheet></RemoteSheet>}
+      >
         <LocalSheet></LocalSheet>
       </Condition>
     </>

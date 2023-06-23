@@ -1,0 +1,50 @@
+.tag-panel--container {
+  position: absolute;
+  z-index: 20;
+  width: 560px;
+  max-height: 360px;
+  padding: 14px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  top: calc(1rem + 25px);
+  left: 0;
+  background-color: var(--backgroundColor);
+  box-shadow: rgba($color: #000000, $alpha: 0.2) 2px 2px 8px;
+  transition: transform 100ms ease-out;
+  transform-origin: center top;
+
+  &[data-show="false"] {
+    transform: scaleY(0);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  &[data-show="true"] {
+    transform: scaleY(1);
+    pointer-events: all;
+  }
+
+
+  & .tag-group--tag {
+    font-size: 1rem !important;
+    color: #666;
+    white-space: nowrap;
+    
+    cursor: pointer;
+  }
+
+  & .tag-group--container {
+    margin-bottom: 16px;
+    
+    & .tag-group--title {
+        margin-bottom: 12px;
+        opacity: 0.8;
+    }
+
+    & .tag-group--tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+    }
+  }
+}

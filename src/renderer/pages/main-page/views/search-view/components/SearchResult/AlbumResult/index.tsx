@@ -18,7 +18,6 @@ function AlbumResult(props: IMediaResultProps) {
 
   const search = useSearch();
   const navigate = useNavigate();
-  console.log(data);
 
   return (
     <MusicSheetlikeList

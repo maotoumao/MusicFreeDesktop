@@ -3,7 +3,7 @@ import { useMusicSheet } from "@/renderer/core/music-sheet/internal/sheets-metho
 import MusicSheetlikeView from "@/renderer/components/MusicSheetlikeView";
 
 export default function LocalSheet() {
-  const { platform, id } = useParams() ?? {};
+  const { id } = useParams() ?? {};
   const musicSheet = useMusicSheet(id);
 
   return (

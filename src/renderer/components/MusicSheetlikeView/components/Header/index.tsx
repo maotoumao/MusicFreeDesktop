@@ -26,7 +26,9 @@ export default function Header(props: IProps) {
       ></img>
       <div className="sheet-info">
         <div className="title-container">
-          <Tag>{musicSheet?.platform}</Tag>
+          <Condition condition={musicSheet?.platform}>
+            <Tag>{musicSheet?.platform}</Tag>
+          </Condition>
           <div className="title">{musicSheet?.title ?? "未命名"}</div>
         </div>
         <Condition condition={musicSheet?.createAt || musicSheet?.artist}>
@@ -55,7 +57,7 @@ export default function Header(props: IProps) {
             title={musicSheet?.description}
             onClick={(e) => {
               const dataset = e.currentTarget.dataset;
-           
+
               dataset.fold = dataset.fold === "true" ? "false" : "true";
               requestAnimationFrame(() => {
                 requestAnimationFrame(() => {

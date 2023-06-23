@@ -14,12 +14,16 @@ export default function MusicFavorite(props: IMusicFavoriteProps) {
   return (
     <div
       role="button"
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation();
         if (isFav) {
           MusicSheet.removeMusicFromFavorite(musicItem);
         } else {
           MusicSheet.addMusicToFavorite(musicItem);
         }
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
       }}
       style={{
         color: isFav ? "red" : "var(--textColor)",

@@ -41,7 +41,7 @@ body {
 }
 
 .highlight {
-  color: var(--primaryColor);
+  color: var(--primaryColor) !important;
 }
 
 input {
@@ -80,7 +80,7 @@ div[role="button"] {
     padding: 0.4em 1em;
     border-radius: 1.6em;
     color: var(--textColor);
-    border: 1px solid var(--textColor);
+    border: 1px solid currentColor;
     width: fit-content;
   }
 }

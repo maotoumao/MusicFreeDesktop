@@ -10,6 +10,7 @@ import AlbumView from "./views/album-view";
 import ArtistView from "./views/artist-view";
 import ToplistView from "./views/toplist-view";
 import TopListDetailView from "./views/toplist-detail-view";
+import RecommendSheetsView from "./views/recommend-sheets-view";
 
 export default function MainPage() {
   return (
@@ -44,6 +45,10 @@ export default function MainPage() {
           <Route
             path="toplist-detail/:platform"
             element={<TopListDetailView></TopListDetailView>}
+          ></Route>
+           <Route
+            path="recommend-sheets"
+            element={<RecommendSheetsView></RecommendSheetsView>}
           ></Route>
 
           <Route

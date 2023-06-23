@@ -1,0 +1,50 @@
+.recommend-sheet-view--body-container {
+  & .tags-container {
+    margin-top: 16px;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    align-items: center;
+    $tag-size: 4px;
+
+    & .first-tag {
+      flex-shrink: 0;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+
+      &::after {
+        content: "";
+        display: block;
+        width: 0;
+        height: 0;
+        margin-left: 0.5rem;
+        border: $tag-size solid transparent;
+        border-left-color: currentColor;
+        transform-origin: left center;
+        transition: transform linear 100ms;
+      }
+
+      &[data-panel-open="true"] {
+        &::after {
+          transform: rotate(90deg);
+        }
+      }
+    }
+
+    & .pinned-tag {
+      font-size: 1rem;
+      color: #666;
+      white-space: nowrap;
+      
+      cursor: pointer;
+    }
+  }
+
+  & .list-container{
+    margin-top: 16px;
+    min-height: 300px;
+    height: 300px;
+  }
+}

@@ -17,7 +17,7 @@ export default function () {
     {
       iconName: "fire",
       title: "热门歌单",
-      route: "recommend-sheet",
+      route: "recommend-sheets",
     },
     {
       iconName: "array-download-tray",

@@ -9,6 +9,7 @@ import Loading from "@/renderer/components/Loading";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import useGetTopList from "./hooks/useGetTopList";
+import NoPlugin from "@/renderer/components/NoPlugin";
 
 export default function ToplistView() {
   const availablePlugins = getSupportedPlugin("getTopLists");
@@ -16,35 +17,40 @@ export default function ToplistView() {
 
   return (
     <div className="toplist-view--container">
-      <Tab.Group
-        defaultIndex={history.state?.usr?.pluginIndex}
-        onChange={(index) => {
-          const usr = history.state.usr ?? {};
-
-          navigate("", {
-            replace: true,
-            state: {
-              ...usr,
-              pluginIndex: index,
-            },
-          });
-        }}
+      <Condition
+        condition={availablePlugins.length}
+        falsy={<NoPlugin supportMethod="排行榜" height={'100%'}></NoPlugin>}
       >
-        <Tab.List className="tab-list-container">
-          {availablePlugins.map((plugin) => (
-            <Tab key={plugin.hash} as="div" className="tab-list-item">
-              {plugin.platform}
-            </Tab>
-          ))}
-        </Tab.List>
-        <Tab.Panels className={"tab-panels-container"}>
-          {availablePlugins.map((plugin) => (
-            <Tab.Panel className="tab-panel-container" key={plugin.hash}>
-              <ToplistBody plugin={plugin}></ToplistBody>
-            </Tab.Panel>
-          ))}
-        </Tab.Panels>
-      </Tab.Group>
+        <Tab.Group
+          defaultIndex={history.state?.usr?.pluginIndex}
+          onChange={(index) => {
+            const usr = history.state.usr ?? {};
+
+            navigate("", {
+              replace: true,
+              state: {
+                ...usr,
+                pluginIndex: index,
+              },
+            });
+          }}
+        >
+          <Tab.List className="tab-list-container">
+            {availablePlugins.map((plugin) => (
+              <Tab key={plugin.hash} as="div" className="tab-list-item">
+                {plugin.platform}
+              </Tab>
+            ))}
+          </Tab.List>
+          <Tab.Panels className={"tab-panels-container"}>
+            {availablePlugins.map((plugin) => (
+              <Tab.Panel className="tab-panel-container" key={plugin.hash}>
+                <ToplistBody plugin={plugin}></ToplistBody>
+              </Tab.Panel>
+            ))}
+          </Tab.Panels>
+        </Tab.Group>
+      </Condition>
     </div>
   );
 }
