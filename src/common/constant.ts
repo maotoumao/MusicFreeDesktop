@@ -29,3 +29,11 @@ export enum RequestStateCode {
     /** 出错了 */
     ERROR = 0b10000000
 }
+
+/** 音质列表 */
+export const qualityKeys: IMusic.IQualityKey[] = [
+    'low',
+    'standard',
+    'high',
+    'super',
+];

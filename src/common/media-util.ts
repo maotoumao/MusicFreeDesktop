@@ -2,6 +2,7 @@ import { produce } from "immer";
 import {
   internalSerializeKey,
   localPluginName,
+  qualityKeys,
   sortIndexSymbol,
   timeStampSymbol,
 } from "./constant";
@@ -41,10 +42,7 @@ export function getMediaPrimaryKey(mediaItem: IMedia.IMediaBase) {
   return `${mediaItem.platform}@${mediaItem.id}`;
 }
 
-export function sortByTimestampAndIndex(
-  array: any[],
-  newArray = false
-) {
+export function sortByTimestampAndIndex(array: any[], newArray = false) {
   if (newArray) {
     array = [...array];
   }
@@ -57,15 +55,39 @@ export function sortByTimestampAndIndex(
   });
 }
 
-export function addSortProperty(mediaItems: IMedia.IMediaBase | IMedia.IMediaBase[]) {
+export function addSortProperty(
+  mediaItems: IMedia.IMediaBase | IMedia.IMediaBase[]
+) {
   const now = Date.now();
-  if(Array.isArray(mediaItems)) {
+  if (Array.isArray(mediaItems)) {
     mediaItems.forEach((item, index) => {
       item[timeStampSymbol] = now;
       item[sortIndexSymbol] = index;
-    })
+    });
   } else {
     mediaItems[timeStampSymbol] = now;
     mediaItems[sortIndexSymbol] = 0;
+  }
+}
+
+/**
+ *  获取音质顺序
+ * 
+ * asc: 优先高音质
+ * desc：优先低音质
+ */
+export function getQualityOrder(
+  qualityKey: IMusic.IQualityKey,
+  sort: "asc" | "desc"
+) {
+  const idx = qualityKeys.indexOf(qualityKey);
+  const left = qualityKeys.slice(0, idx);
+  const right = qualityKeys.slice(idx + 1);
+  if (sort === "asc") {
+    /** 优先高音质 */
+    return [qualityKey, ...right, ...left.reverse()];
+  } else {
+    /** 优先低音质 */
+    return [qualityKey, ...left.reverse(), ...right];
   }
 }

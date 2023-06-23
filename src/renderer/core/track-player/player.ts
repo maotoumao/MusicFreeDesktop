@@ -5,6 +5,7 @@ import trackPlayerEventsEmitter from "./event";
 import shuffle from "lodash.shuffle";
 import {
   addSortProperty,
+  getQualityOrder,
   isSameMedia,
   sortByTimestampAndIndex,
 } from "@/common/media-util";
@@ -395,14 +396,24 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
     const musicItem = musicQueue[currentIndex];
 
     try {
-      const mediaSource = await callPluginDelegateMethod(
-        {
-          platform: musicItem.platform,
-        },
-        "getMediaSource",
-        musicItem,
-        "standard"
-      );
+      const qualityOrder = getQualityOrder("standard", "desc");
+      let mediaSource: IPlugin.IMediaSourceResult | null = null;
+      for (const quality of qualityOrder) {
+        try {
+          mediaSource = await callPluginDelegateMethod(
+            {
+              platform: musicItem.platform,
+            },
+            "getMediaSource",
+            musicItem,
+            quality
+          );
+          if (!mediaSource?.url) {
+            continue;
+          }
+          break;
+        } catch {}
+      }
       if (!mediaSource?.url) {
         throw new Error("Empty Source");
       }
