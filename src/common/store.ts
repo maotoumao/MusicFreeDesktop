@@ -58,3 +58,8 @@ export default class Store<T> {
         this.stateMapper.notify();
     };
 }
+
+
+export function useStore<T>(store: Store<T>) {
+    return [store.useValue(), store.setValue] as const;
+}

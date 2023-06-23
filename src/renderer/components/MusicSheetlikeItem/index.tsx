@@ -25,7 +25,7 @@ function MusicSheetlikeItem(props: IMusicSheetlikeItemProps) {
     >
       <div className="album-img-wrapper">
         <img
-          src={mediaItem?.artwork || albumImg}
+          src={mediaItem?.artwork || mediaItem?.coverImg || albumImg}
           onError={setFallbackAlbum}
         ></img>
         <Condition
@@ -49,9 +49,11 @@ function MusicSheetlikeItem(props: IMusicSheetlikeItemProps) {
         </Condition>
       </div>
       <div className="media-info">
-        <div className="title" title={mediaItem?.title}>{mediaItem?.title}</div>
-        <div className="author" title={mediaItem?.artist}>
-          <span>{mediaItem?.artist ?? ""}</span>
+        <div className="title" title={mediaItem?.title}>
+          {mediaItem?.title}
+        </div>
+        <div className="author" title={mediaItem?.artist ?? mediaItem?.description}>
+          <span>{mediaItem?.artist ?? mediaItem?.description ?? ""}</span>
         </div>
       </div>
     </div>

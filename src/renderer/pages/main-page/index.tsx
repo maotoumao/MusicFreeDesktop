@@ -8,6 +8,8 @@ import MusicDetail from "@/renderer/components/MusicDetail";
 import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
 import AlbumView from "./views/album-view";
 import ArtistView from "./views/artist-view";
+import ToplistView from "./views/toplist-view";
+import TopListDetailView from "./views/toplist-detail-view";
 
 export default function MainPage() {
   return (
@@ -15,6 +17,10 @@ export default function MainPage() {
       <SideBar></SideBar>
       <div className="pages-container" id="page-container">
         <Routes>
+        <Route
+            path="search/:query"
+            element={<SearchView></SearchView>}
+          ></Route>
           <Route
             path="plugin-manager-view"
             element={<PluginManagerView></PluginManagerView>}
@@ -32,8 +38,12 @@ export default function MainPage() {
             element={<ArtistView></ArtistView>}
           ></Route>
           <Route
-            path="search/:query"
-            element={<SearchView></SearchView>}
+            path="toplist"
+            element={<ToplistView></ToplistView>}
+          ></Route>
+          <Route
+            path="toplist-detail/:platform"
+            element={<TopListDetailView></TopListDetailView>}
           ></Route>
 
           <Route

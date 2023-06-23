@@ -12,7 +12,7 @@ export default function () {
     {
       iconName: "trophy",
       title: "排行榜",
-      route: "top-list",
+      route: "toplist",
     },
     {
       iconName: "fire",

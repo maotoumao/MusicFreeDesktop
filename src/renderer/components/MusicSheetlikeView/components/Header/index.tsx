@@ -21,7 +21,7 @@ export default function Header(props: IProps) {
     <div className="music-sheetlike-view--header-container" ref={containerRef}>
       <img
         draggable={false}
-        src={musicSheet?.artwork ?? albumImg}
+        src={musicSheet?.artwork ?? musicSheet?.coverImg ?? albumImg}
         onError={setFallbackAlbum}
       ></img>
       <div className="sheet-info">

@@ -1,0 +1,18 @@
+.toplist-view--container {
+  & .toplist-group-item--container {
+    & .header {
+      font-weight: 600;
+      font-size: 1.5rem;
+      margin-top: 1.5rem;
+      letter-spacing: 0.05rem;
+      user-select: none;
+    }
+
+    & .body {
+      margin-top: 1.5rem;
+      display: grid;
+      width: 100%;
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+}
