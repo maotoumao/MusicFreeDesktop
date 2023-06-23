@@ -5,6 +5,22 @@
   font-size: 1rem;
   cursor: default;
   position: relative;
+  mask-image: linear-gradient(
+    transparent 0%,
+    #fff 25%,
+    #fff 75%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    transparent 0%,
+    #fff 25%,
+    #fff 75%,
+    transparent 100%
+  );
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &[data-loading="false"] {
     &::before,
