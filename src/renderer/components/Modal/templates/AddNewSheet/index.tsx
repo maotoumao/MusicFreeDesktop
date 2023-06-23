@@ -1,6 +1,4 @@
-import { useCallback, useState } from "react";
-import Base from "../Base";
-import "./index.scss";
+import { useCallback } from "react";
 import MusicSheet from "@/renderer/core/music-sheet";
 import debounce from "@/common/debounce";
 import { hideModal } from "../..";
@@ -11,8 +9,6 @@ interface IProps {
 }
 
 export default function AddNewSheet(props: IProps) {
-  const [newSheetName, setNewSheetName] = useState("");
-
   const onCreateNewSheetClick = useCallback(
     debounce(async (newSheetName) => {
       try {

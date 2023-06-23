@@ -1,0 +1,28 @@
+.modal--reconfirm {
+  width: 420px;
+  border-radius: 12px;
+  box-shadow: 2px 2px 10px var(--shadowColor);
+  background-color: var(--backgroundColor);
+  display: flex;
+  flex-direction: column;
+  min-height: 164px;
+  max-height: 340px;
+
+  & .content-container {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  & .opeartion-area {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 16px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+}

@@ -83,6 +83,20 @@ div[role="button"] {
     border: 1px solid currentColor;
     width: fit-content;
   }
+
+  &[data-type="dangerButton"] {
+    font-size: 1.2em;
+    padding: 0.4em 1em;
+    border-radius: 1.6em;
+    color: #fc5f5f;
+    border: 1px solid currentColor;
+    width: fit-content;
+
+    &[data-fill="true"] {
+      color: white;
+      background: #fc5f5f;
+    }
+  }
 }
 
 .divider {

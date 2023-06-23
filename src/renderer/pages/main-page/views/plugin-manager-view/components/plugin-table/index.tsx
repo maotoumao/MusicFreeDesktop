@@ -29,6 +29,12 @@ function renderOptions(info: any) {
         style={{
           color: "#FC5F5F",
         }}
+        onClick={() => {
+          showModal("Reconfirm", {
+            title: "卸载插件",
+            content: `确认卸载插件「${row.platform}」吗?`,
+          });
+        }}
       >
         卸载
       </ActionButton>

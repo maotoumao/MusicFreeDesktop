@@ -36,7 +36,6 @@ export default function SimpleInputWithState<PromiseItem>(
   const [loading, setLoading] = useState(false);
   const [inputText, setInputText] = useState("");
   const isMounted = useMounted();
-  console.log("???", loading);
 
   return (
     <Base withBlur={false}>
