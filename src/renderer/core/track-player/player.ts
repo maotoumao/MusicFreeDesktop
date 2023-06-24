@@ -97,18 +97,20 @@ export async function setupPlayer() {
 
   trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
   try {
+    console.log("getMeda");
     const { mediaSource, quality } = await getMediaSource(currentMusic, {
       quality:
         getUserPerference("currentQuality") ||
         rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
     });
+    console.log("ggg");
 
     setTrackAndPlay(mediaSource, currentMusic, {
       seekTo: currentProgress,
       autoPlay: false,
     });
 
-    setQuality(quality);
+    setCurrentQuality(quality);
   } catch {}
   currentIndex = findMusicIndex(currentMusic);
 
@@ -388,7 +390,7 @@ async function getMediaSource(
   musicItem: IMusic.IMusicItem,
   options?: IGetMediaSourceOptions
 ) {
-  const qualityOrder = getQualityOrder(
+  const qualityOrder = getQualityOrder( 
     options.quality ??
       rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
     rendererAppConfig.getAppConfigPath("playMusic.whenQualityMissing")
@@ -461,14 +463,14 @@ async function playIndex(nextIndex: number, options: IPlayOptions = {}) {
       }
       console.log("MEDIA SOURCE", mediaSource, musicItem);
       if (isSameMedia(musicItem, musicQueueStore.getValue()[currentIndex])) {
-        setQuality(quality);
+        setCurrentQuality(quality);
         setCurrentMusic(musicItem);
         setTrackAndPlay(mediaSource, musicItem);
       }
     } catch (e) {
       // 播放失败
       setCurrentMusic(musicItem);
-      setQuality(
+      setCurrentQuality(
         rendererAppConfig.getAppConfigPath("playMusic.defaultQuality")
       );
       trackPlayer.clear();
@@ -612,7 +614,7 @@ export async function setQuality(quality: IMusic.IQualityKey) {
         autoPlay:
           playerStateStore.getValue() === PlayerState.Playing ? true : false,
       });
-      setQuality(realQuality);
+      setCurrentQuality(realQuality);
     }
   }
 }

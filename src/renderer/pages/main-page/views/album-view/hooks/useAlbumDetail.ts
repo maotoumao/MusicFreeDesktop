@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const idleCode = [
   RequestStateCode.IDLE,
   RequestStateCode.FINISHED,
-  RequestStateCode.PARTLY_DONE,
+  RequestStateCode.PARTLY_DONE
 ];
 
 export default function useAlbumDetail(
@@ -24,7 +24,7 @@ export default function useAlbumDetail(
 
   const getAlbumDetail = useCallback(
     async function () {
-      if (originalAlbumItem === null || !(requestState in idleCode)) {
+      if (originalAlbumItem === null || !(idleCode.includes(requestState))) {
         return;
       }
 
@@ -66,7 +66,7 @@ export default function useAlbumDetail(
             : RequestStateCode.PARTLY_DONE
         );
         currentPageRef.current += 1;
-      } catch {
+      } catch(e) {
         setRequestState(RequestStateCode.IDLE);
       }
     },

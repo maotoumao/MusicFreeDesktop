@@ -144,7 +144,6 @@ export default function useSearch() {
             })
           );
         } catch (e: any) {
-          console.log(e);
           setSearchResults(
             produce((draft) => {
               const prevMediaResult = draft[searchType];

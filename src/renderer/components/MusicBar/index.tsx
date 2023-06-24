@@ -18,11 +18,6 @@ export default function MusicBar() {
       <Slider></Slider>
       <MusicInfo></MusicInfo>
       <Controller></Controller>
-      {/* <div className="music-slidebar">
-        <span>00:26</span>
-        <input type="range" className="slidebar"></input>
-        <span>03:51</span>
-      </div> */}
       <Extra></Extra>
       <PlayList></PlayList>
     </div>

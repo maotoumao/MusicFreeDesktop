@@ -7,14 +7,15 @@ import { RepeatMode } from "@/renderer/core/track-player/enum";
 import { useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
+import { showContextMenu } from "@/renderer/components/ContextMenu";
+import { toast } from "react-toastify";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
-  const quality = trackPlayer.useQuality();
 
   return (
     <div className="music-extra">
-      <div className="extra-btn">{quality}</div>
+      <QualityBtn></QualityBtn>
       <SpeedBtn></SpeedBtn>
       <VolumeBtn></VolumeBtn>
       <div className="extra-btn">
@@ -189,6 +190,31 @@ function SpeedBtn() {
         </div>
       </Condition>
       <SvgAsset title={"倍速播放"} iconName={"dashboard-speed"}></SvgAsset>
+    </div>
+  );
+}
+
+function QualityBtn() {
+  const quality = trackPlayer.useQuality();
+
+  return (
+    <div className="extra-btn" role="button" onClick={(e) => {
+      toast("wow so easy" + Math.random())
+    }}>
+      <SwitchCase.Switch switch={quality}>
+        <SwitchCase.Case case={"low"}>
+          <SvgAsset title={"低音质"} iconName={"lq"}></SvgAsset>
+        </SwitchCase.Case>
+        <SwitchCase.Case case={"standard"}>
+          <SvgAsset title={"标准音质"} iconName={"sd"}></SvgAsset>
+        </SwitchCase.Case>
+        <SwitchCase.Case case={"high"}>
+          <SvgAsset title={"高音质"} iconName={"hq"}></SvgAsset>
+        </SwitchCase.Case>
+        <SwitchCase.Case case={"super"}>
+          <SvgAsset title={"超高音质"} iconName={"sq"}></SvgAsset>
+        </SwitchCase.Case>
+      </SwitchCase.Switch>
     </div>
   );
 }

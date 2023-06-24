@@ -1,26 +1,26 @@
 .search-view--plugins {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+  gap: 8px 14px;
+
+  & .plugin-item {
+    box-sizing: border-box;
+    height: 2rem;
+    border-radius: 1rem;
+    padding: 2px 8px;
+
+    border: 1px solid rgba($color: #000000, $alpha: 0.5);
     display: flex;
-    margin-top: 12px;
-    margin-bottom: 12px;
-    font-size: 1.1rem;
+    align-items: center;
+    justify-content: center;
 
-    & .plugin-item {
-        box-sizing: border-box;
-        height: 2rem;
-        border-radius: 1rem;
-        padding: 2px 8px;
-        margin-left: 12px;
-        margin-right: 12px;
-        border: 1px solid rgba($color: #000000, $alpha: 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        
-        &[data-selected=true] {
-            border: none;
-            background-color: var(--primaryColor);
-            color: white;
-        }
+    &[data-selected="true"] {
+      border: none;
+      background-color: var(--primaryColor);
+      color: white;
     }
-
+  }
 }

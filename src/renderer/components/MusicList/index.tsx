@@ -33,7 +33,7 @@ interface IMusicListProps {
   enableSort?: boolean; // 拖拽排序
   onSortEnd?: () => void; // 排序结束
   state?: RequestStateCode;
-  isEnd?: boolean;
+  doubleClickBehavior?: "replace" | "normal";
   onPageChange?: (page?: number) => void;
   /** 虚拟滚动参数 */
   virtualProps?: {
@@ -151,7 +151,8 @@ function _MusicList(props: IMusicListProps) {
     onPageChange,
     musicSheet,
     virtualProps,
-    getAllMusicItems
+    getAllMusicItems,
+    doubleClickBehavior,
   } = props;
 
   const table = useReactTable({
@@ -215,12 +216,14 @@ function _MusicList(props: IMusicListProps) {
                   );
                 }}
                 onDoubleClick={() => {
-                  const config = rendererAppConfig.getAppConfigPath(
-                    "playMusic.clickMusicList"
-                  );
+                  const config =
+                    doubleClickBehavior ??
+                    rendererAppConfig.getAppConfigPath(
+                      "playMusic.clickMusicList"
+                    );
                   if (config === "replace") {
                     trackPlayer.playMusicWithReplaceQueue(
-                      getAllMusicItems() ?? musicList,
+                      getAllMusicItems?.() ?? musicList,
                       row.original
                     );
                   } else {

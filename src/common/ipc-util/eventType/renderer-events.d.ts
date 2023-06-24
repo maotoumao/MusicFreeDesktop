@@ -43,5 +43,6 @@ declare namespace IpcInvoke {
     }) => boolean;
     "install-plugin-remote": (url: string) => void
     "install-plugin-local": (url: string) => void
+    "uninstall-plugin": (pluginhash: string) => void
   }
 }

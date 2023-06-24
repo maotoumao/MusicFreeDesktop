@@ -15,7 +15,7 @@ interface ISimpleInputWithStateProps<PromiseItem> {
   loadingText?: string;
   onOk?: (text: string) => any;
   onPromiseResolved?: (result: PromiseItem) => void;
-  onPromiseRejected?: () => void;
+  onPromiseRejected?: (reason?: any) => void;
 }
 
 export default function SimpleInputWithState<PromiseItem>(
@@ -71,9 +71,9 @@ export default function SimpleInputWithState<PromiseItem>(
                       setLoading(false);
                     }
                   })
-                  ?.catch(() => {
+                  ?.catch((e: any) => {
                     if (isMounted.current) {
-                      onPromiseRejected?.();
+                      onPromiseRejected?.(e);
                       setLoading(false);
                     }
                   });

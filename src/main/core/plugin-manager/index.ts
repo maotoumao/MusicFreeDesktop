@@ -12,7 +12,7 @@ import { compare } from "compare-versions";
 import { nanoid } from "nanoid";
 import { addRandomHash } from "@/common/normalize-util";
 
-const pluginBasePath = path.resolve(app.getPath("userData"), "./plugins");
+const pluginBasePath = path.resolve(app.getPath("userData"), "./musicfree-plugins");
 
 let plugins: Plugin[] = [];
 let clonedPlugins: IPlugin.IPluginDelegate[] = [];
@@ -65,6 +65,10 @@ function registerEvents() {
 
   /** 获取插件 */
   ipcMainHandle("get-all-plugins", () => clonedPlugins);
+  ipcMainHandle("uninstall-plugin", async (hash) => {
+    await uninstallPlugin(hash);
+    sendPlugins();
+  });
 
   /** 刷新插件 */
   ipcMainOn("refresh-plugins", loadAllPlugins);
@@ -76,15 +80,15 @@ function registerEvents() {
         await installPluginFromUrl(addRandomHash(url));
       } else if (url.endsWith(".json")) {
         const jsonFile = (await axios.get(addRandomHash(url))).data;
-        const urls: string[] = (jsonFile?.plugins ?? []).map((_: any) =>
-          addRandomHash(_.url)
-        );
-        await Promise.all(urls.map((url) => installPluginFromUrl(url)));
+
+        for (const cfg of jsonFile?.plugins ?? []) {
+          await installPluginFromUrl(addRandomHash(cfg.url));
+        }
       }
     } catch (e) {
       throw e;
     } finally {
-      ipcMainSend(getMainWindow(), "plugin-loaded", clonedPlugins);
+      sendPlugins();
     }
   });
 }
@@ -147,6 +151,10 @@ export async function loadAllPlugins() {
   }
   setPlugins(_plugins);
 
+  sendPlugins();
+}
+
+export function sendPlugins() {
   const mainWindow = getMainWindow();
   ipcMainSend(mainWindow, "plugin-loaded", clonedPlugins);
 }
@@ -155,7 +163,7 @@ export async function installPluginFromUrl(url: string) {
   try {
     const funcCode = (await axios.get(url)).data;
     if (funcCode) {
-      installPluginFromRawCode(funcCode);
+      await installPluginFromRawCode(funcCode);
     }
   } catch (e: any) {
     throw new Error(e?.message ?? "");
@@ -189,7 +197,7 @@ async function installPluginFromRawCode(funcCode: string) {
     plugin.path = _pluginPath;
     let newPlugins = plugins.concat(plugin);
     if (oldVersionPlugin) {
-      newPlugins = plugins.filter((_) => _.hash !== oldVersionPlugin.hash);
+      newPlugins = newPlugins.filter((_) => _.hash !== oldVersionPlugin.hash);
       try {
         await rimraf(oldVersionPlugin.path);
       } catch {}

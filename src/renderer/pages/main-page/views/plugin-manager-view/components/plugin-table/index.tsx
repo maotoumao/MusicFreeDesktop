@@ -14,18 +14,14 @@ import { CSSProperties, ReactNode } from "react";
 import Condition from "@/renderer/components/Condition";
 import { hideModal, showModal } from "@/renderer/components/Modal";
 import Empty from "@/renderer/components/Empty";
+import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { toast } from "react-toastify";
+import { toastDuration } from "@/common/constant";
 
 function renderOptions(info: any) {
   const row = info.row.original as IPlugin.IPluginDelegate;
   return (
     <div>
-      <ActionButton
-        style={{
-          color: "#08A34C",
-        }}
-      >
-        更新
-      </ActionButton>
       <ActionButton
         style={{
           color: "#FC5F5F",
@@ -34,11 +30,35 @@ function renderOptions(info: any) {
           showModal("Reconfirm", {
             title: "卸载插件",
             content: `确认卸载插件「${row.platform}」吗?`,
+            async onConfirm() {
+              hideModal();
+              try {
+                await ipcRendererInvoke("uninstall-plugin", row.hash);
+                toast.success(`已卸载「${row.platform}」`);
+              } catch {
+                toast.error("卸载失败");
+              }
+            },
           });
         }}
       >
         卸载
       </ActionButton>
+      <Condition condition={row.srcUrl}>
+        <ActionButton
+          style={{
+            color: "#08A34C",
+          }}
+          onClick={async () => {
+            try {
+              await ipcRendererInvoke("install-plugin-remote", row.srcUrl);
+              toast.success(`插件「${row.platform}」已更新至最新版本`);
+            } catch {}
+          }}
+        >
+          更新
+        </ActionButton>
+      </Condition>
 
       <Condition condition={row.supportedMethod.includes("importMusicItem")}>
         <ActionButton

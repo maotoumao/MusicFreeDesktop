@@ -5,13 +5,16 @@ import ModalComponent from "../components/Modal";
 import bootstrap from "./bootstrap";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import MainPage from "../pages/main-page";
+import { ContextMenuComponent } from "../components/ContextMenu";
+import { ToastContainer } from "react-toastify";
 
 import "@/common/i18n";
 
 import "rc-slider/assets/index.css";
+import "react-toastify/dist/ReactToastify.css";
 import "./index.css"; // 全局样式
 import "./index.scss";
-import { ContextMenuComponent } from "../components/ContextMenu";
+import { toastDuration } from "@/common/constant";
 
 bootstrap().then(() => {
   ReactDOM.createRoot(document.getElementById("root")).render(<Root></Root>);
@@ -30,6 +33,15 @@ function Root() {
       </HashRouter>
       <ModalComponent></ModalComponent>
       <ContextMenuComponent></ContextMenuComponent>
+      <ToastContainer
+        draggable={false}
+        closeOnClick={false}
+        limit={5}
+        pauseOnFocusLoss={false}
+        hideProgressBar
+        autoClose={toastDuration.short}
+        newestOnTop
+      ></ToastContainer>
     </>
   );
 }

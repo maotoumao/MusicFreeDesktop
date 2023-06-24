@@ -8,7 +8,7 @@ import PlayMusic from "./PlayMusic";
 import ShortCut from "./ShortCut";
 
 export default [
-  {
+  { 
     id: "normal",
     title: "常规",
     component: Normal,

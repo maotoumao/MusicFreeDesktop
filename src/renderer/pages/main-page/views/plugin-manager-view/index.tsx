@@ -1,8 +1,9 @@
-import { showModal } from "@/renderer/components/Modal";
+import { hideModal, showModal } from "@/renderer/components/Modal";
 import PluginTable from "./components/plugin-table";
 import "./index.scss";
 import { getUserPerference } from "@/renderer/utils/user-perference";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { toast } from "react-toastify";
 
 export default function PluginManagerView() {
   const subscription = getUserPerference("subscription");
@@ -25,14 +26,21 @@ export default function PluginManagerView() {
                 okText: "安装",
                 loadingText: "安装中",
                 withLoading: true,
-                onOk(text) {
-                  ipcRendererInvoke("install-plugin-remote", text);
+                async onOk(text) {
+                  if(text.trim().endsWith('.json') || text.trim().endsWith('.js')) {
+                    return ipcRendererInvoke("install-plugin-remote", text);
+
+                  } else {
+                    throw new Error("插件链接需要以json或者js结尾")
+                  }
                 },
-                onPromiseResolved(result) {
-                  console.log(result);
+                onPromiseResolved() {
+                  toast.success('安装成功~');
+                  hideModal();
                 },
-                onPromiseRejected() {
-                  console.log("fail");
+                onPromiseRejected(e) {
+                  toast.warn(`安装失败: ${e.message ?? '无效插件'}`)
+
                 },
                 hints: [
                   "插件需要满足 MusicFree 特定的插件协议，具体可在官方网站中查看",

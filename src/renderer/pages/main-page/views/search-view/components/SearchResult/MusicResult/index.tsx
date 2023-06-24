@@ -15,6 +15,7 @@ function MusicResult(props: IMediaResultProps) {
 
   return (
     <MusicList
+      doubleClickBehavior="normal"
       musicList={data}
       state={state}
       onPageChange={() => {

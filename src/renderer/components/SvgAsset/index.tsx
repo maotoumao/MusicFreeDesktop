@@ -39,6 +39,10 @@ export type SvgAssetIconNames =
   | "trash"
   | "trophy"
   | "user"
+  | "lq"
+  | "sd"
+  | "hq"
+  | "sq"
   | "x-mark";
 
 interface IProps {
