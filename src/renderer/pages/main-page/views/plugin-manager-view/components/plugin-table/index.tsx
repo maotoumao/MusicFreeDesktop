@@ -13,6 +13,7 @@ import "./index.scss";
 import { CSSProperties, ReactNode } from "react";
 import Condition from "@/renderer/components/Condition";
 import { hideModal, showModal } from "@/renderer/components/Modal";
+import Empty from "@/renderer/components/Empty";
 
 function renderOptions(info: any) {
   const row = info.row.original as IPlugin.IPluginDelegate;
@@ -155,41 +156,46 @@ export default function PluginTable() {
 
   return (
     <div className="plugin-table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            {table.getHeaderGroups()[0].headers.map((header) => (
-              <th
-                key={header.id}
-                style={{
-                  width: header.id === "extra" ? undefined : header.getSize(),
-                }}
-              >
-                {flexRender(
-                  header.column.columnDef.header,
-                  header.getContext()
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getAllCells().map((cell) => (
-                <td
-                  key={cell.id}
+      <Condition
+        condition={table.getRowModel().rows.length}
+        falsy={<Empty></Empty>}
+      >
+        <table>
+          <thead>
+            <tr>
+              {table.getHeaderGroups()[0].headers.map((header) => (
+                <th
+                  key={header.id}
                   style={{
-                    width: cell.column.getSize(),
+                    width: header.id === "extra" ? undefined : header.getSize(),
                   }}
                 >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getAllCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    style={{
+                      width: cell.column.getSize(),
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Condition>
     </div>
   );
 }

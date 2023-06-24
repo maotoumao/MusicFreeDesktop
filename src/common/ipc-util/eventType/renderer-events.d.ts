@@ -41,5 +41,7 @@ declare namespace IpcInvoke {
       keyPath: Key;
       value: IAppConfigKeyPathValue<Key>;
     }) => boolean;
+    "install-plugin-remote": (url: string) => void
+    "install-plugin-local": (url: string) => void
   }
 }

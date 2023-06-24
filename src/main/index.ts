@@ -1,7 +1,7 @@
 import { app, BrowserWindow, screen } from "electron";
 import { createMainWindow } from "./window";
 import initIpcMain from "./ipc";
-import { initPluginManager } from "./core/plugin-manager";
+import { setupPluginManager } from "./core/plugin-manager";
 import { setupMainAppConfig } from "@/common/app-config/main";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -35,6 +35,6 @@ app.on("activate", () => {
 // code. You can also put them in separate files and import them here.
 app.whenReady().then(() => {
   initIpcMain();
-  initPluginManager();
+  setupPluginManager();
   setupMainAppConfig();
 })

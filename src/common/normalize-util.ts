@@ -9,3 +9,11 @@ export function normalizeNumber(number: number): string {
   number = number / 10000;
   return `${number.toFixed(number < 1000 ? 1 : 0)}亿`;
 }
+
+
+export function addRandomHash(url: string) {
+  if (url.indexOf('#') === -1) {
+      return `${url}#${Date.now()}`;
+  }
+  return url;
+}

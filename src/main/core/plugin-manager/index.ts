@@ -6,11 +6,31 @@ import { ipcMainHandle, ipcMainOn, ipcMainSend } from "@/common/ipc-util/main";
 import { getMainWindow } from "@/main/window";
 import { localPluginHash, localPluginName } from "@/common/constant";
 import localPlugin from "./local-plugin";
+import { rimraf } from "rimraf";
+import axios from "axios";
+import { compare } from "compare-versions";
+import { nanoid } from "nanoid";
+import { addRandomHash } from "@/common/normalize-util";
 
-const pluginBasePath = path.resolve(app.getAppPath(), "./plugins");
+const pluginBasePath = path.resolve(app.getPath("userData"), "./plugins");
 
 let plugins: Plugin[] = [];
 let clonedPlugins: IPlugin.IPluginDelegate[] = [];
+
+async function checkPath() {
+  // 路径:
+  try {
+    const res = await fs.stat(pluginBasePath);
+    if (!res.isDirectory()) {
+      await rimraf(pluginBasePath);
+      throw new Error();
+    }
+  } catch {
+    fs.mkdir(pluginBasePath, {
+      recursive: true,
+    });
+  }
+}
 
 function setPlugins(newPlugins: Plugin[]) {
   plugins = newPlugins;
@@ -32,14 +52,10 @@ function setPlugins(newPlugins: Plugin[]) {
   });
 }
 
-export async function initPluginManager() {
+export async function setupPluginManager() {
   registerEvents();
-  try {
-    await fs.stat(pluginBasePath);
-    await loadAllPlugins();
-  } catch {
-    await fs.mkdir(pluginBasePath);
-  }
+  await checkPath();
+  await loadAllPlugins();
 }
 
 /** 注册事件 */
@@ -52,6 +68,25 @@ function registerEvents() {
 
   /** 刷新插件 */
   ipcMainOn("refresh-plugins", loadAllPlugins);
+
+  ipcMainHandle("install-plugin-remote", async (urlLike: string) => {
+    try {
+      const url = urlLike.trim();
+      if (url.endsWith(".js")) {
+        await installPluginFromUrl(addRandomHash(url));
+      } else if (url.endsWith(".json")) {
+        const jsonFile = (await axios.get(addRandomHash(url))).data;
+        const urls: string[] = (jsonFile?.plugins ?? []).map((_: any) =>
+          addRandomHash(_.url)
+        );
+        await Promise.all(urls.map((url) => installPluginFromUrl(url)));
+      }
+    } catch (e) {
+      throw e;
+    } finally {
+      ipcMainSend(getMainWindow(), "plugin-loaded", clonedPlugins);
+    }
+  });
 }
 
 interface ICallPluginMethodParams<
@@ -114,4 +149,65 @@ export async function loadAllPlugins() {
 
   const mainWindow = getMainWindow();
   ipcMainSend(mainWindow, "plugin-loaded", clonedPlugins);
+}
+
+export async function installPluginFromUrl(url: string) {
+  try {
+    const funcCode = (await axios.get(url)).data;
+    if (funcCode) {
+      installPluginFromRawCode(funcCode);
+    }
+  } catch (e: any) {
+    throw new Error(e?.message ?? "");
+  }
+}
+
+async function installPluginFromRawCode(funcCode: string) {
+  const plugin = new Plugin(funcCode, "");
+  const _pluginIndex = plugins.findIndex((p) => p.hash === plugin.hash);
+  if (_pluginIndex !== -1) {
+    // 静默忽略
+    return;
+  }
+  const oldVersionPlugin = plugins.find((p) => p.name === plugin.name);
+  if (oldVersionPlugin) {
+    if (
+      compare(
+        oldVersionPlugin.instance.version ?? "",
+        plugin.instance.version ?? "",
+        ">"
+      )
+    ) {
+      throw new Error("已安装更新版本的插件");
+    }
+  }
+
+  if (plugin.hash !== "") {
+    const fn = nanoid();
+    const _pluginPath = path.resolve(pluginBasePath, `${fn}.js`);
+    await fs.writeFile(_pluginPath, funcCode, "utf8");
+    plugin.path = _pluginPath;
+    let newPlugins = plugins.concat(plugin);
+    if (oldVersionPlugin) {
+      newPlugins = plugins.filter((_) => _.hash !== oldVersionPlugin.hash);
+      try {
+        await rimraf(oldVersionPlugin.path);
+      } catch {}
+    }
+    setPlugins(newPlugins);
+    return;
+  }
+  throw new Error("插件无法解析!");
+}
+
+/** 卸载插件 */
+async function uninstallPlugin(hash: string) {
+  const targetIndex = plugins.findIndex((_) => _.hash === hash);
+  if (targetIndex !== -1) {
+    try {
+      await rimraf(plugins[targetIndex].path);
+      const newPlugins = plugins.filter((_) => _.hash !== hash);
+      setPlugins(newPlugins);
+    } catch {}
+  }
 }
