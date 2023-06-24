@@ -5,12 +5,14 @@ import {
   registerPluginEvents,
 } from "../core/plugin-delegate";
 import trackPlayer from "../core/track-player";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 export default async function () {
   await Promise.all([
     registerPluginEvents(),
     MusicSheet.setupSheets(),
     trackPlayer.setupPlayer(),
+    rendererAppConfig.setupRendererAppConfig()
   ]);
   dropHandler();
 }

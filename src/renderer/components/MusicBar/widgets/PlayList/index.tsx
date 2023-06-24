@@ -111,7 +111,6 @@ interface IPlayListMusicItemProps {
 }
 function _PlayListMusicItem(props: IPlayListMusicItemProps) {
   const { isPlaying, musicItem } = props;
-  console.log("RERENDER", musicItem);
 
   return (
     <div

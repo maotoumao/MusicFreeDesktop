@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import useGetTopList from "./hooks/useGetTopList";
 import NoPlugin from "@/renderer/components/NoPlugin";
+import Empty from "@/renderer/components/Empty";
 
 export default function ToplistView() {
   const availablePlugins = getSupportedPlugin("getTopLists");
@@ -19,7 +20,7 @@ export default function ToplistView() {
     <div className="toplist-view--container">
       <Condition
         condition={availablePlugins.length}
-        falsy={<NoPlugin supportMethod="排行榜" height={'100%'}></NoPlugin>}
+        falsy={<NoPlugin supportMethod="排行榜" height={"100%"}></NoPlugin>}
       >
         <Tab.Group
           defaultIndex={history.state?.usr?.pluginIndex}
@@ -75,13 +76,18 @@ function ToplistBody(props: IToplistBodyProps) {
       }
       falsy={<Loading></Loading>}
     >
-      {topLists[plugin.hash]?.data?.map((item, index) => (
-        <ToplistGroupItem
-          groupItem={item}
-          key={index}
-          platform={plugin.platform}
-        ></ToplistGroupItem>
-      ))}
+      <Condition
+        condition={topLists[plugin.hash]?.data?.length}
+        falsy={<Empty></Empty>}
+      >
+        {topLists[plugin.hash]?.data?.map((item, index) => (
+          <ToplistGroupItem
+            groupItem={item}
+            key={index}
+            platform={plugin.platform}
+          ></ToplistGroupItem>
+        ))}
+      </Condition>
     </Condition>
   );
 }

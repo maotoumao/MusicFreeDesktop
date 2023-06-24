@@ -14,8 +14,6 @@ export default function initIpcMain(){
             }
             mainWindow.minimize();
         }
-    })
-
-
+    });
 }
 
