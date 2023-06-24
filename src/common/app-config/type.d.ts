@@ -1,18 +1,26 @@
 interface IConfig {
-  setting: number;
-  setting1: boolean;
-  setting2: string;
-  setting3: {
-    dog: string;
-    dog1: {
-      a: number;
-      b: boolean;
-    };
+  normal: {
+    test: never;
   };
-  setting4: Array<{
-    dog6: "ss" | "dff";
-    dog7: boolean;
-  }>;
+  playMusic: {
+    /** 歌单内搜索区分大小写 */
+    caseSensitiveInSearch: boolean;
+    /** 默认播放音质 */
+    defaultQuality: IMusic.IQualityKey;
+    /** 默认播放音质缺失时 */
+    whenQualityMissing: "higher" | "lower";
+    /** 双击音乐列表时 */
+    clickMusicList: "normal" | "replace";
+  };
+  download: {
+    test: never;
+  };
+  shortCut: {
+    test: never;
+  };
+  backup: {
+    test: never;
+  };
 }
 
 type BasicType = string | number | symbol | null | undefined;
@@ -38,7 +46,6 @@ type KeyPaths<
           ? `${Root extends true ? `${K}` : `.${K}`}${KeyPaths<T[K], false>}`
           : never)
   : never;
-
 
 type KeyPathValue<T extends object, K extends string> = T extends Record<
   string | number,

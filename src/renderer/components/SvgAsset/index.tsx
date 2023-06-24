@@ -3,6 +3,7 @@ import { memo } from "react";
 export type SvgAssetIconNames =
   | "album"
   | "array-download-tray"
+  | "check"
   | "chevron-double-down"
   | "chevron-double-up"
   | "chevron-down"

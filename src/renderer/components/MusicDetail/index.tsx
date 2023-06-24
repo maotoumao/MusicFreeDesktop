@@ -2,7 +2,6 @@ import Evt from "@renderer/core/events";
 import AnimatedDiv from "../AnimatedDiv";
 import "./index.scss";
 import albumImg from "@/assets/imgs/album-cover.jpg";
-import navigatorHook from "@/common/navigator-hook";
 import { useCurrentMusic } from "@/renderer/core/track-player/player";
 import Store from "@/common/store";
 import Tag from "../Tag";
@@ -10,8 +9,9 @@ import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import Lyric from "./widgets/Lyric";
 import SvgAsset from "../SvgAsset";
 
-
 export const musicDetailShownStore = new Store(false);
+
+export const isMusicDetailShown = musicDetailShownStore.getValue;
 
 export default function () {
   const musicItem = useCurrentMusic();
@@ -19,9 +19,6 @@ export default function () {
 
   Evt.use("SHOW_MUSIC_DETAIL", () => {
     musicDetailShownStore.setValue(true);
-    navigatorHook.setNavigateHook(() => {
-      musicDetailShownStore.setValue(false);
-    });
   });
 
   Evt.use("HIDE_MUSIC_DETAIL", () => {
@@ -41,10 +38,15 @@ export default function () {
           backgroundImage: `url(${musicItem?.artwork ?? albumImg})`,
         }}
       ></div>
-      <div className="hide-music-detail" role="button" title="关闭歌曲详情页" onClick={() => {
-        musicDetailShownStore.setValue(false);
-      }}>
-        <SvgAsset iconName='chevron-down'></SvgAsset>
+      <div
+        className="hide-music-detail"
+        role="button"
+        title="关闭歌曲详情页"
+        onClick={() => {
+          musicDetailShownStore.setValue(false);
+        }}
+      >
+        <SvgAsset iconName="chevron-down"></SvgAsset>
       </div>
       <div className="music-title" title={musicItem?.title}>
         {musicItem?.title}

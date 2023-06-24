@@ -19,6 +19,7 @@ import {
   setUserPerference,
   setUserPerferenceIDB,
 } from "@/renderer/utils/user-perference";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 const initProgress = {
   currentTime: 0,
@@ -55,6 +56,9 @@ const currentVolumeStore = new Store(1);
 
 /** 速度 */
 const currentSpeedStore = new Store(1);
+
+/** 音质 */
+const currentQualityStore = new Store<IMusic.IQualityKey>("standard");
 
 /** 播放下标 */
 let currentIndex = -1;
@@ -93,16 +97,18 @@ export async function setupPlayer() {
 
   trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
   try {
-    const source = await callPluginDelegateMethod(
-      currentMusic,
-      "getMediaSource",
-      currentMusic,
-      "standard"
-    );
-    setTrackAndPlay(source, currentMusic, false);
-    if (currentProgress) {
-      trackPlayer.seekTo(currentProgress);
-    }
+    const { mediaSource, quality } = await getMediaSource(currentMusic, {
+      quality:
+        getUserPerference("currentQuality") ||
+        rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
+    });
+
+    setTrackAndPlay(mediaSource, currentMusic, {
+      seekTo: currentProgress,
+      autoPlay: false,
+    });
+
+    setQuality(quality);
   } catch {}
   currentIndex = findMusicIndex(currentMusic);
 
@@ -231,6 +237,11 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
   }
 }
 
+function setCurrentQuality(quality: IMusic.IQualityKey) {
+  setUserPerference("currentQuality", quality);
+  currentQualityStore.setValue(quality);
+}
+
 export function useCurrentMusic() {
   return currentMusicStore.useValue();
 }
@@ -250,6 +261,8 @@ export const useLyric = currentLyricStore.useValue;
 export const useVolume = currentVolumeStore.useValue;
 
 export const useSpeed = currentSpeedStore.useValue;
+
+export const useQuality = currentQualityStore.useValue;
 
 export function toggleRepeatMode() {
   let nextRepeatMode: RepeatMode = repeatModeStore.getValue();
@@ -366,14 +379,58 @@ export function skipToNext() {
 
 function splice() {}
 
+interface IGetMediaSourceOptions {
+  /** quality */
+  quality?: IMusic.IQualityKey;
+}
+
+async function getMediaSource(
+  musicItem: IMusic.IMusicItem,
+  options?: IGetMediaSourceOptions
+) {
+  const qualityOrder = getQualityOrder(
+    options.quality ??
+      rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
+    rendererAppConfig.getAppConfigPath("playMusic.whenQualityMissing")
+  );
+  let mediaSource: IPlugin.IMediaSourceResult | null = null;
+  let realQuality: IMusic.IQualityKey = qualityOrder[0];
+  for (const quality of qualityOrder) {
+    try {
+      mediaSource = await callPluginDelegateMethod(
+        {
+          platform: musicItem.platform,
+        },
+        "getMediaSource",
+        musicItem,
+        quality
+      );
+      if (!mediaSource?.url) {
+        continue;
+      }
+      realQuality = quality;
+      break;
+    } catch {}
+  }
+
+  return {
+    quality: realQuality,
+    mediaSource,
+  };
+}
+
 interface IPlayOptions {
   /** 播放相同音乐时是否从头开始 */
   restartOnSameMedia?: boolean;
   /** 强制更新源 */
   refreshSource?: boolean;
+  /** seetTo */
+  seekTo?: number;
+  /** quality */
+  quality?: IMusic.IQualityKey;
 }
 
-async function playIndex(nextIndex: number, options?: IPlayOptions) {
+async function playIndex(nextIndex: number, options: IPlayOptions = {}) {
   const musicQueue = musicQueueStore.getValue();
 
   nextIndex = (nextIndex + musicQueue.length) % musicQueue.length;
@@ -396,35 +453,24 @@ async function playIndex(nextIndex: number, options?: IPlayOptions) {
     const musicItem = musicQueue[currentIndex];
 
     try {
-      const qualityOrder = getQualityOrder("standard", "desc");
-      let mediaSource: IPlugin.IMediaSourceResult | null = null;
-      for (const quality of qualityOrder) {
-        try {
-          mediaSource = await callPluginDelegateMethod(
-            {
-              platform: musicItem.platform,
-            },
-            "getMediaSource",
-            musicItem,
-            quality
-          );
-          if (!mediaSource?.url) {
-            continue;
-          }
-          break;
-        } catch {}
-      }
+      const { mediaSource, quality } = await getMediaSource(musicItem, {
+        quality: options.quality,
+      });
       if (!mediaSource?.url) {
         throw new Error("Empty Source");
       }
       console.log("MEDIA SOURCE", mediaSource, musicItem);
       if (isSameMedia(musicItem, musicQueueStore.getValue()[currentIndex])) {
+        setQuality(quality);
         setCurrentMusic(musicItem);
         setTrackAndPlay(mediaSource, musicItem);
       }
     } catch (e) {
       // 播放失败
       setCurrentMusic(musicItem);
+      setQuality(
+        rendererAppConfig.getAppConfigPath("playMusic.defaultQuality")
+      );
       trackPlayer.clear();
       trackPlayerEventsEmitter.emit(TrackPlayerEvent.Error, e);
     }
@@ -475,16 +521,27 @@ export function resumePlay() {
   trackPlayer.play();
 }
 
+interface ISetTrackOptions {
+  // 默认自动播放
+  autoPlay?: boolean;
+  seekTo?: number;
+}
+
 /** 内部播放 */
 function setTrackAndPlay(
   mediaSource: IPlugin.IMediaSourceResult,
   musicItem: IMusic.IMusicItem,
-  autoPlay = true
+  options: ISetTrackOptions = {
+    autoPlay: true,
+  }
 ) {
   progressStore.setValue(initProgress);
   removeUserPerference("currentProgress");
   trackPlayer.setTrackSource(mediaSource, musicItem);
-  if (autoPlay) {
+  if (options.seekTo) {
+    trackPlayer.seekTo(options.seekTo);
+  }
+  if (options.autoPlay) {
     trackPlayer.play();
   }
 }
@@ -538,4 +595,24 @@ export function setVolume(volume: number) {
 
 export function setSpeed(speed: number) {
   trackPlayer.setSpeed(speed);
+}
+
+export async function setQuality(quality: IMusic.IQualityKey) {
+  const currentMusic = currentMusicStore.getValue();
+  if (currentMusic && quality !== currentQualityStore.getValue()) {
+    const { mediaSource, quality: realQuality } = await getMediaSource(
+      currentMusic,
+      {
+        quality,
+      }
+    );
+    if (isSameMedia(currentMusic, currentMusicStore.getValue())) {
+      setTrackAndPlay(mediaSource, currentMusic, {
+        seekTo: progressStore.getValue().currentTime,
+        autoPlay:
+          playerStateStore.getValue() === PlayerState.Playing ? true : false,
+      });
+      setQuality(realQuality);
+    }
+  }
 }

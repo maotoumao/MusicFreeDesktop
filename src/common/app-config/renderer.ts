@@ -5,8 +5,9 @@ import {
 } from "../ipc-util/renderer";
 import Store from "../store";
 import { IAppConfig, IAppConfigKeyPath, IAppConfigKeyPathValue } from "./type";
+import defaultAppConfig from "./default-app-config";
 
-const appConfigStore = new Store({});
+const appConfigStore = new Store<IAppConfig>({});
 
 async function setupRendererAppConfig() {
   ipcRendererOn("sync-app-config", (config) => {
@@ -21,7 +22,7 @@ function getAppConfigPath<K extends IAppConfigKeyPath>(
   keyPath: K
 ): IAppConfigKeyPathValue<K> {
   const value = appConfigStore.getValue();
-  return objectPath.get(value, keyPath);
+  return objectPath.get(value, keyPath) ?? defaultAppConfig[keyPath];
 }
 
 export async function setAppConfigPath<K extends IAppConfigKeyPath>(

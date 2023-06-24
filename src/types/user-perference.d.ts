@@ -5,6 +5,7 @@ declare namespace IUserPerference {
         /** 当前进度 */
         currentMusic: IMusic.IMusicItem;
         currentProgress: number;
+        currentQuality: IMusic.IQualityKey
         /** 当前音量 */
         volume: number;
         /** 倍速 */

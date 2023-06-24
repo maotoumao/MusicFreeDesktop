@@ -1,6 +1,8 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
 import { useLocation, useNavigate } from "react-router-dom";
+import Evt from "@/renderer/core/events";
+import { isMusicDetailShown } from "@/renderer/components/MusicDetail";
 
 export default function HeaderNavigator() {
   const navigate = useNavigate();
@@ -15,7 +17,11 @@ export default function HeaderNavigator() {
         title={canBack ? "后退" : undefined}
         role="button"
         onClick={() => {
-          navigate(-1);
+          if (isMusicDetailShown()) {
+            Evt.emit("HIDE_MUSIC_DETAIL");
+          } else {
+            navigate(-1);
+          }
         }}
       >
         <SvgAsset iconName="chevron-left"></SvgAsset>
@@ -25,7 +31,11 @@ export default function HeaderNavigator() {
         data-disabled={!canGo}
         title={canGo ? "前进" : undefined}
         onClick={() => {
-          navigate(1);
+          if (isMusicDetailShown()) {
+            Evt.emit("HIDE_MUSIC_DETAIL");
+          } else {
+            navigate(1);
+          }
         }}
       >
         <SvgAsset iconName="chevron-right"></SvgAsset>

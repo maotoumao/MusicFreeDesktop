@@ -7,6 +7,7 @@ import { produce } from "immer";
 import objectPath from "object-path";
 import { ipcMainHandle, ipcMainSend } from "../ipc-util/main";
 import { getMainWindow } from "@/main/window";
+import defaultAppConfig from "./default-app-config";
 
 const configDirPath = app.getPath("userData");
 // 所有的配置操作由主进程完成
@@ -124,5 +125,5 @@ export async function getAppConfigPath<K extends IAppConfigKeyPath>(
   keyPath: K
 ): Promise<IAppConfigKeyPathValue<K> | undefined> {
   const config = getAppConfig();
-  return objectPath.get(config, keyPath);
+  return objectPath.get(config, keyPath) ?? defaultAppConfig[keyPath];
 }

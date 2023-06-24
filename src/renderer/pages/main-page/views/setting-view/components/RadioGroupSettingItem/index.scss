@@ -1,0 +1,13 @@
+.setting-view--radio-group-setting-item-container {
+  & .label-container {
+    opacity: 0.6;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  & .options-container {
+    margin-top: 0.6rem;
+    display: flex;
+    gap: 0.5rem 3rem;
+  }
+}

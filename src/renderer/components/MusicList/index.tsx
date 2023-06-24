@@ -20,9 +20,13 @@ import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import { memo, useRef } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 interface IMusicListProps {
+  /** 展示的播放列表 */
   musicList: IMusic.IMusicItem[];
+  /** 实际的播放列表 */
+  getAllMusicItems?: () => IMusic.IMusicItem[];
   /** 音乐列表所属的歌单信息 */
   musicSheet?: IMusic.IMusicSheetItem;
   // enablePagination?: boolean; // 分页/虚拟长列表
@@ -147,6 +151,7 @@ function _MusicList(props: IMusicListProps) {
     onPageChange,
     musicSheet,
     virtualProps,
+    getAllMusicItems
   } = props;
 
   const table = useReactTable({
@@ -210,7 +215,17 @@ function _MusicList(props: IMusicListProps) {
                   );
                 }}
                 onDoubleClick={() => {
-                  trackPlayer.playMusic(row.original);
+                  const config = rendererAppConfig.getAppConfigPath(
+                    "playMusic.clickMusicList"
+                  );
+                  if (config === "replace") {
+                    trackPlayer.playMusicWithReplaceQueue(
+                      getAllMusicItems() ?? musicList,
+                      row.original
+                    );
+                  } else {
+                    trackPlayer.playMusic(row.original);
+                  }
                 }}
               >
                 {row.getAllCells().map((cell) => (

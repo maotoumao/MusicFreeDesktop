@@ -9,10 +9,10 @@ import rendererAppConfig from "@/common/app-config/renderer";
 
 export default async function () {
   await Promise.all([
+    rendererAppConfig.setupRendererAppConfig(),
     registerPluginEvents(),
     MusicSheet.setupSheets(),
     trackPlayer.setupPlayer(),
-    rendererAppConfig.setupRendererAppConfig()
   ]);
   dropHandler();
 }

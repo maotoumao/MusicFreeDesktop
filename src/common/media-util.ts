@@ -73,17 +73,17 @@ export function addSortProperty(
 /**
  *  获取音质顺序
  * 
- * asc: 优先高音质
- * desc：优先低音质
+ * higher: 优先高音质
+ * lower：优先低音质
  */
 export function getQualityOrder(
   qualityKey: IMusic.IQualityKey,
-  sort: "asc" | "desc"
+  sort: "higher" | "lower"
 ) {
   const idx = qualityKeys.indexOf(qualityKey);
   const left = qualityKeys.slice(0, idx);
   const right = qualityKeys.slice(idx + 1);
-  if (sort === "asc") {
+  if (sort === "higher") {
     /** 优先高音质 */
     return [qualityKey, ...right, ...left.reverse()];
   } else {

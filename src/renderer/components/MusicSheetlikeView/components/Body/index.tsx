@@ -14,6 +14,7 @@ import trackPlayer from "@/renderer/core/track-player";
 import { showModal } from "@/renderer/components/Modal";
 import { RequestStateCode, rem } from "@/common/constant";
 import { offsetHeightStore } from "../../store";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;
@@ -24,36 +25,46 @@ interface IProps {
 export default function Body(props: IProps) {
   const { musicList = [], musicSheet, state, onLoadMore } = props;
 
-
   const [inputSearch, setInputSearch] = useState("");
   const [filterMusicList, setFilterMusicList] = useState<
     IMusic.IMusicItem[] | null
   >(null);
   const [isPending, startTransition] = useTransition();
-  const offsetHeight = offsetHeightStore.useValue();
 
   useEffect(() => {
     if (inputSearch.trim() === "") {
       setFilterMusicList(null);
     } else {
       startTransition(() => {
-        setFilterMusicList(
-          musicList.filter(
-            (item) =>
-              item.title.includes(inputSearch) ||
-              item.artist.includes(inputSearch) ||
-              item.album?.includes(inputSearch)
-          )
+        const caseSensitive = rendererAppConfig.getAppConfigPath(
+          "playMusic.caseSensitiveInSearch"
         );
+        if (caseSensitive) {
+          setFilterMusicList(
+            musicList.filter(
+              (item) =>
+                item.title?.includes(inputSearch) ||
+                item.artist?.includes(inputSearch) ||
+                item.album?.includes(inputSearch)
+            )
+          );
+        } else {
+          const searchText = inputSearch.toLocaleLowerCase();
+          setFilterMusicList(
+            musicList.filter(
+              (item) =>
+                item.title?.toLocaleLowerCase()?.includes(searchText) ||
+                item.artist?.toLocaleLowerCase()?.includes(searchText) ||
+                item.album?.toLocaleLowerCase()?.includes(searchText)
+            )
+          );
+        }
       });
     }
   }, [inputSearch]);
 
   return (
-    <div
-      className="music-sheetlike-view--body-container"
-
-    >
+    <div className="music-sheetlike-view--body-container">
       <div className="operations">
         <div className="buttons">
           <div
@@ -105,6 +116,7 @@ export default function Body(props: IProps) {
       >
         <MusicList
           musicList={filterMusicList ?? musicList}
+          getAllMusicItems={() => musicList}
           musicSheet={musicSheet}
           state={state}
           onPageChange={onLoadMore}
@@ -112,7 +124,7 @@ export default function Body(props: IProps) {
             getScrollElement() {
               return document.querySelector("#page-container");
             },
-            offsetHeight: () => offsetHeightStore.getValue()
+            offsetHeight: () => offsetHeightStore.getValue(),
           }}
         ></MusicList>
       </Condition>

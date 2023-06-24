@@ -5,6 +5,7 @@ import { showModal } from "../Modal";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import HeaderNavigator from "./widgets/Navigator";
+import Evt from "@/renderer/core/events";
 
 export default function AppHeader() {
   const navigate = useNavigate();
@@ -40,15 +41,25 @@ export default function AppHeader() {
       </div>
 
       <div className="right-part">
-        <div role="button" className="header-button sparkles-icon" onClick={() => {
-          showModal('Sparkles')
-        }}>
+        <div
+          role="button"
+          className="header-button sparkles-icon"
+          onClick={() => {
+            showModal("Sparkles");
+          }}
+        >
           <SvgAsset iconName="sparkles"></SvgAsset>
         </div>
         <div className="header-divider"></div>
-        <div role="button" className="header-button" title="设置" onClick={() => {
-          navigate('/main/setting')
-        }}>
+        <div
+          role="button"
+          className="header-button"
+          title="设置"
+          onClick={() => {
+            navigate("/main/setting");
+            Evt.emit("HIDE_MUSIC_DETAIL");
+          }}
+        >
           <SvgAsset iconName="cog-8-tooth"></SvgAsset>
         </div>
         <div

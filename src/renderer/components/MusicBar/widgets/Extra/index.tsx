@@ -10,9 +10,11 @@ import Slider from "rc-slider";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
+  const quality = trackPlayer.useQuality();
 
   return (
     <div className="music-extra">
+      <div className="extra-btn">{quality}</div>
       <SpeedBtn></SpeedBtn>
       <VolumeBtn></VolumeBtn>
       <div className="extra-btn">
@@ -128,12 +130,10 @@ function VolumeBtn() {
   );
 }
 
-
 function SpeedBtn() {
   const speed = trackPlayer.useSpeed();
   const [showSpeedBubble, setShowSpeedBubble] = useState(false);
   const tmpSpeedRef = useRef<number | null>(null);
-
 
   return (
     <div
@@ -185,13 +185,10 @@ function SpeedBtn() {
               }}
             ></Slider>
           </div>
-          <div className="volume-slider-tag">{(speed).toFixed(2)}x</div>
+          <div className="volume-slider-tag">{speed.toFixed(2)}x</div>
         </div>
       </Condition>
-      <SvgAsset
-        title={'倍速播放'}
-        iconName={'dashboard-speed'}
-      ></SvgAsset>
+      <SvgAsset title={"倍速播放"} iconName={"dashboard-speed"}></SvgAsset>
     </div>
   );
 }
