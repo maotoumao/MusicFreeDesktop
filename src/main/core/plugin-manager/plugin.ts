@@ -7,6 +7,7 @@ import qs from 'qs';
 import * as cheerio from 'cheerio';
 import he from 'he';
 import PluginMethods from './plugin-methods';
+import reactNativeCookies from './polyfill/react-native-cookies';
 
 axios.defaults.timeout = 15000;
 
@@ -27,7 +28,7 @@ const packages: Record<string, any> = {
     'big-integer': bigInt,
     qs,
     he,
-    '@react-native-cookies/cookies': {},
+    '@react-native-cookies/cookies': reactNativeCookies,
 };
 
 const _require = (packageName: string) => {
