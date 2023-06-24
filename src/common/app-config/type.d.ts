@@ -11,6 +11,8 @@ interface IConfig {
     whenQualityMissing: "higher" | "lower";
     /** 双击音乐列表时 */
     clickMusicList: "normal" | "replace";
+    /** 播放失败时 */
+    playError: 'pause' | 'skip'
   };
   download: {
     test: never;

@@ -55,6 +55,21 @@ export default function PlayMusic(props: IProps) {
         ]}
       ></RadioGroupSettingItem>
       <RadioGroupSettingItem
+        label="播放失败时"
+        keyPath="playMusic.playError"
+        value={data?.playError}
+        options={[
+          {
+            value: "pause",
+            title: "暂停",
+          },
+          {
+            value: "skip",
+            title: "自动播放下一首",
+          },
+        ]}
+      ></RadioGroupSettingItem>
+      <RadioGroupSettingItem
         label="双击音乐列表时"
         keyPath="playMusic.clickMusicList"
         value={data?.clickMusicList}

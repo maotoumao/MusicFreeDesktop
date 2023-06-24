@@ -20,6 +20,7 @@ import {
   setUserPerferenceIDB,
 } from "@/renderer/utils/user-perference";
 import rendererAppConfig from "@/common/app-config/renderer";
+import { delay } from "@/common/time-util";
 
 const initProgress = {
   currentTime: 0,
@@ -97,13 +98,11 @@ export async function setupPlayer() {
 
   trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
   try {
-    console.log("getMeda");
     const { mediaSource, quality } = await getMediaSource(currentMusic, {
       quality:
         getUserPerference("currentQuality") ||
         rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
     });
-    console.log("ggg");
 
     setTrackAndPlay(mediaSource, currentMusic, {
       seekTo: currentProgress,
@@ -168,13 +167,19 @@ function setupEvents() {
     playerStateStore.setValue(st);
   });
 
-  trackPlayerEventsEmitter.on(TrackPlayerEvent.Error, () => {
-    // 播放错误时自动跳到下一首
-    if (musicQueueStore.getValue().length > 1) {
-      skipToNext();
-    } else {
-      progressStore.setValue(initProgress);
-      removeUserPerference("currentProgress");
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.Error, async () => {
+    progressStore.setValue(initProgress);
+    removeUserPerference("currentProgress");
+    const currentMusic = currentMusicStore.getValue();
+    // 播放错误时自动跳到下一首, 间隔500ms，防止疯狂循环。。
+    if (
+      musicQueueStore.getValue().length > 1 &&
+      rendererAppConfig.getAppConfigPath("playMusic.playError") === "skip"
+    ) {
+      await delay(500);
+      if (isSameMedia(currentMusic, currentMusicStore.getValue())) {
+        skipToNext();
+      }
     }
   });
 
@@ -390,7 +395,7 @@ async function getMediaSource(
   musicItem: IMusic.IMusicItem,
   options?: IGetMediaSourceOptions
 ) {
-  const qualityOrder = getQualityOrder( 
+  const qualityOrder = getQualityOrder(
     options.quality ??
       rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
     rendererAppConfig.getAppConfigPath("playMusic.whenQualityMissing")

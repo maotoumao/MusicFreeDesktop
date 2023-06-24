@@ -8,7 +8,8 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
     'playMusic.whenQualityMissing': 'lower',
     'playMusic.defaultQuality': 'standard',
     'playMusic.clickMusicList': 'replace',
-    'playMusic.caseSensitiveInSearch': false
+    'playMusic.caseSensitiveInSearch': false,
+    'playMusic.playError': 'pause'
 } as const;
 
 export default defaultAppConfig;
