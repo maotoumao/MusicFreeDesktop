@@ -25,6 +25,11 @@ export default function () {
       route: "download",
     },
     {
+      iconName: "array-download-tray",
+      title: "本地音乐",
+      route: "localsheet",
+    },
+    {
       iconName: "code-bracket-square",
       title: "插件管理",
       route: "plugin-manager-view",

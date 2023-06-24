@@ -12,7 +12,10 @@ import { compare } from "compare-versions";
 import { nanoid } from "nanoid";
 import { addRandomHash } from "@/common/normalize-util";
 
-const pluginBasePath = path.resolve(app.getPath("userData"), "./musicfree-plugins");
+const pluginBasePath = path.resolve(
+  app.getPath("userData"),
+  "./musicfree-plugins"
+);
 
 let plugins: Plugin[] = [];
 let clonedPlugins: IPlugin.IPluginDelegate[] = [];
@@ -78,6 +81,25 @@ function registerEvents() {
       const url = urlLike.trim();
       if (url.endsWith(".js")) {
         await installPluginFromUrl(addRandomHash(url));
+      } else if (url.endsWith(".json")) {
+        const jsonFile = (await axios.get(addRandomHash(url))).data;
+
+        for (const cfg of jsonFile?.plugins ?? []) {
+          await installPluginFromUrl(addRandomHash(cfg.url));
+        }
+      }
+    } catch (e) {
+      throw e;
+    } finally {
+      sendPlugins();
+    }
+  });
+  ipcMainHandle("install-plugin-local", async (urlLike: string) => {
+    try {
+      const url = urlLike.trim();
+      if (url.endsWith(".js")) {
+        const rawCode = await fs.readFile(url, "utf8");
+        await installPluginFromRawCode(rawCode);
       } else if (url.endsWith(".json")) {
         const jsonFile = (await axios.get(addRandomHash(url))).data;
 

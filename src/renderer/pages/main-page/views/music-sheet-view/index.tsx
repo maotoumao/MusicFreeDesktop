@@ -17,13 +17,11 @@ export default function MusicSheetView() {
   const { platform } = useParams() ?? {};
 
   return (
-    <>
-      <Condition
-        condition={platform === localPluginName}
-        falsy={<RemoteSheet></RemoteSheet>}
-      >
-        <LocalSheet></LocalSheet>
-      </Condition>
-    </>
+    <Condition
+      condition={platform === localPluginName}
+      falsy={<RemoteSheet></RemoteSheet>}
+    >
+      <LocalSheet></LocalSheet>
+    </Condition>
   );
 }

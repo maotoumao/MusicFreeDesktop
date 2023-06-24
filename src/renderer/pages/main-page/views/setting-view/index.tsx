@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { IConfig } from "@/common/app-config/type";
 import Condition from "@/renderer/components/Condition";
 
-
 export default function SettingView() {
   const appConfig = rendererAppConfig.useAppConfig();
   console.log(appConfig);
@@ -16,6 +15,9 @@ export default function SettingView() {
   const intersectionRatioRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
+    document
+      .getElementById("page-container")
+      ?.classList?.add("page-container-full-width");
     intersectionObserverRef.current = new IntersectionObserver(
       (targets) => {
         const ratio = intersectionRatioRef.current;
@@ -45,6 +47,10 @@ export default function SettingView() {
       }
     }
     return () => {
+      document
+        .getElementById("page-container")
+        ?.classList?.remove("page-container-full-width");
+
       intersectionObserverRef.current.disconnect();
       intersectionObserverRef.current = null;
       intersectionRatioRef.current.clear();

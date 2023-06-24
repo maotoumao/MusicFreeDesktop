@@ -8,6 +8,8 @@
     width: 100%;
     overflow-x: auto;
     flex-shrink: 0;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 
     & .tab-list-container {
       gap: 1.5rem;
@@ -29,6 +31,8 @@
     margin-top: 1rem;
     padding-bottom: 1rem;
     height: max-content;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 
     & .setting-view--body-item-container {
       width: 100%;

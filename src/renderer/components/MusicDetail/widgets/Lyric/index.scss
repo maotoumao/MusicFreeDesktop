@@ -2,6 +2,7 @@
   width: 360px;
   height: 420px;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   font-size: 1rem;
   cursor: default;
   position: relative;
@@ -17,9 +18,13 @@
     #fff 75%,
     transparent 100%
   );
-  
+
   &::-webkit-scrollbar {
     display: none;
+  }
+
+  &:hover::-webkit-scrollbar {
+    display: block;
   }
 
   &[data-loading="false"] {

@@ -11,6 +11,8 @@ declare namespace IpcEvents {
 
     /** 刷新插件 */
     "refresh-plugins": undefined;
+
+    "open-url": string;
   }
 }
 
@@ -41,8 +43,11 @@ declare namespace IpcInvoke {
       keyPath: Key;
       value: IAppConfigKeyPathValue<Key>;
     }) => boolean;
-    "install-plugin-remote": (url: string) => void
-    "install-plugin-local": (url: string) => void
-    "uninstall-plugin": (pluginhash: string) => void
+    "install-plugin-remote": (url: string) => void;
+    "install-plugin-local": (url: string) => void;
+    "uninstall-plugin": (pluginhash: string) => void;
+    "show-open-dialog": (
+      options: Electron.OpenDialogOptions
+    ) => Electron.OpenDialogReturnValue;
   }
 }

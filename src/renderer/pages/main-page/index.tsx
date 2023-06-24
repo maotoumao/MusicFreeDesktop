@@ -14,10 +14,11 @@ import RecommendSheetsView from "./views/recommend-sheets-view";
 import SettingView from "./views/setting-view";
 
 export default function MainPage() {
+
   return (
     <>
       <SideBar></SideBar>
-      <div className="pages-container" id="page-container">
+      <div className="page-container" id="page-container">
         <Routes>
           <Route
             path="search/:query"
