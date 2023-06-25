@@ -65,3 +65,18 @@ export const createMainWindow = (): BrowserWindow => {
 };
 
 export const getMainWindow = () => mainWindow;
+
+
+export function showWindow(){
+  if(!mainWindow) {
+    return;
+  }
+  if(mainWindow.isMinimized()) {
+    mainWindow.restore();
+  } else if (mainWindow.isVisible()) {
+    mainWindow.focus()
+  } else {
+    mainWindow.show();
+  }
+  mainWindow.setSkipTaskbar(false);
+}

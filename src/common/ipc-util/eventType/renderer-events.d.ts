@@ -6,13 +6,17 @@ declare namespace IpcEvents {
       skipTaskBar?: boolean; // 是否隐藏任务栏
     };
 
-    /** 关闭窗口 */
-    "close-window": undefined;
+    /** 退出应用 */
+    "exit-app": undefined;
 
     /** 刷新插件 */
     "refresh-plugins": undefined;
 
     "open-url": string;
+
+    "sync-current-music": IMusic.IMusicItem;
+    "sync-current-playing-state": import("@/renderer/core/track-player/enum").PlayerState;
+    "sync-current-repeat-mode": import("@/renderer/core/track-player/enum").RepeatMode;
   }
 }
 

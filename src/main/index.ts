@@ -1,8 +1,9 @@
 import { app, BrowserWindow, screen } from "electron";
-import { createMainWindow } from "./window";
+import { createMainWindow, getMainWindow, showWindow } from "./window";
 import setupIpcMain from "./ipc";
 import { setupPluginManager } from "./core/plugin-manager";
 import { setupMainAppConfig } from "@/common/app-config/main";
+import { setupTray } from "./tray";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -31,10 +32,22 @@ app.on("activate", () => {
   }
 });
 
+
+if(!app.requestSingleInstanceLock()){
+  app.exit(0);
+}
+
+app.on('second-instance', () => {
+  if(getMainWindow()) {
+    showWindow();
+  }
+})
+
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 app.whenReady().then(() => {
   setupIpcMain();
   setupPluginManager();
   setupMainAppConfig();
+  setupTray();
 })

@@ -9,7 +9,8 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
     'playMusic.defaultQuality': 'standard',
     'playMusic.clickMusicList': 'replace',
     'playMusic.caseSensitiveInSearch': false,
-    'playMusic.playError': 'pause'
+    'playMusic.playError': 'pause',
+    'normal.closeBehavior': 'minimize'
 } as const;
 
 export default defaultAppConfig;

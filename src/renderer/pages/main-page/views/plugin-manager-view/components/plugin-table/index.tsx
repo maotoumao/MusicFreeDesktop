@@ -16,7 +16,6 @@ import { hideModal, showModal } from "@/renderer/components/Modal";
 import Empty from "@/renderer/components/Empty";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import { toast } from "react-toastify";
-import { toastDuration } from "@/common/constant";
 
 function renderOptions(info: any) {
   const row = info.row.original as IPlugin.IPluginDelegate;
@@ -70,7 +69,7 @@ function renderOptions(info: any) {
               title: "导入单曲",
               withLoading: true,
               loadingText: "正在导入中",
-              placeholder: "输入目标链接",
+              placeholder: `输入${row.platform}单曲链接`,
               maxLength: 1000,
               onOk(text) {
                 return callPluginDelegateMethod(
@@ -105,7 +104,7 @@ function renderOptions(info: any) {
               title: "导入歌单",
               withLoading: true,
               loadingText: "正在导入中",
-              placeholder: "输入目标歌单",
+              placeholder: `输入${row.platform}歌单链接`,
               maxLength: 1000,
               onOk(text) {
                 return callPluginDelegateMethod(

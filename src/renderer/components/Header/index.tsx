@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import HeaderNavigator from "./widgets/Navigator";
 import Evt from "@/renderer/core/events";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 export default function AppHeader() {
   const navigate = useNavigate();
@@ -77,8 +78,14 @@ export default function AppHeader() {
           title="退出"
           className="header-button"
           onClick={() => {
-            showModal("ExitConfirm");
-            console.log("close");
+            const exitBehavior = rendererAppConfig.getAppConfigPath('normal.closeBehavior');
+            if(exitBehavior === 'minimize') {
+              ipcRendererSend('min-window', {
+                skipTaskBar: true
+              })
+            } else {
+              ipcRendererSend('exit-app');
+            }
           }}
         >
           <SvgAsset iconName="x-mark"></SvgAsset>

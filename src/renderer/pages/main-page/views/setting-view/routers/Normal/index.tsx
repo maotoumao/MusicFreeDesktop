@@ -1,7 +1,33 @@
+import { IAppConfig } from '@/common/app-config/type';
+import RadioGroupSettingItem from '../../components/RadioGroupSettingItem';
 import './index.scss';
 
-export default function Normal() {
+interface IProps {
+  data: IAppConfig["normal"];
+}
+
+
+export default function Normal(props: IProps) {
+  const {data} = props;
+
   return (
-    <div className='setting-view--normal-container'>PlayMusic</div>
+    <div className='setting-view--normal-container'>
+      <RadioGroupSettingItem
+        label="默认播放音质"
+        keyPath='normal.closeBehavior'
+        value={data?.closeBehavior}
+        options={[
+          {
+            value: "exit",
+            title: "退出应用",
+          },
+          {
+            value: "minimize",
+            title: "最小化到托盘",
+          },
+        
+        ]}
+      ></RadioGroupSettingItem>
+    </div>
   )
 }

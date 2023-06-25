@@ -46,7 +46,7 @@ declare namespace IMusic {
          /** 专辑封面图 */
          artwork?: string;
          /** 默认音源 */
-         url: string;
+         url?: string;
          // todo: 格式化
          /** 歌词URL */
          lrc?: string;

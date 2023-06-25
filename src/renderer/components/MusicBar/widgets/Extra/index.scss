@@ -12,7 +12,7 @@
   & .extra-btn {
     cursor: pointer;
     color: var(--textColor);
-    margin-left: 10px;
+    margin-left: 12px;
     height: 32px;
     position: relative;
     display: flex;
@@ -49,8 +49,8 @@
     }
 
     & svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
     }
   }
 }

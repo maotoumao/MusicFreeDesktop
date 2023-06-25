@@ -38,6 +38,6 @@ export function ipcMainHandle<T extends keyof IpcInvoke.Renderer>(
 
 
 /** 主进程给渲染进程发送消息 */
-export function ipcMainSend<T extends keyof IpcEvents.Main>(rendererWindow: BrowserWindow, channel: T, args: IpcEvents.Main[T]) {
+export function ipcMainSend<T extends keyof IpcEvents.Main>(rendererWindow: BrowserWindow, channel: T, args?: IpcEvents.Main[T]) {
     rendererWindow.webContents.send(channel, args);
 }

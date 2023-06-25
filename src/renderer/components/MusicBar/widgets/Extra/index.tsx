@@ -199,7 +199,7 @@ function QualityBtn() {
 
   return (
     <div className="extra-btn" role="button" onClick={(e) => {
-      toast("wow so easy" + Math.random())
+      
     }}>
       <SwitchCase.Switch switch={quality}>
         <SwitchCase.Case case={"low"}>

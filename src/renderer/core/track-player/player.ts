@@ -21,6 +21,7 @@ import {
 } from "@/renderer/utils/user-perference";
 import rendererAppConfig from "@/common/app-config/renderer";
 import { delay } from "@/common/time-util";
+import { ipcRendererOn, ipcRendererSend } from "@/common/ipc-util/renderer";
 
 const initProgress = {
   currentTime: 0,
@@ -70,7 +71,7 @@ export async function setupPlayer() {
   const _repeatMode = getUserPerference("repeatMode");
 
   if (_repeatMode) {
-    repeatModeStore.setValue(_repeatMode as RepeatMode);
+    setRepeatMode(_repeatMode as RepeatMode);
   }
 
   const [currentMusic, currentProgress] = [
@@ -112,13 +113,6 @@ export async function setupPlayer() {
     setCurrentQuality(quality);
   } catch {}
   currentIndex = findMusicIndex(currentMusic);
-
-  navigator.mediaSession.setActionHandler("previoustrack", () => {
-    skipToPrev();
-  });
-  navigator.mediaSession.setActionHandler("nexttrack", () => {
-    skipToNext();
-  });
 }
 
 function setupEvents() {
@@ -165,6 +159,7 @@ function setupEvents() {
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.StateChanged, (st) => {
     playerStateStore.setValue(st);
+    ipcRendererSend("sync-current-playing-state", st);
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.Error, async () => {
@@ -225,6 +220,34 @@ function setupEvents() {
       }
     }
   });
+
+  ipcRendererOn("switch-music-state", (playerState) => {
+    if (playerState === PlayerState.Playing) {
+      resumePlay();
+    } else {
+      pause();
+    }
+  });
+
+  navigator.mediaSession.setActionHandler("nexttrack", () => {
+    skipToNext();
+  });
+
+  ipcRendererOn("skip-next", () => {
+    skipToNext();
+  });
+
+  navigator.mediaSession.setActionHandler("previoustrack", () => {
+    skipToPrev();
+  });
+
+  ipcRendererOn("skip-prev", () => {
+    skipToPrev();
+  });
+
+  ipcRendererOn("set-repeat-mode", (repeatMode) => {
+    setRepeatMode(repeatMode);
+  });
 }
 
 function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
@@ -239,6 +262,13 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
     currentLyricStore.setValue(null);
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
     setUserPerference("currentMusic", music);
+    ipcRendererSend("sync-current-music", {
+      platform: music.platform,
+      title: music.title,
+      artist: music.artist,
+      id: music.id,
+      album: music.album,
+    });
   } else {
     currentMusicStore.setValue(music);
   }
@@ -296,6 +326,7 @@ export function setRepeatMode(repeatMode: RepeatMode) {
   repeatModeStore.setValue(repeatMode);
   setUserPerference("repeatMode", repeatMode);
   currentIndex = findMusicIndex(currentMusicStore.getValue());
+  ipcRendererSend("sync-current-repeat-mode", repeatMode);
 }
 
 function findMusicIndex(musicItem?: IMusic.IMusicItem) {

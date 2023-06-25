@@ -1,6 +1,6 @@
 interface IConfig {
   normal: {
-    test: never;
+    closeBehavior: 'exit' | 'minimize'
   };
   playMusic: {
     /** 歌单内搜索区分大小写 */
