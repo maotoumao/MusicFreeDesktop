@@ -54,5 +54,9 @@ declare namespace IpcInvoke {
       options: Electron.OpenDialogOptions
     ) => Electron.OpenDialogReturnValue;
     'check-update': () => ICommon.IUpdateInfo;
+    /** 本地文件 */
+    'sync-local-file': () => void;
+    'add-watch-dir': (dirs: string[]) => void;
+    'remove-watch-dir': (dirs: string[]) => void;
   }
 }

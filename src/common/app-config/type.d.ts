@@ -25,6 +25,10 @@ interface IConfig {
   backup: {
     test: never;
   };
+  /** 本地音乐配置 */
+  localMusic: {
+    watchDir: string[];
+  }
 }
 
 type BasicType = string | number | symbol | null | undefined;

@@ -44,6 +44,7 @@ async function checkPath() {
 
 export async function setupMainAppConfig() {
   await checkPath();
+  await getAppConfig();
   ipcMainHandle('sync-app-config', () => {
     return getAppConfig();
   })

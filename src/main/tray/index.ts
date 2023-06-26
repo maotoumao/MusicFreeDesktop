@@ -5,24 +5,16 @@ import {
   Tray,
   app,
 } from "electron";
-import path from "path";
 import { showWindow } from "../window";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
 import { ipcMainSendMainWindow } from "@/common/ipc-util/main";
+import { getResPath } from "../util";
 
 let tray: Tray | null = null;
 
-const resourcesPath = app.isPackaged
-  ? path.resolve(process.resourcesPath, "res")
-  : path.resolve(__dirname, "../../res");
-
-const getResourcePath = (resourceName: string) => {
-  return path.resolve(resourcesPath, resourceName);
-};
-
 export function setupTray() {
-  const iconPath = getResourcePath("logo.ico");
+  const iconPath = getResPath("logo.ico");
 
   tray = new Tray(iconPath);
 

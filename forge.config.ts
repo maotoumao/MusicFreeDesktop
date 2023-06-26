@@ -15,7 +15,8 @@ const config: ForgeConfig = {
     icon: path.resolve(__dirname, "resources/logo"),
     executableName: "MusicFree",
     extraResource: [
-      path.resolve(__dirname, 'res')
+      path.resolve(__dirname, 'res'),
+      
     ],
   },
   rebuildConfig: {},

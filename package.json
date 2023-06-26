@@ -70,6 +70,7 @@
     "axios": "^1.4.0",
     "big-integer": "^1.6.51",
     "cheerio": "^1.0.0-rc.12",
+    "chokidar": "^3.5.3",
     "color": "^4.2.3",
     "compare-versions": "^6.0.0-rc.1",
     "crypto-js": "^4.1.1",

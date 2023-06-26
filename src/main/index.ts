@@ -1,14 +1,15 @@
-import { app, BrowserWindow, screen } from "electron";
+import { app, BrowserWindow } from "electron";
 import { createMainWindow, getMainWindow, showWindow } from "./window";
 import setupIpcMain from "./ipc";
 import { setupPluginManager } from "./core/plugin-manager";
 import { setupMainAppConfig } from "@/common/app-config/main";
 import { setupTray } from "./tray";
+import { setupLocalMusicManager } from "./core/local-music-manager";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require("electron-squirrel-startup")) {
-  app.quit();
-}
+// if (require("electron-squirrel-startup")) {
+//   app.quit();
+// }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -47,7 +48,8 @@ app.on('second-instance', () => {
 // code. You can also put them in separate files and import them here.
 app.whenReady().then(() => {
   setupIpcMain();
-  setupPluginManager();
   setupMainAppConfig();
+  setupPluginManager();
   setupTray();
+  setupLocalMusicManager();
 })
