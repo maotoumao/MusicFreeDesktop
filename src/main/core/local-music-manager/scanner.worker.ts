@@ -1,16 +1,9 @@
 // /***** thread ******/
-// import { parentPort } from "worker_threads";
-// import * as chokidar from 'chokidar';
-// import { supportLocalMediaType } from "@/common/constant";
+import { parentPort, isMainThread, workerData } from "worker_threads";
+import * as chokidar from "chokidar";
+import { supportLocalMediaType } from "@/common/constant";
 
-// let watchDirs: string[] = [];
-// // const glob = supportLocalMediaType.map()
+const watchDirs: string[] = [];
 
-// // chokidar.watch(watchDirs, {
-// //   "ignorePermissionErrors": true,
-// // }).on('change', )
-
-
-// parentPort.postMessage({
-//     hi: "sdds"
-// }); 
+console.log(workerData, "什么东西");
+parentPort.postMessage("what the fuck!!!!");

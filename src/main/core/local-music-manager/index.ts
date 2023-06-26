@@ -1,15 +1,13 @@
-// import { Worker } from "worker_threads";
-// import path from "path";
+import { Worker } from "worker_threads";
+import path from "path";
 
 export async function setupLocalMusicManager() {
-
-    // const worker: Worker = new Worker(new URL(
-    //     /* webpackChunkName: 'scannerWorker' */
-    //     './scanner.worker',
-    //     import.meta.url,
-    //   ))
-    // worker.on('message', (data) => {
-    //     console.log(data)
-    // })
+  const worker: Worker = new Worker(path.resolve(__dirname, "scanner.worker"), {
+    workerData: {
+      aaa: "sddasd",
+    },
+  });
+  worker.on("message", (data) => {
+    console.log(data, "收到啦！！");
+  });
 }
-

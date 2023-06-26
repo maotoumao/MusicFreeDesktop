@@ -9,7 +9,10 @@ export const mainConfig: Configuration = {
    * This is the main entry point for your application, it's the first file
    * that runs in the main process.
    */
-  entry: "./src/main/index.ts",
+  entry: {
+    index: "./src/main/index.ts",
+    'scanner.worker': './src/main/core/local-music-manager/scanner.worker.ts'
+  },
   // Put your normal webpack config below here
   module: {
     rules,
@@ -21,4 +24,7 @@ export const mainConfig: Configuration = {
       "@main": path.join(__dirname, "../src/main"),
     },
   },
+  output: {
+    filename: '[name].js'
+  }
 };
