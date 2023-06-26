@@ -14,7 +14,8 @@ declare namespace IUserPerference {
         subscription: {
             title?: string;
             srcUrl: string;
-        }
+        },
+        skipVersion: string;
     }
 
     interface IDBType {

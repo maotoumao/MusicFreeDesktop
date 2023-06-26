@@ -12,9 +12,9 @@ import ToplistView from "./views/toplist-view";
 import TopListDetailView from "./views/toplist-detail-view";
 import RecommendSheetsView from "./views/recommend-sheets-view";
 import SettingView from "./views/setting-view";
+import { showModal } from "@/renderer/components/Modal";
 
 export default function MainPage() {
-
   return (
     <>
       <SideBar></SideBar>
@@ -55,7 +55,7 @@ export default function MainPage() {
             element={
               <div>
                 啥都没有
-                <div role="button" data-type="primaryButton">
+                <div role="button" data-type="primaryButton" onClick={() => {}}>
                   一个按钮
                 </div>
                 <div role="button" data-type="primaryButton" data-disabled>

@@ -53,5 +53,6 @@ declare namespace IpcInvoke {
     "show-open-dialog": (
       options: Electron.OpenDialogOptions
     ) => Electron.OpenDialogReturnValue;
+    'check-update': () => ICommon.IUpdateInfo;
   }
 }

@@ -4,6 +4,8 @@ import { app, dialog, net, shell } from "electron";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import { setupTrayMenu } from "../tray";
+import axios from "axios";
+import { compare } from "compare-versions";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -49,11 +51,34 @@ export default function setupIpcMain() {
     setupTrayMenu();
   });
 
-  ipcMainOn('sync-current-repeat-mode', (repeatMode) => {
+  ipcMainOn("sync-current-repeat-mode", (repeatMode) => {
     currentMusicInfoStore.setValue((prev) => ({
       ...prev,
       currentRepeatMode: repeatMode,
     }));
     setupTrayMenu();
+  });
+
+  const updateSources = [
+    "https://gitee.com/maotoumao/MusicFree/raw/master/release/version.json",
+    "https://raw.githubusercontent.com/maotoumao/MusicFree/master/release/version.json",
+  ];
+  ipcMainHandle("check-update", async () => {
+    const currentVersion = app.getVersion();
+    const updateInfo: ICommon.IUpdateInfo = {
+      version: currentVersion,
+    };
+    for (let i = 0; i < updateSources.length; ++i) {
+      try {
+        const rawInfo = (await axios.get(updateSources[i])).data;
+        if (compare(rawInfo.version, currentVersion, ">")) {
+          updateInfo.update = rawInfo;
+          return updateInfo;
+        }
+      } catch {
+        continue;
+      }
+    }
+    return updateInfo;
   });
 }

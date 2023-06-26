@@ -6,10 +6,10 @@ import {
   app,
 } from "electron";
 import path from "path";
-import { getMainWindow, showWindow } from "../window";
+import { showWindow } from "../window";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
-import { ipcMainSend } from "@/common/ipc-util/main";
+import { ipcMainSendMainWindow } from "@/common/ipc-util/main";
 
 let tray: Tray | null = null;
 
@@ -35,7 +35,7 @@ export function setupTray() {
 
 function openMusicDetail() {
   showWindow();
-  ipcMainSend(getMainWindow(), "navigate", "evt://SHOW_MUSIC_DETAIL");
+  ipcMainSendMainWindow("navigate", "evt://SHOW_MUSIC_DETAIL");
 }
 
 export function setupTrayMenu() {
@@ -91,17 +91,9 @@ export function setupTrayMenu() {
           return;
         }
         if (currentPlayerState === PlayerState.Playing) {
-          ipcMainSend(
-            getMainWindow(),
-            "switch-music-state",
-            PlayerState.Paused
-          );
+          ipcMainSendMainWindow("switch-music-state", PlayerState.Paused);
         } else if (currentPlayerState === PlayerState.Paused) {
-          ipcMainSend(
-            getMainWindow(),
-            "switch-music-state",
-            PlayerState.Playing
-          );
+          ipcMainSendMainWindow("switch-music-state", PlayerState.Playing);
         }
       },
     },
@@ -109,14 +101,14 @@ export function setupTrayMenu() {
       label: "上一首",
       enabled: !!currentMusic,
       click() {
-        ipcMainSend(getMainWindow(), "skip-prev");
+        ipcMainSendMainWindow("skip-prev");
       },
     },
     {
       label: "下一首",
       enabled: !!currentMusic,
       click() {
-        ipcMainSend(getMainWindow(), "skip-next");
+        ipcMainSendMainWindow("skip-next");
       },
     }
   );
@@ -131,7 +123,7 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Loop,
         click() {
-          ipcMainSend(getMainWindow(), "set-repeat-mode", RepeatMode.Loop);
+          ipcMainSendMainWindow("set-repeat-mode", RepeatMode.Loop);
         },
       },
       {
@@ -140,7 +132,7 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Queue,
         click() {
-          ipcMainSend(getMainWindow(), "set-repeat-mode", RepeatMode.Queue);
+          ipcMainSendMainWindow("set-repeat-mode", RepeatMode.Queue);
         },
       },
       {
@@ -149,7 +141,7 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Shuffle,
         click() {
-          ipcMainSend(getMainWindow(), "set-repeat-mode", RepeatMode.Shuffle);
+          ipcMainSendMainWindow("set-repeat-mode", RepeatMode.Shuffle);
         },
       },
     ]),
@@ -163,7 +155,7 @@ export function setupTrayMenu() {
     label: "设置",
     click() {
       showWindow();
-      ipcMainSend(getMainWindow(), "navigate", "/main/setting");
+      ipcMainSendMainWindow("navigate", "/main/setting");
     },
   });
   ctxMenu.push({

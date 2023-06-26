@@ -16,7 +16,7 @@ const config: ForgeConfig = {
     executableName: "MusicFree",
     extraResource: [
       path.resolve(__dirname, 'res')
-    ]
+    ],
   },
   rebuildConfig: {},
   makers: [

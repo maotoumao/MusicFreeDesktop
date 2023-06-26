@@ -25,7 +25,7 @@ export default function () {
       route: "download",
     },
     {
-      iconName: "array-download-tray",
+      iconName: "folder-open",
       title: "本地音乐",
       route: "localsheet",
     },

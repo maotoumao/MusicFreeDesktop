@@ -14,6 +14,7 @@ export type SvgAssetIconNames =
   | "dashboard-speed"
   | "document-plus"
   | "fire"
+  | "folder-open"
   | "headphone"
   | "heart-outline"
   | "heart"

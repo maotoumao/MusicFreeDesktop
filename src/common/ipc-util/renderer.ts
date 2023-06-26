@@ -37,7 +37,7 @@ type PromiseContent<T> = T extends Promise<infer R> ? R : T;
 /** 渲染进程给主进程发送消息，需要回调 */
 export async function ipcRendererInvoke<T extends keyof IpcInvoke.Renderer>(
   channel: T,
-  args: Parameters<IpcInvoke.Renderer[T]>[0]
+  args?: Parameters<IpcInvoke.Renderer[T]>[0]
 ): Promise<PromiseContent<ReturnType<IpcInvoke.Renderer[T]>>> {
   return await window.ipcRenderer.invoke(channel, args);
 }

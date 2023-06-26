@@ -2,7 +2,11 @@ import { app } from "electron";
 import fs from "fs/promises";
 import path from "path";
 import { Plugin } from "./plugin";
-import { ipcMainHandle, ipcMainOn, ipcMainSend } from "@/common/ipc-util/main";
+import {
+  ipcMainHandle,
+  ipcMainOn,
+  ipcMainSendMainWindow,
+} from "@/common/ipc-util/main";
 import { getMainWindow } from "@/main/window";
 import { localPluginHash, localPluginName } from "@/common/constant";
 import localPlugin from "./local-plugin";
@@ -177,8 +181,7 @@ export async function loadAllPlugins() {
 }
 
 export function sendPlugins() {
-  const mainWindow = getMainWindow();
-  ipcMainSend(mainWindow, "plugin-loaded", clonedPlugins);
+  ipcMainSendMainWindow("plugin-loaded", clonedPlugins);
 }
 
 export async function installPluginFromUrl(url: string) {

@@ -7,4 +7,14 @@ declare namespace ICommon {
     isEnd?: boolean;
     data?: T[];
   };
+
+  interface IUpdateInfo {
+    version: string;
+    update?: {
+      version: string;
+      changeLog: string[];
+      download: string[];
+    }
+    
+  }
 }

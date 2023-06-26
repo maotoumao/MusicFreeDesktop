@@ -1,6 +1,8 @@
 interface IConfig {
   normal: {
-    closeBehavior: 'exit' | 'minimize'
+    closeBehavior: "exit" | "minimize";
+
+    checkUpdate: boolean;
   };
   playMusic: {
     /** 歌单内搜索区分大小写 */
@@ -12,7 +14,7 @@ interface IConfig {
     /** 双击音乐列表时 */
     clickMusicList: "normal" | "replace";
     /** 播放失败时 */
-    playError: 'pause' | 'skip'
+    playError: "pause" | "skip";
   };
   download: {
     test: never;
@@ -62,5 +64,3 @@ type KeyPathValue<T extends object, K extends string> = T extends Record<
 export type IAppConfig = Partial<IConfig>;
 export type IAppConfigKeyPath = KeyPaths<IConfig>;
 export type IAppConfigKeyPathValue<KeyPath> = KeyPathValue<IAppConfig, KeyPath>;
-
-const ff: IAppConfigKeyPath = "setting4.66.dog7";
