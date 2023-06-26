@@ -8,7 +8,7 @@ interface IProps {
 }
 
 export default function PlayMusic(props: IProps) {
-  const { data } = props;
+  const { data = {} as IAppConfig["playMusic"] } = props;
   return (
     <div className="setting-view--play-music-container">
       <CheckBoxSettingItem
@@ -42,7 +42,7 @@ export default function PlayMusic(props: IProps) {
       <RadioGroupSettingItem
         label="播放音质缺失时"
         keyPath="playMusic.whenQualityMissing"
-        value={data?.whenQualityMissing}
+        value={data.whenQualityMissing}
         options={[
           {
             value: "lower",
@@ -57,7 +57,7 @@ export default function PlayMusic(props: IProps) {
       <RadioGroupSettingItem
         label="播放失败时"
         keyPath="playMusic.playError"
-        value={data?.playError}
+        value={data.playError}
         options={[
           {
             value: "pause",
@@ -72,7 +72,7 @@ export default function PlayMusic(props: IProps) {
       <RadioGroupSettingItem
         label="双击音乐列表时"
         keyPath="playMusic.clickMusicList"
-        value={data?.clickMusicList}
+        value={data.clickMusicList}
         options={[
           {
             value: "normal",

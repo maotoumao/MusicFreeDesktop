@@ -1,8 +1,8 @@
 {
   "name": "musicfree-desktop",
-  "productName": "musicfree-desktop",
-  "version": "1.0.0",
-  "description": "插件化音乐播放器",
+  "productName": "MusicFree",
+  "version": "1.0.0-alpha.0",
+  "description": "一个插件化的音乐播放器",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",

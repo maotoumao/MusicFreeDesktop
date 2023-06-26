@@ -14,8 +14,8 @@ import { ipcMainSend } from "@/common/ipc-util/main";
 let tray: Tray | null = null;
 
 const resourcesPath = app.isPackaged
-  ? path.resolve(process.resourcesPath, "resources")
-  : path.resolve(__dirname, "../../resources");
+  ? path.resolve(process.resourcesPath, "res")
+  : path.resolve(__dirname, "../../res");
 
 const getResourcePath = (resourceName: string) => {
   return path.resolve(resourcesPath, resourceName);
@@ -50,7 +50,7 @@ export function setupTrayMenu() {
     currentMusicInfoStore.getValue();
   // 更新一下tooltip
   if (currentMusic) {
-    tray.setTitle(
+    tray.setToolTip(
       `${currentMusic.title ?? "未知音乐"}${
         currentMusic.artist ? ` - ${currentMusic.artist}` : ""
       }`
@@ -162,6 +162,7 @@ export function setupTrayMenu() {
   ctxMenu.push({
     label: "设置",
     click() {
+      showWindow();
       ipcMainSend(getMainWindow(), "navigate", "/main/setting");
     },
   });

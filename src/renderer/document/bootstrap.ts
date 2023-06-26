@@ -24,7 +24,6 @@ function dropHandler() {
 
     const validMusicList: IMusic.IMusicItem[] = [];
     for (const f of event.dataTransfer.files) {
-      
       if (supportLocalMediaType.some((postfix) => f.path.endsWith(postfix))) {
         validMusicList.push(
           await callPluginDelegateMethod(

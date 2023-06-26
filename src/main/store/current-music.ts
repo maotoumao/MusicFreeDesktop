@@ -8,5 +8,5 @@ export const currentMusicInfoStore = new Store<{
 }>({
   currentMusic: null,
   currentPlayerState: PlayerState.Paused,
-  currentRepeatMode: null,
+  currentRepeatMode: RepeatMode.Queue,
 });

@@ -262,13 +262,13 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
     currentLyricStore.setValue(null);
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
     setUserPerference("currentMusic", music);
-    ipcRendererSend("sync-current-music", {
+    ipcRendererSend("sync-current-music", music ? {
       platform: music.platform,
       title: music.title,
       artist: music.artist,
       id: music.id,
       album: music.album,
-    });
+    }: null);
   } else {
     currentMusicStore.setValue(music);
   }

@@ -13,7 +13,7 @@ export default function Normal(props: IProps) {
   return (
     <div className='setting-view--normal-container'>
       <RadioGroupSettingItem
-        label="默认播放音质"
+        label="单击退出按钮时"
         keyPath='normal.closeBehavior'
         value={data?.closeBehavior}
         options={[
