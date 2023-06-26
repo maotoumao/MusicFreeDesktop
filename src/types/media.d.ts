@@ -76,9 +76,14 @@ declare namespace IMusic {
     }
 
     /** 数据库中存储的歌单列表，其中音乐列表只存id */
-    interface  IDBMusicSheetItem extends IMusicSheetItem {
+    interface IDBMusicSheetItem extends IMusicSheetItem {
         musicList?: IMedia.IMediaBase[]
     } 
+
+    interface ILocalMusicList {
+        folder: string;
+        musicList: IMusic.IMusicItem[]
+    }
 
 
     /** 歌单集合 */

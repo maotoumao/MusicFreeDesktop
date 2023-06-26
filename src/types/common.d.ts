@@ -15,6 +15,5 @@ declare namespace ICommon {
       changeLog: string[];
       download: string[];
     }
-    
   }
 }

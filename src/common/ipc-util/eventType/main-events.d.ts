@@ -17,5 +17,8 @@ declare namespace IpcEvents {
           url: string;
           payload?: any;
         };
+
+    "sync-local-music": IMusic.IMusicItem[];
+
   }
 }

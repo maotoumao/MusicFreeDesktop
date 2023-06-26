@@ -13,6 +13,7 @@ import TopListDetailView from "./views/toplist-detail-view";
 import RecommendSheetsView from "./views/recommend-sheets-view";
 import SettingView from "./views/setting-view";
 import { showModal } from "@/renderer/components/Modal";
+import LocalMusicView from "./views/local-music-view";
 
 export default function MainPage() {
   return (
@@ -48,6 +49,10 @@ export default function MainPage() {
           <Route
             path="recommend-sheets"
             element={<RecommendSheetsView></RecommendSheetsView>}
+          ></Route>
+          <Route
+            path="local-music"
+            element={<LocalMusicView></LocalMusicView>}
           ></Route>
           <Route path="setting" element={<SettingView></SettingView>}></Route>
           <Route

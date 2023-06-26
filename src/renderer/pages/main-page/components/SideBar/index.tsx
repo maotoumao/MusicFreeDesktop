@@ -27,7 +27,7 @@ export default function () {
     {
       iconName: "folder-open",
       title: "本地音乐",
-      route: "localsheet",
+      route: "local-music",
     },
     {
       iconName: "code-bracket-square",

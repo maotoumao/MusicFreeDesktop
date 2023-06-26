@@ -17,6 +17,11 @@ declare namespace IpcEvents {
     "sync-current-music": IMusic.IMusicItem;
     "sync-current-playing-state": import("@/renderer/core/track-player/enum").PlayerState;
     "sync-current-repeat-mode": import("@/renderer/core/track-player/enum").RepeatMode;
+
+    /** 本地文件 */
+    "sync-local-music": undefined;
+    "add-watch-dir": string[];
+    "remove-watch-dir": string[];
   }
 }
 
@@ -53,10 +58,6 @@ declare namespace IpcInvoke {
     "show-open-dialog": (
       options: Electron.OpenDialogOptions
     ) => Electron.OpenDialogReturnValue;
-    'check-update': () => ICommon.IUpdateInfo;
-    /** 本地文件 */
-    'sync-local-file': () => void;
-    'add-watch-dir': (dirs: string[]) => void;
-    'remove-watch-dir': (dirs: string[]) => void;
+    "check-update": () => ICommon.IUpdateInfo;
   }
 }

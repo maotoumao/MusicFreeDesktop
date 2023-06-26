@@ -72,7 +72,7 @@ export function addSortProperty(
 
 /**
  *  获取音质顺序
- * 
+ *
  * higher: 优先高音质
  * lower：优先低音质
  */
@@ -91,3 +91,5 @@ export function getQualityOrder(
     return [qualityKey, ...left.reverse(), ...right];
   }
 }
+
+
