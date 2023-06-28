@@ -1,6 +1,6 @@
 import { localPluginHash, localPluginName } from "@/common/constant";
 import { Plugin } from "./plugin";
-import { addFileScheme, parseLocalMusicItem } from "@/common/file-util";
+import { addFileScheme, parseLocalMusicItem, parseLocalMusicItemFolder } from "@/common/file-util";
 
 
 function localPluginDefine(): IPlugin.IPluginInstance {
@@ -19,6 +19,9 @@ function localPluginDefine(): IPlugin.IPluginInstance {
     },
     async importMusicItem(filePath) {
       return parseLocalMusicItem(filePath);
+    },
+    async importMusicSheet(folderPath) {
+      return parseLocalMusicItemFolder(folderPath);
     },
   };
 }

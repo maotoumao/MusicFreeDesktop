@@ -6,6 +6,7 @@ import {
 } from "../core/plugin-delegate";
 import trackPlayer from "../core/track-player";
 import rendererAppConfig from "@/common/app-config/renderer";
+import localMusic from "../core/local-music";
 
 export default async function () {
   await Promise.all([
@@ -13,6 +14,7 @@ export default async function () {
     registerPluginEvents(),
     MusicSheet.setupSheets(),
     trackPlayer.setupPlayer(),
+    localMusic.setupLocalMusic(),
   ]);
   dropHandler();
 }
@@ -24,7 +26,19 @@ function dropHandler() {
 
     const validMusicList: IMusic.IMusicItem[] = [];
     for (const f of event.dataTransfer.files) {
-      if (supportLocalMediaType.some((postfix) => f.path.endsWith(postfix))) {
+      if (f.type === "") {
+        validMusicList.push(
+          ...(await callPluginDelegateMethod(
+            {
+              hash: localPluginHash,
+            },
+            "importMusicSheet",
+            f.path
+          ))
+        );
+      } else if (
+        supportLocalMediaType.some((postfix) => f.path.endsWith(postfix))
+      ) {
         validMusicList.push(
           await callPluginDelegateMethod(
             {

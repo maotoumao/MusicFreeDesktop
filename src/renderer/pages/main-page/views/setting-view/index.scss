@@ -11,18 +11,6 @@
     padding-left: 1.5rem;
     padding-right: 1.5rem;
 
-    & .tab-list-container {
-      gap: 1.5rem;
-    }
-
-    & .tab-list-item {
-      padding-left: 0;
-      padding-right: 0;
-
-      &::after {
-        min-width: 2rem;
-      }
-    }
   }
 
   & .setting-view--body {

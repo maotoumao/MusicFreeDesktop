@@ -18,6 +18,8 @@
   display: flex;
   margin-top: 1.2rem;
   flex-shrink: 0;
+  column-gap: 2.5rem;
+
 
   & .tab-list-item {
     display: flex;
@@ -25,7 +27,7 @@
     justify-content: center;
     position: relative;
     font-size: 1.1rem;
-    padding: 0 2rem 0.5rem;
+    padding: 0 0 0.5rem;
     outline: none;
     cursor: pointer;
     opacity: 0.7;
@@ -41,7 +43,8 @@
       &::after {
         content: "";
         position: absolute;
-        width: 40%;
+        width: 70%;
+        min-width: 2rem;
         height: 4px;
         border-radius: 2px;
         left: 50%;

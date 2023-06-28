@@ -65,7 +65,10 @@ export async function setUserPerferenceIDB<
         value,
       });
     });
-  } catch {}
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function getUserPerferenceIDB<
