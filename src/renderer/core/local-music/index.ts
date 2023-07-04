@@ -7,6 +7,7 @@ async function setupLocalMusic(){
     localWatchDir = await getUserPerferenceIDB('localWatchDir');
     ipcRendererSend("add-watch-dir", localWatchDir);
     ipcRendererOn("sync-local-music", (items) => {
+        console.log("set!!", items);
       localMusicListStore.setValue(items);
     });
 }

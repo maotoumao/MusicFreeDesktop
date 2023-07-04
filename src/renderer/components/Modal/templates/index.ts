@@ -6,6 +6,7 @@ import Reconfirm from "./Reconfirm";
 import SimpleInputWithState from "./SimpleInputWithState";
 import Sparkles from "./Sparkles";
 import Update from "./Update";
+import WatchLocalDir from "./WatchLocalDir";
 
 export default {
     Base,
@@ -15,5 +16,6 @@ export default {
     Sparkles,
     SimpleInputWithState,
     Reconfirm,
-    Update
+    Update,
+    WatchLocalDir
 }

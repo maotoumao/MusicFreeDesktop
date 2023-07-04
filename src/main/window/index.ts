@@ -12,6 +12,7 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 let mainWindow: BrowserWindow | null = null;
 
 export const createMainWindow = (): BrowserWindow => {
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     height: 700,

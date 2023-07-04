@@ -22,6 +22,10 @@ declare namespace IpcEvents {
     "sync-local-music": undefined;
     "add-watch-dir": string[];
     "remove-watch-dir": string[];
+    "set-watch-dir": {
+      add?: string[],
+      rm?: string[]
+    };
   }
 }
 

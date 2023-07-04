@@ -21,6 +21,13 @@ export async function setupLocalMusicManager() {
     });
   });
 
+  ipcMainOn("set-watch-dir", (actions) => {
+    scannerWorker.postMessage({
+      type: "setWatchDir",
+      data: actions,
+    });
+  });
+
   ipcMainOn("sync-local-music", () => {
     scannerWorker.postMessage({
       type: "sync",

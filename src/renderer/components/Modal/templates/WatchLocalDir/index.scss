@@ -1,0 +1,49 @@
+.modal--watch-local-dir-container {
+  width: 500px;
+  max-height: 400px;
+  border-radius: 8px;
+  box-shadow: var(--shadowColor) 2px 2px 8px;
+  background-color: var(--backgroundColor);
+  display: flex;
+  flex-direction: column;
+
+  & .body-container {
+    flex: 1;
+    padding-left: 16px;
+    padding-right: 16px;
+    overflow: auto;
+
+    & .row-container {
+      height: 2.6rem;
+      display: flex;
+      align-items: center;
+
+      & .title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      & .delete-path {
+        color: #fc5f5f;
+        width: 20px;
+        height: 20px;
+        & svg {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+
+  & .footer-options {
+    flex-shrink: 0;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 12px;
+    padding-right: 16px;
+    margin-bottom: 0.5rem;
+  }
+}

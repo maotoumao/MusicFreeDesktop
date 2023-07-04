@@ -22,7 +22,7 @@ export async function parseLocalMusicItem(
         : undefined,
       album: common.album ?? "未知专辑",
       url: addFileScheme(filePath),
-      rawPath: filePath,
+      localPath: filePath,
       platform: localPluginName,
       id: hash,
       rawLrc: common.lyrics?.join(""),
@@ -32,7 +32,7 @@ export async function parseLocalMusicItem(
       title: filePath,
       id: hash,
       platform: localPluginName,
-      rawPath: filePath,
+      localPath: filePath,
       url: addFileScheme(filePath),
       artist: "-",
     };
