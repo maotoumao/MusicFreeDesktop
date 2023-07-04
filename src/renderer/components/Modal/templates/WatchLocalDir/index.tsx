@@ -27,7 +27,7 @@ export default function WatchLocalDir(props: IUpdateProps) {
   }, []);
 
   return (
-    <Base withBlur defaultClose>
+    <Base defaultClose>
       <div className="modal--watch-local-dir-container">
         <Base.Header>扫描本地音乐</Base.Header>
         <div className="body-container">

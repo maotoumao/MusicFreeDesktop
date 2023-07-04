@@ -9,6 +9,8 @@ import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
 import { toast } from "react-toastify";
+import { showModal } from "@/renderer/components/Modal";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
@@ -198,9 +200,45 @@ function QualityBtn() {
   const quality = trackPlayer.useQuality();
 
   return (
-    <div className="extra-btn" role="button" onClick={(e) => {
-      
-    }}>
+    <div
+      className="extra-btn"
+      role="button"
+      onClick={(e) => {
+        showModal("SelectOne", {
+          title: "切换音质",
+          defaultValue: quality,
+          defaultExtra: true,
+          extra: "仅设置当前歌曲",
+          choices: [
+            {
+              value: "low",
+              label: "低音质",
+            },
+            {
+              value: "standard",
+              label: "标准音质",
+            },
+            {
+              value: "high",
+              label: "高音质",
+            },
+            {
+              value: "super",
+              label: "超高音质",
+            },
+          ],
+          onOk(value, extra) {
+            trackPlayer.setQuality(value as IMusic.IQualityKey);
+            if (!extra) {
+              rendererAppConfig.setAppConfigPath(
+                "playMusic.defaultQuality",
+                value
+              );
+            }
+          },
+        });
+      }}
+    >
       <SwitchCase.Switch switch={quality}>
         <SwitchCase.Case case={"low"}>
           <SvgAsset title={"低音质"} iconName={"lq"}></SvgAsset>

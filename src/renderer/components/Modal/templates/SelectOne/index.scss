@@ -1,0 +1,59 @@
+.modal--select-one-container {
+  width: 400px;
+  max-height: 540px;
+  border-radius: 8px;
+  box-shadow: var(--shadowColor) 2px 2px 8px;
+  background-color: var(--backgroundColor);
+  display: flex;
+  flex-direction: column;
+  & .body-container {
+    flex: 1;
+    padding-left: 16px;
+    padding-right: 16px;
+    overflow: auto;
+
+    & .row-container {
+      height: 2.6rem;
+      display: flex;
+      align-items: center;
+
+      &[data-selected="true"] {
+        color: var(--primaryColor);
+      }
+    }
+  }
+
+  & .footer-options {
+    border-top: 1px solid var(--dividerColor);
+    flex-shrink: 0;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 12px;
+    padding: 0.3rem 16px;
+
+    & .footer-extra {
+      display: flex;
+      align-items: center;
+      flex: 1;
+
+      & .checkbox {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 2px;
+        border: 1px solid currentColor;
+        margin-right: 0.4rem;
+        position: relative;
+
+        & svg {
+          position: absolute;
+          width: 1rem;
+          height: 1rem;
+          left: 0;
+          top: 0;
+        }
+      }
+    }
+  }
+}
