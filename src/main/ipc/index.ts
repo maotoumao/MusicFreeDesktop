@@ -30,6 +30,14 @@ export default function setupIpcMain() {
     }
     return dialog.showOpenDialog(options);
   });
+ 
+  ipcMainHandle("show-save-dialog", (options) => {
+    const mainWindow = getMainWindow();
+    if (!mainWindow) {
+      throw new Error("Invalid Window");
+    }
+    return dialog.showSaveDialog(options);
+  });
 
   ipcMainOn("exit-app", () => {
     app.exit(0);

@@ -8,6 +8,7 @@ import Tag from "../Tag";
 import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import Lyric from "./widgets/Lyric";
 import SvgAsset from "../SvgAsset";
+import { OptionItem } from "./widgets/OptionItem";
 
 export const musicDetailShownStore = new Store(false);
 
@@ -58,13 +59,21 @@ export default function () {
         <Tag fill>{musicItem?.platform}</Tag>
       </div>
       <div className="music-body">
-        <img
-          className="music-album"
-          onError={setFallbackAlbum}
-          src={musicItem?.artwork ?? albumImg}
-        ></img>
+        <div className="music-album-options">
+          <img
+            className="music-album"
+            onError={setFallbackAlbum}
+            src={musicItem?.artwork ?? albumImg}
+          ></img>
+          {/* <div className="music-options">
+            <OptionItem iconName='document-plus'></OptionItem>
+          </div> */}
+        </div>
+
         <Lyric></Lyric>
       </div>
     </AnimatedDiv>
   );
 }
+
+

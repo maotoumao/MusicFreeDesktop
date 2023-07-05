@@ -19,11 +19,11 @@ export default function () {
       title: "热门歌单",
       route: "recommend-sheets",
     },
-    {
-      iconName: "array-download-tray",
-      title: "下载管理",
-      route: "download",
-    },
+    // {
+    //   iconName: "array-download-tray",
+    //   title: "下载管理",
+    //   route: "download",
+    // },
     {
       iconName: "folder-open",
       title: "本地音乐",

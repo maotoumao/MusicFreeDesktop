@@ -253,6 +253,30 @@ export async function getSheetDetail(
   );
 }
 
+/** 获取所有歌单信息 */
+export async function getAllSheetDetails(){
+  return await musicSheetDB.transaction(
+    "readonly",
+    musicSheetDB.musicStore,
+    async () => {
+      const allSheets = musicSheetsStore
+        .getValue();
+      if (!allSheets) {
+        return [];
+      }
+      const musicLists = await Promise.all(allSheets.map(sheet => musicSheetDB.musicStore.bulkGet(
+        (sheet.musicList ?? []).map(item => [item.platform, item.id])
+      )));
+
+      allSheets.forEach((sheet, index) => {
+        sheet.musicList = musicLists[index];
+      })
+   
+      return allSheets;
+    }
+  );
+}
+
 /** 从歌单内移除歌曲 */
 export async function removeMusicFromSheet(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],

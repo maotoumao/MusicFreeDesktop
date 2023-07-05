@@ -21,6 +21,7 @@ export const createMainWindow = (): BrowserWindow => {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegration: true,
       webSecurity: false,
+      sandbox: false
     },
     resizable: false,
     frame: false,

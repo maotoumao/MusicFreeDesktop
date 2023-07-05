@@ -14,6 +14,7 @@ import RecommendSheetsView from "./views/recommend-sheets-view";
 import SettingView from "./views/setting-view";
 import { showModal } from "@/renderer/components/Modal";
 import LocalMusicView from "./views/local-music-view";
+import Empty from "@/renderer/components/Empty";
 
 export default function MainPage() {
   return (
@@ -58,45 +59,7 @@ export default function MainPage() {
           <Route
             path="*"
             element={
-              <div>
-                啥都没有
-                <div role="button" data-type="primaryButton" onClick={() => {}}>
-                  一个按钮
-                </div>
-                <div role="button" data-type="primaryButton" data-disabled>
-                  一个按钮
-                </div>
-                <MusicSheetlikeItem
-                  mediaItem={{
-                    title: "专辑啊",
-                    platform: "猫头",
-                    id: "sd",
-                    artist: "小猫咪",
-                    // createAt: Date.now(),
-                    playCount: 99999,
-                  }}
-                ></MusicSheetlikeItem>
-                <MusicSheetlikeItem
-                  mediaItem={{
-                    title: "专辑啊",
-                    platform: "猫头",
-                    id: "sd",
-                    artist: "小猫咪",
-                    createAt: Date.now(),
-                  }}
-                ></MusicSheetlikeItem>
-                <MusicSheetlikeItem
-                  mediaItem={{
-                    title: "专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊",
-                    platform: "猫头",
-                    id: "sd",
-                    artist:
-                      "小猫咪专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊专辑啊",
-                    playCount: 1236,
-                    createAt: Date.now(),
-                  }}
-                ></MusicSheetlikeItem>
-              </div>
+             <Empty></Empty>
             }
           ></Route>
         </Routes>

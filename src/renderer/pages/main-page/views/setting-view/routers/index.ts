@@ -18,16 +18,16 @@ export default [
     title: "播放",
     component: PlayMusic,
   },
-  {
-    id: "download",
-    title: "下载",
-    component: Download,
-  },
-  {
-    id: "shortCut",
-    title: "快捷键",
-    component: ShortCut,
-  },
+  // {
+  //   id: "download",
+  //   title: "下载",
+  //   component: Download,
+  // },
+  // {
+  //   id: "shortCut",
+  //   title: "快捷键",
+  //   component: ShortCut,
+  // },
   {
     id: "backup",
     title: "备份与恢复",

@@ -62,6 +62,10 @@ declare namespace IpcInvoke {
     "show-open-dialog": (
       options: Electron.OpenDialogOptions
     ) => Electron.OpenDialogReturnValue;
+    "show-save-dialog": (
+      options: Electron.SaveDialogOptions
+    ) => Electron.SaveDialogReturnValue;
+
     "check-update": () => ICommon.IUpdateInfo;
   }
 }

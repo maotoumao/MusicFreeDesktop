@@ -1,0 +1,17 @@
+.music-detail--option-item {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #aaa;
+    background-color: #ececec;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & svg {
+        width: 24px;
+        height: 24px;
+    }
+
+}

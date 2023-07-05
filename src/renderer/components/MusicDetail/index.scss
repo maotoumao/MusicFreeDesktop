@@ -74,14 +74,27 @@
     display: flex;
     justify-content: center;
 
-    & .music-album {
+    & .music-album-options {
       width: 260px;
       height: 260px;
-      border-radius: 16px;
       margin-top: 40px;
       margin-right: 96px;
       object-fit: cover;
       -webkit-user-drag: none;
+      & .music-album {
+        width: 260px;
+        height: 260px;
+        border-radius: 16px;
+        object-fit: cover;
+      }
+
+      & .music-options {
+        margin-top: 18px;
+        height: 64px;
+        width: 100%;
+        display: flex;
+        gap: 12px;
+      }
     }
   }
 }

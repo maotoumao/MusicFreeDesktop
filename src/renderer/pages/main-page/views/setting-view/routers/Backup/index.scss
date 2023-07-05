@@ -1,5 +1,8 @@
 .setting-view--backup-container {
-    height: 60vh;
-    width: 50vw;
-    background-color: firebrick;
+    width: 100%;
+
+    & .backup-row {
+        display: flex;
+        gap: 12px;
+    }
 }
