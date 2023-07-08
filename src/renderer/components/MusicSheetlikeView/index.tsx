@@ -3,7 +3,7 @@ import Body from "./components/Body";
 import Header from "./components/Header";
 
 import "./index.scss";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { initValue, offsetHeightStore } from "./store";
 
 interface IMusicSheetlikeViewProps {
@@ -12,6 +12,7 @@ interface IMusicSheetlikeViewProps {
   musicList?: IMusic.IMusicItem[];
   state?: RequestStateCode;
   onLoadMore?: () => void;
+  options?: ReactNode;
 }
 
 export default function MusicSheetlikeView(props: IMusicSheetlikeViewProps) {
@@ -20,6 +21,7 @@ export default function MusicSheetlikeView(props: IMusicSheetlikeViewProps) {
     musicList,
     state = RequestStateCode.IDLE,
     onLoadMore,
+    options,
   } = props;
 
   useEffect(() => {
@@ -36,6 +38,7 @@ export default function MusicSheetlikeView(props: IMusicSheetlikeViewProps) {
         musicSheet={musicSheet}
         state={state}
         onLoadMore={onLoadMore}
+        options={options}
       ></Body>
     </div>
   );

@@ -6,11 +6,12 @@ import {
 } from "@/common/constant";
 import { nanoid } from "nanoid";
 import musicSheetDB from "./db";
-import { musicSheetsStore } from "./store";
+import { musicSheetsStore, starredSheetsStore } from "./store";
 import { produce } from "immer";
 import defaultSheet from "./default-sheet";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import { useEffect, useState } from "react";
+import { getUserPerferenceIDB, setUserPerferenceIDB } from "@/renderer/utils/user-perference";
 
 // 默认歌单，快速判定是否在列表中
 const favoriteMusicListIds = new Set<string>();
@@ -39,6 +40,9 @@ export async function setupSheets() {
       });
       musicSheetsStore.setValue(allSheets);
     }
+    // 收藏歌单
+    const starredSheets = await getUserPerferenceIDB('starredMusicSheets');
+    starredSheetsStore.setValue(starredSheets ?? []);
   } catch (e) {
     console.log(e);
   }
@@ -446,4 +450,19 @@ export function useMusicSheet(sheetId: string) {
   }, [sheetId]);
 
   return musicSheet;
+}
+
+
+export async function starMusicSheet(sheet: IMedia.IMediaBase) {
+
+  const currentStarredSheets = starredSheetsStore.getValue();
+  const newSheets = [...currentStarredSheets, sheet];
+  await setUserPerferenceIDB('starredMusicSheets', newSheets);
+  starredSheetsStore.setValue(newSheets);
+}
+
+export async function unstarMusicSheet(sheet: IMedia.IMediaBase) {
+  const newSheets = starredSheetsStore.getValue().filter(item => !isSameMedia(item, sheet));
+  await setUserPerferenceIDB('starredMusicSheets', newSheets);
+  starredSheetsStore.setValue(newSheets);
 }

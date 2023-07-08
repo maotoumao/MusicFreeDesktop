@@ -5,5 +5,5 @@ const MusicSheet = {
 };
 
 export default MusicSheet;
-export { musicSheetsStore } from "./internal/store";
+export { musicSheetsStore, starredSheetsStore } from "./internal/store";
 export { default as defaultSheet } from "./internal/default-sheet";

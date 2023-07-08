@@ -2,6 +2,7 @@ import ListItem from "./widgets/ListItem";
 import "./index.scss";
 import MySheets from "./widgets/MySheets";
 import { useMatch, useNavigate } from "react-router";
+import StarredSheets from "./widgets/StarredSheets";
 
 export default function () {
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ export default function () {
         ></ListItem>
       ))}
       <MySheets></MySheets>
+      <StarredSheets></StarredSheets>
     </div>
   );
 }

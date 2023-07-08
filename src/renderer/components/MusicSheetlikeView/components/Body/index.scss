@@ -10,9 +10,7 @@
       display: flex;
       font-size: 1.05rem;
 
-      & .add-to-sheet {
-        margin-left: 1rem;
-      }
+      column-gap: 1rem;
     }
 
     & .search-in-music-list-container {

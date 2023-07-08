@@ -3,6 +3,7 @@ import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import {
   MutableRefObject,
+  ReactNode,
   useEffect,
   useRef,
   useState,
@@ -21,9 +22,10 @@ interface IProps {
   musicList: IMusic.IMusicItem[];
   state?: RequestStateCode;
   onLoadMore?: () => void;
+  options?: ReactNode
 }
 export default function Body(props: IProps) {
-  const { musicList = [], musicSheet, state, onLoadMore } = props;
+  const { musicList = [], musicSheet, state, onLoadMore, options } = props;
 
   const [inputSearch, setInputSearch] = useState("");
   const [filterMusicList, setFilterMusicList] = useState<
@@ -94,6 +96,7 @@ export default function Body(props: IProps) {
           >
             添加到歌单
           </div>
+          {options}
         </div>
         <div className="search-in-music-list-container">
           <input

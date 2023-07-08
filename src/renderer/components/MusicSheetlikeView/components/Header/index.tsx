@@ -4,7 +4,7 @@ import "./index.scss";
 import Tag from "@/renderer/components/Tag";
 import dayjs from "dayjs";
 import Condition from "@/renderer/components/Condition";
-import { initValue, offsetHeightStore } from "../../store";
+import { offsetHeightStore } from "../../store";
 import { useRef } from "react";
 import { rem } from "@/common/constant";
 
