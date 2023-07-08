@@ -2,6 +2,7 @@ import AddMusicToSheet from "./AddMusicToSheet";
 import AddNewSheet from "./AddNewSheet";
 import Base from "./Base";
 import ExitConfirm from "./ExitConfirm";
+import PluginSubscription from "./PluginSubscription";
 import Reconfirm from "./Reconfirm";
 import SelectOne from "./SelectOne";
 import SimpleInputWithState from "./SimpleInputWithState";
@@ -19,5 +20,6 @@ export default {
     Reconfirm,
     Update,
     WatchLocalDir,
-    SelectOne
+    SelectOne,
+    PluginSubscription
 }

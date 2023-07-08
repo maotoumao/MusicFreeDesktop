@@ -11,10 +11,10 @@ declare namespace IUserPerference {
         /** 倍速 */
         speed: number
         /** 订阅 */
-        subscription: {
+        subscription: Array<{
             title?: string;
             srcUrl: string;
-        },
+        }>,
         skipVersion: string;
     }
 
