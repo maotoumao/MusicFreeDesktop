@@ -20,9 +20,9 @@ export default function Extra() {
       <QualityBtn></QualityBtn>
       <SpeedBtn></SpeedBtn>
       <VolumeBtn></VolumeBtn>
-      <div className="extra-btn">
+      {/* <div className="extra-btn">
         <SvgAsset iconName="lyric"></SvgAsset>
-      </div>
+      </div> */}
       <div
         className="extra-btn"
         onClick={() => {

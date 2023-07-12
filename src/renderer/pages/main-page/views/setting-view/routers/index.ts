@@ -35,7 +35,7 @@ export default [
   },
   {
     id: "about",
-    title: "关于 Music Free",
+    title: "关于 MusicFree",
     component: About,
   },
 ];

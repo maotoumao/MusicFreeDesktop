@@ -34,5 +34,11 @@
       width: 100%;
       text-align: end;
     }
+
+    & .secret {
+      font-size: 10px;
+      color: transparent;
+      user-select: none;
+    }
   }
 }
