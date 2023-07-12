@@ -21,6 +21,9 @@ function MusicResult(props: IMediaResultProps) {
       onPageChange={() => {
         search(undefined, undefined, "music", pluginHash);
       }}
+      virtualProps={{
+        fallbackRenderCount: -1
+      }}
     ></MusicList>
   );
 }

@@ -21,6 +21,7 @@ import { memo, useRef } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import rendererAppConfig from "@/common/app-config/renderer";
+import { ipcRendererSend } from "@/common/ipc-util/renderer";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -39,6 +40,7 @@ interface IMusicListProps {
   virtualProps?: {
     offsetHeight?: number | (() => number); // 距离顶部的高度
     getScrollElement?: () => HTMLElement; // 滚动
+    fallbackRenderCount?: number
   };
 }
 
@@ -140,6 +142,16 @@ export function showMusicContextMenu(
           MusicSheet.removeMusicFromSheet(musicItem, localMusicSheetId);
         },
       },
+      {
+        title: '下载',
+        icon: 'array-download-tray',
+        show: musicItem.platform !== localPluginName,
+        onClick() {
+          ipcRendererSend('download-media', {
+            mediaItem: musicItem
+          })
+        },
+      }
     ],
   });
 }
@@ -168,7 +180,7 @@ function _MusicList(props: IMusicListProps) {
     getScrollElement: virtualProps?.getScrollElement,
     offsetHeight: virtualProps?.offsetHeight,
     estimizeItemHeight,
-    fallbackRenderCount: 100,
+    fallbackRenderCount: virtualProps?.fallbackRenderCount ?? 100,
   });
 
   return (

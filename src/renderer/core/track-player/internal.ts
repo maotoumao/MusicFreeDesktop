@@ -1,6 +1,7 @@
 /**
  * 播放音乐
  */
+import { encodeUrlHeaders } from "@/common/normalize-util";
 import { ErrorReason, PlayerState, TrackPlayerEvent } from "./enum";
 import trackPlayerEventsEmitter from "./event";
 import albumImg from "@/assets/imgs/album-cover.jpg";
@@ -82,25 +83,13 @@ class TrackPlayerInternal {
     musicItem: IMusic.IMusicItem
   ) {
     let url = trackSource.url;
-    let formalizedKey: string;
     if (trackSource.headers || trackSource.userAgent) {
-      const _setHeaders: Record<string, string> = {};
       const trackSourceHeaders = trackSource.headers ?? {};
-      for (const key in trackSourceHeaders) {
-        formalizedKey = key.toLowerCase();
-        if (formalizedKey === "user-agent") {
-          _setHeaders[formalizedKey] =
-            trackSourceHeaders[formalizedKey] ?? trackSource.userAgent;
-        } else {
-          _setHeaders[formalizedKey] = trackSourceHeaders[formalizedKey];
-        }
+      if (trackSource.userAgent) {
+        trackSourceHeaders["user-agent"] = trackSource.userAgent;
       }
-      const encodedUrl = new URL(url);
-      encodedUrl.searchParams.set(
-        "_setHeaders",
-        encodeURIComponent(JSON.stringify(_setHeaders))
-      );
-      url = encodedUrl.toString();
+
+      url = encodeUrlHeaders(url, trackSourceHeaders);
     }
     if (!url) {
       this.throwError(ErrorReason.EmptyResource);

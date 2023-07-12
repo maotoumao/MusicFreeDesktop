@@ -17,7 +17,8 @@ interface IConfig {
     playError: "pause" | "skip";
   };
   download: {
-    test: never;
+    /** 下载路径 */
+    path: string;
   };
   shortCut: {
     test: never;

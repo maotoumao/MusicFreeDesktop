@@ -65,6 +65,10 @@ export async function setupPluginManager() {
   await loadAllPlugins();
 }
 
+export function getPluginByMedia(mediaItem: IMedia.IMediaBase) {
+  return plugins.find(item => item.instance.platform === mediaItem.platform);
+}
+
 /** 注册事件 */
 function registerEvents() {
   /** 调用插件方法 */

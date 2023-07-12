@@ -6,6 +6,8 @@ import { PlayerState } from "@/renderer/core/track-player/enum";
 import { setupTrayMenu } from "../tray";
 import axios from "axios";
 import { compare } from "compare-versions";
+import { getPluginByMedia } from "../core/plugin-manager";
+import { encodeUrlHeaders } from "@/common/normalize-util";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -67,6 +69,8 @@ export default function setupIpcMain() {
     setupTrayMenu();
   });
 
+
+  /** APP更新 */
   const updateSources = [
     "https://gitee.com/maotoumao/MusicFree/raw/master/release/version.json",
     "https://raw.githubusercontent.com/maotoumao/MusicFree/master/release/version.json",
@@ -89,4 +93,24 @@ export default function setupIpcMain() {
     }
     return updateInfo;
   });
+
+  /** 下载音乐 */
+  ipcMainOn('download-media', async ({mediaItem}) => {
+    const mainWindow = getMainWindow();
+    if(!mainWindow) {
+      return;
+    }
+    try {
+      const mediaSource = await getPluginByMedia(mediaItem)?.methods?.getMediaSource(mediaItem);
+      const headers = mediaSource.headers ?? {};
+      if(mediaSource.userAgent) {
+        headers['user-agent'] = mediaSource.userAgent;
+      }
+      const url = encodeUrlHeaders(mediaSource.url, headers);
+      mainWindow.webContents.downloadURL(url);
+    } catch {
+
+    }
+  })
+
 }
