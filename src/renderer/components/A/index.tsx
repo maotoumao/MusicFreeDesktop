@@ -1,8 +1,21 @@
-import { ipcRendererSend } from "@/common/ipc-util/renderer"
+import { ipcRendererSend } from "@/common/ipc-util/renderer";
 
-
-export default function A(props: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>){
-    return <a {...props} href={undefined} onClick={() => {
-        ipcRendererSend('open-url', props.href);
-    }}></a>
+export default function A(
+  props: React.DetailedHTMLProps<
+    React.AnchorHTMLAttributes<HTMLAnchorElement>,
+    HTMLAnchorElement
+  >
+) {
+  return (
+    <a
+      {...props}
+      href={"javascript:void(0);"}
+      onClick={(...args) => {
+        if (props.href) {
+          ipcRendererSend("open-url", props.href);
+        }
+        props?.onClick?.(...args);
+      }}
+    ></a>
+  );
 }

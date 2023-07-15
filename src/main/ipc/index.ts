@@ -73,8 +73,8 @@ export default function setupIpcMain() {
 
   /** APP更新 */
   const updateSources = [
-    "https://gitee.com/maotoumao/MusicFree/raw/master/release/version.json",
-    "https://raw.githubusercontent.com/maotoumao/MusicFree/master/release/version.json",
+    "https://gitee.com/maotoumao/MusicFreeDesktop/raw/master/release/version.json",
+    "https://raw.githubusercontent.com/maotoumao/MusicFreeDesktop/master/release/version.json",
   ];
   ipcMainHandle("check-update", async () => {
     const currentVersion = app.getVersion();

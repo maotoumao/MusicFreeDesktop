@@ -93,6 +93,10 @@ export const createMainWindow = (): BrowserWindow => {
     });
   });
 
+  mainWindow.webContents.on('did-finish-load', () => {
+    injectGlobalData();
+  })
+
   return mainWindow;
 };
 
@@ -110,4 +114,17 @@ export function showWindow() {
     mainWindow.show();
   }
   mainWindow.setSkipTaskbar(false);
+}
+
+
+function injectGlobalData(){
+  if(!mainWindow) {
+    return;
+  }
+
+  const globalData: IGlobalData = {
+    appVersion: app.getVersion(),
+  }
+  mainWindow.webContents.executeJavaScript(`window.globalData=${JSON.stringify(globalData)}`)
+
 }

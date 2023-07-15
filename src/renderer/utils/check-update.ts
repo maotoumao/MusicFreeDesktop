@@ -6,7 +6,6 @@ import { getUserPerference } from "./user-perference";
 export default async function checkUpdate(ignorePref?: boolean) {
   /** checkupdate */
   const updateInfo = await ipcRendererInvoke("check-update");
-  console.log(updateInfo);
   if (updateInfo.update) {
     const skipVersion = getUserPerference("skipVersion");
     if (
@@ -14,11 +13,13 @@ export default async function checkUpdate(ignorePref?: boolean) {
       skipVersion &&
       compare(updateInfo.version, skipVersion, "<=")
     ) {
-      return;
+      return false;
     }
     showModal("Update", {
       currentVersion: updateInfo.version,
       update: updateInfo.update,
     });
+    return true;
   }
+  return false;
 }
