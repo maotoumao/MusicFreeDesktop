@@ -263,16 +263,17 @@ function QualityBtn() {
 }
 
 function LyricBtn() {
-  const [enabled, setEnabled] = useState(false);
+  const rendererConfig = rendererAppConfig.useAppConfig();
+  const enableDesktopLyric = rendererConfig?.lyric?.enableDesktopLyric ?? false;
   const lyric = useLyric();
 
   useEffect(() => {
-    ipcRendererInvoke("set-lyric-window", enabled);
-  }, [enabled]);
+    ipcRendererInvoke("set-lyric-window", enableDesktopLyric);
+  }, [enableDesktopLyric]);
 
   useEffect(() => {
     // 同步歌词 这样写貌似不好 应该用回调
-    if (enabled) {
+    if (enableDesktopLyric) {
       // 同步歌词
       if (lyric?.currentLrc) {
         const currentLrc = lyric?.currentLrc;
@@ -290,17 +291,20 @@ function LyricBtn() {
         });
       }
     }
-  }, [lyric, enabled]);
+  }, [lyric, enableDesktopLyric]);
 
   return (
     <div
       className={classNames({
         "extra-btn": true,
-        highlight: enabled,
+        highlight: enableDesktopLyric,
       })}
       role="button"
       onClick={async () => {
-        setEnabled((prev) => !prev);
+        rendererAppConfig.setAppConfigPath(
+          "lyric.enableDesktopLyric",
+          !enableDesktopLyric
+        );
       }}
     >
       <SvgAsset iconName="lyric"></SvgAsset>

@@ -6,7 +6,9 @@ export default function LyricWindowPage() {
   console.log("lyricWindowPage");
   console.log(lyric);
   return (
-    <div className="lyric-window-container">
+    <div className="lyric-window-container" onMouseOver={() => {
+        console.log("mouse over");
+    }}>
       <div className="lyric-window-content-container">
         <div className="lyric-text-row">{lyric[0]?.lrc ?? "暂无歌词"}</div>
       </div>

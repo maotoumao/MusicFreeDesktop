@@ -22,4 +22,9 @@ declare namespace ICommon {
     timeStamp: number;
     lrc: ILyric.IParsedLrcItem[]
   }
+
+  interface IPoint {
+    x: number;
+    y: number
+  }
 }

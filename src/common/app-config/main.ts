@@ -6,13 +6,12 @@ import { IAppConfig, IAppConfigKeyPath, IAppConfigKeyPathValue } from "./type";
 import { produce } from "immer";
 import objectPath from "object-path";
 import { ipcMainHandle, ipcMainSend } from "../ipc-util/main";
-import { getMainWindow } from "@/main/window";
+import { getLyricWindow, getMainWindow } from "@/main/window";
 import defaultAppConfig from "./default-app-config";
 
 const configDirPath = app.getPath("userData");
 // 所有的配置操作由主进程完成
 const configPath = path.resolve(configDirPath, "config.json");
-
 
 let cacheConfig: IAppConfig = null;
 
@@ -45,26 +44,22 @@ async function checkPath() {
 export async function setupMainAppConfig() {
   await checkPath();
   await getAppConfig();
-  ipcMainHandle('sync-app-config', () => {
+  ipcMainHandle("sync-app-config", () => {
     return getAppConfig();
-  })
+  });
 
-  ipcMainHandle('set-app-config', (config) => {
+  ipcMainHandle("set-app-config", (config) => {
     return setAppConfig(config);
-  })
+  });
 
-  ipcMainHandle('set-app-config-path', ({
-    keyPath,
-    value
-  }) => {
+  ipcMainHandle("set-app-config-path", ({ keyPath, value }) => {
     return setAppConfigPath(keyPath, value);
   });
-  
-  // 一些在主进程完成的初始化
-  if(!cacheConfig?.download?.path) {
-    setAppConfigPath('download.path', app.getPath('downloads'));
-  }
 
+  // 一些在主进程完成的初始化
+  if (!cacheConfig?.download?.path) {
+    setAppConfigPath("download.path", app.getPath("downloads"));
+  }
 }
 
 export async function getAppConfig(): Promise<IAppConfig> {
@@ -95,14 +90,22 @@ export async function setAppConfig(
   retryTime = 1
 ): Promise<boolean> {
   const mainWindow = getMainWindow();
+  const lyricWindow = getLyricWindow();
 
   try {
     const rawConfig = JSON.stringify(appConfig, undefined, 4);
     await fs.writeFile(configPath, rawConfig, "utf8");
     cacheConfig = appConfig;
     ipcMainSend(mainWindow, "sync-app-config", cacheConfig);
+    if (lyricWindow) {
+      // 没必要全部同步
+      ipcMainSend(lyricWindow, "sync-app-config", {
+        lyric: cacheConfig.lyric,
+      });
+    }
     return true;
   } catch (e) {
+    console.log("SET CONFIG FAIL", e);
     if (retryTime > 0) {
       if (e.code === "EISDIR") {
         // 非文件
@@ -112,6 +115,11 @@ export async function setAppConfig(
       }
     }
     ipcMainSend(mainWindow, "sync-app-config", cacheConfig);
+    if (lyricWindow) {
+      ipcMainSend(lyricWindow, "sync-app-config", {
+        lyric: cacheConfig.lyric,
+      });
+    }
     return false;
   }
 }
@@ -130,6 +138,6 @@ export async function setAppConfigPath<K extends IAppConfigKeyPath>(
 export async function getAppConfigPath<K extends IAppConfigKeyPath>(
   keyPath: K
 ): Promise<IAppConfigKeyPathValue<K> | undefined> {
-  const config = getAppConfig();
+  const config = await getAppConfig();
   return objectPath.get(config, keyPath) ?? defaultAppConfig[keyPath];
 }

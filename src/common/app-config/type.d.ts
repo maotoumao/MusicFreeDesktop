@@ -16,6 +16,9 @@ interface IConfig {
     /** 播放失败时 */
     playError: "pause" | "skip";
   };
+  lyric: {
+    enableDesktopLyric: boolean;
+  },
   download: {
     /** 下载路径 */
     path: string;
@@ -34,6 +37,14 @@ interface IConfig {
   localMusic: {
     watchDir: string[];
   };
+
+  /** 不需要用户配置的数据 */
+  private: {
+    lyricWindowPosition: {
+      x: number;
+      y: number;
+    }
+  }
 }
 
 type BasicType = string | number | symbol | null | undefined;

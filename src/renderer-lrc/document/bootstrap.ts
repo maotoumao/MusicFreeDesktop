@@ -1,5 +1,6 @@
 import { ipcRendererOn } from "@/common/ipc-util/renderer";
 import currentLyricStore from "../store/current-lyric-store";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 
 export default async function () {
@@ -10,5 +11,6 @@ export default async function () {
       currentLyricStore.setValue(data.lrc);
     }
   })
+  await rendererAppConfig.setupRendererAppConfig();
 }
 
