@@ -1,6 +1,6 @@
 import { ipcMainHandle, ipcMainOn } from "@/common/ipc-util/main";
-import { getMainWindow } from "../window";
-import { app, dialog, net, shell } from "electron";
+import { closeLyricWindow, createLyricWindow, getLyricWindow, getMainWindow } from "../window";
+import { MessageChannelMain, app, dialog, ipcRenderer, net, shell } from "electron";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import { setupTrayMenu } from "../tray";
@@ -10,6 +10,9 @@ import { getPluginByMedia } from "../core/plugin-manager";
 import { encodeUrlHeaders } from "@/common/normalize-util";
 import { getQualityOrder } from "@/common/media-util";
 import { getAppConfigPath } from "@/common/app-config/main";
+
+
+let messageChannel: MessageChannelMain;
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -137,4 +140,29 @@ export default function setupIpcMain() {
       console.log(e);
     }
   });
+
+  ipcMainHandle('set-lyric-window', (enabled) => {
+    if(enabled) {
+      let lyricWindow = getLyricWindow();
+      if(!lyricWindow) {
+        lyricWindow = createLyricWindow();
+      }
+    } else {
+      closeLyricWindow();
+    }
+  });
+
+  ipcMainOn('send-to-lyric-window', (data) => {
+    const lyricWindow = getLyricWindow();
+    if(!lyricWindow) {
+      return;
+    }
+    
+    lyricWindow.webContents.send('send-to-lyric-window', data);
+  })
+
+  // ipcMainHandle('', () => {
+  //   return messageChannel.port2;
+  // })
+
 }

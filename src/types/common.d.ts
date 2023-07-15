@@ -16,4 +16,10 @@ declare namespace ICommon {
       download: string[];
     }
   }
+
+  interface ISendToLyricWindowData {
+    // 时序
+    timeStamp: number;
+    lrc: ILyric.IParsedLrcItem[]
+  }
 }

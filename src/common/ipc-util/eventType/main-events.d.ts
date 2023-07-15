@@ -20,5 +20,6 @@ declare namespace IpcEvents {
 
     "sync-local-music": IMusic.IMusicItem[];
 
+    'send-to-lyric-window': ICommon.ISendToLyricWindowData
   }
 }

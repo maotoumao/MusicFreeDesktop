@@ -8,6 +8,7 @@ import path from "path";
 // plugin that tells the Electron app where to look for the Webpack-bundled app code (depending on
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+declare const LRC_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 /** 主窗口创建 */
@@ -81,7 +82,7 @@ export const createMainWindow = (): BrowserWindow => {
       (await getAppConfigPath("download.path")) ?? app.getPath("downloads");
     // item.setSavePath(path.resolve(downloadPath, 'test.mp3'));
     // console.log(path.resolve(downloadPath, 'test.mp3'));
-    console.log(item.getFilename())
+    console.log(item.getFilename());
     console.log(item.getURL(), "DOWNLOAD");
     item.on("done", () => {
       console.log("done!!!!!!");
@@ -93,9 +94,9 @@ export const createMainWindow = (): BrowserWindow => {
     });
   });
 
-  mainWindow.webContents.on('did-finish-load', () => {
-    injectGlobalData();
-  })
+  mainWindow.webContents.on("did-finish-load", () => {
+    injectGlobalData(mainWindow);
+  });
 
   return mainWindow;
 };
@@ -116,15 +117,57 @@ export function showWindow() {
   mainWindow.setSkipTaskbar(false);
 }
 
-
-function injectGlobalData(){
-  if(!mainWindow) {
+function injectGlobalData(targetWindow: BrowserWindow) {
+  if (!targetWindow) {
     return;
   }
 
   const globalData: IGlobalData = {
     appVersion: app.getVersion(),
-  }
-  mainWindow.webContents.executeJavaScript(`window.globalData=${JSON.stringify(globalData)}`)
-
+  };
+  targetWindow.webContents.executeJavaScript(
+    `window.globalData=${JSON.stringify(globalData)}`
+  );
 }
+
+/** 歌词窗口创建 */
+let lyricWindow: BrowserWindow | null = null;
+
+export const createLyricWindow = (): BrowserWindow => {
+  // Create the browser window.
+  lyricWindow = new BrowserWindow({
+    height: 180,
+    width: 800,
+    webPreferences: {
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      nodeIntegration: true,
+      webSecurity: false,
+      sandbox: false,
+    },
+    resizable: false,
+    frame: false,
+    skipTaskbar: true,
+    icon: getResPath("logo.ico"),
+  });
+
+  // and load the index.html of the app.
+  lyricWindow.loadURL(LRC_WINDOW_WEBPACK_ENTRY);
+
+  if (!app.isPackaged) {
+    // Open the DevTools.
+    lyricWindow.webContents.openDevTools();
+  }
+
+  lyricWindow.webContents.on("did-finish-load", () => {
+    injectGlobalData(lyricWindow);
+  });
+
+  return lyricWindow;
+};
+
+export const closeLyricWindow = () => {
+  lyricWindow?.close();
+  lyricWindow = null;
+}
+
+export const getLyricWindow = () => lyricWindow;

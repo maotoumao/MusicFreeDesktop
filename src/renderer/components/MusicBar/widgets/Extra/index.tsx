@@ -4,13 +4,20 @@ import "./index.scss";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import trackPlayer from "@/renderer/core/track-player";
 import { RepeatMode } from "@/renderer/core/track-player/enum";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
 import { toast } from "react-toastify";
 import { showModal } from "@/renderer/components/Modal";
 import rendererAppConfig from "@/common/app-config/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import {
+  sendMessageToLyricWindow,
+  setMainWindowMessagePort,
+} from "@/renderer/utils/lrc-window-message-channel";
+import classNames from "@/renderer/utils/classnames";
+import { useLyric } from "@/renderer/core/track-player/player";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
@@ -20,9 +27,7 @@ export default function Extra() {
       <QualityBtn></QualityBtn>
       <SpeedBtn></SpeedBtn>
       <VolumeBtn></VolumeBtn>
-      {/* <div className="extra-btn">
-        <SvgAsset iconName="lyric"></SvgAsset>
-      </div> */}
+      <LyricBtn></LyricBtn>
       <div
         className="extra-btn"
         onClick={() => {
@@ -253,6 +258,52 @@ function QualityBtn() {
           <SvgAsset title={"超高音质"} iconName={"sq"}></SvgAsset>
         </SwitchCase.Case>
       </SwitchCase.Switch>
+    </div>
+  );
+}
+
+function LyricBtn() {
+  const [enabled, setEnabled] = useState(false);
+  const lyric = useLyric();
+
+  useEffect(() => {
+    ipcRendererInvoke("set-lyric-window", enabled);
+  }, [enabled]);
+
+  useEffect(() => {
+    // 同步歌词 这样写貌似不好 应该用回调
+    if (enabled) {
+      // 同步歌词
+      if (lyric?.currentLrc) {
+        const currentLrc = lyric?.currentLrc;
+        // 同步两句歌词
+        ipcRendererSend("send-to-lyric-window", {
+          timeStamp: Date.now(),
+          lrc: currentLrc
+            ? [currentLrc.lrc, lyric.parser.getLyric()[currentLrc.index + 1]]
+            : [],
+        });
+      } else {
+        ipcRendererSend("send-to-lyric-window", {
+          timeStamp: Date.now(),
+          lrc: [],
+        });
+      }
+    }
+  }, [lyric, enabled]);
+
+  return (
+    <div
+      className={classNames({
+        "extra-btn": true,
+        highlight: enabled,
+      })}
+      role="button"
+      onClick={async () => {
+        setEnabled((prev) => !prev);
+      }}
+    >
+      <SvgAsset iconName="lyric"></SvgAsset>
     </div>
   );
 }

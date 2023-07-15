@@ -31,6 +31,7 @@ declare namespace IpcEvents {
       add?: string[],
       rm?: string[]
     };
+    'send-to-lyric-window': ICommon.ISendToLyricWindowData
   }
 }
 
@@ -72,5 +73,7 @@ declare namespace IpcInvoke {
     ) => Electron.SaveDialogReturnValue;
 
     "check-update": () => ICommon.IUpdateInfo;
+    "set-lyric-window": (show: boolean) => void; 
+    /** 主窗口和歌词窗口之间 */
   }
 }

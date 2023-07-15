@@ -45,6 +45,14 @@ const config: ForgeConfig = {
               js: "./src/preload/index.ts",
             },
           },
+          {
+            html: "./src/renderer-lrc/document/index.html",
+            js: "./src/renderer-lrc/document/index.tsx",
+            name: "lrc_window",
+            preload: {
+              js: "./src/preload/index.ts",
+            },
+          },
         ],
       },
     }),

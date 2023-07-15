@@ -16,7 +16,8 @@
       "*": ["node_modules/*"],
       "@/*": ["src/*"],
       "@main/*": ["src/main/*"],
-      "@renderer/*": ["src/renderer/*"]
+      "@renderer/*": ["src/renderer/*"],
+      "@renderer-lrc/*": ["src/renderer-lrc/*"]
     }
   },
   "include": ["src/**/*"]

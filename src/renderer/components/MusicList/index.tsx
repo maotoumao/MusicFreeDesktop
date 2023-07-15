@@ -142,16 +142,16 @@ export function showMusicContextMenu(
           MusicSheet.removeMusicFromSheet(musicItem, localMusicSheetId);
         },
       },
-      {
-        title: '下载',
-        icon: 'array-download-tray',
-        show: musicItem.platform !== localPluginName,
-        onClick() {
-          ipcRendererSend('download-media', {
-            mediaItem: musicItem
-          })
-        },
-      }
+      // {
+      //   title: '下载',
+      //   icon: 'array-download-tray',
+      //   show: musicItem.platform !== localPluginName,
+      //   onClick() {
+      //     ipcRendererSend('download-media', {
+      //       mediaItem: musicItem
+      //     })
+      //   },
+      // }
     ],
   });
 }

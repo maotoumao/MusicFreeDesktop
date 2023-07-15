@@ -54,6 +54,7 @@ export const rendererConfig: Configuration = {
     alias: {
       "@": path.join(__dirname, "../src"),
       "@renderer": path.join(__dirname, "../src/renderer"),
+      "@renderer-lrc": path.join(__dirname, "../src/renderer-lrc"),
     },
   },
 };
