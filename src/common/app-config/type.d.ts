@@ -19,6 +19,10 @@ interface IConfig {
   download: {
     /** 下载路径 */
     path: string;
+    /** 默认下载音质 */
+    defaultQuality: IMusic.IQualityKey;
+    /** 默认下载音质缺失时 */
+    whenQualityMissing: "higher" | "lower";
   };
   shortCut: {
     test: never;
@@ -29,7 +33,7 @@ interface IConfig {
   /** 本地音乐配置 */
   localMusic: {
     watchDir: string[];
-  }
+  };
 }
 
 type BasicType = string | number | symbol | null | undefined;

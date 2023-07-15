@@ -1,6 +1,6 @@
 // See the Electron documentation for details on how to use preload scripts:
 
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import ipcRendererDelegate from "./internal/ipc-renderer-delegate";
 import fsDelegate from "./internal/fs-delegate";
 

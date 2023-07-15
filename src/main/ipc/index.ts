@@ -8,6 +8,8 @@ import axios from "axios";
 import { compare } from "compare-versions";
 import { getPluginByMedia } from "../core/plugin-manager";
 import { encodeUrlHeaders } from "@/common/normalize-util";
+import { getQualityOrder } from "@/common/media-util";
+import { getAppConfigPath } from "@/common/app-config/main";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -32,7 +34,7 @@ export default function setupIpcMain() {
     }
     return dialog.showOpenDialog(options);
   });
- 
+
   ipcMainHandle("show-save-dialog", (options) => {
     const mainWindow = getMainWindow();
     if (!mainWindow) {
@@ -69,7 +71,6 @@ export default function setupIpcMain() {
     setupTrayMenu();
   });
 
-
   /** APP更新 */
   const updateSources = [
     "https://gitee.com/maotoumao/MusicFree/raw/master/release/version.json",
@@ -95,22 +96,45 @@ export default function setupIpcMain() {
   });
 
   /** 下载音乐 */
-  ipcMainOn('download-media', async ({mediaItem}) => {
+  ipcMainOn("download-media", async ({ mediaItem }) => {
     const mainWindow = getMainWindow();
-    if(!mainWindow) {
+    if (!mainWindow) {
       return;
     }
+
+    const [defaultQuality, whenQualityMissing] = await Promise.all([
+      getAppConfigPath("download.defaultQuality"),
+      getAppConfigPath("download.whenQualityMissing"),
+    ]);
+
     try {
-      const mediaSource = await getPluginByMedia(mediaItem)?.methods?.getMediaSource(mediaItem);
-      const headers = mediaSource.headers ?? {};
-      if(mediaSource.userAgent) {
-        headers['user-agent'] = mediaSource.userAgent;
+      const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
+      let mediaSource: IPlugin.IMediaSourceResult | null = null;
+      let realQuality: IMusic.IQualityKey = qualityOrder[0];
+      for (const quality of qualityOrder) {
+        try {
+          mediaSource = await getPluginByMedia(
+            mediaItem
+          )?.methods?.getMediaSource(mediaItem, quality);
+          if (!mediaSource?.url) {
+            continue;
+          }
+          realQuality = quality;
+          break;
+        } catch {}
       }
-      const url = encodeUrlHeaders(mediaSource.url, headers);
-      mainWindow.webContents.downloadURL(url);
-    } catch {
 
+      const headers = mediaSource.headers ?? {};
+      if (mediaSource.userAgent) {
+        headers["user-agent"] = mediaSource.userAgent;
+      }
+      // const encodedUrl = encodeUrlHeaders(mediaSource.url, headers);
+      // mainWindow.webContents.downloadURL(encodedUrl);
+      mainWindow.webContents.session.downloadURL(mediaSource.url, {
+        headers: mediaSource.headers,
+      });
+    } catch (e) {
+      console.log(e);
     }
-  })
-
+  });
 }
