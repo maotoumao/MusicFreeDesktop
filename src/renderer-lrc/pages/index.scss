@@ -1,0 +1,26 @@
+.lyric-window-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba($color: #000000, $alpha: 0.2);
+  }
+
+
+  & .lyric-window-content-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & .lyric-text-row {
+      -webkit-text-stroke: 1px #b48f1d;
+      color: white;
+      font-size: 52px;
+    }
+  }
+}

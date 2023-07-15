@@ -1,10 +1,11 @@
 html,
-body {
+body,
+#root {
   margin: 0;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: #fc5f5f;
+
 }
 
 ::-webkit-scrollbar {

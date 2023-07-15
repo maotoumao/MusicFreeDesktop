@@ -5,7 +5,7 @@ import {
   Tray,
   app,
 } from "electron";
-import { showWindow } from "../window";
+import { showMainWindow } from "../window";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
 import { ipcMainSendMainWindow } from "@/common/ipc-util/main";
@@ -19,14 +19,14 @@ export function setupTray() {
   tray = new Tray(iconPath);
 
   tray.on("double-click", () => {
-    showWindow();
+    showMainWindow();
   });
 
   setupTrayMenu();
 }
 
 function openMusicDetail() {
-  showWindow();
+  showMainWindow();
   ipcMainSendMainWindow("navigate", "evt://SHOW_MUSIC_DETAIL");
 }
 
@@ -146,7 +146,7 @@ export function setupTrayMenu() {
   ctxMenu.push({
     label: "设置",
     click() {
-      showWindow();
+      showMainWindow();
       ipcMainSendMainWindow("navigate", "/main/setting");
     },
   });

@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from "electron";
-import { createMainWindow, getMainWindow, showWindow } from "./window";
+import { createMainWindow, getMainWindow, showMainWindow } from "./window";
 import setupIpcMain from "./ipc";
 import { setupPluginManager } from "./core/plugin-manager";
 import { setupMainAppConfig } from "@/common/app-config/main";
@@ -40,7 +40,7 @@ if(!app.requestSingleInstanceLock()){
 
 app.on('second-instance', () => {
   if(getMainWindow()) {
-    showWindow();
+    showMainWindow();
   }
 })
 
