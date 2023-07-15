@@ -18,11 +18,11 @@ export default function About() {
       </div>
 
       <div className="setting-row about-version">
-        作者: <A href="https://github.com/maotoumao">@猫头猫</A> 
+        软件作者: <A href="https://github.com/maotoumao">@猫头猫</A> 
       </div>
 
       <div className="setting-row about-version">
-        源代码：软件基于GPL3.0协议开源，
+        源代码：软件基于GPL3.0协议开源.
         <A href="https://github.com/maotoumao/MusicFreeDesktop">Github地址</A>
         <A href="https://gitee.com/maotoumao/MusicFreeDesktop">Gitee地址</A>
       </div>
