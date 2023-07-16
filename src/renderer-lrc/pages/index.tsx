@@ -138,7 +138,11 @@ export default function LyricWindowPage() {
         </div>
       </Condition>
       <div className="lyric-window-content-container">
-        <div className="lyric-text-row">
+        <div className="lyric-text-row" style={{
+          color: lyricAppConfig?.fontColor,
+          // @ts-ignore
+          '-webkit-text-stroke-color': lyricAppConfig?.strokeColor
+        }}>
           {lyric[0]?.lrc ??
             (currentMusic
               ? `${currentMusic.title} - ${currentMusic.artist}`

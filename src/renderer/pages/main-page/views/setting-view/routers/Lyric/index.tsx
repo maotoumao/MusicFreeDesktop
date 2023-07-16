@@ -33,11 +33,16 @@ export default function Lyric(props: IProps) {
           ipcRendererSend("set-desktop-lyric-lock", checked);
         }}
       ></CheckBoxSettingItem>
-      {/* <ColorPickerSettingItem
+      <ColorPickerSettingItem
         label="字体颜色"
         value={data.fontColor}
         keyPath="lyric.fontColor"
-      ></ColorPickerSettingItem> */}
+      ></ColorPickerSettingItem>
+      <ColorPickerSettingItem
+        label="描边颜色"
+        value={data.strokeColor}
+        keyPath="lyric.strokeColor"
+      ></ColorPickerSettingItem>
     </div>
   );
 }

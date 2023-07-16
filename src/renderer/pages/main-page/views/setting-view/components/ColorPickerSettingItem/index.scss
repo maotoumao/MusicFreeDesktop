@@ -20,7 +20,6 @@
   z-index: 10;
   box-shadow: var(--shadowColor) 2px 2px 8px;
 
-
   & .react-colorful__pointer {
     width: 14px;
     height: 14px;
@@ -30,10 +29,24 @@
   & .react-colorful__alpha {
     height: 18px;
     border-radius: 0;
-  } 
+  }
 
-  & input {
-    letter-spacing: 1px;
+  & .setting-colorpicker-options {
     width: 200px;
+    display: flex;
+    & input {
+      letter-spacing: 1px;
+      width: 136px;
+    }
+
+    & div[role="button"] {
+      width: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--primaryColor);
+      color: white;
+
+    }
   }
 }

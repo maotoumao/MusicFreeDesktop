@@ -29,18 +29,41 @@ export default function ColorPickerSettingItem<T extends IAppConfigKeyPath>(
         <Popover.Button
           as="div"
           style={{
-            backgroundColor: color,
+            backgroundColor: value as string,
           }}
           className={"picker-swatch"}
         ></Popover.Button>
-        <div>{color}</div>
+        <div>{value as string}</div>
       </div>
       <Popover.Panel className={"setting-colorpicker-panel"}>
-        <HexAlphaColorPicker
-          color={color}
-          onChange={setColor}
-        ></HexAlphaColorPicker>
-        <HexColorInput color={color} onChange={setColor} alpha prefixed placeholder="选择一个颜色"></HexColorInput>
+        {({ close }) => {
+          return (
+            <>
+              <HexAlphaColorPicker
+                color={color}
+                onChange={setColor}
+              ></HexAlphaColorPicker>
+              <div className="setting-colorpicker-options">
+                <HexColorInput
+                  color={color}
+                  onChange={setColor}
+                  alpha
+                  prefixed
+                  placeholder="选择一个颜色"
+                ></HexColorInput>
+                <div
+                  role="button"
+                  onClick={() => {
+                    rendererAppConfig.setAppConfigPath(keyPath, color as any);
+                    close();
+                  }}
+                >
+                  提交
+                </div>
+              </div>
+            </>
+          );
+        }}
       </Popover.Panel>
     </Popover>
     // <div
