@@ -17,8 +17,6 @@ declare namespace ICommon {
     }
   }
 
- 
-
   interface IPoint {
     x: number;
     y: number

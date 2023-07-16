@@ -3,6 +3,7 @@ import path from "path";
 import { localPluginName, supportLocalMediaType } from "./constant";
 import CryptoJS from "crypto-js";
 import fs from "fs/promises";
+import url from 'url';
 
 function getB64Picture(picture: IPicture) {
   return `data:${picture.format};base64,${picture.data.toString("base64")}`;
@@ -63,5 +64,9 @@ export async function parseLocalMusicItemFolder(
 }
 
 export function addFileScheme(filePath: string) {
-  return filePath.startsWith("file://") ? filePath : `file://${filePath}`;
+  return url.pathToFileURL(filePath).toString();
+}
+
+export function addTailSlash(filePath: string) {
+  return (filePath.endsWith('/') || filePath.endsWith('\\')) ? filePath : filePath + '/';
 }

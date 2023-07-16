@@ -1,3 +1,9 @@
+interface IThemePack {
+  name: string;
+  path: string;
+  preview: string;
+}
+
 interface IConfig {
   normal: {
     closeBehavior: "exit" | "minimize";
@@ -47,6 +53,13 @@ interface IConfig {
   localMusic: {
     watchDir: string[];
   };
+  /** 主题设置 */
+  theme: {
+    // 主题列表
+    themePacks: IThemePack[],
+    // 当前主题
+    currentThemePack: IThemePack | null
+  }
 
   /** 不需要用户配置的数据 */
   private: {

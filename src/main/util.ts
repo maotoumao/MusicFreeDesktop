@@ -8,3 +8,4 @@ const resPath = app.isPackaged
 export const getResPath = (resourceName: string) => {
   return path.resolve(resPath, resourceName);
 };
+

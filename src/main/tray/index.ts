@@ -82,31 +82,28 @@ export function setupTrayMenu() {
         if (!currentMusic) {
           return;
         }
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "set-player-state",
-          payload:
-            currentPlayerState === PlayerState.Playing
-              ? PlayerState.Paused
-              : PlayerState.Playing,
-        });
+        ipcMainSendMainWindow('player-cmd', {
+          cmd: 'set-player-state',
+          payload: currentPlayerState === PlayerState.Playing ? PlayerState.Paused : PlayerState.Playing
+        })
       },
     },
     {
       label: "上一首",
       enabled: !!currentMusic,
       click() {
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "skip-prev",
-        });
+        ipcMainSendMainWindow('player-cmd', {
+          cmd: 'skip-prev'
+        })
       },
     },
     {
       label: "下一首",
       enabled: !!currentMusic,
       click() {
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "skip-next",
-        });
+        ipcMainSendMainWindow('player-cmd', {
+          cmd: 'skip-next'
+        })
       },
     }
   );
@@ -121,10 +118,10 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Loop,
         click() {
-          ipcMainSendMainWindow("player-cmd", {
-            cmd: "set-repeat-mode",
-            payload: RepeatMode.Loop,
-          });
+          ipcMainSendMainWindow('player-cmd', {
+            cmd: 'set-repeat-mode',
+            payload: RepeatMode.Loop
+          })
         },
       },
       {
@@ -133,10 +130,10 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Queue,
         click() {
-          ipcMainSendMainWindow("player-cmd", {
-            cmd: "set-repeat-mode",
-            payload: RepeatMode.Queue,
-          });
+          ipcMainSendMainWindow('player-cmd', {
+            cmd: 'set-repeat-mode',
+            payload: RepeatMode.Queue
+          })
         },
       },
       {
@@ -145,10 +142,10 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Shuffle,
         click() {
-          ipcMainSendMainWindow("player-cmd", {
-            cmd: "set-repeat-mode",
-            payload: RepeatMode.Shuffle,
-          });
+          ipcMainSendMainWindow('player-cmd', {
+            cmd: 'set-repeat-mode',
+            payload: RepeatMode.Shuffle
+          })
         },
       },
     ]),

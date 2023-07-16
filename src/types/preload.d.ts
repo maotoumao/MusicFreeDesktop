@@ -1,6 +1,7 @@
 interface Window {
     fs: typeof import('../preload/internal/fs-delegate').default;
-    globalData: IGlobalData
+    themepack: typeof import('../preload/internal/themepack').default;
+    globalData: IGlobalData,
 }
 
 interface IGlobalData {

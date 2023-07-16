@@ -56,10 +56,6 @@ export async function setupMainAppConfig() {
     return setAppConfigPath(keyPath, value);
   });
 
-  // 一些在主进程完成的初始化
-  if (!cacheConfig?.download?.path) {
-    setAppConfigPath("download.path", app.getPath("downloads"));
-  }
 }
 
 export async function getAppConfig(): Promise<IAppConfig> {

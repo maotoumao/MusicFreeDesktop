@@ -3,6 +3,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import ipcRendererDelegate from "./internal/ipc-renderer-delegate";
 import fsDelegate from "./internal/fs-delegate";
+import themepack from "./internal/themepack";
 
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
@@ -11,3 +12,6 @@ import fsDelegate from "./internal/fs-delegate";
 
 contextBridge.exposeInMainWorld('ipcRenderer', ipcRendererDelegate);
 contextBridge.exposeInMainWorld('fs', fsDelegate);
+contextBridge.exposeInMainWorld('themepack', themepack);
+
+
