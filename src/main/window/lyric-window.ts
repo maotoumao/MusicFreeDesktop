@@ -22,7 +22,7 @@ let lyricWindow: BrowserWindow | null = null;
 
 export const createLyricWindow = (): BrowserWindow => {
   // Create the browser window.
-  const width = 800;
+  const width = 920;
   const height = 160;
   lyricWindow = new BrowserWindow({
     height,
