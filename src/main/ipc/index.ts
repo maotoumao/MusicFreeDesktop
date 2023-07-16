@@ -165,15 +165,7 @@ export default function setupIpcMain() {
   });
 
   ipcMainHandle("set-lyric-window", (enabled) => {
-    if (enabled) {
-      let lyricWindow = getLyricWindow();
-      if (!lyricWindow) {
-        lyricWindow = createLyricWindow();
-      }
-    } else {
-      closeLyricWindow();
-    }
-    setAppConfigPath("lyric.enableDesktopLyric", enabled);
+    setLyricWindow(enabled);
   });
 
   ipcMainOn("send-to-lyric-window", (data) => {
@@ -190,23 +182,8 @@ export default function setupIpcMain() {
     });
   });
 
-  ipcMainOn("set-desktop-lyric-lock", async (lockState) => {
-    const result = await setAppConfigPath("lyric.lockLyric", lockState);
-
-    if (result) {
-      const lyricWindow = getLyricWindow();
-
-      if (!lyricWindow) {
-        return;
-      }
-      if (lockState) {
-        lyricWindow.setIgnoreMouseEvents(true, {
-          forward: true,
-        });
-      } else {
-        lyricWindow.setIgnoreMouseEvents(false);
-      }
-    }
+  ipcMainOn("set-desktop-lyric-lock", (lockState) => {
+    setDesktopLyricLock(lockState);
   });
 
   ipcMainOn("ignore-mouse-event", async (data) => {
@@ -228,7 +205,7 @@ export default function setupIpcMain() {
     const targetWindow = getExtensionWindow(evt.sender.id);
 
     if (targetWindow) {
-    const currentMusicInfo = currentMusicInfoStore.getValue();
+      const currentMusicInfo = currentMusicInfoStore.getValue();
 
       syncExtensionData(
         {
@@ -240,4 +217,38 @@ export default function setupIpcMain() {
       );
     }
   });
+}
+
+export async function setLyricWindow(enabled: boolean) {
+  if (enabled) {
+    let lyricWindow = getLyricWindow();
+    if (!lyricWindow) {
+      lyricWindow = createLyricWindow();
+    }
+  } else {
+    closeLyricWindow();
+  }
+  await setAppConfigPath("lyric.enableDesktopLyric", enabled);
+  setupTrayMenu();
+}
+
+export async function setDesktopLyricLock(lockState: boolean) {
+  const result = await setAppConfigPath("lyric.lockLyric", lockState);
+
+  if (result) {
+    const lyricWindow = getLyricWindow();
+
+    if (!lyricWindow) {
+      return;
+    }
+    if (lockState) {
+      lyricWindow.setIgnoreMouseEvents(true, {
+        forward: true,
+      });
+    } else {
+      lyricWindow.setIgnoreMouseEvents(false);
+    }
+  }
+  setupTrayMenu();
+
 }

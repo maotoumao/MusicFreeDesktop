@@ -2,6 +2,7 @@ interface IThemePack {
   name: string;
   path: string;
   preview: string;
+  description?: string;
 }
 
 interface IConfig {

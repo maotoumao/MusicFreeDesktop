@@ -3,7 +3,6 @@ import path from "path";
 
 import { rules } from "./webpack.rules";
 
-
 export const mainConfig: Configuration = {
   /**
    * This is the main entry point for your application, it's the first file
@@ -11,7 +10,7 @@ export const mainConfig: Configuration = {
    */
   entry: {
     index: "./src/main/index.ts",
-    'scanner.worker': './src/main/core/local-music-manager/scanner.worker.ts'
+    "scanner.worker": "./src/main/core/local-music-manager/scanner.worker.ts",
   },
   // Put your normal webpack config below here
   module: {
@@ -25,6 +24,6 @@ export const mainConfig: Configuration = {
     },
   },
   output: {
-    filename: '[name].js'
-  }
+    filename: "[name].js",
+  },
 };

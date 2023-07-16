@@ -105,6 +105,7 @@ async function bootstrap() {
           ? jsonData.preview
           : jsonData.preview?.replace?.("@/", addTailSlash(addFileScheme(themepackPath))),
         path: themepackPath,
+        description: jsonData.description
       };
       parsedThemePacks.push(themePack);
     } catch(e) {

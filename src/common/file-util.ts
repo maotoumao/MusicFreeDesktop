@@ -3,7 +3,7 @@ import path from "path";
 import { localPluginName, supportLocalMediaType } from "./constant";
 import CryptoJS from "crypto-js";
 import fs from "fs/promises";
-import url from 'url';
+import url from "url";
 
 function getB64Picture(picture: IPicture) {
   return `data:${picture.format};base64,${picture.data.toString("base64")}`;
@@ -55,7 +55,11 @@ export async function parseLocalMusicItemFolder(
         supportLocalMediaType.some((postfix) => fp.endsWith(postfix))
       );
       // TODO: 分片
-      return Promise.all(validFiles.map((fp) => parseLocalMusicItem(path.resolve(folderPath, fp))));
+      return Promise.all(
+        validFiles.map((fp) =>
+          parseLocalMusicItem(path.resolve(folderPath, fp))
+        )
+      );
     }
     throw new Error("Folder Not Found");
   } catch {
@@ -64,9 +68,13 @@ export async function parseLocalMusicItemFolder(
 }
 
 export function addFileScheme(filePath: string) {
-  return url.pathToFileURL(filePath).toString();
+  return filePath.startsWith("file:")
+    ? filePath
+    : url.pathToFileURL(filePath).toString();
 }
 
 export function addTailSlash(filePath: string) {
-  return (filePath.endsWith('/') || filePath.endsWith('\\')) ? filePath : filePath + '/';
+  return filePath.endsWith("/") || filePath.endsWith("\\")
+    ? filePath
+    : filePath + "/";
 }

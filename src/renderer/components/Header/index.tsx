@@ -23,10 +23,10 @@ export default function AppHeader() {
           <SvgAsset iconName="logo"></SvgAsset>
         </div>
         <HeaderNavigator></HeaderNavigator>
-        <div className="search">
+        <div className="header-search">
           <input
             ref={inputRef}
-            className="search-input"
+            className="header-search-input"
             placeholder="在这里输入搜索内容"
             maxLength={50}
             onKeyDown={(key) => {

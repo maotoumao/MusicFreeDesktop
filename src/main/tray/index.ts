@@ -10,6 +10,8 @@ import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
 import { ipcMainSendMainWindow } from "@/common/ipc-util/main";
 import { getResPath } from "../util";
+import { getAppConfigPath } from "@/common/app-config/main";
+import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 
 let tray: Tray | null = null;
 
@@ -30,7 +32,7 @@ function openMusicDetail() {
   ipcMainSendMainWindow("navigate", "evt://SHOW_MUSIC_DETAIL");
 }
 
-export function setupTrayMenu() {
+export async function setupTrayMenu() {
   if (!tray) {
     return;
   }
@@ -82,28 +84,31 @@ export function setupTrayMenu() {
         if (!currentMusic) {
           return;
         }
-        ipcMainSendMainWindow('player-cmd', {
-          cmd: 'set-player-state',
-          payload: currentPlayerState === PlayerState.Playing ? PlayerState.Paused : PlayerState.Playing
-        })
+        ipcMainSendMainWindow("player-cmd", {
+          cmd: "set-player-state",
+          payload:
+            currentPlayerState === PlayerState.Playing
+              ? PlayerState.Paused
+              : PlayerState.Playing,
+        });
       },
     },
     {
       label: "上一首",
       enabled: !!currentMusic,
       click() {
-        ipcMainSendMainWindow('player-cmd', {
-          cmd: 'skip-prev'
-        })
+        ipcMainSendMainWindow("player-cmd", {
+          cmd: "skip-prev",
+        });
       },
     },
     {
       label: "下一首",
       enabled: !!currentMusic,
       click() {
-        ipcMainSendMainWindow('player-cmd', {
-          cmd: 'skip-next'
-        })
+        ipcMainSendMainWindow("player-cmd", {
+          cmd: "skip-next",
+        });
       },
     }
   );
@@ -118,10 +123,10 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Loop,
         click() {
-          ipcMainSendMainWindow('player-cmd', {
-            cmd: 'set-repeat-mode',
-            payload: RepeatMode.Loop
-          })
+          ipcMainSendMainWindow("player-cmd", {
+            cmd: "set-repeat-mode",
+            payload: RepeatMode.Loop,
+          });
         },
       },
       {
@@ -130,10 +135,10 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Queue,
         click() {
-          ipcMainSendMainWindow('player-cmd', {
-            cmd: 'set-repeat-mode',
-            payload: RepeatMode.Queue
-          })
+          ipcMainSendMainWindow("player-cmd", {
+            cmd: "set-repeat-mode",
+            payload: RepeatMode.Queue,
+          });
         },
       },
       {
@@ -142,14 +147,51 @@ export function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Shuffle,
         click() {
-          ipcMainSendMainWindow('player-cmd', {
-            cmd: 'set-repeat-mode',
-            payload: RepeatMode.Shuffle
-          })
+          ipcMainSendMainWindow("player-cmd", {
+            cmd: "set-repeat-mode",
+            payload: RepeatMode.Shuffle,
+          });
         },
       },
     ]),
   });
+
+  ctxMenu.push({
+    type: "separator",
+  });
+  /** 桌面歌词 */
+  const lyricConfig = await getAppConfigPath("lyric");
+  if (lyricConfig.enableDesktopLyric) {
+    ctxMenu.push({
+      label: "关闭桌面歌词",
+      click() {
+        setLyricWindow(false);
+      },
+    });
+  } else {
+    ctxMenu.push({
+      label: "开启桌面歌词",
+      click() {
+        setLyricWindow(true);
+      },
+    });
+  }
+
+  if (lyricConfig.lockLyric) {
+    ctxMenu.push({
+      label: "解锁桌面歌词",
+      click() {
+        setDesktopLyricLock(false);
+      },
+    });
+  } else {
+    ctxMenu.push({
+      label: "锁定桌面歌词",
+      click() {
+        setDesktopLyricLock(true);
+      },
+    });
+  }
 
   ctxMenu.push({
     type: "separator",

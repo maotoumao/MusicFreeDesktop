@@ -69,8 +69,10 @@
   --primaryColor: #f17d34; // 主色调
   --backgroundColor: #fdfdfd; // 背景色
   --dividerColor: rgba(0, 0, 0, 0.1); // 分割线颜色
+  --hoverColor: rgba(0, 0, 0, 0.1); // 选中颜色
   --shadowColor: rgba(0, 0, 0, 0.2);
   --textColor: #333333; // 主文本颜色
+  --maskColor: rgba(51, 51, 51, 0.2);
   --animate-duration: 300ms !important;
   --scrollbar-width: 8px;
   font-size: 13px;

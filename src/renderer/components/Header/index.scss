@@ -28,7 +28,7 @@
       }
     }
 
-    & .search {
+    & .header-search {
       -webkit-app-region: none;
       background-color: rgba($color: #000, $alpha: 0.14);
       position: relative;
@@ -40,7 +40,7 @@
       align-items: center;
       margin-left: 14px;
 
-      & .search-input {
+      & .header-search-input {
         flex: auto;
         font-size: 1rem;
         line-height: 1.2rem;

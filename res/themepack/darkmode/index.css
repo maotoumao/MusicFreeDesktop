@@ -1,3 +1,40 @@
-#root {
-    background: url('@/assets/night_sky_stars_linear_gradient_hd_8k_anime_style_8013dbdf-270b-4f00-b981-5745e056aae3.png') !important;
+:root {
+  --textColor: #fcfcfc !important;
+  --backgroundColor: #202020 !important;
+  --shadowColor: rgba(128, 128, 128, 0.1) !important;
+  --dividerColor: rgba(255, 255, 255, 0.1) !important;
+  --maskColor: rgba(33, 33, 33, 0.8) !important;
+}
+
+.music-background {
+  background: var(--backgroundColor) !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+.header-container,
+.music-bar-container {
+  background-color: #131313 !important;
+}
+
+input {
+    background-color: #424242 !important;
+    color: var(--textColor);
+}
+
+input + svg {
+    color: white !important;
+    opacity: 0.7 !important;
+}
+
+.header-search {
+    background-color: #666 !important;
+}
+
+.header-search input {
+    background-color: transparent !important;
+}
+
+a {
+    color: #8bd1ed !important;
 }
