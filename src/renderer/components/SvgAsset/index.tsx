@@ -19,6 +19,8 @@ export type SvgAssetIconNames =
   | "heart-outline"
   | "heart"
   | "identification"
+  | "lock-closed"
+  | "lock-open"
   | "logo"
   | "lyric"
   | "magnifying-glass"

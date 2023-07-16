@@ -17,7 +17,15 @@ interface IConfig {
     playError: "pause" | "skip";
   };
   lyric: {
+    /** 显示桌面歌词 */
     enableDesktopLyric: boolean;
+    /** 桌面歌词置顶 */
+    alwaysOnTop: boolean;
+    /** 字体颜色 */
+    fontColor: string;
+    /** 描边颜色 */
+    strokeColor: string;
+
   },
   download: {
     /** 下载路径 */

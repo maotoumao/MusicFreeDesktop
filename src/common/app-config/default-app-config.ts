@@ -13,7 +13,11 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
     'normal.closeBehavior': 'minimize',
     'normal.checkUpdate': true,
     'download.defaultQuality': 'standard',
-    'download.whenQualityMissing': 'lower'
+    'download.whenQualityMissing': 'lower',
+    'lyric.enableDesktopLyric': false,
+    'lyric.alwaysOnTop': false,
+    'lyric.fontColor': '#fff',
+    'lyric.strokeColor': '#b48f1d'
 } as const;
 
 export default defaultAppConfig;

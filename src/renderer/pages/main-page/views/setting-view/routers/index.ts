@@ -3,6 +3,7 @@
 import About from "./About";
 import Backup from "./Backup";
 import Download from "./Download";
+import Lyric from "./Lyric";
 import Normal from "./Normal";
 import PlayMusic from "./PlayMusic";
 import ShortCut from "./ShortCut";
@@ -17,6 +18,11 @@ export default [
     id: "playMusic",
     title: "播放",
     component: PlayMusic,
+  },
+  {
+    id: "lyric",
+    title: "歌词",
+    component: Lyric,
   },
   // {
   //   id: "download",

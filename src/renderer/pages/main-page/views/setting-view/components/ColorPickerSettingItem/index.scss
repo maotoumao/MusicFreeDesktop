@@ -1,0 +1,39 @@
+.picker-container {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  column-gap: 1rem;
+
+  & .picker-swatch {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 2px;
+    border: 3px solid var(--backgroundColor);
+    cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    font-size: 1.1rem;
+  }
+}
+
+.setting-colorpicker-panel {
+  position: absolute;
+  z-index: 10;
+  box-shadow: var(--shadowColor) 2px 2px 8px;
+
+
+  & .react-colorful__pointer {
+    width: 14px;
+    height: 14px;
+  }
+
+  & .react-colorful__hue,
+  & .react-colorful__alpha {
+    height: 18px;
+    border-radius: 0;
+  } 
+
+  & input {
+    letter-spacing: 1px;
+    width: 200px;
+  }
+}
