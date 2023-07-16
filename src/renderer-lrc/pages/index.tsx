@@ -10,7 +10,6 @@ import { PlayerState } from "@/renderer/core/track-player/enum";
 
 export default function LyricWindowPage() {
   const lyricStore = currentLyricStore.useValue();
-  console.log(lyricStore);
   const { lrc: lyric = [], currentMusic, playerState } = lyricStore;
   const lyricAppConfig = rendererAppConfig.useAppConfig()?.lyric;
 
@@ -32,7 +31,6 @@ export default function LyricWindowPage() {
         "lock-lyric": lockLyric,
       })}
       onMouseOver={() => {
-        console.log("over");
         if (!lockLyric || mouseOverTimerRef.current) {
           if (!lockLyric) {
             setShowOperations(true);

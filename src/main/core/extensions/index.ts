@@ -15,9 +15,10 @@ export function unregisterExtension(bWindow: BrowserWindow) {
 
 /** 向扩展进程同步数据 */
 export function syncExtensionData(
-  data: IpcEvents.IExtensionWindowSyncData["data"]
+  data: IpcEvents.IExtensionWindowSyncData["data"],
+  targetWindow?: BrowserWindow
 ) {
-  extensions.forEach((bWindow) => {
+  (targetWindow ? [targetWindow] : extensions).forEach((bWindow) => {
     if (bWindow) {
       ipcMainSend(bWindow, "sync-extension-data", {
         timeStamp: Date.now(),
@@ -25,4 +26,9 @@ export function syncExtensionData(
       });
     }
   });
+}
+
+
+export function getExtensionWindow(webContentId: number) {
+    return [...extensions].find(item => item.webContents.id === webContentId)
 }

@@ -27,7 +27,7 @@ import { getPluginByMedia } from "../core/plugin-manager";
 import { encodeUrlHeaders } from "@/common/normalize-util";
 import { getQualityOrder } from "@/common/media-util";
 import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/main";
-import { syncExtensionData } from "../core/extensions";
+import { getExtensionWindow, syncExtensionData } from "../core/extensions";
 
 let messageChannel: MessageChannelMain;
 
@@ -173,7 +173,7 @@ export default function setupIpcMain() {
     } else {
       closeLyricWindow();
     }
-    setAppConfigPath('lyric.enableDesktopLyric', enabled);
+    setAppConfigPath("lyric.enableDesktopLyric", enabled);
   });
 
   ipcMainOn("send-to-lyric-window", (data) => {
@@ -181,7 +181,10 @@ export default function setupIpcMain() {
     if (!lyricWindow) {
       return;
     }
-
+    currentMusicInfoStore.setValue((prev) => ({
+      ...prev,
+      lrc: data.lrc,
+    }));
     syncExtensionData({
       lrc: data.lrc,
     });
@@ -219,5 +222,22 @@ export default function setupIpcMain() {
 
   ipcMainOn("player-cmd", (data) => {
     ipcMainSendMainWindow("player-cmd", data);
+  });
+
+  ipcMainOn("extension-inited", (_, evt) => {
+    const targetWindow = getExtensionWindow(evt.sender.id);
+
+    if (targetWindow) {
+    const currentMusicInfo = currentMusicInfoStore.getValue();
+
+      syncExtensionData(
+        {
+          currentMusic: currentMusicInfo.currentMusic,
+          playerState: currentMusicInfo.currentPlayerState,
+          lrc: currentMusicInfo.lrc,
+        },
+        targetWindow
+      );
+    }
   });
 }

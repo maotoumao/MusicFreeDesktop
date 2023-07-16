@@ -45,7 +45,9 @@ declare namespace IpcEvents {
     'player-cmd': {
       cmd: IPlayerCmd,
       payload?: any
-    }
+    },
+    /** 扩展窗口已经初始化完成 */
+    'extension-inited': undefined;
   }
 }
 
