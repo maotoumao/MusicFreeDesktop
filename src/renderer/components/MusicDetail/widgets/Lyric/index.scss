@@ -2,25 +2,23 @@
   width: 360px;
   height: 420px;
   overflow-y: auto;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: stable both-edges;
   font-size: 1rem;
   cursor: default;
   position: relative;
-  mask-image: linear-gradient(
-    transparent 0%,
-    #fff 25%,
-    #fff 75%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    transparent 0%,
-    #fff 25%,
-    #fff 75%,
-    transparent 100%
-  );
+
 
   &::-webkit-scrollbar {
     display: none;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #999;
+    border-radius: 8px;
   }
 
   &:hover::-webkit-scrollbar {
