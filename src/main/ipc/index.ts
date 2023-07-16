@@ -1,4 +1,8 @@
-import { ipcMainHandle, ipcMainOn } from "@/common/ipc-util/main";
+import {
+  ipcMainHandle,
+  ipcMainOn,
+  ipcMainSendMainWindow,
+} from "@/common/ipc-util/main";
 import {
   closeLyricWindow,
   createLyricWindow,
@@ -23,6 +27,7 @@ import { getPluginByMedia } from "../core/plugin-manager";
 import { encodeUrlHeaders } from "@/common/normalize-util";
 import { getQualityOrder } from "@/common/media-util";
 import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/main";
+import { syncExtensionData } from "../core/extensions";
 
 let messageChannel: MessageChannelMain;
 
@@ -67,6 +72,9 @@ export default function setupIpcMain() {
       ...prev,
       currentMusic: musicItem ?? null,
     }));
+    syncExtensionData({
+      currentMusic: musicItem,
+    });
     setupTrayMenu();
   });
 
@@ -75,6 +83,9 @@ export default function setupIpcMain() {
       ...prev,
       currentPlayerState: playerState ?? PlayerState.None,
     }));
+    syncExtensionData({
+      playerState: playerState ?? PlayerState.None,
+    });
     setupTrayMenu();
   });
 
@@ -162,6 +173,7 @@ export default function setupIpcMain() {
     } else {
       closeLyricWindow();
     }
+    setAppConfigPath('lyric.enableDesktopLyric', enabled);
   });
 
   ipcMainOn("send-to-lyric-window", (data) => {
@@ -170,7 +182,9 @@ export default function setupIpcMain() {
       return;
     }
 
-    lyricWindow.webContents.send("send-to-lyric-window", data);
+    syncExtensionData({
+      lrc: data.lrc,
+    });
   });
 
   ipcMainOn("set-desktop-lyric-lock", async (lockState) => {
@@ -193,16 +207,17 @@ export default function setupIpcMain() {
   });
 
   ipcMainOn("ignore-mouse-event", async (data) => {
-    const targetWindow = data.window === 'main' ? getMainWindow(): getLyricWindow();
-    if(!targetWindow) {
+    const targetWindow =
+      data.window === "main" ? getMainWindow() : getLyricWindow();
+    if (!targetWindow) {
       return;
     }
     targetWindow.setIgnoreMouseEvents(data.ignore, {
-      forward: true
+      forward: true,
     });
   });
 
-  // ipcMainHandle('', () => {
-  //   return messageChannel.port2;
-  // })
+  ipcMainOn("player-cmd", (data) => {
+    ipcMainSendMainWindow("player-cmd", data);
+  });
 }

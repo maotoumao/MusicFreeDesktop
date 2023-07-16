@@ -5,10 +5,13 @@ import classNames from "@/renderer/utils/classnames";
 import { useEffect, useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { PlayerState } from "@/renderer/core/track-player/enum";
 
 export default function LyricWindowPage() {
-  const lyric = currentLyricStore.useValue();
+  const lyricStore = currentLyricStore.useValue();
+  console.log(lyricStore);
+  const { lrc: lyric = [], currentMusic, playerState } = lyricStore;
   const lyricAppConfig = rendererAppConfig.useAppConfig()?.lyric;
 
   const lockLyric = lyricAppConfig?.lockLyric;
@@ -80,16 +83,69 @@ export default function LyricWindowPage() {
             <div
               className="operation-button"
               onClick={() => {
+                ipcRendererSend("player-cmd", {
+                  cmd: "skip-prev",
+                });
+              }}
+            >
+              <SvgAsset iconName="skip-left"></SvgAsset>
+            </div>
+            <div
+              className="operation-button"
+              onClick={() => {
+                if (currentMusic) {
+                  ipcRendererSend("player-cmd", {
+                    cmd: "set-player-state",
+                    payload:
+                      playerState === PlayerState.Playing
+                        ? PlayerState.Paused
+                        : PlayerState.Playing,
+                  });
+                }
+              }}
+            >
+              <SvgAsset
+                iconName={
+                  playerState === PlayerState.Playing ? "pause" : "play"
+                }
+              ></SvgAsset>
+            </div>
+            <div
+              className="operation-button"
+              onClick={() => {
+                ipcRendererSend("player-cmd", {
+                  cmd: "skip-next",
+                });
+              }}
+            >
+              <SvgAsset iconName="skip-right"></SvgAsset>
+            </div>
+            <div
+              className="operation-button"
+              onClick={() => {
                 ipcRendererSend("set-desktop-lyric-lock", true);
               }}
             >
               <SvgAsset iconName="lock-closed"></SvgAsset>
             </div>
+            <div
+              className="operation-button"
+              onClick={() => {
+                ipcRendererInvoke('set-lyric-window', false);
+              }}
+            >
+              <SvgAsset iconName='x-mark'></SvgAsset>
+            </div>
           </Condition>
         </div>
       </Condition>
       <div className="lyric-window-content-container">
-        <div className="lyric-text-row">{lyric[0]?.lrc ?? "暂无歌词"}</div>
+        <div className="lyric-text-row">
+          {lyric[0]?.lrc ??
+            (currentMusic
+              ? `${currentMusic.title} - ${currentMusic.artist}`
+              : "暂无歌词")}
+        </div>
       </div>
     </div>
   );

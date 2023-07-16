@@ -17,11 +17,11 @@ export default function Lyric(props: IProps) {
         checked={data.enableDesktopLyric}
         keyPath="lyric.enableDesktopLyric"
       ></CheckBoxSettingItem>
-      <CheckBoxSettingItem
+      {/* <CheckBoxSettingItem
         label="置顶桌面歌词"
         checked={data.alwaysOnTop}
         keyPath="lyric.alwaysOnTop"
-      ></CheckBoxSettingItem>
+      ></CheckBoxSettingItem> */}
       <CheckBoxSettingItem
         label="锁定桌面歌词"
         checked={data.lockLyric}
@@ -30,11 +30,11 @@ export default function Lyric(props: IProps) {
           ipcRendererSend("set-desktop-lyric-lock", checked);
         }}
       ></CheckBoxSettingItem>
-      <ColorPickerSettingItem
+      {/* <ColorPickerSettingItem
         label="字体颜色"
         value={data.fontColor}
         keyPath="lyric.fontColor"
-      ></ColorPickerSettingItem>
+      ></ColorPickerSettingItem> */}
     </div>
   );
 }

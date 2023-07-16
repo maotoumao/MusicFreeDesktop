@@ -1,5 +1,6 @@
 declare namespace IpcEvents {
   // 由 Renderer 发出的ipc通信
+
   interface Renderer {
     /** 最小化窗口 */
     "min-window": {
@@ -31,12 +32,20 @@ declare namespace IpcEvents {
       add?: string[],
       rm?: string[]
     };
-    'send-to-lyric-window': ICommon.ISendToLyricWindowData;
+    'send-to-lyric-window': {
+      // 时序
+      timeStamp: number;
+      lrc: ILyric.IParsedLrcItem[]
+    };
     'set-desktop-lyric-lock': boolean;
     'ignore-mouse-event': {
       ignore: boolean,
       window: 'main' | 'lyric'
     };
+    'player-cmd': {
+      cmd: IPlayerCmd,
+      payload?: any
+    }
   }
 }
 

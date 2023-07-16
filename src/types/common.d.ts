@@ -17,11 +17,7 @@ declare namespace ICommon {
     }
   }
 
-  interface ISendToLyricWindowData {
-    // 时序
-    timeStamp: number;
-    lrc: ILyric.IParsedLrcItem[]
-  }
+ 
 
   interface IPoint {
     x: number;

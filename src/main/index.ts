@@ -1,8 +1,14 @@
-import { app, BrowserWindow } from "electron";
-import { createMainWindow, getMainWindow, showMainWindow } from "./window";
+import { app, BrowserWindow, ipcRenderer } from "electron";
+import {
+  createLyricWindow,
+  createMainWindow,
+  getLyricWindow,
+  getMainWindow,
+  showMainWindow,
+} from "./window";
 import setupIpcMain from "./ipc";
 import { setupPluginManager } from "./core/plugin-manager";
-import { setupMainAppConfig } from "@/common/app-config/main";
+import { getAppConfigPath, setupMainAppConfig } from "@/common/app-config/main";
 import { setupTray } from "./tray";
 import { setupLocalMusicManager } from "./core/local-music-manager";
 
@@ -33,23 +39,31 @@ app.on("activate", () => {
   }
 });
 
-
-if(!app.requestSingleInstanceLock()){
+if (!app.requestSingleInstanceLock()) {
   app.exit(0);
 }
 
-app.on('second-instance', () => {
-  if(getMainWindow()) {
+app.on("second-instance", () => {
+  if (getMainWindow()) {
     showMainWindow();
   }
-})
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   setupIpcMain();
-  setupMainAppConfig();
+  await setupMainAppConfig();
   setupPluginManager();
   setupTray();
   setupLocalMusicManager();
-})
+
+  /** 一些初始化设置 */
+  getAppConfigPath("lyric.enableDesktopLyric").then((result) => {
+    if (result) {
+      if (!getLyricWindow()) {
+        createLyricWindow();
+      }
+    }
+  });
+});

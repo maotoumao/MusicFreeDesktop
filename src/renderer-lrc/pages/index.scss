@@ -32,6 +32,10 @@
     left: 50%;
     transform: translateX(-50%);
     height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 8px;
 
     & .operation-button {
       width: 28px;

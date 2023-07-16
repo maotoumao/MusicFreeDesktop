@@ -221,33 +221,33 @@ function setupEvents() {
     }
   });
 
-  ipcRendererOn("switch-music-state", (playerState) => {
-    if (playerState === PlayerState.Playing) {
-      resumePlay();
-    } else {
-      pause();
-    }
-  });
+
 
   navigator.mediaSession.setActionHandler("nexttrack", () => {
     skipToNext();
   });
 
-  ipcRendererOn("skip-next", () => {
-    skipToNext();
-  });
+  ipcRendererOn('player-cmd', (data) => {
+    const {cmd, payload} = data;
+    if(cmd === 'skip-next') {
+      skipToNext();
+    } else if (cmd === 'skip-prev') {
+      skipToPrev();
+    } else if (cmd  === 'set-repeat-mode') {
+      setRepeatMode(payload as RepeatMode)
+    } else if (cmd === 'set-player-state') {
+      if (payload === PlayerState.Playing) {
+        resumePlay();
+      } else {
+        pause();
+      }
+    }
+  })
 
   navigator.mediaSession.setActionHandler("previoustrack", () => {
     skipToPrev();
   });
 
-  ipcRendererOn("skip-prev", () => {
-    skipToPrev();
-  });
-
-  ipcRendererOn("set-repeat-mode", (repeatMode) => {
-    setRepeatMode(repeatMode);
-  });
 }
 
 function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {

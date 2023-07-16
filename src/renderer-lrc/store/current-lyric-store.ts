@@ -1,3 +1,3 @@
 import Store from "@/common/store";
 
-export default new Store<ICommon.ISendToLyricWindowData['lrc']>([]);
+export default new Store<IpcEvents.IExtensionWindowSyncData['data']>({});

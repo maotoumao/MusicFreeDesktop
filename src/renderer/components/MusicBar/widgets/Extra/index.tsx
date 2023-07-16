@@ -268,10 +268,6 @@ function LyricBtn() {
   const lyric = useLyric();
 
   useEffect(() => {
-    ipcRendererInvoke("set-lyric-window", enableDesktopLyric);
-  }, [enableDesktopLyric]);
-
-  useEffect(() => {
     // 同步歌词 这样写貌似不好 应该用回调
     if (enableDesktopLyric) {
       // 同步歌词
@@ -301,10 +297,7 @@ function LyricBtn() {
       })}
       role="button"
       onClick={async () => {
-        rendererAppConfig.setAppConfigPath(
-          "lyric.enableDesktopLyric",
-          !enableDesktopLyric
-        );
+        ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
       }}
     >
       <SvgAsset iconName="lyric"></SvgAsset>

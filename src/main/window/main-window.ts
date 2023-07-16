@@ -67,7 +67,6 @@ export const createMainWindow = (): BrowserWindow => {
           requestHeaders,
         });
       } catch {
-        console.log(details.url, details.requestHeaders, "!!!HIHI");
 
         callback({
           requestHeaders: details.requestHeaders,

@@ -4,12 +4,13 @@ import rendererAppConfig from "@/common/app-config/renderer";
 
 
 export default async function () {
-  let prevTimestamp = 0;
-  ipcRendererOn('send-to-lyric-window', (data) => {
-    if(data.timeStamp > prevTimestamp) {
-      prevTimestamp = data.timeStamp;
-      currentLyricStore.setValue(data.lrc);
-    }
+  // let prevTimestamp = 0;
+
+  ipcRendererOn('sync-extension-data', (data) => {
+    currentLyricStore.setValue(prev => ({
+      ...prev,
+      ...(data.data)
+    }))
   })
   await rendererAppConfig.setupRendererAppConfig();
 }
