@@ -18,7 +18,8 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
     'lyric.alwaysOnTop': false,
     'lyric.lockLyric': false,
     'lyric.fontColor': '#fff',
-    'lyric.strokeColor': '#b48f1d'
+    'lyric.strokeColor': '#b48f1d',
+    'lyric.fontSize': 54
 } as const;
 
 export default defaultAppConfig;

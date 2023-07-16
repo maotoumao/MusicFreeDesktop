@@ -32,6 +32,8 @@ interface IConfig {
     lockLyric: boolean;
     /** 字体颜色 */
     fontColor: string;
+    /** 字体大小 */
+    fontSize: number;
     /** 描边颜色 */
     strokeColor: string;
 

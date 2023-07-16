@@ -3,10 +3,14 @@ import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import "./index.scss";
 import ColorPickerSettingItem from "../../components/ColorPickerSettingItem";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 
 interface IProps {
   data: IAppConfig["lyric"];
 }
+
+const numberArray = Array(64).fill(0).map((_, index) => ({value: 16 + index}));
+
 export default function Lyric(props: IProps) {
   const { data } = props;
 
@@ -43,6 +47,7 @@ export default function Lyric(props: IProps) {
         value={data.strokeColor}
         keyPath="lyric.strokeColor"
       ></ColorPickerSettingItem>
+      <ListBoxSettingItem keyPath='lyric.fontSize' value={data.fontSize} options={numberArray} label="字体大小"></ListBoxSettingItem>
     </div>
   );
 }

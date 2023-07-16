@@ -141,7 +141,8 @@ export default function LyricWindowPage() {
         <div className="lyric-text-row" style={{
           color: lyricAppConfig?.fontColor,
           // @ts-ignore
-          '-webkit-text-stroke-color': lyricAppConfig?.strokeColor
+          '-webkit-text-stroke-color': lyricAppConfig?.strokeColor,
+          fontSize: lyricAppConfig?.fontSize
         }}>
           {lyric[0]?.lrc ??
             (currentMusic
