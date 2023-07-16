@@ -112,6 +112,7 @@ export function showMainWindow() {
   } else {
     mainWindow.show();
   }
+  mainWindow.moveTop();
   mainWindow.setSkipTaskbar(false);
 }
 
