@@ -2,7 +2,7 @@ import { IAppConfig } from "@/common/app-config/type";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import "./index.scss";
 import ColorPickerSettingItem from "../../components/ColorPickerSettingItem";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 
 interface IProps {
   data: IAppConfig["lyric"];
@@ -16,6 +16,9 @@ export default function Lyric(props: IProps) {
         label="启用桌面歌词"
         checked={data.enableDesktopLyric}
         keyPath="lyric.enableDesktopLyric"
+        onCheckChanged={(checked) => {
+          ipcRendererInvoke("set-lyric-window", checked);
+        }}
       ></CheckBoxSettingItem>
       {/* <CheckBoxSettingItem
         label="置顶桌面歌词"
