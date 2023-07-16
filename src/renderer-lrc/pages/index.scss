@@ -5,7 +5,7 @@
   cursor: default;
   user-select: none;
 
-  &:hover {
+  &:not(.lock-lyric):hover {
     background-color: rgba($color: #000000, $alpha: 0.2);
   }
 
@@ -13,6 +13,7 @@
   & .lyric-window-content-container {
     width: 100%;
     height: 100%;
+    margin-top: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -21,6 +22,31 @@
       -webkit-text-stroke: 1px #b48f1d;
       color: white;
       font-size: 52px;
+    }
+  }
+
+
+  & .lyric-window-operation-container {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 28px;
+
+    & .operation-button {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      filter: drop-shadow(0px 0px 2px rgba($color: #000000, $alpha: 0.6));
+
+      & svg {
+        width: 24px;
+        height: 24px;
+      }
     }
   }
 }

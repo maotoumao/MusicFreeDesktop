@@ -31,7 +31,12 @@ declare namespace IpcEvents {
       add?: string[],
       rm?: string[]
     };
-    'send-to-lyric-window': ICommon.ISendToLyricWindowData
+    'send-to-lyric-window': ICommon.ISendToLyricWindowData;
+    'set-desktop-lyric-lock': boolean;
+    'ignore-mouse-event': {
+      ignore: boolean,
+      window: 'main' | 'lyric'
+    };
   }
 }
 

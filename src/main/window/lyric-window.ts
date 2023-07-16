@@ -62,10 +62,19 @@ export const createLyricWindow = (): BrowserWindow => {
       }
     },
   });
+  
+  // 初始化设置
   lyricWindow.once("ready-to-show", async () => {
     const position = await getAppConfigPath('private.lyricWindowPosition');
     if (position) {
       lyricWindow.setPosition(position.x, position.y, false);
+    }
+    const lockState = await getAppConfigPath('lyric.lockLyric');
+
+    if (lockState) {
+      lyricWindow.setIgnoreMouseEvents(true, {
+        forward: true,
+      });
     }
   });
 

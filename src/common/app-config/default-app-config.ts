@@ -16,6 +16,7 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
     'download.whenQualityMissing': 'lower',
     'lyric.enableDesktopLyric': false,
     'lyric.alwaysOnTop': false,
+    'lyric.lockLyric': false,
     'lyric.fontColor': '#fff',
     'lyric.strokeColor': '#b48f1d'
 } as const;

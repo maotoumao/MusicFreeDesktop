@@ -11,19 +11,29 @@ interface ICheckBoxSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
   label?: string;
   checked?: IAppConfigKeyPathValue<T>;
+  onCheckChanged?: (checked: boolean) => void;
 }
 
 export default function CheckBoxSettingItem<T extends IAppConfigKeyPath>(
   props: ICheckBoxSettingItemProps<T>
 ) {
-  const { keyPath, label, checked = defaultAppConfig[keyPath] } = props;
+  const {
+    keyPath,
+    label,
+    checked = defaultAppConfig[keyPath],
+    onCheckChanged,
+  } = props;
 
   return (
     <div
       className="setting-row"
       role="button"
       onClick={() => {
-        rendererAppConfig.setAppConfigPath(keyPath, !checked as any);
+        if (onCheckChanged) {
+          onCheckChanged(!checked);
+        } else {
+          rendererAppConfig.setAppConfigPath(keyPath, !checked as any);
+        }
       }}
     >
       <div

@@ -21,6 +21,8 @@ interface IConfig {
     enableDesktopLyric: boolean;
     /** 桌面歌词置顶 */
     alwaysOnTop: boolean;
+    /** 锁定桌面歌词 */
+    lockLyric: boolean;
     /** 字体颜色 */
     fontColor: string;
     /** 描边颜色 */

@@ -1,6 +1,19 @@
 import { ipcMainHandle, ipcMainOn } from "@/common/ipc-util/main";
-import { closeLyricWindow, createLyricWindow, getLyricWindow, getMainWindow } from "../window";
-import { MessageChannelMain, app, dialog, ipcRenderer, net, shell } from "electron";
+import {
+  closeLyricWindow,
+  createLyricWindow,
+  getLyricWindow,
+  getMainWindow,
+} from "../window";
+import {
+  BrowserWindow,
+  MessageChannelMain,
+  app,
+  dialog,
+  ipcRenderer,
+  net,
+  shell,
+} from "electron";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import { setupTrayMenu } from "../tray";
@@ -9,8 +22,7 @@ import { compare } from "compare-versions";
 import { getPluginByMedia } from "../core/plugin-manager";
 import { encodeUrlHeaders } from "@/common/normalize-util";
 import { getQualityOrder } from "@/common/media-util";
-import { getAppConfigPath } from "@/common/app-config/main";
-
+import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/main";
 
 let messageChannel: MessageChannelMain;
 
@@ -141,10 +153,10 @@ export default function setupIpcMain() {
     }
   });
 
-  ipcMainHandle('set-lyric-window', (enabled) => {
-    if(enabled) {
+  ipcMainHandle("set-lyric-window", (enabled) => {
+    if (enabled) {
       let lyricWindow = getLyricWindow();
-      if(!lyricWindow) {
+      if (!lyricWindow) {
         lyricWindow = createLyricWindow();
       }
     } else {
@@ -152,17 +164,45 @@ export default function setupIpcMain() {
     }
   });
 
-  ipcMainOn('send-to-lyric-window', (data) => {
+  ipcMainOn("send-to-lyric-window", (data) => {
     const lyricWindow = getLyricWindow();
-    if(!lyricWindow) {
+    if (!lyricWindow) {
       return;
     }
-    
-    lyricWindow.webContents.send('send-to-lyric-window', data);
-  })
+
+    lyricWindow.webContents.send("send-to-lyric-window", data);
+  });
+
+  ipcMainOn("set-desktop-lyric-lock", async (lockState) => {
+    const result = await setAppConfigPath("lyric.lockLyric", lockState);
+
+    if (result) {
+      const lyricWindow = getLyricWindow();
+
+      if (!lyricWindow) {
+        return;
+      }
+      if (lockState) {
+        lyricWindow.setIgnoreMouseEvents(true, {
+          forward: true,
+        });
+      } else {
+        lyricWindow.setIgnoreMouseEvents(false);
+      }
+    }
+  });
+
+  ipcMainOn("ignore-mouse-event", async (data) => {
+    const targetWindow = data.window === 'main' ? getMainWindow(): getLyricWindow();
+    if(!targetWindow) {
+      return;
+    }
+    targetWindow.setIgnoreMouseEvents(data.ignore, {
+      forward: true
+    });
+  });
 
   // ipcMainHandle('', () => {
   //   return messageChannel.port2;
   // })
-
 }
