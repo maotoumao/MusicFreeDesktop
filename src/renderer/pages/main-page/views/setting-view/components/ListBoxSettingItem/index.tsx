@@ -3,10 +3,8 @@ import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
 } from "@/common/app-config/type";
-import { Listbox, RadioGroup } from "@headlessui/react";
+import { Listbox } from "@headlessui/react";
 import "./index.scss";
-import SvgAsset from "@/renderer/components/SvgAsset";
-import classNames from "@/renderer/utils/classnames";
 import defaultAppConfig from "@/common/app-config/default-app-config";
 
 interface ListBoxSettingItemProps<T extends IAppConfigKeyPath> {
@@ -37,10 +35,11 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
           {label}
         </div>
         <div className="options-container">
-          <Listbox.Button>{value as string}</Listbox.Button>
-          <Listbox.Options>
+          <Listbox.Button as="div" className={'listbox-button'}>{value as string}
+          </Listbox.Button>
+          <Listbox.Options className={'listbox-options'}>
             {options.map((option, index) => (
-              <Listbox.Option key={index} value={option.value}>
+              <Listbox.Option className={'listbox-option'} key={index} value={option.value}>
                 {option.title ?? (option.value as string)}
               </Listbox.Option>
             ))}

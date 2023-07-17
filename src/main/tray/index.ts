@@ -161,7 +161,7 @@ export async function setupTrayMenu() {
   });
   /** 桌面歌词 */
   const lyricConfig = await getAppConfigPath("lyric");
-  if (lyricConfig.enableDesktopLyric) {
+  if (lyricConfig?.enableDesktopLyric) {
     ctxMenu.push({
       label: "关闭桌面歌词",
       click() {
@@ -177,7 +177,7 @@ export async function setupTrayMenu() {
     });
   }
 
-  if (lyricConfig.lockLyric) {
+  if (lyricConfig?.lockLyric) {
     ctxMenu.push({
       label: "解锁桌面歌词",
       click() {

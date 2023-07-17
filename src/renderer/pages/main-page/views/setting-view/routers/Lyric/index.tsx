@@ -9,10 +9,12 @@ interface IProps {
   data: IAppConfig["lyric"];
 }
 
-const numberArray = Array(64).fill(0).map((_, index) => ({value: 16 + index}));
+const numberArray = Array(65)
+  .fill(0)
+  .map((_, index) => ({ value: 16 + index }));
 
 export default function Lyric(props: IProps) {
-  const { data } = props;
+  const { data = {} as IAppConfig["lyric"] } = props;
 
   return (
     <div className="setting-view--lyric-container">
@@ -47,7 +49,12 @@ export default function Lyric(props: IProps) {
         value={data.strokeColor}
         keyPath="lyric.strokeColor"
       ></ColorPickerSettingItem>
-      <ListBoxSettingItem keyPath='lyric.fontSize' value={data.fontSize} options={numberArray} label="字体大小"></ListBoxSettingItem>
+      <ListBoxSettingItem
+        keyPath="lyric.fontSize"
+        value={data.fontSize}
+        options={numberArray}
+        label="字体大小"
+      ></ListBoxSettingItem>
     </div>
   );
 }

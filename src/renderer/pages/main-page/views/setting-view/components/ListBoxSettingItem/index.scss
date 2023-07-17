@@ -3,5 +3,63 @@
     margin-top: 0.6rem;
     display: flex;
     gap: 0.5rem 3rem;
+    position: relative;
+
+    & .listbox-button {
+      height: 2.6rem;
+      width: 200px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding-left: 12px;
+      border-radius: 6px;
+      background-color: var(--backgroundColor);
+
+      &::after {
+        position: absolute;
+        right: 6px;
+        content: "";
+        width: 0;
+        height: 0;
+        margin-left: 0.5rem;
+        border: 4px solid  transparent;
+        border-left-color: currentColor;
+        transform-origin: left center;
+        transform: rotate(90deg);
+      }
+    }
+
+    & .listbox-options {
+      position: absolute;
+      padding-inline-start: 0;
+      margin-block-start: 0;
+      border-radius: 4px;
+      left: 0;
+      top: 3rem;
+      z-index: 10;
+      background-color: var(--backgroundColor);
+      box-shadow: 2px 2px 10px var(--shadowColor);
+      width: 212px;
+      height: 280px;
+      overflow-y: auto;
+      list-style: none;
+
+      & .listbox-option {
+        list-style: none;
+        height: 2.2rem;
+        line-height: 2.2rem;
+        padding-left: 12px;
+        vertical-align: middle;
+        cursor: default;
+
+        &[data-headlessui-state*="active"] {
+          color: var(--primaryColor);
+        }
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
   }
 }

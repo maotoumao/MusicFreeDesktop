@@ -2,7 +2,7 @@ import rendererAppConfig from "@/common/app-config/renderer";
 import currentLyricStore from "../store/current-lyric-store";
 import "./index.scss";
 import classNames from "@/renderer/utils/classnames";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
@@ -129,21 +129,23 @@ export default function LyricWindowPage() {
             <div
               className="operation-button"
               onClick={() => {
-                ipcRendererInvoke('set-lyric-window', false);
+                ipcRendererInvoke("set-lyric-window", false);
               }}
             >
-              <SvgAsset iconName='x-mark'></SvgAsset>
+              <SvgAsset iconName="x-mark"></SvgAsset>
             </div>
           </Condition>
         </div>
       </Condition>
       <div className="lyric-window-content-container">
-        <div className="lyric-text-row" style={{
-          color: lyricAppConfig?.fontColor,
-          // @ts-ignore
-          '-webkit-text-stroke-color': lyricAppConfig?.strokeColor,
-          fontSize: lyricAppConfig?.fontSize
-        }}>
+        <div
+          className={`lyric-text-row`}
+          style={{
+            color: lyricAppConfig?.fontColor,
+            WebkitTextStrokeColor: lyricAppConfig?.strokeColor,
+            fontSize: lyricAppConfig?.fontSize,
+          }}
+        >
           {lyric[0]?.lrc ??
             (currentMusic
               ? `${currentMusic.title} - ${currentMusic.artist}`
