@@ -12,7 +12,7 @@ import path from "path";
 const config: ForgeConfig = {
   packagerConfig: {
     appBundleId: "fun.upup.musicfree",
-    icon: path.resolve(__dirname, "resources/logo"),
+    // icon: path.resolve(__dirname, "res/logo"),
     executableName: "MusicFree",
     extraResource: [
       path.resolve(__dirname, 'res'),
@@ -21,11 +21,11 @@ const config: ForgeConfig = {
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({
-      exe: "MusicFree",
-      setupIcon: path.resolve(__dirname, "resources/logo.ico"),
-      setupMsi: "MusicFreeInstaller",
-    }),
+    // new MakerSquirrel({
+    //   exe: "MusicFree",
+    //   setupIcon: path.resolve(__dirname, "resources/logo.ico"),
+    //   setupMsi: "MusicFreeInstaller",
+    // }),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({}),
     new MakerDeb({}),

@@ -8,6 +8,7 @@ import trackPlayer from "../core/track-player";
 import rendererAppConfig from "@/common/app-config/renderer";
 import localMusic from "../core/local-music";
 import themepack from "@/preload/internal/themepack";
+import { setupLocalShortCut } from "../core/local-shortcut";
 
 export default async function () {
   await Promise.all([
@@ -18,6 +19,7 @@ export default async function () {
     localMusic.setupLocalMusic(),
   ]);
   setupThemePack();
+  setupLocalShortCut();
   dropHandler();
 }
 

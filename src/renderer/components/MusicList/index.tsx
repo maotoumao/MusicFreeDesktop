@@ -15,13 +15,14 @@ import Empty from "../Empty";
 import MusicFavorite from "../MusicFavorite";
 import { RequestStateCode, localPluginName } from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
-import { showContextMenu } from "../ContextMenu";
+import { IContextMenuItem, showContextMenu } from "../ContextMenu";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
-import { memo, useRef } from "react";
+import { memo, useRef, useState } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import rendererAppConfig from "@/common/app-config/renderer";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { isKeyDown } from "@/renderer/core/local-shortcut";
+import { isBetween } from "@/common/normalize-util";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -40,7 +41,7 @@ interface IMusicListProps {
   virtualProps?: {
     offsetHeight?: number | (() => number); // 距离顶部的高度
     getScrollElement?: () => HTMLElement; // 滚动
-    fallbackRenderCount?: number
+    fallbackRenderCount?: number;
   };
 }
 
@@ -90,69 +91,76 @@ const columnDef = [
   }),
 ];
 
-const estimizeItemHeight = 2.6 * 13;
+const estimizeItemHeight = 2.6 * 13; // lineheight 2.6rem
 
 export function showMusicContextMenu(
-  musicItem: IMusic.IMusicItem,
+  musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
   x: number,
   y: number,
   localMusicSheetId?: string
 ) {
-  showContextMenu({
-    x,
-    y,
-    menuItems: [
+  const menuItems: IContextMenuItem[] = [];
+  if (!Array.isArray(musicItems)) {
+    menuItems.push(
       {
-        title: `ID: ${getMediaPrimaryKey(musicItem)}`,
+        title: `ID: ${getMediaPrimaryKey(musicItems)}`,
         icon: "identification",
       },
       {
-        title: `作者: ${musicItem.artist}`,
+        title: `作者: ${musicItems.artist}`,
         icon: "user",
       },
       {
-        title: `专辑: ${musicItem.album}`,
+        title: `专辑: ${musicItems.album}`,
         icon: "album",
-        show: !!musicItem.album,
+        show: !!musicItems.album,
       },
       {
         divider: true,
+      }
+    );
+  }
+  menuItems.push(
+    {
+      title: "下一首播放",
+      icon: "motion-play",
+      onClick() {
+        trackPlayer.addNext(musicItems);
       },
-      {
-        title: "下一首播放",
-        icon: "motion-play",
-        onClick() {
-          trackPlayer.addNext(musicItem);
-        },
+    },
+    {
+      title: "添加到歌单",
+      icon: "document-plus",
+      onClick() {
+        showModal("AddMusicToSheet", {
+          musicItems: musicItems,
+        });
       },
-      {
-        title: "添加到歌单",
-        icon: "document-plus",
-        onClick() {
-          showModal("AddMusicToSheet", {
-            musicItems: musicItem,
-          });
-        },
+    },
+    {
+      title: "从歌单内删除",
+      icon: "trash",
+      show: !!localMusicSheetId,
+      onClick() {
+        MusicSheet.removeMusicFromSheet(musicItems, localMusicSheetId);
       },
-      {
-        title: "从歌单内删除",
-        icon: "trash",
-        show: !!localMusicSheetId,
-        onClick() {
-          MusicSheet.removeMusicFromSheet(musicItem, localMusicSheetId);
-        },
-      },
-      // {
-      //   title: '下载',
-      //   icon: 'array-download-tray',
-      //   show: musicItem.platform !== localPluginName,
-      //   onClick() {
-      //     ipcRendererSend('download-media', {
-      //       mediaItem: musicItem
-      //     })
-      //   },
-      // }
-    ],
+    }
+    // {
+    //   title: '下载',
+    //   icon: 'array-download-tray',
+    //   show: musicItem.platform !== localPluginName,
+    //   onClick() {
+    //     ipcRendererSend('download-media', {
+    //       mediaItem: musicItem
+    //     })
+    //   },
+    // }
+  );
+
+  showContextMenu({
+    x,
+    y,
+    menuItems,
   });
 }
 
@@ -182,6 +190,8 @@ function _MusicList(props: IMusicListProps) {
     estimizeItemHeight,
     fallbackRenderCount: virtualProps?.fallbackRenderCount ?? 100,
   });
+
+  const [activeItems, setActiveItems] = useState<number[]>([]);
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>
@@ -217,15 +227,56 @@ function _MusicList(props: IMusicListProps) {
             return (
               <tr
                 key={row.id}
+                data-active={
+                  activeItems.length === 2
+                    ? isBetween(
+                        virtualItem.rowIndex,
+                        activeItems[0],
+                        activeItems[1]
+                      )
+                    : activeItems[0] === virtualItem.rowIndex
+                }
                 onContextMenu={(e) => {
-                  showMusicContextMenu(
-                    row.original,
-                    e.clientX,
-                    e.clientY,
-                    musicSheet?.platform === localPluginName
-                      ? musicSheet.id
-                      : undefined
-                  );
+                  if (
+                    activeItems.length === 2 &&
+                    isBetween(
+                      virtualItem.rowIndex,
+                      activeItems[0],
+                      activeItems[1]
+                    ) && activeItems[0] !== activeItems[1]
+                  ) {
+                    let [start, end] = activeItems;
+                    if(start > end) {
+                      [start, end] = [end, start];
+                    }
+
+                    showMusicContextMenu(
+                      table.getRowModel().rows.slice(start, end + 1).map(item => item.original),
+                      e.clientX,
+                      e.clientY,
+                      musicSheet?.platform === localPluginName
+                        ? musicSheet.id
+                        : undefined
+                    );
+                  } else {
+                    setActiveItems([virtualItem.rowIndex]);
+                    showMusicContextMenu(
+                      row.original,
+                      e.clientX,
+                      e.clientY,
+                      musicSheet?.platform === localPluginName
+                        ? musicSheet.id
+                        : undefined
+                    );
+                  }
+                }}
+                onClick={() => {
+                  // 如果点击的时候按下shift
+                  if (isKeyDown("Shift")) {
+                    setActiveItems([activeItems[0] ?? 0, virtualItem.rowIndex]);
+                  } else {
+                    setActiveItems([virtualItem.rowIndex]);
+                  }
                 }}
                 onDoubleClick={() => {
                   const config =

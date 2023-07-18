@@ -4,7 +4,7 @@ import "./index.scss";
 import Condition from "../Condition";
 import { useEffect, useMemo } from "react";
 
-interface IContextMenuItem {
+export interface IContextMenuItem {
   /** 左侧图标 */
   icon?: SvgAssetIconNames;
   /** 列表标题 */

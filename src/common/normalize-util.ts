@@ -36,3 +36,11 @@ export function encodeUrlHeaders(
   );
   return encodedUrl.toString();
 }
+
+
+export function isBetween(target: number, a: number, b: number) {
+  if(a > b) {
+    return a >= target && target >= b;
+  }
+  return b >= target && target >= a;
+}
