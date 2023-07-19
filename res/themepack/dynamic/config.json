@@ -1,0 +1,11 @@
+{
+    "name": "动态主题",
+    "preview": "#66ccff",
+    "description": "布鲁布鲁",
+    "appConfig": {
+        
+    },
+    "iframe": {
+        "body": "@/iframes/body.html"
+    }
+}

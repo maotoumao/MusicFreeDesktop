@@ -3,6 +3,7 @@ interface IThemePack {
   path: string;
   preview: string;
   description?: string;
+  iframe?: Record<'app' | 'header' | 'body' | 'music-bar' | 'side-bar' | 'page', string>
 }
 
 interface IConfig {

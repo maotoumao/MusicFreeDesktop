@@ -6,7 +6,7 @@
   --maskColor: rgba(33, 33, 33, 0.8) !important;
 }
 
-.music-background {
+.music-detail-background {
   background: var(--backgroundColor) !important;
   mask-image: none !important;
   -webkit-mask-image: none !important;

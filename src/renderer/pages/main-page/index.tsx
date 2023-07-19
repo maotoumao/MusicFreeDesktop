@@ -56,15 +56,10 @@ export default function MainPage() {
             element={<LocalMusicView></LocalMusicView>}
           ></Route>
           <Route path="setting" element={<SettingView></SettingView>}></Route>
-          <Route
-            path="*"
-            element={
-             <Empty></Empty>
-            }
-          ></Route>
+          <Route path="*" element={<Empty></Empty>}></Route>
         </Routes>
-        <MusicDetail></MusicDetail>
       </div>
+      <MusicDetail></MusicDetail>
     </>
   );
 }

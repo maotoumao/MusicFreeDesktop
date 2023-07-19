@@ -98,14 +98,14 @@ async function bootstrap() {
       // 读取json
       const themepackPath = path.resolve(themepackDir, validThemePacks[i]);
       const jsonData = JSON.parse(await fs.readFile(path.resolve(themepackPath, "config.json"), 'utf-8'));
-      console.log(jsonData);
       const themePack: IThemePack = {
         name: jsonData.name,
         preview: jsonData.preview?.startsWith?.("#")
           ? jsonData.preview
           : jsonData.preview?.replace?.("@/", addTailSlash(addFileScheme(themepackPath))),
         path: themepackPath,
-        description: jsonData.description
+        description: jsonData.description,
+        iframe: jsonData.iframe ?? {}
       };
       parsedThemePacks.push(themePack);
     } catch(e) {

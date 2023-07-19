@@ -17,7 +17,7 @@ import { RequestStateCode, localPluginName } from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
 import { IContextMenuItem, showContextMenu } from "../ContextMenu";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
-import { memo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import rendererAppConfig from "@/common/app-config/renderer";
@@ -192,6 +192,10 @@ function _MusicList(props: IMusicListProps) {
   });
 
   const [activeItems, setActiveItems] = useState<number[]>([]);
+
+  useEffect(() => {
+    setActiveItems([]);
+  }, [musicList]);
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>

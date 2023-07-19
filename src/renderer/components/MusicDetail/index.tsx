@@ -34,7 +34,7 @@ export default function () {
       unmountClassName="animate__slideOutDown"
     >
       <div
-        className="music-background"
+        className="music-detail-background"
         style={{
           backgroundImage: `url(${musicItem?.artwork ?? albumImg})`,
         }}
