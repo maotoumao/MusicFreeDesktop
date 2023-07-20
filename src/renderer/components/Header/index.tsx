@@ -13,7 +13,9 @@ export default function AppHeader() {
   const inputRef = useRef<HTMLInputElement>();
 
   function onSearchSubmit() {
-    navigate(`/main/search/${inputRef.current.value}`);
+    if(inputRef.current.value) {
+      navigate(`/main/search/${inputRef.current.value}`);
+    }
   }
 
   return (
