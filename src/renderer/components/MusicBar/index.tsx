@@ -14,7 +14,7 @@ import Extra from "./widgets/Extra";
 
 export default function MusicBar() {
   return (
-    <div className="music-bar-container">
+    <div className="music-bar-container background-color">
       <Slider></Slider>
       <MusicInfo></MusicInfo>
       <Controller></Controller>

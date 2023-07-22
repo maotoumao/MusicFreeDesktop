@@ -54,7 +54,7 @@ export default function PlayList() {
         }
       }}
     >
-      <div className="content-container animate__animated animate__slideInRight">
+      <div className="content-container animate__animated animate__slideInRight shadow background-color">
         <div className="header">
           <div className="title">播放列表({musicQueue.length}首)</div>
           <div

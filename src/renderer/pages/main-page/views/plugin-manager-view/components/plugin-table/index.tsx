@@ -23,7 +23,7 @@ function renderOptions(info: any) {
     <div>
       <ActionButton
         style={{
-          color: "#FC5F5F",
+          color: "var(--dangerColor, #FC5F5F)",
         }}
         onClick={() => {
           showModal("Reconfirm", {
@@ -46,7 +46,7 @@ function renderOptions(info: any) {
       <Condition condition={row.srcUrl}>
         <ActionButton
           style={{
-            color: "#08A34C",
+            color: "var(--successColor, #08A34C)",
           }}
           onClick={async () => {
             try {
@@ -62,7 +62,7 @@ function renderOptions(info: any) {
       <Condition condition={row.supportedMethod.includes("importMusicItem")}>
         <ActionButton
           style={{
-            color: "#0A95C8",
+            color: "var(--infoColor, #0A95C8)",
           }}
           onClick={() => {
             showModal("SimpleInputWithState", {

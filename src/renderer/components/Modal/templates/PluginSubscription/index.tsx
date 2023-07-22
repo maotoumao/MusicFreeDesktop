@@ -19,7 +19,7 @@ export default function PluginSubscription(props: IReconfirmProps) {
 
   return (
     <Base withBlur={false}>
-      <div className="modal--plugin-subscription">
+      <div className="modal--plugin-subscription shadow backdrop-color">
         <Base.Header>插件订阅</Base.Header>
         <div className="content-container">
           <Condition condition={subscription.length} falsy={<Empty></Empty>}>

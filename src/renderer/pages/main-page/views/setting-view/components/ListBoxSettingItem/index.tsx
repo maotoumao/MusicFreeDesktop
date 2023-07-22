@@ -37,7 +37,7 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
         <div className="options-container">
           <Listbox.Button as="div" className={'listbox-button'}>{value as string}
           </Listbox.Button>
-          <Listbox.Options className={'listbox-options'}>
+          <Listbox.Options className={'listbox-options shadow backdrop-color'}>
             {options.map((option, index) => (
               <Listbox.Option className={'listbox-option'} key={index} value={option.value}>
                 {option.title ?? (option.value as string)}

@@ -2,8 +2,6 @@
   width: 400px;
   max-height: 540px;
   border-radius: 8px;
-  box-shadow: var(--shadowColor) 2px 2px 8px;
-  background-color: var(--backgroundColor);
   display: flex;
   flex-direction: column;
   & .body-container {

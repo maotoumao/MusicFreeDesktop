@@ -12,7 +12,7 @@ export default function TagPanel(props: ITagPanelProps) {
   const { show, onTagClick, tagsGroups } = props;
 
   return (
-    <div className="tag-panel--container" data-show={show}>
+    <div className="tag-panel--container shadow backdrop-color" data-show={show}>
       <div className="tag-group--container">
         <div
           role="button"

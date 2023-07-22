@@ -1,9 +1,14 @@
 :root {
   --textColor: #fcfcfc !important;
   --backgroundColor: #202020 !important;
-  --shadowColor: rgba(128, 128, 128, 0.1) !important;
+  --shadowColor: rgba(0, 0, 0, 0.15) !important;
   --dividerColor: rgba(255, 255, 255, 0.1) !important;
   --maskColor: rgba(33, 33, 33, 0.8) !important;
+  --backdropColor: #101010 !important;
+
+  --listHoverColor: rgba(255, 255, 255, 0.05) !important;
+  --listActiveColor: rgba(255, 255, 255, 0.1) !important;
+
 }
 
 .music-detail-background {

@@ -29,7 +29,7 @@ export default function () {
   return (
     <AnimatedDiv
       showIf={musicDetailShown}
-      className="music-detail-container animate__animated"
+      className="music-detail-container animate__animated background-color"
       mountClassName="animate__slideInUp"
       unmountClassName="animate__slideOutDown"
     >

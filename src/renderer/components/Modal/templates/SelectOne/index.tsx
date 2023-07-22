@@ -29,7 +29,7 @@ export default function SelectOne(props: IProps) {
 
   return (
     <Base defaultClose withBlur={false}>
-      <div className="modal--select-one-container">
+      <div className="modal--select-one-container shadow backdrop-color">
         <Base.Header>{title}</Base.Header>
         <div className="body-container">
           {choices.map((choice, index) => (

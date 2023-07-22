@@ -21,7 +21,6 @@
   flex-shrink: 0;
   column-gap: 2.5rem;
 
-
   & .tab-list-item {
     display: flex;
     align-items: center;
@@ -71,11 +70,25 @@
   --backgroundColor: #fdfdfd; // 背景色
   --dividerColor: rgba(0, 0, 0, 0.1); // 分割线颜色
   --hoverColor: rgba(0, 0, 0, 0.1); // 选中颜色
-  --shadowColor: rgba(0, 0, 0, 0.2);
+  --listHoverColor: rgba(0, 0, 0, 0.1); // 列表悬浮颜色
+  --listActiveColor: rgba(0, 0, 0, 0.2); // 列表选中颜色
   --textColor: #333333; // 主文本颜色
-  --maskColor: rgba(51, 51, 51, 0.2);
+  --textSecondaryColor: #999999; // 次要文本颜色
+  --maskColor: rgba(51, 51, 51, 0.2); // 遮罩层颜色
+  /* --backdropColor: #fdfdfd; // 弹窗等地方的背景颜色，默认和背景色一致*/
+  --shadowColor: rgba(0, 0, 0, 0.2);
+  /** --shadow:  // 全部的shadow属性 */
+
+  /* --placeholderColor:  */
+  /* --placeholderInputColor:  */
+  --successColor: #08A34C;
+  --dangerColor: #FC5F5F;
+  --infoColor: #0A95C8;
+
+
   --animate-duration: 300ms !important;
   --scrollbar-width: 8px;
+
   font-size: 13px;
   color: var(--textColor);
 }

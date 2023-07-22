@@ -50,6 +50,9 @@ export default function MySheets() {
                   navigate(`/main/musicsheet/${localPluginName}/${item.id}`);
               }}
               onContextMenu={(e) => {
+                if(item.id === defaultSheet.id) {
+                  return;
+                }
                 showContextMenu({
                   x: e.clientX,
                   y: e.clientY,

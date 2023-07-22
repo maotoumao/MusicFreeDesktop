@@ -118,3 +118,15 @@ div[role="button"] {
   margin-top: 12px;
   margin-bottom: 12px;
 }
+
+.shadow {
+  box-shadow: var(--shadow, var(--shadowColor) 2px 2px 8px);
+}
+
+.background-color {
+  background: var(--backgroundColor);
+}
+
+.backdrop-color {
+  background: var(--backdropColor, var(--backgroundColor));
+}

@@ -35,7 +35,7 @@ export default function ColorPickerSettingItem<T extends IAppConfigKeyPath>(
         ></Popover.Button>
         <div>{value as string}</div>
       </div>
-      <Popover.Panel className={"setting-colorpicker-panel"}>
+      <Popover.Panel className={"setting-colorpicker-panel shadow"}>
         {({ close }) => {
           return (
             <>

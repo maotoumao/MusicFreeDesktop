@@ -15,7 +15,7 @@ export default function Update(props: IUpdateProps) {
 
   return (
     <Base withBlur defaultClose>
-      <div className="modal--update-container">
+      <div className="modal--update-container shadow backdrop-color">
         <Base.Header>发现新版本</Base.Header>
         <div className="body-container">
           <div className="version highlight">最新版本：{update.version}</div>

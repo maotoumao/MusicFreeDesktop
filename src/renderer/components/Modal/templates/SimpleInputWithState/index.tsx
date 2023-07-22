@@ -39,7 +39,7 @@ export default function SimpleInputWithState<PromiseItem>(
 
   return (
     <Base withBlur={false}>
-      <div className="modal--simple-input-with-state">
+      <div className="modal--simple-input-with-state shadow backdrop-color">
         <Base.Header>{title}</Base.Header>
         <Condition
           condition={!(loading && withLoading)}

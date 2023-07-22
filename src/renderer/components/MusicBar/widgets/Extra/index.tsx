@@ -98,7 +98,7 @@ function VolumeBtn() {
     >
       <Condition condition={showVolumeBubble}>
         <div
-          className="volume-bubble-container"
+          className="volume-bubble-container shadow backdrop-color"
           onClick={(e) => {
             e.stopPropagation();
           }}

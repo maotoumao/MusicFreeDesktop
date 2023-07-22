@@ -15,7 +15,7 @@ export default function Reconfirm(props: IReconfirmProps) {
 
   return (
     <Base withBlur={false}>
-      <div className="modal--reconfirm">
+      <div className="modal--reconfirm shadow backdrop-color">
         <Base.Header>{title}</Base.Header>
         <div className="content-container">{content}</div>
         <div className="opeartion-area">

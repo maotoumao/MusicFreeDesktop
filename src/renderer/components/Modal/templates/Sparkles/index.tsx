@@ -7,7 +7,7 @@ export default function Sparkles() {
   // TODO a标签不对
   return (
     <Base withBlur defaultClose>
-      <div className="modal--sparkles-container">
+      <div className="modal--sparkles-container shadow backdrop-color">
         <Base.Header>✨✨✨开发者的话</Base.Header>
         <div className="body-container">
           <p>

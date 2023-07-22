@@ -16,7 +16,7 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
   const allSheets = MusicSheet.useAllSheets();
   return (
     <Base withBlur={false}>
-      <div className="modal--add-music-to-sheet-container">
+      <div className="modal--add-music-to-sheet-container shadow backdrop-color">
         <Base.Header>
           <span>
             添加到歌单{" "}

@@ -34,9 +34,11 @@ table {
       &:nth-child(even) {
         background-color: rgba($color: #000000, $alpha: 0.05);
       }
-      &:hover,
+      &:hover {
+        background: var(--listHoverColor);
+      }
       &[data-active="true"] {
-        background-color: var(--hoverColor);
+        background: var(--listActiveColor);
       }
     }
   }

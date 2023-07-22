@@ -47,7 +47,7 @@ function SingleColumnContextMenuComponent(props: IContextMenuData) {
 
   return (
     <div
-      className="context-menu--single-column-container"
+      className="context-menu--single-column-container shadow backdrop-color"
       style={{
         width: menuItemWidth,
         paddingTop: menuItemHeight / 4,
