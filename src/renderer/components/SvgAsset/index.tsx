@@ -30,6 +30,7 @@ export type SvgAssetIconNames =
   | "pause"
   | "play"
   | "playlist"
+  | "plus"
   | "plus-circle"
   | "repeat-song-1"
   | "repeat-song"

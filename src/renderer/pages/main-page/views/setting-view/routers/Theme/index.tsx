@@ -1,10 +1,14 @@
-import { IAppConfig, IThemePack } from "@/common/app-config/type";
-import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
+import { IAppConfig } from "@/common/app-config/type";
 import "./index.scss";
-import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
-import rendererAppConfig from "@/common/app-config/renderer";
 import classNames from "@/renderer/utils/classnames";
 import { useEffect, useState } from "react";
+import {
+  IContextMenuItem,
+  showContextMenu,
+} from "@/renderer/components/ContextMenu";
+import { toast } from "react-toastify";
+import SvgAsset from "@/renderer/components/SvgAsset";
+import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 
 interface IProps {
   data: IAppConfig["theme"];
@@ -48,6 +52,33 @@ export default function Theme(props: IProps) {
             selected={item.path === currentThemePack?.path}
           ></ThemeItem>
         ))}
+        <div
+          className="theme-item-container"
+          role="button"
+          title="安装主题"
+          onClick={async () => {
+            const result = await ipcRendererInvoke("show-open-dialog", {
+              title: "安装主题包",
+              buttonLabel: "安装",
+              properties: ["openDirectory"],
+            });
+            if (!result.canceled) {
+              const themePackPath = result.filePaths[0];
+              const [code, reason] = await window.themepack.installThemePack(
+                themePackPath
+              );
+              if (code) {
+                toast.success("安装成功~");
+              } else {
+                toast.error(`安装失败: ${reason?.message ?? ""}`);
+              }
+            }
+          }}
+        >
+          <div className="theme-item-preview install-theme-pack">
+            <SvgAsset iconName="plus"></SvgAsset>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -55,7 +86,57 @@ export default function Theme(props: IProps) {
 
 interface IThemeItemProps {
   selected: boolean;
-  themePack: IThemePack | null;
+  themePack: ICommon.IThemePack | null;
+}
+
+export function showThemeContextMenu(
+  themePack: ICommon.IThemePack,
+  x: number,
+  y: number
+) {
+  const menuItems: IContextMenuItem[] = [];
+
+  menuItems.push(
+    // {
+    //   title: "刷新主题",
+    //   icon: "motion-play",
+    //   onClick() {
+    //     trackPlayer.addNext(musicItems);
+    //   },
+    // },
+    {
+      title: "卸载主题",
+      icon: "trash",
+      async onClick() {
+        console.log("???");
+        const [code, reason] = await window.themepack.uninstallThemePack(
+          themePack
+        );
+
+        if (code) {
+          toast.success("卸载成功~");
+        } else {
+          toast.error(`卸载失败: ${reason?.message ?? ""}`);
+        }
+      },
+    }
+    // {
+    //   title: '下载',
+    //   icon: 'array-download-tray',
+    //   show: musicItem.platform !== localPluginName,
+    //   onClick() {
+    //     ipcRendererSend('download-media', {
+    //       mediaItem: musicItem
+    //     })
+    //   },
+    // }
+  );
+
+  showContextMenu({
+    x,
+    y,
+    menuItems,
+  });
 }
 
 function ThemeItem(props: IThemeItemProps) {
@@ -66,6 +147,12 @@ function ThemeItem(props: IThemeItemProps) {
       role="button"
       onClick={() => {
         window.themepack.selectTheme(themePack);
+      }}
+      onContextMenu={(e) => {
+        if (!themePack) {
+          return;
+        }
+        showThemeContextMenu(themePack, e.clientX, e.clientY);
       }}
       title={themePack?.description}
     >

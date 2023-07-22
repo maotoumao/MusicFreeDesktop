@@ -1,11 +1,3 @@
-interface IThemePack {
-  name: string;
-  path: string;
-  preview: string;
-  description?: string;
-  iframe?: Record<'app' | 'header' | 'body' | 'music-bar' | 'side-bar' | 'page', string>
-}
-
 interface IConfig {
   normal: {
     closeBehavior: "exit" | "minimize";
@@ -59,10 +51,7 @@ interface IConfig {
   };
   /** 主题设置 */
   theme: {
-    // 主题列表
-    themePacks: IThemePack[],
-    // 当前主题
-    currentThemePack: IThemePack | null
+    test: never;
   }
 
   /** 不需要用户配置的数据 */

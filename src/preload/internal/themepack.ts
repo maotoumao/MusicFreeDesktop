@@ -9,7 +9,6 @@ import { nanoid } from "nanoid";
 const themeNodeId = `themepack-node`;
 const themePathKey = "themepack-path";
 
-
 const validIframeMap = new Map<
   "app" | "header" | "body" | "music-bar" | "side-bar" | "page",
   HTMLIFrameElement | null
@@ -206,20 +205,28 @@ async function installThemePack(themePackPath: string) {
         recursive: true,
       });
       parsedThemePack.path = targetFolderName;
-      allThemePacksStore.setValue(prev => [...prev, parsedThemePack]);
-    } catch {}
+      allThemePacksStore.setValue((prev) => [...prev, parsedThemePack]);
+      return [true, null];
+    } catch (e) {
+      return [false, e];
+    }
   }
+  return [false, new Error("解析失败")]
 }
 
 async function uninstallThemePack(themePack: ICommon.IThemePack) {
   try {
-    await fs.rmdir(themePack.path);
-    allThemePacksStore.setValue(prev => prev.filter(item => item.path !== themePack.path));
-    if(currentThemePackStore.getValue().path === themePack.path) {
-      currentThemePackStore.setValue(null);
+    await rimraf(themePack.path);
+    allThemePacksStore.setValue((prev) =>
+      prev.filter((item) => item.path !== themePack.path)
+    );
+    if (currentThemePackStore.getValue()?.path === themePack.path) {
+      selectTheme(null);
     }
-  } catch {
-
+    return [true, null];
+  } catch (e) {
+    console.log(e);
+    return [false, e];
   }
 }
 
@@ -229,5 +236,5 @@ export default {
   allThemePacksStore,
   currentThemePackStore,
   installThemePack,
-  uninstallThemePack
+  uninstallThemePack,
 };

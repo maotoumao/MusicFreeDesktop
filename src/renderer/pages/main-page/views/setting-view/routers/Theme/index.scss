@@ -13,12 +13,27 @@
       align-items: center;
       box-sizing: border-box;
 
+      & .install-theme-pack {
+        border: 1px dashed var(--textColor);
+        opacity: 0.6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        & svg {
+          color: var(--textColor);
+          width: 36px;
+          height: 36px;
+        }
+      }
+
       & .theme-item-preview {
         width: 44px;
         height: 44px;
         border-radius: 4px;
         position: relative;
       }
+
       & .theme-item-preview-selected::after {
         content: '';
         width: 48px;
