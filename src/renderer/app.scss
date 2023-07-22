@@ -73,14 +73,12 @@
   --listHoverColor: rgba(0, 0, 0, 0.1); // 列表悬浮颜色
   --listActiveColor: rgba(0, 0, 0, 0.2); // 列表选中颜色
   --textColor: #333333; // 主文本颜色
-  --textSecondaryColor: #999999; // 次要文本颜色
   --maskColor: rgba(51, 51, 51, 0.2); // 遮罩层颜色
   /* --backdropColor: #fdfdfd; // 弹窗等地方的背景颜色，默认和背景色一致*/
   --shadowColor: rgba(0, 0, 0, 0.2);
   /** --shadow:  // 全部的shadow属性 */
+  --placeholderColor: #f4f4f4;
 
-  /* --placeholderColor:  */
-  /* --placeholderInputColor:  */
   --successColor: #08A34C;
   --dangerColor: #FC5F5F;
   --infoColor: #0A95C8;

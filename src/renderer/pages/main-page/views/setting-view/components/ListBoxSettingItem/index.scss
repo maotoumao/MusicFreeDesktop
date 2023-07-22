@@ -13,7 +13,8 @@
       align-items: center;
       padding-left: 12px;
       border-radius: 6px;
-      background-color: var(--backgroundColor);
+      background-color: var(--placeholderColor);
+      border: 1px solid var(--dividerColor);
 
       &::after {
         position: absolute;

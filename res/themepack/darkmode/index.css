@@ -1,5 +1,6 @@
 :root {
   --textColor: #fcfcfc !important;
+  --textSecondaryColor: #aaaaaa !important;
   --backgroundColor: #202020 !important;
   --shadowColor: rgba(0, 0, 0, 0.15) !important;
   --dividerColor: rgba(255, 255, 255, 0.1) !important;
@@ -8,6 +9,7 @@
 
   --listHoverColor: rgba(255, 255, 255, 0.05) !important;
   --listActiveColor: rgba(255, 255, 255, 0.1) !important;
+  --placeholderColor: #424242 !important;
 
 }
 
@@ -22,10 +24,6 @@
   background-color: #131313 !important;
 }
 
-input {
-    background-color: #424242 !important;
-    color: var(--textColor);
-}
 
 input + svg {
     color: white !important;

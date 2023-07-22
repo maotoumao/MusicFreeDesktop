@@ -63,6 +63,8 @@ input {
   border-radius: 2px;
   border: 1px solid var(--dividerColor);
   box-sizing: border-box;
+  background: var(--placeholderColor);
+  color: var(--textColor);
 
   &::placeholder {
     opacity: 0.6;
@@ -100,13 +102,13 @@ div[role="button"] {
     font-size: 1em;
     padding: 0.4em 1em;
     border-radius: 1.6em;
-    color: #fc5f5f;
+    color: var(--dangerColor);
     border: 1px solid currentColor;
     width: fit-content;
 
     &[data-fill="true"] {
       color: white;
-      background: #fc5f5f;
+      background: var(--dangerColor);
     }
   }
 }
