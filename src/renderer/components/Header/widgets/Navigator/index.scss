@@ -11,11 +11,12 @@
       width: 26px;
       height: 22px;
       cursor: pointer;
-      color: white;
-      border: 1px solid rgba($color: #000, $alpha: 0.1);
+      color: var(--headerTextColor);
+      border: 1px solid var(--dividerColor);
 
       &[data-disabled="true"] {
-          color: rgba($color: white, $alpha: 0.5);
+          color: var(--headerTextColor);
+          opacity: 0.5;
           cursor: default;
       }
       & svg {

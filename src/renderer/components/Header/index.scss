@@ -19,7 +19,7 @@
     & .logo {
       width: 142px;
       height: 1.2rem;
-      color: white;
+      color: var(--headerTextColor);
       display: flex;
       align-items: center;
 
@@ -31,7 +31,7 @@
 
     & .header-search {
       -webkit-app-region: none;
-      background-color: rgba($color: #000, $alpha: 0.14);
+      background-color: var(--headerPlaceholderColor, rgba($color: #000, $alpha: 0.14));
       position: relative;
       height: 28px;
       width: 220px;
@@ -47,12 +47,13 @@
         line-height: 1.2rem;
         outline: none;
         border: none;
-        background-color: transparent;
-        color: white;
+        background-color: transparent !important;
+        color: var(--headerTextColor);
 
         &::placeholder {
-          color: rgba($color: white, $alpha: 0.7);
+          opacity: 0.7;
           user-select: none;
+          color: var(--headerTextColor);
         }
       }
 
@@ -61,7 +62,7 @@
         margin-left: 2px;
         width: #{$box-size};
         height: #{$box-size};
-        color: white;
+        color: var(--headerTextColor);
         opacity: 0.7;
         cursor: pointer;
         display: flex;
@@ -83,7 +84,7 @@
   & .right-part {
     width: 120px;
     height: 100%;
-    color: white;
+    color: var(--headerTextColor);
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -96,7 +97,7 @@
       height: 16px;
       width: 1px;
       opacity: 0.2;
-      background-color: white;
+      background-color: var(--headerTextColor);
     }
 
     & .sparkles-icon:hover {
