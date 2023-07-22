@@ -68,6 +68,7 @@ input {
 
   &::placeholder {
     opacity: 0.6;
+    color: var(--textColor);
   }
 }
 

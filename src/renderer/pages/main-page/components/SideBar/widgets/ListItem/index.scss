@@ -28,7 +28,7 @@
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.03);
+    background: var(--listHoverColor);
   }
 
   &[data-selected="true"] {
@@ -44,7 +44,8 @@
 
     & {
       color: var(--primaryColor);
-      background-color: rgba(0, 0, 0, 0.05);
+      background: var(--listActiveColor);
+
     }
   }
 }
