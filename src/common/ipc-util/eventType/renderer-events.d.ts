@@ -91,5 +91,6 @@ declare namespace IpcInvoke {
     "check-update": () => ICommon.IUpdateInfo;
     "set-lyric-window": (show: boolean) => void; 
     /** 主窗口和歌词窗口之间 */
+    'app-get-path': (pathName: string) => string;
   }
 }

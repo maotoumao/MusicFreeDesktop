@@ -4,26 +4,48 @@ import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import rendererAppConfig from "@/common/app-config/renderer";
 import classNames from "@/renderer/utils/classnames";
+import { useEffect, useState } from "react";
 
 interface IProps {
   data: IAppConfig["theme"];
 }
 
 export default function Theme(props: IProps) {
-  const { data = {} as IAppConfig["theme"] } = props;
-  console.log(data);
+  // const { data = {} as IAppConfig["theme"] } = props;
+  // console.log(data);
+  const allThemePacksStore = window.themepack.allThemePacksStore;
+  const currentThemePackStore = window.themepack.currentThemePackStore;
+  const [currentThemePack, setCurrentThemePack] = useState<ICommon.IThemePack>(
+    currentThemePackStore.getValue()
+  );
+  const [allThemePacks, setAllThemePacks] = useState<
+    Array<ICommon.IThemePack | null>
+  >(allThemePacksStore.getValue());
+
+  useEffect(() => {
+    const unsub1 = allThemePacksStore.onValueChange((newValue) => {
+      setAllThemePacks(newValue);
+    });
+    const unsub2 = currentThemePackStore.onValueChange((newValue) => {
+      setCurrentThemePack(newValue);
+    });
+    return () => {
+      unsub1();
+      unsub2();
+    };
+  }, []);
 
   return (
     <div className="setting-view--theme-container">
       <div className="setting-view--theme-items">
         <ThemeItem
-          selected={data.currentThemePack === null}
+          selected={currentThemePack === null}
           themePack={null}
         ></ThemeItem>
-        {data.themePacks?.map((item) => (
+        {allThemePacks?.map((item) => (
           <ThemeItem
             themePack={item}
-            selected={item.path === data.currentThemePack?.path}
+            selected={item.path === currentThemePack?.path}
           ></ThemeItem>
         ))}
       </div>

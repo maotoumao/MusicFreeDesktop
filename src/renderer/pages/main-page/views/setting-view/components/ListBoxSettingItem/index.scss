@@ -4,6 +4,7 @@
     display: flex;
     gap: 0.5rem 3rem;
     position: relative;
+    user-select: none;
 
     & .listbox-button {
       height: 2.6rem;

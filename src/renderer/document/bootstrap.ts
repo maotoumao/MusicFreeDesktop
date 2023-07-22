@@ -18,7 +18,8 @@ export default async function () {
     trackPlayer.setupPlayer(),
     localMusic.setupLocalMusic(),
   ]);
-  setupThemePack();
+  // setupThemePack();
+  await window.themepack.setupThemePacks();
   setupLocalShortCut();
   dropHandler();
 }
@@ -65,10 +66,3 @@ function dropHandler() {
   });
 }
 
-
-async function setupThemePack(){
-  const themePack = rendererAppConfig.getAppConfigPath('theme.currentThemePack');
-  if(themePack) {
-    window.themepack.selectTheme(themePack);
-  }
-}

@@ -1,0 +1,36 @@
+:root {
+  --textColor: #fcfcfc !important;
+  --textSecondaryColor: #aaaaaa !important;
+  --backgroundColor: #4E6370 !important;
+  --shadowColor: rgba(0, 0, 0, 0.3) !important;
+  --dividerColor: rgba(255, 255, 255, 0.1) !important;
+  --maskColor: rgba(33, 33, 33, 0.8) !important;
+  --backdropColor: #6a767d !important;
+  --primaryColor: #5f9ce5 !important;
+
+  --listHoverColor: rgba(255, 255, 255, 0.05) !important;
+  --listActiveColor: rgba(255, 255, 255, 0.1) !important;
+  --placeholderColor: #9caeb9ad !important;
+
+}
+
+/* .music-detail-background {
+  background: var(--backgroundColor) !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+} */
+
+.header-container,
+.music-bar-container {
+  background-color: transparent !important;
+  backdrop-filter: blur(10px);
+}
+
+
+.body-container {
+  background-color: rgba(0,0,0,0.2);
+}
+
+a {
+    color: #8bd1ed !important;
+}

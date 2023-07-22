@@ -21,4 +21,20 @@ declare namespace ICommon {
     x: number;
     y: number
   }
+
+  interface IThemePack {
+    name: string;
+    path: string;
+    /** 预览图 */
+    preview: string;
+    /** 主题更新链接 */
+    srcUrl?: string;
+    /** 版本号 */
+    version?: string;
+    description?: string;
+    iframe?: Record<
+      "app" | "header" | "body" | "music-bar" | "side-bar" | "page",
+      string
+    >;
+  }
 }

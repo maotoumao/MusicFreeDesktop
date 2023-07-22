@@ -30,7 +30,7 @@ export default function WatchLocalDir(props: IUpdateProps) {
     <Base defaultClose>
       <div className="modal--watch-local-dir-container shadow backdrop-color">
         <Base.Header>扫描本地音乐</Base.Header>
-        <div className="body-container">
+        <div className="modal--body-container">
           <Condition
             condition={localDirs.length}
             falsy={

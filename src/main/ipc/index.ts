@@ -97,6 +97,10 @@ export default function setupIpcMain() {
     setupTrayMenu();
   });
 
+  ipcMainHandle('app-get-path', pathName => {
+    return app.getPath(pathName as any);
+  })
+
   /** APP更新 */
   const updateSources = [
     "https://gitee.com/maotoumao/MusicFreeDesktop/raw/master/release/version.json",

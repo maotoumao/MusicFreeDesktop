@@ -9,7 +9,7 @@ export default function Sparkles() {
     <Base withBlur defaultClose>
       <div className="modal--sparkles-container shadow backdrop-color">
         <Base.Header>✨✨✨开发者的话</Base.Header>
-        <div className="body-container">
+        <div className="modal--body-container">
           <p>
             首先感谢你使用这款软件。开发这款软件的初衷首先是满足自己日常的需求，顺便分享出来，如果能对更多人有帮助那再好不过。
           </p>

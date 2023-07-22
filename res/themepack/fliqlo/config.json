@@ -1,0 +1,8 @@
+{
+    "name": "fliqlo",
+    "preview": "#000",
+    "iframe": {
+        "app": "@/iframes/app.html"
+    }
+    
+}

@@ -1,11 +1,14 @@
-import { IThemePack } from "@/common/app-config/type";
 import { addFileScheme, addTailSlash } from "@/common/file-util";
 import path from "path";
 import fs from "fs/promises";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { ipcRenderer } from "electron";
+import { rimraf } from "rimraf";
+import Store from "@/common/store";
+import { nanoid } from "nanoid";
 
 const themeNodeId = `themepack-node`;
+const themePathKey = "themepack-path";
+
 
 const validIframeMap = new Map<
   "app" | "header" | "body" | "music-bar" | "side-bar" | "page",
@@ -19,7 +22,11 @@ const validIframeMap = new Map<
   ["page", null],
 ]);
 
-async function selectTheme(themePack: IThemePack | null) {
+const allThemePacksStore = new Store<Array<ICommon.IThemePack | null>>([]);
+const currentThemePackStore = new Store<ICommon.IThemePack | null>(null);
+
+/** 选择某个主题 */
+async function selectTheme(themePack: ICommon.IThemePack | null) {
   try {
     const themeNode = document.querySelector(`#${themeNodeId}`);
     if (themePack === null) {
@@ -31,6 +38,7 @@ async function selectTheme(themePack: IThemePack | null) {
           validIframeMap.set(key, null);
         }
       });
+      localStorage.removeItem(themePathKey);
     } else {
       const rawStyle = await fs.readFile(
         path.resolve(themePack.path, "index.css"),
@@ -74,23 +82,152 @@ async function selectTheme(themePack: IThemePack | null) {
           }
         });
       }
+      localStorage.setItem(themePathKey, themePack.path);
     }
-    ipcRenderer.invoke("set-app-config-path", {
-      keyPath: "theme.currentThemePack",
-      value: themePack,
-    });
+    currentThemePackStore.setValue(themePack);
   } catch {}
 }
 
+/** 替换标记 */
 function replaceAlias(
   rawText: string,
   basePath: string,
-  fileScheme = true
+  withFileScheme = true
 ) {
   return rawText.replaceAll(
     "@/",
-    addTailSlash(fileScheme ? addFileScheme(basePath) : basePath)
+    addTailSlash(withFileScheme ? addFileScheme(basePath) : basePath)
   );
 }
 
-export default { selectTheme };
+async function appGetPath(pathName: string) {
+  return ipcRenderer.invoke("app-get-path", pathName);
+}
+
+let themePackBasePath: string;
+
+async function checkPath() {
+  // 路径:
+  try {
+    const res = await fs.stat(themePackBasePath);
+    if (!res.isDirectory()) {
+      await rimraf(themePackBasePath);
+      throw new Error();
+    }
+  } catch {
+    fs.mkdir(themePackBasePath, {
+      recursive: true,
+    });
+  }
+}
+
+/** 加载所有的主题包 */
+async function setupThemePacks() {
+  themePackBasePath = path.resolve(
+    await appGetPath("userData"),
+    "./musicfree-themepacks"
+  );
+  await checkPath();
+  const allThemePacks = await loadThemePacks();
+  const currentThemePath = localStorage.getItem(themePathKey);
+  const currentTheme: ICommon.IThemePack | null = null;
+  if (currentThemePath) {
+    const currentTheme = allThemePacks.find(
+      (item) => item.path === currentThemePath
+    );
+    if (!currentTheme) {
+      localStorage.removeItem(themePathKey);
+    }
+  }
+  allThemePacksStore.setValue(allThemePacks);
+  selectTheme(currentTheme ?? null);
+}
+
+async function loadThemePacks() {
+  const themePackDirNames = await fs.readdir(themePackBasePath);
+  // 读取所有的文件夹
+  const parsedThemePacks: ICommon.IThemePack[] = [];
+
+  for (const themePackDir of themePackDirNames) {
+    const parsedThemePack = await parseThemePack(
+      path.resolve(themePackBasePath, themePackDir)
+    );
+    if (parseThemePack) {
+      parsedThemePacks.push(parsedThemePack);
+    }
+  }
+
+  return parsedThemePacks;
+}
+
+async function parseThemePack(
+  themePackPath: string
+): Promise<ICommon.IThemePack | null> {
+  try {
+    const packContent = await fs.readdir(themePackPath);
+    if (
+      !(
+        packContent.includes("config.json") && packContent.includes("index.css")
+      )
+    ) {
+      throw new Error("Not Valid Theme Pack");
+    }
+
+    // 读取json
+    const jsonData = JSON.parse(
+      await fs.readFile(path.resolve(themePackPath, "config.json"), "utf-8")
+    );
+    const themePack: ICommon.IThemePack = {
+      ...jsonData,
+      preview: jsonData.preview?.startsWith?.("#")
+        ? jsonData.preview
+        : jsonData.preview?.replace?.(
+            "@/",
+            addTailSlash(addFileScheme(themePackPath))
+          ),
+      path: themePackPath,
+    };
+    return themePack;
+  } catch (e) {
+    console.log("eeee", e);
+    return null;
+  }
+}
+
+async function installThemePack(themePackPath: string) {
+  const parsedThemePack = await parseThemePack(themePackPath);
+
+  const folderName = `theme-${nanoid()}`;
+  const targetFolderName = path.resolve(themePackBasePath, folderName);
+
+  if (parsedThemePack) {
+    try {
+      await fs.cp(themePackPath, targetFolderName, {
+        recursive: true,
+      });
+      parsedThemePack.path = targetFolderName;
+      allThemePacksStore.setValue(prev => [...prev, parsedThemePack]);
+    } catch {}
+  }
+}
+
+async function uninstallThemePack(themePack: ICommon.IThemePack) {
+  try {
+    await fs.rmdir(themePack.path);
+    allThemePacksStore.setValue(prev => prev.filter(item => item.path !== themePack.path));
+    if(currentThemePackStore.getValue().path === themePack.path) {
+      currentThemePackStore.setValue(null);
+    }
+  } catch {
+
+  }
+}
+
+export default {
+  selectTheme,
+  setupThemePacks,
+  allThemePacksStore,
+  currentThemePackStore,
+  installThemePack,
+  uninstallThemePack
+};
