@@ -80,6 +80,13 @@ async function selectTheme(themePack: ICommon.IThemePack | null) {
             validIframeMap.set(key, null);
           }
         });
+      } else {
+        validIframeMap.forEach((value, key) => {
+          if (value !== null) {
+            value.remove();
+            validIframeMap.set(key, null);
+          }
+        });
       }
       localStorage.setItem(themePathKey, themePack.path);
     }
@@ -211,7 +218,7 @@ async function installThemePack(themePackPath: string) {
       return [false, e];
     }
   }
-  return [false, new Error("解析失败")]
+  return [false, new Error("解析失败")];
 }
 
 async function uninstallThemePack(themePack: ICommon.IThemePack) {
