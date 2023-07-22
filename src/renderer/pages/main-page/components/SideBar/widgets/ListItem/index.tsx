@@ -15,6 +15,7 @@ export default function ListItem(props: IProps) {
     <div
       onClick={onClick}
       onContextMenu={onContextMenu}
+      title={title}
       role="button"
       className="side-bar--list-item-container"
       data-selected={selected}
