@@ -9,6 +9,7 @@ import {
 import { toast } from "react-toastify";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import A from "@/renderer/components/A";
 
 interface IProps {
   data: IAppConfig["theme"];
@@ -41,6 +42,7 @@ export default function Theme(props: IProps) {
 
   return (
     <div className="setting-view--theme-container">
+      <div className="setting-row">💡这里有些示例主题：<A href="https://github.com/maotoumao/MusicFreeThemePacks">https://github.com/maotoumao/MusicFreeThemePacks</A></div>
       <div className="setting-view--theme-items">
         <ThemeItem
           selected={currentThemePack === null}
@@ -48,6 +50,7 @@ export default function Theme(props: IProps) {
         ></ThemeItem>
         {allThemePacks?.map((item) => (
           <ThemeItem
+            key={item.path}
             themePack={item}
             selected={item.path === currentThemePack?.path}
           ></ThemeItem>

@@ -1,7 +1,0 @@
-{
-    "name": "雨季",
-    "preview": "#000",
-    "iframe": {
-        "app": "@/iframes/app.html"
-    }
-}

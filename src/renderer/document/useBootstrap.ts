@@ -12,6 +12,12 @@ export default function useBootstrap() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (window.themepack.currentThemePackStore.getValue()) {
+      window.themepack.selectTheme(
+        window.themepack.currentThemePackStore.getValue()
+      );
+    }
+
     const navigateCallback = (url: string, payload?: any) => {
       if (url.startsWith("evt://")) {
         const evtName = url.slice(6);

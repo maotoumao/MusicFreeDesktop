@@ -91,7 +91,9 @@ async function selectTheme(themePack: ICommon.IThemePack | null) {
       localStorage.setItem(themePathKey, themePack.path);
     }
     currentThemePackStore.setValue(themePack);
-  } catch {}
+  } catch (e) {
+    console.log("切换主题失败", e);
+  }
 }
 
 /** 替换标记 */
@@ -129,24 +131,29 @@ async function checkPath() {
 
 /** 加载所有的主题包 */
 async function setupThemePacks() {
-  themePackBasePath = path.resolve(
-    await appGetPath("userData"),
-    "./musicfree-themepacks"
-  );
-  await checkPath();
-  const allThemePacks = await loadThemePacks();
-  const currentThemePath = localStorage.getItem(themePathKey);
-  const currentTheme: ICommon.IThemePack | null = null;
-  if (currentThemePath) {
-    const currentTheme = allThemePacks.find(
-      (item) => item.path === currentThemePath
+  try {
+    themePackBasePath = path.resolve(
+      await appGetPath("userData"),
+      "./musicfree-themepacks"
     );
-    if (!currentTheme) {
-      localStorage.removeItem(themePathKey);
+    await checkPath();
+    const allThemePacks = await loadThemePacks();
+    const currentThemePath = localStorage.getItem(themePathKey);
+    let currentTheme: ICommon.IThemePack | null = null;
+    if (currentThemePath) {
+      currentTheme = allThemePacks.find(
+        (item) => item.path === currentThemePath
+      );
+      if (!currentTheme) {
+        localStorage.removeItem(themePathKey);
+      }
     }
+    allThemePacksStore.setValue(allThemePacks);
+    currentThemePackStore.setValue(currentTheme ?? null);
+    // selectTheme(currentTheme ?? null);
+  } catch (e) {
+    console.log("主题包加载失败", e);
   }
-  allThemePacksStore.setValue(allThemePacks);
-  selectTheme(currentTheme ?? null);
 }
 
 async function loadThemePacks() {
