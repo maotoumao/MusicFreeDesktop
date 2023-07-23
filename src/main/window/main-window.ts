@@ -1,5 +1,5 @@
 import { localPluginName } from "@/common/constant";
-import { BrowserWindow, app } from "electron";
+import { BrowserWindow, app, nativeImage } from "electron";
 import { getResPath } from "../util";
 import { getAppConfigPath } from "@/common/app-config/main";
 import injectGlobalData from "./common/inject-global-data";
@@ -26,7 +26,7 @@ export const createMainWindow = (): BrowserWindow => {
     },
     resizable: false,
     frame: false,
-    icon: getResPath("logo.ico"),
+    icon: nativeImage.createFromPath(getResPath('logo.png')),
   });
 
   // and load the index.html of the app.

@@ -4,6 +4,7 @@ import {
   MenuItemConstructorOptions,
   Tray,
   app,
+  nativeImage,
 } from "electron";
 import { showMainWindow } from "../window";
 import { currentMusicInfoStore } from "../store/current-music";
@@ -16,9 +17,7 @@ import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 let tray: Tray | null = null;
 
 export function setupTray() {
-  const iconPath = getResPath("logo.ico");
-
-  tray = new Tray(iconPath);
+  tray = new Tray(nativeImage.createFromPath(getResPath('logo.png')));
 
   tray.on("double-click", () => {
     showMainWindow();

@@ -1,4 +1,4 @@
-import { BrowserWindow, app } from "electron";
+import { BrowserWindow, app, nativeImage } from "electron";
 import { getResPath } from "../util";
 import injectGlobalData from "./common/inject-global-data";
 import makeWindowFullyDraggable from "./common/make-window-fully-draggable";
@@ -38,7 +38,7 @@ export const createLyricWindow = (): BrowserWindow => {
     frame: false,
     skipTaskbar: true,
     alwaysOnTop: true,
-    icon: getResPath("logo.ico"),
+    icon: nativeImage.createFromPath(getResPath('logo.png')),
   });
 
   // and load the index.html of the app.

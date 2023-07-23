@@ -12,7 +12,7 @@ import path from "path";
 const config: ForgeConfig = {
   packagerConfig: {
     appBundleId: "fun.upup.musicfree",
-    // icon: path.resolve(__dirname, "res/logo"),
+    icon: path.resolve(__dirname, "res/logo"),
     executableName: "MusicFree",
     extraResource: [
       path.resolve(__dirname, 'res'),
