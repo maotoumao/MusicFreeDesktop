@@ -126,7 +126,7 @@ export default function setupIpcMain() {
   });
 
   /** 下载音乐 */
-  ipcMainOn("download-media", async ({ mediaItem }) => {
+  ipcMainOn("download-media", async ({ mediaItems }) => {
     const mainWindow = getMainWindow();
     if (!mainWindow) {
       return;
@@ -137,6 +137,7 @@ export default function setupIpcMain() {
       getAppConfigPath("download.whenQualityMissing"),
     ]);
 
+   for(const mediaItem of mediaItems) {
     try {
       const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
       let mediaSource: IPlugin.IMediaSourceResult | null = null;
@@ -166,6 +167,7 @@ export default function setupIpcMain() {
     } catch (e) {
       console.log(e);
     }
+   }
   });
 
   ipcMainHandle("set-lyric-window", (enabled) => {

@@ -23,6 +23,7 @@ import useVirtualList from "@/renderer/hooks/useVirtualList";
 import rendererAppConfig from "@/common/app-config/renderer";
 import { isKeyDown } from "@/renderer/core/local-shortcut";
 import { isBetween } from "@/common/normalize-util";
+import { ipcRendererSend } from "@/common/ipc-util/renderer";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -100,7 +101,8 @@ export function showMusicContextMenu(
   localMusicSheetId?: string
 ) {
   const menuItems: IContextMenuItem[] = [];
-  if (!Array.isArray(musicItems)) {
+  const isArray = Array.isArray(musicItems);
+  if (!isArray) {
     menuItems.push(
       {
         title: `ID: ${getMediaPrimaryKey(musicItems)}`,
@@ -145,17 +147,20 @@ export function showMusicContextMenu(
         MusicSheet.removeMusicFromSheet(musicItems, localMusicSheetId);
       },
     }
-    // {
-    //   title: '下载',
-    //   icon: 'array-download-tray',
-    //   show: musicItem.platform !== localPluginName,
-    //   onClick() {
-    //     ipcRendererSend('download-media', {
-    //       mediaItem: musicItem
-    //     })
-    //   },
-    // }
   );
+
+  // menuItems.push({
+  //   title: "下载",
+  //   icon: "array-download-tray",
+  //   show: isArray
+  //     ? !musicItems.every((item) => item.platform === localPluginName)
+  //     : musicItems.platform !== localPluginName,
+  //   onClick() {
+  //     ipcRendererSend("download-media", {
+  //       mediaItems: isArray ? musicItems : [musicItems],
+  //     });
+  //   },
+  // });
 
   showContextMenu({
     x,
@@ -247,15 +252,19 @@ function _MusicList(props: IMusicListProps) {
                       virtualItem.rowIndex,
                       activeItems[0],
                       activeItems[1]
-                    ) && activeItems[0] !== activeItems[1]
+                    ) &&
+                    activeItems[0] !== activeItems[1]
                   ) {
                     let [start, end] = activeItems;
-                    if(start > end) {
+                    if (start > end) {
                       [start, end] = [end, start];
                     }
 
                     showMusicContextMenu(
-                      table.getRowModel().rows.slice(start, end + 1).map(item => item.original),
+                      table
+                        .getRowModel()
+                        .rows.slice(start, end + 1)
+                        .map((item) => item.original),
                       e.clientX,
                       e.clientY,
                       musicSheet?.platform === localPluginName

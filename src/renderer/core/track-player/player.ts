@@ -70,17 +70,17 @@ export async function setupPlayer() {
   setupEvents();
   const _repeatMode = getUserPerference("repeatMode");
 
-  if (_repeatMode) {
-    setRepeatMode(_repeatMode as RepeatMode);
-  }
-
   const [currentMusic, currentProgress] = [
     getUserPerference("currentMusic"),
     getUserPerference("currentProgress"),
   ];
   const playList = (await getUserPerferenceIDB("playList")) ?? [];
-
   musicQueueStore.setValue(playList);
+
+  if (_repeatMode) {
+    setRepeatMode(_repeatMode as RepeatMode);
+  }
+
   setCurrentMusic(currentMusic);
 
   const [volume, speed] = [
@@ -221,33 +221,30 @@ function setupEvents() {
     }
   });
 
-
-
   navigator.mediaSession.setActionHandler("nexttrack", () => {
     skipToNext();
   });
 
-  ipcRendererOn('player-cmd', (data) => {
-    const {cmd, payload} = data;
-    if(cmd === 'skip-next') {
+  ipcRendererOn("player-cmd", (data) => {
+    const { cmd, payload } = data;
+    if (cmd === "skip-next") {
       skipToNext();
-    } else if (cmd === 'skip-prev') {
+    } else if (cmd === "skip-prev") {
       skipToPrev();
-    } else if (cmd  === 'set-repeat-mode') {
-      setRepeatMode(payload as RepeatMode)
-    } else if (cmd === 'set-player-state') {
+    } else if (cmd === "set-repeat-mode") {
+      setRepeatMode(payload as RepeatMode);
+    } else if (cmd === "set-player-state") {
       if (payload === PlayerState.Playing) {
         resumePlay();
       } else {
         pause();
       }
     }
-  })
+  });
 
   navigator.mediaSession.setActionHandler("previoustrack", () => {
     skipToPrev();
   });
-
 }
 
 function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
@@ -262,13 +259,18 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
     currentLyricStore.setValue(null);
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
     setUserPerference("currentMusic", music);
-    ipcRendererSend("sync-current-music", music ? {
-      platform: music.platform,
-      title: music.title,
-      artist: music.artist,
-      id: music.id,
-      album: music.album,
-    }: null);
+    ipcRendererSend(
+      "sync-current-music",
+      music
+        ? {
+            platform: music.platform,
+            title: music.title,
+            artist: music.artist,
+            id: music.id,
+            album: music.album,
+          }
+        : null
+    );
   } else {
     currentMusicStore.setValue(music);
   }

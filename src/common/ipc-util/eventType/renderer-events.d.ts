@@ -21,7 +21,7 @@ declare namespace IpcEvents {
 
     /** 下载 */
     'download-media': {
-      mediaItem: IMedia.IMediaBase,
+      mediaItems: IMedia.IMediaBase[],
     }
 
     /** 本地文件 */
