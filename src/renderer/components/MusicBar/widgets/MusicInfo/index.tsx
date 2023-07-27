@@ -10,14 +10,23 @@ import Tag from "@/renderer/components/Tag";
 import { secondsToDuration } from "@/common/time-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
 import { musicDetailShownStore } from "@/renderer/components/MusicDetail";
-import albumImg from '@/assets/imgs/album-cover.jpg';
+import albumImg from "@/assets/imgs/album-cover.jpg";
 
 export default function MusicInfo() {
   const musicItem = useCurrentMusic();
   const musicDetailShown = musicDetailShownStore.useValue();
 
   return (
-    <div className="music-info-container">
+    <div
+      className="music-info-container"
+      onClick={() => {
+        if (musicDetailShown) {
+          Evt.emit("HIDE_MUSIC_DETAIL");
+        } else {
+          Evt.emit("SHOW_MUSIC_DETAIL");
+        }
+      }}
+    >
       {!musicItem ? null : (
         <>
           <img
@@ -32,13 +41,6 @@ export default function MusicInfo() {
             className="open-detail"
             role="button"
             title={musicDetailShown ? "关闭歌曲详情页" : "打开歌曲详情页"}
-            onClick={() => {
-              if (musicDetailShown) {
-                Evt.emit("HIDE_MUSIC_DETAIL");
-              } else {
-                Evt.emit("SHOW_MUSIC_DETAIL");
-              }
-            }}
           >
             <SvgAsset
               iconName={
