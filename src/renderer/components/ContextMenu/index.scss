@@ -16,6 +16,7 @@
     align-items: center;
     padding-left: 8px;
     padding-right: 8px;
+    position: relative;
 
     & span {
       white-space: nowrap;
@@ -33,6 +34,14 @@
         width: $item-size;
         height: $item-size;
       }
+    }
+
+    & .menu-item-expand {
+      $tag-size: 4px;
+      border: $tag-size solid transparent;
+      border-left-color: currentColor;
+      position: absolute;
+      right: 12px;
     }
 
     &:hover {

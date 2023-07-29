@@ -14,7 +14,7 @@ export interface IContextMenuItem {
   /** 是否展示 */
   show?: boolean;
   /** 点击事件 */
-  onClick?: () => void;
+  onClick?: (e?: any) => void;
   /** 子菜单 */
   subMenu?: Omit<IContextMenuItem, "subMenu">[];
 }
@@ -27,6 +27,14 @@ interface IContextMenuData {
   /** 出现位置 y */
   y: number;
 }
+
+interface IContextSubMenuData {
+  /** 菜单 */
+  menuItems: IContextMenuItem[];
+  x: number;
+  y: number;
+  onClick?: (value: any) => void;
+}        
 
 const contextMenuDataStore = new Store<IContextMenuData | null>(null);
 
@@ -67,6 +75,58 @@ function SingleColumnContextMenuComponent(props: IContextMenuData) {
               className="menu-item"
               role="button"
               onClick={item.onClick}
+              onMouseEnter={() => {
+                console.log("onMouseEnter");
+              }}
+              style={{
+                height: menuItemHeight,
+              }}
+            >
+              <Condition condition={item.icon}>
+                <div className="menu-item-icon">
+                  <SvgAsset iconName={item.icon}></SvgAsset>
+                </div>
+              </Condition>
+              <span>{item.title}</span>
+              <Condition condition={item.subMenu}>
+                <div className="menu-item-expand"></div>
+              </Condition>
+            </div>
+          </Condition>
+        </Condition>
+      ))}
+    </div>
+  );
+}
+
+function ContextSubMenuComponent(props: IContextSubMenuData) {
+  const { menuItems, x, y } = props;
+
+  return (
+    <div
+      className="context-menu--single-column-container shadow backdrop-color"
+      style={{
+        width: menuItemWidth,
+        paddingTop: menuItemHeight / 4,
+        paddingBottom: menuItemHeight / 4,
+        top: y,
+        left: x,
+        maxHeight: menuContainerMaxHeight
+      }}
+    >
+      {menuItems.map((item, index) => (
+        <Condition condition={item.show !== false} key={index}>
+          <Condition
+            condition={!item.divider}
+            falsy={<div className="divider"></div>}
+          >
+            <div
+              className="menu-item"
+              role="button"
+              onClick={item.onClick}
+              onMouseEnter={() => {
+                console.log("onMouseEnter");
+              }}
               style={{
                 height: menuItemHeight,
               }}

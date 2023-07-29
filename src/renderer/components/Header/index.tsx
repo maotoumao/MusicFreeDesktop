@@ -7,6 +7,7 @@ import { useRef } from "react";
 import HeaderNavigator from "./widgets/Navigator";
 import Evt from "@/renderer/core/events";
 import rendererAppConfig from "@/common/app-config/renderer";
+import { musicDetailShownStore } from "../MusicDetail";
 
 export default function AppHeader() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function AppHeader() {
   function onSearchSubmit() {
     if(inputRef.current.value) {
       navigate(`/main/search/${inputRef.current.value}`);
+      musicDetailShownStore.setValue(false);
     }
   }
 
