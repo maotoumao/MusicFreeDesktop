@@ -120,7 +120,10 @@ class TrackPlayerInternal {
   /** 开始播放 */
   play() {
     if (this.hasSource()) {
-      this.audio.play();
+      this.audio.play().catch(e => {
+        // 播放失败会自动被onerror监控到
+        // trackPlayerEventsEmitter.emit(TrackPlayerEvent.Error, e);
+      })
     }
   }
 

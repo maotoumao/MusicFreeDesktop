@@ -121,6 +121,7 @@ function renderOptions(info: any) {
               },
               onPromiseRejected() {
                 console.log("导入失败");
+                toast.error('导入歌单失败！')
               },
               hints: row.hints?.importMusicSheet,
             });
