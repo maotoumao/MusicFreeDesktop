@@ -26,6 +26,8 @@ interface IContextMenuData {
   x: number;
   /** 出现位置 y */
   y: number;
+  /** 设置子目录 */
+  // setSubMenuItems: ()
 }
 
 interface IContextSubMenuData {
@@ -75,7 +77,7 @@ function SingleColumnContextMenuComponent(props: IContextMenuData) {
               className="menu-item"
               role="button"
               onClick={item.onClick}
-              onMouseEnter={() => {
+              onMouseEnter={(e) => {
                 console.log("onMouseEnter");
               }}
               style={{
@@ -175,6 +177,7 @@ export function ContextMenuComponent() {
         return [x - menuItemWidth - offset, y - offset - validItemsHeight];
     }
   }, [x, y]);
+
 
   useEffect(() => {
     const contextClickListener = () => {

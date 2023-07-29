@@ -12,6 +12,7 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
     'playMusic.playError': 'pause',
     'normal.closeBehavior': 'minimize',
     'normal.checkUpdate': true,
+    'normal.maxHistoryLength': 30,
     'download.defaultQuality': 'standard',
     'download.whenQualityMissing': 'lower',
     'lyric.enableDesktopLyric': false,

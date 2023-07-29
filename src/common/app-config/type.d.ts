@@ -1,7 +1,7 @@
 interface IConfig {
   normal: {
     closeBehavior: "exit" | "minimize";
-
+    maxHistoryLength: number;
     checkUpdate: boolean;
   };
   playMusic: {

@@ -22,8 +22,10 @@ declare namespace IUserPerference {
         /** 当前播放队列 */
         playList: IMusic.IMusicItem[];
         /** 本地音乐监听列表 */
-        localWatchDir: string[]
+        localWatchDir: string[];
         /** 收藏的歌单 */
         starredMusicSheets: IMedia.IMediaBase[]
+        /** 搜索历史 */
+        searchHistory: string[];
     }
 }

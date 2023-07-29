@@ -32,6 +32,28 @@ export default function Normal(props: IProps) {
           },
         ]}
       ></RadioGroupSettingItem>
+      <RadioGroupSettingItem
+        label="搜索历史记录最多保存条数"
+        keyPath="normal.maxHistoryLength"
+        value={data.maxHistoryLength}
+        options={[
+          {
+            value: 15,
+          },
+          {
+            value: 30,
+          },
+          {
+            value: 50,
+          },
+          {
+            value: 100,
+          },
+          {
+            value: 200,
+          }
+        ]}
+      ></RadioGroupSettingItem>
     </div>
   );
 }

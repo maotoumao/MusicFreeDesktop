@@ -11,6 +11,7 @@
   flex-shrink: 0;
   font-size: 1rem;
   position: relative;
+  z-index: 200;
 
   & .left-part {
     display: flex;

@@ -3,21 +3,36 @@ import SvgAsset from "../SvgAsset";
 import "./index.scss";
 import { showModal } from "../Modal";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import HeaderNavigator from "./widgets/Navigator";
 import Evt from "@/renderer/core/events";
 import rendererAppConfig from "@/common/app-config/renderer";
 import { musicDetailShownStore } from "../MusicDetail";
+import Condition from "../Condition";
+import SearchHistory from "./widgets/SearchHistory";
+import { addSearchHistory } from "@/renderer/utils/search-history";
 
 export default function AppHeader() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>();
+  const [showSearchHistory, setShowSearchHistory] = useState(false);
+  const isHistoryFocusRef = useRef(false);
+
+  if (!showSearchHistory) {
+    isHistoryFocusRef.current = false;
+  }
 
   function onSearchSubmit() {
-    if(inputRef.current.value) {
-      navigate(`/main/search/${inputRef.current.value}`);
-      musicDetailShownStore.setValue(false);
+    if (inputRef.current.value) {
+      search(inputRef.current.value);
     }
+  }
+
+  function search(keyword: string) {
+    navigate(`/main/search/${keyword}`);
+    musicDetailShownStore.setValue(false);
+    addSearchHistory(keyword);
+    setShowSearchHistory(false);
   }
 
   return (
@@ -27,21 +42,50 @@ export default function AppHeader() {
           <SvgAsset iconName="logo"></SvgAsset>
         </div>
         <HeaderNavigator></HeaderNavigator>
-        <div className="header-search">
+        <div id="header-search" className="header-search">
           <input
             ref={inputRef}
             className="header-search-input"
             placeholder="在这里输入搜索内容"
             maxLength={50}
+            onClick={() => {
+              setShowSearchHistory(true);
+            }}
             onKeyDown={(key) => {
               if (key.key === "Enter") {
                 onSearchSubmit();
               }
             }}
+            onFocus={() => {
+              setShowSearchHistory(true);
+            }}
+            onBlur={() => {
+              setTimeout(() => {
+                if (!isHistoryFocusRef.current) {
+                  setShowSearchHistory(false);
+                }
+              }, 0);
+            }}
           ></input>
           <div className="search-submit" role="button" onClick={onSearchSubmit}>
             <SvgAsset iconName="magnifying-glass"></SvgAsset>
           </div>
+          <Condition condition={showSearchHistory}>
+            <SearchHistory
+              onHistoryClick={(item) => {
+                search(item);
+              }}
+              onHistoryPanelBlur={() => {
+                isHistoryFocusRef.current = false;
+                setShowSearchHistory(false);
+              }}
+              onHistoryPanelFocus={() => {
+                isHistoryFocusRef.current = true;
+                console.log("FOCUS");
+                setShowSearchHistory(true);
+              }}
+            ></SearchHistory>
+          </Condition>
         </div>
       </div>
 
@@ -82,13 +126,15 @@ export default function AppHeader() {
           title="退出"
           className="header-button"
           onClick={() => {
-            const exitBehavior = rendererAppConfig.getAppConfigPath('normal.closeBehavior');
-            if(exitBehavior === 'minimize') {
-              ipcRendererSend('min-window', {
-                skipTaskBar: true
-              })
+            const exitBehavior = rendererAppConfig.getAppConfigPath(
+              "normal.closeBehavior"
+            );
+            if (exitBehavior === "minimize") {
+              ipcRendererSend("min-window", {
+                skipTaskBar: true,
+              });
             } else {
-              ipcRendererSend('exit-app');
+              ipcRendererSend("exit-app");
             }
           }}
         >

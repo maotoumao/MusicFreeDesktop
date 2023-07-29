@@ -16,7 +16,7 @@ interface IRadioGroupSettingItemProps<T extends IAppConfigKeyPath> {
     /** 存储的value */
     value: IAppConfigKeyPathValue<T>;
     /** 展示的值 */
-    title: string;
+    title?: string;
   }>;
   value?: IAppConfigKeyPathValue<T>;
   direction?: "horizonal" | "vertical";
@@ -63,7 +63,7 @@ export default function RadioGroupSettingItem<T extends IAppConfigKeyPath>(
                     <div className="checkbox">
                       {checked ? <SvgAsset iconName="check"></SvgAsset> : null}
                     </div>
-                    {option.title}
+                    {option.title ?? (option.value as string)}
                   </div>
                 );
               }}
