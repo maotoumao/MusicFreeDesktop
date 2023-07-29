@@ -109,7 +109,7 @@ function registerEvents() {
         const rawCode = await fs.readFile(url, "utf8");
         await installPluginFromRawCode(rawCode);
       } else if (url.endsWith(".json")) {
-        const jsonFile = (await axios.get(addRandomHash(url))).data;
+        const jsonFile = JSON.parse(await fs.readFile(url, "utf8"));
 
         for (const cfg of jsonFile?.plugins ?? []) {
           await installPluginFromUrl(addRandomHash(cfg.url));

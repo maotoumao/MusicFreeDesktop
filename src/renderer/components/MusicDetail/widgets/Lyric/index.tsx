@@ -3,6 +3,7 @@ import "./index.scss";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import { useEffect, useRef } from "react";
+import { showContextMenu } from "@/renderer/components/ContextMenu";
 
 export default function Lyric() {
   const currentLrc = trackPlayer.useLyric();
@@ -30,6 +31,26 @@ export default function Lyric() {
     <div
       className="lyric-container"
       data-loading={currentLrc === null}
+      onContextMenu={(e) => {
+        showContextMenu({
+          x: e.clientX,
+          y: e.clientY,
+          menuItems: [
+            {
+              title: "字体大小",
+              subMenu: [{
+                title: "12",
+              },{
+                title: "13",
+              }],
+
+            },
+            {
+              title: '下载歌词'
+            }
+          ],
+        });
+      }}
       ref={containerRef}
     >
       {
