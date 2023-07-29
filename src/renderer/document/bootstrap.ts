@@ -22,6 +22,7 @@ export default async function () {
   await window.themepack.setupThemePacks();
   setupLocalShortCut();
   dropHandler();
+  clearDefaultBehavior();
 }
 
 function dropHandler() {
@@ -66,3 +67,32 @@ function dropHandler() {
   });
 }
 
+function clearDefaultBehavior() {
+  const killSpaceBar = function (evt: any) {
+    // https://greasyfork.org/en/scripts/25035-disable-space-bar-scrolling/code
+    const target = evt.target || {},
+      isInput =
+        "INPUT" == target.tagName ||
+        "TEXTAREA" == target.tagName ||
+        "SELECT" == target.tagName ||
+        "EMBED" == target.tagName;
+
+    // if we're an input or not a real target exit
+    if (isInput || !target.tagName) return;
+
+    // if we're a fake input like the comments exit
+    if (
+      target &&
+      target.getAttribute &&
+      target.getAttribute("role") === "textbox"
+    )
+      return;
+
+    // ignore the space
+    if (evt.keyCode === 32) {
+      evt.preventDefault();
+    }
+  };
+
+  document.addEventListener("keydown", killSpaceBar, false);
+}

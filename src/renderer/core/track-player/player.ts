@@ -289,6 +289,8 @@ export const useProgress = progressStore.useValue;
 
 export const getProgress = progressStore.getValue;
 
+export const getPlayerState = playerStateStore.getValue;
+
 export const usePlayerState = playerStateStore.useValue;
 
 export const useRepeatMode = repeatModeStore.useValue;
