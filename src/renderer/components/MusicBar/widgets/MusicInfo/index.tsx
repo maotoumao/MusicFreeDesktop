@@ -16,17 +16,16 @@ export default function MusicInfo() {
   const musicItem = useCurrentMusic();
   const musicDetailShown = musicDetailShownStore.useValue();
 
+  function toggleMusicDetail() {
+    if (musicDetailShown) {
+      Evt.emit("HIDE_MUSIC_DETAIL");
+    } else {
+      Evt.emit("SHOW_MUSIC_DETAIL");
+    }
+  }
+
   return (
-    <div
-      className="music-info-container"
-      onClick={() => {
-        if (musicDetailShown) {
-          Evt.emit("HIDE_MUSIC_DETAIL");
-        } else {
-          Evt.emit("SHOW_MUSIC_DETAIL");
-        }
-      }}
-    >
+    <div className="music-info-container">
       {!musicItem ? null : (
         <>
           <img
@@ -41,6 +40,7 @@ export default function MusicInfo() {
             className="open-detail"
             role="button"
             title={musicDetailShown ? "关闭歌曲详情页" : "打开歌曲详情页"}
+            onClick={toggleMusicDetail}
           >
             <SvgAsset
               iconName={
@@ -50,7 +50,7 @@ export default function MusicInfo() {
           </div>
           <div className="music-info">
             <div className="music-title">
-              <span title={musicItem.title}>{musicItem.title}</span>
+              <span role="button" onClick={toggleMusicDetail} title={musicItem.title}>{musicItem.title}</span>
               <Tag
                 fill
                 style={{
