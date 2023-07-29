@@ -356,8 +356,11 @@ export function addNext(musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) {
   const currentMusic = currentMusicStore.getValue();
   let duplicateIndex = -1;
   _musicItems.forEach((item, index) => {
-    item[timeStampSymbol] = now;
-    item[sortIndexSymbol] = index;
+    _musicItems[index] = {
+      ...item,
+      [timeStampSymbol]: now,
+      [sortIndexSymbol]: index
+    }
     if (duplicateIndex === -1 && isSameMedia(item, currentMusic)) {
       duplicateIndex = index;
     }
