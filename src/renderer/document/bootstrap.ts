@@ -7,8 +7,10 @@ import {
 import trackPlayer from "../core/track-player";
 import rendererAppConfig from "@/common/app-config/renderer";
 import localMusic from "../core/local-music";
-import themepack from "@/preload/internal/themepack";
 import { setupLocalShortCut } from "../core/local-shortcut";
+import { setAutoFreeze } from "immer";
+
+setAutoFreeze(false);
 
 export default async function () {
   await Promise.all([
@@ -18,7 +20,6 @@ export default async function () {
     trackPlayer.setupPlayer(),
     localMusic.setupLocalMusic(),
   ]);
-  // setupThemePack();
   await window.themepack.setupThemePacks();
   setupLocalShortCut();
   dropHandler();
