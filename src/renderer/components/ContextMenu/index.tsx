@@ -2,7 +2,7 @@ import Store from "@/common/store";
 import SvgAsset, { SvgAssetIconNames } from "../SvgAsset";
 import "./index.scss";
 import Condition from "../Condition";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export interface IContextMenuItem {
   /** 左侧图标 */
@@ -14,9 +14,9 @@ export interface IContextMenuItem {
   /** 是否展示 */
   show?: boolean;
   /** 点击事件 */
-  onClick?: (e?: any) => void;
+  onClick?: (value?: IContextMenuItem) => void;
   /** 子菜单 */
-  subMenu?: Omit<IContextMenuItem, "subMenu">[];
+  subMenu?: IContextMenuItem[];
 }
 
 interface IContextMenuData {
@@ -27,20 +27,18 @@ interface IContextMenuData {
   /** 出现位置 y */
   y: number;
   /** 设置子目录 */
-  // setSubMenuItems: ()
+  setSubMenu?: (
+    subMenu?: Omit<IContextMenuData, "setSubMenu">,
+    menuItem?: IContextMenuItem
+  ) => void;
+  onItemClick?: (value: any) => void;
 }
-
-interface IContextSubMenuData {
-  /** 菜单 */
-  menuItems: IContextMenuItem[];
-  x: number;
-  y: number;
-  onClick?: (value: any) => void;
-}        
 
 const contextMenuDataStore = new Store<IContextMenuData | null>(null);
 
-export function showContextMenu(contextMenuData: IContextMenuData) {
+export function showContextMenu(
+  contextMenuData: Pick<IContextMenuData, "menuItems" | "x" | "y">
+) {
   contextMenuDataStore.setValue(contextMenuData);
 }
 
@@ -50,10 +48,11 @@ function hideContextMenu() {
 
 const menuItemWidth = 240;
 const menuItemHeight = 32;
-const menuContainerMaxHeight = menuItemHeight * 10
+const menuContainerMaxHeight = menuItemHeight * 10;
 
 function SingleColumnContextMenuComponent(props: IContextMenuData) {
-  const { menuItems, x, y } = props;
+  const { menuItems, x, y, setSubMenu, onItemClick } = props;
+  const menuContainerRef = useRef<HTMLDivElement>();
 
   return (
     <div
@@ -64,8 +63,9 @@ function SingleColumnContextMenuComponent(props: IContextMenuData) {
         paddingBottom: menuItemHeight / 4,
         top: y,
         left: x,
-        maxHeight: menuContainerMaxHeight
+        maxHeight: menuContainerMaxHeight,
       }}
+      ref={menuContainerRef}
     >
       {menuItems.map((item, index) => (
         <Condition condition={item.show !== false} key={index}>
@@ -76,9 +76,43 @@ function SingleColumnContextMenuComponent(props: IContextMenuData) {
             <div
               className="menu-item"
               role="button"
-              onClick={item.onClick}
+              onClick={() => {
+                item.onClick?.();
+                onItemClick?.(item);
+              }}
               onMouseEnter={(e) => {
-                console.log("onMouseEnter");
+                const subMenu = item.subMenu;
+                if (!subMenu) {
+                  setSubMenu?.(null, item);
+                  return;
+                }
+
+                const realPos =
+                  y +
+                  (e.target as HTMLDivElement).offsetTop -
+                  menuContainerRef.current.scrollTop;
+                const realHeight = Math.min(
+                  subMenu.length * menuItemHeight,
+                  menuContainerMaxHeight
+                );
+                let [subX, subY] = [
+                  x - menuItemWidth - offset,
+                  realPos - realHeight / 2,
+                ];
+                if (x < window.innerWidth - x - offset - menuItemWidth) {
+                  subX = x + menuItemWidth + offset;
+                }
+                if (subY < 54) {
+                  subY = 54;
+                }
+                if (subY + realHeight > window.innerHeight - 64 - offset) {
+                  subY = window.innerHeight - 64 - realHeight - offset;
+                }
+                setSubMenu?.({
+                  menuItems: subMenu,
+                  x: subX,
+                  y: subY,
+                }, item);
               }}
               style={{
                 height: menuItemHeight,
@@ -101,57 +135,12 @@ function SingleColumnContextMenuComponent(props: IContextMenuData) {
   );
 }
 
-function ContextSubMenuComponent(props: IContextSubMenuData) {
-  const { menuItems, x, y } = props;
-
-  return (
-    <div
-      className="context-menu--single-column-container shadow backdrop-color"
-      style={{
-        width: menuItemWidth,
-        paddingTop: menuItemHeight / 4,
-        paddingBottom: menuItemHeight / 4,
-        top: y,
-        left: x,
-        maxHeight: menuContainerMaxHeight
-      }}
-    >
-      {menuItems.map((item, index) => (
-        <Condition condition={item.show !== false} key={index}>
-          <Condition
-            condition={!item.divider}
-            falsy={<div className="divider"></div>}
-          >
-            <div
-              className="menu-item"
-              role="button"
-              onClick={item.onClick}
-              onMouseEnter={() => {
-                console.log("onMouseEnter");
-              }}
-              style={{
-                height: menuItemHeight,
-              }}
-            >
-              <Condition condition={item.icon}>
-                <div className="menu-item-icon">
-                  <SvgAsset iconName={item.icon}></SvgAsset>
-                </div>
-              </Condition>
-              <span>{item.title}</span>
-            </div>
-          </Condition>
-        </Condition>
-      ))}
-    </div>
-  );
-}
-
 const offset = 6;
 
 export function ContextMenuComponent() {
   const contextMenuData = contextMenuDataStore.useValue();
   const { menuItems, x, y } = contextMenuData ?? {};
+  const [subMenuData, setSubMenuData] = useState<IContextMenuData | null>(null);
 
   const [actualX, actualY] = useMemo(() => {
     if (x === undefined || y === undefined) {
@@ -159,13 +148,16 @@ export function ContextMenuComponent() {
     }
     const isLeft = x < window.innerWidth / 2 ? 0 : 1;
     const isTop = y < window.innerHeight / 2 ? 0 : 2;
-    const validItemsHeight = Math.min(menuItems.reduce(
-      (prev, curr) =>
-        prev +
-        (curr.show !== false ? (curr.divider ? 1 : menuItemHeight) : 0),
-      menuItemHeight / 2
-    ), menuContainerMaxHeight);
-    
+    const validItemsHeight = Math.min(
+      menuItems.reduce(
+        (prev, curr) =>
+          prev +
+          (curr.show !== false ? (curr.divider ? 1 : menuItemHeight) : 0),
+        menuItemHeight / 2
+      ),
+      menuContainerMaxHeight
+    );
+
     switch (isLeft + isTop) {
       case 0:
         return [x + offset, y + offset];
@@ -177,7 +169,6 @@ export function ContextMenuComponent() {
         return [x - menuItemWidth - offset, y - offset - validItemsHeight];
     }
   }, [x, y]);
-
 
   useEffect(() => {
     const contextClickListener = () => {
@@ -192,13 +183,37 @@ export function ContextMenuComponent() {
     };
   }, []);
 
+  useEffect(() => {
+    setSubMenuData(null);
+  }, [contextMenuData]);
+
   return (
     <Condition condition={contextMenuData !== null}>
       <SingleColumnContextMenuComponent
         menuItems={menuItems}
         x={actualX}
         y={actualY}
+        setSubMenu={(data, menuItem) => {
+          setSubMenuData(
+            data
+              ? {
+                  ...data,
+                  onItemClick(value) {
+                    menuItem?.onClick?.(value);
+                  },
+                }
+              : data
+          );
+        }}
       ></SingleColumnContextMenuComponent>
+      <Condition condition={subMenuData}>
+        <SingleColumnContextMenuComponent
+          menuItems={subMenuData?.menuItems}
+          x={subMenuData?.x}
+          y={subMenuData?.y}
+          onItemClick={subMenuData?.onItemClick}
+        ></SingleColumnContextMenuComponent>
+      </Condition>
     </Condition>
   );
 }

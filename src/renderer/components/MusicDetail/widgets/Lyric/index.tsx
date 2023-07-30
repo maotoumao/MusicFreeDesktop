@@ -43,7 +43,9 @@ export default function Lyric() {
               },{
                 title: "13",
               }],
-
+              onClick(value) {
+                console.log(value);
+              },
             },
             {
               title: '下载歌词'
