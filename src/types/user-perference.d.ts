@@ -16,6 +16,7 @@ declare namespace IUserPerference {
             srcUrl: string;
         }>,
         skipVersion: string;
+        inlineLyricFontSize: string;
     }
 
     interface IDBType {

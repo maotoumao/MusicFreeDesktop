@@ -2,12 +2,27 @@ import trackPlayer from "@/renderer/core/track-player";
 import "./index.scss";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
+import {
+  getUserPerference,
+  setUserPerference,
+} from "@/renderer/utils/user-perference";
+import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { toast } from "react-toastify";
+
+const fontSizeList = Array(25)
+  .fill(0)
+  .map((_, index) => ({
+    title: `${index + 8}`,
+  }));
 
 export default function Lyric() {
   const currentLrc = trackPlayer.useLyric();
   const containerRef = useRef<HTMLDivElement>();
+  const [fontSize, setFontSize] = useState<string | null>(
+    getUserPerference("inlineLyricFontSize")
+  );
 
   useEffect(() => {
     if (containerRef.current) {
@@ -38,21 +53,68 @@ export default function Lyric() {
           menuItems: [
             {
               title: "字体大小",
-              subMenu: [{
-                title: "12",
-              },{
-                title: "13",
-              }],
+              subMenu: fontSizeList,
               onClick(value) {
-                console.log(value);
+                const title = value.title;
+                setFontSize(title);
+                setUserPerference("inlineLyricFontSize", title);
               },
             },
             {
-              title: '下载歌词'
-            }
+              title: "下载歌词",
+              show: !!currentLrc.parser,
+              subMenu: [
+                {
+                  title: "lrc 格式",
+                },
+                {
+                  title: "txt 格式",
+                },
+              ],
+              async onClick(value) {
+                const parser = currentLrc.parser;
+                let rawLrc = "";
+                const fileType = value.title.startsWith("lrc") ? "lrc" : "txt";
+                if (fileType === "lrc") {
+                  rawLrc = parser.getRawLyricStr(true);
+                } else {
+                  rawLrc = parser.getRawLyricStr();
+                }
+
+                try {
+                  const result = await ipcRendererInvoke("show-save-dialog", {
+                    title: "下载歌词",
+                    defaultPath:
+                      currentLrc.parser.getCurrentMusicItem().title +
+                      (fileType === "lrc" ? ".lrc" : ".txt"),
+                    filters: [
+                      {
+                        name: "歌词",
+                        extensions: ["lrc", "txt"],
+                      },
+                    ],
+                  });
+                  if (!result.canceled && result.filePath) {
+                    await window.fs.writeFile(result.filePath, rawLrc, "utf-8");
+                    toast.success("下载成功");
+                  } else {
+                    throw new Error();
+                  }
+                } catch {
+                  toast.error("下载失败");
+                }
+              },
+            },
           ],
         });
       }}
+      style={
+        fontSize
+          ? {
+              fontSize: `${fontSize}px`,
+            }
+          : null
+      }
       ref={containerRef}
     >
       {
