@@ -4,9 +4,10 @@ import {
   IAppConfigKeyPathValue,
 } from "@/common/app-config/type";
 import defaultAppConfig from "@/common/app-config/default-app-config";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ListBoxSettingItem from "../ListBoxSettingItem";
 import { defaultFont } from "@/common/constant";
+import useLocalFonts from "@/renderer/hooks/useLocalFonts";
 
 interface FontPickerSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -15,18 +16,11 @@ interface FontPickerSettingItemProps<T extends IAppConfigKeyPath> {
 }
 
 function useFonts() {
-  const [fonts, setFonts] = useState<FontData[] | null>(null);
-
-  useEffect(() => {
-    window
-      .queryLocalFonts()
-      .then((res) => {
-        setFonts([defaultFont, ...res]);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }, []);
+  const allLocalFonts = useLocalFonts();
+  const fonts = useMemo(
+    () => (allLocalFonts ? [defaultFont, ...allLocalFonts] : null),
+    [allLocalFonts]
+  );
 
   return fonts;
 }
