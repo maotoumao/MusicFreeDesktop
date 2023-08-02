@@ -62,3 +62,10 @@ export const toastDuration = {
   short: 1000,
   long: 2500,
 };
+
+export const defaultFont = {
+  fullName: "默认",
+  family: "",
+  postscriptName: "",
+  style: "",
+};

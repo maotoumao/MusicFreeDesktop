@@ -4,6 +4,7 @@ import "./index.scss";
 import ColorPickerSettingItem from "../../components/ColorPickerSettingItem";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
+import FontPickerSettingItem from "../../components/FontPickerSettingItem";
 
 interface IProps {
   data: IAppConfig["lyric"];
@@ -11,7 +12,7 @@ interface IProps {
 
 const numberArray = Array(65)
   .fill(0)
-  .map((_, index) => ({ value: 16 + index }));
+  .map((_, index) => 16 + index);
 
 export default function Lyric(props: IProps) {
   const { data = {} as IAppConfig["lyric"] } = props;
@@ -39,6 +40,17 @@ export default function Lyric(props: IProps) {
           ipcRendererSend("set-desktop-lyric-lock", checked);
         }}
       ></CheckBoxSettingItem>
+      <FontPickerSettingItem
+        label="字体"
+        keyPath="lyric.fontData"
+        value={data.fontData}
+      ></FontPickerSettingItem>
+      <ListBoxSettingItem
+        keyPath="lyric.fontSize"
+        value={data.fontSize}
+        options={numberArray}
+        label="字体大小"
+      ></ListBoxSettingItem>
       <ColorPickerSettingItem
         label="字体颜色"
         value={data.fontColor}
@@ -49,12 +61,6 @@ export default function Lyric(props: IProps) {
         value={data.strokeColor}
         keyPath="lyric.strokeColor"
       ></ColorPickerSettingItem>
-      <ListBoxSettingItem
-        keyPath="lyric.fontSize"
-        value={data.fontSize}
-        options={numberArray}
-        label="字体大小"
-      ></ListBoxSettingItem>
     </div>
   );
 }

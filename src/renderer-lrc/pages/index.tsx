@@ -139,11 +139,12 @@ export default function LyricWindowPage() {
       </Condition>
       <div className="lyric-window-content-container">
         <div
-          className='lyric-text-row'
+          className="lyric-text-row"
           style={{
             color: lyricAppConfig?.fontColor,
             WebkitTextStrokeColor: lyricAppConfig?.strokeColor,
             fontSize: lyricAppConfig?.fontSize,
+            fontFamily: lyricAppConfig?.fontData?.family || undefined,
           }}
         >
           {lyric[0]?.lrc ??

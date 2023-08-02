@@ -37,10 +37,23 @@ export function encodeUrlHeaders(
   return encodedUrl.toString();
 }
 
-
 export function isBetween(target: number, a: number, b: number) {
-  if(a > b) {
+  if (a > b) {
     return a >= target && target >= b;
   }
   return b >= target && target >= a;
+}
+
+export function isBasicType(val: unknown) {
+  const tp = typeof val;
+  if (
+    tp === "string" ||
+    tp === "boolean" ||
+    tp === "number" ||
+    tp === "undefined" ||
+    val === null
+  ) {
+    return true;
+  }
+  return false;
 }

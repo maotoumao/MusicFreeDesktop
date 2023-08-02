@@ -23,6 +23,8 @@ interface IConfig {
     alwaysOnTop: boolean;
     /** 锁定桌面歌词 */
     lockLyric: boolean;
+    /** 字体 */
+    fontData: FontData;
     /** 字体颜色 */
     fontColor: string;
     /** 字体大小 */

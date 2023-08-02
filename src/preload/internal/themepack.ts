@@ -23,7 +23,9 @@ const validIframeMap = new Map<
 
 const allThemePacksStore = new Store<Array<ICommon.IThemePack | null>>([]);
 const currentThemePackStore = new Store<ICommon.IThemePack | null>(null);
-
+/**
+ * TODO: iframe需要运行在独立的进程中，不然会影响到app的fps 得想个办法
+ */
 /** 选择某个主题 */
 async function selectTheme(themePack: ICommon.IThemePack | null) {
   try {
