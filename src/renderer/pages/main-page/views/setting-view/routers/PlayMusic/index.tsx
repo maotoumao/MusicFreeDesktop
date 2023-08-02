@@ -2,6 +2,10 @@ import { IAppConfig } from "@/common/app-config/type";
 import "./index.scss";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
+import { useOutputAudioDevices } from "@/renderer/hooks/useMediaDevices";
+import ListBoxSettingItem from "../../components/ListBoxSettingItem";
+import rendererAppConfig from "@/common/app-config/renderer";
+import trackPlayer from "@/renderer/core/track-player";
 
 interface IProps {
   data: IAppConfig["playMusic"];
@@ -9,6 +13,9 @@ interface IProps {
 
 export default function PlayMusic(props: IProps) {
   const { data = {} as IAppConfig["playMusic"] } = props;
+
+  const audioDevices = useOutputAudioDevices();
+
   return (
     <div className="setting-view--play-music-container">
       <CheckBoxSettingItem
@@ -84,6 +91,25 @@ export default function PlayMusic(props: IProps) {
           },
         ]}
       ></RadioGroupSettingItem>
+      <ListBoxSettingItem
+        label="音频输出设备"
+        keyPath="playMusic.audioOutputDevice"
+        value={data.audioOutputDevice}
+        renderItem={(item) => {
+          return item ? item.label : "默认";
+        }}
+        width={'320px'}
+        onChange={async (item) => {
+          const result = await trackPlayer.setAudioOutputDevice(item.deviceId);
+          if (result) {
+            rendererAppConfig.setAppConfigPath(
+              "playMusic.audioOutputDevice",
+              item.toJSON()
+            );
+          }
+        }}
+        options={audioDevices}
+      ></ListBoxSettingItem>
     </div>
   );
 }

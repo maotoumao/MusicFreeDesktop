@@ -20,6 +20,7 @@ interface ListBoxSettingItemProps<T extends IAppConfigKeyPath> {
   value?: IAppConfigKeyPathValue<T>;
   onChange?: (val: IAppConfigKeyPathValue<T>) => void;
   renderItem?: (item: IAppConfigKeyPathValue<T>) => string;
+  width?: number | string;
 }
 
 export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
@@ -32,6 +33,7 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
     value = defaultAppConfig[keyPath],
     onChange,
     renderItem,
+    width,
   } = props;
 
   return (
@@ -47,7 +49,11 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
       >
         <div className={"label-container"}>{label}</div>
         <div className="options-container">
-          <Listbox.Button as="div" className={"listbox-button"}>
+          <Listbox.Button
+            as="div"
+            className={"listbox-button"}
+            style={{ width }}
+          >
             <span>
               {renderItem
                 ? renderItem(value)
@@ -58,6 +64,7 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
           </Listbox.Button>
           <Listbox.Options as={"div"}>
             <ListBoxOptions
+              width={width}
               options={options}
               renderItem={renderItem}
             ></ListBoxOptions>
@@ -71,12 +78,13 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
 interface IListBoxOptionsProps<T extends IAppConfigKeyPath> {
   options: Array<IAppConfigKeyPathValue<T>> | null;
   renderItem?: (item: IAppConfigKeyPathValue<T>) => string;
+  width?: number | string;
 }
 
 function ListBoxOptions<T extends IAppConfigKeyPath>(
   props: IListBoxOptionsProps<T>
 ) {
-  const { options, renderItem } = props;
+  const { options, renderItem, width } = props;
   const containerRef = useRef<HTMLDivElement>();
 
   const virtualController = useVirtualList({
@@ -88,7 +96,11 @@ function ListBoxOptions<T extends IAppConfigKeyPath>(
   });
 
   return (
-    <div ref={containerRef} className={"listbox-options shadow backdrop-color"}>
+    <div
+      ref={containerRef}
+      className={"listbox-options shadow backdrop-color"}
+      style={{ width }}
+    >
       <Condition condition={options !== null} falsy={<Loading></Loading>}>
         <div
           style={{
@@ -104,6 +116,7 @@ function ListBoxOptions<T extends IAppConfigKeyPath>(
               style={{
                 position: "absolute",
                 top: virtualItem.top,
+                width,
               }}
               as="div"
             >

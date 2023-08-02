@@ -15,6 +15,8 @@ interface IConfig {
     clickMusicList: "normal" | "replace";
     /** 播放失败时 */
     playError: "pause" | "skip";
+    /** 输出设备 */
+    audioOutputDevice: MediaDeviceInfo | null
   };
   lyric: {
     /** 显示桌面歌词 */

@@ -120,10 +120,10 @@ class TrackPlayerInternal {
   /** 开始播放 */
   play() {
     if (this.hasSource()) {
-      this.audio.play().catch(e => {
+      this.audio.play().catch((e) => {
         // 播放失败会自动被onerror监控到
         // trackPlayerEventsEmitter.emit(TrackPlayerEvent.Error, e);
-      })
+      });
     }
   }
 
@@ -161,6 +161,11 @@ class TrackPlayerInternal {
   setSpeed(speed: number) {
     this.audio.defaultPlaybackRate = speed;
     this.audio.playbackRate = speed;
+  }
+
+  /** 设置设备 */
+  async setSinkId(deviceId: string) {
+    return (this.audio as any).setSinkId(deviceId);
   }
 }
 

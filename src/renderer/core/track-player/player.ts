@@ -82,6 +82,9 @@ export async function setupPlayer() {
   }
 
   setCurrentMusic(currentMusic);
+  setAudioOutputDevice(
+    rendererAppConfig.getAppConfigPath("playMusic.audioOutputDevice.deviceId")
+  );
 
   const [volume, speed] = [
     getUserPerference("volume"),
@@ -361,8 +364,8 @@ export function addNext(musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) {
     _musicItems[index] = {
       ...item,
       [timeStampSymbol]: now,
-      [sortIndexSymbol]: index
-    }
+      [sortIndexSymbol]: index,
+    };
     if (duplicateIndex === -1 && isSameMedia(item, currentMusic)) {
       duplicateIndex = index;
     }
@@ -659,5 +662,14 @@ export async function setQuality(quality: IMusic.IQualityKey) {
       });
       setCurrentQuality(realQuality);
     }
+  }
+}
+
+export async function setAudioOutputDevice(deviceId?: string) {
+  try {
+    await trackPlayer.setSinkId(deviceId ?? "");
+    return true;
+  } catch {
+    return false;
   }
 }
