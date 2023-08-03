@@ -23,7 +23,9 @@ export default function LocalMusicView() {
         }}>导入文件夹</div>
       </div>
       <div className="music-list-container">
-        <MusicList musicList={localMusicList} ></MusicList>
+        <MusicList musicList={localMusicList} virtualProps={{
+          fallbackRenderCount: -1
+        }}></MusicList>
       </div>
     </div>
   );
