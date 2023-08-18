@@ -16,7 +16,7 @@ interface IConfig {
     /** 播放失败时 */
     playError: "pause" | "skip";
     /** 输出设备 */
-    audioOutputDevice: MediaDeviceInfo | null
+    audioOutputDevice: MediaDeviceInfo | null;
   };
   lyric: {
     /** 显示桌面歌词 */
@@ -33,8 +33,23 @@ interface IConfig {
     fontSize: number;
     /** 描边颜色 */
     strokeColor: string;
-
-  },
+  };
+  shortCut: {
+    enableLocal: boolean;
+    enableGlobal: boolean;
+    shortcuts: Record<
+      | "play/pause"
+      | "skip-previous"
+      | "skip-next"
+      | "toggle-desktop-lyric"
+      | "volume-up"
+      | "volume-down",
+      {
+        local?: string[] | null;
+        global?: string[] | null;
+      }
+    >;
+  };
   download: {
     /** 下载路径 */
     path: string;
@@ -43,9 +58,7 @@ interface IConfig {
     /** 默认下载音质缺失时 */
     whenQualityMissing: "higher" | "lower";
   };
-  shortCut: {
-    test: never;
-  };
+
   backup: {
     test: never;
   };
@@ -56,15 +69,15 @@ interface IConfig {
   /** 主题设置 */
   theme: {
     test: never;
-  }
+  };
 
   /** 不需要用户配置的数据 */
   private: {
     lyricWindowPosition: {
       x: number;
       y: number;
-    }
-  }
+    };
+  };
 }
 
 type BasicType = string | number | symbol | null | undefined;

@@ -1,3 +1,5 @@
+import { IAppConfig } from "./app-config/type";
+
 export const internalSerializeKey = "$";
 export const internalDataSymbol = Symbol.for("internal");
 // 加入播放列表/歌单的时间
@@ -69,3 +71,7 @@ export const defaultFont = {
   postscriptName: "",
   style: "",
 };
+
+
+type IShortCutKeys = keyof IAppConfig["shortCut"]["shortcuts"];
+export const shortCutKeys: IShortCutKeys[] = ['play/pause', 'skip-next', 'skip-previous', 'volume-up', 'volume-down', 'toggle-desktop-lyric'];

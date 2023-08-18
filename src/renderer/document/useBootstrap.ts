@@ -19,6 +19,9 @@ export default function useBootstrap() {
     }
 
     const navigateCallback = (url: string, payload?: any) => {
+      /**
+       * evt:// 协议 触发任意事件
+       */
       if (url.startsWith("evt://")) {
         const evtName = url.slice(6);
         if (evtName !== "NAVIGATE") {

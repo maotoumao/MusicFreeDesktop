@@ -35,11 +35,11 @@ export default [
   //   title: "下载",
   //   component: Download,
   // },
-  // {
-  //   id: "shortCut",
-  //   title: "快捷键",
-  //   component: ShortCut,
-  // },
+  {
+    id: "shortCut",
+    title: "快捷键",
+    component: ShortCut,
+  },
   {
     id: "backup",
     title: "备份与恢复",

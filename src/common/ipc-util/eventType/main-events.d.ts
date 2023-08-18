@@ -12,7 +12,7 @@ declare namespace IpcEvents {
       // 播放状态
       playerState: import("@/renderer/core/track-player/enum").PlayerState;
       // 当前音乐
-      currentMusic: IMusic.IMusicItem
+      currentMusic: IMusic.IMusicItem,
     }>
   }
   interface Main {

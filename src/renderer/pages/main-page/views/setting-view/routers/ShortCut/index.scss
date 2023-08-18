@@ -1,5 +1,30 @@
-.setting-view--short-container {
-  height: 60vh;
-  width: 50vw;
-  background-color: lightcoral;
+.setting-view--short-cut-container {
+  width: 100%;
+}
+
+.setting-view--short-cut-table-row {
+  width: 42rem;
+  display: flex;
+  align-items: center;
+  height: 3rem;
+  line-height: 3rem;
+  justify-content: space-between;
+
+  & .short-cut-cell {
+    width: 14rem;
+    flex-shrink: 0;
+    flex-grow: 0;
+    white-space: nowrap;
+    user-select: none;
+    ime-mode: disabled;
+
+    &:first-child {
+      width: 9rem;
+    }
+
+    & .short-cut-item--container[data-disabled=true] {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  }
 }

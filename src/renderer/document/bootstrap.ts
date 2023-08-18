@@ -7,7 +7,7 @@ import {
 import trackPlayer from "../core/track-player";
 import rendererAppConfig from "@/common/app-config/renderer";
 import localMusic from "../core/local-music";
-import { setupLocalShortCut } from "../core/local-shortcut";
+import { setupLocalShortCut } from "../core/shortcut";
 import { setAutoFreeze } from "immer";
 
 setAutoFreeze(false);

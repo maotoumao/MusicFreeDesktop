@@ -22,6 +22,7 @@ import {
 import rendererAppConfig from "@/common/app-config/renderer";
 import { delay } from "@/common/time-util";
 import { ipcRendererOn, ipcRendererSend } from "@/common/ipc-util/renderer";
+import Evt from "../events";
 
 const initProgress = {
   currentTime: 0,
@@ -247,6 +248,29 @@ function setupEvents() {
 
   navigator.mediaSession.setActionHandler("previoustrack", () => {
     skipToPrev();
+  });
+
+  /** 行为 */
+  Evt.on("SKIP_NEXT", () => {
+    skipToNext();
+  });
+  Evt.on("SKIP_PREVIOUS", () => {
+    skipToPrev();
+  });
+  Evt.on("TOGGLE_PLAYER_STATE", () => {
+    console.log("on");
+    const currentState = getPlayerState();
+    if (currentState === PlayerState.Playing) {
+      pause();
+    } else {
+      resumePlay();
+    }
+  });
+  Evt.on("VOLUME_UP", (val = 0.04) => {
+    setVolume(Math.min(1, currentVolumeStore.getValue() + val));
+  });
+  Evt.on("VOLUME_DOWN", (val = 0.04) => {
+    setVolume(Math.max(0, currentVolumeStore.getValue() - val));
   });
 }
 

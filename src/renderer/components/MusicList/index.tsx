@@ -21,9 +21,9 @@ import { memo, useEffect, useRef, useState } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import rendererAppConfig from "@/common/app-config/renderer";
-import { isKeyDown } from "@/renderer/core/local-shortcut";
 import { isBetween } from "@/common/normalize-util";
 import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import hotkeys from "hotkeys-js";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -202,6 +202,15 @@ function _MusicList(props: IMusicListProps) {
     setActiveItems([]);
   }, [musicList]);
 
+  useEffect(() => {
+    const musiclistScope = 'ml' + Math.random().toString().slice(2);
+    hotkeys('Shift', musiclistScope, () => {});
+
+    return () => {
+      hotkeys.unbind('Shift', musiclistScope);
+    }
+  })
+
   return (
     <div className="music-list-container" ref={tableContainerRef}>
       <table
@@ -285,7 +294,7 @@ function _MusicList(props: IMusicListProps) {
                 }}
                 onClick={() => {
                   // 如果点击的时候按下shift
-                  if (isKeyDown("Shift")) {
+                  if (hotkeys.shift) {
                     setActiveItems([activeItems[0] ?? 0, virtualItem.rowIndex]);
                   } else {
                     setActiveItems([virtualItem.rowIndex]);
