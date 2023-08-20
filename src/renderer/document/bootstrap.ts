@@ -9,6 +9,8 @@ import rendererAppConfig from "@/common/app-config/renderer";
 import localMusic from "../core/local-music";
 import { setupLocalShortCut } from "../core/shortcut";
 import { setAutoFreeze } from "immer";
+import Evt from "../core/events";
+import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 
 setAutoFreeze(false);
 
@@ -24,6 +26,7 @@ export default async function () {
   setupLocalShortCut();
   dropHandler();
   clearDefaultBehavior();
+  setupEvents();
 }
 
 function dropHandler() {
@@ -96,4 +99,19 @@ function clearDefaultBehavior() {
   };
 
   document.addEventListener("keydown", killSpaceBar, false);
+}
+
+/** 设置事件 */
+function setupEvents() {
+  Evt.on("TOGGLE_DESKTOP_LYRIC", () => {
+    const enableDesktopLyric = rendererAppConfig.getAppConfigPath(
+      "lyric.enableDesktopLyric"
+    );
+
+    ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
+    rendererAppConfig.setAppConfigPath(
+      "lyric.enableDesktopLyric",
+      !enableDesktopLyric
+    );
+  });
 }

@@ -269,6 +269,7 @@ function LyricBtn() {
 
   useEffect(() => {
     // 同步歌词 这样写貌似不好 应该用回调
+    // TODO: 挪到bootstrap中
     if (enableDesktopLyric) {
       // 同步歌词
       if (lyric?.currentLrc) {
