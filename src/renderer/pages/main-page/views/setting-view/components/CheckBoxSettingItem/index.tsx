@@ -25,23 +25,21 @@ export default function CheckBoxSettingItem<T extends IAppConfigKeyPath>(
   } = props;
 
   return (
-    <div
-      className="setting-row"
-      role="button"
-      onClick={() => {
-        if (onCheckChanged) {
-          onCheckChanged(!checked);
-        } else {
-          rendererAppConfig.setAppConfigPath(keyPath, !checked as any);
-        }
-      }}
-    >
+    <div className="setting-row">
       <div
         className={classNames({
           "option-item-container": true,
           highlight: checked as boolean,
         })}
         title={label}
+        role="button"
+        onClick={() => {
+          if (onCheckChanged) {
+            onCheckChanged(!checked);
+          } else {
+            rendererAppConfig.setAppConfigPath(keyPath, !checked as any);
+          }
+        }}
       >
         <div className="checkbox">
           {checked ? <SvgAsset iconName="check"></SvgAsset> : null}

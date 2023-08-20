@@ -61,7 +61,6 @@ export function bindShortCut(
   // 原有的快捷键
   const mapKey = `${eventType}${global ? "-g" : ""}`;
   unbindShortCut(eventType, global);
-  console.log(shortCutKeyFuncs[mapKey]);
   hotkeys(keys.join("+"), shortCutKeyFuncs[mapKey]);
 
   boundKeyMap.set(mapKey, keys);
