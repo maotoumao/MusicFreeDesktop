@@ -7,4 +7,8 @@ interface Window {
 interface IGlobalData {
     /** 版本号 */
     appVersion: string;
+    workersPath: {
+        /** 下载器worker */
+        downloader: string;
+    }
 }

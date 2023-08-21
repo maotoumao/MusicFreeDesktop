@@ -24,6 +24,7 @@ import rendererAppConfig from "@/common/app-config/renderer";
 import { isBetween } from "@/common/normalize-util";
 import { ipcRendererSend } from "@/common/ipc-util/renderer";
 import hotkeys from "hotkeys-js";
+import Downloader from "@/renderer/core/downloader";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -149,18 +150,22 @@ export function showMusicContextMenu(
     }
   );
 
-  // menuItems.push({
-  //   title: "下载",
-  //   icon: "array-download-tray",
-  //   show: isArray
-  //     ? !musicItems.every((item) => item.platform === localPluginName)
-  //     : musicItems.platform !== localPluginName,
-  //   onClick() {
-  //     ipcRendererSend("download-media", {
-  //       mediaItems: isArray ? musicItems : [musicItems],
-  //     });
-  //   },
-  // });
+  menuItems.push({
+    title: "下载",
+    icon: "array-download-tray",
+    show: isArray
+      ? !musicItems.every((item) => item.platform === localPluginName)
+      : musicItems.platform !== localPluginName,
+    onClick() {
+      if(!isArray) {
+        console.log(rendererAppConfig.getAppConfigPath('download.path') + '/dog.mp3');
+        Downloader.downloadMusic(musicItems, rendererAppConfig.getAppConfigPath('download.path') + `/dog${Math.random().toString().slice(2)}.mp3`)
+      }
+      // ipcRendererSend("download-media", {
+      //   mediaItems: isArray ? musicItems : [musicItems],
+      // });
+    },
+  });
 
   showContextMenu({
     x,

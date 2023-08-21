@@ -37,4 +37,11 @@ declare namespace ICommon {
       string
     >;
   }
+
+  interface IDownloadFileSize {
+    /** 当前下载的大小 */
+    currentSize?: number;
+    /** 总大小 */
+    totalSize?: number;
+  }
 }

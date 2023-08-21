@@ -53,6 +53,12 @@ const config: ForgeConfig = {
               js: "./src/preload/index.ts",
             },
           },
+          /** webworkers */
+          {
+            js: "./src/webworkers/downloader.ts",
+            name: 'worker_downloader',
+            nodeIntegration: true
+          }
         ],
       },
     }),

@@ -12,6 +12,8 @@ import { setAutoFreeze } from "immer";
 import Evt from "../core/events";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 
+import * as Comlink from 'comlink';
+
 setAutoFreeze(false);
 
 export default async function () {
@@ -27,6 +29,7 @@ export default async function () {
   dropHandler();
   clearDefaultBehavior();
   setupEvents();
+
 }
 
 function dropHandler() {

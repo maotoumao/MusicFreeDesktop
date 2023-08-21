@@ -13,5 +13,3 @@ import themepack from "./internal/themepack";
 contextBridge.exposeInMainWorld('ipcRenderer', ipcRendererDelegate);
 contextBridge.exposeInMainWorld('fs', fsDelegate);
 contextBridge.exposeInMainWorld('themepack', themepack);
-
-

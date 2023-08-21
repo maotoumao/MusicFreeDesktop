@@ -22,7 +22,7 @@ export default function About() {
       </div>
 
       <div className="setting-row about-version">
-        软件作者: <A href="https://github.com/maotoumao">Github@猫头猫</A> <A href="https://weibo.com/u/7808449879">微博@不想上班猫头猫</A>
+        软件作者: <A href="https://github.com/maotoumao">Github@猫头猫</A>
       </div>
       <img className="wx-channel" src={wxChannelImg}></img>
 

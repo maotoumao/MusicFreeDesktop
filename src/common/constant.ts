@@ -72,6 +72,22 @@ export const defaultFont = {
   style: "",
 };
 
-
 type IShortCutKeys = keyof IAppConfig["shortCut"]["shortcuts"];
-export const shortCutKeys: IShortCutKeys[] = ['play/pause', 'skip-next', 'skip-previous', 'volume-up', 'volume-down', 'toggle-desktop-lyric'];
+export const shortCutKeys: IShortCutKeys[] = [
+  "play/pause",
+  "skip-next",
+  "skip-previous",
+  "volume-up",
+  "volume-down",
+  "toggle-desktop-lyric",
+];
+
+/** 下载状态 */
+export enum DownloadState {
+  /** 下载中 */
+  PENDING,
+  /** 失败 */
+  ERROR,
+  /** 下载完成 */
+  DONE,
+}

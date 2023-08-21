@@ -39,7 +39,7 @@ rules.push(
           titleProp: true,
           ref: true,
         },
-      }
+      },
     ],
   }
 );

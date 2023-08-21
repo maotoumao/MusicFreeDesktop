@@ -21,6 +21,7 @@ export const createMainWindow = (): BrowserWindow => {
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegration: true,
+      nodeIntegrationInWorker: true,
       webSecurity: false,
       sandbox: false,
     },
