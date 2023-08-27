@@ -123,16 +123,6 @@ export function showThemeContextMenu(
         }
       },
     }
-    // {
-    //   title: '下载',
-    //   icon: 'array-download-tray',
-    //   show: musicItem.platform !== localPluginName,
-    //   onClick() {
-    //     ipcRendererSend('download-media', {
-    //       mediaItem: musicItem
-    //     })
-    //   },
-    // }
   );
 
   showContextMenu({

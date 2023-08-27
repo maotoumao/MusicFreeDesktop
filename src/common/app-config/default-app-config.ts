@@ -24,7 +24,8 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
   "lyric.strokeColor": "#b48f1d",
   "lyric.fontSize": 54,
   'shortCut.enableLocal': true,
-  'shortCut.enableGlobal': false
+  'shortCut.enableGlobal': false,
+  'download.concurrency': 5
 } as const;
 
 export default defaultAppConfig;

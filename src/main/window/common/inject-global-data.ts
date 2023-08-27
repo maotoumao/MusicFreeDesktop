@@ -13,6 +13,11 @@ export default function injectGlobalData(targetWindow: BrowserWindow) {
       appVersion: app.getVersion(),
       workersPath: {
         downloader: WORKER_DOWNLOADER_WEBPACK_ENTRY
+      },
+      appPath: {
+        downloads: app.getPath('downloads'),
+        temp: app.getPath('temp'),
+        userData: app.getPath('userData')
       }
     };
     targetWindow.webContents.executeJavaScript(

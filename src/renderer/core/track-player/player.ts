@@ -5,6 +5,7 @@ import trackPlayerEventsEmitter from "./event";
 import shuffle from "lodash.shuffle";
 import {
   addSortProperty,
+  getInternalData,
   getQualityOrder,
   isSameMedia,
   sortByTimestampAndIndex,
@@ -467,6 +468,24 @@ async function getMediaSource(
   );
   let mediaSource: IPlugin.IMediaSourceResult | null = null;
   let realQuality: IMusic.IQualityKey = qualityOrder[0];
+  // 1. 已下载
+  const downloadedData = getInternalData<IMusic.IMusicItemInternalData>(
+    musicItem,
+    "downloadData"
+  );
+  if (downloadedData) {
+    const { quality, path: _path } = downloadedData;
+    if (await window.fs.isFile(_path)) {
+      return {
+        quality,
+        mediaSource: {
+          url: _path,
+        },
+      };
+    } else {
+      // TODO 删除
+    }
+  }
   for (const quality of qualityOrder) {
     try {
       mediaSource = await callPluginDelegateMethod(

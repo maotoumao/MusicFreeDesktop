@@ -1,6 +1,6 @@
 import { IAppConfig } from "./app-config/type";
 
-export const internalSerializeKey = "$";
+export const internalDataKey = "$";
 export const internalDataSymbol = Symbol.for("internal");
 // 加入播放列表/歌单的时间
 export const timeStampSymbol = Symbol.for("time-stamp");
@@ -84,6 +84,8 @@ export const shortCutKeys: IShortCutKeys[] = [
 
 /** 下载状态 */
 export enum DownloadState {
+  /** 等待中 */
+  WAITING,
   /** 下载中 */
   PENDING,
   /** 失败 */

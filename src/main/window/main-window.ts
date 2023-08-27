@@ -76,23 +76,6 @@ export const createMainWindow = (): BrowserWindow => {
     }
   );
 
-  mainWindow.webContents.session.on("will-download", async (evt, item) => {
-    const downloadPath =
-      (await getAppConfigPath("download.path")) ?? app.getPath("downloads");
-    // item.setSavePath(path.resolve(downloadPath, 'test.mp3'));
-    // console.log(path.resolve(downloadPath, 'test.mp3'));
-    console.log(item.getFilename());
-    console.log(item.getURL(), "DOWNLOAD");
-    item.on("done", () => {
-      console.log("done!!!!!!");
-    });
-
-    console.log(item.getTotalBytes());
-    item.on("updated", (...args) => {
-      console.log("updated!!!", ...args);
-    });
-  });
-
   mainWindow.webContents.on("did-finish-load", () => {
     injectGlobalData(mainWindow);
   });

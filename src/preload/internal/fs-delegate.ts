@@ -10,7 +10,17 @@ function readFile(...args: Parameters<typeof originalFsReadFile>): ReturnType<ty
     return originalFsReadFile(...args);
 }
 
+async function isFile(path: string) {
+    try {
+        const stat = await fs.stat(path);
+        return stat.isFile();
+    } catch {
+        return false;
+    }
+}
+
 export default {
     writeFile,
-    readFile
+    readFile,
+    isFile
 }

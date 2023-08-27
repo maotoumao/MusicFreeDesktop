@@ -1,9 +1,10 @@
-import { resetMediaItem } from "@/common/media-util";
+import { getInternalData, resetMediaItem } from "@/common/media-util";
 import type { Plugin } from "./plugin";
 import { localFilePathSymbol } from "@/common/constant";
 import fs from "fs/promises";
 import { delay } from "@/common/time-util";
 import axios from "axios";
+import { addFileScheme } from "@/common/file-util";
 
 export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
   private plugin;
@@ -47,18 +48,6 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     retryCount = 1,
     notUpdateCache = false
   ): Promise<IPlugin.IMediaSourceResult | null> {
-    // 1. 本地搜索
-    const localFilePath = musicItem[localFilePathSymbol];
-    try {
-      const fileData = await fs.stat(localFilePath);
-      if (fileData.isFile()) {
-        return {
-          url: localFilePath,
-        };
-      }
-    } catch {
-      // TODO 本地文件失效
-    }
     // TODO 2. url 缓存策略，先略过
 
     // 3 插件解析
@@ -91,7 +80,11 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     } catch (e: any) {
       if (retryCount > 0 && e?.message !== "NOT RETRY") {
         await delay(150);
-        return this.plugin.methods.getMediaSource(musicItem, quality, --retryCount);
+        return this.plugin.methods.getMediaSource(
+          musicItem,
+          quality,
+          --retryCount
+        );
       }
       // devLog('error', '获取真实源失败', e, e?.message);
       return null;

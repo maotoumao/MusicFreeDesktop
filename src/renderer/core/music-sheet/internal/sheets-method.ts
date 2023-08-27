@@ -12,6 +12,7 @@ import defaultSheet from "./default-sheet";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import { useEffect, useState } from "react";
 import { getUserPerferenceIDB, setUserPerferenceIDB } from "@/renderer/utils/user-perference";
+import { setupDownloadedMusicList } from "./downloaded-sheet";
 
 // 默认歌单，快速判定是否在列表中
 const favoriteMusicListIds = new Set<string>();
@@ -43,6 +44,7 @@ export async function setupSheets() {
     // 收藏歌单
     const starredSheets = await getUserPerferenceIDB('starredMusicSheets');
     starredSheetsStore.setValue(starredSheets ?? []);
+    await setupDownloadedMusicList();
   } catch (e) {
     console.log(e);
   }
@@ -466,3 +468,5 @@ export async function unstarMusicSheet(sheet: IMedia.IMediaBase) {
   await setUserPerferenceIDB('starredMusicSheets', newSheets);
   starredSheetsStore.setValue(newSheets);
 }
+
+export {addDownloadedMusic, removeDownloadedMusic, isDownloadeed} from './downloaded-sheet'

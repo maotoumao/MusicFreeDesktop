@@ -57,6 +57,8 @@ interface IConfig {
     defaultQuality: IMusic.IQualityKey;
     /** 默认下载音质缺失时 */
     whenQualityMissing: "higher" | "lower";
+    /** 最多同时下载 */
+    concurrency: number
   };
 
   backup: {

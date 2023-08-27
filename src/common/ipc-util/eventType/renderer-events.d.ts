@@ -19,10 +19,6 @@ declare namespace IpcEvents {
     "sync-current-playing-state": import("@/renderer/core/track-player/enum").PlayerState;
     "sync-current-repeat-mode": import("@/renderer/core/track-player/enum").RepeatMode;
 
-    /** 下载 */
-    'download-media': {
-      mediaItems: IMedia.IMediaBase[],
-    }
 
     /** 本地文件 */
     "sync-local-music": undefined;

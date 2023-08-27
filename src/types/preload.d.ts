@@ -2,6 +2,7 @@ interface Window {
     fs: typeof import('../preload/internal/fs-delegate').default;
     themepack: typeof import('../preload/internal/themepack').default;
     globalData: IGlobalData,
+    path: typeof import("node:path");
 }
 
 interface IGlobalData {
@@ -10,5 +11,10 @@ interface IGlobalData {
     workersPath: {
         /** 下载器worker */
         downloader: string;
+    },
+    appPath: {
+        userData: string;
+        temp: string;
+        downloads: string;
     }
 }

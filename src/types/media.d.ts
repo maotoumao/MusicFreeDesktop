@@ -56,6 +56,14 @@ declare namespace IMusic {
         [k: string | number | symbol]: any;
     }
 
+    // 音乐的内部数据
+    interface IMusicItemInternalData {
+        downloadData?: {
+            path: string;
+            quality: IQualityKey;
+        }
+    }
+
     interface IMusicSheetItem extends IMedia.IMediaBase {
         /** 封面图 */
         artwork?: string;

@@ -157,13 +157,7 @@ export function showMusicContextMenu(
       ? !musicItems.every((item) => item.platform === localPluginName)
       : musicItems.platform !== localPluginName,
     onClick() {
-      if(!isArray) {
-        console.log(rendererAppConfig.getAppConfigPath('download.path') + '/dog.mp3');
-        Downloader.downloadMusic(musicItems, rendererAppConfig.getAppConfigPath('download.path') + `/dog${Math.random().toString().slice(2)}.mp3`)
-      }
-      // ipcRendererSend("download-media", {
-      //   mediaItems: isArray ? musicItems : [musicItems],
-      // });
+      Downloader.generateDownloadMusicTask(musicItems);
     },
   });
 

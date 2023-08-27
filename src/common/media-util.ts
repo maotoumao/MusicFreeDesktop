@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import {
-  internalSerializeKey,
+  internalDataKey,
   localPluginName,
   qualityKeys,
   sortIndexSymbol,
@@ -28,12 +28,12 @@ export function resetMediaItem<T extends IMedia.IMediaBase>(
   }
   if (!newObj) {
     mediaItem.platform = platform ?? mediaItem.platform;
-    mediaItem[internalSerializeKey] = undefined;
+    mediaItem[internalDataKey] = undefined;
     return mediaItem;
   } else {
     return produce(mediaItem, (_) => {
       _.platform = platform ?? mediaItem.platform;
-      _[internalSerializeKey] = undefined;
+      _[internalDataKey] = undefined;
     });
   }
 }
@@ -92,4 +92,38 @@ export function getQualityOrder(
   }
 }
 
+/** 获取内部属性 */
+export function getInternalData<
+  T extends Record<string, any>,
+  K extends keyof T = keyof T
+>(mediaItem: IMedia.IMediaBase, internalProp: K): T[K] | null {
+  if (!mediaItem || !mediaItem[internalDataKey]) {
+    return null;
+  }
+  return mediaItem[internalDataKey][internalProp] ?? null;
+}
+
+export function setInternalData<
+  T extends Record<string, any>,
+  K extends keyof T = keyof T
+>(
+  mediaItem: IMedia.IMediaBase,
+  internalProp: K,
+  value: T[K] | null,
+  newObj = false
+) {
+  if (newObj) {
+    return {
+      ...mediaItem,
+      [internalDataKey]: {
+        ...(mediaItem[internalDataKey] ?? {}),
+        [internalProp]: value,
+      },
+    };
+  }
+
+  mediaItem[internalDataKey] = mediaItem[internalDataKey] ?? {};
+  mediaItem[internalDataKey][internalProp] = value;
+  return mediaItem;
+}
 

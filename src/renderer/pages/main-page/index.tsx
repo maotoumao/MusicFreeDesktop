@@ -15,6 +15,7 @@ import SettingView from "./views/setting-view";
 import { showModal } from "@/renderer/components/Modal";
 import LocalMusicView from "./views/local-music-view";
 import Empty from "@/renderer/components/Empty";
+import DownloadView from "./views/download-view";
 
 export default function MainPage() {
   return (
@@ -54,6 +55,10 @@ export default function MainPage() {
           <Route
             path="local-music"
             element={<LocalMusicView></LocalMusicView>}
+          ></Route>
+          <Route
+            path="download"
+            element={<DownloadView></DownloadView>}
           ></Route>
           <Route path="setting" element={<SettingView></SettingView>}></Route>
           <Route path="*" element={<Empty></Empty>}></Route>

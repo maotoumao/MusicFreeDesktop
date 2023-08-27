@@ -1,10 +1,19 @@
 import rendererAppConfig from "@/common/app-config/renderer";
-import { getQualityOrder } from "@/common/media-util";
+import {
+  getQualityOrder,
+  isSameMedia,
+  setInternalData,
+} from "@/common/media-util";
 import * as Comlink from "comlink";
 import { callPluginDelegateMethod } from "../plugin-delegate";
-import { DownloadState } from "@/common/constant";
+import { DownloadState, localPluginName } from "@/common/constant";
+import PQueue from "p-queue";
+import MusicSheet from "../music-sheet";
+import { downloadingQueueStore } from "./store";
+import throttle from "lodash.throttle";
 
-type ProxyMarkedFunction<T extends (...args: any) => void> = T & Comlink.ProxyMarked;
+type ProxyMarkedFunction<T extends (...args: any) => void> = T &
+  Comlink.ProxyMarked;
 
 type IOnStateChangeFunc = (data: {
   state: DownloadState;
@@ -22,17 +31,97 @@ interface IDownloaderWorker {
 }
 
 let downloaderWorker: IDownloaderWorker;
+
 async function setupDownloader() {
-  const worker = new Worker(window.globalData.workersPath.downloader);
-  if (worker) {
+  setupDownloaderWorker();
+}
+
+function forceUpdatePendingQueue() {
+  downloadingQueueStore.setValue((prev) => [...prev]);
+}
+
+function tForceUpdatePendingQueue() {
+  throttle(forceUpdatePendingQueue, 32, {
+    leading: true,
+    trailing: true,
+  });
+}
+
+function setupDownloaderWorker() {
+  // 初始化worker
+  const downloaderWorkerPath = window.globalData?.workersPath?.downloader;
+  if (downloaderWorkerPath) {
+    const worker = new Worker(downloaderWorkerPath);
     downloaderWorker = Comlink.wrap(worker);
   }
 }
 
-async function downloadMusic(musicItem: IMusic.IMusicItem, filePath: string) {
+const downloadingQueue = new PQueue({
+  concurrency: rendererAppConfig.getAppConfigPath("download.concurrency"),
+});
+
+async function generateDownloadMusicTask(
+  musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]
+) {
   if (!downloaderWorker) {
-    await setupDownloader();
+    setupDownloaderWorker();
   }
+  const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
+  // 过滤掉已下载的
+  const _validMusicItems = _musicItems.filter(
+    (it) => !MusicSheet.isDownloadeed(it) && it.platform !== localPluginName
+  );
+  // @ts-ignore
+  downloadingQueueStore.setValue((prev) => {
+    return [
+      ...prev,
+      ..._validMusicItems.map(
+        (mi) =>
+          [
+            mi,
+            {
+              state: DownloadState.WAITING,
+            },
+          ] as const
+      ),
+    ];
+  });
+  const downloadingFuncs = _validMusicItems.map((mi) => async () => {
+    const queueItem = downloadingQueueStore
+      .getValue()
+      .find((it) => isSameMedia(it[0], mi));
+    console.log(queueItem);
+    if (queueItem) {
+      queueItem[1] = {
+        state: DownloadState.PENDING,
+      };
+      tForceUpdatePendingQueue();
+      const fileName = `${mi.title}-${mi.artist}`;
+      await new Promise<void>((resolve) => {
+        downloadMusic(mi, fileName, (data) => {
+          console.log(data);
+          queueItem[1] = data;
+          if (data.state === DownloadState.DONE) {
+            downloadingQueueStore.setValue((prev) =>
+              prev.filter((it) => !isSameMedia(it[0], mi))
+            );
+            resolve();
+          } else if (data.state === DownloadState.ERROR) {
+            resolve();
+          }
+          tForceUpdatePendingQueue();
+        });
+      });
+    }
+  });
+  downloadingQueue.addAll(downloadingFuncs);
+}
+
+async function downloadMusic(
+  musicItem: IMusic.IMusicItem,
+  fileName: string,
+  onStateChange: IOnStateChangeFunc
+) {
   const [defaultQuality, whenQualityMissing] = [
     rendererAppConfig.getAppConfigPath("download.defaultQuality"),
     rendererAppConfig.getAppConfigPath("download.whenQualityMissing"),
@@ -42,7 +131,6 @@ async function downloadMusic(musicItem: IMusic.IMusicItem, filePath: string) {
   let realQuality: IMusic.IQualityKey = qualityOrder[0];
   for (const quality of qualityOrder) {
     try {
-      console.log("qq", quality);
       mediaSource = await callPluginDelegateMethod(
         musicItem,
         "getMediaSource",
@@ -56,16 +144,36 @@ async function downloadMusic(musicItem: IMusic.IMusicItem, filePath: string) {
       break;
     } catch {}
   }
+
   try {
     if (mediaSource?.url) {
-      console.log("download file", mediaSource);
-      return await downloaderWorker.downloadFile(
+      const ext = mediaSource.url.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
+      const downloadBasePath =
+        rendererAppConfig.getAppConfigPath("download.path") ??
+        window.globalData.appPath.downloads;
+      const downloadPath = window.path.resolve(
+        downloadBasePath,
+        `./${fileName}.${ext}`
+      );
+      downloaderWorker.downloadFile(
         mediaSource,
-        filePath,
-        Comlink.proxy(async (data) => {
-          console.log(data);
-        }),
-
+        downloadPath,
+        Comlink.proxy((dataState) => {
+          onStateChange(dataState);
+          if (dataState.state === DownloadState.DONE) {
+            MusicSheet.addDownloadedMusic(
+              setInternalData<IMusic.IMusicItemInternalData>(
+                musicItem as any,
+                "downloadData",
+                {
+                  path: downloadPath,
+                  quality: realQuality,
+                },
+                true
+              ) as IMusic.IMusicItem
+            );
+          }
+        })
       );
     }
   } catch (e) {
@@ -74,6 +182,7 @@ async function downloadMusic(musicItem: IMusic.IMusicItem, filePath: string) {
 }
 
 const Downloader = {
-  downloadMusic,
+  setupDownloader,
+  generateDownloadMusicTask,
 };
 export default Downloader;

@@ -22,6 +22,8 @@ declare namespace IUserPerference {
     interface IDBType {
         /** 当前播放队列 */
         playList: IMusic.IMusicItem[];
+        /** 已下载列表 */
+        downloadedList: IMedia.IMediaBase[];
         /** 本地音乐监听列表 */
         localWatchDir: string[];
         /** 收藏的歌单 */

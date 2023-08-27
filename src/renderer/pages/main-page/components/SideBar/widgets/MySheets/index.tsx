@@ -1,6 +1,6 @@
 import "./index.scss";
 import ListItem from "../ListItem";
-import { useMatch, useNavigate, useParams } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import { Disclosure } from "@headlessui/react";
 import MusicSheet, {
   defaultSheet,
@@ -50,7 +50,7 @@ export default function MySheets() {
                   navigate(`/main/musicsheet/${localPluginName}/${item.id}`);
               }}
               onContextMenu={(e) => {
-                if(item.id === defaultSheet.id) {
+                if (item.id === defaultSheet.id) {
                   return;
                 }
                 showContextMenu({

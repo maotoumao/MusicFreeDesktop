@@ -65,6 +65,10 @@ export default function Body(props: IProps) {
     }
   }, [inputSearch]);
 
+  useEffect(() => {
+    setInputSearch("");
+  }, [musicSheet?.id]);
+
   return (
     <div className="music-sheetlike-view--body-container">
       <div className="operations">
