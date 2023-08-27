@@ -1,0 +1,26 @@
+name: 自动构建
+on: 
+    workflow_dispatch:
+    push:
+        branches:
+            - 'master'
+jobs:
+    build-windows: 
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                node-version: 16
+            - run: npm install
+            - run: npm run package
+    build-windows-legacy: 
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                node-version: 16
+            - run: npm install
+            - run: npm install electron@22
+            - run: npm run package
