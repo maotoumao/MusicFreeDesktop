@@ -1,5 +1,6 @@
 name: 自动构建
 on: 
+    workflow_dispatch:
     push:
         branches:
             - 'master'
