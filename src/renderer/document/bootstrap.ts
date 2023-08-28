@@ -13,6 +13,7 @@ import Evt from "../core/events";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 
 import * as Comlink from 'comlink';
+import Downloader from "../core/downloader";
 
 setAutoFreeze(false);
 
@@ -29,6 +30,7 @@ export default async function () {
   dropHandler();
   clearDefaultBehavior();
   setupEvents();
+  await Downloader.setupDownloader();
 
 }
 

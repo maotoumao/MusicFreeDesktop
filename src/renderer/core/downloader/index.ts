@@ -8,9 +8,9 @@ import * as Comlink from "comlink";
 import { callPluginDelegateMethod } from "../plugin-delegate";
 import { DownloadState, localPluginName } from "@/common/constant";
 import PQueue from "p-queue";
-import MusicSheet from "../music-sheet";
 import { downloadingQueueStore } from "./store";
 import throttle from "lodash.throttle";
+import { addDownloadedMusicToList, isDownloaded, setupDownloadedMusicList } from "./downloaded-sheet";
 
 type ProxyMarkedFunction<T extends (...args: any) => void> = T &
   Comlink.ProxyMarked;
@@ -34,6 +34,7 @@ let downloaderWorker: IDownloaderWorker;
 
 async function setupDownloader() {
   setupDownloaderWorker();
+  setupDownloadedMusicList();
 }
 
 function forceUpdatePendingQueue() {
@@ -69,7 +70,7 @@ async function generateDownloadMusicTask(
   const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
   // 过滤掉已下载的
   const _validMusicItems = _musicItems.filter(
-    (it) => !MusicSheet.isDownloadeed(it) && it.platform !== localPluginName
+    (it) => !isDownloaded(it) && it.platform !== localPluginName
   );
   // @ts-ignore
   downloadingQueueStore.setValue((prev) => {
@@ -161,7 +162,7 @@ async function downloadMusic(
         Comlink.proxy((dataState) => {
           onStateChange(dataState);
           if (dataState.state === DownloadState.DONE) {
-            MusicSheet.addDownloadedMusic(
+            addDownloadedMusicToList(
               setInternalData<IMusic.IMusicItemInternalData>(
                 musicItem as any,
                 "downloadData",

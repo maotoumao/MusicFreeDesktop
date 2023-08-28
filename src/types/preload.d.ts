@@ -3,6 +3,7 @@ interface Window {
     themepack: typeof import('../preload/internal/themepack').default;
     globalData: IGlobalData,
     path: typeof import("node:path");
+    rimraf: typeof import('rimraf').rimraf
 }
 
 interface IGlobalData {

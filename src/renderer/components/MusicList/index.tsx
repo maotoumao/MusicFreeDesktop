@@ -208,7 +208,7 @@ function _MusicList(props: IMusicListProps) {
     return () => {
       hotkeys.unbind('Shift', musiclistScope);
     }
-  })
+  }, [])
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>
@@ -241,6 +241,7 @@ function _MusicList(props: IMusicListProps) {
         >
           {virtualController.virtualItems.map((virtualItem) => {
             const row = virtualItem.dataItem;
+            // todo 拆出一个组件
             return (
               <tr
                 key={row.id}

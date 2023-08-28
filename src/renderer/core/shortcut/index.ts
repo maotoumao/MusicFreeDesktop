@@ -30,8 +30,10 @@ const shortCutKeysEvts: Record<IShortCutKeys, keyof IEventType.IEvents> = {
 
 const baseShortCutFunction = (
   evt: keyof IEventType.IEvents,
-  global: boolean
+  global: boolean,
+  originalEvt: KeyboardEvent
 ) => {
+  originalEvt.preventDefault();
   if (global && rendererAppConfig.getAppConfigPath("shortCut.enableGlobal")) {
   } else if (rendererAppConfig.getAppConfigPath("shortCut.enableLocal")) {
     Evt.emit(evt);
