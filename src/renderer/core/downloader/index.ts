@@ -10,7 +10,13 @@ import { DownloadState, localPluginName } from "@/common/constant";
 import PQueue from "p-queue";
 import { downloadingQueueStore } from "./store";
 import throttle from "lodash.throttle";
-import { addDownloadedMusicToList, isDownloaded, setupDownloadedMusicList } from "./downloaded-sheet";
+import {
+  addDownloadedMusicToList,
+  isDownloaded,
+  setupDownloadedMusicList,
+  useDownloaded,
+  useDownloadedMusicList,
+} from "./downloaded-sheet";
 
 type ProxyMarkedFunction<T extends (...args: any) => void> = T &
   Comlink.ProxyMarked;
@@ -185,5 +191,7 @@ async function downloadMusic(
 const Downloader = {
   setupDownloader,
   generateDownloadMusicTask,
+  useDownloaded,
+  useDownloadedMusicList,
 };
 export default Downloader;

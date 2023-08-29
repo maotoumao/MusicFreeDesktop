@@ -14,16 +14,30 @@ import { internalDataKey, musicRefSymbol } from "@/common/constant";
 import { useEffect, useState } from "react";
 import Evt from "../events";
 
-const downloadedMusicListStore = new Store<IMedia.IMediaBase[]>([]);
+const downloadedMusicListStore = new Store<IMusic.IMusicItem[]>([]);
 const downloadedSet = new Set<string>();
 
 // 在初始化歌单时一起初始化
 export async function setupDownloadedMusicList() {
-  const downloaded = (await getUserPerferenceIDB("downloadedList")) ?? [];
-  downloadedMusicListStore.setValue(downloaded);
-  downloaded.forEach((it) => {
+  const downloadedPKs = (await getUserPerferenceIDB("downloadedList")) ?? [];
+  downloadedMusicListStore.setValue(await getDownloadedDetails(downloadedPKs));
+  downloadedPKs.forEach((it) => {
     downloadedSet.add(getMediaPrimaryKey(it));
   });
+}
+
+async function getDownloadedDetails(mediaBases: IMedia.IMediaBase[]) {
+  return await musicSheetDB.transaction(
+    "readonly",
+    musicSheetDB.musicStore,
+    async () => {
+      const musicDetailList = await musicSheetDB.musicStore.bulkGet(
+        mediaBases.map((item) => [item.platform, item.id])
+      );
+
+      return musicDetailList;
+    }
+  );
 }
 
 function primaryKeyMap(media: IMedia.IMediaBase) {
@@ -65,17 +79,14 @@ export async function addDownloadedMusicToList(
         }
       });
       await musicSheetDB.musicStore.bulkPut(allMusic);
-      downloadedMusicListStore.setValue((prev) => [
-        ...prev,
-        ...allMusic.map(primaryKeyMap),
-      ]);
+      downloadedMusicListStore.setValue((prev) => [...prev, ...allMusic]);
       allMusic.forEach((it) => {
         downloadedSet.add(getMediaPrimaryKey(it));
       });
       Evt.emit("MUSIC_DOWNLOADED", allMusic);
       setUserPerferenceIDB(
         "downloadedList",
-        downloadedMusicListStore.getValue()
+        downloadedMusicListStore.getValue().map(primaryKeyMap)
       );
     });
   } catch {
@@ -194,4 +205,6 @@ export function useDownloaded(musicItem: IMedia.IMediaBase) {
       Evt.off("MUSIC_REMOVE_DOWNLOADED", rmCb);
     };
   }, [musicItem]);
+
+  return downloaded;
 }

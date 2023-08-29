@@ -1,13 +1,15 @@
-import MusicSheet from '@/renderer/core/music-sheet'
-import React from 'react'
+import MusicList from "@/renderer/components/MusicList";
+import Downloader from "@/renderer/core/downloader";
+import MusicSheet from "@/renderer/core/music-sheet";
+import React from "react";
 
 export default function Downloaded() {
+  // const downloadedMusic = MusicSheet.addDownloadedMusic
+  const downloadedList = Downloader.useDownloadedMusicList();
 
-    // const downloadedMusic = MusicSheet.addDownloadedMusic
+  console.log(downloadedList);
 
-    
-
-  return (
-    <div>Downloaded</div>
-  )
+  return <div>
+    <MusicList musicList={downloadedList}></MusicList>
+  </div>;
 }
