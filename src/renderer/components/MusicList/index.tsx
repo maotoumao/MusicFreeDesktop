@@ -25,6 +25,7 @@ import { isBetween } from "@/common/normalize-util";
 import { ipcRendererSend } from "@/common/ipc-util/renderer";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
+import { toast } from "react-toastify";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -150,16 +151,35 @@ export function showMusicContextMenu(
     }
   );
 
-  menuItems.push({
-    title: "下载",
-    icon: "array-download-tray",
-    show: isArray
-      ? !musicItems.every((item) => item.platform === localPluginName)
-      : musicItems.platform !== localPluginName,
-    onClick() {
-      Downloader.generateDownloadMusicTask(musicItems);
+  menuItems.push(
+    {
+      title: "下载",
+      icon: "array-download-tray",
+      show: isArray
+        ? !musicItems.every(
+            (item) =>
+              item.platform === localPluginName || Downloader.isDownloaded(item)
+          )
+        : musicItems.platform !== localPluginName &&
+          !Downloader.isDownloaded(musicItems),
+      onClick() {
+        Downloader.generateDownloadMusicTask(musicItems);
+      },
     },
-  });
+    {
+      title: "删除本地下载",
+      icon: "trash",
+      show: !isArray && Downloader.isDownloaded(musicItems),
+      async onClick() {
+        try {
+          await Downloader.removeDownloadedMusic(musicItems, true);
+          toast.success(`已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`)
+        } catch(e) {
+          toast.error(`删除失败: ${e?.message ?? ''}`)
+        }
+      },
+    }
+  );
 
   showContextMenu({
     x,
@@ -202,13 +222,13 @@ function _MusicList(props: IMusicListProps) {
   }, [musicList]);
 
   useEffect(() => {
-    const musiclistScope = 'ml' + Math.random().toString().slice(2);
-    hotkeys('Shift', musiclistScope, () => {});
+    const musiclistScope = "ml" + Math.random().toString().slice(2);
+    hotkeys("Shift", musiclistScope, () => {});
 
     return () => {
-      hotkeys.unbind('Shift', musiclistScope);
-    }
-  }, [])
+      hotkeys.unbind("Shift", musiclistScope);
+    };
+  }, []);
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>

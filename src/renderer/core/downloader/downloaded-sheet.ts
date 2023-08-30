@@ -88,9 +88,11 @@ export async function addDownloadedMusicToList(
         "downloadedList",
         downloadedMusicListStore.getValue().map(primaryKeyMap)
       );
+      return true;
     });
   } catch {
     console.log("error!!");
+    return false;
   }
 }
 
@@ -101,28 +103,40 @@ export async function removeDownloadedMusic(
   const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
 
   try {
-    await musicSheetDB.transaction("rw", musicSheetDB.musicStore, async () => {
-      // 寻找引用
-      const toBeRemovedMusicDetail = await musicSheetDB.musicStore.bulkGet(
-        _musicItems.map((item) => [item.platform, item.id])
+    // 1. 获取全部详细信息
+    const toBeRemovedMusicDetail = await musicSheetDB.transaction(
+      "r",
+      musicSheetDB.musicStore,
+      async () => {
+        return await musicSheetDB.musicStore.bulkGet(
+          _musicItems.map((item) => [item.platform, item.id])
+        );
+      }
+    );
+    // 2. 删除文件，事务中删除会报错
+    let removeResults: boolean[] = [];
+    if (removeFile) {
+      removeResults = await Promise.all(
+        toBeRemovedMusicDetail.map((it) =>
+          window.rimraf(
+            getInternalData<IMusic.IMusicItemInternalData>(it, "downloadData")
+              ?.path
+          )
+        )
       );
+    }
+    // 3. 修改数据库
+    await musicSheetDB.transaction("rw", musicSheetDB.musicStore, async () => {
       const needDelete: any[] = [];
       const needUpdate: any[] = [];
       await Promise.all(
-        toBeRemovedMusicDetail.map(async (musicItem) => {
+        toBeRemovedMusicDetail.map(async (musicItem, index) => {
           if (!musicItem) {
             return;
           }
-          // 1. 如果要删除本地文件
-          if (removeFile) {
-            const internalPath = getInternalData<IMusic.IMusicItemInternalData>(
-              musicItem,
-              "downloadData"
-            )?.path;
-            const rmResult = await window.rimraf(internalPath);
-            if (!rmResult) {
-              return;
-            }
+          // 1. 如果本地文件删除失败
+          if (removeFile && !removeResults[index]) {
+            return;
           }
           // 只从歌单中删除，引用-1
           musicItem[musicRefSymbol]--;
@@ -133,12 +147,13 @@ export async function removeDownloadedMusic(
             setInternalData<IMusic.IMusicItemInternalData>(
               musicItem,
               "downloadData",
-              null
+              undefined
             );
             needUpdate.push(musicItem);
           }
         })
       );
+      console.log(needUpdate);
       await musicSheetDB.musicStore.bulkDelete(needDelete);
       await musicSheetDB.musicStore.bulkPut(needUpdate);
 

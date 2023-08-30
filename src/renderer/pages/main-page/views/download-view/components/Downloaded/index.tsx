@@ -7,9 +7,10 @@ export default function Downloaded() {
   // const downloadedMusic = MusicSheet.addDownloadedMusic
   const downloadedList = Downloader.useDownloadedMusicList();
 
-  console.log(downloadedList);
 
-  return <div>
-    <MusicList musicList={downloadedList}></MusicList>
-  </div>;
+  return (
+    <div>
+      <MusicList musicList={downloadedList}></MusicList>
+    </div>
+  );
 }

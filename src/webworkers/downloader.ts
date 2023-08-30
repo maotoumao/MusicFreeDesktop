@@ -18,7 +18,7 @@ const responseToReadable = (
   let size = 0;
   const tOnRead = throttle(options?.onRead, 64, {
     leading: true,
-    trailing: true
+    trailing: true,
   });
   rs._read = async () => {
     const result = await reader.read();
@@ -54,21 +54,22 @@ async function downloadFile(
   let state = DownloadState.PENDING;
   try {
     const stat = fs.statSync(filePath);
-    if (stat.isFile()) {
-      state = DownloadState.ERROR;
-      onStateChange?.({
-        state,
-        msg: "File Exist",
-      });
-    }
+    // if (stat.isFile()) {
+    //   state = DownloadState.ERROR;
+    //   onStateChange?.({
+    //     state,
+    //     msg: "File Exist",
+    //   });
+    //   return;
+    // }
     if (stat.isDirectory()) {
       state = DownloadState.ERROR;
       onStateChange?.({
         state,
         msg: "Filepath is a directory",
       });
+      return;
     }
-    return;
   } catch (e) {}
   const _headers = {
     ...(mediaSource.headers ?? {}),
@@ -81,15 +82,15 @@ async function downloadFile(
     onStateChange({
       state,
       downloaded: 0,
-      total: totalSize
-    })
+      total: totalSize,
+    });
     const stm = responseToReadable(res, {
       onRead(size) {
         if (state !== DownloadState.PENDING) {
           return;
         }
         state = DownloadState.PENDING;
-        console.log(state, size, totalSize)
+        console.log(state, size, totalSize);
         onStateChange({
           state,
           downloaded: size,

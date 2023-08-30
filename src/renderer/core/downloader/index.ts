@@ -13,6 +13,7 @@ import throttle from "lodash.throttle";
 import {
   addDownloadedMusicToList,
   isDownloaded,
+  removeDownloadedMusic,
   setupDownloadedMusicList,
   useDownloaded,
   useDownloadedMusicList,
@@ -97,7 +98,6 @@ async function generateDownloadMusicTask(
     const queueItem = downloadingQueueStore
       .getValue()
       .find((it) => isSameMedia(it[0], mi));
-    console.log(queueItem);
     if (queueItem) {
       queueItem[1] = {
         state: DownloadState.PENDING,
@@ -188,10 +188,15 @@ async function downloadMusic(
   }
 }
 
+
+
 const Downloader = {
   setupDownloader,
   generateDownloadMusicTask,
   useDownloaded,
+  isDownloaded,
   useDownloadedMusicList,
+  removeDownloadedMusic,
+  useDownloadingQueue: downloadingQueueStore.useValue
 };
 export default Downloader;
