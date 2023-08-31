@@ -22,6 +22,16 @@ export function useSupportedPlugin(
     .filter((_) => _.supportedMethod.includes(featureMethod));
 }
 
+export function getSearchablePlugins(
+  supportedSearchType?: IMedia.SupportMediaType
+) {
+  return getSupportedPlugin("search").filter((_) =>
+    supportedSearchType && _.supportedSearchType
+      ? _.supportedSearchType.includes(supportedSearchType)
+      : true
+  );
+}
+
 export function getPluginByHash(hash: string) {
   return delegatePluginsStore.getValue().find((item) => item.hash === hash);
 }
@@ -38,10 +48,10 @@ export async function callPluginDelegateMethod<
   method: T,
   ...args: Parameters<IPlugin.IPluginInstanceMethods[T]>
 ) {
-  return await ipcRendererInvoke("call-plugin-method", {
+  return (await ipcRendererInvoke("call-plugin-method", {
     hash: pluginDelegate.hash,
     platform: pluginDelegate.platform,
     method,
     args,
-  }) as ReturnType<IPlugin.IPluginInstanceMethods[T]>;
+  })) as ReturnType<IPlugin.IPluginInstanceMethods[T]>;
 }

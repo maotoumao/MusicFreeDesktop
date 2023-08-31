@@ -1,4 +1,5 @@
 import {
+  getSearchablePlugins,
   getSupportedPlugin,
   useSupportedPlugin,
 } from "@/renderer/core/plugin-delegate";
@@ -68,7 +69,7 @@ export default function SearchView() {
               <Tab.Panel className="tab-panel-container" key={type}>
                 <SearchResult
                   type={type}
-                  plugins={plugins}
+                  plugins={getSearchablePlugins(type)}
                   query={query}
                 ></SearchResult>
               </Tab.Panel>
