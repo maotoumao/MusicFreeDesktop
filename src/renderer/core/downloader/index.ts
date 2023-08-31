@@ -62,11 +62,23 @@ function setupDownloaderWorker() {
     const worker = new Worker(downloaderWorkerPath);
     downloaderWorker = Comlink.wrap(worker);
   }
+  setDownloadingConcurrency(
+    rendererAppConfig.getAppConfigPath("download.concurrency")
+  );
 }
 
+const concurrencyLimit = 20;
 const downloadingQueue = new PQueue({
-  concurrency: rendererAppConfig.getAppConfigPath("download.concurrency"),
+  concurrency: 5,
 });
+
+
+function setDownloadingConcurrency(concurrency: number) {
+  downloadingQueue.concurrency = Math.min(
+    concurrency < 0 ? 1 : concurrency,
+    concurrencyLimit
+  );
+}
 
 async function generateDownloadMusicTask(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]
@@ -183,18 +195,16 @@ async function downloadMusic(
         })
       );
     } else {
-      throw new Error("Invalid Source")
+      throw new Error("Invalid Source");
     }
   } catch (e) {
-    console.log(e, 'ERROR');
+    console.log(e, "ERROR");
     onStateChange({
       state: DownloadState.ERROR,
-      msg: e?.message
-    })
+      msg: e?.message,
+    });
   }
 }
-
-
 
 const Downloader = {
   setupDownloader,
@@ -203,6 +213,7 @@ const Downloader = {
   isDownloaded,
   useDownloadedMusicList,
   removeDownloadedMusic,
-  useDownloadingQueue: downloadingQueueStore.useValue
+  useDownloadingQueue: downloadingQueueStore.useValue,
+  setDownloadingConcurrency,
 };
 export default Downloader;

@@ -30,11 +30,11 @@ export default [
     title: "主题",
     component: Theme,
   },
-  // {
-  //   id: "download",
-  //   title: "下载",
-  //   component: Download,
-  // },
+  {
+    id: "download",
+    title: "下载",
+    component: Download,
+  },
   {
     id: "shortCut",
     title: "快捷键",
