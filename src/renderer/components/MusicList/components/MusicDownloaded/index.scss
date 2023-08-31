@@ -1,0 +1,11 @@
+.music-downloaded {
+
+}
+
+.music-can-download {
+    opacity: 0.6;
+    cursor: pointer;
+    &:hover {
+        opacity: 1;
+    }
+}

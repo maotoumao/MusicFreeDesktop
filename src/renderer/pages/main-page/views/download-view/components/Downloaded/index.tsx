@@ -1,16 +1,22 @@
 import MusicList from "@/renderer/components/MusicList";
 import Downloader from "@/renderer/core/downloader";
-import MusicSheet from "@/renderer/core/music-sheet";
-import React from "react";
+import React, { useRef } from "react";
 
 export default function Downloaded() {
-  // const downloadedMusic = MusicSheet.addDownloadedMusic
   const downloadedList = Downloader.useDownloadedMusicList();
-
+  const musicListContainerRef = useRef<HTMLDivElement>();
 
   return (
-    <div>
-      <MusicList musicList={downloadedList}></MusicList>
+    <div ref={musicListContainerRef}>
+      <MusicList
+        musicList={downloadedList}
+        virtualProps={{
+          getScrollElement() {
+            return document.querySelector("#page-container");
+          },
+          offsetHeight: () => musicListContainerRef.current.offsetTop,
+        }}
+      ></MusicList>
     </div>
   );
 }

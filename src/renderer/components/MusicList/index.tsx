@@ -26,6 +26,7 @@ import { ipcRendererSend } from "@/common/ipc-util/renderer";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
 import { toast } from "react-toastify";
+import MusicDownloaded from "./components/MusicDownloaded";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -52,9 +53,12 @@ const columnHelper = createColumnHelper<IMusic.IMusicItem>();
 const columnDef = [
   columnHelper.display({
     id: "like",
-    size: 32,
+    size: 42,
     cell: (info) => (
-      <MusicFavorite musicItem={info.row.original} size={18}></MusicFavorite>
+      <div className="music-list-operations">
+        <MusicFavorite musicItem={info.row.original} size={18}></MusicFavorite>
+        <MusicDownloaded musicItem={info.row.original}></MusicDownloaded>
+      </div>
     ),
   }),
   columnHelper.accessor((_, index) => index + 1, {
@@ -173,9 +177,11 @@ export function showMusicContextMenu(
       async onClick() {
         try {
           await Downloader.removeDownloadedMusic(musicItems, true);
-          toast.success(`已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`)
-        } catch(e) {
-          toast.error(`删除失败: ${e?.message ?? ''}`)
+          toast.success(
+            `已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`
+          );
+        } catch (e) {
+          toast.error(`删除失败: ${e?.message ?? ""}`);
         }
       },
     }

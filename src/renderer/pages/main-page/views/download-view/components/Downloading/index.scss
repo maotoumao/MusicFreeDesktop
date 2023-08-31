@@ -1,0 +1,15 @@
+.downloading-container {
+  width: 100%;
+  min-height: 300px;
+
+
+
+  & td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+  }
+
+ 
+}

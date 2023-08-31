@@ -57,3 +57,13 @@ export function isBasicType(val: unknown) {
   }
   return false;
 }
+
+const fileSizeUnits = ["B", "KB", "MB", "GB", "TB"];
+export function normalizeFileSize(bytes: number) {
+  let ptr = 0;
+  while (bytes >= 1024 && ptr < fileSizeUnits.length) {
+    bytes = bytes / 1024;
+    ++ptr;
+  }
+  return `${bytes.toFixed(1)}${fileSizeUnits[ptr]}`;
+}

@@ -75,7 +75,7 @@ async function generateDownloadMusicTask(
     setupDownloaderWorker();
   }
   const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
-  // 过滤掉已下载的
+  // 过滤掉已下载的、本地音乐、任务中的音乐
   const _validMusicItems = _musicItems.filter(
     (it) => !isDownloaded(it) && it.platform !== localPluginName
   );
@@ -182,9 +182,15 @@ async function downloadMusic(
           }
         })
       );
+    } else {
+      throw new Error("Invalid Source")
     }
   } catch (e) {
-    console.log("download fail", e);
+    console.log(e, 'ERROR');
+    onStateChange({
+      state: DownloadState.ERROR,
+      msg: e?.message
+    })
   }
 }
 
