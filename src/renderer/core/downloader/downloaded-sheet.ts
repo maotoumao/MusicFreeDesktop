@@ -212,6 +212,10 @@ export function useDownloaded(musicItem: IMedia.IMediaBase) {
       }
     };
 
+    if(musicItem) {
+      setDownloaded(isDownloaded(musicItem));
+    }
+
     Evt.on("MUSIC_DOWNLOADED", dlCb);
     Evt.on("MUSIC_REMOVE_DOWNLOADED", rmCb);
 

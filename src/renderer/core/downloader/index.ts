@@ -48,12 +48,10 @@ function forceUpdatePendingQueue() {
   downloadingQueueStore.setValue((prev) => [...prev]);
 }
 
-function tForceUpdatePendingQueue() {
-  throttle(forceUpdatePendingQueue, 32, {
-    leading: true,
-    trailing: true,
-  });
-}
+const tForceUpdatePendingQueue = throttle(forceUpdatePendingQueue, 32, {
+  leading: true,
+  trailing: true,
+});
 
 function setupDownloaderWorker() {
   // 初始化worker
@@ -115,7 +113,7 @@ async function generateDownloadMusicTask(
         state: DownloadState.PENDING,
       };
       tForceUpdatePendingQueue();
-      const fileName = `${mi.title}-${mi.artist}`;
+      const fileName = `${mi.title}-${mi.artist}`.replaceAll('/', '_');
       await new Promise<void>((resolve) => {
         downloadMusic(mi, fileName, (data) => {
           console.log(data);

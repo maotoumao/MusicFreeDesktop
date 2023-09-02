@@ -173,13 +173,19 @@ export function showMusicContextMenu(
     {
       title: "删除本地下载",
       icon: "trash",
-      show: !isArray && Downloader.isDownloaded(musicItems),
+      show:
+        (isArray && musicItems.every((it) => Downloader.isDownloaded(it))) ||
+        (!isArray && Downloader.isDownloaded(musicItems)),
       async onClick() {
         try {
           await Downloader.removeDownloadedMusic(musicItems, true);
-          toast.success(
-            `已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`
-          );
+          if (isArray) {
+            toast.success(`已删除 ${musicItems.length} 首本地歌曲`);
+          } else {
+            toast.success(
+              `已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`
+            );
+          }
         } catch (e) {
           toast.error(`删除失败: ${e?.message ?? ""}`);
         }
@@ -343,15 +349,18 @@ function _MusicList(props: IMusicListProps) {
                 }}
               >
                 {row.getAllCells().map((cell) => (
-                  <td
-                    key={cell.id}
-                    style={{
-                      width: cell.column.getSize(),
-                    }}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
+                    <td
+                      key={cell.id}
+                      style={{
+                        width: cell.column.getSize(),
+                      }}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
               </tr>
             );
           })}
