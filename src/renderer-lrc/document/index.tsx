@@ -14,12 +14,43 @@ import "./index.scss";
 import { toastDuration } from "@/common/constant";
 import useBootstrap from "./useBootstrap";
 import LyricWindowPage from "../pages";
+import { useEffect, useRef } from "react";
+import { ipcRendererSend } from "@/common/ipc-util/renderer";
 
 bootstrap().then(() => {
   ReactDOM.createRoot(document.getElementById("root")).render(<Root></Root>);
 });
 
 function Root() {
+  const isMovingRef = useRef(false);
+  const startClientPosRef = useRef<ICommon.IPoint | null>(null);
+
+  useEffect(() => {
+    if (window.globalData.platform !== "win32") {
+      // win32使用make-window-fully-draggable方案
+      window.addEventListener("mousedown", (e) => {
+        startClientPosRef.current = {
+          x: e.clientX,
+          y: e.clientY,
+        };
+        isMovingRef.current = true;
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (startClientPosRef.current && isMovingRef.current) {
+          ipcRendererSend("set-lyric-window-pos", {
+            x: e.screenX - startClientPosRef.current.x,
+            y: e.screenY - startClientPosRef.current.y,
+          });
+        }
+      });
+
+      window.addEventListener("mouseup", () => {
+        isMovingRef.current = false;
+        startClientPosRef.current = null;
+      });
+    }
+  }, []);
+
   return <LyricWindowPage></LyricWindowPage>;
 }
 

@@ -18,7 +18,8 @@ export default function injectGlobalData(targetWindow: BrowserWindow) {
         downloads: app.getPath('downloads'),
         temp: app.getPath('temp'),
         userData: app.getPath('userData')
-      }
+      },
+      platform: process.platform
     };
     targetWindow.webContents.executeJavaScript(
       `window.globalData=${JSON.stringify(globalData)};console.log('injected!!')`

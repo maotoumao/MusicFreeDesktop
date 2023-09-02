@@ -44,4 +44,5 @@ declare namespace ICommon {
     /** 总大小 */
     totalSize?: number;
   }
+  
 }

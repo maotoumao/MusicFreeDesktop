@@ -18,4 +18,5 @@ interface IGlobalData {
         temp: string;
         downloads: string;
     }
+    platform: NodeJS.Platform
 }

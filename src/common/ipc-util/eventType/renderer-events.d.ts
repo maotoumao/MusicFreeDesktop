@@ -44,6 +44,8 @@ declare namespace IpcEvents {
     },
     /** 扩展窗口已经初始化完成 */
     'extension-inited': undefined;
+    /** 设置歌词窗口位置 */
+    'set-lyric-window-pos': ICommon.IPoint
   }
 }
 

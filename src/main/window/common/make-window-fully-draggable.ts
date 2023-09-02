@@ -1,5 +1,4 @@
 /**
- * TODO win32api 区分平台
  * https://github.com/electron/electron/issues/1354#issuecomment-1356330873
  */
 
