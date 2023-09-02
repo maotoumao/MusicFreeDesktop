@@ -1,11 +1,17 @@
 .music-downloaded {
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--infoColor, #0A95C8);
 }
 
 .music-can-download {
-    opacity: 0.6;
-    cursor: pointer;
-    &:hover {
-        opacity: 1;
-    }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.6;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+  }
 }

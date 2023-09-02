@@ -1,7 +1,7 @@
 import { isSameMedia } from "@/common/media-util";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { useDownloaded } from "@/renderer/core/downloader/downloaded-sheet";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import "./index.scss";
 import { localPluginName } from "@/common/constant";
 import Downloader from "@/renderer/core/downloader";
@@ -12,10 +12,15 @@ interface IMusicDownloadedProps {
 
 function MusicDownloaded(props: IMusicDownloadedProps) {
   const { musicItem } = props;
+  // const [loading, setLoading] = useState(false);
 
   const isDownloaded = useDownloaded(musicItem);
   const isDownloadedOrLocal =
     isDownloaded || musicItem.platform === localPluginName;
+
+  // useEffect(() => {
+  //   setLoading(false);
+  // }, [isDownloaded]);
 
 
   return (
@@ -32,7 +37,7 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
       }}
     >
       <SvgAsset
-        iconName={isDownloadedOrLocal ? "check" : "array-download-tray"}
+        iconName={isDownloadedOrLocal ? 'check-circle' : "array-download-tray"}
         size={18}
       ></SvgAsset>
     </div>
