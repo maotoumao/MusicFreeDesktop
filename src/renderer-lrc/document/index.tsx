@@ -26,28 +26,33 @@ function Root() {
   const startClientPosRef = useRef<ICommon.IPoint | null>(null);
 
   useEffect(() => {
-    if (window.globalData.platform !== "win32") {
-      // win32使用make-window-fully-draggable方案
-      window.addEventListener("mousedown", (e) => {
-        startClientPosRef.current = {
-          x: e.clientX,
-          y: e.clientY,
-        };
-        isMovingRef.current = true;
-      });
-      window.addEventListener("mousemove", (e) => {
-        if (startClientPosRef.current && isMovingRef.current) {
-          ipcRendererSend("set-lyric-window-pos", {
-            x: e.screenX - startClientPosRef.current.x,
-            y: e.screenY - startClientPosRef.current.y,
+    document.onload = () => {
+      setTimeout(() => {
+        // hack: inject数据延迟
+        if (window.globalData.platform !== "win32") {
+          // win32使用make-window-fully-draggable方案
+          window.addEventListener("mousedown", (e) => {
+            startClientPosRef.current = {
+              x: e.clientX,
+              y: e.clientY,
+            };
+            isMovingRef.current = true;
+          });
+          window.addEventListener("mousemove", (e) => {
+            if (startClientPosRef.current && isMovingRef.current) {
+              ipcRendererSend("set-lyric-window-pos", {
+                x: e.screenX - startClientPosRef.current.x,
+                y: e.screenY - startClientPosRef.current.y,
+              });
+            }
+          });
+    
+          window.addEventListener("mouseup", () => {
+            isMovingRef.current = false;
+            startClientPosRef.current = null;
           });
         }
-      });
-
-      window.addEventListener("mouseup", () => {
-        isMovingRef.current = false;
-        startClientPosRef.current = null;
-      });
+      }, 20);
     }
   }, []);
 

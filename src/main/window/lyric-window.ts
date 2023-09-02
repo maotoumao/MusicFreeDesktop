@@ -1,4 +1,4 @@
-import { BrowserWindow, app, ipcMain, nativeImage } from "electron";
+import { BrowserWindow, app, screen, nativeImage } from "electron";
 import { getResPath } from "../util";
 import injectGlobalData from "./common/inject-global-data";
 import makeWindowFullyDraggable from "./common/make-window-fully-draggable";
@@ -21,6 +21,7 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 /** 歌词窗口创建 */
 let lyricWindow: BrowserWindow | null = null;
 
+/** 更新位置配置 */
 const dSetLyricWindowConfig = debounce(
   (point: ICommon.IPoint) => {
     setAppConfigPath("private.lyricWindowPosition", point);
@@ -62,9 +63,11 @@ export const createLyricWindow = (): BrowserWindow => {
   }
 
   lyricWindow.webContents.on("did-finish-load", () => {
+    // 注入全局变量
     injectGlobalData(lyricWindow);
   });
   if (process.platform === "win32") {
+    // windows系统移动桌面歌词
     makeWindowFullyDraggable(lyricWindow, {
       width,
       height,
@@ -78,6 +81,7 @@ export const createLyricWindow = (): BrowserWindow => {
       },
     });
   } else {
+    // 其他系统通过ipc移动桌面歌词
     ipcMainOn("set-lyric-window-pos", (pos) => {
       if (lyricWindow) {
         lyricWindow.setBounds({
@@ -95,7 +99,28 @@ export const createLyricWindow = (): BrowserWindow => {
   lyricWindow.once("ready-to-show", async () => {
     const position = await getAppConfigPath("private.lyricWindowPosition");
     if (position) {
+      const currentDisplayBounds = screen.getDisplayNearestPoint(position).bounds;
+      // 如果完全在是窗外，重置位置
+      const [left, top, right, bottom] = [position.x, position.y, position.x + width, position.y + height];
+      let needMakeup = false;
+      if(left > currentDisplayBounds.x + currentDisplayBounds.width) {
+        position.x = currentDisplayBounds.x + currentDisplayBounds.width - width;
+        needMakeup = true;
+      } else if(right < currentDisplayBounds.x) {
+        position.x = currentDisplayBounds.x;
+        needMakeup = true;
+      }
+      if(top > currentDisplayBounds.y + currentDisplayBounds.height) {
+        position.y = currentDisplayBounds.y + currentDisplayBounds.height - height;
+        needMakeup = true;
+      }else if(bottom < currentDisplayBounds.y) {
+        position.y = currentDisplayBounds.y;
+        needMakeup = true;
+      }
       lyricWindow.setPosition(position.x, position.y, false);
+      if(needMakeup) {
+        await setAppConfigPath('private.lyricWindowPosition', position);
+      }
     }
     const lockState = await getAppConfigPath("lyric.lockLyric");
 
