@@ -1,9 +1,6 @@
-name: 自动构建
+name: 打包
 on: 
     workflow_dispatch:
-    push:
-        branches:
-            - 'master'
 jobs:
     build-windows: 
         runs-on: windows-latest
@@ -12,8 +9,19 @@ jobs:
             - uses: actions/setup-node@v3
               with:
                 node-version: 16
+            - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
             - run: npm install
             - run: npm run package
+            - uses: maotoumao/inno-setup-action-cli@662544f81a6c4e611c73eb7c4d82b3650c1b0893
+              with: 
+                  filepath: ./release/build-windows.iss
+                  variables: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=${{ secrets.MYAPPID }}
+            - name: Upload Setup
+              uses: actions/upload-artifact@v3
+              with:
+                  name: windows-release
+                  path: ./out/MusicFreeSetup.exe
+
     build-windows-legacy: 
         runs-on: windows-latest
         steps:
