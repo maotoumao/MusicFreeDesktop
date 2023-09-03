@@ -10,6 +10,7 @@ jobs:
               with:
                 node-version: 16
             - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $Env:GITHUB_ENV
+            - run: echo ${{ env.VERSION }}
             - run: npm install
             - run: npm run package
             - uses: maotoumao/inno-setup-action-cli@main
