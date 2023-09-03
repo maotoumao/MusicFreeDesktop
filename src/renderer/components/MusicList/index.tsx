@@ -211,6 +211,7 @@ function _MusicList(props: IMusicListProps) {
     doubleClickBehavior,
   } = props;
 
+  const musicListRef = useRef(musicList);
   const table = useReactTable({
     debugAll: false,
     data: musicList,
@@ -231,16 +232,24 @@ function _MusicList(props: IMusicListProps) {
 
   useEffect(() => {
     setActiveItems([]);
+    musicListRef.current = musicList;
   }, [musicList]);
 
   useEffect(() => {
     const musiclistScope = "ml" + Math.random().toString().slice(2);
     hotkeys("Shift", musiclistScope, () => {});
+    const ctrlAHandler = (evt: Event) => {
+      evt.preventDefault();
+      setActiveItems([0, musicListRef.current.length - 1]);
+    };
+    hotkeys("Ctrl+A", ctrlAHandler);
 
     return () => {
       hotkeys.unbind("Shift", musiclistScope);
+      hotkeys.unbind("Ctrl+A", ctrlAHandler);
     };
   }, []);
+
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>
@@ -349,18 +358,15 @@ function _MusicList(props: IMusicListProps) {
                 }}
               >
                 {row.getAllCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      style={{
-                        width: cell.column.getSize(),
-                      }}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
+                  <td
+                    key={cell.id}
+                    style={{
+                      width: cell.column.getSize(),
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
               </tr>
             );
           })}
