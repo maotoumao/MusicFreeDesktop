@@ -29,6 +29,16 @@ jobs:
             - uses: actions/setup-node@v3
               with:
                 node-version: 16
+            - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
             - run: npm install
             - run: npm install electron@22
             - run: npm run package
+            - uses: maotoumao/inno-setup-action-cli@main
+              with: 
+                  filepath: ./release/build-windows.iss
+                  variables: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=${{ secrets.MYAPPID }}
+            - name: Upload Setup
+              uses: actions/upload-artifact@v3
+              with:
+                  name: windows-legacy-release
+                  path: ./out/MusicFreeSetup.exe
