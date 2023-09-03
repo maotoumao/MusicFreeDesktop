@@ -14,6 +14,7 @@ declare namespace IpcEvents {
     "refresh-plugins": undefined;
 
     "open-url": string;
+    'open-path': string;
 
     "sync-current-music": IMusic.IMusicItem;
     "sync-current-playing-state": import("@/renderer/core/track-player/enum").PlayerState;

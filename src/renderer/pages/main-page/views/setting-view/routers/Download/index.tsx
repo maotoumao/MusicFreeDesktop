@@ -4,6 +4,7 @@ import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import Downloader from "@/renderer/core/downloader";
 import rendererAppConfig from "@/common/app-config/renderer";
+import PathSettingItem from "../../components/PathSettingItem";
 
 interface IProps {
   data: IAppConfig["download"];
@@ -17,6 +18,7 @@ export default function Download(props: IProps) {
 
   return (
     <div className="setting-view--download-container">
+      <PathSettingItem keyPath='download.path' value={data.path} label="下载目录"></PathSettingItem>
       <ListBoxSettingItem
         keyPath="download.concurrency"
         value={data.concurrency}

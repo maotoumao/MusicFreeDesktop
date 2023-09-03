@@ -19,8 +19,18 @@ async function isFile(path: string) {
     }
 }
 
+async function isFolder(path: string) {
+    try {
+        const stat = await fs.stat(path);
+        return stat.isDirectory();
+    } catch {
+        return false;
+    }
+}
+
 export default {
     writeFile,
     readFile,
-    isFile
+    isFile,
+    isFolder
 }

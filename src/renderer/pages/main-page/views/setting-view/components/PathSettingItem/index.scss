@@ -1,0 +1,18 @@
+.setting-view--path-setting-item-container {
+  & .options-container {
+    margin-top: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    position: relative;
+
+    & .path-container {
+      max-width: 60%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 2rem;
+    }
+
+  }
+}

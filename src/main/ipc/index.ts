@@ -47,6 +47,10 @@ export default function setupIpcMain() {
     shell.openExternal(url);
   });
 
+  ipcMainOn('open-path', (path) => {
+    shell.openPath(path);
+  })
+
   ipcMainHandle("show-open-dialog", (options) => {
     const mainWindow = getMainWindow();
     if (!mainWindow) {
