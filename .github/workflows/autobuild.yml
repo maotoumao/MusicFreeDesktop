@@ -9,7 +9,7 @@ jobs:
             - uses: actions/setup-node@v3
               with:
                 node-version: 16
-            - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $GITHUB_ENV
+            - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $Env:GITHUB_ENV
             - run: npm install
             - run: npm run package
             - uses: maotoumao/inno-setup-action-cli@main
@@ -29,7 +29,7 @@ jobs:
             - uses: actions/setup-node@v3
               with:
                 node-version: 16
-            - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $GITHUB_ENV
+            - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $Env:GITHUB_ENV
             - run: npm install
             - run: npm install electron@22
             - run: npm run package
