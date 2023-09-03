@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcRenderer } from "electron";
+import { app, BrowserWindow, globalShortcut } from "electron";
 import {
   createLyricWindow,
   createMainWindow,
@@ -15,10 +15,7 @@ import {
 } from "@/common/app-config/main";
 import { setupTray } from "./tray";
 import { setupLocalMusicManager } from "./core/local-music-manager";
-import fs from "fs/promises";
-import path from "path";
-import { getResPath } from "./util";
-import { addFileScheme, addTailSlash } from "@/common/file-util";
+import { setupGlobalShortCut } from "./core/global-short-cut";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require("electron-squirrel-startup")) {
@@ -57,6 +54,10 @@ app.on("second-instance", () => {
   }
 });
 
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
+})
+
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 app.whenReady().then(async () => {
@@ -66,6 +67,7 @@ app.whenReady().then(async () => {
   setupTray();
   setupLocalMusicManager();
   bootstrap();
+  setupGlobalShortCut();
 });
 
 async function bootstrap() {

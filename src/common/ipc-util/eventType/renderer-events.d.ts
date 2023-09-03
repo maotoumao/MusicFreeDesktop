@@ -46,7 +46,18 @@ declare namespace IpcEvents {
     /** 扩展窗口已经初始化完成 */
     'extension-inited': undefined;
     /** 设置歌词窗口位置 */
-    'set-lyric-window-pos': ICommon.IPoint
+    'set-lyric-window-pos': ICommon.IPoint;
+
+    /** 快捷键 */
+    'enable-global-short-cut': boolean;
+    'bind-global-short-cut': {
+      key: keyof import('../../app-config/type').IAppConfig["shortCut"]["shortcuts"],
+      shortCut: string[]
+    }
+    'unbind-global-short-cut': {
+      key: keyof import('../../app-config/type').IAppConfig["shortCut"]["shortcuts"],
+      shortCut: string[]
+    }
   }
 }
 

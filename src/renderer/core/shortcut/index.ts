@@ -4,8 +4,9 @@ import trackPlayer from "../track-player";
 import { PlayerState, TrackPlayerEvent } from "../track-player/enum";
 import { IAppConfig } from "@/common/app-config/type";
 import Evt from "../events";
-import { shortCutKeys } from "@/common/constant";
+import { shortCutKeys, shortCutKeysEvts } from "@/common/constant";
 import rendererAppConfig from "@/common/app-config/renderer";
+import { ipcRendererSend } from "@/common/ipc-util/renderer";
 
 const originalHotkeysFilter = hotkeys.filter;
 
@@ -19,15 +20,6 @@ hotkeys.filter = (event) => {
 
 type IShortCutKeys = keyof IAppConfig["shortCut"]["shortcuts"];
 
-const shortCutKeysEvts: Record<IShortCutKeys, keyof IEventType.IEvents> = {
-  "play/pause": "TOGGLE_PLAYER_STATE",
-  "skip-next": "SKIP_NEXT",
-  "skip-previous": "SKIP_PREVIOUS",
-  "volume-down": "VOLUME_DOWN",
-  "volume-up": "VOLUME_UP",
-  "toggle-desktop-lyric": "TOGGLE_DESKTOP_LYRIC",
-};
-
 const baseShortCutFunction = (
   evt: keyof IEventType.IEvents,
   global: boolean,
@@ -40,32 +32,40 @@ const baseShortCutFunction = (
   }
 };
 
-const shortCutKeyFuncs = {} as Record<any, () => void>;
+const localShortCutKeyFuncs = {} as Record<any, () => void>;
 shortCutKeys.forEach((it) => {
-  shortCutKeyFuncs[it] = baseShortCutFunction.bind(
+  localShortCutKeyFuncs[it] = baseShortCutFunction.bind(
     undefined,
     shortCutKeysEvts[it],
     false
-  );
-  shortCutKeyFuncs[`${it}-g`] = baseShortCutFunction.bind(
-    undefined,
-    shortCutKeysEvts[it],
-    true
   );
 });
 
 const boundKeyMap = new Map<string, string[]>();
 export function bindShortCut(
-  eventType: IShortCutKeys,
-  keys: string[],
+  key: IShortCutKeys,
+  shortCut: string[],
   global = false
 ) {
   // 原有的快捷键
-  const mapKey = `${eventType}${global ? "-g" : ""}`;
-  unbindShortCut(eventType, global);
-  hotkeys(keys.join("+"), shortCutKeyFuncs[mapKey]);
+  const mapKey = `${key}${global ? "-g" : ""}`;
+  // const originalHotKey = boundKeyMap.get(mapKey);
+  // console.log(originalHotKey, shortCut);
+  // if (originalHotKey?.join?.("+") === shortCut?.join?.("+")) {
+  //   // 没改
+  //   return;
+  // }
+  unbindShortCut(key, global);
+  if (global) {
+    ipcRendererSend("bind-global-short-cut", {
+      key: key,
+      shortCut: shortCut,
+    });
+  } else {
+    hotkeys(shortCut.join("+"), localShortCutKeyFuncs[mapKey]);
+  }
 
-  boundKeyMap.set(mapKey, keys);
+  boundKeyMap.set(mapKey, shortCut);
 }
 
 export function unbindShortCut(eventType: IShortCutKeys, global = false) {
@@ -74,7 +74,14 @@ export function unbindShortCut(eventType: IShortCutKeys, global = false) {
 
   const originalHotKey = boundKeyMap.get(mapKey);
   if (originalHotKey) {
-    hotkeys.unbind(originalHotKey.join("+"), shortCutKeyFuncs[mapKey]);
+    if (global) {
+      ipcRendererSend("unbind-global-short-cut", {
+        key: eventType,
+        shortCut: originalHotKey,
+      });
+    } else {
+      hotkeys.unbind(originalHotKey.join("+"), localShortCutKeyFuncs[mapKey]);
+    }
     boundKeyMap.delete(mapKey);
   }
 }

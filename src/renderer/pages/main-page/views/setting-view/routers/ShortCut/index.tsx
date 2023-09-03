@@ -6,6 +6,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import hotkeys from "hotkeys-js";
 import rendererAppConfig from "@/common/app-config/renderer";
 import { bindShortCut } from "@/renderer/core/shortcut";
+import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import raf2 from "@/renderer/utils/raf2";
 interface IProps {
   data: IAppConfig["shortCut"];
 }
@@ -22,6 +24,7 @@ export default function ShortCut(props: IProps) {
         capture: true,
       },
       (evt, detail) => {
+        console.log(evt, detail);
         const target = evt.target as HTMLElement;
         if (
           target.tagName === "INPUT" &&
@@ -45,7 +48,6 @@ export default function ShortCut(props: IProps) {
           // 跟一个普通键
           for (let i = pressedKeys.length - 1; i >= 0; --i) {
             if (!hotkeys.modifier[pressedKeys[i]]) {
-              console.log(pressedKeys[i]);
               _recordShortCutKey.push(
                 pressedKeys[i].replace(/^(.)/, (_, $1: string) =>
                   $1.toUpperCase()
@@ -74,6 +76,9 @@ export default function ShortCut(props: IProps) {
       <CheckBoxSettingItem
         keyPath="shortCut.enableGlobal"
         checked={data.enableGlobal}
+        onCheckChanged={(val) => {
+          ipcRendererSend("enable-global-short-cut", val);
+        }}
         label="启用全局快捷键"
       ></CheckBoxSettingItem>
       <ShortCutTable
@@ -135,11 +140,8 @@ function ShortCutTable(props: IShortCutTableProps) {
               enabled={enableGlobal}
               value={shortCuts[it]?.global}
               onChange={(val) => {
+                console.log(it, val);
                 bindShortCut(it as IShortCutKeys, val, true);
-                rendererAppConfig.setAppConfigPath(
-                  `shortCut.shortcuts.${it}.global`,
-                  val
-                );
               }}
             ></ShortCutItem>
           </div>
@@ -164,6 +166,32 @@ function ShortCutItem(props: IShortCutItemProps) {
   const [realValue, setRealValue] = useState(formatValue(value ?? []));
   const isRecordingRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>();
+  // todo 写的很奇怪
+  const resultRef = useRef<string[]>([]);
+  const isAllModifierKeyRef = useRef(false);
+
+  const keyupHandler = () =>
+    raf2(() => {
+      const isAllModifierKey = isAllModifierKeyRef.current;
+      const recordShortCutKey = resultRef.current;
+      if (isRecordingRef.current) {
+        if (isAllModifierKey || !recordShortCutKey.length) {
+          setRealValue(formatValue(value ?? []));
+        } else if (
+          recordShortCutKey.includes("Backspace")
+        ) {
+          setRealValue("");
+          onChange?.([]);
+        } else {
+          setRealValue(formatValue(recordShortCutKey));
+          onChange?.(recordShortCutKey);
+        }
+      }
+      isAllModifierKeyRef.current = false;
+      resultRef.current = [];
+
+      isRecordingRef.current = false;
+    });
 
   return (
     <input
@@ -174,35 +202,24 @@ function ShortCutItem(props: IShortCutItemProps) {
       ref={inputRef}
       value={realValue || "空"}
       onKeyDown={(e) => {
-        console.log(recordShortCutKey);
-        setRealValue(
-          `${recordShortCutKey.filter((it) => it !== "Backspace").join(" + ")}${
-            isAllModifierKey ? " +" : ""
-          }`
-        );
-        if (isRecordingRef.current) {
-          return;
-        } else {
-          isRecordingRef.current = true;
-        }
-      }}
-      onKeyUp={() => {
-        if (isRecordingRef.current) {
-          if (
-            isAllModifierKey ||
-            !recordShortCutKey.length ||
-            recordShortCutKey.includes("Backspace")
-          ) {
-            setRealValue("");
-            onChange?.([]);
+        e.preventDefault();
+        raf2(() => {
+          resultRef.current = recordShortCutKey.filter(
+            (it) => it !== "Backspace"
+          );
+          isAllModifierKeyRef.current = isAllModifierKey;
+          setRealValue(
+            `${resultRef.current.join(" + ")}${isAllModifierKey ? " +" : ""}`
+          );
+          if (isRecordingRef.current) {
+            return;
           } else {
-            setRealValue(formatValue(recordShortCutKey));
-            onChange?.(recordShortCutKey);
+            isRecordingRef.current = true;
           }
-        }
-        isRecordingRef.current = false;
-        // inputRef.current.blur();
+        });
       }}
+      onKeyUp={keyupHandler}
+      onBlur={keyupHandler}
     ></input>
   );
 }

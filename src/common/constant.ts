@@ -82,6 +82,16 @@ export const shortCutKeys: IShortCutKeys[] = [
   "toggle-desktop-lyric",
 ];
 
+// 快捷键列表对应的事件
+export const shortCutKeysEvts: Record<IShortCutKeys, keyof IEventType.IEvents> = {
+  "play/pause": "TOGGLE_PLAYER_STATE",
+  "skip-next": "SKIP_NEXT",
+  "skip-previous": "SKIP_PREVIOUS",
+  "volume-down": "VOLUME_DOWN",
+  "volume-up": "VOLUME_UP",
+  "toggle-desktop-lyric": "TOGGLE_DESKTOP_LYRIC",
+};
+
 /** 下载状态 */
 export enum DownloadState {
   /** 等待中 */
