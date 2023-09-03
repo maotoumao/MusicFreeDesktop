@@ -11,7 +11,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={#MyAppId}
+AppId={{{#MyAppId}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -24,9 +24,9 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=.\out
+OutputDir=..\out
 OutputBaseFilename=MusicFreeSetup
-SetupIconFile=.\res\logo.ico
+SetupIconFile=..\res\logo.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -39,8 +39,8 @@ Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.i
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: ".\out\MusicFree-win32-x64\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\out\MusicFree-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\out\MusicFree-win32-x64\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\out\MusicFree-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
