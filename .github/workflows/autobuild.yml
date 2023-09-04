@@ -59,18 +59,3 @@ jobs:
                   name: macos-x64-dmg-release
                   path: ./out/make/MusicFree-${{ env.VERSION }}-x64.dmg
 
-    build-macos-arm64: 
-        runs-on: macos-arm64
-        steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
-              with:
-                node-version: 16
-            - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
-            - run: npm install
-            - run: npm run make
-            - name: Upload Setup
-              uses: actions/upload-artifact@v3
-              with:
-                  name: macos-x64-dmg-release
-                  path: ./out/make/MusicFree-${{ env.VERSION }}-arm64.dmg
