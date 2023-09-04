@@ -286,7 +286,11 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
     currentMusicStore.setValue(music);
     currentLyricStore.setValue(null);
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
-    setUserPerference("currentMusic", music);
+    if(music) {
+      setUserPerference("currentMusic", music);
+    } else {
+      removeUserPerference('currentMusic');
+    }
     ipcRendererSend(
       "sync-current-music",
       music
