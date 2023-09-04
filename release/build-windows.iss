@@ -2,11 +2,16 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MusicFree"
+#ifndef MyAppVersion
 #define MyAppVersion "0.0.0-alpha.0"
+#endif
 #define MyAppPublisher "猫头猫"
 #define MyAppURL "http://musicfree.upup.fun"
 #define MyAppExeName "MusicFree.exe"
+#ifndef MyAppId
 #define MyAppId
+#endif
+
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
