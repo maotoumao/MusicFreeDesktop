@@ -50,7 +50,7 @@ jobs:
             - uses: actions/setup-node@v3
               with:
                 node-version: 16
-            - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $Env:GITHUB_ENV
+            - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $Env:GITHUB_ENV
             - run: npm install
             - run: npm run make
             - name: Upload Setup
