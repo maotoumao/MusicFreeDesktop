@@ -42,3 +42,19 @@ jobs:
               with:
                   name: windows-legacy-release
                   path: ./out/MusicFreeSetup.exe
+
+    build-macos: 
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                node-version: 16
+            - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $Env:GITHUB_ENV
+            - run: npm install
+            - run: npm run make
+            - name: Upload Setup
+              uses: actions/upload-artifact@v3
+              with:
+                  name: macos-dmg-release
+                  path: ./out/make/MusicFree-${{ env.VERSION }}-arm64.dmg
