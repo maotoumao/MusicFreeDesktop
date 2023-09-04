@@ -26,7 +26,7 @@ function Root() {
   const startClientPosRef = useRef<ICommon.IPoint | null>(null);
 
   useEffect(() => {
-    document.onload = () => {
+    const moveWindowHandler = () => {
       setTimeout(() => {
         // hack: inject数据延迟
         if (window.globalData.platform !== "win32") {
@@ -53,7 +53,13 @@ function Root() {
           });
         }
       }, 20);
+    };
+    if(document.readyState === 'complete') {
+      moveWindowHandler();
+    } else {
+      document.onload = moveWindowHandler;
     }
+    
   }, []);
 
   return <LyricWindowPage></LyricWindowPage>;
