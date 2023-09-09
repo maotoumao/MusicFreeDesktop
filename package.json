@@ -82,6 +82,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "eventemitter3": "^5.0.1",
     "he": "^1.2.0",
+    "hls.js": "^1.4.12",
     "hotkeys-js": "^3.12.0",
     "i18next": "^22.5.1",
     "immer": "^10.0.2",

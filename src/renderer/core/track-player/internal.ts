@@ -5,6 +5,8 @@ import { encodeUrlHeaders } from "@/common/normalize-util";
 import { ErrorReason, PlayerState, TrackPlayerEvent } from "./enum";
 import trackPlayerEventsEmitter from "./event";
 import albumImg from "@/assets/imgs/album-cover.jpg";
+import getUrlExt from "@/renderer/utils/get-url-ext";
+import Hls from "hls.js";
 
 class TrackPlayerInternal {
   private audioContext: AudioContext;
@@ -107,7 +109,14 @@ class TrackPlayerInternal {
         },
       ],
     });
-    this.audio.src = url;
+    // 拓展播放功能
+    if (getUrlExt(url) === ".m3u8" && Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(this.audio);
+    } else {
+      this.audio.src = url;
+    }
   }
 
   /** 暂停播放 */
