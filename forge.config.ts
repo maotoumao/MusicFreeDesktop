@@ -32,8 +32,13 @@ const config: ForgeConfig = {
       // background
       format: 'ULFO'
     }, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    // new MakerRpm({}),
+    new MakerDeb({
+      options: {
+        name: "MusicFree",
+        bin: "MusicFree"
+      }
+    }),
   ],
   plugins: [
     new WebpackPlugin({
