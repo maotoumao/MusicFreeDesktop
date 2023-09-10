@@ -34,7 +34,7 @@ const config: ForgeConfig = {
     }, ['darwin']),
     // new MakerRpm({}),
     new MakerDeb({
-      config: {
+      options: {
         name: "MusicFree",
         bin: "MusicFree"
       }
