@@ -16,15 +16,24 @@ import { compare } from "compare-versions";
 import { nanoid } from "nanoid";
 import { addRandomHash } from "@/common/normalize-util";
 
-const pluginBasePath = path.resolve(
-  app.getPath("userData"),
-  "./musicfree-plugins"
-);
-
 let plugins: Plugin[] = [];
 let clonedPlugins: IPlugin.IPluginDelegate[] = [];
 
+let _pluginBasePath: string;
+function getPluginBasePath() {
+  if(_pluginBasePath) {
+    return _pluginBasePath;
+  }
+  _pluginBasePath = path.resolve(
+    app.getPath("userData"),
+    "./musicfree-plugins"
+  );
+  return _pluginBasePath;
+}
+
 async function checkPath() {
+  const pluginBasePath = getPluginBasePath();
+
   // 路径:
   try {
     const res = await fs.stat(pluginBasePath);
@@ -66,7 +75,7 @@ export async function setupPluginManager() {
 }
 
 export function getPluginByMedia(mediaItem: IMedia.IMediaBase) {
-  return plugins.find(item => item.instance.platform === mediaItem.platform);
+  return plugins.find((item) => item.instance.platform === mediaItem.platform);
 }
 
 /** 注册事件 */
@@ -157,6 +166,7 @@ function callPluginMethod({
 
 /** 加载所有插件 */
 export async function loadAllPlugins() {
+  const pluginBasePath = getPluginBasePath();
   const rawPluginNames = await fs.readdir(pluginBasePath);
   const pluginHashSet = new Set<string>();
   const _plugins: Plugin[] = [];
@@ -200,6 +210,7 @@ export async function installPluginFromUrl(url: string) {
 }
 
 async function installPluginFromRawCode(funcCode: string) {
+  const pluginBasePath = getPluginBasePath();
   const plugin = new Plugin(funcCode, "");
   const _pluginIndex = plugins.findIndex((p) => p.hash === plugin.hash);
   if (_pluginIndex !== -1) {

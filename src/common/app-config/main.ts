@@ -9,14 +9,21 @@ import { ipcMainHandle, ipcMainSend } from "../ipc-util/main";
 import { getLyricWindow, getMainWindow } from "@/main/window";
 import defaultAppConfig from "./default-app-config";
 
-const configDirPath = app.getPath("userData");
-// 所有的配置操作由主进程完成
-const configPath = path.resolve(configDirPath, "config.json");
+
+let _configPath: string;
+
+function getConfigPath(){
+  if(!_configPath) {
+    _configPath = path.resolve(app.getPath("userData"), "config.json");
+  }
+  return _configPath;
+}
 
 let cacheConfig: IAppConfig = null;
 
 async function checkPath() {
   // 路径:
+  const configDirPath = app.getPath('userData');
   try {
     const res = await fs.stat(configDirPath);
     if (!res.isDirectory()) {
@@ -30,13 +37,13 @@ async function checkPath() {
   }
 
   try {
-    const res = await fs.stat(configPath);
+    const res = await fs.stat(getConfigPath());
     if (!res.isFile()) {
-      await rimraf(configPath);
+      await rimraf(getConfigPath());
       throw new Error();
     }
   } catch {
-    fs.writeFile(configPath, "{}", "utf-8");
+    fs.writeFile(getConfigPath(), "{}", "utf-8");
     cacheConfig = {};
   }
 }
@@ -63,14 +70,14 @@ export async function getAppConfig(): Promise<IAppConfig> {
     if (cacheConfig) {
       return cacheConfig;
     } else {
-      const rawConfig = await fs.readFile(configPath, "utf8");
+      const rawConfig = await fs.readFile(getConfigPath(), "utf8");
       const rawJson = JSON.parse(rawConfig);
       cacheConfig = rawJson;
     }
   } catch (e) {
     if (e.message === "Unexpected end of JSON input" || e.code === "EISDIR") {
       // JSON 解析异常 / 非文件
-      await rimraf(configPath);
+      await rimraf(getConfigPath());
       await checkPath();
     } else if (e.code === "ENOENT") {
       // 文件不存在
@@ -90,7 +97,7 @@ export async function setAppConfig(
 
   try {
     const rawConfig = JSON.stringify(appConfig, undefined, 4);
-    await fs.writeFile(configPath, rawConfig, "utf8");
+    await fs.writeFile(getConfigPath(), rawConfig, "utf8");
     cacheConfig = appConfig;
     ipcMainSend(mainWindow, "sync-app-config", cacheConfig);
     if (lyricWindow) {
@@ -105,7 +112,7 @@ export async function setAppConfig(
     if (retryTime > 0) {
       if (e.code === "EISDIR") {
         // 非文件
-        await rimraf(configPath);
+        await rimraf(getConfigPath());
         await checkPath();
         return setAppConfig(appConfig, retryTime - 1);
       }

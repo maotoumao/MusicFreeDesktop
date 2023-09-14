@@ -56,11 +56,11 @@ export default function () {
       <div className="music-info">
         <span>
           <Condition condition={musicItem?.artist}>
-            {musicItem.artist}
+            {musicItem?.artist}
           </Condition>
           <Condition condition={musicItem?.album}>
             {" "}
-            - {musicItem.album}
+            - {musicItem?.album}
           </Condition>
         </span>
         <Tag fill>{musicItem?.platform}</Tag>

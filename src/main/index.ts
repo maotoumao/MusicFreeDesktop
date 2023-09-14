@@ -16,11 +16,35 @@ import {
 import { setupTray } from "./tray";
 import { setupLocalMusicManager } from "./core/local-music-manager";
 import { setupGlobalShortCut } from "./core/global-short-cut";
+import fs from "fs";
+import path from "path";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require("electron-squirrel-startup")) {
 //   app.quit();
 // }
+
+// portable
+if(process.platform === 'win32') {
+  try {
+    const appPath = app.getPath('exe');
+    const portablePath = path.resolve(appPath, "../portable");
+    const portableFolderStat = fs.statSync(portablePath);
+    console.log(portablePath);
+    if (portableFolderStat.isDirectory()) {
+      const appPathNames = [
+        "appData",
+        "userData",
+      ];
+      appPathNames.forEach((it) => {
+        app.setPath(it, path.resolve(portablePath, it));
+      });
+    }
+  } catch (e){
+    console.log(e)
+  }
+}
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -54,9 +78,9 @@ app.on("second-instance", () => {
   }
 });
 
-app.on('will-quit', () => {
+app.on("will-quit", () => {
   globalShortcut.unregisterAll();
-})
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
