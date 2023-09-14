@@ -8,10 +8,11 @@ import Downloader from "@/renderer/core/downloader";
 
 interface IMusicDownloadedProps {
   musicItem: IMusic.IMusicItem;
+  size?: number;
 }
 
 function MusicDownloaded(props: IMusicDownloadedProps) {
-  const { musicItem } = props;
+  const { musicItem, size = 18 } = props;
   // const [loading, setLoading] = useState(false);
 
   const isDownloaded = useDownloaded(musicItem);
@@ -21,7 +22,6 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
   // useEffect(() => {
   //   setLoading(false);
   // }, [isDownloaded]);
-
 
   return (
     <div
@@ -37,8 +37,8 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
       }}
     >
       <SvgAsset
-        iconName={isDownloadedOrLocal ? 'check-circle' : "array-download-tray"}
-        size={18}
+        iconName={isDownloadedOrLocal ? "check-circle" : "array-download-tray"}
+        size={size}
       ></SvgAsset>
     </div>
   );

@@ -21,7 +21,6 @@ export default function useTopListDetail(
       topListItem
     )
       .then((_) => {
-        console.log("hh", _);
         if (_) {
           setMergedTopListItem(
             (prev) =>

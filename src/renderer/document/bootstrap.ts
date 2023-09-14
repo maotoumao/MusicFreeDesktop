@@ -12,7 +12,7 @@ import { setAutoFreeze } from "immer";
 import Evt from "../core/events";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 
-import * as Comlink from 'comlink';
+import * as Comlink from "comlink";
 import Downloader from "../core/downloader";
 
 setAutoFreeze(false);
@@ -31,7 +31,6 @@ export default async function () {
   clearDefaultBehavior();
   setupEvents();
   await Downloader.setupDownloader();
-
 }
 
 function dropHandler() {
@@ -41,7 +40,7 @@ function dropHandler() {
 
     const validMusicList: IMusic.IMusicItem[] = [];
     for (const f of event.dataTransfer.files) {
-      if (f.type === "") {
+      if (f.type === "" && (await window.fs.isFolder(f.path))) {
         validMusicList.push(
           ...(await callPluginDelegateMethod(
             {

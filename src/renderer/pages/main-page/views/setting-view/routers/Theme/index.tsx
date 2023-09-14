@@ -111,7 +111,6 @@ export function showThemeContextMenu(
       title: "卸载主题",
       icon: "trash",
       async onClick() {
-        console.log("???");
         const [code, reason] = await window.themepack.uninstallThemePack(
           themePack
         );

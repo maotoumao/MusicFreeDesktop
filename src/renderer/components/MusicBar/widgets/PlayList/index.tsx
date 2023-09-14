@@ -11,6 +11,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import { rem } from "@/common/constant";
 import { showMusicContextMenu } from "@/renderer/components/MusicList";
+import MusicDownloaded from "@/renderer/components/MusicDownloaded";
 
 const baseId = "music-bar--play-list";
 const estimizeItemHeight = 2.6 * rem;
@@ -125,7 +126,10 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
         showMusicContextMenu(musicItem, e.clientX, e.clientY);
       }}
     >
-      <MusicFavorite musicItem={musicItem} size={16}></MusicFavorite>
+      <div className="playlist--options">
+        <MusicFavorite musicItem={musicItem} size={16}></MusicFavorite>
+        <MusicDownloaded musicItem={musicItem} size={16}></MusicDownloaded>
+      </div>
       <div className="playlist--title" title={musicItem.title}>
         {musicItem.title}
       </div>

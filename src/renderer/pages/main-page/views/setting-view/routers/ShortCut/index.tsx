@@ -24,7 +24,6 @@ export default function ShortCut(props: IProps) {
         capture: true,
       },
       (evt, detail) => {
-        console.log(evt, detail);
         const target = evt.target as HTMLElement;
         if (
           target.tagName === "INPUT" &&

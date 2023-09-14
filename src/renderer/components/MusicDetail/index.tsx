@@ -9,6 +9,7 @@ import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import Lyric from "./widgets/Lyric";
 import SvgAsset from "../SvgAsset";
 import { OptionItem } from "./widgets/OptionItem";
+import Condition from "../Condition";
 
 export const musicDetailShownStore = new Store(false);
 
@@ -54,7 +55,13 @@ export default function () {
       </div>
       <div className="music-info">
         <span>
-          {musicItem?.artist} - {musicItem?.album}
+          <Condition condition={musicItem?.artist}>
+            {musicItem.artist}
+          </Condition>
+          <Condition condition={musicItem?.album}>
+            {" "}
+            - {musicItem.album}
+          </Condition>
         </span>
         <Tag fill>{musicItem?.platform}</Tag>
       </div>
@@ -75,5 +82,3 @@ export default function () {
     </AnimatedDiv>
   );
 }
-
-

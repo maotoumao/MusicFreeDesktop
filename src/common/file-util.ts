@@ -15,8 +15,9 @@ export async function parseLocalMusicItem(
   const hash = CryptoJS.MD5(filePath).toString();
   try {
     const { common = {} as ICommonTagsResult } = await parseFile(filePath);
+
     return {
-      title: common.title ?? path.parse(filePath).name,
+      title: common.title ?? path.basename(filePath),
       artist: common.artist ?? "未知作者",
       artwork: common.picture?.[0]
         ? getB64Picture(common.picture[0])
@@ -30,7 +31,7 @@ export async function parseLocalMusicItem(
     };
   } catch {
     return {
-      title: filePath,
+      title: path.basename(filePath) || filePath,
       id: hash,
       platform: localPluginName,
       localPath: filePath,

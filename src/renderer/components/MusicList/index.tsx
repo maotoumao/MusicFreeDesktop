@@ -13,6 +13,7 @@ import trackPlayer from "@/renderer/core/track-player";
 import Condition from "../Condition";
 import Empty from "../Empty";
 import MusicFavorite from "../MusicFavorite";
+import MusicDownloaded from "../MusicDownloaded";
 import { RequestStateCode, localPluginName } from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
 import { IContextMenuItem, showContextMenu } from "../ContextMenu";
@@ -26,7 +27,6 @@ import { ipcRendererSend } from "@/common/ipc-util/renderer";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
 import { toast } from "react-toastify";
-import MusicDownloaded from "./components/MusicDownloaded";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
