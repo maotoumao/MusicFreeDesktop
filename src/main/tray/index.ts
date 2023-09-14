@@ -17,7 +17,10 @@ import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 let tray: Tray | null = null;
 
 export function setupTray() {
-  tray = new Tray(nativeImage.createFromPath(getResPath('logo.png')));
+  tray = new Tray(nativeImage.createFromPath(getResPath('logo.png')).resize({
+    width: 32, 
+    height: 32
+  }));
 
   tray.on("double-click", () => {
     showMainWindow();
