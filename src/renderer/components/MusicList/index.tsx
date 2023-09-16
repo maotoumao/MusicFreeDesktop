@@ -225,7 +225,11 @@ function _MusicList(props: IMusicListProps) {
     getScrollElement: virtualProps?.getScrollElement,
     offsetHeight: virtualProps?.offsetHeight,
     estimizeItemHeight,
-    fallbackRenderCount: virtualProps?.fallbackRenderCount ?? 100,
+    fallbackRenderCount: !(
+      virtualProps?.getScrollElement || virtualProps?.offsetHeight
+    )
+      ? -1
+      : virtualProps?.fallbackRenderCount ?? 100,
   });
 
   const [activeItems, setActiveItems] = useState<number[]>([]);
@@ -249,7 +253,6 @@ function _MusicList(props: IMusicListProps) {
       hotkeys.unbind("Ctrl+A", ctrlAHandler);
     };
   }, []);
-
 
   return (
     <div className="music-list-container" ref={tableContainerRef}>
