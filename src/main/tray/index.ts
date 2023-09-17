@@ -15,6 +15,7 @@ import { getAppConfigPath } from "@/common/app-config/main";
 import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 
 let tray: Tray | null = null;
+Menu.setApplicationMenu(null);
 
 export function setupTray() {
   tray = new Tray(nativeImage.createFromPath(getResPath('logo.png')).resize({
