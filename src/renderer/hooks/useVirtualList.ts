@@ -119,10 +119,20 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
     }
   }
 
+  function scrollToIndex(index: number, behavior?: ScrollBehavior) {
+    scrollElementRef.current.scrollTo({
+      top:
+        (typeof offsetHeight === "number" ? offsetHeight : offsetHeight()) +
+        estimizeItemHeight * index,
+      behavior,
+    });
+  }
+
   return {
     virtualItems,
     totalHeight,
     startTop: virtualItems[0]?.top ?? 0,
     setScrollElement,
+    scrollToIndex,
   };
 }

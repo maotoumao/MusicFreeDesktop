@@ -313,9 +313,10 @@ function setCurrentQuality(quality: IMusic.IQualityKey) {
   currentQualityStore.setValue(quality);
 }
 
-export function useCurrentMusic() {
-  return currentMusicStore.useValue();
-}
+
+export const getCurrentMusic = currentMusicStore.getValue;
+
+export const useCurrentMusic = currentMusicStore.useValue;
 
 export const useProgress = progressStore.useValue;
 
@@ -326,6 +327,8 @@ export const getPlayerState = playerStateStore.getValue;
 export const usePlayerState = playerStateStore.useValue;
 
 export const useRepeatMode = repeatModeStore.useValue;
+
+export const getMusicQueue = musicQueueStore.getValue;
 
 export const useMusicQueue = musicQueueStore.useValue;
 

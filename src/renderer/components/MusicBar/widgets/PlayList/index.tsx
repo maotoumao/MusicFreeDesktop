@@ -42,6 +42,14 @@ export default function PlayList() {
   useEffect(() => {
     if (show) {
       virtualController.setScrollElement(scrollElementRef.current);
+      const currentMusic = trackPlayer.getCurrentMusic();
+      if (currentMusic) {
+        const queue = trackPlayer.getMusicQueue();
+        const index = queue.findIndex((it) => isSameMedia(it, currentMusic));
+        if (index > 4) {
+          virtualController.scrollToIndex(index - 4);
+        }
+      }
     }
   }, [show]);
 
