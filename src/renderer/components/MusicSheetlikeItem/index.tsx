@@ -27,6 +27,7 @@ function MusicSheetlikeItem(props: IMusicSheetlikeItemProps) {
         <img
           src={mediaItem?.artwork || mediaItem?.coverImg || albumImg}
           onError={setFallbackAlbum}
+          loading='lazy'
         ></img>
         <Condition
           condition={
