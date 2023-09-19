@@ -23,7 +23,9 @@ export default function RecommendSheetsView() {
             replace: true,
             state: {
               ...usr,
+              pluginHash: availablePlugins[index].hash,
               pluginIndex: index,
+              tag: null
             },
           });
         }}

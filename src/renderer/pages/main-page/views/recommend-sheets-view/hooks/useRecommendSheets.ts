@@ -3,7 +3,7 @@ import { resetMediaItem } from "@/common/media-util";
 import { callPluginDelegateMethod } from "@/renderer/core/plugin-delegate";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export default function (plugin: IPlugin.IPluginDelegate, tag: IMedia.IUnique) {
+export default function (plugin: IPlugin.IPluginDelegate, tag: IMedia.IUnique | null) {
   const [sheets, setSheets] = useState<IMusic.IMusicSheetItem[]>([]);
   const [status, setStatus] = useState<RequestStateCode>(RequestStateCode.IDLE);
   const currentTagRef = useRef<string>();
@@ -51,7 +51,9 @@ export default function (plugin: IPlugin.IPluginDelegate, tag: IMedia.IUnique) {
   }, [tag, status]);
 
   useEffect(() => {
-    query();
+    if (tag) {
+      query();
+    }
   }, [tag]);
 
   return [query, sheets, status] as const;

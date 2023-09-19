@@ -8,13 +8,19 @@ export default function (plugin: IPlugin.IPluginDelegate) {
 
   const query = useCallback(async () => {
     try {
-      const result = await callPluginDelegateMethod(plugin, 'getRecommendSheetTags');
+      const result = await callPluginDelegateMethod(
+        plugin,
+        "getRecommendSheetTags"
+      );
       if (!result) {
         throw new Error();
       }
       setTags(result);
     } catch {
-      setTags(null);
+      setTags({
+        pinned: [],
+        data: [],
+      });
     }
   }, []);
 
