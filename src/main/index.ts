@@ -30,7 +30,6 @@ if(process.platform === 'win32') {
     const appPath = app.getPath('exe');
     const portablePath = path.resolve(appPath, "../portable");
     const portableFolderStat = fs.statSync(portablePath);
-    console.log(portablePath);
     if (portableFolderStat.isDirectory()) {
       const appPathNames = [
         "appData",
@@ -41,7 +40,7 @@ if(process.platform === 'win32') {
       });
     }
   } catch (e){
-    console.log(e)
+    // console.log(e)
   }
 }
 

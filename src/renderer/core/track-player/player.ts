@@ -300,6 +300,7 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
             artist: music.artist,
             id: music.id,
             album: music.album,
+            artwork: music.artwork
           }
         : null
     );

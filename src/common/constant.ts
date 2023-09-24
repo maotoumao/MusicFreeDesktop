@@ -56,7 +56,7 @@ export const supportLocalMediaType = [
   ".ogg",
   ".acc",
   ".aac",
-  ".ape",
+  // ".ape",
   ".opus",
 ];
 

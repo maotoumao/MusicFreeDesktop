@@ -16,8 +16,7 @@ const config: ForgeConfig = {
     icon: path.resolve(__dirname, "res/logo"),
     executableName: "MusicFree",
     extraResource: [
-      path.resolve(__dirname, 'res'),
-      
+      path.resolve(__dirname, 'res')
     ],
   },
   rebuildConfig: {},
@@ -72,6 +71,13 @@ const config: ForgeConfig = {
         ],
       },
     }),
+    {
+      name: '@timfish/forge-externals-plugin',
+      config: {
+        externals: ['sharp'],
+        includeDeps: true
+      }
+    }
   ],
 };
 

@@ -28,6 +28,7 @@ import { encodeUrlHeaders } from "@/common/normalize-util";
 import { getQualityOrder } from "@/common/media-util";
 import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/main";
 import { getExtensionWindow, syncExtensionData } from "../core/extensions";
+import setThumbImg from "../utils/setThumbImg";
 
 let messageChannel: MessageChannelMain;
 
@@ -47,9 +48,9 @@ export default function setupIpcMain() {
     shell.openExternal(url);
   });
 
-  ipcMainOn('open-path', (path) => {
+  ipcMainOn("open-path", (path) => {
     shell.openPath(path);
-  })
+  });
 
   ipcMainHandle("show-open-dialog", (options) => {
     const mainWindow = getMainWindow();
@@ -80,6 +81,19 @@ export default function setupIpcMain() {
       currentMusic: musicItem,
     });
     setupTrayMenu();
+    // 设置当前缩略图
+    const mainWindow = getMainWindow();
+    if (mainWindow) {
+      const hwnd = mainWindow.getNativeWindowHandle().readBigUInt64LE(0);
+      setThumbImg(musicItem?.artwork, hwnd);
+      if(musicItem) {
+        mainWindow.setTitle(
+          musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : "")
+        );
+      } else {
+        mainWindow.setTitle(app.name);
+      }
+    }
   });
 
   ipcMainOn("sync-current-playing-state", (playerState) => {
@@ -101,9 +115,9 @@ export default function setupIpcMain() {
     setupTrayMenu();
   });
 
-  ipcMainHandle('app-get-path', pathName => {
+  ipcMainHandle("app-get-path", (pathName) => {
     return app.getPath(pathName as any);
-  })
+  });
 
   /** APP更新 */
   const updateSources = [
@@ -128,7 +142,6 @@ export default function setupIpcMain() {
     }
     return updateInfo;
   });
-
 
   ipcMainHandle("set-lyric-window", (enabled) => {
     setLyricWindow(enabled);
@@ -216,5 +229,4 @@ export async function setDesktopLyricLock(lockState: boolean) {
     }
   }
   setupTrayMenu();
-
 }
