@@ -84,8 +84,10 @@ export default function setupIpcMain() {
     // 设置当前缩略图
     const mainWindow = getMainWindow();
     if (mainWindow) {
-      const hwnd = mainWindow.getNativeWindowHandle().readBigUInt64LE(0);
-      setThumbImg(musicItem?.artwork, hwnd);
+      if(process.platform === 'win32') {
+        const hwnd = mainWindow.getNativeWindowHandle().readBigUInt64LE(0);
+        setThumbImg(musicItem?.artwork, hwnd);
+      }
       if(musicItem) {
         mainWindow.setTitle(
           musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : "")
