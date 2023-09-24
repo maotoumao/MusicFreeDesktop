@@ -21,6 +21,7 @@ export const mainConfig: Configuration = {
     alias: {
       "@": path.join(__dirname, "../src"),
       "@main": path.join(__dirname, "../src/main"),
+      "@native": path.join(__dirname, "../src/main/native_modules"),
     },
   },
   output: {
