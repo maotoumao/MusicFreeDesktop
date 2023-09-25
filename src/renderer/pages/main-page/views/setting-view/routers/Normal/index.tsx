@@ -32,6 +32,23 @@ export default function Normal(props: IProps) {
           },
         ]}
       ></RadioGroupSettingItem>
+      {window.globalData.platform === "win32" ? (
+        <RadioGroupSettingItem
+          label="任务栏缩略图样式 (重启应用后生效)"
+          keyPath="normal.taskbarThumb"
+          value={data.taskbarThumb}
+          options={[
+            {
+              value: 'artwork',
+              title: "当前播放歌曲的封面",
+            },
+            {
+              value: 'window',
+              title: "主窗口界面",
+            },
+          ]}
+        ></RadioGroupSettingItem>
+      ) : null}
       <RadioGroupSettingItem
         label="搜索历史记录最多保存条数"
         keyPath="normal.maxHistoryLength"
@@ -51,7 +68,7 @@ export default function Normal(props: IProps) {
           },
           {
             value: 200,
-          }
+          },
         ]}
       ></RadioGroupSettingItem>
     </div>

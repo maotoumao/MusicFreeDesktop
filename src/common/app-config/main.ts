@@ -144,3 +144,12 @@ export async function getAppConfigPath<K extends IAppConfigKeyPath>(
   const config = await getAppConfig();
   return objectPath.get(config, keyPath) ?? defaultAppConfig[keyPath];
 }
+
+export function getAppConfigPathSync<K extends IAppConfigKeyPath>(
+  keyPath: K
+): IAppConfigKeyPathValue<K> | undefined {
+  if(!cacheConfig) {
+    return null;
+  }
+  return objectPath.get(cacheConfig, keyPath) ?? defaultAppConfig[keyPath];
+}

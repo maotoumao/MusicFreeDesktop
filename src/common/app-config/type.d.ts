@@ -3,6 +3,7 @@ interface IConfig {
     closeBehavior: "exit" | "minimize";
     maxHistoryLength: number;
     checkUpdate: boolean;
+    taskbarThumb: 'window' | 'artwork'
   };
   playMusic: {
     /** 歌单内搜索区分大小写 */

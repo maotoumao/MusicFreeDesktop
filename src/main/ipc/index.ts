@@ -26,7 +26,11 @@ import { compare } from "compare-versions";
 import { getPluginByMedia } from "../core/plugin-manager";
 import { encodeUrlHeaders } from "@/common/normalize-util";
 import { getQualityOrder } from "@/common/media-util";
-import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/main";
+import {
+  getAppConfigPath,
+  getAppConfigPathSync,
+  setAppConfigPath,
+} from "@/common/app-config/main";
 import { getExtensionWindow, syncExtensionData } from "../core/extensions";
 import setThumbImg from "../utils/set-thumb-img";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
@@ -73,6 +77,7 @@ export default function setupIpcMain() {
     app.exit(0);
   });
 
+  const thumbStyle = getAppConfigPathSync("normal.taskbarThumb");
   ipcMainOn("sync-current-music", (musicItem) => {
     currentMusicInfoStore.setValue((prev) => ({
       ...prev,
@@ -85,7 +90,7 @@ export default function setupIpcMain() {
     // 设置当前缩略图
     const mainWindow = getMainWindow();
     if (mainWindow) {
-      if (process.platform === "win32") {
+      if (process.platform === "win32" && thumbStyle === "artwork") {
         const hwnd = mainWindow.getNativeWindowHandle().readBigUInt64LE(0);
         setThumbImg(musicItem?.artwork, hwnd);
       }
@@ -108,7 +113,9 @@ export default function setupIpcMain() {
       playerState: playerState ?? PlayerState.None,
     });
     setupTrayMenu();
-    setThumbbarBtns(playerState === PlayerState.Playing);
+    if (process.platform === "win32") {
+      setThumbbarBtns(playerState === PlayerState.Playing);
+    }
   });
 
   ipcMainOn("sync-current-repeat-mode", (repeatMode) => {
