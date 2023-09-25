@@ -2,7 +2,6 @@ import { asyncCacheFn } from "@/common/cache-fn";
 import axios from "axios";
 import fs from "fs/promises";
 import sharp from "sharp";
-import TaskbarThumbnailManager from "@native/TaskbarThumbnailManager/TaskbarThumbnailManager.node";
 import { getResPath } from "./get-res-path";
 
 const getDefaultAlbumBuffer = asyncCacheFn(async () => {
@@ -12,6 +11,7 @@ const getDefaultAlbumBuffer = asyncCacheFn(async () => {
 let hasHooked = false;
 
 export default async function (src: string, hwnd: bigint) {
+  const TaskbarThumbnailManager = (await import("@native/TaskbarThumbnailManager/TaskbarThumbnailManager.node")).default;
   if (!hasHooked) {
     TaskbarThumbnailManager.config(hwnd);
     hasHooked = true;
