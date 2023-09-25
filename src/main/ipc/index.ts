@@ -28,7 +28,8 @@ import { encodeUrlHeaders } from "@/common/normalize-util";
 import { getQualityOrder } from "@/common/media-util";
 import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/main";
 import { getExtensionWindow, syncExtensionData } from "../core/extensions";
-import setThumbImg from "../utils/setThumbImg";
+import setThumbImg from "../utils/set-thumb-img";
+import setThumbbarBtns from "../utils/set-thumbbar-btns";
 
 let messageChannel: MessageChannelMain;
 
@@ -84,11 +85,11 @@ export default function setupIpcMain() {
     // 设置当前缩略图
     const mainWindow = getMainWindow();
     if (mainWindow) {
-      if(process.platform === 'win32') {
+      if (process.platform === "win32") {
         const hwnd = mainWindow.getNativeWindowHandle().readBigUInt64LE(0);
         setThumbImg(musicItem?.artwork, hwnd);
       }
-      if(musicItem) {
+      if (musicItem) {
         mainWindow.setTitle(
           musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : "")
         );
@@ -107,6 +108,7 @@ export default function setupIpcMain() {
       playerState: playerState ?? PlayerState.None,
     });
     setupTrayMenu();
+    setThumbbarBtns(playerState === PlayerState.Playing);
   });
 
   ipcMainOn("sync-current-repeat-mode", (repeatMode) => {

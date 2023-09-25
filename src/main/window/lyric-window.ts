@@ -1,5 +1,5 @@
 import { BrowserWindow, app, screen, nativeImage } from "electron";
-import { getResPath } from "../utils/getResPath";
+import { getResPath } from "../utils/get-res-path";
 import injectGlobalData from "./common/inject-global-data";
 import makeWindowFullyDraggable from "./common/make-window-fully-draggable";
 import {

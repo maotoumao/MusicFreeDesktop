@@ -3,7 +3,7 @@ import axios from "axios";
 import fs from "fs/promises";
 import sharp from "sharp";
 import TaskbarThumbnailManager from "@native/TaskbarThumbnailManager/TaskbarThumbnailManager.node";
-import { getResPath } from "./getResPath";
+import { getResPath } from "./get-res-path";
 
 const getDefaultAlbumBuffer = asyncCacheFn(async () => {
   return await fs.readFile(getResPath("album-cover.jpeg"));
