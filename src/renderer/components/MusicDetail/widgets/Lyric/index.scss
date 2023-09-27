@@ -49,4 +49,11 @@
       opacity: 1;
     }
   }
+
+
+  & .search-lyric {
+    color: var(--linkColor);
+    text-decoration: underline;
+  }
+
 }

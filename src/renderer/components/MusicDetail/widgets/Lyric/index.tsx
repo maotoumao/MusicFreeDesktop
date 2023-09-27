@@ -121,7 +121,12 @@ export default function Lyric() {
         <Condition condition={currentLrc !== null} falsy={<Loading></Loading>}>
           <Condition
             condition={currentLrc?.parser}
-            falsy={<div className="lyric-item">暂无歌词</div>}
+            falsy={<>
+              <div className="lyric-item">暂无歌词</div>
+              <div className="lyric-item search-lyric" role="button" onClick={() => {
+                console.log("search");
+              }}>搜索歌词</div>
+            </>}
           >
             {currentLrc?.parser?.getLyric?.()?.map((lrc, index) => (
               <div
