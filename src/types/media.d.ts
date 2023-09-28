@@ -3,7 +3,8 @@ declare namespace IMedia {
         music: IMusic.IMusicItem;
         album: IAlbum.IAlbumItem;
         artist: IArtist.IArtistItem;
-        sheet: IMusic.IMusicSheetItem
+        sheet: IMusic.IMusicSheetItem;
+        lyric: ILyric.ILyricItem;
     };
 
     export type SupportMediaType = keyof SupportMediaItem;
@@ -139,6 +140,13 @@ declare namespace IArtist {
 
 
 declare namespace ILyric {
+
+    interface ILyricItem extends IMusic.IMusicItem {
+        /** 歌词（无时间戳） */
+        rawLrcTxt?: string;
+    }
+
+
     interface ILyricSource  {
         lrc?: string;
         rawLrc?: string;

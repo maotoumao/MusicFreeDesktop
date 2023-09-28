@@ -10,6 +10,8 @@ import {
 } from "@/renderer/utils/user-perference";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import { toast } from "react-toastify";
+import { showModal } from "@/renderer/components/Modal";
+import { getCurrentMusic } from "@/renderer/core/track-player/player";
 
 const fontSizeList = Array(25)
   .fill(0)
@@ -124,7 +126,9 @@ export default function Lyric() {
             falsy={<>
               <div className="lyric-item">暂无歌词</div>
               <div className="lyric-item search-lyric" role="button" onClick={() => {
-                console.log("search");
+                showModal('SearchLyric', {
+                  "defaultTitle": getCurrentMusic()?.title
+                })
               }}>搜索歌词</div>
             </>}
           >
