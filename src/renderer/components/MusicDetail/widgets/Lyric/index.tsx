@@ -221,6 +221,8 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           <SvgAsset iconName="font-size-larger"></SvgAsset>
         </div>
       </div>
+      <div className="divider"></div>
+
       <div
         className="lyric-ctx-menu--row-container"
         role="button"
@@ -241,6 +243,18 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
       >
         下载歌词(纯文本)
       </div>
+      <div className="divider"></div>
+      <div
+        className="lyric-ctx-menu--row-container"
+        role="button"
+        onClick={() => {
+          showModal("SearchLyric", {
+            defaultTitle: lyricParser?.getCurrentMusicItem()?.title
+          })
+        }}
+      >
+        搜索歌词
+      </div> 
     </>
   );
 }

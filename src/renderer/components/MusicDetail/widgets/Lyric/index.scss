@@ -60,9 +60,6 @@
   width: 100%;
   display: flex;
   align-items: center;
-  border-bottom: 1px;
-  border-bottom-color: var(--dividerColor);
-  border-bottom-style: solid;
 
   & .font-size-button {
     width: 36px;
@@ -98,6 +95,10 @@
   align-items: center;
   padding-left: 12px;
   box-sizing: border-box;
+
+  &:hover {
+    background-color: var(--listHoverColor);
+  }
 
 }
 
