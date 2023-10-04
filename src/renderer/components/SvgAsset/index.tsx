@@ -16,6 +16,8 @@ export type SvgAssetIconNames =
   | "document-plus"
   | "fire"
   | "folder-open"
+  | "font-size-larger"
+  | "font-size-smaller"
   | "headphone"
   | "heart-outline"
   | "heart"

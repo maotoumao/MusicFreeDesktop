@@ -5,7 +5,7 @@ import rendererAppConfig from "@/common/app-config/renderer";
 
 export default async function () {
   // let prevTimestamp = 0;
-
+  // TODO: broadcast
   ipcRendererOn('sync-extension-data', (data) => {
     currentLyricStore.setValue(prev => ({
       ...prev,

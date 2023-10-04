@@ -11,6 +11,7 @@ import searchResultStore from "./hooks/searchResultStore";
 import { getSearchablePlugins } from "@/renderer/core/plugin-delegate";
 import { Tab } from "@headlessui/react";
 import Loading from "@/renderer/components/Loading";
+import SearchResult from "./searchResult";
 
 interface IProps {
     defaultTitle?: string;
@@ -64,7 +65,7 @@ export default function SearchLyric(props: IProps) {
                     <Tab.Panels className={"tab-panels-container"}>
                         {availablePlugins.map((plugin) => (
                             <Tab.Panel className="tab-panel-container" key={plugin.hash}>
-                                
+                                <SearchResult data={searchResults.data[plugin.hash]}></SearchResult>
                             </Tab.Panel>
                         ))}
                     </Tab.Panels>

@@ -7,7 +7,6 @@
   cursor: default;
   position: relative;
 
-
   &::-webkit-scrollbar {
     display: none;
   }
@@ -50,10 +49,63 @@
     }
   }
 
-
   & .search-lyric {
     color: var(--linkColor);
     text-decoration: underline;
   }
+}
 
+.lyric-ctx-menu--font-container {
+  height: 48px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px;
+  border-bottom-color: var(--dividerColor);
+  border-bottom-style: solid;
+
+  & .font-size-button {
+    width: 36px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    flex-grow: 0;
+
+    & svg {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+  }
+  & input {
+    flex: 1;
+    width: 0;
+    text-align: center;
+    margin: 0 12px;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+  }
+}
+
+.lyric-ctx-menu--row-container {
+  height: 36px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  box-sizing: border-box;
+
+}
+
+.lyric-ctx-menu--set-font-title {
+  margin-top: 12px;
+  font-weight: 600;
+  opacity: 0.6;
+  font-size: 1rem;
+  height: 14px;
+  padding-left: 12px;
 }

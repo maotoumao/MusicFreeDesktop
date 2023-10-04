@@ -38,8 +38,10 @@ export const createMainWindow = (): BrowserWindow => {
   mainWindow.loadURL(initUrl.toString());
 
   if (!app.isPackaged) {
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    mainWindow.on("ready-to-show", () => {
+      // Open the DevTools.
+      mainWindow.webContents.openDevTools();
+    });
   }
 
   mainWindow.webContents.session.webRequest.onBeforeSendHeaders(

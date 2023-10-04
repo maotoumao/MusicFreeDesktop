@@ -1,8 +1,8 @@
 import Store from "@/common/store";
 import SvgAsset, { SvgAssetIconNames } from "../SvgAsset";
 import "./index.scss";
-import Condition from "../Condition";
-import { useEffect, useMemo, useRef, useState } from "react";
+import Condition, { If, IfTruthy } from "../Condition";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 export interface IContextMenuItem {
   /** 左侧图标 */
@@ -21,7 +21,7 @@ export interface IContextMenuItem {
 
 interface IContextMenuData {
   /** 菜单 */
-  menuItems: IContextMenuItem[];
+  menuItems?: IContextMenuItem[];
   /** 出现位置 x */
   x: number;
   /** 出现位置 y */
@@ -32,12 +32,26 @@ interface IContextMenuData {
     menuItem?: IContextMenuItem
   ) => void;
   onItemClick?: (value: any) => void;
+
+  /** 自定义的菜单 */
+  width?: number;
+  height?: number;
+  component?: ReactNode;
 }
 
 const contextMenuDataStore = new Store<IContextMenuData | null>(null);
 
 export function showContextMenu(
   contextMenuData: Pick<IContextMenuData, "menuItems" | "x" | "y">
+) {
+  contextMenuDataStore.setValue(contextMenuData);
+}
+
+export function showCustomContextMenu(
+  contextMenuData: Pick<
+    IContextMenuData,
+    "x" | "y" | "width" | "height" | "component"
+  >
 ) {
   contextMenuDataStore.setValue(contextMenuData);
 }
@@ -68,68 +82,73 @@ function SingleColumnContextMenuComponent(props: IContextMenuData) {
       ref={menuContainerRef}
     >
       {menuItems.map((item, index) => (
-        <Condition condition={item.show !== false} key={index}>
-          <Condition
-            condition={!item.divider}
-            falsy={<div className="divider"></div>}
-          >
-            <div
-              className="menu-item"
-              role="button"
-              onClick={() => {
-                item.onClick?.();
-                onItemClick?.(item);
-              }}
-              onMouseEnter={(e) => {
-                const subMenu = item.subMenu;
-                if (!subMenu) {
-                  setSubMenu?.(null, item);
-                  return;
-                }
+        <IfTruthy condition={item.show !== false} key={index}>
+          <If condition={!item.divider}>
+            <If.Falsy>
+              <div className="divider"></div>
+            </If.Falsy>
+            <If.Truthy>
+              <div
+                className="menu-item"
+                role="button"
+                onClick={() => {
+                  item.onClick?.();
+                  onItemClick?.(item);
+                }}
+                onMouseEnter={(e) => {
+                  const subMenu = item.subMenu;
+                  if (!subMenu) {
+                    setSubMenu?.(null, item);
+                    return;
+                  }
 
-                const realPos =
-                  y +
-                  (e.target as HTMLDivElement).offsetTop -
-                  menuContainerRef.current.scrollTop;
-                const realHeight = Math.min(
-                  subMenu.length * menuItemHeight,
-                  menuContainerMaxHeight
-                );
-                let [subX, subY] = [
-                  x - menuItemWidth - offset,
-                  realPos - realHeight / 2,
-                ];
-                if (x < window.innerWidth - x - offset - menuItemWidth) {
-                  subX = x + menuItemWidth + offset;
-                }
-                if (subY < 54) {
-                  subY = 54;
-                }
-                if (subY + realHeight > window.innerHeight - 64 - offset) {
-                  subY = window.innerHeight - 64 - realHeight - offset;
-                }
-                setSubMenu?.({
-                  menuItems: subMenu,
-                  x: subX,
-                  y: subY,
-                }, item);
-              }}
-              style={{
-                height: menuItemHeight,
-              }}
-            >
-              <Condition condition={item.icon}>
-                <div className="menu-item-icon">
-                  <SvgAsset iconName={item.icon}></SvgAsset>
-                </div>
-              </Condition>
-              <span>{item.title}</span>
-              <Condition condition={item.subMenu}>
-                <div className="menu-item-expand"></div>
-              </Condition>
-            </div>
-          </Condition>
-        </Condition>
+                  const realPos =
+                    y +
+                    (e.target as HTMLDivElement).offsetTop -
+                    menuContainerRef.current.scrollTop;
+                  const realHeight = Math.min(
+                    subMenu.length * menuItemHeight,
+                    menuContainerMaxHeight
+                  );
+                  let [subX, subY] = [
+                    x - menuItemWidth - offset,
+                    realPos - realHeight / 2,
+                  ];
+                  if (x < window.innerWidth - x - offset - menuItemWidth) {
+                    subX = x + menuItemWidth + offset;
+                  }
+                  if (subY < 54) {
+                    subY = 54;
+                  }
+                  if (subY + realHeight > window.innerHeight - 64 - offset) {
+                    subY = window.innerHeight - 64 - realHeight - offset;
+                  }
+                  setSubMenu?.(
+                    {
+                      menuItems: subMenu,
+                      x: subX,
+                      y: subY,
+                    },
+                    item
+                  );
+                }}
+                style={{
+                  height: menuItemHeight,
+                }}
+              >
+                <IfTruthy condition={item.icon}>
+                  <div className="menu-item-icon">
+                    <SvgAsset iconName={item.icon}></SvgAsset>
+                  </div>
+                </IfTruthy>
+                <span>{item.title}</span>
+                <IfTruthy condition={item.subMenu}>
+                  <div className="menu-item-expand"></div>
+                </IfTruthy>
+              </div>
+            </If.Truthy>
+          </If>
+        </IfTruthy>
       ))}
     </div>
   );
@@ -139,7 +158,7 @@ const offset = 6;
 
 export function ContextMenuComponent() {
   const contextMenuData = contextMenuDataStore.useValue();
-  const { menuItems, x, y } = contextMenuData ?? {};
+  const { menuItems, x, y, width, height, component } = contextMenuData ?? {};
   const [subMenuData, setSubMenuData] = useState<IContextMenuData | null>(null);
 
   const [actualX, actualY] = useMemo(() => {
@@ -148,25 +167,30 @@ export function ContextMenuComponent() {
     }
     const isLeft = x < window.innerWidth / 2 ? 0 : 1;
     const isTop = y < window.innerHeight / 2 ? 0 : 2;
-    const validItemsHeight = Math.min(
-      menuItems.reduce(
-        (prev, curr) =>
-          prev +
-          (curr.show !== false ? (curr.divider ? 1 : menuItemHeight) : 0),
-        menuItemHeight / 2
-      ),
+    
+    const containerHeight = Math.min(
+      component
+        ? height
+        : menuItems.reduce(
+            (prev, curr) =>
+              prev +
+              (curr.show !== false ? (curr.divider ? 1 : menuItemHeight) : 0),
+            menuItemHeight / 2
+          ),
       menuContainerMaxHeight
     );
 
+    const containerWidth = width ?? menuItemWidth;
+
     switch (isLeft + isTop) {
-      case 0:
+      case 0: // 左上角
         return [x + offset, y + offset];
-      case 1:
-        return [x - menuItemWidth - offset, y + offset];
-      case 2:
-        return [x + offset, y - offset - validItemsHeight];
-      case 3:
-        return [x - menuItemWidth - offset, y - offset - validItemsHeight];
+      case 1: // 右上角
+        return [x - containerWidth - offset, y + offset];
+      case 2: // 左下角
+        return [x + offset, y - offset - containerHeight];
+      case 3: // 右下角
+        return [x - containerWidth - offset, y - offset - containerHeight];
     }
   }, [x, y]);
 
@@ -187,33 +211,49 @@ export function ContextMenuComponent() {
     setSubMenuData(null);
   }, [contextMenuData]);
 
+
   return (
-    <Condition condition={contextMenuData !== null}>
-      <SingleColumnContextMenuComponent
-        menuItems={menuItems}
-        x={actualX}
-        y={actualY}
-        setSubMenu={(data, menuItem) => {
-          setSubMenuData(
-            data
-              ? {
-                  ...data,
-                  onItemClick(value) {
-                    menuItem?.onClick?.(value);
-                  },
-                }
-              : data
-          );
-        }}
-      ></SingleColumnContextMenuComponent>
-      <Condition condition={subMenuData}>
+    <If condition={contextMenuData !== null && !component}>
+      <If.Truthy>
         <SingleColumnContextMenuComponent
-          menuItems={subMenuData?.menuItems}
-          x={subMenuData?.x}
-          y={subMenuData?.y}
-          onItemClick={subMenuData?.onItemClick}
+          menuItems={menuItems}
+          x={actualX}
+          y={actualY}
+          setSubMenu={(data, menuItem) => {
+            setSubMenuData(
+              data
+                ? {
+                    ...data,
+                    onItemClick(value) {
+                      menuItem?.onClick?.(value);
+                    },
+                  }
+                : data
+            );
+          }}
         ></SingleColumnContextMenuComponent>
-      </Condition>
-    </Condition>
+        <Condition condition={subMenuData}>
+          <SingleColumnContextMenuComponent
+            menuItems={subMenuData?.menuItems}
+            x={subMenuData?.x}
+            y={subMenuData?.y}
+            onItemClick={subMenuData?.onItemClick}
+          ></SingleColumnContextMenuComponent>
+        </Condition>
+      </If.Truthy>
+      <If.Falsy>
+        <div
+          className="context-menu--single-column-container shadow backdrop-color"
+          style={{
+            width: width ?? menuItemWidth,
+            top: actualY,
+            left: actualX,
+            maxHeight: menuContainerMaxHeight,
+          }}
+        >
+          {component}
+        </div>
+      </If.Falsy>
+    </If>
   );
 }
