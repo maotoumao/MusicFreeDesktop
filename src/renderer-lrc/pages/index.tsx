@@ -7,6 +7,7 @@ import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import { PlayerState } from "@/renderer/core/track-player/enum";
+import getTextWidth from "@/renderer/utils/get-text-width";
 
 export default function LyricWindowPage() {
   const lyricStore = currentLyricStore.useValue();
@@ -23,6 +24,22 @@ export default function LyricWindowPage() {
       setShowOperations(false);
     }
   }, [lockLyric]);
+
+  const textWidth = useMemo(() => {
+    if (lyric[0] && lyric[0].lrc) {
+      return getTextWidth(lyric[0].lrc, {
+        fontSize: lyricAppConfig?.fontSize ?? 48,
+        fontFamily: lyricAppConfig?.fontData?.family || undefined,
+      });
+    } else if (currentMusic) {
+      return getTextWidth(`${currentMusic.title} - ${currentMusic.artist}`, {
+        fontSize: lyricAppConfig?.fontSize ?? 48,
+        fontFamily: lyricAppConfig?.fontData?.family || undefined,
+      });
+      
+    }
+    return 0;
+  }, [lyric, lyricAppConfig, currentMusic]);
 
   return (
     <div
@@ -145,6 +162,7 @@ export default function LyricWindowPage() {
             WebkitTextStrokeColor: lyricAppConfig?.strokeColor,
             fontSize: lyricAppConfig?.fontSize,
             fontFamily: lyricAppConfig?.fontData?.family || undefined,
+            left: textWidth > window.innerWidth ? 0 : undefined,
           }}
         >
           {lyric[0]?.lrc ??

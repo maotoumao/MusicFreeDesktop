@@ -44,8 +44,9 @@ export default function setupIpcMain() {
       if (skipTaskBar) {
         mainWindow.hide();
         mainWindow.setSkipTaskbar(true);
+      } else {
+        mainWindow.minimize();
       }
-      mainWindow.minimize();
     }
   });
 

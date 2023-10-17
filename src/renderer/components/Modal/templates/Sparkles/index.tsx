@@ -4,7 +4,7 @@ import "./index.scss";
 import wcChannelImg from "@/assets/imgs/wechat_channel.jpg";
 
 export default function Sparkles() {
-  // TODO a标签不对
+  
   return (
     <Base withBlur defaultClose>
       <div className="modal--sparkles-container shadow backdrop-color">
