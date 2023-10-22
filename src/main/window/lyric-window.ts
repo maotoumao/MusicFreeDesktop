@@ -7,7 +7,7 @@ import {
   getAppConfigPath,
   setAppConfigPath,
 } from "@/common/app-config/main";
-import { registerExtension, unregisterExtension } from "../core/extensions";
+import { registerExtension } from "../core/extensions";
 import { ipcMainOn, ipcMainSend } from "@/common/ipc-util/main";
 import { currentMusicInfoStore } from "../store/current-music";
 import debounce from "lodash.debounce";
@@ -16,7 +16,7 @@ import debounce from "lodash.debounce";
 // plugin that tells the Electron app where to look for the Webpack-bundled app code (depending on
 // whether you're running in development or production).
 declare const LRC_WINDOW_WEBPACK_ENTRY: string;
-declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+declare const LRC_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 /** 歌词窗口创建 */
 let lyricWindow: BrowserWindow | null = null;
@@ -42,7 +42,7 @@ export const createLyricWindow = (): BrowserWindow => {
     width,
     transparent: true,
     webPreferences: {
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: LRC_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegration: true,
       webSecurity: false,
       sandbox: false,
@@ -134,12 +134,12 @@ export const createLyricWindow = (): BrowserWindow => {
   //   lyricWindow.setIgnoreMouseEvents(true, {
   //     forward: true
   //   })
+
   registerExtension(lyricWindow);
   return lyricWindow;
 };
 
 export const closeLyricWindow = () => {
-  unregisterExtension(lyricWindow);
   lyricWindow?.close();
   lyricWindow = null;
 };

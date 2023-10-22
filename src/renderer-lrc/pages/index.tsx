@@ -8,16 +8,27 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import getTextWidth from "@/renderer/utils/get-text-width";
+import command from "../utils/command";
 
 export default function LyricWindowPage() {
   const lyricStore = currentLyricStore.useValue();
-  const { lrc: lyric = [], currentMusic, playerState } = lyricStore;
+  const { lyric = [], music: currentMusic, playerState } = lyricStore;
   const lyricAppConfig = rendererAppConfig.useAppConfig()?.lyric;
 
   const lockLyric = lyricAppConfig?.lockLyric;
   const [showOperations, setShowOperations] = useState(false);
 
   const mouseOverTimerRef = useRef<number | null>(null);
+
+  // useEffect(() => {
+  //   setInterval(() => {
+  //     window.extPort.sendToMain({
+  //       cmd: " from lyric window!!!",
+  //     });
+  //   }, 2000);
+
+  //   window.extPort.on(console.log);
+  // }, []);
 
   useEffect(() => {
     if (lockLyric) {
@@ -26,7 +37,7 @@ export default function LyricWindowPage() {
   }, [lockLyric]);
 
   const textWidth = useMemo(() => {
-    if (lyric[0] && lyric[0].lrc) {
+    if (lyric && lyric[0] && lyric[0].lrc) {
       return getTextWidth(lyric[0].lrc, {
         fontSize: lyricAppConfig?.fontSize ?? 48,
         fontFamily: lyricAppConfig?.fontData?.family || undefined,
@@ -36,7 +47,6 @@ export default function LyricWindowPage() {
         fontSize: lyricAppConfig?.fontSize ?? 48,
         fontFamily: lyricAppConfig?.fontData?.family || undefined,
       });
-      
     }
     return 0;
   }, [lyric, lyricAppConfig, currentMusic]);
@@ -98,9 +108,7 @@ export default function LyricWindowPage() {
             <div
               className="operation-button"
               onClick={() => {
-                ipcRendererSend("player-cmd", {
-                  cmd: "skip-prev",
-                });
+                command("skip-prev");
               }}
             >
               <SvgAsset iconName="skip-left"></SvgAsset>
@@ -109,13 +117,12 @@ export default function LyricWindowPage() {
               className="operation-button"
               onClick={() => {
                 if (currentMusic) {
-                  ipcRendererSend("player-cmd", {
-                    cmd: "set-player-state",
-                    payload:
-                      playerState === PlayerState.Playing
-                        ? PlayerState.Paused
-                        : PlayerState.Playing,
-                  });
+                  command(
+                    "set-player-state",
+                    playerState === PlayerState.Playing
+                      ? PlayerState.Paused
+                      : PlayerState.Playing
+                  );
                 }
               }}
             >
@@ -128,9 +135,7 @@ export default function LyricWindowPage() {
             <div
               className="operation-button"
               onClick={() => {
-                ipcRendererSend("player-cmd", {
-                  cmd: "skip-next",
-                });
+                command("skip-next");
               }}
             >
               <SvgAsset iconName="skip-right"></SvgAsset>
@@ -165,7 +170,7 @@ export default function LyricWindowPage() {
             left: textWidth > window.innerWidth ? 0 : undefined,
           }}
         >
-          {lyric[0]?.lrc ??
+          {lyric?.[0]?.lrc ??
             (currentMusic
               ? `${currentMusic.title} - ${currentMusic.artist}`
               : "暂无歌词")}

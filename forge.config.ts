@@ -59,7 +59,7 @@ const config: ForgeConfig = {
             js: "./src/renderer-lrc/document/index.tsx",
             name: "lrc_window",
             preload: {
-              js: "./src/preload/index.ts",
+              js: "./src/preload/extension.ts",
             },
           },
           /** webworkers */

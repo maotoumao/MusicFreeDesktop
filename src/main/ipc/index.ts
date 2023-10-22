@@ -31,11 +31,10 @@ import {
   getAppConfigPathSync,
   setAppConfigPath,
 } from "@/common/app-config/main";
-import { getExtensionWindow, syncExtensionData } from "../core/extensions";
+// import { getExtensionWindow, syncExtensionData } from "../core/extensions";
 import setThumbImg from "../utils/set-thumb-img";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
 
-let messageChannel: MessageChannelMain;
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -84,9 +83,9 @@ export default function setupIpcMain() {
       ...prev,
       currentMusic: musicItem ?? null,
     }));
-    syncExtensionData({
-      currentMusic: musicItem,
-    });
+    // syncExtensionData({
+    //   currentMusic: musicItem,
+    // });
     setupTrayMenu();
     // 设置当前缩略图
     const mainWindow = getMainWindow();
@@ -110,9 +109,9 @@ export default function setupIpcMain() {
       ...prev,
       currentPlayerState: playerState ?? PlayerState.None,
     }));
-    syncExtensionData({
-      playerState: playerState ?? PlayerState.None,
-    });
+    // syncExtensionData({
+    //   playerState: playerState ?? PlayerState.None,
+    // });
     setupTrayMenu();
     if (process.platform === "win32") {
       setThumbbarBtns(playerState === PlayerState.Playing);
@@ -168,9 +167,9 @@ export default function setupIpcMain() {
       ...prev,
       lrc: data.lrc,
     }));
-    syncExtensionData({
-      lrc: data.lrc,
-    });
+    // syncExtensionData({
+    //   lrc: data.lrc,
+    // });
   });
 
   ipcMainOn("set-desktop-lyric-lock", (lockState) => {
@@ -188,26 +187,6 @@ export default function setupIpcMain() {
     });
   });
 
-  ipcMainOn("player-cmd", (data) => {
-    ipcMainSendMainWindow("player-cmd", data);
-  });
-
-  ipcMainOn("extension-inited", (_, evt) => {
-    const targetWindow = getExtensionWindow(evt.sender.id);
-
-    if (targetWindow) {
-      const currentMusicInfo = currentMusicInfoStore.getValue();
-
-      syncExtensionData(
-        {
-          currentMusic: currentMusicInfo.currentMusic,
-          playerState: currentMusicInfo.currentPlayerState,
-          lrc: currentMusicInfo.lrc,
-        },
-        targetWindow
-      );
-    }
-  });
 }
 
 export async function setLyricWindow(enabled: boolean) {

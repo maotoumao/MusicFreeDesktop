@@ -1,6 +1,11 @@
 import Store from "@/common/store";
 import trackPlayer from "./internal";
-import { PlayerState, RepeatMode, TrackPlayerEvent } from "./enum";
+import {
+  ICurrentLyric,
+  PlayerState,
+  RepeatMode,
+  TrackPlayerEvent,
+} from "./enum";
 import trackPlayerEventsEmitter from "./event";
 import shuffle from "lodash.shuffle";
 import {
@@ -36,13 +41,6 @@ const musicQueueStore = new Store<IMusic.IMusicItem[]>([]);
 /** 当前播放 */
 const currentMusicStore = new Store<IMusic.IMusicItem | null>(null);
 
-interface ICurrentLyric {
-  parser?: LyricParser;
-  currentLrc?: {
-    lrc?: ILyric.IParsedLrcItem; // 当前时刻的歌词
-    index?: number; // 下标
-  };
-}
 /** 当前歌词解析器 */
 const currentLyricStore = new Store<ICurrentLyric | null>(null);
 
@@ -102,7 +100,7 @@ export async function setupPlayer() {
     setSpeed(speed);
   }
 
-  trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
+  trackPlayerEventsEmitter.emit(TrackPlayerEvent.NeedRefreshLyric);
   try {
     const { mediaSource, quality } = await getMediaSource(currentMusic, {
       quality:
@@ -137,14 +135,14 @@ function setupEvents() {
     }
   });
 
-  trackPlayerEventsEmitter.on(TrackPlayerEvent.TimeUpdated, (res) => {
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.ProgressChanged, (res) => {
     progressStore.setValue(res);
     setUserPerference("currentProgress", res.currentTime);
     const currentLyric = currentLyricStore.getValue();
     if (currentLyric?.parser) {
       const lrcItem = currentLyric.parser.getPosition(res.currentTime);
       if (lrcItem?.lrc !== currentLyric.currentLrc?.lrc) {
-        currentLyricStore.setValue({
+        setCurrentLyric({
           parser: currentLyric.parser,
           currentLrc: lrcItem,
         });
@@ -164,7 +162,6 @@ function setupEvents() {
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.StateChanged, (st) => {
     playerStateStore.setValue(st);
-    ipcRendererSend("sync-current-playing-state", st);
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.Error, async () => {
@@ -184,11 +181,11 @@ function setupEvents() {
   });
 
   // 更新当前音乐的歌词
-  trackPlayerEventsEmitter.on(TrackPlayerEvent.UpdateLyric, async () => {
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.NeedRefreshLyric, async () => {
     const currentMusic = currentMusicStore.getValue();
     // 当前没有歌曲
     if (!currentMusic) {
-      currentLyricStore.setValue(null);
+      setCurrentLyric(null);
       return;
     }
 
@@ -210,17 +207,17 @@ function setupEvents() {
           return;
         }
         if (!lyric?.rawLrc) {
-          currentLyricStore.setValue({});
+          setCurrentLyric({});
           return;
         }
         const rawLrc = lyric?.rawLrc;
         const parser = new LyricParser(rawLrc, currentMusic);
-        currentLyricStore.setValue({
+        setCurrentLyric({
           parser,
         });
       } catch (e) {
         console.log(e, "歌词解析失败");
-        currentLyricStore.setValue({});
+        setCurrentLyric({});
         // 解析歌词失败
       }
     }
@@ -228,23 +225,6 @@ function setupEvents() {
 
   navigator.mediaSession.setActionHandler("nexttrack", () => {
     skipToNext();
-  });
-
-  ipcRendererOn("player-cmd", (data) => {
-    const { cmd, payload } = data;
-    if (cmd === "skip-next") {
-      skipToNext();
-    } else if (cmd === "skip-prev") {
-      skipToPrev();
-    } else if (cmd === "set-repeat-mode") {
-      setRepeatMode(payload as RepeatMode);
-    } else if (cmd === "set-player-state") {
-      if (payload === PlayerState.Playing) {
-        resumePlay();
-      } else {
-        pause();
-      }
-    }
   });
 
   navigator.mediaSession.setActionHandler("previoustrack", () => {
@@ -259,7 +239,6 @@ function setupEvents() {
     skipToPrev();
   });
   Evt.on("TOGGLE_PLAYER_STATE", () => {
-    console.log("on");
     const currentState = getPlayerState();
     if (currentState === PlayerState.Playing) {
       pause();
@@ -284,28 +263,18 @@ function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
 function setCurrentMusic(music: IMusic.IMusicItem | null) {
   if (!isSameMedia(music, currentMusicStore.getValue())) {
     currentMusicStore.setValue(music);
-    currentLyricStore.setValue(null);
-    trackPlayerEventsEmitter.emit(TrackPlayerEvent.UpdateLyric);
-    if(music) {
+    setCurrentLyric(null);
+    trackPlayerEventsEmitter.emit(TrackPlayerEvent.NeedRefreshLyric);
+    if (music) {
       setUserPerference("currentMusic", music);
     } else {
-      removeUserPerference('currentMusic');
+      removeUserPerference("currentMusic");
     }
-    ipcRendererSend(
-      "sync-current-music",
-      music
-        ? {
-            platform: music.platform,
-            title: music.title,
-            artist: music.artist,
-            id: music.id,
-            album: music.album,
-            artwork: music.artwork
-          }
-        : null
-    );
+
+    trackPlayerEventsEmitter.emit(TrackPlayerEvent.MusicChanged, music ?? null);
   } else {
     currentMusicStore.setValue(music);
+    // 相同的歌曲，不需要额外触发事件
   }
 }
 
@@ -314,6 +283,18 @@ function setCurrentQuality(quality: IMusic.IQualityKey) {
   currentQualityStore.setValue(quality);
 }
 
+function setCurrentLyric(lyric?: ICurrentLyric) {
+  const prev = currentLyricStore.getValue();
+  currentLyricStore.setValue(lyric);
+  if (lyric?.parser !== prev?.parser) {
+    trackPlayerEventsEmitter.emit(TrackPlayerEvent.LyricChanged, lyric?.parser);
+  } else if (lyric?.currentLrc === prev?.currentLrc) {
+    trackPlayerEventsEmitter.emit(
+      TrackPlayerEvent.CurrentLyricChanged,
+      lyric?.currentLrc
+    );
+  }
+}
 
 export const getCurrentMusic = currentMusicStore.getValue;
 
@@ -329,11 +310,15 @@ export const usePlayerState = playerStateStore.useValue;
 
 export const useRepeatMode = repeatModeStore.useValue;
 
+export const getRepeatMode = repeatModeStore.getValue;
+
 export const getMusicQueue = musicQueueStore.getValue;
 
 export const useMusicQueue = musicQueueStore.useValue;
 
 export const useLyric = currentLyricStore.useValue;
+
+export const getLyric = currentLyricStore.getValue;
 
 export const useVolume = currentVolumeStore.useValue;
 
@@ -366,7 +351,7 @@ export function setRepeatMode(repeatMode: RepeatMode) {
   repeatModeStore.setValue(repeatMode);
   setUserPerference("repeatMode", repeatMode);
   currentIndex = findMusicIndex(currentMusicStore.getValue());
-  ipcRendererSend("sync-current-repeat-mode", repeatMode);
+  trackPlayerEventsEmitter.emit(TrackPlayerEvent.RepeatModeChanged, repeatMode);
 }
 
 function findMusicIndex(musicItem?: IMusic.IMusicItem) {

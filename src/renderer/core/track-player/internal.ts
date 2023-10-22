@@ -54,7 +54,7 @@ class TrackPlayerInternal {
     };
 
     this.audio.ontimeupdate = () => {
-      trackPlayerEventsEmitter.emit(TrackPlayerEvent.TimeUpdated, {
+      trackPlayerEventsEmitter.emit(TrackPlayerEvent.ProgressChanged, {
         currentTime: this.audio.currentTime,
         duration: this.audio.duration, // 缓冲中是Infinity
       });

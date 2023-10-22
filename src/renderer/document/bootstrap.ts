@@ -14,6 +14,7 @@ import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 
 import * as Comlink from "comlink";
 import Downloader from "../core/downloader";
+import MessageManager from "../core/message-manager";
 
 setAutoFreeze(false);
 
@@ -25,6 +26,7 @@ export default async function () {
     trackPlayer.setupPlayer(),
     localMusic.setupLocalMusic(),
   ]);
+  await MessageManager.setupMessageManager();
   await window.themepack.setupThemePacks();
   setupLocalShortCut();
   dropHandler();

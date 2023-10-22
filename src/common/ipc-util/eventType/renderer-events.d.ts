@@ -39,12 +39,6 @@ declare namespace IpcEvents {
       ignore: boolean,
       window: 'main' | 'lyric'
     };
-    'player-cmd': {
-      cmd: IPlayerCmd,
-      payload?: any
-    },
-    /** 扩展窗口已经初始化完成 */
-    'extension-inited': undefined;
     /** 设置歌词窗口位置 */
     'set-lyric-window-pos': ICommon.IPoint;
 
