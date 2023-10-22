@@ -15,11 +15,12 @@ import SearchResult from "./searchResult";
 
 interface IProps {
     defaultTitle?: string;
+    musicItem?: IMusic.IMusicItem;
     defaultExtra?: boolean;
 }
 
 export default function SearchLyric(props: IProps) {
-    const { defaultTitle } = props;
+    const { defaultTitle, musicItem } = props;
 
     const [inputSearch, setInputSearch] = useState(defaultTitle ?? '');
 
@@ -65,7 +66,7 @@ export default function SearchLyric(props: IProps) {
                     <Tab.Panels className={"tab-panels-container"}>
                         {availablePlugins.map((plugin) => (
                             <Tab.Panel className="tab-panel-container" key={plugin.hash}>
-                                <SearchResult data={searchResults.data[plugin.hash]}></SearchResult>
+                                <SearchResult data={searchResults.data[plugin.hash]} musicItem={musicItem}></SearchResult>
                             </Tab.Panel>
                         ))}
                     </Tab.Panels>

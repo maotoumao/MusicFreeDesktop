@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { hideModal } from "../..";
 import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
@@ -16,7 +16,14 @@ interface IBaseModalProps {
 const baseId = "components--modal-base-container";
 
 function Base(props: IBaseModalProps) {
-  const { onDefaultClick, defaultClose = false, children, withBlur = true } = props;
+  const {
+    onDefaultClick,
+    defaultClose = false,
+    children,
+    withBlur = true,
+  } = props;
+
+  const trapCloseRef = useRef(false);
 
   return (
     <div
@@ -25,14 +32,27 @@ function Base(props: IBaseModalProps) {
         withBlur ? "blur10" : ""
       }`}
       role="button"
-      onClick={(e) => {
+      onMouseDown={(e) => {
         if ((e.target as HTMLElement)?.id === baseId) {
+          trapCloseRef.current = true;
+        } else {
+          trapCloseRef.current = false;
+        }
+      }}
+      onMouseUp={(e) => {
+        if ((e.target as HTMLElement)?.id === baseId && trapCloseRef.current) {
           if (defaultClose) {
             hideModal();
           } else {
             onDefaultClick?.();
           }
         }
+      }}
+      onMouseLeave={() => {
+        trapCloseRef.current = false;
+      }}
+      onMouseOut={() => {
+        trapCloseRef.current = false;
       }}
     >
       {children}

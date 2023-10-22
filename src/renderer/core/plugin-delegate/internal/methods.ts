@@ -55,3 +55,7 @@ export async function callPluginDelegateMethod<
     args,
   })) as ReturnType<IPlugin.IPluginInstanceMethods[T]>;
 }
+
+export function getPluginPrimaryKey(pluginItem: IPluginDelegateLike) {
+  return delegatePluginsStore.getValue().find(it => it.platform === pluginItem.platform)?.primaryKey ?? [];
+}

@@ -105,13 +105,14 @@ export function getInternalData<
 
 export function setInternalData<
   T extends Record<string, any>,
-  K extends keyof T = keyof T
+  K extends keyof T = keyof T,
+  R extends IMedia.IMediaBase = IMedia.IMediaBase
 >(
-  mediaItem: IMedia.IMediaBase,
+  mediaItem: R,
   internalProp: K,
   value: T[K] | null,
   newObj = false
-) {
+): R {
   if (newObj) {
     return {
       ...mediaItem,

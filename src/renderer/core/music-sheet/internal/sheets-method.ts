@@ -5,7 +5,7 @@ import {
   timeStampSymbol,
 } from "@/common/constant";
 import { nanoid } from "nanoid";
-import musicSheetDB from "./db";
+import musicSheetDB from "../../db/music-sheet-db";
 import { musicSheetsStore, starredSheetsStore } from "./store";
 import { produce } from "immer";
 import defaultSheet from "./default-sheet";

@@ -68,7 +68,7 @@ export interface TrackPlayerEventParams {
   [TrackPlayerEvent.StateChanged]: PlayerState;
   [TrackPlayerEvent.ProgressChanged]: CurrentTime;
   [TrackPlayerEvent.PlayEnd]: undefined;
-  [TrackPlayerEvent.NeedRefreshLyric]: undefined;
+  [TrackPlayerEvent.NeedRefreshLyric]: boolean;
   [TrackPlayerEvent.SpeedChanged]: number;
   [TrackPlayerEvent.VolumeChanged]: number;
   [TrackPlayerEvent.MusicChanged]: IMusic.IMusicItem | null;

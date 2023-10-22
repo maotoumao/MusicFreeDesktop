@@ -83,6 +83,7 @@ export default function Lyric() {
                   onClick={() => {
                     showModal("SearchLyric", {
                       defaultTitle: getCurrentMusic()?.title,
+                      musicItem: getCurrentMusic()
                     });
                   }}
                 >
@@ -117,7 +118,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
   const { setLyricFontSize, lyricParser } = props;
 
   const [fontSize, setFontSize] = useState<string | null>(
-    getUserPerference("inlineLyricFontSize")
+    getUserPerference("inlineLyricFontSize") ?? '13'
   );
 
   function handleFontSize(val: string | number) {
@@ -164,7 +165,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
 
   return (
     <>
-      <div className="lyric-ctx-menu--set-font-title">设置字体</div>
+      <div className="lyric-ctx-menu--set-font-title">设置字号</div>
       <div
         className="lyric-ctx-menu--font-container"
         onClick={(e) => e.stopPropagation()}
@@ -249,7 +250,8 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
         role="button"
         onClick={() => {
           showModal("SearchLyric", {
-            defaultTitle: lyricParser?.getCurrentMusicItem()?.title
+            defaultTitle: lyricParser?.getCurrentMusicItem()?.title,
+            musicItem: getCurrentMusic()
           })
         }}
       >

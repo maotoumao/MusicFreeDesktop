@@ -29,6 +29,7 @@ import rendererAppConfig from "@/common/app-config/renderer";
 import { delay } from "@/common/time-util";
 import { ipcRendererOn, ipcRendererSend } from "@/common/ipc-util/renderer";
 import Evt from "../events";
+import { getLinkedLyric } from "../link-lyric";
 
 const initProgress = {
   currentTime: 0,
@@ -181,7 +182,7 @@ function setupEvents() {
   });
 
   // 更新当前音乐的歌词
-  trackPlayerEventsEmitter.on(TrackPlayerEvent.NeedRefreshLyric, async () => {
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.NeedRefreshLyric, async (force) => {
     const currentMusic = currentMusicStore.getValue();
     // 当前没有歌曲
     if (!currentMusic) {
@@ -191,18 +192,31 @@ function setupEvents() {
 
     const currentLyric = currentLyricStore.getValue();
     // 已经有了
-    if (
+    if ((!force) &&
       currentLyric &&
       isSameMedia(currentLyric?.parser?.getCurrentMusicItem?.(), currentMusic)
     ) {
       return;
     } else {
       try {
-        const lyric = await callPluginDelegateMethod(
-          currentMusic,
-          "getLyric",
-          currentMusic
-        );
+        // 获取被关联的条目
+        const linkedLyricItem = await getLinkedLyric(currentMusic);
+        let lyric: ILyric.ILyricSource;
+        if (linkedLyricItem) {
+          lyric = await callPluginDelegateMethod(
+            linkedLyricItem,
+            "getLyric",
+            linkedLyricItem
+          );
+        }
+        if (!lyric) {
+          lyric = await callPluginDelegateMethod(
+            currentMusic,
+            "getLyric",
+            currentMusic
+          );
+        }
+
         if (!isSameMedia(currentMusic, currentMusicStore.getValue())) {
           return;
         }

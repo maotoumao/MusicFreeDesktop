@@ -9,7 +9,7 @@ import {
   getUserPerferenceIDB,
   setUserPerferenceIDB,
 } from "@/renderer/utils/user-perference";
-import musicSheetDB from "../music-sheet/internal/db";
+import musicSheetDB from "../db/music-sheet-db";
 import { internalDataKey, musicRefSymbol } from "@/common/constant";
 import { useEffect, useState } from "react";
 import Evt from "../events";

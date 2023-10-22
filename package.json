@@ -89,6 +89,7 @@
     "immer": "^10.0.2",
     "lodash.shuffle": "^4.2.0",
     "lodash.throttle": "^4.1.1",
+    "lru-cache": "^10.0.1",
     "music-metadata": "^8.1.4",
     "nanoid": "^4.0.2",
     "object-path": "^0.11.8",
