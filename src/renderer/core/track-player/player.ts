@@ -182,60 +182,64 @@ function setupEvents() {
   });
 
   // 更新当前音乐的歌词
-  trackPlayerEventsEmitter.on(TrackPlayerEvent.NeedRefreshLyric, async (force) => {
-    const currentMusic = currentMusicStore.getValue();
-    // 当前没有歌曲
-    if (!currentMusic) {
-      setCurrentLyric(null);
-      return;
-    }
+  trackPlayerEventsEmitter.on(
+    TrackPlayerEvent.NeedRefreshLyric,
+    async (force) => {
+      const currentMusic = currentMusicStore.getValue();
+      // 当前没有歌曲
+      if (!currentMusic) {
+        setCurrentLyric(null);
+        return;
+      }
 
-    const currentLyric = currentLyricStore.getValue();
-    // 已经有了
-    if ((!force) &&
-      currentLyric &&
-      isSameMedia(currentLyric?.parser?.getCurrentMusicItem?.(), currentMusic)
-    ) {
-      return;
-    } else {
-      try {
-        // 获取被关联的条目
-        const linkedLyricItem = await getLinkedLyric(currentMusic);
-        let lyric: ILyric.ILyricSource;
-        if (linkedLyricItem) {
-          lyric = await callPluginDelegateMethod(
-            linkedLyricItem,
-            "getLyric",
-            linkedLyricItem
-          );
-        }
-        if (!lyric) {
-          lyric = await callPluginDelegateMethod(
-            currentMusic,
-            "getLyric",
-            currentMusic
-          );
-        }
+      const currentLyric = currentLyricStore.getValue();
+      // 已经有了
+      if (
+        !force &&
+        currentLyric &&
+        isSameMedia(currentLyric?.parser?.getCurrentMusicItem?.(), currentMusic)
+      ) {
+        return;
+      } else {
+        try {
+          // 获取被关联的条目
+          const linkedLyricItem = await getLinkedLyric(currentMusic);
+          let lyric: ILyric.ILyricSource;
+          if (linkedLyricItem) {
+            lyric = await callPluginDelegateMethod(
+              linkedLyricItem,
+              "getLyric",
+              linkedLyricItem
+            );
+          }
+          if (!lyric) {
+            lyric = await callPluginDelegateMethod(
+              currentMusic,
+              "getLyric",
+              currentMusic
+            );
+          }
 
-        if (!isSameMedia(currentMusic, currentMusicStore.getValue())) {
-          return;
-        }
-        if (!lyric?.rawLrc) {
+          if (!isSameMedia(currentMusic, currentMusicStore.getValue())) {
+            return;
+          }
+          if (!lyric?.rawLrc) {
+            setCurrentLyric({});
+            return;
+          }
+          const rawLrc = lyric?.rawLrc;
+          const parser = new LyricParser(rawLrc, currentMusic);
+          setCurrentLyric({
+            parser,
+          });
+        } catch (e) {
+          console.log(e, "歌词解析失败");
           setCurrentLyric({});
-          return;
+          // 解析歌词失败
         }
-        const rawLrc = lyric?.rawLrc;
-        const parser = new LyricParser(rawLrc, currentMusic);
-        setCurrentLyric({
-          parser,
-        });
-      } catch (e) {
-        console.log(e, "歌词解析失败");
-        setCurrentLyric({});
-        // 解析歌词失败
       }
     }
-  });
+  );
 
   navigator.mediaSession.setActionHandler("nexttrack", () => {
     skipToNext();
