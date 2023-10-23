@@ -15,7 +15,7 @@ const linkLyricCache = new LRUCache({
   allowStale: false,
 });
 
-const linkLyricKey = "linkLyricKey";
+const linkLyricKey = "associatedLrc";
 
 export async function linkLyric(
   from: IMusic.IMusicItem,

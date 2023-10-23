@@ -12,6 +12,8 @@ import { isSameMedia } from "@/common/media-util";
 import { getCurrentMusic } from "@/renderer/core/track-player/player";
 import trackPlayerEventsEmitter from "@/renderer/core/track-player/event";
 import { TrackPlayerEvent } from "@/renderer/core/track-player/enum";
+import { toast } from "react-toastify";
+import { hideModal } from "../..";
 
 interface ISearchResultProps {
   data: ISearchLyricResult;
@@ -40,14 +42,20 @@ function SearchResult(props: ISearchResultProps) {
                     <div
                       className="lyric-item"
                       role="button"
-                      onClick={() => {
+                      onClick={async () => {
                         if (musicItem) {
-                          linkLyric(musicItem, it);
-                          if (isSameMedia(getCurrentMusic(), musicItem)) {
-                            trackPlayerEventsEmitter.emit(
-                              TrackPlayerEvent.NeedRefreshLyric,
-                              true
-                            );
+                          try {
+                            await linkLyric(musicItem, it);
+                            if (isSameMedia(getCurrentMusic(), musicItem)) {
+                              trackPlayerEventsEmitter.emit(
+                                TrackPlayerEvent.NeedRefreshLyric,
+                                true
+                              );
+                            }
+                            toast.success("已关联歌词~");
+                            hideModal();
+                          } catch (e) {
+                            toast.error(`关联歌词失败: ${e?.message ?? e}`);
                           }
                         }
                       }}

@@ -17,6 +17,10 @@ import { showModal } from "@/renderer/components/Modal";
 import { getCurrentMusic } from "@/renderer/core/track-player/player";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import LyricParser from "@/renderer/utils/lyric-parser";
+import { getLinkedLyric, unlinkLyric } from "@/renderer/core/link-lyric";
+import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
+import trackPlayerEventsEmitter from "@/renderer/core/track-player/event";
+import { TrackPlayerEvent } from "@/renderer/core/track-player/enum";
 
 export default function Lyric() {
   const currentLrc = trackPlayer.useLyric();
@@ -24,6 +28,8 @@ export default function Lyric() {
   const [fontSize, setFontSize] = useState<string | null>(
     getUserPerference("inlineLyricFontSize")
   );
+
+  const mountRef = useRef(false);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -35,12 +41,13 @@ export default function Lyric() {
         if (dom) {
           const offsetTop = dom.offsetTop - 210 + dom.clientHeight / 2;
           containerRef.current.scrollTo({
-            behavior: "smooth",
+            behavior: mountRef.current ? "smooth" : "instant",
             top: offsetTop,
           });
         }
       }
     }
+    mountRef.current = true;
   }, [currentLrc?.currentLrc]);
 
   return (
@@ -83,7 +90,7 @@ export default function Lyric() {
                   onClick={() => {
                     showModal("SearchLyric", {
                       defaultTitle: getCurrentMusic()?.title,
-                      musicItem: getCurrentMusic()
+                      musicItem: getCurrentMusic(),
                     });
                   }}
                 >
@@ -118,8 +125,24 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
   const { setLyricFontSize, lyricParser } = props;
 
   const [fontSize, setFontSize] = useState<string | null>(
-    getUserPerference("inlineLyricFontSize") ?? '13'
+    getUserPerference("inlineLyricFontSize") ?? "13"
   );
+
+  const [linkedLyricInfo, setLinkedLyricInfo] = useState<IMedia.IUnique>(null);
+
+  const currentMusicRef = useRef<IMusic.IMusicItem>(
+    getCurrentMusic() ?? ({} as any)
+  );
+
+  console.log(currentMusicRef);
+
+  useEffect(() => {
+    getLinkedLyric(currentMusicRef.current).then((linked) => {
+      if (linked) {
+        setLinkedLyricInfo(linked);
+      }
+    });
+  }, []);
 
   function handleFontSize(val: string | number) {
     if (val) {
@@ -143,7 +166,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
       const result = await ipcRendererInvoke("show-save-dialog", {
         title: "下载歌词",
         defaultPath:
-          lyricParser.getCurrentMusicItem().title +
+          currentMusicRef.current.title +
           (fileType === "lrc" ? ".lrc" : ".txt"),
         filters: [
           {
@@ -250,13 +273,36 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
         role="button"
         onClick={() => {
           showModal("SearchLyric", {
-            defaultTitle: lyricParser?.getCurrentMusicItem()?.title,
-            musicItem: getCurrentMusic()
-          })
+            defaultTitle: currentMusicRef.current.title,
+            musicItem: currentMusicRef.current,
+          });
         }}
       >
-        搜索歌词
-      </div> 
+        <span>
+          {linkedLyricInfo
+            ? `已关联歌词: ${getMediaPrimaryKey(linkedLyricInfo)}`
+            : "搜索歌词"}
+        </span>
+      </div>
+      <div
+        className="lyric-ctx-menu--row-container"
+        role="button"
+        data-disabled={!linkedLyricInfo}
+        onClick={async () => {
+          try {
+            await unlinkLyric(currentMusicRef.current);
+            if (isSameMedia(currentMusicRef.current, getCurrentMusic())) {
+              trackPlayerEventsEmitter.emit(
+                TrackPlayerEvent.NeedRefreshLyric,
+                true
+              );
+            }
+            toast.success("已取消关联歌词");
+          } catch {}
+        }}
+      >
+        取消关联歌词
+      </div>
     </>
   );
 }

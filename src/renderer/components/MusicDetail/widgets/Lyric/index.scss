@@ -94,12 +94,18 @@
   display: flex;
   align-items: center;
   padding-left: 12px;
+  padding-right: 12px;
   box-sizing: border-box;
+
+  & span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   &:hover {
     background-color: var(--listHoverColor);
   }
-
 }
 
 .lyric-ctx-menu--set-font-title {

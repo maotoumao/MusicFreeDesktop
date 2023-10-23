@@ -38,8 +38,11 @@ export function resetMediaItem<T extends IMedia.IMediaBase>(
   }
 }
 
-export function getMediaPrimaryKey(mediaItem: IMedia.IMediaBase) {
-  return `${mediaItem.platform}@${mediaItem.id}`;
+export function getMediaPrimaryKey(mediaItem: IMedia.IUnique) {
+  if(mediaItem) {
+    return `${mediaItem.platform}@${mediaItem.id}`;
+  }
+  return 'invalid@invalid'
 }
 
 export function sortByTimestampAndIndex(array: any[], newArray = false) {
