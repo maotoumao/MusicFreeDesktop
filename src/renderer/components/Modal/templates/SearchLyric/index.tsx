@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
-import { hideModal } from "../..";
 import Base from "../Base";
 import "./index.scss";
-import Condition from "@/renderer/components/Condition";
-import classNames from "@/renderer/utils/classnames";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import useSearchLyric from "./hooks/useSearchLyric";
-import { useStore } from "@/common/store";
 import searchResultStore from "./hooks/searchResultStore";
 import { getSearchablePlugins } from "@/renderer/core/plugin-delegate";
 import { Tab } from "@headlessui/react";
-import Loading from "@/renderer/components/Loading";
 import SearchResult from "./searchResult";
 
 interface IProps {

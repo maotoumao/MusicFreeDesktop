@@ -306,7 +306,7 @@ function setCurrentLyric(lyric?: ICurrentLyric) {
   currentLyricStore.setValue(lyric);
   if (lyric?.parser !== prev?.parser) {
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.LyricChanged, lyric?.parser);
-  } else if (lyric?.currentLrc === prev?.currentLrc) {
+  } else if (lyric?.currentLrc !== prev?.currentLrc) {
     trackPlayerEventsEmitter.emit(
       TrackPlayerEvent.CurrentLyricChanged,
       lyric?.currentLrc

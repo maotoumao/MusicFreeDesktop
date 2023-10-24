@@ -8,7 +8,7 @@ import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import Empty from "@/renderer/components/Empty";
 import "./searchResult.scss";
 import { linkLyric } from "@/renderer/core/link-lyric";
-import { isSameMedia } from "@/common/media-util";
+import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import { getCurrentMusic } from "@/renderer/core/track-player/player";
 import trackPlayerEventsEmitter from "@/renderer/core/track-player/event";
 import { TrackPlayerEvent } from "@/renderer/core/track-player/enum";
@@ -41,6 +41,7 @@ function SearchResult(props: ISearchResultProps) {
                   {(data?.data ?? []).map((it) => (
                     <div
                       className="lyric-item"
+                      key={getMediaPrimaryKey(it)}
                       role="button"
                       onClick={async () => {
                         if (musicItem) {

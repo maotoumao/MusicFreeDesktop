@@ -25,6 +25,7 @@ function getCurrentMusicData() {
         }
       : null,
     lyric: currentLyric?.parser?.getLyric() ?? null,
+    currentLyric: currentLyric?.currentLrc,
     playerState: currentPlayerState,
     progress,
     repeatMode,
@@ -102,6 +103,11 @@ async function setupMessageManager() {
       type: "sync-current-music",
       timestamp: Date.now(),
     });
+    window.mainPort.broadcast({
+      data: {},
+      type: "sync-current-lyric",
+      timestamp: Date.now(),
+    });
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.StateChanged, (state) => {
@@ -130,19 +136,27 @@ async function setupMessageManager() {
     });
   });
 
-  let lastSyncProgress = 0;
-  trackPlayerEventsEmitter.on(TrackPlayerEvent.ProgressChanged, (progress) => {
-    const timeStamp = Date.now();
-    // 100s同步一次
-    if (timeStamp - lastSyncProgress > 100) {
-      window.mainPort.broadcast({
-        data: progress,
-        type: "sync-progress",
-        timestamp: Date.now(),
-      });
-      lastSyncProgress = timeStamp;
-    }
+  trackPlayerEventsEmitter.on(TrackPlayerEvent.CurrentLyricChanged, (lyric) => {
+    window.mainPort.broadcast({
+      data: lyric,
+      type: "sync-current-lyric",
+      timestamp: Date.now(),
+    });
   });
+
+  // let lastSyncProgress = 0;
+  // trackPlayerEventsEmitter.on(TrackPlayerEvent.ProgressChanged, (progress) => {
+  //   const timeStamp = Date.now();
+  //   // 100s同步一次
+  //   if (timeStamp - lastSyncProgress > 100) {
+  //     window.mainPort.broadcast({
+  //       data: progress,
+  //       type: "sync-progress",
+  //       timestamp: Date.now(),
+  //     });
+  //     lastSyncProgress = timeStamp;
+  //   }
+  // });
 }
 
 const MessageManager = {

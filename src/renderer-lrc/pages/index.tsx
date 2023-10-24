@@ -1,5 +1,4 @@
 import rendererAppConfig from "@/common/app-config/renderer";
-import currentLyricStore from "../store/current-lyric-store";
 import "./index.scss";
 import classNames from "@/renderer/utils/classnames";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,10 +8,13 @@ import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import getTextWidth from "@/renderer/utils/get-text-width";
 import command from "../utils/command";
+import currentPlayerStore from "../store/current-player-store";
+import currentProgressStore from "../store/current-progress-store";
+import currentLyricStore from "../store/current-lyric-store";
 
 export default function LyricWindowPage() {
-  const lyricStore = currentLyricStore.useValue();
-  const { lyric = [], music: currentMusic, playerState } = lyricStore;
+  const playerStore = currentPlayerStore.useValue();
+  const { music: currentMusic, playerState } = playerStore;
   const lyricAppConfig = rendererAppConfig.useAppConfig()?.lyric;
 
   const lockLyric = lyricAppConfig?.lockLyric;
@@ -35,21 +37,6 @@ export default function LyricWindowPage() {
       setShowOperations(false);
     }
   }, [lockLyric]);
-
-  const textWidth = useMemo(() => {
-    if (lyric && lyric[0] && lyric[0].lrc) {
-      return getTextWidth(lyric[0].lrc, {
-        fontSize: lyricAppConfig?.fontSize ?? 48,
-        fontFamily: lyricAppConfig?.fontData?.family || undefined,
-      });
-    } else if (currentMusic) {
-      return getTextWidth(`${currentMusic.title} - ${currentMusic.artist}`, {
-        fontSize: lyricAppConfig?.fontSize ?? 48,
-        fontFamily: lyricAppConfig?.fontData?.family || undefined,
-      });
-    }
-    return 0;
-  }, [lyric, lyricAppConfig, currentMusic]);
 
   return (
     <div
@@ -160,22 +147,73 @@ export default function LyricWindowPage() {
         </div>
       </Condition>
       <div className="lyric-window-content-container">
-        <div
-          className="lyric-text-row"
-          style={{
-            color: lyricAppConfig?.fontColor,
-            WebkitTextStrokeColor: lyricAppConfig?.strokeColor,
-            fontSize: lyricAppConfig?.fontSize,
-            fontFamily: lyricAppConfig?.fontData?.family || undefined,
-            left: textWidth > window.innerWidth ? 0 : undefined,
-          }}
-        >
-          {lyric?.[0]?.lrc ??
-            (currentMusic
-              ? `${currentMusic.title} - ${currentMusic.artist}`
-              : "暂无歌词")}
-        </div>
+        <LyricContent></LyricContent>
       </div>
+    </div>
+  );
+}
+
+function LyricContent() {
+  const lyricStore = currentPlayerStore.useValue();
+  // const progress = currentProgressStore.useValue();
+  const currentLyric = currentLyricStore.useValue();
+
+  const { lyric = [], music: currentMusic } = lyricStore;
+
+  const lyricAppConfig = rendererAppConfig.useAppConfig()?.lyric;
+
+
+
+  const textWidth = useMemo(() => {
+    if (currentLyric?.lrc?.lrc) {
+      return getTextWidth(currentLyric?.lrc?.lrc, {
+        fontSize: lyricAppConfig?.fontSize ?? 48,
+        fontFamily: lyricAppConfig?.fontData?.family || undefined,
+      });
+    } else if (currentMusic) {
+      return getTextWidth(`${currentMusic.title} - ${currentMusic.artist}`, {
+        fontSize: lyricAppConfig?.fontSize ?? 48,
+        fontFamily: lyricAppConfig?.fontData?.family || undefined,
+      });
+    }
+    return 0;
+  }, [currentLyric, lyricAppConfig, currentMusic]);
+
+  // const lastIndexRef = useRef(0);
+
+  // const currentIndex = useMemo(() => {
+  //   if (!lyric?.length) {
+  //     return -1;
+  //   }
+  //   for (
+  //     let i = lastIndexRef.current % lyric.length;
+  //     i !== (lastIndexRef.current + lyric.length - 1) % lyric.length;
+  //     i = (i + 1) % lyric.length
+  //   ) {
+  //     if (lyric[i].time >= progress.currentTime) {
+  //       lastIndexRef.current = i - 1;
+  //       return i - 1;
+  //     }
+  //   }
+  //   lastIndexRef.current = lyric.length - 1;
+  //   return lyric.length - 1;
+  // }, [lyric, progress]);
+
+  return (
+    <div
+      className="lyric-text-row"
+      style={{
+        color: lyricAppConfig?.fontColor,
+        WebkitTextStrokeColor: lyricAppConfig?.strokeColor,
+        fontSize: lyricAppConfig?.fontSize,
+        fontFamily: lyricAppConfig?.fontData?.family || undefined,
+        left: textWidth > window.innerWidth ? 0 : undefined,
+      }}
+    >
+      {currentLyric?.lrc?.lrc ??
+        (currentMusic
+          ? `${currentMusic.title} - ${currentMusic.artist}`
+          : "暂无歌词")}
     </div>
   );
 }
