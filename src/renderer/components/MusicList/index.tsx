@@ -3,6 +3,10 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
+  ColumnResizeMode,
+  ColumnDef,
+  SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 
 import "./index.scss";
@@ -27,6 +31,9 @@ import { ipcRendererSend } from "@/common/ipc-util/renderer";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
 import { toast } from "react-toastify";
+import classNames from "@/renderer/utils/classnames";
+import SwitchCase from "../SwitchCase";
+import SvgAsset from "../SvgAsset";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -50,10 +57,12 @@ interface IMusicListProps {
 }
 
 const columnHelper = createColumnHelper<IMusic.IMusicItem>();
-const columnDef = [
+const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
   columnHelper.display({
     id: "like",
     size: 42,
+    minSize: 42,
+    maxSize: 42,
     cell: (info) => (
       <div className="music-list-operations">
         <MusicFavorite musicItem={info.row.original} size={18}></MusicFavorite>
@@ -72,28 +81,38 @@ const columnDef = [
   columnHelper.accessor("title", {
     header: "标题",
     size: 250,
+    maxSize: 300,
+    minSize: 100,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
 
   columnHelper.accessor("artist", {
     header: "作者",
     size: 130,
+    maxSize: 200,
+    minSize: 60,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
   columnHelper.accessor("album", {
     header: "专辑",
     size: 120,
+    maxSize: 200,
+    minSize: 60,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
   columnHelper.accessor("duration", {
     header: "时长",
     size: 64,
+    maxSize: 150,
+    minSize: 48,
     cell: (info) =>
       info.getValue() ? secondsToDuration(info.getValue()) : "--:--",
   }),
   columnHelper.accessor("platform", {
     header: "来源",
     size: 100,
+    minSize: 80,
+    maxSize: 300,
     cell: (info) => <Tag fill>{info.getValue()}</Tag>,
   }),
 ];
@@ -211,12 +230,20 @@ function _MusicList(props: IMusicListProps) {
     doubleClickBehavior,
   } = props;
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const musicListRef = useRef(musicList);
   const table = useReactTable({
     debugAll: false,
     data: musicList,
     columns: columnDef,
+    columnResizeMode: "onChange",
+    state: {
+      sorting: sorting,
+    },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   const tableContainerRef = useRef<HTMLDivElement>();
@@ -259,6 +286,7 @@ function _MusicList(props: IMusicListProps) {
       <table
         style={{
           height: virtualController.totalHeight + estimizeItemHeight,
+          width: table.getCenterTotalSize(),
         }}
       >
         <thead>
@@ -269,11 +297,38 @@ function _MusicList(props: IMusicListProps) {
                 style={{
                   width: header.id === "extra" ? undefined : header.getSize(),
                 }}
+                onClick={header.column.getToggleSortingHandler()}
               >
                 {flexRender(
                   header.column.columnDef.header,
                   header.getContext()
                 )}
+                <div
+                  className="sort-container"
+                  data-sorting={header.column.getIsSorted() !== false}
+                >
+                  <SwitchCase.Switch switch={header.column.getIsSorted()}>
+                    <SwitchCase.Case case={"asc"}>
+                      <SvgAsset iconName="sort-asc"></SvgAsset>
+                    </SwitchCase.Case>
+                    <SwitchCase.Case case={"desc"}>
+                      <SvgAsset iconName="sort-desc"></SvgAsset>
+                    </SwitchCase.Case>
+                    <SwitchCase.Case case={false}>
+                      <SvgAsset iconName="sort"></SvgAsset>
+                    </SwitchCase.Case>
+                  </SwitchCase.Switch>
+                </div>
+                <div
+                  onMouseDown={header.getResizeHandler()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className={classNames({
+                    resizer: true,
+                    "resizer-resizing": header.column.getIsResizing(),
+                  })}
+                ></div>
               </th>
             ))}
           </tr>
@@ -351,6 +406,7 @@ function _MusicList(props: IMusicListProps) {
                       "playMusic.clickMusicList"
                     );
                   if (config === "replace") {
+                    // TODO: 排序后的
                     trackPlayer.playMusicWithReplaceQueue(
                       getAllMusicItems?.() ?? musicList,
                       row.original

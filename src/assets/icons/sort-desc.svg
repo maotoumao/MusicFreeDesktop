@@ -1,0 +1,10 @@
+<svg width="120.000000" height="120.000000" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<defs>
+		<clipPath id="clip27_9">
+			<rect id="画板 1" width="120.000000" height="120.000000" fill="white"/>
+		</clipPath>
+	</defs>
+	<g clip-path="url(#clip27_9)">
+		<path id="多边形 1" d="M56.8865 91.5223L7.11328 51.9124C3.40991 48.9652 5.4939 43 10.2268 43L109.773 43C114.506 43 116.59 48.9652 112.887 51.9124L63.1135 91.5223C61.291 92.9725 58.709 92.9725 56.8865 91.5223Z" fill-rule="evenodd" fill="currentColor"/>
+	</g>
+</svg>
