@@ -20,7 +20,7 @@ export default function LocalMusicView() {
       <div className="opeartions">
         <div data-type='normalButton' role="button" onClick={() => {
           showModal('WatchLocalDir');
-        }}>导入文件夹</div>
+        }}>自动扫描</div>
       </div>
       <div className="music-list-container">
         <MusicList musicList={localMusicList} virtualProps={{

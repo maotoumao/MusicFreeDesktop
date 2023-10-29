@@ -21,14 +21,6 @@ declare namespace IpcEvents {
     "sync-current-repeat-mode": import("@/renderer/core/track-player/enum").RepeatMode;
 
 
-    /** 本地文件 */
-    "sync-local-music": undefined;
-    "add-watch-dir": string[];
-    "remove-watch-dir": string[];
-    "set-watch-dir": {
-      add?: string[],
-      rm?: string[]
-    };
     'send-to-lyric-window': {
       // 时序
       timeStamp: number;

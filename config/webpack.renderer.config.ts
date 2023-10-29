@@ -57,4 +57,5 @@ export const rendererConfig: Configuration = {
       "@renderer-lrc": path.join(__dirname, "../src/renderer-lrc"),
     },
   },
+  externals: process.platform !== "darwin" ? ["fsevents"] : undefined,
 };

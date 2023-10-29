@@ -26,6 +26,8 @@ declare namespace IUserPerference {
         downloadedList: IMedia.IMediaBase[];
         /** 本地音乐监听列表 */
         localWatchDir: string[];
+        /** 本地音乐勾选的监听列表 */
+        localWatchDirChecked: string[];
         /** 收藏的歌单 */
         starredMusicSheets: IMedia.IMediaBase[]
         /** 搜索历史 */

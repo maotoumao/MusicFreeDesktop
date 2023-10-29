@@ -15,6 +15,8 @@ interface IGlobalData {
     workersPath: {
         /** 下载器worker */
         downloader: string;
+        /** 本地文件监听器worker */
+        localFileWatcher: string;
     },
     appPath: {
         userData: string;

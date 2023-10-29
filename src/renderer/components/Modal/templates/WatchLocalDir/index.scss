@@ -1,22 +1,43 @@
 .modal--watch-local-dir-container {
   width: 500px;
-  max-height: 400px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
 
   & .modal--body-container {
-    flex: 1;
+    height: 280px;
     padding-left: 16px;
     padding-right: 16px;
-    overflow: auto;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+
+    & .modal--body-container-title {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    & .modal--body-scan-content {
+      width: 100%;
+      margin-top: 12px;
+      flex-grow: 1;
+      border: 1px solid var(--dividerColor);
+      overflow-y: auto;
+    }
 
     & .row-container {
       height: 2.6rem;
+      padding: 0 8px;
       display: flex;
       align-items: center;
 
       & .title {
+        white-space: nowrap;
+        margin: 0 6px;
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -30,6 +51,14 @@
           width: 20px;
           height: 20px;
         }
+      }
+
+      &:hover {
+        background-color: var(--listHoverColor);
+      }
+
+      &:active {
+        background-color: var(--listActiveColor);
       }
     }
   }

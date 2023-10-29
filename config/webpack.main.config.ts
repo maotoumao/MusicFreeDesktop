@@ -10,7 +10,6 @@ export const mainConfig: Configuration = {
    */
   entry: {
     index: "./src/main/index.ts",
-    "scanner.worker": "./src/main/core/local-music-manager/scanner.worker.ts",
   },
   // Put your normal webpack config below here
   module: {

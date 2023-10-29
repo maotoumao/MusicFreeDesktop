@@ -14,7 +14,6 @@ import {
   setupMainAppConfig,
 } from "@/common/app-config/main";
 import { setupTray } from "./tray";
-import { setupLocalMusicManager } from "./core/local-music-manager";
 import { setupGlobalShortCut } from "./core/global-short-cut";
 import fs from "fs";
 import path from "path";
@@ -88,7 +87,6 @@ app.whenReady().then(async () => {
   setupIpcMain();
   setupPluginManager();
   setupTray();
-  setupLocalMusicManager();
   bootstrap();
   setupGlobalShortCut();
 });

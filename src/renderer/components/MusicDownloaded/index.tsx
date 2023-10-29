@@ -17,7 +17,7 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
 
   const isDownloaded = useDownloaded(musicItem);
   const isDownloadedOrLocal =
-    isDownloaded || musicItem.platform === localPluginName;
+    isDownloaded || musicItem?.platform === localPluginName;
 
   // useEffect(() => {
   //   setLoading(false);

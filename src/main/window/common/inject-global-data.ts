@@ -2,6 +2,7 @@ import { BrowserWindow, app } from "electron";
 
 
 declare const WORKER_DOWNLOADER_WEBPACK_ENTRY: string;
+declare const LOCAL_FILE_WATCHER_WEBPACK_ENTRY: string;
 
 
 export default function injectGlobalData(targetWindow: BrowserWindow) {
@@ -12,7 +13,8 @@ export default function injectGlobalData(targetWindow: BrowserWindow) {
     const globalData: IGlobalData = {
       appVersion: app.getVersion(),
       workersPath: {
-        downloader: WORKER_DOWNLOADER_WEBPACK_ENTRY
+        downloader: WORKER_DOWNLOADER_WEBPACK_ENTRY,
+        localFileWatcher: LOCAL_FILE_WATCHER_WEBPACK_ENTRY
       },
       appPath: {
         downloads: app.getPath('downloads'),

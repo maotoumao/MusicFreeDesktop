@@ -1,0 +1,15 @@
+.checkbox-container {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+  position: relative;
+
+  & svg {
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    left: 0;
+    top: 0;
+  }
+}

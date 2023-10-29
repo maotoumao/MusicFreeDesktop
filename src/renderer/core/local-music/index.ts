@@ -1,45 +1,143 @@
 import { ipcRendererSend, ipcRendererOn } from "@/common/ipc-util/renderer";
 import localMusicListStore from "./store";
-import { getUserPerferenceIDB, setUserPerferenceIDB } from "@/renderer/utils/user-perference";
+import {
+  getUserPerferenceIDB,
+  setUserPerferenceIDB,
+} from "@/renderer/utils/user-perference";
+import * as Comlink from "comlink";
+import musicSheetDB from "../db/music-sheet-db";
 
-let localWatchDir: string[] = [];
-async function setupLocalMusic(){
-    localWatchDir = await getUserPerferenceIDB('localWatchDir');
-    ipcRendererSend("add-watch-dir", localWatchDir);
-    ipcRendererOn("sync-local-music", (items) => {
-        console.log("set!!", items);
-      localMusicListStore.setValue(items);
-    });
+type ProxyMarkedFunction<T extends (...args: any) => void> = T &
+  Comlink.ProxyMarked;
+
+type IMusicItemWithLocalPath = IMusic.IMusicItem & { $$localPath: string };
+
+interface ILocalFileWatcherWorker {
+  setupWatcher: (initPaths?: string[]) => Promise<void>;
+  changeWatchPath: (addPaths?: string[], rmPaths?: string[]) => Promise<void>;
+  onAdd: (
+    cb: ProxyMarkedFunction<
+      (musicItems: Array<IMusicItemWithLocalPath>) => Promise<void>
+    >
+  ) => void;
+  onRemove: (
+    cb: ProxyMarkedFunction<(filePaths: string[]) => Promise<void>>
+  ) => void;
 }
 
-async function addWatchDir(dirs: string | string[]){
-    dirs = Array.isArray(dirs) ? dirs : [dirs];
-    ipcRendererSend('add-watch-dir', dirs);
-    const newDir = [...localWatchDir, ...dirs];
-    const isSuccess = await setUserPerferenceIDB('localWatchDir', newDir);
-    if(isSuccess) {
-        localWatchDir = newDir;
+let localFileWatcherWorker: ILocalFileWatcherWorker;
+
+function isSubDir(parent: string, target: string) {
+  const relative = window.path.relative(parent, target);
+  return (
+    relative && !relative.startsWith("..") && !window.path.isAbsolute(relative)
+  );
+}
+
+async function setupLocalMusic() {
+  try {
+    const localWatchDir =
+      (await getUserPerferenceIDB("localWatchDirChecked")) ?? [];
+
+    // ipcRendererSend("add-watch-dir", localWatchDir);
+    // ipcRendererOn("sync-local-music", (items) => {
+    //   console.log("set!!", items);
+    //   localMusicListStore.setValue(items);
+    // });
+
+    const localFileWatcherWorkerPath =
+      window.globalData?.workersPath?.localFileWatcher;
+    if (localFileWatcherWorkerPath) {
+      const worker = new Worker(localFileWatcherWorkerPath);
+      localFileWatcherWorker = Comlink.wrap(worker);
+      await localFileWatcherWorker.setupWatcher(localWatchDir);
     }
+
+    const allMusic = await musicSheetDB.localMusicStore.toArray();
+    localMusicListStore.setValue(allMusic);
+    localFileWatcherWorker.onAdd(
+      Comlink.proxy(async (musicItems: IMusicItemWithLocalPath[]) => {
+        await musicSheetDB.transaction(
+          "rw",
+          musicSheetDB.localMusicStore,
+          async () => {
+            await musicSheetDB.localMusicStore.bulkPut(musicItems);
+            const allMusic = await musicSheetDB.localMusicStore.toArray();
+            console.log("allmusic", allMusic)
+            localMusicListStore.setValue(allMusic);
+          }
+        );
+      })
+    );
+
+    localFileWatcherWorker.onRemove(
+      Comlink.proxy(async (filePaths: string[]) => {
+        await musicSheetDB.transaction(
+          "rw",
+          musicSheetDB.localMusicStore,
+          async () => {
+            const tobeDeletedFilePaths = new Set(filePaths);
+            const cachedLocalMusic = localMusicListStore.getValue();
+            const tobeDeletedPrimaryKeys: any[] = [];
+            const newCachedLocalMusic: IMusicItemWithLocalPath[] = [];
+            cachedLocalMusic.forEach(it => {
+              if(tobeDeletedFilePaths.has(it.$$localPath)) {
+                tobeDeletedPrimaryKeys.push([it.platform, it.id]);
+              } else {
+                newCachedLocalMusic.push(it);
+              }
+            })
+            await musicSheetDB.localMusicStore.bulkDelete(tobeDeletedPrimaryKeys);
+            localMusicListStore.setValue(newCachedLocalMusic);
+          }
+        );
+      })
+    );
+  } catch {}
 }
 
-async function rmWatchDir(dirs: string | string[]){
-    dirs = Array.isArray(dirs) ? dirs : [dirs];
-    ipcRendererSend('remove-watch-dir', dirs);
-    const newDir = localWatchDir.filter(dir => !dirs.includes(dir));
-    const isSuccess = await setUserPerferenceIDB('localWatchDir', newDir);
-    if(isSuccess) {
-        localWatchDir = newDir;
+async function changeWatchPath(logs: Map<string, "add" | "delete">) {
+  // 对所有的要删除的路径
+  const tobeDeletedPaths: string[] = [];
+  const tobeAddedPaths: string[] = [];
+  logs.forEach((action, dirPath) => {
+    if (action === "delete") {
+      tobeDeletedPaths.push(dirPath);
+    } else {
+      tobeAddedPaths.push(dirPath);
     }
+  });
+
+  // 删除所有子路径的
+  if (tobeDeletedPaths.length) {
+    await musicSheetDB.transaction(
+      "rw",
+      musicSheetDB.localMusicStore,
+      async () => {
+        const localFiles = localMusicListStore.getValue();
+        const tobeDeletedItems = localFiles
+          .filter((it) =>
+            tobeDeletedPaths.some((deletePath) =>
+              isSubDir(deletePath, it.$$localPath)
+            )
+          )
+          .map((it) => [it.platform, it.id]);
+        await musicSheetDB.localMusicStore.bulkDelete(tobeDeletedItems);
+      }
+    );
+
+    localMusicListStore.setValue(await musicSheetDB.localMusicStore.toArray());
+  }
+  // 通知
+  localFileWatcherWorker.changeWatchPath(tobeAddedPaths, tobeDeletedPaths);
 }
 
-async function syncLocalMusic(){
-    ipcRendererSend('sync-local-music');
-}
-
+// async function syncLocalMusic() {
+//   ipcRendererSend("sync-local-music");
+// }
 
 export default {
-    setupLocalMusic,
-    addWatchDir,
-    rmWatchDir,
-    syncLocalMusic
-}
+  setupLocalMusic,
+  // syncLocalMusic,
+  changeWatchPath,
+};

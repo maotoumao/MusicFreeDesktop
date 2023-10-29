@@ -83,7 +83,10 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     size: 250,
     maxSize: 300,
     minSize: 100,
-    cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
+    cell: (info) => {
+      const title = info?.getValue?.();
+      return <span title={title}>{title}</span>;
+    },
   }),
 
   columnHelper.accessor("artist", {
@@ -340,6 +343,9 @@ function _MusicList(props: IMusicListProps) {
         >
           {virtualController.virtualItems.map((virtualItem) => {
             const row = virtualItem.dataItem;
+            if (!row.original) {
+              return null;
+            }
             // todo 拆出一个组件
             return (
               <tr

@@ -11,91 +11,146 @@ import Condition from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import SvgAsset from "@/renderer/components/SvgAsset";
+import Checkbox from "@/renderer/components/Checkbox";
+import localMusic from "@/renderer/core/local-music";
 
-interface IUpdateProps {}
-export default function WatchLocalDir(props: IUpdateProps) {
+interface IWatchDirProps {}
+export default function WatchLocalDir(props: IWatchDirProps) {
+  // 全部的文件夹
   const [localDirs, setLocalDirs] = useState<string[]>([]);
-  const changeLogRef = useRef({
-    add: new Set<string>(),
-    rm: new Set<string>(),
-  });
+  // 选中的文件夹
+  const [checkedDirs, setCheckedDirs] = useState(new Set<string>());
+  const changeLogRef = useRef(new Map<string, "add" | "delete">()); // key: path; value: op
 
   useEffect(() => {
-    getUserPerferenceIDB("localWatchDir").then((dirs) => {
-      setLocalDirs(dirs ?? []);
-    });
+    (async () => {
+      const allDirs = (await getUserPerferenceIDB("localWatchDir")) ?? [];
+      const checked =
+        (await getUserPerferenceIDB("localWatchDirChecked")) ?? [];
+      const allDirsSet = new Set(allDirs);
+      const validChecked = checked.filter((it) => allDirsSet.has(it));
+      setLocalDirs([...allDirsSet]);
+      setCheckedDirs(new Set(validChecked));
+    })();
   }, []);
+
 
   return (
     <Base defaultClose>
       <div className="modal--watch-local-dir-container shadow backdrop-color">
         <Base.Header>扫描本地音乐</Base.Header>
         <div className="modal--body-container">
-          <Condition
-            condition={localDirs.length}
-            falsy={
-              <Empty
-                style={{
-                  minHeight: "100px",
-                }}
-              ></Empty>
-            }
-          >
-            {localDirs.map((item) => (
-              <div className="row-container" key={item}>
-                <div className="title">{item}</div>
-                <div
-                  role="button"
-                  className="delete-path"
-                  onClick={() => {
+          <div className="modal--body-container-title">
+            <span>将自动扫描勾选的文件夹 (文件增删实时同步)</span>
+            <div
+              role="button"
+              data-type="normalButton"
+              onClick={async () => {
+                const result = await ipcRendererInvoke("show-open-dialog", {
+                  title: "扫描本地音乐",
+                  properties: ["openDirectory", "createDirectory"],
+                });
+                if (!result.canceled) {
+                  const selected = result.filePaths[0];
+                  if (!localDirs.includes(selected)) {
                     const changeLog = changeLogRef.current;
-                    if (changeLog.add.has(item)) {
-                      changeLog.add.delete(item);
-                    } else {
-                      changeLog.rm.add(item);
-                    }
-                    setLocalDirs((prev) => prev.filter((pth) => pth !== item));
+                    setCheckedDirs((prev) => {
+                      return new Set([...prev, selected]);
+                    });
+                    setLocalDirs((prev) => [...prev, selected]);
+                    changeLog.set(selected, "add");
+                  }
+                }
+              }}
+            >
+              添加文件夹
+            </div>
+          </div>
+          <div className="modal--body-scan-content backdrop-color">
+            <Condition
+              condition={localDirs.length}
+              falsy={
+                <Empty
+                  style={{
+                    minHeight: "200px",
                   }}
-                >
-                  <SvgAsset iconName="trash"></SvgAsset>
-                </div>
-              </div>
-            ))}
-          </Condition>
+                ></Empty>
+              }
+            >
+              {localDirs.map((item) => {
+                const isChecked = checkedDirs.has(item);
+
+                return (
+                  <div
+                    className="row-container"
+                    key={item}
+                    onClick={() => {
+                      setCheckedDirs((prev) => {
+                        const changeLog = changeLogRef.current;
+                        const itemChangeLog = changeLog.get(item);
+                        const isChecked = prev.has(item);
+                        // 如果此次没有任何变动，说明是旧有的，此时需要删除监听
+                        if (!itemChangeLog) {
+                          changeLog.set(item, isChecked ? "delete" : "add");
+                        } else if (
+                          (itemChangeLog === "add" && isChecked) ||
+                          (itemChangeLog === "delete" && !isChecked)
+                        ) {
+                          changeLog.delete(item);
+                        }
+                        isChecked ? prev.delete(item) : prev.add(item);
+                        return new Set(prev);
+                      });
+                    }}
+                  >
+                    <Checkbox
+                      checked={isChecked}
+                      style={{
+                        color: isChecked ? "var(--primaryColor)" : undefined,
+                      }}
+                    ></Checkbox>
+                    <div className="title">{item}</div>
+                    <div
+                      role="button"
+                      className="delete-path"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const changeLog = changeLogRef.current;
+                        const itemChangeLog = changeLog.get(item);
+                        // 如果此次没有任何变动，说明是旧有的，此时需要删除监听
+                        if (!itemChangeLog) {
+                          changeLog.set(item, "delete");
+                        } else if (itemChangeLog === "add") {
+                          // 此次新增，但是被删掉了
+                          changeLog.delete(item);
+                          console.log("heredelete", changeLog);
+                        }
+
+                        setLocalDirs((prev) =>
+                          prev.filter((it) => it !== item)
+                        );
+                        setCheckedDirs((prev) => {
+                          prev.delete(item);
+                          return new Set(prev);
+                        });
+                      }}
+                    >
+                      <SvgAsset iconName="trash"></SvgAsset>
+                    </div>
+                  </div>
+                );
+              })}
+            </Condition>
+          </div>
         </div>
         <div className="footer-options">
-          <div
-            role="button"
-            data-type="normalButton"
-            onClick={async () => {
-              const result = await ipcRendererInvoke("show-open-dialog", {
-                properties: ["openDirectory", "createDirectory"],
-              });
-              if (!result.canceled) {
-                const selected = result.filePaths[0];
-                if (!localDirs.includes(selected)) {
-                  const changeLog = changeLogRef.current;
-                  if (changeLog.rm.has(selected)) {
-                    changeLog.rm.delete(selected);
-                  } else {
-                    changeLog.add.add(selected);
-                  }
-                  setLocalDirs((prev) => [...prev, selected]);
-                }
-              }
-            }}
-          >
-            添加文件夹
-          </div>
           <div
             role="button"
             data-type="primaryButton"
             onClick={async () => {
               setUserPerferenceIDB("localWatchDir", localDirs);
-              ipcRendererSend("set-watch-dir", {
-                rm: [...changeLogRef.current.rm],
-                add: [...changeLogRef.current.add]
-              });
+              setUserPerferenceIDB('localWatchDirChecked', [...checkedDirs]);
+              localMusic.changeWatchPath(changeLogRef.current);
               hideModal();
             }}
           >

@@ -67,6 +67,11 @@ const config: ForgeConfig = {
             js: "./src/webworkers/downloader.ts",
             name: 'worker_downloader',
             nodeIntegration: true
+          },
+          {
+            js: "./src/webworkers/local-file-watcher.ts",
+            name: 'local_file_watcher',
+            nodeIntegration: true
           }
         ],
       },
