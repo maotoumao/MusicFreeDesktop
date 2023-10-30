@@ -1,4 +1,13 @@
 .local-music-view--container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
+  &[data-full-page="true"] {
+    max-height: 100%;
+    height: 100%;
+  }
+
   & .header {
     font-weight: 600;
     font-size: 1.5rem;
@@ -8,7 +17,37 @@
     user-select: none;
   }
 
-  & .opeartions {
-    
+  & .operations {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    & .operations-layout {
+      display: flex;
+      align-items: center;
+
+      & .list-view-action {
+        width: 2.4rem;
+        height: 2rem;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        & svg {
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+        &:hover {
+          background-color: var(--listHoverColor);
+          color: var(--primaryColor);
+        }
+        &[data-selected="true"] {
+          background-color: var(--listActiveColor);
+          color: var(--primaryColor);
+        }
+      }
+    }
   }
 }

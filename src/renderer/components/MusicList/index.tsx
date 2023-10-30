@@ -22,7 +22,7 @@ import { RequestStateCode, localPluginName } from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
 import { IContextMenuItem, showContextMenu } from "../ContextMenu";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
-import { memo, useEffect, useRef, useState } from "react";
+import { CSSProperties, memo, useEffect, useRef, useState } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import rendererAppConfig from "@/common/app-config/renderer";
@@ -54,6 +54,10 @@ interface IMusicListProps {
     getScrollElement?: () => HTMLElement; // 滚动
     fallbackRenderCount?: number;
   };
+  containerStyle?: CSSProperties;
+  hideRows?: Array<
+    "like" | "index" | "title" | "artist" | "album" | "duration" | "platform"
+  >;
 }
 
 const columnHelper = createColumnHelper<IMusic.IMusicItem>();
@@ -69,6 +73,8 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
         <MusicDownloaded musicItem={info.row.original}></MusicDownloaded>
       </div>
     ),
+    enableResizing: false,
+    enableSorting: false,
   }),
   columnHelper.accessor((_, index) => index + 1, {
     cell: (info) => info.getValue(),
@@ -77,6 +83,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     minSize: 40,
     maxSize: 40,
     size: 40,
+    enableResizing: false,
   }),
   columnHelper.accessor("title", {
     header: "标题",
@@ -87,6 +94,8 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
       const title = info?.getValue?.();
       return <span title={title}>{title}</span>;
     },
+    // @ts-ignore
+    fr: 3,
   }),
 
   columnHelper.accessor("artist", {
@@ -95,6 +104,8 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     maxSize: 200,
     minSize: 60,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
+    // @ts-ignore
+    fr: 2,
   }),
   columnHelper.accessor("album", {
     header: "专辑",
@@ -102,6 +113,8 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     maxSize: 200,
     minSize: 60,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
+    // @ts-ignore
+    fr: 2,
   }),
   columnHelper.accessor("duration", {
     header: "时长",
@@ -110,6 +123,8 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     minSize: 48,
     cell: (info) =>
       info.getValue() ? secondsToDuration(info.getValue()) : "--:--",
+    // @ts-ignore
+    fr: 1,
   }),
   columnHelper.accessor("platform", {
     header: "来源",
@@ -117,6 +132,8 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     minSize: 80,
     maxSize: 300,
     cell: (info) => <Tag fill>{info.getValue()}</Tag>,
+    // @ts-ignore
+    fr: 1,
   }),
 ];
 
@@ -231,6 +248,8 @@ function _MusicList(props: IMusicListProps) {
     virtualProps,
     getAllMusicItems,
     doubleClickBehavior,
+    containerStyle,
+    hideRows,
   } = props;
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -240,9 +259,14 @@ function _MusicList(props: IMusicListProps) {
     debugAll: false,
     data: musicList,
     columns: columnDef,
-    columnResizeMode: "onChange",
     state: {
       sorting: sorting,
+      columnVisibility: hideRows
+        ? hideRows.reduce((prev, curr) => ({ ...prev, [curr]: false }), {})
+        : undefined,
+      // columnVisibility: {
+      //   duration: false
+      // }
     },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
@@ -285,11 +309,15 @@ function _MusicList(props: IMusicListProps) {
   }, []);
 
   return (
-    <div className="music-list-container" ref={tableContainerRef}>
+    <div
+      className="music-list-container"
+      style={containerStyle}
+      ref={tableContainerRef}
+    >
       <table
         style={{
           height: virtualController.totalHeight + estimizeItemHeight,
-          width: table.getCenterTotalSize(),
+          tableLayout: "fixed",
         }}
       >
         <thead>
@@ -297,8 +325,13 @@ function _MusicList(props: IMusicListProps) {
             {table.getHeaderGroups()[0].headers.map((header) => (
               <th
                 key={header.id}
+                data-id={header.id}
                 style={{
-                  width: header.id === "extra" ? undefined : header.getSize(),
+                  //@ts-ignore
+                  width: header.column.columnDef.fr
+                    ? //@ts-ignore
+                      `${header.column.columnDef.fr * 100}%`
+                    : header.column.columnDef.size,
                 }}
                 onClick={header.column.getToggleSortingHandler()}
               >
@@ -322,7 +355,7 @@ function _MusicList(props: IMusicListProps) {
                     </SwitchCase.Case>
                   </SwitchCase.Switch>
                 </div>
-                <div
+                {/* <div
                   onMouseDown={header.getResizeHandler()}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -331,7 +364,7 @@ function _MusicList(props: IMusicListProps) {
                     resizer: true,
                     "resizer-resizing": header.column.getIsResizing(),
                   })}
-                ></div>
+                ></div> */}
               </th>
             ))}
           </tr>
@@ -422,11 +455,15 @@ function _MusicList(props: IMusicListProps) {
                   }
                 }}
               >
-                {row.getAllCells().map((cell) => (
+                {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
                     style={{
-                      width: cell.column.getSize(),
+                      //@ts-ignore
+                      width: cell.column.columnDef.fr
+                        ? //@ts-ignore
+                          `${cell.column.columnDef.fr * 100}%`
+                        : cell.column.columnDef.size,
                     }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -5,7 +5,7 @@
   & th {
     position: relative;
 
-    &:hover {
+    &:not([data-id=like]):hover {
       background-color: var(--listHoverColor);
 
       & .sort-container[data-sorting="false"] {
@@ -56,23 +56,23 @@
     gap: 6px;
   }
 
-  & .resizer {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    width: 4px;
-    cursor: col-resize;
-    user-select: none;
-    touch-action: none;
-    opacity: 0;
+  // & .resizer {
+  //   position: absolute;
+  //   right: 0;
+  //   top: 0;
+  //   height: 100%;
+  //   width: 4px;
+  //   cursor: col-resize;
+  //   user-select: none;
+  //   touch-action: none;
+  //   opacity: 0;
 
-    &:hover {
-      opacity: 1;
-    }
-  }
+  //   &:hover {
+  //     opacity: 1;
+  //   }
+  // }
 
-  & .resizer-resizing {
-    opacity: 1;
-  }
+  // & .resizer-resizing {
+  //   opacity: 1;
+  // }
 }

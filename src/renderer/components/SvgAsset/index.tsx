@@ -3,6 +3,7 @@ import { memo } from "react";
 export type SvgAssetIconNames =
   | "album"
   | "array-download-tray"
+  | "cd"
   | "check"
   | "check-circle"
   | "chevron-double-down"
@@ -22,6 +23,7 @@ export type SvgAssetIconNames =
   | "heart-outline"
   | "heart"
   | "identification"
+  | "list-bullet"
   | "lock-closed"
   | "lock-open"
   | "logo"

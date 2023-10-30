@@ -63,7 +63,6 @@ async function setupLocalMusic() {
           async () => {
             await musicSheetDB.localMusicStore.bulkPut(musicItems);
             const allMusic = await musicSheetDB.localMusicStore.toArray();
-            console.log("allmusic", allMusic)
             localMusicListStore.setValue(allMusic);
           }
         );

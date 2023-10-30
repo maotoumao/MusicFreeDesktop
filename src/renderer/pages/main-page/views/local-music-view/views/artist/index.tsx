@@ -1,0 +1,47 @@
+import localMusicListStore from "@/renderer/core/local-music/store";
+import "./index.scss";
+import { useMemo, useState } from "react";
+import groupBy from "@/renderer/utils/groupBy";
+import MusicList from "@/renderer/components/MusicList";
+
+export default function ArtistView() {
+  const localMusicList = localMusicListStore.useValue();
+
+  const [keys, allMusic] = useMemo(() => {
+    const grouped = groupBy(localMusicList ?? [], (it) => it.artist);
+    return [Object.keys(grouped).sort((a, b) => a.localeCompare(b)), grouped];
+  }, [localMusicList]);
+
+  const [selectedKey, setSelectedKey] = useState<string>();
+
+  const actualSelectedKey = selectedKey ?? keys?.[0];
+
+  return (
+    <div className="local-music--artist-view-container">
+      <div className="left-part">
+        {keys.map((it) => (
+          <div
+            className="artist-item list-behavior"
+            key={it}
+            data-selected={actualSelectedKey === it}
+            onClick={() => {
+              setSelectedKey(it);
+            }}
+          >
+            <span>{it}</span>
+            <span>共{allMusic?.[it]?.length ?? 0}首</span>
+          </div>
+        ))}
+      </div>
+      <div className="right-part">
+        <MusicList
+          musicList={allMusic[actualSelectedKey] ?? []}
+          hideRows={['artist']}
+          virtualProps={{
+            fallbackRenderCount: -1,
+          }}
+        ></MusicList>
+      </div>
+    </div>
+  );
+}

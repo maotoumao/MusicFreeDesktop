@@ -70,6 +70,7 @@
   --primaryColor: #f17d34; // 主色调
   --backgroundColor: #fdfdfd; // 背景色
   --dividerColor: rgba(0, 0, 0, 0.1); // 分割线颜色
+  --listEvenColor: rgba(0, 0, 0, 0.05); // 列表背景色（奇数条目）
   --listHoverColor: rgba(0, 0, 0, 0.05); // 列表悬浮颜色
   --listActiveColor: rgba(0, 0, 0, 0.1); // 列表选中颜色
   --textColor: #333333; // 主文本颜色
@@ -79,15 +80,13 @@
   /** --shadow:  // 全部的shadow属性 */
   --placeholderColor: #f4f4f4;
 
-  --successColor: #08A34C;
-  --dangerColor: #FC5F5F;
-  --infoColor: #0A95C8;
+  --successColor: #08a34c;
+  --dangerColor: #fc5f5f;
+  --infoColor: #0a95c8;
   --linkColor: #0c66fc;
   /* --headerPlaceholderColor: rgba($color: #000, $alpha: 0.14); */
   --headerTextColor: white;
   /* --musicBarTextColor: #000; // 有必要再加*/
-
-
 
   --animate-duration: 300ms !important;
   --scrollbar-width: 8px;
@@ -96,7 +95,6 @@
   color: var(--textColor);
 }
 
-
 a {
-  color: var(--linkColor)
+  color: var(--linkColor);
 }

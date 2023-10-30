@@ -1,4 +1,5 @@
 import Dexie, { Table } from "dexie";
+import { useEffect, useState } from "react";
 
 const basicType = ["number", "string", "boolean", "null", "undefined"];
 
@@ -38,6 +39,18 @@ export function getUserPerference<K extends keyof IUserPerference.IType>(
   }
 }
 
+export function useUserPerference<K extends keyof IUserPerference.IType>(
+  key: K
+) {
+  const [state, _setState] = useState(getUserPerference(key));
+
+  function setState(newState: IUserPerference.IType[K] | null) {
+    _setState(newState);
+    setUserPerference(key, newState);
+  }
+
+  return [state, setState] as const;
+}
 
 /** 比较大的数据 */
 
@@ -55,6 +68,11 @@ class UserPerferenceDB extends Dexie {
 
 const upDB = new UserPerferenceDB();
 
+const dbKeyUpdateCbs = new Map<
+  keyof IUserPerference.IDBType,
+  Set<(...args: any) => void>
+>();
+
 export async function setUserPerferenceIDB<
   K extends keyof IUserPerference.IDBType
 >(key: K, value: IUserPerference.IDBType[K]) {
@@ -65,6 +83,8 @@ export async function setUserPerferenceIDB<
         value,
       });
     });
+    const cb = dbKeyUpdateCbs.get(key);
+    cb?.forEach((it) => it?.(value));
     return true;
   } catch {
     return false;
@@ -85,4 +105,28 @@ export async function getUserPerferenceIDB<
   } catch {
     return null;
   }
+}
+
+export function useUserPerferenceIDBValue<K extends keyof IUserPerference.IDBType>(
+  key: K
+) {
+  const [state, setState] = useState<IUserPerference.IDBType[K] | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await getUserPerferenceIDB(key);
+        setState(result);
+      } catch {
+      } finally {
+        if (dbKeyUpdateCbs.has(key)) {
+          dbKeyUpdateCbs.get(key).add(setState);
+        } else {
+          dbKeyUpdateCbs.set(key, new Set([setState]));
+        }
+      }
+    })();
+  }, []);
+
+  return state;
 }

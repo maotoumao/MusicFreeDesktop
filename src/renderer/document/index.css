@@ -133,3 +133,20 @@ div[role="button"] {
 .backdrop-color {
   background: var(--backdropColor, var(--backgroundColor));
 }
+
+.list-behavior {
+  cursor: pointer;
+}
+
+
+.list-behavior:hover {
+  background-color: var(--listHoverColor);
+}
+
+.list-behavior:active {
+  background-color: var(--listActiveColor);
+}
+
+.list-behavior[data-selected=true] {
+  background-color: var(--listActiveColor);
+}
