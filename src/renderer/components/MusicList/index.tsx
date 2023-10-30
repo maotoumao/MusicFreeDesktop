@@ -21,7 +21,11 @@ import MusicDownloaded from "../MusicDownloaded";
 import { RequestStateCode, localPluginName } from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
 import { IContextMenuItem, showContextMenu } from "../ContextMenu";
-import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
+import {
+  getInternalData,
+  getMediaPrimaryKey,
+  isSameMedia,
+} from "@/common/media-util";
 import { CSSProperties, memo, useEffect, useRef, useState } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
@@ -223,6 +227,28 @@ export function showMusicContextMenu(
           } else {
             toast.success(
               `已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`
+            );
+          }
+        } catch (e) {
+          toast.error(`删除失败: ${e?.message ?? ""}`);
+        }
+      },
+    },
+    {
+      title: "打开歌曲所在文件夹",
+      icon: "folder-open",
+      show: !isArray && (Downloader.isDownloaded(musicItems) || musicItems?.platform === localPluginName),
+      async onClick() {
+        try {
+          if (!isArray) {
+            ipcRendererSend(
+              "open-path",
+              window.path.dirname(
+                getInternalData<IMusic.IMusicItemInternalData>(
+                  musicItems,
+                  "downloadData"
+                )?.path
+              )
             );
           }
         } catch (e) {

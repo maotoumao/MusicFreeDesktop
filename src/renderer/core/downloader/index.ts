@@ -113,7 +113,7 @@ async function generateDownloadMusicTask(
         state: DownloadState.PENDING,
       };
       tForceUpdatePendingQueue();
-      const fileName = `${mi.title}-${mi.artist}`.replaceAll('/', '_');
+      const fileName = `${mi.title}-${mi.artist}`.replace(/[:/]/g, "_");
       await new Promise<void>((resolve) => {
         downloadMusic(mi, fileName, (data) => {
           console.log(data);

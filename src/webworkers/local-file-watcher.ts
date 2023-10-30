@@ -4,6 +4,7 @@ import path from "path";
 import { supportLocalMediaType } from "@/common/constant";
 import debounce from "lodash.debounce";
 import { parseLocalMusicItem } from "@/common/file-util";
+import { setInternalData } from "@/common/media-util";
 
 let watcher: chokidar.FSWatcher;
 
@@ -27,6 +28,14 @@ async function setupWatcher(initPaths?: string[]) {
     ) {
       const musicItem = await parseLocalMusicItem(fp);
       musicItem.$$localPath = fp;
+      setInternalData<IMusic.IMusicItemInternalData>(
+        musicItem,
+        "downloadData", 
+        {
+            path: fp,
+            quality: "standard"
+        },
+      )
       addedMusicItems.push(musicItem);
       syncAddedMusic();
     }
@@ -92,7 +101,7 @@ async function changeWatchPath(addPaths?: string[], rmPaths?: string[]) {
         // watcher._watched.delete(it);
       });
     }
-    console.log("WATCH PATH CHANGED", addPaths, rmPaths, watcher);
+    // console.log("WATCH PATH CHANGED", addPaths, rmPaths, watcher);
   } catch (e) {
     console.log(e);
   }
