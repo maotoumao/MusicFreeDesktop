@@ -2,6 +2,7 @@ import { IAppConfig } from "@/common/app-config/type";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
+import MultiRadioGroupSettingItem from "../../components/MultiRadioGroupSettingItem";
 
 interface IProps {
   data: IAppConfig["normal"];
@@ -39,11 +40,11 @@ export default function Normal(props: IProps) {
           value={data.taskbarThumb}
           options={[
             {
-              value: 'artwork',
+              value: "artwork",
               title: "当前播放歌曲的封面",
             },
             {
-              value: 'window',
+              value: "window",
               title: "主窗口界面",
             },
           ]}
@@ -71,6 +72,21 @@ export default function Normal(props: IProps) {
           },
         ]}
       ></RadioGroupSettingItem>
+      <MultiRadioGroupSettingItem
+        label="歌曲列表隐藏列"
+        keyPath="normal.musicListColumnsShown"
+        value={data.musicListColumnsShown}
+        options={[
+          {
+            title: "时长",
+            value: "duration",
+          },
+          {
+            title: "来源",
+            value: "platform",
+          },
+        ]}
+      ></MultiRadioGroupSettingItem>
     </div>
   );
 }

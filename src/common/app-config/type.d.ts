@@ -3,7 +3,8 @@ interface IConfig {
     closeBehavior: "exit" | "minimize";
     maxHistoryLength: number;
     checkUpdate: boolean;
-    taskbarThumb: 'window' | 'artwork'
+    taskbarThumb: 'window' | 'artwork',
+    musicListColumnsShown: Array<'duration' | 'platform'>
   };
   playMusic: {
     /** 歌单内搜索区分大小写 */

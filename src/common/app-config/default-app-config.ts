@@ -11,7 +11,7 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
   "playMusic.clickMusicList": "replace",
   "playMusic.caseSensitiveInSearch": false,
   "playMusic.playError": "skip",
-  'normal.taskbarThumb': 'window',
+  "normal.taskbarThumb": "window",
   "normal.closeBehavior": "minimize",
   "normal.checkUpdate": true,
   "normal.maxHistoryLength": 30,
@@ -24,9 +24,10 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
   "lyric.fontColor": "#fff",
   "lyric.strokeColor": "#b48f1d",
   "lyric.fontSize": 54,
-  'shortCut.enableLocal': true,
-  'shortCut.enableGlobal': false,
-  'download.concurrency': 5
+  "shortCut.enableLocal": true,
+  "shortCut.enableGlobal": false,
+  "download.concurrency": 5,
+  "normal.musicListColumnsShown": [] as any,
 } as const;
 
 export default defaultAppConfig;

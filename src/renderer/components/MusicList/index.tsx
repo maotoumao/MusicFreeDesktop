@@ -38,6 +38,7 @@ import { toast } from "react-toastify";
 import classNames from "@/renderer/utils/classnames";
 import SwitchCase from "../SwitchCase";
 import SvgAsset from "../SvgAsset";
+import { getAppConfigPath } from "@/common/app-config/main";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -237,7 +238,10 @@ export function showMusicContextMenu(
     {
       title: "打开歌曲所在文件夹",
       icon: "folder-open",
-      show: !isArray && (Downloader.isDownloaded(musicItems) || musicItems?.platform === localPluginName),
+      show:
+        !isArray &&
+        (Downloader.isDownloaded(musicItems) ||
+          musicItems?.platform === localPluginName),
       async onClick() {
         try {
           if (!isArray) {
@@ -281,6 +285,17 @@ function _MusicList(props: IMusicListProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const musicListRef = useRef(musicList);
+  const columnShownRef = useRef(
+    rendererAppConfig.getAppConfigPath("normal.musicListColumnsShown").reduce(
+      (prev, curr) => ({
+        ...prev,
+        [curr]: false,
+      }),
+      {}
+    )
+  );
+
+
   const table = useReactTable({
     debugAll: false,
     data: musicList,
@@ -288,11 +303,8 @@ function _MusicList(props: IMusicListProps) {
     state: {
       sorting: sorting,
       columnVisibility: hideRows
-        ? hideRows.reduce((prev, curr) => ({ ...prev, [curr]: false }), {})
-        : undefined,
-      // columnVisibility: {
-      //   duration: false
-      // }
+        ? hideRows.reduce((prev, curr) => ({ ...prev, [curr]: false }), {...columnShownRef.current})
+        : columnShownRef.current,
     },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
