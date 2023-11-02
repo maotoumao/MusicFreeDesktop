@@ -97,6 +97,7 @@ const translations: Record<IShortCutKeys, string> = {
   "volume-up": "增加音量",
   "volume-down": "减少音量",
   "toggle-desktop-lyric": "打开/关闭桌面歌词",
+  "like/dislike": "喜欢/不喜欢当前歌曲",
 };
 
 const shortCutKeys = Object.keys(translations) as IShortCutKeys[];

@@ -120,4 +120,14 @@ function setupEvents() {
       !enableDesktopLyric
     );
   });
+  
+  Evt.on("TOGGLE_LIKE", async (item) => {
+    // 如果没有传入，就是当前播放的歌曲
+    const realItem = item || trackPlayer.getCurrentMusic();
+    if (await MusicSheet.isFavoriteMusic(realItem)) {
+      MusicSheet.removeMusicFromFavorite(realItem);
+    } else {
+      MusicSheet.addMusicToFavorite(realItem);
+    }
+  });
 }

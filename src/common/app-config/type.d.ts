@@ -45,7 +45,8 @@ interface IConfig {
       | "skip-next"
       | "toggle-desktop-lyric"
       | "volume-up"
-      | "volume-down",
+      | "volume-down"
+      | "like/dislike",
       {
         local?: string[] | null;
         global?: string[] | null;

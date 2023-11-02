@@ -11,7 +11,10 @@ import { produce } from "immer";
 import defaultSheet from "./default-sheet";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import { useEffect, useState } from "react";
-import { getUserPerferenceIDB, setUserPerferenceIDB } from "@/renderer/utils/user-perference";
+import {
+  getUserPerferenceIDB,
+  setUserPerferenceIDB,
+} from "@/renderer/utils/user-perference";
 
 // 默认歌单，快速判定是否在列表中
 const favoriteMusicListIds = new Set<string>();
@@ -41,7 +44,7 @@ export async function setupSheets() {
       musicSheetsStore.setValue(allSheets);
     }
     // 收藏歌单
-    const starredSheets = await getUserPerferenceIDB('starredMusicSheets');
+    const starredSheets = await getUserPerferenceIDB("starredMusicSheets");
     starredSheetsStore.setValue(starredSheets ?? []);
   } catch (e) {
     console.log(e);
@@ -137,9 +140,14 @@ export async function removeSheet(sheetId: string) {
       musicSheetDB.sheets,
       musicSheetDB.musicStore,
       async () => {
-        const targetSheet = musicSheetsStore.getValue().find(item => item.id === sheetId);
+        const targetSheet = musicSheetsStore
+          .getValue()
+          .find((item) => item.id === sheetId);
         console.log(targetSheet);
-        await removeMusicFromSheet(targetSheet.musicList ?? [] as any, sheetId);
+        await removeMusicFromSheet(
+          targetSheet.musicList ?? ([] as any),
+          sheetId
+        );
         musicSheetDB.sheets.delete(sheetId);
       }
     );
@@ -258,24 +266,27 @@ export async function getSheetDetail(
 }
 
 /** 获取所有歌单信息 */
-export async function getAllSheetDetails(){
+export async function getAllSheetDetails() {
   return await musicSheetDB.transaction(
     "readonly",
     musicSheetDB.musicStore,
     async () => {
-      const allSheets = musicSheetsStore
-        .getValue();
+      const allSheets = musicSheetsStore.getValue();
       if (!allSheets) {
         return [];
       }
-      const musicLists = await Promise.all(allSheets.map(sheet => musicSheetDB.musicStore.bulkGet(
-        (sheet.musicList ?? []).map(item => [item.platform, item.id])
-      )));
+      const musicLists = await Promise.all(
+        allSheets.map((sheet) =>
+          musicSheetDB.musicStore.bulkGet(
+            (sheet.musicList ?? []).map((item) => [item.platform, item.id])
+          )
+        )
+      );
 
       allSheets.forEach((sheet, index) => {
         sheet.musicList = musicLists[index];
-      })
-   
+      });
+
       return allSheets;
     }
   );
@@ -318,7 +329,7 @@ export async function removeMusicFromSheet(
         const needDelete: any[] = [];
         const needUpdate: any[] = [];
         toBeRemovedMusicDetail.forEach((musicItem) => {
-          if(!musicItem) {
+          if (!musicItem) {
             return;
           }
           musicItem[musicRefSymbol]--;
@@ -362,7 +373,7 @@ export async function removeMusicFromSheet(
       refreshFavoriteState();
     }
     refreshSheetState(sheetId);
-  } catch (e){
+  } catch (e) {
     console.log(e);
     throw e;
   }
@@ -452,17 +463,17 @@ export function useMusicSheet(sheetId: string) {
   return musicSheet;
 }
 
-
 export async function starMusicSheet(sheet: IMedia.IMediaBase) {
-
   const currentStarredSheets = starredSheetsStore.getValue();
   const newSheets = [...currentStarredSheets, sheet];
-  await setUserPerferenceIDB('starredMusicSheets', newSheets);
+  await setUserPerferenceIDB("starredMusicSheets", newSheets);
   starredSheetsStore.setValue(newSheets);
 }
 
 export async function unstarMusicSheet(sheet: IMedia.IMediaBase) {
-  const newSheets = starredSheetsStore.getValue().filter(item => !isSameMedia(item, sheet));
-  await setUserPerferenceIDB('starredMusicSheets', newSheets);
+  const newSheets = starredSheetsStore
+    .getValue()
+    .filter((item) => !isSameMedia(item, sheet));
+  await setUserPerferenceIDB("starredMusicSheets", newSheets);
   starredSheetsStore.setValue(newSheets);
 }
