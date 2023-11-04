@@ -5,6 +5,8 @@ import { ipcRenderer } from "electron";
 import { rimraf } from "rimraf";
 import Store from "@/common/store";
 import { nanoid } from "nanoid";
+import { createReadStream } from "original-fs";
+import unzipper from "unzipper";
 
 const themeNodeId = `themepack-node`;
 const themePathKey = "themepack-path";
@@ -210,24 +212,30 @@ async function parseThemePack(
 }
 
 async function installThemePack(themePackPath: string) {
-  const parsedThemePack = await parseThemePack(themePackPath);
+  // 第一步: 移动到安装文件夹
+  try {
+    const cacheFolder = path.resolve(themePackBasePath, nanoid(12));
+    await createReadStream(themePackPath)
+      .pipe(
+        unzipper.Extract({
+          path: cacheFolder,
+        })
+      )
+      .promise();
+    const parsedThemePack = await parseThemePack(cacheFolder);
 
-  const folderName = `theme-${nanoid()}`;
-  const targetFolderName = path.resolve(themePackBasePath, folderName);
-
-  if (parsedThemePack) {
-    try {
-      await fs.cp(themePackPath, targetFolderName, {
-        recursive: true,
-      });
-      parsedThemePack.path = targetFolderName;
+    if (parsedThemePack) {
+      parsedThemePack.path = cacheFolder;
       allThemePacksStore.setValue((prev) => [...prev, parsedThemePack]);
       return [true, null];
-    } catch (e) {
-      return [false, e];
+    } else {
+      // 无效的主题包
+      await rimraf(cacheFolder);
+      return [false, new Error("主题包无效")];
     }
+  } catch (e) {
+    return [false, e];
   }
-  return [false, new Error("解析失败")];
 }
 
 async function uninstallThemePack(themePack: ICommon.IThemePack) {

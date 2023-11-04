@@ -63,17 +63,27 @@ export default function Theme(props: IProps) {
             const result = await ipcRendererInvoke("show-open-dialog", {
               title: "安装主题包",
               buttonLabel: "安装",
-              properties: ["openDirectory"],
+              filters: [{
+                "name": "MusicFree主题",
+                "extensions": ["mftheme", 'zip']
+              }, {
+                name: "全部文件",
+                extensions: ["*"]
+              }],
+              properties: ["openFile", "multiSelections"],
             });
+            console.log(result);
             if (!result.canceled) {
-              const themePackPath = result.filePaths[0];
-              const [code, reason] = await window.themepack.installThemePack(
-                themePackPath
-              );
-              if (code) {
-                toast.success("安装成功~");
-              } else {
-                toast.error(`安装失败: ${reason?.message ?? ""}`);
+              const themePackPaths = result.filePaths;
+              for(const themePackPath of themePackPaths) {
+                const [code, reason] = await window.themepack.installThemePack(
+                  themePackPath
+                );
+                if (code) {
+                  toast.success("安装成功~");
+                } else {
+                  toast.error(`安装失败: ${reason?.message ?? ""}`);
+                }
               }
             }
           }}
