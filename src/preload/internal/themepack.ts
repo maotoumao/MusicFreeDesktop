@@ -227,7 +227,7 @@ async function installThemePack(themePackPath: string) {
     if (parsedThemePack) {
       parsedThemePack.path = cacheFolder;
       allThemePacksStore.setValue((prev) => [...prev, parsedThemePack]);
-      return [true, null];
+      return [true, parsedThemePack];
     } else {
       // 无效的主题包
       await rimraf(cacheFolder);

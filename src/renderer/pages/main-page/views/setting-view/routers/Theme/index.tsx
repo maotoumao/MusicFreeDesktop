@@ -43,6 +43,7 @@ export default function Theme(props: IProps) {
   return (
     <div className="setting-view--theme-container">
       <div className="setting-row">💡这里有些示例主题：<A href="https://github.com/maotoumao/MusicFreeThemePacks">https://github.com/maotoumao/MusicFreeThemePacks</A></div>
+      <div className="setting-row">⭐也可以关注公众号：<span className="highlight"> 一只猫头猫 </span>，回复<span className="highlight"> MusicFree主题包 </span>获取下载地址 (不定期更新)</div>
       <div className="setting-view--theme-items">
         <ThemeItem
           selected={currentThemePack === null}
@@ -80,9 +81,9 @@ export default function Theme(props: IProps) {
                   themePackPath
                 );
                 if (code) {
-                  toast.success("安装成功~");
+                  toast.success(`安装主题${reason?.name ? `「${reason.name}」` : ''}成功~`);
                 } else {
-                  toast.error(`安装失败: ${reason?.message ?? ""}`);
+                  toast.error(`安装主题失败: ${reason?.message ?? ""}`);
                 }
               }
             }
