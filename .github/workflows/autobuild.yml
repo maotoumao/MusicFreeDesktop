@@ -62,7 +62,7 @@ jobs:
             - name: Upload Portable
               uses: actions/upload-artifact@v3
               with:
-                  name: windows-portable-release
+                  name: windows-legacy-portable-release
                   path: ${{ github.workspace }}/MusicFree-win32-x64-legacy-portable.zip
 
     build-macos-x64: 
