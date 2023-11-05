@@ -23,16 +23,15 @@ jobs:
                   path: ./out/MusicFreeSetup.exe
             - name: Generate Portable
               run: mkdir ./out/MusicFree-win32-x64/portable
-            - name: Archive Release
-              uses: thedoctor0/zip-release@0.7.5
+            - uses: vimtor/action-zip@v1.1
               with:
-                directory: ./out/MusicFree-win32-x64
-                filename: ./out/MusicFree-win32-x64-portable.zip
+                files: ./out/MusicFree-win32-x64
+                dest: MusicFree-win32-x64-portable.zip
             - name: Upload Portable
               uses: actions/upload-artifact@v3
               with:
                   name: windows-portable-release
-                  path: ./out/MusicFree-win32-x64-portable.zip
+                  path: ${{ github.workspace }}/MusicFree-win32-x64-portable.zip
 
     build-windows-legacy: 
         runs-on: windows-latest
@@ -56,16 +55,15 @@ jobs:
                   path: ./out/MusicFreeSetup.exe
             - name: Generate Portable
               run: mkdir ./out/MusicFree-win32-x64/portable
-            - name: Archive Release
-              uses: thedoctor0/zip-release@0.7.5
+            - uses: vimtor/action-zip@v1.1
               with:
-                directory: ./out/MusicFree-win32-x64
-                filename: ./out/MusicFree-win32-x64-portable.zip
+                files: ./out/MusicFree-win32-x64
+                dest: MusicFree-win32-x64-legacy-portable.zip
             - name: Upload Portable
               uses: actions/upload-artifact@v3
               with:
-                  name: windows-legacy-portable-release
-                  path: ./out/MusicFree-win32-x64-portable.zip
+                  name: windows-portable-release
+                  path: ${{ github.workspace }}/MusicFree-win32-x64-legacy-portable.zip
 
     build-macos-x64: 
         runs-on: macos-latest
