@@ -41,7 +41,7 @@ export default function Lyric() {
         if (dom) {
           const offsetTop = dom.offsetTop - 210 + dom.clientHeight / 2;
           containerRef.current.scrollTo({
-            behavior: mountRef.current ? "smooth" : "instant",
+            behavior: mountRef.current ? "smooth" : "auto",
             top: offsetTop,
           });
         }
