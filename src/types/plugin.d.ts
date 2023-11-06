@@ -28,9 +28,11 @@ declare namespace IPlugin {
         type: T,
     ) => Promise<ISearchResult<T>>;
 
-    interface IUserEnv {
+    interface IUserVariables {
+        /** 变量键名 */
         key: string;
-        name: string;
+        /** 变量名 */
+        name?: string;
     }
 
     interface IAlbumInfoResult {
@@ -69,7 +71,7 @@ declare namespace IPlugin {
         /** 插件缓存控制 */
         cacheControl?: 'cache' | 'no-cache' | 'no-store';
         /** 用户自定义输入 */
-        userEnv?: IUserEnv[];
+        userVariables?: IUserVariables[];
         /** 提示文本 */
         hints?: Record<string, string[]>;
         /** 搜索 */
@@ -122,6 +124,8 @@ declare namespace IPlugin {
             tag: ICommon.IUnique,
             page?: number,
         ) => Promise<ICommon.PaginationResponse<IMusic.IMusicSheetItem>>;
+        /** 获取用户变量 */
+        getUserVariables?: () => Record<string, string>;
     }
 
     export interface IPluginInstance extends IPluginDefine {
@@ -138,7 +142,7 @@ declare namespace IPlugin {
     /** 插件其他属性 */
     export type IPluginMeta = {
         order: number;
-        userEnv: Record<string, string>;
+        userVariables: Record<string, string>;
     };
 
     export type IPluginDelegate = {
