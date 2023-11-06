@@ -124,8 +124,6 @@ declare namespace IPlugin {
             tag: ICommon.IUnique,
             page?: number,
         ) => Promise<ICommon.PaginationResponse<IMusic.IMusicSheetItem>>;
-        /** 获取用户变量 */
-        getUserVariables?: () => Record<string, string>;
     }
 
     export interface IPluginInstance extends IPluginDefine {
