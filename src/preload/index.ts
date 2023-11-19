@@ -7,6 +7,7 @@ import themepack from "./internal/themepack";
 import path from "path";
 import { rimraf } from "rimraf";
 import mainPort from "./internal/main-port";
+import utils from './internal/utils';
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 contextBridge.exposeInMainWorld("ipcRenderer", ipcRendererDelegate);
@@ -15,3 +16,4 @@ contextBridge.exposeInMainWorld("themepack", themepack);
 contextBridge.exposeInMainWorld("path", path);
 contextBridge.exposeInMainWorld("rimraf", rimraf);
 contextBridge.exposeInMainWorld('mainPort', mainPort);
+contextBridge.exposeInMainWorld('utils', utils);

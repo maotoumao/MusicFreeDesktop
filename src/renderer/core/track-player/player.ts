@@ -490,7 +490,7 @@ async function getMediaSource(
       return {
         quality,
         mediaSource: {
-          url: _path,
+          url: window.utils.addFileScheme(_path),
         },
       };
     } else {
