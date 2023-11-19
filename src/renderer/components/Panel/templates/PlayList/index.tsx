@@ -12,23 +12,14 @@ import useVirtualList from "@/renderer/hooks/useVirtualList";
 import { rem } from "@/common/constant";
 import { showMusicContextMenu } from "@/renderer/components/MusicList";
 import MusicDownloaded from "@/renderer/components/MusicDownloaded";
+import Base from "../Base";
 
-const baseId = "music-bar--play-list";
 const estimizeItemHeight = 2.6 * rem;
 
 export default function PlayList() {
-  const [show, setShow] = useState(false);
   const musicQueue = trackPlayer.useMusicQueue();
   const currentMusic = trackPlayer.useCurrentMusic();
   const scrollElementRef = useRef<HTMLDivElement>();
-
-  Evt.use("SWITCH_PLAY_LIST", (payload) => {
-    if (!payload) {
-      setShow((_) => !_);
-    } else {
-      setShow((_) => payload.show);
-    }
-  });
 
   const virtualController = useVirtualList({
     estimizeItemHeight,
@@ -40,78 +31,63 @@ export default function PlayList() {
   });
 
   useEffect(() => {
-    if (show) {
-      virtualController.setScrollElement(scrollElementRef.current);
-      const currentMusic = trackPlayer.getCurrentMusic();
-      if (currentMusic) {
-        const queue = trackPlayer.getMusicQueue();
-        const index = queue.findIndex((it) => isSameMedia(it, currentMusic));
-        if (index > 4) {
-          virtualController.scrollToIndex(index - 4);
-        }
+    virtualController.setScrollElement(scrollElementRef.current);
+    const currentMusic = trackPlayer.getCurrentMusic();
+    if (currentMusic) {
+      const queue = trackPlayer.getMusicQueue();
+      const index = queue.findIndex((it) => isSameMedia(it, currentMusic));
+      if (index > 4) {
+        virtualController.scrollToIndex(index - 4);
       }
     }
-  }, [show]);
+  }, []);
 
-  return show ? (
-    <div
-      id={baseId}
-      className="music-bar--play-list-container"
-      onClick={(e) => {
-        if ((e.target as HTMLElement)?.id === baseId) {
-          setShow(false);
-        }
-      }}
-    >
-      <div className="content-container animate__animated animate__slideInRight shadow background-color">
-        <div className="header">
-          <div className="title">播放列表({musicQueue.length}首)</div>
-          <div
-            role="button"
-            onClick={() => {
-              trackPlayer.clearQueue();
-            }}
-          >
-            清空
-          </div>
-        </div>
-        <div className="divider"></div>
-        <div className="playlist--music-list-container" ref={scrollElementRef}>
-          <Condition
-            condition={musicQueue.length !== 0}
-            falsy={<Empty></Empty>}
-          >
-            <div
-              className="playlist--music-list-scroll"
-              style={{
-                height: virtualController.totalHeight,
-              }}
-            >
-              {virtualController.virtualItems.map((virtualItem) => {
-                const item = virtualItem.dataItem;
-                return (
-                  <div
-                    key={virtualItem.rowIndex}
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: virtualItem.top,
-                    }}
-                  >
-                    <PlayListMusicItem
-                      key={getMediaPrimaryKey(item)}
-                      isPlaying={isSameMedia(currentMusic, item)}
-                      musicItem={item}
-                    ></PlayListMusicItem>
-                  </div>
-                );
-              })}
-            </div>
-          </Condition>
+  return (
+    <Base width={"460px"} scrollable={false}>
+      <div className="playlist--header">
+        <div className="playlist--title">播放列表({musicQueue.length}首)</div>
+        <div
+          role="button"
+          onClick={() => {
+            trackPlayer.clearQueue();
+          }}
+        >
+          清空
         </div>
       </div>
-    </div>
-  ) : null;
+      <div className="playlist--divider"></div>
+      <div className="playlist--music-list-container" ref={scrollElementRef}>
+        <Condition condition={musicQueue.length !== 0} falsy={<Empty></Empty>}>
+          <div
+            className="playlist--music-list-scroll"
+            style={{
+              height: virtualController.totalHeight,
+            }}
+          >
+            {virtualController.virtualItems.map((virtualItem) => {
+              const item = virtualItem.dataItem;
+              return (
+                <div
+                  key={virtualItem.rowIndex}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: virtualItem.top,
+                  }}
+                >
+                  <PlayListMusicItem
+                    key={getMediaPrimaryKey(item)}
+                    isPlaying={isSameMedia(currentMusic, item)}
+                    musicItem={item}
+                  ></PlayListMusicItem>
+                </div>
+              );
+            })}
+          </div>
+        </Condition>
+      </div>
+    </Base>
+  );
 }
 
 interface IPlayListMusicItemProps {

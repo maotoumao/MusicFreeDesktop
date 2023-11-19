@@ -16,9 +16,11 @@ import { hideModal, showModal } from "@/renderer/components/Modal";
 import Empty from "@/renderer/components/Empty";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import { toast } from "react-toastify";
+import { showPanel } from "@/renderer/components/Panel";
 
 function renderOptions(info: any) {
   const row = info.row.original as IPlugin.IPluginDelegate;
+  
   return (
     <div>
       <ActionButton
@@ -128,6 +130,20 @@ function renderOptions(info: any) {
           }}
         >
           导入歌单
+        </ActionButton>
+      </Condition>
+      <Condition condition={row.userVariables?.length}>
+        <ActionButton
+          style={{
+            color: "#0A95C8",
+          }}
+          onClick={() => {
+            showPanel('UserVariables', {
+              variables: row.userVariables
+            });
+          }}
+        >
+          用户变量
         </ActionButton>
       </Condition>
     </div>

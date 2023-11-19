@@ -28,7 +28,7 @@ declare namespace IPlugin {
         type: T,
     ) => Promise<ISearchResult<T>>;
 
-    interface IUserVariables {
+    interface IUserVariable {
         /** 变量键名 */
         key: string;
         /** 变量名 */
@@ -71,7 +71,7 @@ declare namespace IPlugin {
         /** 插件缓存控制 */
         cacheControl?: 'cache' | 'no-cache' | 'no-store';
         /** 用户自定义输入 */
-        userVariables?: IUserVariables[];
+        userVariables?: IUserVariable[];
         /** 提示文本 */
         hints?: Record<string, string[]>;
         /** 搜索 */

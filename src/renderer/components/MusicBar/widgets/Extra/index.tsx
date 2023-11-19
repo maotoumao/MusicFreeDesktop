@@ -18,6 +18,11 @@ import {
 } from "@/renderer/utils/lrc-window-message-channel";
 import classNames from "@/renderer/utils/classnames";
 import { useLyric } from "@/renderer/core/track-player/player";
+import {
+  getCurrentPanel,
+  hidePanel,
+  showPanel,
+} from "@/renderer/components/Panel";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
@@ -58,7 +63,11 @@ export default function Extra() {
         title="播放列表"
         role="button"
         onClick={() => {
-          Evt.emit("SWITCH_PLAY_LIST");
+          if (getCurrentPanel()?.type === "PlayList") {
+            hidePanel();
+          } else {
+            showPanel("PlayList");
+          }
         }}
       >
         <SvgAsset iconName="playlist"></SvgAsset>

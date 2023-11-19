@@ -128,7 +128,7 @@ export default function PluginManagerView() {
             onClick={async () => {
               const subscription = getUserPerference("subscription");
 
-              if (subscription.length) {
+              if (subscription?.length) {
                 for (let i = 0; i < subscription.length; ++i) {
                   await ipcRendererInvoke(
                     "install-plugin-remote",

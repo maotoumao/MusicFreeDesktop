@@ -81,7 +81,6 @@ export default function AppHeader() {
               }}
               onHistoryPanelFocus={() => {
                 isHistoryFocusRef.current = true;
-                console.log("FOCUS");
                 setShowSearchHistory(true);
               }}
             ></SearchHistory>
