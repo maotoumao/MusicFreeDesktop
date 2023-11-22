@@ -139,7 +139,8 @@ function renderOptions(info: any) {
           }}
           onClick={() => {
             showPanel('UserVariables', {
-              variables: row.userVariables
+              variables: row.userVariables,
+              plugin: row
             });
           }}
         >

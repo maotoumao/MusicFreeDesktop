@@ -1,7 +1,17 @@
+.panel--user-variables-submit {
+    font-weight: 400;
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    color: var(--infoColor, #0A95C8);
+    border: 1px solid currentColor;
+}
+
 .panel--user-variables-container {
     height: 100%;
     width: 100%;
     overflow-y: auto;
+    
 
 
     & .panel--user-variable-item {

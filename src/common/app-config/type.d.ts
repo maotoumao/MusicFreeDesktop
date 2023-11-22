@@ -82,6 +82,7 @@ interface IConfig {
       x: number;
       y: number;
     };
+    pluginMeta: Record<string, IPlugin.IPluginMeta>
   };
 }
 
