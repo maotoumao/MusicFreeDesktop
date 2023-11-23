@@ -7,7 +7,6 @@ import {
   ipcMainOn,
   ipcMainSendMainWindow,
 } from "@/common/ipc-util/main";
-import { getMainWindow } from "@/main/window";
 import { localPluginHash, localPluginName } from "@/common/constant";
 import localPlugin from "./local-plugin";
 import { rimraf } from "rimraf";

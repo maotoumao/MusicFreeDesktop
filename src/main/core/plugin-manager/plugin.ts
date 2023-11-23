@@ -8,6 +8,7 @@ import * as cheerio from 'cheerio';
 import he from 'he';
 import PluginMethods from './plugin-methods';
 import reactNativeCookies from './polyfill/react-native-cookies';
+import { getAppConfigPathSync } from '@/common/app-config/main';
 
 axios.defaults.timeout = 15000;
 
@@ -80,13 +81,22 @@ export class Plugin {
         const _module: any = {exports: {}};
         try {
             if (typeof funcCode === 'string') {
+                // 插件的环境变量
+                const env = {
+                    getUserVariables: () => {
+                        return (
+                            getAppConfigPathSync('private.pluginMeta')?.[this.name]?.userVariables ?? {}
+                        );
+                    },
+                    os: process.platform,
+                };
                 // eslint-disable-next-line no-new-func
                 _instance = Function(`
                     'use strict';
-                    return function(require, __musicfree_require, module, exports, console) {
+                    return function(require, __musicfree_require, module, exports, console, env) {
                         ${funcCode}
                     }
-                `)()(_require, _require, _module, _module.exports, console);
+                `)()(_require, _require, _module, _module.exports, console, env);
                 if (_module.exports.default) {
                     _instance = _module.exports
                         .default as IPlugin.IPluginInstance;

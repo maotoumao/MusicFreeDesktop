@@ -17,6 +17,7 @@ import Empty from "@/renderer/components/Empty";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import { toast } from "react-toastify";
 import { showPanel } from "@/renderer/components/Panel";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 function renderOptions(info: any) {
   const row = info.row.original as IPlugin.IPluginDelegate;
@@ -140,7 +141,8 @@ function renderOptions(info: any) {
           onClick={() => {
             showPanel('UserVariables', {
               variables: row.userVariables,
-              plugin: row
+              plugin: row,
+              initValues: rendererAppConfig.getAppConfigPath('private.pluginMeta')?.[row.platform]?.userVariables
             });
           }}
         >
