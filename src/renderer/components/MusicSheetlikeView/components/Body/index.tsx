@@ -123,7 +123,7 @@ export default function Body(props: IProps) {
       >
         <MusicList
           musicList={filterMusicList ?? musicList}
-          getAllMusicItems={() => musicList}
+          // getAllMusicItems={() => musicList} // TODO: 过滤歌曲
           musicSheet={musicSheet}
           state={state}
           onPageChange={onLoadMore}

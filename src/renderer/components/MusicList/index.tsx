@@ -276,7 +276,7 @@ function _MusicList(props: IMusicListProps) {
     onPageChange,
     musicSheet,
     virtualProps,
-    getAllMusicItems,
+    // getAllMusicItems,
     doubleClickBehavior,
     containerStyle,
     hideRows,
@@ -483,9 +483,8 @@ function _MusicList(props: IMusicListProps) {
                       "playMusic.clickMusicList"
                     );
                   if (config === "replace") {
-                    // TODO: 排序后的
                     trackPlayer.playMusicWithReplaceQueue(
-                      getAllMusicItems?.() ?? musicList,
+                      table.getRowModel().rows.map(it => it.original),
                       row.original
                     );
                   } else {
