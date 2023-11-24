@@ -256,7 +256,7 @@ export function showMusicContextMenu(
             );
           }
         } catch (e) {
-          toast.error(`删除失败: ${e?.message ?? ""}`);
+          toast.error(`打开失败: ${e?.message ?? ""}`);
         }
       },
     }
