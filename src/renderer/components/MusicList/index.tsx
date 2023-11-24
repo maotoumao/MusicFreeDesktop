@@ -39,6 +39,7 @@ import classNames from "@/renderer/utils/classnames";
 import SwitchCase from "../SwitchCase";
 import SvgAsset from "../SvgAsset";
 import { getAppConfigPath } from "@/common/app-config/main";
+import musicSheetDB from "@/renderer/core/db/music-sheet-db";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -245,11 +246,15 @@ export function showMusicContextMenu(
       async onClick() {
         try {
           if (!isArray) {
+            let realTimeMusicItem = musicItems;
+            if (musicItems.platform !== localPluginName) {
+              realTimeMusicItem = await musicSheetDB.musicStore.get([musicItems.platform, musicItems.id]);
+            }
             ipcRendererSend(
               "open-path",
               window.path.dirname(
                 getInternalData<IMusic.IMusicItemInternalData>(
-                  musicItems,
+                  realTimeMusicItem,
                   "downloadData"
                 )?.path
               )
