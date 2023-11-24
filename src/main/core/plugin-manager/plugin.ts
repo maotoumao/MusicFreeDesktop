@@ -106,6 +106,12 @@ export class Plugin {
             } else {
                 _instance = funcCode();
             }
+            // 插件初始化后的一些操作
+            if (Array.isArray(_instance.userVariables)) {
+                _instance.userVariables = _instance.userVariables.filter(
+                    it => it?.key,
+                );
+            }
             this.checkValid(_instance);
         } catch (e: any) {
             console.log(e);
