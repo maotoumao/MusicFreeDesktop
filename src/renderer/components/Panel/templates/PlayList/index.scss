@@ -57,7 +57,7 @@
 
   & .playlist--artist {
     margin-left: 8px;
-    width: 120px;
+    width: 106px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -66,11 +66,14 @@
 
   & .playlist--platform {
     margin-left: 8px;
-    flex: 1;
+    flex-basis: 0;
+    flex-grow: 1;
+    width: 0;
   }
 
   & .playlist--remove {
     flex-shrink: 0;
+    margin-left: 8px;
     height: 16px;
     width: 16px;
   }

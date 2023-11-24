@@ -121,7 +121,9 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
         {musicItem.artist ?? "-"}
       </div>
       <div className="playlist--platform">
-        <Tag>{musicItem.platform}</Tag>
+        <Tag style={{
+          width: "initial"
+        }}>{musicItem.platform}</Tag>
       </div>
       <div
         className="playlist--remove"
