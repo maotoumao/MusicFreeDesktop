@@ -70,8 +70,6 @@ export class Plugin {
     public path: string;
     /** 插件方法 */
     public methods: PluginMethods;
-    // /** TODO 用户输入 */
-    // public userEnv?: Record<string, string>;
 
     constructor(
         funcCode: string | (() => IPlugin.IPluginInstance),
