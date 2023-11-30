@@ -243,8 +243,6 @@ export function showMusicContextMenu(
         (Downloader.isDownloaded(musicItems) ||
           musicItems?.platform === localPluginName),
       async onClick() {
-        console.log(musicItems);
-        
         try {
           if (!isArray) {
             const filePath = getInternalData<IMusic.IMusicItemInternalData>(
