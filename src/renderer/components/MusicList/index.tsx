@@ -243,20 +243,24 @@ export function showMusicContextMenu(
         (Downloader.isDownloaded(musicItems) ||
           musicItems?.platform === localPluginName),
       async onClick() {
+        console.log(musicItems);
+        
         try {
           if (!isArray) {
-            ipcRendererSend(
-              "open-path",
-              window.path.dirname(
-                getInternalData<IMusic.IMusicItemInternalData>(
+            const filePath = getInternalData<IMusic.IMusicItemInternalData>(
                   musicItems,
                   "downloadData"
                 )?.path
-              )
+            const downloadBasePath =
+        rendererAppConfig.getAppConfigPath("download.path") ??
+        window.globalData.appPath.downloads;        
+            ipcRendererSend(
+              "open-path",
+              filePath ? window.path.dirname(filePath) : downloadBasePath
             );
           }
         } catch (e) {
-          toast.error(`删除失败: ${e?.message ?? ""}`);
+          toast.error(`打开歌曲所在文件夹失败: ${e?.message ?? ""}`);
         }
       },
     }
