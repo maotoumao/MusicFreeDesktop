@@ -19,6 +19,7 @@ declare namespace IpcEvents {
     "sync-current-music": IMusic.IMusicItem;
     "sync-current-playing-state": import("@/renderer/core/track-player/enum").PlayerState;
     "sync-current-repeat-mode": import("@/renderer/core/track-player/enum").RepeatMode;
+    'sync-current-lyric': string;
 
 
     'send-to-lyric-window': {

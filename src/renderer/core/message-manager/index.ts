@@ -137,6 +137,10 @@ async function setupMessageManager() {
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.CurrentLyricChanged, (lyric) => {
+    if (window.globalData.platform === 'darwin') {
+      // 只有macos需要同步歌词，用来设置状态栏歌词
+      ipcRendererSend('sync-current-lyric', lyric?.lrc?.lrc ?? '');
+    }
     window.mainPort.broadcast({
       data: lyric,
       type: "sync-current-lyric",
