@@ -35,7 +35,6 @@ import {
 import setThumbImg from "../utils/set-thumb-img";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
 
-
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
     const mainWindow = getMainWindow();
@@ -126,9 +125,13 @@ export default function setupIpcMain() {
     setupTrayMenu();
   });
 
-  ipcMainOn('sync-current-lyric', (lrc) => {
-    setTrayTitle(lrc);
-  })
+  ipcMainOn("sync-current-lyric", (lrc) => {
+    if (getAppConfigPathSync("lyric.enableStatusBarLyric")) {
+      setTrayTitle(lrc);
+    } else {
+      setTrayTitle('');
+    }
+  });
 
   ipcMainHandle("app-get-path", (pathName) => {
     return app.getPath(pathName as any);
@@ -190,7 +193,6 @@ export default function setupIpcMain() {
       forward: true,
     });
   });
-
 }
 
 export async function setLyricWindow(enabled: boolean) {

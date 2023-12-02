@@ -21,6 +21,8 @@ interface IConfig {
     audioOutputDevice: MediaDeviceInfo | null;
   };
   lyric: {
+    /** [darwin only] 显示状态栏歌词 */
+    enableStatusBarLyric: boolean;
     /** 显示桌面歌词 */
     enableDesktopLyric: boolean;
     /** 桌面歌词置顶 */
