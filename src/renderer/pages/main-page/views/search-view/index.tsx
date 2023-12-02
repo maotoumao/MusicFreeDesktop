@@ -1,7 +1,6 @@
 import {
   getSearchablePlugins,
-  getSupportedPlugin,
-  useSupportedPlugin,
+  useSortedSupportedPlugin,
 } from "@/renderer/core/plugin-delegate";
 import { useEffect } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
@@ -18,7 +17,7 @@ export default function SearchView() {
   const match = useMatch("/main/search/:query");
   const query = match?.params?.query;
 
-  const plugins = useSupportedPlugin("search");
+  const plugins = useSortedSupportedPlugin("search");
 
   const { t } = useTranslation();
   const search = useSearch();

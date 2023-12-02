@@ -96,7 +96,7 @@ export const useAllSheets = musicSheetsStore.useValue;
 /** 更新歌单信息 */
 export async function updateSheet(
   sheetId: string,
-  newData: IMusic.IMusicSheetItem
+  newData: Partial<IMusic.IMusicSheetItem>
 ) {
   try {
     if (!newData) {
@@ -115,7 +115,7 @@ export async function updateSheet(
           .getValue()
           .findIndex((_) => _.id === sheetId);
         if (currentIndex === -1) {
-          draft.push(newData);
+          draft.push(newData as IMusic.IDBMusicSheetItem);
         } else {
           draft[currentIndex] = {
             ...draft[currentIndex],

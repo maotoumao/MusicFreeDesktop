@@ -1,5 +1,7 @@
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import delegatePluginsStore from "./store";
+import rendererAppConfig from "@/common/app-config/renderer";
+import { useMemo } from "react";
 
 /** 刷新插件 */
 export function refreshPlugins() {
@@ -14,12 +16,44 @@ export function getSupportedPlugin(
     .filter((_) => _.supportedMethod.includes(featureMethod));
 }
 
+export function getSortedSupportedPlugin(
+  featureMethod: keyof IPlugin.IPluginInstanceMethods
+) {
+  const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta");
+  return delegatePluginsStore
+    .getValue()
+    .filter((_) => _.supportedMethod.includes(featureMethod))
+    .sort((a, b) => {
+      return (meta[a.platform]?.order ?? Infinity) -
+        (meta[b?.platform]?.order ?? Infinity) <
+        0
+        ? -1
+        : 1;
+    });
+}
+
 export function useSupportedPlugin(
   featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
   return delegatePluginsStore
     .useValue()
     .filter((_) => _.supportedMethod.includes(featureMethod));
+}
+
+export function useSortedSupportedPlugin(
+  featureMethod: keyof IPlugin.IPluginInstanceMethods
+) {
+  const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta");
+  return delegatePluginsStore
+    .useValue()
+    .filter((_) => _.supportedMethod.includes(featureMethod))
+    .sort((a, b) => {
+      return (meta[a.platform]?.order ?? Infinity) -
+        (meta[b?.platform]?.order ?? Infinity) <
+        0
+        ? -1
+        : 1;
+    });
 }
 
 export function getSearchablePlugins(
@@ -57,5 +91,30 @@ export async function callPluginDelegateMethod<
 }
 
 export function getPluginPrimaryKey(pluginItem: IPluginDelegateLike) {
-  return delegatePluginsStore.getValue().find(it => it.platform === pluginItem.platform)?.primaryKey ?? [];
+  return (
+    delegatePluginsStore
+      .getValue()
+      .find((it) => it.platform === pluginItem.platform)?.primaryKey ?? []
+  );
+}
+
+export function useSortedPlugins() {
+  const plugins = delegatePluginsStore.useValue();
+  const configs = rendererAppConfig.useAppConfig();
+
+  const meta = useMemo(() => {
+    return configs?.private?.pluginMeta ?? {};
+  }, [configs]);
+
+  const sortedPlugins = useMemo(() => {
+    return [...plugins].sort((a, b) => {
+      return (meta[a.platform]?.order ?? Infinity) -
+        (meta[b?.platform]?.order ?? Infinity) <
+        0
+        ? -1
+        : 1;
+    });
+  }, [plugins, meta]);
+
+  return sortedPlugins;
 }
