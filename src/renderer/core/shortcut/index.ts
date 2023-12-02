@@ -56,13 +56,16 @@ export function bindShortCut(
   //   return;
   // }
   unbindShortCut(key, global);
+  if (!shortCut?.length) {
+    return;
+  }
   if (global) {
     ipcRendererSend("bind-global-short-cut", {
       key: key,
       shortCut: shortCut,
     });
   } else {
-    hotkeys(shortCut.join("+"), localShortCutKeyFuncs[mapKey]);
+    hotkeys(shortCut.join("+"), "all", localShortCutKeyFuncs[mapKey]);
   }
 
   boundKeyMap.set(mapKey, shortCut);
@@ -73,6 +76,7 @@ export function unbindShortCut(eventType: IShortCutKeys, global = false) {
   const mapKey = `${eventType}${global ? "-g" : ""}`;
 
   const originalHotKey = boundKeyMap.get(mapKey);
+
   if (originalHotKey) {
     if (global) {
       ipcRendererSend("unbind-global-short-cut", {
@@ -80,7 +84,11 @@ export function unbindShortCut(eventType: IShortCutKeys, global = false) {
         shortCut: originalHotKey,
       });
     } else {
-      hotkeys.unbind(originalHotKey.join("+"), localShortCutKeyFuncs[mapKey]);
+      hotkeys.unbind(
+        originalHotKey.join("+"),
+        "all",
+        localShortCutKeyFuncs[mapKey]
+      );
     }
     boundKeyMap.delete(mapKey);
   }

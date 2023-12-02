@@ -11,7 +11,7 @@ import ShortCut from "./ShortCut";
 import Theme from "./Theme";
 
 export default [
-  { 
+  {
     id: "normal",
     title: "常规",
     component: Normal,
@@ -20,6 +20,11 @@ export default [
     id: "playMusic",
     title: "播放",
     component: PlayMusic,
+  },
+  {
+    id: "download",
+    title: "下载",
+    component: Download,
   },
   {
     id: "lyric",
@@ -35,11 +40,6 @@ export default [
     id: "theme",
     title: "主题",
     component: Theme,
-  },
-  {
-    id: "download",
-    title: "下载",
-    component: Download,
   },
   {
     id: "shortCut",
