@@ -259,3 +259,15 @@ export async function setupTrayMenu() {
 
   tray.setContextMenu(Menu.buildFromTemplate(ctxMenu));
 }
+
+
+export function setTrayTitle(str: string) {
+  if(!str || !str.length) {
+    tray.setTitle("");
+  }
+  if (str.length > 7) {
+    tray?.setTitle(" " + str.slice(0, ) + '...')
+  } else {
+    tray?.setTitle(" " + str);
+  }
+}

@@ -20,7 +20,7 @@ import {
 } from "electron";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState } from "@/renderer/core/track-player/enum";
-import { setupTrayMenu } from "../tray";
+import { setTrayTitle, setupTrayMenu } from "../tray";
 import axios from "axios";
 import { compare } from "compare-versions";
 import { getPluginByMedia } from "../core/plugin-manager";
@@ -125,6 +125,10 @@ export default function setupIpcMain() {
     }));
     setupTrayMenu();
   });
+
+  ipcMainOn('sync-current-lyric', (lrc) => {
+    setTrayTitle(lrc);
+  })
 
   ipcMainHandle("app-get-path", (pathName) => {
     return app.getPath(pathName as any);
