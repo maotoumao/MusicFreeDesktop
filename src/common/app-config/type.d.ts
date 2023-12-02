@@ -65,6 +65,10 @@ interface IConfig {
     /** 最多同时下载 */
     concurrency: number
   };
+  plugin: {
+    autoUpdatePlugin: boolean; // 是否自动升级插件
+    notCheckPluginVersion: boolean; // 是否不检测插件版本
+  }
 
   backup: {
     test: never;

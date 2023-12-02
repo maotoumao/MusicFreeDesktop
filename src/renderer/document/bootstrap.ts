@@ -10,7 +10,7 @@ import localMusic from "../core/local-music";
 import { setupLocalShortCut } from "../core/shortcut";
 import { setAutoFreeze } from "immer";
 import Evt from "../core/events";
-import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 
 import * as Comlink from "comlink";
 import Downloader from "../core/downloader";
@@ -33,6 +33,16 @@ export default async function () {
   clearDefaultBehavior();
   setupEvents();
   await Downloader.setupDownloader();
+
+  // 自动更新插件
+  if (rendererAppConfig.getAppConfigPath("plugin.autoUpdatePlugin")) {
+    const lastUpdated = +(localStorage.getItem("pluginLastupdatedTime") || 0);
+    const now = Date.now();
+    if (Math.abs(now - lastUpdated) > 86400000) {
+      localStorage.setItem("pluginLastupdatedTime", `${now}`);
+      ipcRendererSend("update-all-plugins");
+    }
+  }
 }
 
 function dropHandler() {
@@ -120,7 +130,7 @@ function setupEvents() {
       !enableDesktopLyric
     );
   });
-  
+
   Evt.on("TOGGLE_LIKE", async (item) => {
     // 如果没有传入，就是当前播放的歌曲
     const realItem = item || trackPlayer.getCurrentMusic();

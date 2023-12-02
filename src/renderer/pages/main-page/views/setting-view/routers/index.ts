@@ -6,6 +6,7 @@ import Download from "./Download";
 import Lyric from "./Lyric";
 import Normal from "./Normal";
 import PlayMusic from "./PlayMusic";
+import Plugin from "./Plugin";
 import ShortCut from "./ShortCut";
 import Theme from "./Theme";
 
@@ -24,6 +25,11 @@ export default [
     id: "lyric",
     title: "歌词",
     component: Lyric,
+  },
+  {
+    id: "plugin",
+    title: "插件",
+    component: Plugin,
   },
   {
     id: "theme",
