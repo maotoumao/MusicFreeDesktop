@@ -57,7 +57,9 @@ function renderOptions(info: any) {
             try {
               await ipcRendererInvoke("install-plugin-remote", row.srcUrl);
               toast.success(`插件「${row.platform}」已更新至最新版本`);
-            } catch {}
+            } catch (e) {
+              toast.error(e?.message ?? "更新失败");
+            }
           }}
         >
           更新

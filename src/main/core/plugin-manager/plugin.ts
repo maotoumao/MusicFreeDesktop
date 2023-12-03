@@ -9,6 +9,7 @@ import he from 'he';
 import PluginMethods from './plugin-methods';
 import reactNativeCookies from './polyfill/react-native-cookies';
 import { getAppConfigPathSync } from '@/common/app-config/main';
+import { app } from 'electron';
 
 axios.defaults.timeout = 15000;
 
@@ -87,6 +88,7 @@ export class Plugin {
                         );
                     },
                     os: process.platform,
+                    appVersion: app.getVersion()
                 };
                 // eslint-disable-next-line no-new-func
                 _instance = Function(`
