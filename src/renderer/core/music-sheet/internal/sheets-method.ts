@@ -10,7 +10,7 @@ import { musicSheetsStore, starredSheetsStore } from "./store";
 import { produce } from "immer";
 import defaultSheet from "./default-sheet";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getUserPerferenceIDB,
   setUserPerferenceIDB,
@@ -241,28 +241,39 @@ export async function addMusicToSheet(
 export async function getSheetDetail(
   sheetId: string
 ): Promise<IMusic.IMusicSheetItem | null> {
-  return await musicSheetDB.transaction(
-    "readonly",
-    musicSheetDB.musicStore,
-    async () => {
-      const targetSheet = musicSheetsStore
-        .getValue()
-        .find((item) => item.id === sheetId);
-      if (!targetSheet) {
-        return null;
+  // 取太多歌曲时会卡顿， 1000首歌大约100ms
+  const targetSheet = musicSheetsStore
+    .getValue()
+    .find((item) => item.id === sheetId);
+  if (!targetSheet) {
+    return null;
+  }
+  const tmpResult = [];
+  const musicList = targetSheet.musicList ?? [];
+  // 一组800个
+  const groupSize = 800;
+  const groupNum = Math.ceil(musicList.length / groupSize);
+
+  for (let i = 0; i < groupNum; ++i) {
+    const sliceResult = await musicSheetDB.transaction(
+      "readonly",
+      musicSheetDB.musicStore,
+      async () => {
+        return await musicSheetDB.musicStore.bulkGet(
+          musicList
+            .slice(i * groupSize, (i + 1) * groupSize)
+            .map((item) => [item.platform, item.id])
+        );
       }
-      const musicList = targetSheet.musicList ?? [];
-      const musicDetailList = await musicSheetDB.musicStore.bulkGet(
-        musicList.map((item) => [item.platform, item.id])
-      );
-      const _targetSheet = { ...targetSheet };
-      _targetSheet.musicList = musicList.map((mi, index) => ({
-        ...mi,
-        ...musicDetailList[index],
-      }));
-      return _targetSheet as IMusic.IMusicSheetItem;
-    }
-  );
+    );
+
+    tmpResult.push(...(sliceResult ?? []));
+  }
+
+  return {
+    ...targetSheet,
+    musicList: tmpResult,
+  } as IMusic.IMusicSheetItem;
 }
 
 /** 获取所有歌单信息 */
@@ -431,10 +442,19 @@ export function useMusicSheet(sheetId: string) {
   const [musicSheet, setMusicSheet] = useState<IMusic.IMusicSheetItem | null>(
     null
   );
+  const [loading, setLoading] = useState(true);
+
+  const realTimeSheetIdRef = useRef(sheetId);
+  realTimeSheetIdRef.current = sheetId;
 
   useEffect(() => {
-    const updateSheet = () => {
-      getSheetDetail(sheetId).then(setMusicSheet);
+    const updateSheet = async () => {
+      setLoading(true);
+      const sheetDetails = await getSheetDetail(sheetId);
+      setLoading(false);
+      if (realTimeSheetIdRef.current === sheetId) {
+        setMusicSheet(sheetDetails);
+      }
     };
     const cbs = updateSheetCbs.get(sheetId) ?? new Set();
     cbs.add(updateSheet);
@@ -451,16 +471,14 @@ export function useMusicSheet(sheetId: string) {
       });
     }
 
-    // TODO 长列表会有短暂卡顿
-    setTimeout(() => {
-      updateSheet();
-    }, 0);
+    updateSheet();
+
     return () => {
       cbs?.delete(updateSheet);
     };
   }, [sheetId]);
 
-  return musicSheet;
+  return [musicSheet, loading] as const;
 }
 
 export async function starMusicSheet(sheet: IMedia.IMediaBase) {

@@ -27,6 +27,7 @@ export enum RequestStateCode {
   /** 空闲 */
   IDLE = 0b00000000,
   PENDING_FIRST_PAGE = 0b00000010,
+  LOADING = 0b00000010,
   /** 检索中 */
   PENDING_REST_PAGE = 0b00000011,
   /** 部分结束 */
