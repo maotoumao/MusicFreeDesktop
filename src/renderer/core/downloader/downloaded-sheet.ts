@@ -99,8 +99,10 @@ export async function addDownloadedMusicToList(
 export async function removeDownloadedMusic(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
   removeFile = false
-) {
+): Promise<ICommon.ICommonReturnType> {
   const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
+
+  let message: string | null = null;
 
   try {
     // 1. 获取全部详细信息
@@ -117,12 +119,18 @@ export async function removeDownloadedMusic(
     let removeResults: boolean[] = [];
     if (removeFile) {
       removeResults = await Promise.all(
-        toBeRemovedMusicDetail.map((it) =>
-          window.rimraf(
-            getInternalData<IMusic.IMusicItemInternalData>(it, "downloadData")
-              ?.path
-          )
-        )
+        toBeRemovedMusicDetail.map((it) => {
+          try {
+            return window.rimraf(
+              getInternalData<IMusic.IMusicItemInternalData>(it, "downloadData")
+                ?.path
+            );
+          } catch (e) {
+            // 删除失败
+            message = "部分歌曲删除失败 " + (e?.message ?? "");
+            return false;
+          }
+        })
       );
     }
     // 3. 修改数据库
@@ -173,8 +181,17 @@ export async function removeDownloadedMusic(
       );
     });
   } catch (e) {
-    console.log(e);
-    throw e;
+    message = "删除失败 " + e?.message ?? "";
+  }
+  if (message) {
+    return [
+      false,
+      {
+        msg: message,
+      },
+    ];
+  } else {
+    return [true];
   }
 }
 
@@ -212,7 +229,7 @@ export function useDownloaded(musicItem: IMedia.IMediaBase) {
       }
     };
 
-    if(musicItem) {
+    if (musicItem) {
       setDownloaded(isDownloaded(musicItem));
     }
 

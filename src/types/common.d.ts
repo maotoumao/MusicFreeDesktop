@@ -14,12 +14,12 @@ declare namespace ICommon {
       version: string;
       changeLog: string[];
       download: string[];
-    }
+    };
   }
 
   interface IPoint {
     x: number;
-    y: number
+    y: number;
   }
 
   interface IThemePack {
@@ -44,5 +44,12 @@ declare namespace ICommon {
     /** 总大小 */
     totalSize?: number;
   }
-  
+
+  type ICommonReturnType = [
+    boolean,
+    {
+      msg?: string;
+      [k: string]: any;
+    }?
+  ];
 }

@@ -233,8 +233,11 @@ export function showMusicContextMenu(
         (isArray && musicItems.every((it) => Downloader.isDownloaded(it))) ||
         (!isArray && Downloader.isDownloaded(musicItems)),
       async onClick() {
-        try {
-          await Downloader.removeDownloadedMusic(musicItems, true);
+        const [isSuccess, info] = await Downloader.removeDownloadedMusic(
+          musicItems,
+          true
+        );
+        if (isSuccess) {
           if (isArray) {
             toast.success(`已删除 ${musicItems.length} 首本地歌曲`);
           } else {
@@ -242,8 +245,8 @@ export function showMusicContextMenu(
               `已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`
             );
           }
-        } catch (e) {
-          toast.error(`删除失败: ${e?.message ?? ""}`);
+        } else if (info?.msg) {
+          toast.error(info.msg);
         }
       },
     },
@@ -536,7 +539,6 @@ function _MusicList(props: IMusicListProps) {
 
                   // }
                   startDrag(e, virtualItem.rowIndex, "musiclist");
-
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
