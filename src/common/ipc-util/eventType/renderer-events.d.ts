@@ -46,6 +46,13 @@ declare namespace IpcEvents {
       key: keyof import("../../app-config/type").IAppConfig["shortCut"]["shortcuts"];
       shortCut: string[];
     };
+    "set-proxy": {
+      enabled: boolean;
+      host?: string;
+      port?: string;
+      username?: string;
+      password?: string;
+    }
   }
 }
 

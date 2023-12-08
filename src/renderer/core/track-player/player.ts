@@ -102,20 +102,24 @@ export async function setupPlayer() {
   }
 
   trackPlayerEventsEmitter.emit(TrackPlayerEvent.NeedRefreshLyric);
-  try {
-    const { mediaSource, quality } = await getMediaSource(currentMusic, {
-      quality:
-        getUserPerference("currentQuality") ||
-        rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
-    });
+  // 不能阻塞加载
+  getMediaSource(currentMusic, {
+    quality:
+      getUserPerference("currentQuality") ||
+      rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
+  })
+    .then(({ mediaSource, quality }) => {
+      if (isSameMedia(currentMusic, currentMusicStore.getValue())) {
+        setTrackAndPlay(mediaSource, currentMusic, {
+          seekTo: currentProgress,
+          autoPlay: false,
+        });
 
-    setTrackAndPlay(mediaSource, currentMusic, {
-      seekTo: currentProgress,
-      autoPlay: false,
-    });
+        setCurrentQuality(quality);
+      }
+    })
+    .catch(() => {});
 
-    setCurrentQuality(quality);
-  } catch {}
   currentIndex = findMusicIndex(currentMusic);
 }
 

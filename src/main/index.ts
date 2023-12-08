@@ -6,7 +6,7 @@ import {
   getMainWindow,
   showMainWindow,
 } from "./window";
-import setupIpcMain from "./ipc";
+import setupIpcMain, { handleProxy } from "./ipc";
 import { setupPluginManager } from "./core/plugin-manager";
 import {
   getAppConfigPath,
@@ -24,25 +24,21 @@ import path from "path";
 // }
 
 // portable
-if(process.platform === 'win32') {
+if (process.platform === "win32") {
   try {
-    const appPath = app.getPath('exe');
+    const appPath = app.getPath("exe");
     const portablePath = path.resolve(appPath, "../portable");
     const portableFolderStat = fs.statSync(portablePath);
     if (portableFolderStat.isDirectory()) {
-      const appPathNames = [
-        "appData",
-        "userData",
-      ];
+      const appPathNames = ["appData", "userData"];
       appPathNames.forEach((it) => {
         app.setPath(it, path.resolve(portablePath, it));
       });
     }
-  } catch (e){
+  } catch (e) {
     // console.log(e)
   }
 }
-
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -104,6 +100,12 @@ async function bootstrap() {
       if (!getLyricWindow()) {
         createLyricWindow();
       }
+    }
+  });
+
+  getAppConfigPath("network.proxy").then((result) => {
+    if (result) {
+      handleProxy(result);
     }
   });
 }

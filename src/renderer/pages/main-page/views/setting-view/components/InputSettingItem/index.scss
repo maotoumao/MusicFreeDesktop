@@ -1,0 +1,19 @@
+.setting-view--input-setting-item-container {
+  display: flex;
+  align-items: center;
+  width: 200px;
+  column-gap: 12px;
+
+  & .input-label {
+    width: 48px;
+    white-space: nowrap;
+  }
+
+  & input {
+    flex: 1;
+  }
+
+  & input:disabled {
+    opacity: 0.5;
+  }
+}

@@ -1,9 +1,9 @@
 /** 配置 */
-
 import About from "./About";
 import Backup from "./Backup";
 import Download from "./Download";
 import Lyric from "./Lyric";
+import Network from "./Network";
 import Normal from "./Normal";
 import PlayMusic from "./PlayMusic";
 import Plugin from "./Plugin";
@@ -45,6 +45,11 @@ export default [
     id: "shortCut",
     title: "快捷键",
     component: ShortCut,
+  },
+  {
+    id: "network",
+    title: "网络",
+    component: Network,
   },
   {
     id: "backup",
