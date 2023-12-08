@@ -98,11 +98,12 @@ export async function setupTrayMenu() {
     tray.setToolTip("MusicFree");
   }
   if (currentMusic) {
+    const fullName = `${currentMusic.title ?? "未知音乐"}${
+      currentMusic.artist ? ` - ${currentMusic.artist}` : ""
+    }`;
     ctxMenu.push(
       {
-        label: `${currentMusic.title ?? "未知音乐"}${
-          currentMusic.artist ? ` - ${currentMusic.artist}` : ""
-        }`,
+        label: fullName.length > 12 ? fullName.slice(0, 12) + "..." : fullName,
         click: openMusicDetail,
       },
       {
@@ -260,13 +261,12 @@ export async function setupTrayMenu() {
   tray.setContextMenu(Menu.buildFromTemplate(ctxMenu));
 }
 
-
 export function setTrayTitle(str: string) {
-  if(!str || !str.length) {
+  if (!str || !str.length) {
     tray.setTitle("");
   }
   if (str.length > 7) {
-    tray?.setTitle(" " + str.slice(0, ) + '...')
+    tray?.setTitle(" " + str.slice(0) + "...");
   } else {
     tray?.setTitle(" " + str);
   }
