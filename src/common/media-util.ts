@@ -1,4 +1,4 @@
-import { produce } from "immer";
+import { produce, setAutoFreeze } from "immer";
 import {
   internalDataKey,
   localPluginName,
@@ -6,6 +6,7 @@ import {
   sortIndexSymbol,
   timeStampSymbol,
 } from "./constant";
+setAutoFreeze(false);
 
 export function isSameMedia(
   a?: IMedia.IMediaBase | null,

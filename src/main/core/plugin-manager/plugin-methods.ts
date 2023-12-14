@@ -78,6 +78,7 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
 
       return result;
     } catch (e: any) {
+      console.log(e);
       if (retryCount > 0 && e?.message !== "NOT RETRY") {
         await delay(150);
         return this.plugin.methods.getMediaSource(
@@ -213,7 +214,7 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     if (!this.plugin.instance.getAlbumInfo) {
       return {
         albumItem,
-        musicList: albumItem?.musicList ?? [],
+        musicList: (albumItem?.musicList ?? []).map(it => resetMediaItem(it, this.plugin.name)),
         isEnd: true,
       };
     }
@@ -256,7 +257,7 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     sheetItem: IMusic.IMusicSheetItem,
     page = 1
   ): Promise<IPlugin.ISheetInfoResult | null> {
-    if (!this.plugin.instance.getAlbumInfo) {
+    if (!this.plugin.instance.getMusicSheetInfo) {
       return {
         sheetItem,
         musicList: sheetItem?.musicList ?? [],
