@@ -13,6 +13,9 @@ import { rem } from "@/common/constant";
 import { showMusicContextMenu } from "@/renderer/components/MusicList";
 import MusicDownloaded from "@/renderer/components/MusicDownloaded";
 import Base from "../Base";
+import useStateRef from "@/renderer/hooks/useStateRef";
+import { isBetween } from "@/common/normalize-util";
+import hotkeys from "hotkeys-js";
 
 const estimizeItemHeight = 2.6 * rem;
 
@@ -20,6 +23,7 @@ export default function PlayList() {
   const musicQueue = trackPlayer.useMusicQueue();
   const currentMusic = trackPlayer.useCurrentMusic();
   const scrollElementRef = useRef<HTMLDivElement>();
+  const [activeItems, setActiveItems] = useState<number[]>([]);
 
   const virtualController = useVirtualList({
     estimizeItemHeight,
@@ -40,7 +44,23 @@ export default function PlayList() {
         virtualController.scrollToIndex(index - 4);
       }
     }
+
+    const ctrlAHandler = (evt: Event) => {
+      evt.preventDefault();
+      const queue = trackPlayer.getMusicQueue();
+      setActiveItems([0, queue.length - 1]);
+    };
+    hotkeys("Ctrl+A", "play-list", ctrlAHandler);
+
+    return () => {
+      hotkeys.unbind("Ctrl+A", ctrlAHandler);
+    };
   }, []);
+
+
+  useEffect(() => {
+    setActiveItems([]);
+  }, [musicQueue]);
 
   return (
     <Base width={"460px"} scrollable={false}>
@@ -63,9 +83,16 @@ export default function PlayList() {
             style={{
               height: virtualController.totalHeight,
             }}
+            tabIndex={-1}
+            onFocus={() => {
+              hotkeys.setScope("play-list");
+            }}
+            onBlur={() => {
+              hotkeys.setScope("all");
+            }}
           >
             {virtualController.virtualItems.map((virtualItem) => {
-              const item = virtualItem.dataItem;
+              const musicItem = virtualItem.dataItem;
               return (
                 <div
                   key={virtualItem.rowIndex}
@@ -74,11 +101,65 @@ export default function PlayList() {
                     left: 0,
                     top: virtualItem.top,
                   }}
+                  onDoubleClick={() => {
+                    trackPlayer.playMusic(musicItem);
+                  }}
+                  onContextMenu={(e) => {
+                    if (
+                      activeItems.length === 2 &&
+                      isBetween(
+                        virtualItem.rowIndex,
+                        activeItems[0],
+                        activeItems[1]
+                      ) &&
+                      activeItems[0] !== activeItems[1]
+                    ) {
+                      let [start, end] = activeItems;
+                      if (start > end) {
+                        [start, end] = [end, start];
+                      }
+
+                      showMusicContextMenu(
+                        musicQueue.slice(start, end + 1),
+                        e.clientX,
+                        e.clientY,
+                        'play-list'
+                      );
+                    } else {
+                      setActiveItems([virtualItem.rowIndex]);
+                      showMusicContextMenu(
+                        musicItem,
+                        e.clientX,
+                        e.clientY,
+                        'play-list'
+                      );
+                    }
+                  }}
+                  onClick={() => {
+                    // 如果点击的时候按下shift
+                    if (hotkeys.shift) {
+                      setActiveItems([
+                        activeItems[0] ?? 0,
+                        virtualItem.rowIndex,
+                      ]);
+                    } else {
+                      setActiveItems([virtualItem.rowIndex]);
+                    }
+                  }}
                 >
                   <PlayListMusicItem
-                    key={getMediaPrimaryKey(item)}
-                    isPlaying={isSameMedia(currentMusic, item)}
-                    musicItem={item}
+                    key={getMediaPrimaryKey(musicItem)}
+                    isPlaying={isSameMedia(currentMusic, musicItem)}
+                    isActive={
+                      activeItems.length === 2
+                        ? isBetween(
+                            virtualItem.rowIndex,
+                            activeItems[0],
+                            activeItems[1]
+                          )
+                        : activeItems[0] === virtualItem.rowIndex
+                    }
+                    musicItem={musicItem}
                   ></PlayListMusicItem>
                 </div>
               );
@@ -93,9 +174,10 @@ export default function PlayList() {
 interface IPlayListMusicItemProps {
   isPlaying: boolean;
   musicItem: IMusic.IMusicItem;
+  isActive?: boolean;
 }
 function _PlayListMusicItem(props: IPlayListMusicItemProps) {
-  const { isPlaying, musicItem } = props;
+  const { isPlaying, musicItem, isActive } = props;
 
   return (
     <div
@@ -103,12 +185,7 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
       style={{
         color: `var(--${isPlaying ? "primaryColor" : "textColor"})`,
       }}
-      onDoubleClick={() => {
-        trackPlayer.playMusic(musicItem);
-      }}
-      onContextMenu={(e) => {
-        showMusicContextMenu(musicItem, e.clientX, e.clientY);
-      }}
+      data-active={isActive}
     >
       <div className="playlist--options">
         <MusicFavorite musicItem={musicItem} size={16}></MusicFavorite>
@@ -121,9 +198,13 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
         {musicItem.artist ?? "-"}
       </div>
       <div className="playlist--platform">
-        <Tag style={{
-          width: "initial"
-        }}>{musicItem.platform}</Tag>
+        <Tag
+          style={{
+            width: "initial",
+          }}
+        >
+          {musicItem.platform}
+        </Tag>
       </div>
       <div
         className="playlist--remove"
@@ -141,5 +222,7 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
 const PlayListMusicItem = memo(
   _PlayListMusicItem,
   (prev, curr) =>
-    prev.isPlaying === curr.isPlaying && prev.musicItem === curr.musicItem
+    prev.isPlaying === curr.isPlaying &&
+    prev.musicItem === curr.musicItem &&
+    prev.isActive === curr.isActive
 );

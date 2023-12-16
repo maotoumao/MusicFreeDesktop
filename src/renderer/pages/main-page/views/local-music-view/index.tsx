@@ -39,6 +39,7 @@ export default function LocalMusicView() {
           自动扫描
         </div>
         <div className="operations-layout">
+          <div>搜索</div>
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.LIST}

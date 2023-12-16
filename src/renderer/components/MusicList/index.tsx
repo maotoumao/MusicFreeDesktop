@@ -204,9 +204,17 @@ export function showMusicContextMenu(
     {
       title: "从歌单内删除",
       icon: "trash",
-      show: !!localMusicSheetId,
+      show: !!localMusicSheetId && localMusicSheetId !== 'play-list',
       onClick() {
         MusicSheet.frontend.removeMusicFromSheet(musicItems, localMusicSheetId);
+      },
+    },
+    {
+      title: "删除",
+      icon: "trash",
+      show: localMusicSheetId === 'play-list',
+      onClick() {
+        trackPlayer.removeFromQueue(musicItems);
       },
     }
   );
@@ -357,16 +365,13 @@ function _MusicList(props: IMusicListProps) {
   }, [musicList]);
 
   useEffect(() => {
-    const musiclistScope = "ml" + Math.random().toString().slice(2);
-    hotkeys("Shift", musiclistScope, () => {});
     const ctrlAHandler = (evt: Event) => {
       evt.preventDefault();
       setActiveItems([0, musicListRef.current.length - 1]);
     };
-    hotkeys("Ctrl+A", ctrlAHandler);
+    hotkeys("Ctrl+A", 'music-list', ctrlAHandler);
 
     return () => {
-      hotkeys.unbind("Shift", musiclistScope);
       hotkeys.unbind("Ctrl+A", ctrlAHandler);
     };
   }, []);
@@ -391,6 +396,13 @@ function _MusicList(props: IMusicListProps) {
       className="music-list-container"
       style={containerStyle}
       ref={tableContainerRef}
+      tabIndex={-1}
+      onFocus={() => {
+        hotkeys.setScope('music-list');
+      }}
+      onBlur={() => {
+        hotkeys.setScope('all');
+      }}
     >
       <table
         style={{

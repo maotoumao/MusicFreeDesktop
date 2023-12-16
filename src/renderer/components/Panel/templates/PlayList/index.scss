@@ -22,6 +22,7 @@
 .playlist--music-list-scroll {
   position: relative;
   width: 100%;
+  outline: none;
 }
 
 .playlist--divider {
@@ -40,6 +41,10 @@
   padding-left: 14px;
   padding-right: 14px;
   box-sizing: border-box;
+
+  &[data-active="true"] {
+    background: var(--listActiveColor);
+  }
 
   & .playlist--options {
     display: flex;

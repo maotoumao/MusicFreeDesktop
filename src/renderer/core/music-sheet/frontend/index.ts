@@ -106,7 +106,10 @@ export async function addMusicToSheet(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
   sheetId: string
 ) {
+  const start = Date.now();
   await backend.addMusicToSheet(musicItems, sheetId);
+  console.log("添加音乐", Date.now() - start, "ms");
+
   musicSheetsStore.setValue(backend.getAllSheets());
   if (sheetId === defaultSheet.id) {
     // 更新默认列表的状态
@@ -132,7 +135,10 @@ export async function removeMusicFromSheet(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
   sheetId: string
 ) {
+  const start = Date.now();
   await backend.removeMusicFromSheet(musicItems, sheetId);
+  console.log("删除音乐", Date.now() - start, "ms");
+
   musicSheetsStore.setValue(backend.getAllSheets());
   if (sheetId === defaultSheet.id) {
     // 更新默认列表的状态
@@ -198,18 +204,17 @@ export function useMusicSheet(sheetId: string) {
 
   useEffect(() => {
     const updateSheet = async () => {
+      const start = Date.now();
       const sheetDetail = await backend.getSheetItemDetail(sheetId);
-      console.log("歌单详情", sheetDetail);
+      console.log("歌单详情", Date.now() - start, "ms");
       if (realTimeSheetIdRef.current === sheetId) {
         console.log("歌单详情", sheetId);
-
         setSheetItem(sheetDetail);
         setPendingState(RequestStateCode.FINISHED);
       }
     };
 
     const updateSheetCallback = async () => {
-      console.log("Update", pendingStateRef.current);
       if (!(pendingStateRef.current & RequestStateCode.LOADING)) {
         setPendingState(RequestStateCode.PENDING_REST_PAGE);
         await updateSheet();
@@ -235,7 +240,7 @@ export function useMusicSheet(sheetId: string) {
     updateSheet();
 
     return () => {
-      cbs?.delete(updateSheet);
+      cbs?.delete(updateSheetCallback);
     };
   }, [sheetId]);
 
