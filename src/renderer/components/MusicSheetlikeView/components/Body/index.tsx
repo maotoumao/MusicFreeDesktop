@@ -137,11 +137,8 @@ export default function Body(props: IProps) {
           }}
           enableDrag={musicSheet?.platform === localPluginName}
           onDragEnd={(newData) => {
-            if (musicSheet?.platform === localPluginName) {
-              // MusicSheet.updateSheetMusicList(musicSheet.id, {
-              //   // @ts-ignore
-              //   musicList: newData.map(toMediaBase),
-              // });
+            if (musicSheet?.platform === localPluginName && musicSheet?.id) {
+              MusicSheet.frontend.updateSheetMusicOrder(musicSheet.id, newData);
             }
           }}
         ></MusicList>

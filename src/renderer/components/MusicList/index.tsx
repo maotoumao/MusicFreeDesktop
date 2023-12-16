@@ -204,7 +204,7 @@ export function showMusicContextMenu(
     {
       title: "从歌单内删除",
       icon: "trash",
-      show: !!localMusicSheetId && localMusicSheetId !== 'play-list',
+      show: !!localMusicSheetId && localMusicSheetId !== "play-list",
       onClick() {
         MusicSheet.frontend.removeMusicFromSheet(musicItems, localMusicSheetId);
       },
@@ -212,7 +212,7 @@ export function showMusicContextMenu(
     {
       title: "删除",
       icon: "trash",
-      show: localMusicSheetId === 'play-list',
+      show: localMusicSheetId === "play-list",
       onClick() {
         trackPlayer.removeFromQueue(musicItems);
       },
@@ -369,7 +369,7 @@ function _MusicList(props: IMusicListProps) {
       evt.preventDefault();
       setActiveItems([0, musicListRef.current.length - 1]);
     };
-    hotkeys("Ctrl+A", 'music-list', ctrlAHandler);
+    hotkeys("Ctrl+A", "music-list", ctrlAHandler);
 
     return () => {
       hotkeys.unbind("Ctrl+A", ctrlAHandler);
@@ -385,7 +385,11 @@ function _MusicList(props: IMusicListProps) {
       const newData = musicList
         .slice(0, fromIndex)
         .concat(musicList.slice(fromIndex + 1));
-      newData.splice(toIndex, 0, musicList[fromIndex]);
+      newData.splice(
+        fromIndex > toIndex ? toIndex : toIndex - 1,
+        0,
+        musicList[fromIndex]
+      );
       onDragEnd?.(newData);
     },
     [onDragEnd, musicList]
@@ -398,10 +402,10 @@ function _MusicList(props: IMusicListProps) {
       ref={tableContainerRef}
       tabIndex={-1}
       onFocus={() => {
-        hotkeys.setScope('music-list');
+        hotkeys.setScope("music-list");
       }}
       onBlur={() => {
-        hotkeys.setScope('all');
+        hotkeys.setScope("all");
       }}
     >
       <table
