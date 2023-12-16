@@ -12,7 +12,6 @@ import { setAutoFreeze } from "immer";
 import Evt from "../core/events";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 
-import * as Comlink from "comlink";
 import Downloader from "../core/downloader";
 import MessageManager from "../core/message-manager";
 
@@ -22,7 +21,7 @@ export default async function () {
   await Promise.all([
     rendererAppConfig.setupRendererAppConfig(),
     registerPluginEvents(),
-    MusicSheet.setupSheets(),
+    MusicSheet.frontend.setupMusicSheets(),
     trackPlayer.setupPlayer(),
     localMusic.setupLocalMusic(),
   ]);
@@ -134,10 +133,10 @@ function setupEvents() {
   Evt.on("TOGGLE_LIKE", async (item) => {
     // 如果没有传入，就是当前播放的歌曲
     const realItem = item || trackPlayer.getCurrentMusic();
-    if (await MusicSheet.isFavoriteMusic(realItem)) {
-      MusicSheet.removeMusicFromFavorite(realItem);
+    if (MusicSheet.frontend.isFavoriteMusic(realItem)) {
+      MusicSheet.frontend.removeMusicFromFavorite(realItem);
     } else {
-      MusicSheet.addMusicToFavorite(realItem);
+      MusicSheet.frontend.addMusicToFavorite(realItem);
     }
   });
 }

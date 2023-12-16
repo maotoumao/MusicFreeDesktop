@@ -2,10 +2,7 @@ import "./index.scss";
 import ListItem from "../ListItem";
 import { useMatch, useNavigate } from "react-router-dom";
 import { Disclosure } from "@headlessui/react";
-import MusicSheet, {
-  defaultSheet,
-  musicSheetsStore,
-} from "@/renderer/core/music-sheet";
+import MusicSheet, { defaultSheet } from "@/renderer/core/music-sheet";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { showModal } from "@/renderer/components/Modal";
 import { localPluginName } from "@/common/constant";
@@ -16,8 +13,7 @@ export default function MySheets() {
     `/main/musicsheet/${encodeURIComponent(localPluginName)}/:sheetId`
   );
   const currentSheetId = sheetIdMatch?.params?.sheetId;
-
-  const musicSheets = musicSheetsStore.useValue();
+  const musicSheets = MusicSheet.frontend.useAllSheets();
   const navigate = useNavigate();
 
   return (
@@ -62,7 +58,7 @@ export default function MySheets() {
                       icon: "trash",
                       show: item.id !== defaultSheet.id,
                       onClick() {
-                        MusicSheet.removeSheet(item.id).then(() => {
+                        MusicSheet.frontend.removeSheet(item.id).then(() => {
                           if (currentSheetId === item.id) {
                             navigate(
                               `/main/musicsheet/${localPluginName}/${defaultSheet.id}`,

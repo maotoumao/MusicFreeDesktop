@@ -206,7 +206,7 @@ export function showMusicContextMenu(
       icon: "trash",
       show: !!localMusicSheetId,
       onClick() {
-        MusicSheet.removeMusicFromSheet(musicItems, localMusicSheetId);
+        MusicSheet.frontend.removeMusicFromSheet(musicItems, localMusicSheetId);
       },
     }
   );

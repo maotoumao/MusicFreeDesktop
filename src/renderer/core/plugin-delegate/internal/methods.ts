@@ -66,6 +66,16 @@ export function getSearchablePlugins(
   );
 }
 
+export function getSortedSearchablePlugins(
+  supportedSearchType?: IMedia.SupportMediaType
+) {
+  return getSortedSupportedPlugin("search").filter((_) =>
+    supportedSearchType && _.supportedSearchType
+      ? _.supportedSearchType.includes(supportedSearchType)
+      : true
+  );
+}
+
 export function getPluginByHash(hash: string) {
   return delegatePluginsStore.getValue().find((item) => item.hash === hash);
 }

@@ -1,5 +1,6 @@
 import {
   getSearchablePlugins,
+  getSortedSearchablePlugins,
   useSortedSupportedPlugin,
 } from "@/renderer/core/plugin-delegate";
 import { useEffect } from "react";
@@ -68,7 +69,7 @@ export default function SearchView() {
               <Tab.Panel className="tab-panel-container" key={type}>
                 <SearchResult
                   type={type}
-                  plugins={getSearchablePlugins(type)}
+                  plugins={getSortedSearchablePlugins(type)}
                   query={query}
                 ></SearchResult>
               </Tab.Panel>

@@ -1,4 +1,3 @@
-import { useMusicIsFavorite } from "@/renderer/core/music-sheet/internal/sheets-method";
 import SvgAsset from "../SvgAsset";
 import MusicSheet from "@/renderer/core/music-sheet";
 
@@ -9,17 +8,17 @@ interface IMusicFavoriteProps {
 
 export default function MusicFavorite(props: IMusicFavoriteProps) {
   const { musicItem, size } = props;
-  const isFav = useMusicIsFavorite(musicItem);
-  
+  const isFav = MusicSheet.frontend.useMusicIsFavorite(musicItem);
+
   return (
     <div
       role="button"
       onClick={(e) => {
         e.stopPropagation();
         if (isFav) {
-          MusicSheet.removeMusicFromFavorite(musicItem);
+          MusicSheet.frontend.removeMusicFromFavorite(musicItem);
         } else {
-          MusicSheet.addMusicToFavorite(musicItem);
+          MusicSheet.frontend.addMusicToFavorite(musicItem);
         }
       }}
       onDoubleClick={(e) => {

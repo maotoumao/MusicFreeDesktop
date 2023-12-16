@@ -1,9 +1,11 @@
-import * as sheetsMethod from "./internal/sheets-method";
+import * as frontend from './frontend';
+import defaultSheet from "./common/default-sheet";
 
 const MusicSheet = {
-  ...sheetsMethod,
+  // ...sheetsMethod,
+  defaultSheet,
+  frontend
 };
 
 export default MusicSheet;
-export { musicSheetsStore, starredSheetsStore } from "./internal/store";
-export { default as defaultSheet } from "./internal/default-sheet";
+export { defaultSheet };

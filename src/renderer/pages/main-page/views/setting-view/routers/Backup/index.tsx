@@ -22,7 +22,7 @@ export default function Backup() {
               title: "备份到...",
             });
             if (!result.canceled && result.filePath) {
-              const sheetDetails = await MusicSheet.getAllSheetDetails();
+              const sheetDetails = await MusicSheet.frontend.exportAllSheetDetails();
               const backUp = JSON.stringify({
                 musicSheets: sheetDetails,
               });
@@ -56,8 +56,8 @@ export default function Backup() {
                 const parsedSheets = JSON.parse(rawSheets);
                 const allSheets = parsedSheets.musicSheets;
                 for (const sheet of allSheets) {
-                  const sheetId = await MusicSheet.addSheet(sheet.title);
-                  await MusicSheet.addMusicToSheet(sheet.musicList, sheetId);
+                  const newSheet = await MusicSheet.frontend.addSheet(sheet.title);
+                  await MusicSheet.frontend.addMusicToSheet(sheet.musicList, newSheet.id);
                 }
                 toast.success("恢复成功~");
               } catch (e) {

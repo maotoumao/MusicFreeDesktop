@@ -135,14 +135,13 @@ export default function Body(props: IProps) {
             },
             offsetHeight: () => offsetHeightStore.getValue(),
           }}
-          // enableDrag={musicSheet?.platform === localPluginName}
+          enableDrag={musicSheet?.platform === localPluginName}
           onDragEnd={(newData) => {
             if (musicSheet?.platform === localPluginName) {
-              // @ts-ignore
-              MusicSheet.updateSheet(musicSheet.id, {
-                // @ts-ignore
-                musicList: newData.map(toMediaBase),
-              });
+              // MusicSheet.updateSheetMusicList(musicSheet.id, {
+              //   // @ts-ignore
+              //   musicList: newData.map(toMediaBase),
+              // });
             }
           }}
         ></MusicList>
