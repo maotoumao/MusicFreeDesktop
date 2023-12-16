@@ -7,6 +7,8 @@
 
 <img src="./src/assets/imgs/wechat_channel1.png" height="144px" title="微信公众号" style="display:inherit;"/>
 
+## 打包分发请遵守 GPL3.0 协议，并保留此 Github 仓库地址作为出处。
+
 ### 下载地址
 
 [蓝奏云下载地址](https://wwzb.lanzoue.com/b042da1xe)
