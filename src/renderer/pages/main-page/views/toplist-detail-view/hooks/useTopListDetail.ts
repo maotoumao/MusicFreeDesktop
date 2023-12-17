@@ -1,5 +1,6 @@
+import { RequestStateCode } from "@/common/constant";
 import { callPluginDelegateMethod } from "@/renderer/core/plugin-delegate";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function useTopListDetail(
   topListItem: IMusic.IMusicSheetItem | null,
@@ -7,37 +8,46 @@ export default function useTopListDetail(
 ) {
   const [mergedTopListItem, setMergedTopListItem] =
     useState<ICommon.WithMusicList<IMusic.IMusicSheetItem> | null>(topListItem);
+  const pageRef = useRef(1);
+  const [requestState, setRequestState] = useState(RequestStateCode.IDLE);
+
+  async function loadMore(){
+    if (!topListItem) {
+      return;
+    }
+    try {
+      if (pageRef.current === 1) {
+        setRequestState(RequestStateCode.PENDING_FIRST_PAGE);
+      } else {
+        setRequestState(RequestStateCode.PENDING_REST_PAGE);
+      }
+      const result = await callPluginDelegateMethod({platform}, 'getTopListDetail', topListItem, pageRef.current);
+      if (!result) {
+        throw new Error();
+      }
+      const currentPage = pageRef.current;
+      setMergedTopListItem((prev) => ({
+        ...prev,
+        ...(result.topListItem),
+        musicList: currentPage === 1 ? (result.musicList ?? []): [...prev.musicList, ...result.musicList]
+      }))
+
+      if (!result.isEnd) {
+        setRequestState(RequestStateCode.IDLE);
+      } else {
+        setRequestState(RequestStateCode.FINISHED);
+      }
+      pageRef.current++;
+    } catch {
+      setRequestState(RequestStateCode.FINISHED);
+    }
+  }
 
   useEffect(() => {
     if (topListItem === null) {
       return;
     }
-    console.log("here", topListItem, platform);
-    callPluginDelegateMethod(
-      {
-        platform,
-      },
-      "getTopListDetail",
-      topListItem
-    )
-      .then((_) => {
-        if (_) {
-          setMergedTopListItem(
-            (prev) =>
-              ({
-                ...(prev ?? {}),
-                ...(_ ?? {}),
-              } as any)
-          );
-        }
-      })
-      .catch((e) => {
-        console.log("catch", e);
-        setMergedTopListItem((prev) => ({
-          ...prev,
-          musicList: [],
-        }));
-      });
+    loadMore();
   }, []);
-  return mergedTopListItem;
+  return [mergedTopListItem, requestState, loadMore] as const;
 }

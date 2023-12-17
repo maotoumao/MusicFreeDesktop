@@ -6,7 +6,7 @@ import { RequestStateCode } from "@/common/constant";
 
 export default function TopListDetailView() {
   const params = useParams();
-  const topListDetail = useTopListDetail(
+  const [topListDetail, state, loadMore] = useTopListDetail(
     history.state?.usr?.toplist,
     params?.platform
   );
@@ -15,11 +15,8 @@ export default function TopListDetailView() {
     <MusicSheetlikeView
       musicSheet={topListDetail}
       musicList={topListDetail?.musicList ?? []}
-      state={
-        topListDetail?.musicList
-          ? RequestStateCode.FINISHED
-          : RequestStateCode.PENDING_FIRST_PAGE
-      }
+      state={state}
+      onLoadMore={loadMore}
     />
   );
 }
