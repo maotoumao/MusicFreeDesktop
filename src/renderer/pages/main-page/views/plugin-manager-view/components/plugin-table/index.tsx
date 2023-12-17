@@ -185,6 +185,13 @@ const columnDef = [
     maxSize: 100,
     size: 100,
   }),
+  columnHelper.accessor("author", {
+    cell: (info) => info.getValue() ?? '未知作者',
+    header: () => "作者",
+    maxSize: 100,
+    minSize: 100,
+    size: 100,
+  }),
   columnHelper.accessor(() => 0, {
     id: "extra",
     cell: renderOptions,
@@ -262,6 +269,9 @@ export default function PluginTable() {
                     key={cell.id}
                     style={{
                       width: cell.column.getSize(),
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
                     }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
