@@ -43,12 +43,14 @@ export default function (props: IUserVariablesProps) {
           <div className="panel--user-variable-item" key={variable.key}>
             <span>{variable.name ?? variable.key}</span>
             <input
+              spellCheck={false}
               defaultValue={initValues[variable.key]}
               onInput={(e) => {
                 valueRef.current[variable.key] = (
                   e.target as HTMLInputElement
                 ).value;
               }}
+              placeholder={variable.hint}
             ></input>
           </div>
         ))}

@@ -26,6 +26,10 @@
       display: flex;
       align-items: center;
 
+      & .search-local-music {
+        margin-right: 12px;
+      }
+
       & .list-view-action {
         width: 2.4rem;
         height: 2rem;
