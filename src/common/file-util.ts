@@ -26,6 +26,9 @@ export async function parseLocalMusicItem(
     const testItems = [common.title, common.artist, common.album];
 
     for (const testItem of testItems) {
+      if (!testItem) {
+        continue;
+      }
       const testResult = jschardet.detect(testItem, {
         minimumThreshold: 0.4,
       });
@@ -68,7 +71,7 @@ export async function parseLocalMusicItem(
     }
 
     return {
-      title: common.title ?? path.basename(filePath),
+      title: common.title ?? path.parse(filePath).name,
       artist: common.artist ?? "未知作者",
       artwork: common.picture?.[0]
         ? getB64Picture(common.picture[0])
@@ -80,14 +83,15 @@ export async function parseLocalMusicItem(
       id: hash,
       rawLrc: common.lyrics?.join(""),
     };
-  } catch {
+  } catch (e) {
     return {
-      title: path.basename(filePath) || filePath,
+      title: path.parse(filePath).name || filePath,
       id: hash,
       platform: localPluginName,
       localPath: filePath,
       url: addFileScheme(filePath),
-      artist: "-",
+      artist: "未知作者",
+      album: '未知专辑'
     };
   }
 }
