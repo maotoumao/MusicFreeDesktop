@@ -81,6 +81,7 @@ export default function Network(props: IProps) {
         <InputSettingItem
           width="100%"
           label="密码"
+          type="password"
           disabled={!proxyEnabled}
           keyPath="network.proxy.password"
           value={data.proxy?.password}

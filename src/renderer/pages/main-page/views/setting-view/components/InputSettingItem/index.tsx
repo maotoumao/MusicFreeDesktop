@@ -11,7 +11,13 @@ import Loading from "@/renderer/components/Loading";
 import { isBasicType } from "@/common/normalize-util";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import { rem } from "@/common/constant";
-import { Fragment, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  HTMLInputTypeAttribute,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface InputSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -22,6 +28,7 @@ interface InputSettingItemProps<T extends IAppConfigKeyPath> {
   /** 是否过滤首尾空格 */
   trim?: boolean;
   disabled?: boolean;
+  type?: HTMLInputTypeAttribute;
 }
 
 export default function InputSettingItem<T extends IAppConfigKeyPath>(
@@ -33,7 +40,8 @@ export default function InputSettingItem<T extends IAppConfigKeyPath>(
     value = defaultAppConfig[keyPath],
     onChange,
     width,
-    disabled
+    type,
+    disabled,
   } = props;
 
   const [tmpValue, setTmpValue] = useState<string | null>(null);
@@ -52,6 +60,7 @@ export default function InputSettingItem<T extends IAppConfigKeyPath>(
         onChange={(e) => {
           setTmpValue(e.target.value ?? null);
         }}
+        type={type}
         onBlur={() => {
           if (tmpValue === null) {
             return;
@@ -68,4 +77,3 @@ export default function InputSettingItem<T extends IAppConfigKeyPath>(
     </div>
   );
 }
-

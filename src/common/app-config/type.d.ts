@@ -85,7 +85,13 @@ interface IConfig {
   };
 
   backup: {
-    test: never;
+    /** 恢复歌单时行为 */
+    resumeBehavior: 'append' | 'overwrite',
+    webdav: {
+      url: string;
+      username: string;
+      password: string
+    }
   };
   /** 本地音乐配置 */
   localMusic: {

@@ -6,7 +6,10 @@ export const internalDataSymbol = Symbol.for("internal");
 export const timeStampSymbol = Symbol.for("time-stamp");
 // 加入播放列表的辅助顺序
 export const sortIndexSymbol = Symbol.for("sort-index");
-/** 歌曲引用次数 */
+/** 
+ * 歌曲引用次数
+ * TODO: 没必要算引用 如果真有需要直接取异或就可以了
+ */
 export const musicRefSymbol = "$$ref";
 
 /** 本地存储路径 */

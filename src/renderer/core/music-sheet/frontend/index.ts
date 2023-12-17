@@ -11,6 +11,8 @@ const starredSheetsStore = new Store<IMedia.IMediaBase[]>([]);
 export const useAllSheets = musicSheetsStore.useValue;
 export const useAllStarredSheets = starredSheetsStore.useValue;
 
+export const getAllSheets = musicSheetsStore.getValue;
+
 /** 更新默认歌单变化 */
 const refreshFavCbs = new Set<() => void>();
 function refreshFavoriteState() {
@@ -60,8 +62,8 @@ export async function updateSheet(
 
 /**
  * 更新歌单中的歌曲顺序
- * @param sheetId 
- * @param musicList 
+ * @param sheetId
+ * @param musicList
  */
 export async function updateSheetMusicOrder(
   sheetId: string,
@@ -91,6 +93,19 @@ export async function removeSheet(sheetId: string) {
   try {
     await backend.removeSheet(sheetId);
     musicSheetsStore.setValue(backend.getAllSheets());
+  } catch {}
+}
+
+/**
+ * 清空所有音乐
+ * @param sheetId 歌单ID
+ * @returns 删除后的ID
+ */
+export async function clearSheet(sheetId: string) {
+  try {
+    await backend.clearSheet(sheetId);
+    musicSheetsStore.setValue(backend.getAllSheets());
+    refetchSheetDetail(sheetId);
   } catch {}
 }
 

@@ -195,6 +195,32 @@ export async function removeSheet(sheetId: string) {
 }
 
 /**
+ * 清空所有音乐
+ * @param sheetId 歌单ID
+ * @returns 删除后的ID
+ */
+export async function clearSheet(sheetId: string) {
+  try {
+    await musicSheetDB.transaction(
+      "readwrite",
+      musicSheetDB.sheets,
+      musicSheetDB.musicStore,
+      async () => {
+        const targetSheet = musicSheets.find((item) => item.id === sheetId);
+        await removeMusicFromSheet(
+          targetSheet.musicList ?? ([] as any),
+          sheetId
+        );
+        targetSheet.musicList = [];
+      }
+    );
+    return [...musicSheets];
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+/**
  * 收藏歌单
  * @param sheet
  */
