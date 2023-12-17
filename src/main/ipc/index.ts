@@ -151,19 +151,19 @@ export default function setupIpcMain() {
     setLyricWindow(enabled);
   });
 
-  ipcMainOn("send-to-lyric-window", (data) => {
-    const lyricWindow = getLyricWindow();
-    if (!lyricWindow) {
-      return;
-    }
-    currentMusicInfoStore.setValue((prev) => ({
-      ...prev,
-      lrc: data.lrc,
-    }));
-    // syncExtensionData({
-    //   lrc: data.lrc,
-    // });
-  });
+  // ipcMainOn("send-to-lyric-window", (data) => {
+  //   const lyricWindow = getLyricWindow();
+  //   if (!lyricWindow) {
+  //     return;
+  //   }
+  //   currentMusicInfoStore.setValue((prev) => ({
+  //     ...prev,
+  //     lrc: data.lrc,
+  //   }));
+  //   // syncExtensionData({
+  //   //   lrc: data.lrc,
+  //   // });
+  // });
 
   ipcMainOn("set-desktop-lyric-lock", (lockState) => {
     setDesktopLyricLock(lockState);

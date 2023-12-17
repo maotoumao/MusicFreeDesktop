@@ -1,8 +1,6 @@
-import React from "react";
 import useTopListDetail from "./hooks/useTopListDetail";
 import { useParams } from "react-router-dom";
 import MusicSheetlikeView from "@/renderer/components/MusicSheetlikeView";
-import { RequestStateCode } from "@/common/constant";
 
 export default function TopListDetailView() {
   const params = useParams();

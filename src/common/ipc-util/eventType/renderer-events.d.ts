@@ -23,11 +23,11 @@ declare namespace IpcEvents {
     "sync-current-repeat-mode": import("@/renderer/core/track-player/enum").RepeatMode;
     "sync-current-lyric": string;
 
-    "send-to-lyric-window": {
-      // 时序
-      timeStamp: number;
-      lrc: ILyric.IParsedLrcItem[];
-    };
+    // "send-to-lyric-window": {
+    //   // 时序
+    //   timeStamp: number;
+    //   lrc: ILyric.IParsedLrcItem[];
+    // };
     "set-desktop-lyric-lock": boolean;
     "ignore-mouse-event": {
       ignore: boolean;
