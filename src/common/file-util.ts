@@ -9,12 +9,63 @@ function getB64Picture(picture: IPicture) {
   return `data:${picture.format};base64,${picture.data.toString("base64")}`;
 }
 
+const specialEncoding = ["GB2312"];
+
 export async function parseLocalMusicItem(
   filePath: string
 ): Promise<IMusic.IMusicItem> {
   const hash = CryptoJS.MD5(filePath).toString();
   try {
     const { common = {} as ICommonTagsResult } = await parseFile(filePath);
+
+    const jschardet = await import("jschardet");
+
+    // 检测编码
+    let encoding: string | null = null;
+    let conf = 0;
+    const testItems = [common.title, common.artist, common.album];
+
+    for (const testItem of testItems) {
+      const testResult = jschardet.detect(testItem, {
+        minimumThreshold: 0.4,
+      });
+      if (testResult.confidence > conf) {
+        conf = testResult.confidence;
+        encoding = testResult.encoding;
+      }
+
+      if (conf > 0.9) {
+        break;
+      }
+    }
+
+    if (specialEncoding.includes(encoding)) {
+      const iconv = await import("iconv-lite");
+
+      if (common.title) {
+        common.title = iconv.decode(
+          common.title as unknown as Buffer,
+          encoding
+        );
+      }
+      if (common.artist) {
+        common.artist = iconv.decode(
+          common.artist as unknown as Buffer,
+          encoding
+        );
+      }
+      if (common.artist) {
+        common.album = iconv.decode(
+          common.album as unknown as Buffer,
+          encoding
+        );
+      }
+      if (common.lyrics) {
+        common.lyrics = common.lyrics.map((it) =>
+          it ? iconv.decode(it as unknown as Buffer, encoding) : ""
+        );
+      }
+    }
 
     return {
       title: common.title ?? path.basename(filePath),
