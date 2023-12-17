@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import "./index.scss";
 import Base from "../Base";
 import useMounted from "@/renderer/hooks/useMounted";
@@ -8,7 +8,7 @@ import Loading from "@/renderer/components/Loading";
 interface ISimpleInputWithStateProps<PromiseItem> {
   title: string;
   placeholder?: string;
-  hints?: string[];
+  hints?: ReactNode[];
   maxLength?: number;
   withLoading?: boolean; // 是否需要中间状态
   okText?: string;
