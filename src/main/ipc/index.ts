@@ -151,6 +151,22 @@ export default function setupIpcMain() {
     setLyricWindow(enabled);
   });
 
+  ipcMainOn("clear-cache", () => {
+    const mainWindow = getMainWindow();
+    if (mainWindow) {
+      mainWindow.webContents.session.clearCache?.();
+    }
+  });
+
+  ipcMainHandle("get-cache-size", async () => {
+    const mainWindow = getMainWindow();
+    if (mainWindow) {
+      return await mainWindow.webContents.session.getCacheSize();
+    }
+
+    return NaN;
+  });
+
   // ipcMainOn("send-to-lyric-window", (data) => {
   //   const lyricWindow = getLyricWindow();
   //   if (!lyricWindow) {

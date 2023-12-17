@@ -2,7 +2,9 @@ import { IAppConfig } from "@/common/app-config/type";
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import InputSettingItem from "../../components/InputSettingItem";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { useEffect, useState } from "react";
+import { normalizeFileSize } from "@/common/normalize-util";
 
 interface IProps {
   data: IAppConfig["network"];
@@ -11,7 +13,15 @@ interface IProps {
 export default function Network(props: IProps) {
   const { data = {} as IAppConfig["network"] } = props;
 
-    const proxyEnabled = !!data.proxy?.enabled;
+  const proxyEnabled = !!data.proxy?.enabled;
+
+  const [cacheSize, setCacheSize] = useState(NaN);
+
+  useEffect(() => {
+    ipcRendererInvoke("get-cache-size").then((res) => {
+      setCacheSize(res);
+    });
+  }, []);
 
   return (
     <div className="setting-view--network-container">
@@ -81,6 +91,20 @@ export default function Network(props: IProps) {
             });
           }}
         ></InputSettingItem>
+      </div>
+
+      <div className="setting-row network-cache-container">
+        本地缓存： {isNaN(cacheSize) ? "-" : normalizeFileSize(cacheSize)}
+        <div
+          role="button"
+          data-type="normalButton"
+          onClick={() => {
+            setCacheSize(0);
+            ipcRendererSend("clear-cache");
+          }}
+        >
+          清空缓存
+        </div>
       </div>
     </div>
   );

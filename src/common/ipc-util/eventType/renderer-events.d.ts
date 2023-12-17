@@ -46,13 +46,16 @@ declare namespace IpcEvents {
       key: keyof import("../../app-config/type").IAppConfig["shortCut"]["shortcuts"];
       shortCut: string[];
     };
+    /** 设置代理 */
     "set-proxy": {
       enabled: boolean;
       host?: string;
       port?: string;
       username?: string;
       password?: string;
-    }
+    };
+    /** 清空缓存 */
+    "clear-cache": undefined;
   }
 }
 
@@ -97,5 +100,6 @@ declare namespace IpcInvoke {
     "set-lyric-window": (show: boolean) => void;
     /** 主窗口和歌词窗口之间 */
     "app-get-path": (pathName: string) => string;
+    "get-cache-size": () => number;
   }
 }
