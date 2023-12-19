@@ -11,6 +11,7 @@ import Hls from "hls.js";
 class TrackPlayerInternal {
   private audioContext: AudioContext;
   private audio: HTMLAudioElement;
+  private hls: Hls;
   private playerState: PlayerState;
   private currentMusic: IMusic.IMusicItem;
 
@@ -19,6 +20,8 @@ class TrackPlayerInternal {
     this.audio = new Audio();
     this.audio.preload = "auto";
     this.audio.controls = false;
+    this.hls = new Hls();
+    this.hls.attachMedia(this.audio);
 
     this.registerEvents();
   }
@@ -111,9 +114,7 @@ class TrackPlayerInternal {
     });
     // 拓展播放功能
     if (getUrlExt(url) === ".m3u8" && Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(url);
-      hls.attachMedia(this.audio);
+      this.hls.loadSource(url);
     } else {
       this.audio.src = url;
     }
