@@ -41,7 +41,9 @@ export default function (props: IUserVariablesProps) {
       <div className="panel--user-variables-container">
         {variables.map((variable) => (
           <div className="panel--user-variable-item" key={variable.key}>
-            <span>{variable.name ?? variable.key}</span>
+            <span title={variable.name ?? variable.key}>
+              {variable.name ?? variable.key}
+            </span>
             <input
               spellCheck={false}
               defaultValue={initValues[variable.key]}
