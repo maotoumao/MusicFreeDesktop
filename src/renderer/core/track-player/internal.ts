@@ -22,6 +22,11 @@ class TrackPlayerInternal {
     this.audio.controls = false;
     this.hls = new Hls();
     this.hls.attachMedia(this.audio);
+    // @ts-ignore
+    this.hls.on('hlsError', () => {
+      console.log("???")
+      this.throwError(ErrorReason.EmptyResource)
+    })
 
     this.registerEvents();
   }

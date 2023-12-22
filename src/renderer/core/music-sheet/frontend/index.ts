@@ -156,7 +156,7 @@ export async function addMusicToSheet(
     // 更新默认列表的状态
     refreshFavoriteState();
   }
-  refreshSheetDetailState(sheetId);
+  refetchSheetDetail(sheetId);
 }
 
 /** 添加到默认歌单 */
@@ -185,7 +185,7 @@ export async function removeMusicFromSheet(
     // 更新默认列表的状态
     refreshFavoriteState();
   }
-  refreshSheetDetailState(sheetId);
+  refetchSheetDetail(sheetId);
 }
 
 /** 从默认歌单中移除 */
@@ -218,11 +218,6 @@ export function useMusicIsFavorite(musicItem: IMusic.IMusicItem) {
   return isFav;
 }
 
-const updateSheetCbs: Map<string, Set<() => void>> = new Map();
-/** 更新最新的歌单状态 */
-function refreshSheetDetailState(sheetId: string) {
-  updateSheetCbs.get(sheetId)?.forEach((cb) => cb?.());
-}
 
 const updateSheetDetailCallbacks: Map<
   string,
