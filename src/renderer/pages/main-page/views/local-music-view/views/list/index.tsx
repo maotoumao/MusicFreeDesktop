@@ -15,7 +15,11 @@ export default function ListView(props: IProps) {
       }}
       musicList={localMusicList}
       virtualProps={{
-        fallbackRenderCount: -1,
+        fallbackRenderCount: 40,
+        getScrollElement() {
+            return document.querySelector('#page-container');
+        },
+        offsetHeight: 102
       }}
     ></MusicList>
   );
