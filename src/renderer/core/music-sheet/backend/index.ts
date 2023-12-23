@@ -87,7 +87,7 @@ export async function queryAllSheets() {
 export async function queryAllStarredSheets() {
   try {
     starredMusicSheets = await getUserPerferenceIDB("starredMusicSheets");
-    return starredMusicSheets;
+    return starredMusicSheets ?? [];
   } catch {
     return [];
   }
