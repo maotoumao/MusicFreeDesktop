@@ -171,11 +171,11 @@ export function showMusicContextMenu(
         icon: "identification",
       },
       {
-        title: `作者: ${musicItems.artist}`,
+        title: `作者: ${musicItems.artist ?? '未知作者'}`,
         icon: "user",
       },
       {
-        title: `专辑: ${musicItems.album}`,
+        title: `专辑: ${musicItems.album ?? '未知专辑'}`,
         icon: "album",
         show: !!musicItems.album,
       },
