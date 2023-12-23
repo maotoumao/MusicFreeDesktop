@@ -19,7 +19,7 @@ export function getSupportedPlugin(
 export function getSortedSupportedPlugin(
   featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
-  const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta");
+  const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta") ?? {};
   return delegatePluginsStore
     .getValue()
     .filter((_) => _.supportedMethod.includes(featureMethod))
@@ -43,7 +43,7 @@ export function useSupportedPlugin(
 export function useSortedSupportedPlugin(
   featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
-  const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta");
+  const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta") ?? {};
   return delegatePluginsStore
     .useValue()
     .filter((_) => _.supportedMethod.includes(featureMethod))
