@@ -71,13 +71,29 @@ async function downloadFile(
       return;
     }
   } catch (e) {}
-  const _headers = {
+  const _headers: Record<string, string> = {
     ...(mediaSource.headers ?? {}),
     "user-agent": mediaSource.userAgent,
   };
 
   try {
-    const res = await fetch(encodeUrlHeaders(mediaSource.url, _headers));
+    const urlObj = new URL(mediaSource.url);
+    let res: Response;
+    if (urlObj.username && urlObj.password) {
+      _headers["Authorization"] = `Basic ${btoa(
+        `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
+          urlObj.password
+        )}`
+      )}`;
+      urlObj.username = "";
+      urlObj.password = "";
+      res = await fetch(urlObj.toString(), {
+        headers: _headers,
+      });
+    } else {
+      res = await fetch(encodeUrlHeaders(mediaSource.url, _headers));
+    }
+
     const totalSize = +res.headers.get("content-length");
     onStateChange({
       state,

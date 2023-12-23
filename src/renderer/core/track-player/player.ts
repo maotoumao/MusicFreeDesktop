@@ -102,20 +102,24 @@ export async function setupPlayer() {
   }
 
   trackPlayerEventsEmitter.emit(TrackPlayerEvent.NeedRefreshLyric);
-  try {
-    const { mediaSource, quality } = await getMediaSource(currentMusic, {
-      quality:
-        getUserPerference("currentQuality") ||
-        rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
-    });
+  // 不能阻塞加载
+  getMediaSource(currentMusic, {
+    quality:
+      getUserPerference("currentQuality") ||
+      rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
+  })
+    .then(({ mediaSource, quality }) => {
+      if (isSameMedia(currentMusic, currentMusicStore.getValue())) {
+        setTrackAndPlay(mediaSource, currentMusic, {
+          seekTo: currentProgress,
+          autoPlay: false,
+        });
 
-    setTrackAndPlay(mediaSource, currentMusic, {
-      seekTo: currentProgress,
-      autoPlay: false,
-    });
+        setCurrentQuality(quality);
+      }
+    })
+    .catch(() => {});
 
-    setCurrentQuality(quality);
-  } catch {}
   currentIndex = findMusicIndex(currentMusic);
 }
 
@@ -490,7 +494,7 @@ async function getMediaSource(
       return {
         quality,
         mediaSource: {
-          url: _path,
+          url: window.utils.addFileScheme(_path),
         },
       };
     } else {
@@ -659,28 +663,56 @@ export function clearQueue() {
   currentIndex = -1;
 }
 
-export function removeFromQueue(musicItem: IMusic.IMusicItem | number) {
-  let musicIndex: number;
-  if (typeof musicItem !== "number") {
-    musicIndex = findMusicIndex(musicItem);
+export function removeFromQueue(
+  musicItem: IMusic.IMusicItem | number | IMusic.IMusicItem[]
+) {
+  if (Array.isArray(musicItem)) {
+    const mapObj: Record<string, Record<string, true>> = {};
+    for (const mi of musicItem) {
+      mapObj[mi.platform] = { ...mapObj[mi.platform], [mi.id]: true };
+    }
+    const musicQueue = musicQueueStore.getValue();
+    const result: IMusic.IMusicItem[] = [];
+    for (let i = 0; i < musicQueue.length; ++i) {
+      const loopMusicItem = musicQueue[i];
+      // 命中即将删除的逻辑
+      if (mapObj?.[loopMusicItem.platform]?.[loopMusicItem.id]) {
+        if (currentIndex === i) {
+          trackPlayer.clear();
+          currentIndex = -1;
+          setCurrentMusic(null);
+        }
+      } else {
+        result.push(loopMusicItem);
+        if (currentIndex === i) {
+          currentIndex = result.length - 1;
+        }
+      }
+    }
+    setMusicQueue(result);
   } else {
-    musicIndex = musicItem;
-  }
-  if (musicIndex === -1) {
-    return;
-  }
+    let musicIndex: number;
+    if (typeof musicItem !== "number") {
+      musicIndex = findMusicIndex(musicItem);
+    } else {
+      musicIndex = musicItem;
+    }
+    if (musicIndex === -1) {
+      return;
+    }
 
-  if (musicIndex === currentIndex) {
-    trackPlayer.clear();
-    currentIndex = -1;
-    setCurrentMusic(null);
+    if (musicIndex === currentIndex) {
+      trackPlayer.clear();
+      currentIndex = -1;
+      setCurrentMusic(null);
+    }
+
+    const newQueue = [...musicQueueStore.getValue()];
+    newQueue.splice(musicIndex, 1);
+
+    setMusicQueue(newQueue);
+    currentIndex = findMusicIndex(currentMusicStore.getValue());
   }
-
-  const newQueue = [...musicQueueStore.getValue()];
-  newQueue.splice(musicIndex, 1);
-
-  setMusicQueue(newQueue);
-  currentIndex = findMusicIndex(currentMusicStore.getValue());
 }
 
 export function seekTo(position: number) {

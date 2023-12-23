@@ -1,4 +1,4 @@
-import { produce } from "immer";
+import { produce, setAutoFreeze } from "immer";
 import {
   internalDataKey,
   localPluginName,
@@ -6,6 +6,7 @@ import {
   sortIndexSymbol,
   timeStampSymbol,
 } from "./constant";
+setAutoFreeze(false);
 
 export function isSameMedia(
   a?: IMedia.IMediaBase | null,
@@ -39,10 +40,10 @@ export function resetMediaItem<T extends IMedia.IMediaBase>(
 }
 
 export function getMediaPrimaryKey(mediaItem: IMedia.IUnique) {
-  if(mediaItem) {
+  if (mediaItem) {
     return `${mediaItem.platform}@${mediaItem.id}`;
   }
-  return 'invalid@invalid'
+  return "invalid@invalid";
 }
 
 export function sortByTimestampAndIndex(array: any[], newArray = false) {
@@ -110,12 +111,7 @@ export function setInternalData<
   T extends Record<string, any>,
   K extends keyof T = keyof T,
   R extends IMedia.IMediaBase = IMedia.IMediaBase
->(
-  mediaItem: R,
-  internalProp: K,
-  value: T[K] | null,
-  newObj = false
-): R {
+>(mediaItem: R, internalProp: K, value: T[K] | null, newObj = false): R {
   if (newObj) {
     return {
       ...mediaItem,
@@ -131,3 +127,9 @@ export function setInternalData<
   return mediaItem;
 }
 
+export function toMediaBase(media: IMedia.IMediaBase) {
+  return {
+    platform: media.platform,
+    id: media.id,
+  };
+}

@@ -2,7 +2,7 @@ import Condition from "@/renderer/components/Condition";
 import "./index.scss";
 import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
 import { Tab } from "@headlessui/react";
-import { getSupportedPlugin } from "@/renderer/core/plugin-delegate";
+import { getSortedSupportedPlugin } from "@/renderer/core/plugin-delegate";
 import { pluginsTopListStore } from "./store";
 import { RequestStateCode } from "@/common/constant";
 import Loading from "@/renderer/components/Loading";
@@ -13,7 +13,7 @@ import NoPlugin from "@/renderer/components/NoPlugin";
 import Empty from "@/renderer/components/Empty";
 
 export default function ToplistView() {
-  const availablePlugins = getSupportedPlugin("getTopLists");
+  const availablePlugins = getSortedSupportedPlugin("getTopLists");
   const navigate = useNavigate();
 
   return (

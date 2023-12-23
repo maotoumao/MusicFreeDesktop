@@ -4,8 +4,13 @@ import { useMemo, useState } from "react";
 import groupBy from "@/renderer/utils/groupBy";
 import MusicList from "@/renderer/components/MusicList";
 
-export default function ArtistView() {
-  const localMusicList = localMusicListStore.useValue();
+
+interface IProps {
+  localMusicList: IMusic.IMusicItem[]
+}
+
+export default function ArtistView(props: IProps) {
+  const {localMusicList} = props;
 
   const [keys, allMusic] = useMemo(() => {
     const grouped = groupBy(localMusicList ?? [], (it) => it.artist);

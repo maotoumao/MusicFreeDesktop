@@ -1,0 +1,38 @@
+.panel--user-variables-submit {
+    font-weight: 400;
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    color: var(--infoColor, #0A95C8);
+    border: 1px solid currentColor;
+}
+
+.panel--user-variables-container {
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    
+
+
+    & .panel--user-variable-item {
+        width: 100%;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        box-sizing: border-box;
+
+        & span {
+            width: 6rem;
+            margin-right: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+
+        & input {
+            flex: 1;
+        }
+    }
+}

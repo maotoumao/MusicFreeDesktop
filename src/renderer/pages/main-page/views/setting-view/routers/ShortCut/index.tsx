@@ -7,63 +7,13 @@ import hotkeys from "hotkeys-js";
 import rendererAppConfig from "@/common/app-config/renderer";
 import { bindShortCut } from "@/renderer/core/shortcut";
 import { ipcRendererSend } from "@/common/ipc-util/renderer";
-import raf2 from "@/renderer/utils/raf2";
+
 interface IProps {
   data: IAppConfig["shortCut"];
 }
 
-let recordShortCutKey: string[] = [];
-let isAllModifierKey = false;
-
 export default function ShortCut(props: IProps) {
   const { data = {} as IAppConfig["shortCut"] } = props;
-  useEffect(() => {
-    hotkeys(
-      "*",
-      {
-        capture: true,
-      },
-      (evt, detail) => {
-        const target = evt.target as HTMLElement;
-        if (
-          target.tagName === "INPUT" &&
-          target.dataset["capture"] === "true"
-        ) {
-          const pressedKeys = hotkeys.getPressedKeyString();
-          const _recordShortCutKey = [];
-          isAllModifierKey = false;
-          if (hotkeys.ctrl) {
-            _recordShortCutKey.push("Ctrl");
-            isAllModifierKey = true;
-          }
-          if (hotkeys.shift) {
-            _recordShortCutKey.push("Shift");
-            isAllModifierKey = true;
-          }
-          if (hotkeys.alt) {
-            _recordShortCutKey.push("Alt");
-            isAllModifierKey = true;
-          }
-          // 跟一个普通键
-          for (let i = pressedKeys.length - 1; i >= 0; --i) {
-            if (!hotkeys.modifier[pressedKeys[i]]) {
-              _recordShortCutKey.push(
-                pressedKeys[i].replace(/^(.)/, (_, $1: string) =>
-                  $1.toUpperCase()
-                )
-              );
-              isAllModifierKey = false;
-              break;
-            }
-          }
-          recordShortCutKey = _recordShortCutKey;
-        }
-      }
-    );
-    return () => {
-      hotkeys.unbind("*");
-    };
-  }, []);
 
   return (
     <div className="setting-view--short-cut-container">
@@ -140,7 +90,6 @@ function ShortCutTable(props: IShortCutTableProps) {
               enabled={enableGlobal}
               value={shortCuts[it]?.global}
               onChange={(val) => {
-                console.log(it, val);
                 bindShortCut(it as IShortCutKeys, val, true);
               }}
             ></ShortCutItem>
@@ -153,6 +102,7 @@ function ShortCutTable(props: IShortCutTableProps) {
 
 interface IShortCutItemProps {
   enabled?: boolean;
+  isGlobal?: boolean;
   value?: string[];
   onChange?: (sc?: string[]) => void;
 }
@@ -161,65 +111,142 @@ function formatValue(val: string[]) {
   return val.join(" + ");
 }
 
-function ShortCutItem(props: IShortCutItemProps) {
-  const { value, onChange, enabled } = props;
-  const [realValue, setRealValue] = useState(formatValue(value ?? []));
-  const isRecordingRef = useRef(false);
-  const inputRef = useRef<HTMLInputElement>();
-  // todo 写的很奇怪
-  const resultRef = useRef<string[]>([]);
-  const isAllModifierKeyRef = useRef(false);
+function keyCodeMap(code: string) {
+  switch (code) {
+    case "arrowup":
+      return "Up";
+    case "arrowdown":
+      return "Down";
+    case "arrowleft":
+      return "Left";
+    case "arrowright":
+      return "Right";
+    default:
+      return code;
+  }
+}
 
-  const keyupHandler = () =>
-    raf2(() => {
-      const isAllModifierKey = isAllModifierKeyRef.current;
-      const recordShortCutKey = resultRef.current;
-      if (isRecordingRef.current) {
-        if (isAllModifierKey || !recordShortCutKey.length) {
-          setRealValue(formatValue(value ?? []));
-        } else if (
-          recordShortCutKey.includes("Backspace")
-        ) {
-          setRealValue("");
-          onChange?.([]);
-        } else {
-          setRealValue(formatValue(recordShortCutKey));
-          onChange?.(recordShortCutKey);
+function ShortCutItem(props: IShortCutItemProps) {
+  const { value, onChange, enabled, isGlobal } = props;
+  const [tmpValue, setTmpValue] = useState<string[] | null>();
+  const realValue = formatValue(tmpValue ?? value ?? []);
+  const isRecordingRef = useRef(false);
+  const scopeRef = useRef(Math.random().toString().slice(2));
+  const recordedKeysRef = useRef(new Set<string>());
+
+  useEffect(() => {
+    hotkeys(
+      "*",
+      {
+        scope: scopeRef.current,
+        keyup: true,
+      },
+      (evt) => {
+        console.log(evt);
+        const type = evt.type;
+        let key = evt.key.toLowerCase();
+        if (evt.code === "Space") {
+          key = "Space";
+        }
+        if (type === "keydown") {
+          isRecordingRef.current = true;
+          if (key === "backspace") {
+            // 删除
+            setTmpValue(null);
+            isRecordingRef.current = false;
+            recordedKeysRef.current.clear();
+            // 新的快捷键为空
+            onChange?.([]);
+          } else if (key === "meta") {
+            setTmpValue(null);
+            isRecordingRef.current = false;
+            recordedKeysRef.current.clear();
+          } else {
+            if (!recordedKeysRef.current.has(key)) {
+              recordedKeysRef.current.add(key);
+              setTmpValue(
+                [...recordedKeysRef.current].map((it) =>
+                  it.replace(/^(.)/, (_, $1: string) => $1.toUpperCase())
+                )
+              );
+            }
+          }
+        } else if (type === "keyup" && isRecordingRef.current) {
+          isRecordingRef.current = false;
+          // 开始结算
+          const recordedSet = recordedKeysRef.current;
+          const _recordShortCutKey = [];
+
+          let statusCode = 0;
+          if (recordedSet.has("ctrl") || recordedSet.has("control")) {
+            _recordShortCutKey.push("Ctrl");
+            recordedSet.delete("ctrl");
+            recordedSet.delete("control");
+            statusCode |= 1;
+          }
+          if (recordedSet.has("command")) {
+            _recordShortCutKey.push("Command");
+            recordedSet.delete("command");
+            statusCode |= 1;
+          }
+          if (recordedSet.has("option")) {
+            _recordShortCutKey.push("Option");
+            recordedSet.delete("option");
+            statusCode |= 1;
+          }
+          if (recordedSet.has("shift")) {
+            _recordShortCutKey.push("Shift");
+            recordedSet.delete("shift");
+            statusCode |= 1;
+          }
+
+          if (recordedSet.has("alt")) {
+            _recordShortCutKey.push("Alt");
+            recordedSet.delete("alt");
+            statusCode |= 1;
+          }
+
+          if (recordedSet.size === 1 && (isGlobal ? statusCode : true)) {
+            _recordShortCutKey.push(
+              keyCodeMap([...recordedSet.values()][0]).replace(
+                /^(.)/,
+                (_, $1: string) => $1.toUpperCase()
+              )
+            );
+            setTmpValue(_recordShortCutKey);
+            onChange?.(_recordShortCutKey);
+          } else {
+            setTmpValue(null);
+          }
+
+          recordedKeysRef.current.clear();
         }
       }
-      isAllModifierKeyRef.current = false;
-      resultRef.current = [];
-
-      isRecordingRef.current = false;
-    });
+    );
+  }, []);
 
   return (
     <input
       data-capture="true"
       data-disabled={!enabled}
+      autoCorrect="off"
+      autoCapitalize="off"
+      type="text"
       readOnly
+      aria-live="off"
       className="short-cut-item--container"
-      ref={inputRef}
       value={realValue || "空"}
       onKeyDown={(e) => {
         e.preventDefault();
-        raf2(() => {
-          resultRef.current = recordShortCutKey.filter(
-            (it) => it !== "Backspace"
-          );
-          isAllModifierKeyRef.current = isAllModifierKey;
-          setRealValue(
-            `${resultRef.current.join(" + ")}${isAllModifierKey ? " +" : ""}`
-          );
-          if (isRecordingRef.current) {
-            return;
-          } else {
-            isRecordingRef.current = true;
-          }
-        });
       }}
-      onKeyUp={keyupHandler}
-      onBlur={keyupHandler}
+      onFocus={() => {
+        hotkeys.setScope(scopeRef.current);
+      }}
+      onBlur={() => {
+        hotkeys.setScope("all");
+        setTmpValue(null);
+        recordedKeysRef.current.clear();
+      }}
     ></input>
   );
 }

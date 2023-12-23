@@ -7,12 +7,13 @@ import MusicList from "@/renderer/components/MusicList";
 import { showModal } from "@/renderer/components/Modal";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { useUserPerference } from "@/renderer/utils/user-perference";
-import { useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import ListView from "./views/list";
 import ArtistView from "./views/artist";
 import AlbumView from "./views/album";
 import FolderView from "./views/folder";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 enum DisplayView {
   LIST,
@@ -25,8 +26,57 @@ export default function LocalMusicView() {
   const { t } = useTranslation();
   const [displayView, setDisplayView] = useState(DisplayView.LIST);
 
+  const localMusicList = localMusicListStore.useValue();
+  const [inputSearch, setInputSearch] = useState("");
+  const [filterMusicList, setFilterMusicList] = useState<
+    IMusic.IMusicItem[] | null
+  >(null);
+
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (inputSearch.trim() === "") {
+      setFilterMusicList(null);
+    } else {
+      startTransition(() => {
+        const caseSensitive = rendererAppConfig.getAppConfigPath(
+          "playMusic.caseSensitiveInSearch"
+        );
+        if (caseSensitive) {
+          setFilterMusicList(
+            localMusicListStore
+              .getValue()
+              .filter(
+                (item) =>
+                  item.title?.includes(inputSearch) ||
+                  item.artist?.includes(inputSearch) ||
+                  item.album?.includes(inputSearch)
+              )
+          );
+        } else {
+          const searchText = inputSearch.toLocaleLowerCase();
+          setFilterMusicList(
+            localMusicListStore
+              .getValue()
+              .filter(
+                (item) =>
+                  item.title?.toLocaleLowerCase()?.includes(searchText) ||
+                  item.artist?.toLocaleLowerCase()?.includes(searchText) ||
+                  item.album?.toLocaleLowerCase()?.includes(searchText)
+              )
+          );
+        }
+      });
+    }
+  }, [inputSearch]);
+
+  const finalMusicList = filterMusicList ?? localMusicList;
+
   return (
-    <div className="local-music-view--container" data-full-page={displayView !== DisplayView.LIST}>
+    <div
+      className="local-music-view--container"
+      data-full-page={displayView !== DisplayView.LIST}
+    >
       <div className="header">本地音乐</div>
       <div className="operations">
         <div
@@ -39,6 +89,14 @@ export default function LocalMusicView() {
           自动扫描
         </div>
         <div className="operations-layout">
+          <input
+            className="search-local-music"
+            spellCheck={false}
+            onChange={(evt) => {
+              setInputSearch(evt.target.value);
+            }}
+            placeholder="搜索本地音乐"
+          ></input>
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.LIST}
@@ -83,16 +141,16 @@ export default function LocalMusicView() {
       </div>
       <SwitchCase.Switch switch={displayView}>
         <SwitchCase.Case case={DisplayView.LIST}>
-          <ListView></ListView>
+          <ListView localMusicList={finalMusicList}></ListView>
         </SwitchCase.Case>
         <SwitchCase.Case case={DisplayView.ARTIST}>
-          <ArtistView></ArtistView>
+          <ArtistView localMusicList={finalMusicList}></ArtistView>
         </SwitchCase.Case>
         <SwitchCase.Case case={DisplayView.ALBUM}>
-          <AlbumView></AlbumView>
+          <AlbumView localMusicList={finalMusicList}></AlbumView>
         </SwitchCase.Case>
         <SwitchCase.Case case={DisplayView.FOLDER}>
-          <FolderView></FolderView>
+          <FolderView localMusicList={finalMusicList}></FolderView>
         </SwitchCase.Case>
       </SwitchCase.Switch>
     </div>

@@ -32,6 +32,9 @@
   }
 
   &[data-selected="true"] {
+    color: var(--primaryColor);
+    background: var(--listActiveColor);
+
     &::before {
       content: "";
       position: absolute;
@@ -40,12 +43,6 @@
       top: 0;
       height: $height;
       background-color: var(--primaryColor);
-    }
-
-    & {
-      color: var(--primaryColor);
-      background: var(--listActiveColor);
-
     }
   }
 }

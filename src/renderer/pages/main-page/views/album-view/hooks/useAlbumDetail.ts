@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const idleCode = [
   RequestStateCode.IDLE,
   RequestStateCode.FINISHED,
-  RequestStateCode.PARTLY_DONE
+  RequestStateCode.PARTLY_DONE,
 ];
 
 export default function useAlbumDetail(
@@ -24,7 +24,7 @@ export default function useAlbumDetail(
 
   const getAlbumDetail = useCallback(
     async function () {
-      if (originalAlbumItem === null || !(idleCode.includes(requestState))) {
+      if (originalAlbumItem === null || !idleCode.includes(requestState)) {
         return;
       }
 
@@ -52,8 +52,9 @@ export default function useAlbumDetail(
           }));
         }
         if (result?.musicList) {
+          const currentPage = currentPageRef.current;
           setMusicList((prev) => {
-            if (currentPageRef.current === 1) {
+            if (currentPage === 1) {
               return result?.musicList ?? prev;
             } else {
               return [...prev, ...(result.musicList ?? [])];
@@ -66,7 +67,7 @@ export default function useAlbumDetail(
             : RequestStateCode.PARTLY_DONE
         );
         currentPageRef.current += 1;
-      } catch(e) {
+      } catch (e) {
         setRequestState(RequestStateCode.IDLE);
       }
     },
@@ -76,6 +77,7 @@ export default function useAlbumDetail(
   useEffect(() => {
     getAlbumDetail();
   }, []);
+  console.log(musicList);
 
   return [requestState, albumItem, musicList, getAlbumDetail] as const;
 }

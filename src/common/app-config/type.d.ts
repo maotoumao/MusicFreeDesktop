@@ -3,8 +3,8 @@ interface IConfig {
     closeBehavior: "exit" | "minimize";
     maxHistoryLength: number;
     checkUpdate: boolean;
-    taskbarThumb: 'window' | 'artwork',
-    musicListColumnsShown: Array<'duration' | 'platform'>
+    taskbarThumb: "window" | "artwork";
+    musicListColumnsShown: Array<"duration" | "platform">;
   };
   playMusic: {
     /** 歌单内搜索区分大小写 */
@@ -21,6 +21,8 @@ interface IConfig {
     audioOutputDevice: MediaDeviceInfo | null;
   };
   lyric: {
+    /** [darwin only] 显示状态栏歌词 */
+    enableStatusBarLyric: boolean;
     /** 显示桌面歌词 */
     enableDesktopLyric: boolean;
     /** 桌面歌词置顶 */
@@ -61,11 +63,35 @@ interface IConfig {
     /** 默认下载音质缺失时 */
     whenQualityMissing: "higher" | "lower";
     /** 最多同时下载 */
-    concurrency: number
+    concurrency: number;
+  };
+  plugin: {
+    autoUpdatePlugin: boolean; // 是否自动升级插件
+    notCheckPluginVersion: boolean; // 是否不检测插件版本
+  };
+  network: {
+    proxy: {
+      /** 是否启用代理 */
+      enabled: boolean;
+      /** 主机 */
+      host?: string;
+      /** 端口 */
+      port?: string;
+      /** 账号 */
+      username?: string;
+      /** 密码 */
+      password?: string;
+    };
   };
 
   backup: {
-    test: never;
+    /** 恢复歌单时行为 */
+    resumeBehavior: 'append' | 'overwrite',
+    webdav: {
+      url: string;
+      username: string;
+      password: string
+    }
   };
   /** 本地音乐配置 */
   localMusic: {
@@ -82,6 +108,7 @@ interface IConfig {
       x: number;
       y: number;
     };
+    pluginMeta: Record<string, IPlugin.IPluginMeta>;
   };
 }
 

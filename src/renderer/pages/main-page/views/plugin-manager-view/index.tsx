@@ -4,6 +4,7 @@ import "./index.scss";
 import { getUserPerference } from "@/renderer/utils/user-perference";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import { toast } from "react-toastify";
+import A from "@/renderer/components/A";
 
 export default function PluginManagerView() {
   return (
@@ -69,7 +70,7 @@ export default function PluginManagerView() {
                   toast.warn(`安装失败: ${e.message ?? "无效插件"}`);
                 },
                 hints: [
-                  "插件需要满足 MusicFree 特定的插件协议，具体可在官方网站中查看",
+                  <>插件需要满足 MusicFree 特定的插件协议，具体可在<A href="https://musicfree.upup.fun">官方网站</A>中查看</>
                 ],
               });
             }}
@@ -128,7 +129,7 @@ export default function PluginManagerView() {
             onClick={async () => {
               const subscription = getUserPerference("subscription");
 
-              if (subscription.length) {
+              if (subscription?.length) {
                 for (let i = 0; i < subscription.length; ++i) {
                   await ipcRendererInvoke(
                     "install-plugin-remote",

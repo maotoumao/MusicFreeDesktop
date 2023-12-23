@@ -2,10 +2,7 @@ import "./index.scss";
 import ListItem from "../ListItem";
 import { useMatch, useNavigate } from "react-router-dom";
 import { Disclosure } from "@headlessui/react";
-import MusicSheet, {
-  defaultSheet,
-  starredSheetsStore,
-} from "@/renderer/core/music-sheet";
+import MusicSheet, { defaultSheet } from "@/renderer/core/music-sheet";
 import { localPluginName } from "@/common/constant";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
 
@@ -15,7 +12,7 @@ export default function StarredSheets() {
   const currentPlatform = sheetIdMatch?.params?.platform;
   const currentSheetId = sheetIdMatch?.params?.sheetId;
 
-  const starredSheets = starredSheetsStore.useValue();
+  const starredSheets = MusicSheet.frontend.useAllStarredSheets();
 
   const navigate = useNavigate();
 
@@ -31,13 +28,19 @@ export default function StarredSheets() {
               key={item.id}
               iconName={"musical-note"}
               onClick={() => {
-                currentSheetId !== item.id &&
-                  currentPlatform !== item.platform &&
+                if (
+                  !(
+                    currentSheetId === item.id &&
+                    currentPlatform === item.platform
+                  )
+                ) {
+                  // 如果不是相同歌单
                   navigate(`/main/musicsheet/${item.platform}/${item.id}`, {
                     state: {
                       sheetItem: item,
                     },
                   });
+                }
               }}
               onContextMenu={(e) => {
                 showContextMenu({
@@ -48,7 +51,7 @@ export default function StarredSheets() {
                       title: "取消收藏",
                       icon: "trash",
                       onClick() {
-                        MusicSheet.unstarMusicSheet(item).then(() => {
+                        MusicSheet.frontend.unstarMusicSheet(item).then(() => {
                           if (
                             currentSheetId === item.id &&
                             currentPlatform === item.platform

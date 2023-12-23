@@ -1,7 +1,7 @@
 import {
   getSearchablePlugins,
-  getSupportedPlugin,
-  useSupportedPlugin,
+  getSortedSearchablePlugins,
+  useSortedSupportedPlugin,
 } from "@/renderer/core/plugin-delegate";
 import { useEffect } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ export default function SearchView() {
   const match = useMatch("/main/search/:query");
   const query = match?.params?.query;
 
-  const plugins = useSupportedPlugin("search");
+  const plugins = useSortedSupportedPlugin("search");
 
   const { t } = useTranslation();
   const search = useSearch();
@@ -69,7 +69,7 @@ export default function SearchView() {
               <Tab.Panel className="tab-panel-container" key={type}>
                 <SearchResult
                   type={type}
-                  plugins={getSearchablePlugins(type)}
+                  plugins={getSortedSearchablePlugins(type)}
                   query={query}
                 ></SearchResult>
               </Tab.Panel>

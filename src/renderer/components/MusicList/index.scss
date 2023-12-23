@@ -1,11 +1,16 @@
 .music-list-container {
   width: 100%;
   min-height: 300px;
+  
+
+  &:focus-visible {
+    outline: none;
+  }
 
   & th {
     position: relative;
 
-    &:not([data-id=like]):hover {
+    &:not([data-id="like"]):hover {
       background-color: var(--listHoverColor);
 
       & .sort-container[data-sorting="false"] {
@@ -38,6 +43,10 @@
         opacity: 0;
       }
     }
+  }
+
+  & tr {
+    position: relative;
   }
 
   & td {
@@ -75,4 +84,28 @@
   // & .resizer-resizing {
   //   opacity: 1;
   // }
+}
+
+.music-list-drag-receiver {
+  position: absolute;
+  left: 0;
+  height: 12px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+
+  & .music-list-drag-receiver-content {
+    width: 100%;
+    height: 2px;
+    background-color: var(--primaryColor);
+    pointer-events: none;
+  }
+}
+
+.music-list-drag-receiver-top {
+  top: -6px;
+}
+
+.music-list-drag-receiver-bottom {
+  bottom: -6px;
 }

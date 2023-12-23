@@ -12,9 +12,9 @@ export default function AddNewSheet(props: IProps) {
   const onCreateNewSheetClick = useCallback(
     debounce(async (newSheetName) => {
       try {
-        const id = await MusicSheet.addSheet(newSheetName);
+        const newSheet = await MusicSheet.frontend.addSheet(newSheetName);
         if (props?.initMusicItems) {
-          await MusicSheet.addMusicToSheet(props.initMusicItems, id);
+          await MusicSheet.frontend.addMusicToSheet(props.initMusicItems, newSheet.id);
         }
         hideModal();
       } catch {

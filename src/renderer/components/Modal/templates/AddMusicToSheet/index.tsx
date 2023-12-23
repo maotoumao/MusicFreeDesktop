@@ -13,7 +13,7 @@ interface IAddMusicToSheetProps {
 export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
   const { musicItems } = props;
 
-  const allSheets = MusicSheet.useAllSheets();
+  const allSheets = MusicSheet.frontend.useAllSheets();
   return (
     <Base withBlur={false}>
       <div className="modal--add-music-to-sheet-container shadow backdrop-color">
@@ -44,7 +44,7 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
               key={sheet.id}
               role="button"
               onClick={() => {
-                MusicSheet.addMusicToSheet(musicItems, sheet.id);
+                MusicSheet.frontend.addMusicToSheet(musicItems, sheet.id);
                 hideModal();
               }}
             >

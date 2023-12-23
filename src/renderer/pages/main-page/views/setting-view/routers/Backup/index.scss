@@ -1,8 +1,14 @@
 .setting-view--backup-container {
-    width: 100%;
+  width: 100%;
 
-    & .backup-row {
-        display: flex;
-        gap: 12px;
-    }
+  & .backup-row {
+    display: flex;
+    gap: 12px;
+  }
+
+  & .webdav-backup-container {
+    display: grid;
+    grid-template-columns: 33% 33%;
+    gap: 18px;
+  }
 }

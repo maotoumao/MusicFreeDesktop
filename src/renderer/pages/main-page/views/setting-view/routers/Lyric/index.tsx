@@ -5,6 +5,7 @@ import ColorPickerSettingItem from "../../components/ColorPickerSettingItem";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import FontPickerSettingItem from "../../components/FontPickerSettingItem";
+import { IfTruthy } from "@/renderer/components/Condition";
 
 interface IProps {
   data: IAppConfig["lyric"];
@@ -19,6 +20,13 @@ export default function Lyric(props: IProps) {
 
   return (
     <div className="setting-view--lyric-container">
+      <IfTruthy condition={window.globalData.platform === "darwin"}>
+        <CheckBoxSettingItem
+          label="启用状态栏歌词"
+          checked={data.enableStatusBarLyric}
+          keyPath="lyric.enableStatusBarLyric"
+        ></CheckBoxSettingItem>
+      </IfTruthy>
       <CheckBoxSettingItem
         label="启用桌面歌词"
         checked={data.enableDesktopLyric}

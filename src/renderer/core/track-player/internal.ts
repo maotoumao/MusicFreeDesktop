@@ -11,6 +11,7 @@ import Hls from "hls.js";
 class TrackPlayerInternal {
   private audioContext: AudioContext;
   private audio: HTMLAudioElement;
+  private hls: Hls;
   private playerState: PlayerState;
   private currentMusic: IMusic.IMusicItem;
 
@@ -19,6 +20,13 @@ class TrackPlayerInternal {
     this.audio = new Audio();
     this.audio.preload = "auto";
     this.audio.controls = false;
+    this.hls = new Hls();
+    this.hls.attachMedia(this.audio);
+    // @ts-ignore
+    this.hls.on("hlsError", () => {
+      console.log("???");
+      this.throwError(ErrorReason.EmptyResource);
+    });
 
     this.registerEvents();
   }
@@ -111,11 +119,43 @@ class TrackPlayerInternal {
     });
     // 拓展播放功能
     if (getUrlExt(url) === ".m3u8" && Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(url);
-      hls.attachMedia(this.audio);
+      this.hls.loadSource(url);
     } else {
-      this.audio.src = url;
+      const urlObj = new URL(trackSource.url);
+      if (urlObj.username && urlObj.password) {
+        // TODO: 这部分逻辑需要抽离出来 特殊逻辑
+        const mediaSource = new MediaSource();
+        this.audio.src = URL.createObjectURL(mediaSource);
+        mediaSource.addEventListener("sourceopen", () => {
+          const sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
+
+          const authHeader = `Basic ${btoa(
+            `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
+              urlObj.password
+            )}`
+          )}`;
+          urlObj.username = "";
+          urlObj.password = "";
+          fetch(urlObj.toString(), {
+            method: "GET",
+            headers: {
+              ...trackSource.headers,
+              Authorization: authHeader,
+            },
+          })
+            .then((res) => res.arrayBuffer())
+            .then((buf) => {
+              sourceBuffer.addEventListener('updateend', () => {
+                mediaSource.endOfStream();
+              })
+              sourceBuffer.appendBuffer(buf);
+
+            });
+        });
+
+      } else {
+        this.audio.src = url;
+      }
     }
   }
 

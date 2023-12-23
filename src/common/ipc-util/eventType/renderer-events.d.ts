@@ -12,38 +12,50 @@ declare namespace IpcEvents {
 
     /** 刷新插件 */
     "refresh-plugins": undefined;
+    /** 更新所有插件 */
+    "update-all-plugins": undefined;
 
     "open-url": string;
-    'open-path': string;
+    "open-path": string;
 
     "sync-current-music": IMusic.IMusicItem;
     "sync-current-playing-state": import("@/renderer/core/track-player/enum").PlayerState;
     "sync-current-repeat-mode": import("@/renderer/core/track-player/enum").RepeatMode;
+    "sync-current-lyric": string;
 
-
-    'send-to-lyric-window': {
-      // 时序
-      timeStamp: number;
-      lrc: ILyric.IParsedLrcItem[]
-    };
-    'set-desktop-lyric-lock': boolean;
-    'ignore-mouse-event': {
-      ignore: boolean,
-      window: 'main' | 'lyric'
+    // "send-to-lyric-window": {
+    //   // 时序
+    //   timeStamp: number;
+    //   lrc: ILyric.IParsedLrcItem[];
+    // };
+    "set-desktop-lyric-lock": boolean;
+    "ignore-mouse-event": {
+      ignore: boolean;
+      window: "main" | "lyric";
     };
     /** 设置歌词窗口位置 */
-    'set-lyric-window-pos': ICommon.IPoint;
+    "set-lyric-window-pos": ICommon.IPoint;
 
     /** 快捷键 */
-    'enable-global-short-cut': boolean;
-    'bind-global-short-cut': {
-      key: keyof import('../../app-config/type').IAppConfig["shortCut"]["shortcuts"],
-      shortCut: string[]
-    }
-    'unbind-global-short-cut': {
-      key: keyof import('../../app-config/type').IAppConfig["shortCut"]["shortcuts"],
-      shortCut: string[]
-    }
+    "enable-global-short-cut": boolean;
+    "bind-global-short-cut": {
+      key: keyof import("../../app-config/type").IAppConfig["shortCut"]["shortcuts"];
+      shortCut: string[];
+    };
+    "unbind-global-short-cut": {
+      key: keyof import("../../app-config/type").IAppConfig["shortCut"]["shortcuts"];
+      shortCut: string[];
+    };
+    /** 设置代理 */
+    "set-proxy": {
+      enabled: boolean;
+      host?: string;
+      port?: string;
+      username?: string;
+      password?: string;
+    };
+    /** 清空缓存 */
+    "clear-cache": undefined;
   }
 }
 
@@ -85,8 +97,9 @@ declare namespace IpcInvoke {
     ) => Electron.SaveDialogReturnValue;
 
     "check-update": () => ICommon.IUpdateInfo;
-    "set-lyric-window": (show: boolean) => void; 
+    "set-lyric-window": (show: boolean) => void;
     /** 主窗口和歌词窗口之间 */
-    'app-get-path': (pathName: string) => string;
+    "app-get-path": (pathName: string) => string;
+    "get-cache-size": () => number;
   }
 }

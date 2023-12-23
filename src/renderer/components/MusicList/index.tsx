@@ -14,7 +14,7 @@ import Tag from "../Tag";
 import { secondsToDuration } from "@/common/time-util";
 import MusicSheet from "@/renderer/core/music-sheet";
 import trackPlayer from "@/renderer/core/track-player";
-import Condition from "../Condition";
+import Condition, { IfTruthy } from "../Condition";
 import Empty from "../Empty";
 import MusicFavorite from "../MusicFavorite";
 import MusicDownloaded from "../MusicDownloaded";
@@ -26,7 +26,15 @@ import {
   getMediaPrimaryKey,
   isSameMedia,
 } from "@/common/media-util";
-import { CSSProperties, memo, useEffect, useRef, useState } from "react";
+import {
+  CSSProperties,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import rendererAppConfig from "@/common/app-config/renderer";
@@ -39,6 +47,8 @@ import classNames from "@/renderer/utils/classnames";
 import SwitchCase from "../SwitchCase";
 import SvgAsset from "../SvgAsset";
 import { getAppConfigPath } from "@/common/app-config/main";
+import musicSheetDB from "@/renderer/core/db/music-sheet-db";
+import DragReceiver, { startDrag } from "../DragReceiver";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -48,11 +58,9 @@ interface IMusicListProps {
   /** 音乐列表所属的歌单信息 */
   musicSheet?: IMusic.IMusicSheetItem;
   // enablePagination?: boolean; // 分页/虚拟长列表
-  enableSort?: boolean; // 拖拽排序
-  onSortEnd?: () => void; // 排序结束
-  state?: RequestStateCode;
-  doubleClickBehavior?: "replace" | "normal";
-  onPageChange?: (page?: number) => void;
+  state?: RequestStateCode; // 网络状态
+  doubleClickBehavior?: "replace" | "normal"; // 双击行为
+  onPageChange?: (page?: number) => void; // 分页
   /** 虚拟滚动参数 */
   virtualProps?: {
     offsetHeight?: number | (() => number); // 距离顶部的高度
@@ -63,6 +71,10 @@ interface IMusicListProps {
   hideRows?: Array<
     "like" | "index" | "title" | "artist" | "album" | "duration" | "platform"
   >;
+  /** 允许拖拽 */
+  enableDrag?: boolean;
+  /** 拖拽结束 */
+  onDragEnd?: (newMusicList: IMusic.IMusicItem[]) => void;
 }
 
 const columnHelper = createColumnHelper<IMusic.IMusicItem>();
@@ -159,11 +171,11 @@ export function showMusicContextMenu(
         icon: "identification",
       },
       {
-        title: `作者: ${musicItems.artist}`,
+        title: `作者: ${musicItems.artist ?? '未知作者'}`,
         icon: "user",
       },
       {
-        title: `专辑: ${musicItems.album}`,
+        title: `专辑: ${musicItems.album ?? '未知专辑'}`,
         icon: "album",
         show: !!musicItems.album,
       },
@@ -192,9 +204,17 @@ export function showMusicContextMenu(
     {
       title: "从歌单内删除",
       icon: "trash",
-      show: !!localMusicSheetId,
+      show: !!localMusicSheetId && localMusicSheetId !== "play-list",
       onClick() {
-        MusicSheet.removeMusicFromSheet(musicItems, localMusicSheetId);
+        MusicSheet.frontend.removeMusicFromSheet(musicItems, localMusicSheetId);
+      },
+    },
+    {
+      title: "删除",
+      icon: "trash",
+      show: localMusicSheetId === "play-list",
+      onClick() {
+        trackPlayer.removeFromQueue(musicItems);
       },
     }
   );
@@ -221,8 +241,11 @@ export function showMusicContextMenu(
         (isArray && musicItems.every((it) => Downloader.isDownloaded(it))) ||
         (!isArray && Downloader.isDownloaded(musicItems)),
       async onClick() {
-        try {
-          await Downloader.removeDownloadedMusic(musicItems, true);
+        const [isSuccess, info] = await Downloader.removeDownloadedMusic(
+          musicItems,
+          true
+        );
+        if (isSuccess) {
           if (isArray) {
             toast.success(`已删除 ${musicItems.length} 首本地歌曲`);
           } else {
@@ -230,8 +253,8 @@ export function showMusicContextMenu(
               `已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`
             );
           }
-        } catch (e) {
-          toast.error(`删除失败: ${e?.message ?? ""}`);
+        } else if (info?.msg) {
+          toast.error(info.msg);
         }
       },
     },
@@ -245,18 +268,25 @@ export function showMusicContextMenu(
       async onClick() {
         try {
           if (!isArray) {
+            let realTimeMusicItem = musicItems;
+            if (musicItems.platform !== localPluginName) {
+              realTimeMusicItem = await musicSheetDB.musicStore.get([
+                musicItems.platform,
+                musicItems.id,
+              ]);
+            }
             ipcRendererSend(
               "open-path",
               window.path.dirname(
                 getInternalData<IMusic.IMusicItemInternalData>(
-                  musicItems,
+                  realTimeMusicItem,
                   "downloadData"
                 )?.path
               )
             );
           }
         } catch (e) {
-          toast.error(`删除失败: ${e?.message ?? ""}`);
+          toast.error(`打开失败: ${e?.message ?? ""}`);
         }
       },
     }
@@ -276,10 +306,12 @@ function _MusicList(props: IMusicListProps) {
     onPageChange,
     musicSheet,
     virtualProps,
-    getAllMusicItems,
+    // getAllMusicItems,
     doubleClickBehavior,
     containerStyle,
     hideRows,
+    enableDrag,
+    onDragEnd,
   } = props;
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -295,7 +327,6 @@ function _MusicList(props: IMusicListProps) {
     )
   );
 
-
   const table = useReactTable({
     debugAll: false,
     data: musicList,
@@ -303,7 +334,9 @@ function _MusicList(props: IMusicListProps) {
     state: {
       sorting: sorting,
       columnVisibility: hideRows
-        ? hideRows.reduce((prev, curr) => ({ ...prev, [curr]: false }), {...columnShownRef.current})
+        ? hideRows.reduce((prev, curr) => ({ ...prev, [curr]: false }), {
+            ...columnShownRef.current,
+          })
         : columnShownRef.current,
     },
     onSortingChange: setSorting,
@@ -332,25 +365,48 @@ function _MusicList(props: IMusicListProps) {
   }, [musicList]);
 
   useEffect(() => {
-    const musiclistScope = "ml" + Math.random().toString().slice(2);
-    hotkeys("Shift", musiclistScope, () => {});
     const ctrlAHandler = (evt: Event) => {
       evt.preventDefault();
       setActiveItems([0, musicListRef.current.length - 1]);
     };
-    hotkeys("Ctrl+A", ctrlAHandler);
+    hotkeys("Ctrl+A", "music-list", ctrlAHandler);
 
     return () => {
-      hotkeys.unbind("Shift", musiclistScope);
       hotkeys.unbind("Ctrl+A", ctrlAHandler);
     };
   }, []);
+
+  const _onDrop = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      if (!onDragEnd || fromIndex === toIndex) {
+        // 没有移动
+        return;
+      }
+      const newData = musicList
+        .slice(0, fromIndex)
+        .concat(musicList.slice(fromIndex + 1));
+      newData.splice(
+        fromIndex > toIndex ? toIndex : toIndex - 1,
+        0,
+        musicList[fromIndex]
+      );
+      onDragEnd?.(newData);
+    },
+    [onDragEnd, musicList]
+  );
 
   return (
     <div
       className="music-list-container"
       style={containerStyle}
       ref={tableContainerRef}
+      tabIndex={-1}
+      onFocus={() => {
+        hotkeys.setScope("music-list");
+      }}
+      onBlur={() => {
+        hotkeys.setScope("all");
+      }}
     >
       <table
         style={{
@@ -412,8 +468,9 @@ function _MusicList(props: IMusicListProps) {
             transform: `translateY(${virtualController.startTop}px)`,
           }}
         >
-          {virtualController.virtualItems.map((virtualItem) => {
+          {virtualController.virtualItems.map((virtualItem, index) => {
             const row = virtualItem.dataItem;
+
             if (!row.original) {
               return null;
             }
@@ -483,14 +540,21 @@ function _MusicList(props: IMusicListProps) {
                       "playMusic.clickMusicList"
                     );
                   if (config === "replace") {
-                    // TODO: 排序后的
                     trackPlayer.playMusicWithReplaceQueue(
-                      getAllMusicItems?.() ?? musicList,
+                      table.getRowModel().rows.map((it) => it.original),
                       row.original
                     );
                   } else {
                     trackPlayer.playMusic(row.original);
                   }
+                }}
+                draggable={enableDrag}
+                onDragStart={(e) => {
+                  // TODO
+                  // if(activeItems) {
+
+                  // }
+                  startDrag(e, virtualItem.rowIndex, "musiclist");
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -507,6 +571,24 @@ function _MusicList(props: IMusicListProps) {
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
+                <IfTruthy condition={enableDrag}>
+                  <IfTruthy condition={index === 0}>
+                    <DragReceiver
+                      position="top"
+                      rowIndex={virtualItem.rowIndex}
+                      onDrop={_onDrop}
+                      tag="musiclist"
+                      insideTable
+                    ></DragReceiver>
+                  </IfTruthy>
+                  <DragReceiver
+                    position="bottom"
+                    rowIndex={virtualItem.rowIndex + 1}
+                    onDrop={_onDrop}
+                    tag="musiclist"
+                    insideTable
+                  ></DragReceiver>
+                </IfTruthy>
               </tr>
             );
           })}
@@ -538,10 +620,10 @@ export default memo(
   _MusicList,
   (prev, curr) =>
     prev.state === curr.state &&
-    prev.enableSort === curr.enableSort &&
+    prev.enableDrag === curr.enableDrag &&
     prev.musicList === curr.musicList &&
     prev.onPageChange === curr.onPageChange &&
-    prev.onSortEnd === curr.onSortEnd &&
+    prev.onDragEnd === curr.onDragEnd &&
     prev.musicSheet &&
     curr.musicSheet &&
     isSameMedia(prev.musicSheet, curr.musicSheet)

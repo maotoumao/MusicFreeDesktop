@@ -6,7 +6,7 @@ import {
   getMainWindow,
   showMainWindow,
 } from "./window";
-import setupIpcMain from "./ipc";
+import setupIpcMain, { handleProxy } from "./ipc";
 import { setupPluginManager } from "./core/plugin-manager";
 import {
   getAppConfigPath,
@@ -17,6 +17,7 @@ import { setupTray } from "./tray";
 import { setupGlobalShortCut } from "./core/global-short-cut";
 import fs from "fs";
 import path from "path";
+import { setAutoFreeze } from "immer";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require("electron-squirrel-startup")) {
@@ -24,26 +25,23 @@ import path from "path";
 // }
 
 // portable
-if(process.platform === 'win32') {
+if (process.platform === "win32") {
   try {
-    const appPath = app.getPath('exe');
+    const appPath = app.getPath("exe");
     const portablePath = path.resolve(appPath, "../portable");
     const portableFolderStat = fs.statSync(portablePath);
     if (portableFolderStat.isDirectory()) {
-      const appPathNames = [
-        "appData",
-        "userData",
-      ];
+      const appPathNames = ["appData", "userData"];
       appPathNames.forEach((it) => {
         app.setPath(it, path.resolve(portablePath, it));
       });
     }
-  } catch (e){
+  } catch (e) {
     // console.log(e)
   }
 }
 
-
+setAutoFreeze(false);
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -104,6 +102,12 @@ async function bootstrap() {
       if (!getLyricWindow()) {
         createLyricWindow();
       }
+    }
+  });
+
+  getAppConfigPath("network.proxy").then((result) => {
+    if (result) {
+      handleProxy(result);
     }
   });
 }

@@ -1,0 +1,23 @@
+.setting-view--network-container {
+  width: 100%;
+
+  & .proxy-container {
+    display: grid;
+    grid-template-columns: 33% 33%;
+    gap: 18px;
+
+    & .proxy-item {
+      display: flex;
+
+      & input {
+        flex: 1;
+      }
+    }
+  }
+
+  & .network-cache-container {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+}

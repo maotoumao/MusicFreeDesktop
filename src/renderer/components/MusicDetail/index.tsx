@@ -68,7 +68,7 @@ export default function () {
       <div className="music-body">
         <div className="music-album-options">
           <img
-            className="music-album"
+            className="music-album shadow"
             onError={setFallbackAlbum}
             src={musicItem?.artwork ?? albumImg}
           ></img>

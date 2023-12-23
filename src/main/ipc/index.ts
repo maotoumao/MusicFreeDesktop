@@ -1,40 +1,25 @@
-import {
-  ipcMainHandle,
-  ipcMainOn,
-  ipcMainSendMainWindow,
-} from "@/common/ipc-util/main";
+import { ipcMainHandle, ipcMainOn } from "@/common/ipc-util/main";
 import {
   closeLyricWindow,
   createLyricWindow,
   getLyricWindow,
   getMainWindow,
 } from "../window";
-import {
-  BrowserWindow,
-  MessageChannelMain,
-  app,
-  dialog,
-  ipcRenderer,
-  net,
-  shell,
-} from "electron";
+import { app, dialog, shell } from "electron";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState } from "@/renderer/core/track-player/enum";
-import { setupTrayMenu } from "../tray";
+import { setTrayTitle, setupTrayMenu } from "../tray";
 import axios from "axios";
 import { compare } from "compare-versions";
-import { getPluginByMedia } from "../core/plugin-manager";
-import { encodeUrlHeaders } from "@/common/normalize-util";
-import { getQualityOrder } from "@/common/media-util";
 import {
-  getAppConfigPath,
   getAppConfigPathSync,
   setAppConfigPath,
 } from "@/common/app-config/main";
 // import { getExtensionWindow, syncExtensionData } from "../core/extensions";
 import setThumbImg from "../utils/set-thumb-img";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
-
+import { HttpsProxyAgent } from "https-proxy-agent";
+import { IAppConfig } from "@/common/app-config/type";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -126,6 +111,14 @@ export default function setupIpcMain() {
     setupTrayMenu();
   });
 
+  ipcMainOn("sync-current-lyric", (lrc) => {
+    if (getAppConfigPathSync("lyric.enableStatusBarLyric")) {
+      setTrayTitle(lrc);
+    } else {
+      setTrayTitle("");
+    }
+  });
+
   ipcMainHandle("app-get-path", (pathName) => {
     return app.getPath(pathName as any);
   });
@@ -158,19 +151,35 @@ export default function setupIpcMain() {
     setLyricWindow(enabled);
   });
 
-  ipcMainOn("send-to-lyric-window", (data) => {
-    const lyricWindow = getLyricWindow();
-    if (!lyricWindow) {
-      return;
+  ipcMainOn("clear-cache", () => {
+    const mainWindow = getMainWindow();
+    if (mainWindow) {
+      mainWindow.webContents.session.clearCache?.();
     }
-    currentMusicInfoStore.setValue((prev) => ({
-      ...prev,
-      lrc: data.lrc,
-    }));
-    // syncExtensionData({
-    //   lrc: data.lrc,
-    // });
   });
+
+  ipcMainHandle("get-cache-size", async () => {
+    const mainWindow = getMainWindow();
+    if (mainWindow) {
+      return await mainWindow.webContents.session.getCacheSize();
+    }
+
+    return NaN;
+  });
+
+  // ipcMainOn("send-to-lyric-window", (data) => {
+  //   const lyricWindow = getLyricWindow();
+  //   if (!lyricWindow) {
+  //     return;
+  //   }
+  //   currentMusicInfoStore.setValue((prev) => ({
+  //     ...prev,
+  //     lrc: data.lrc,
+  //   }));
+  //   // syncExtensionData({
+  //   //   lrc: data.lrc,
+  //   // });
+  // });
 
   ipcMainOn("set-desktop-lyric-lock", (lockState) => {
     setDesktopLyricLock(lockState);
@@ -187,6 +196,34 @@ export default function setupIpcMain() {
     });
   });
 
+  /** 设置代理 */
+  ipcMainOn("set-proxy", async (data) => {
+    handleProxy(data);
+    setAppConfigPath("network.proxy", data);
+  });
+}
+
+export async function handleProxy(data: IAppConfig["network"]["proxy"]) {
+  try {
+    if (!data.enabled) {
+      axios.defaults.httpAgent = undefined;
+      axios.defaults.httpsAgent = undefined;
+    } else if (data.host) {
+      const proxyUrl = new URL(data.host);
+      proxyUrl.port = data.port;
+      proxyUrl.username = data.username;
+      proxyUrl.password = data.password;
+      const agent = new HttpsProxyAgent(proxyUrl);
+
+      axios.defaults.httpAgent = agent;
+      axios.defaults.httpsAgent = agent;
+    } else {
+      throw new Error("Unknown Host");
+    }
+  } catch (e) {
+    axios.defaults.httpAgent = undefined;
+    axios.defaults.httpsAgent = undefined;
+  }
 }
 
 export async function setLyricWindow(enabled: boolean) {

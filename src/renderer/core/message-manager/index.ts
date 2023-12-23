@@ -6,6 +6,7 @@ import {
   TrackPlayerEvent,
 } from "../track-player/enum";
 import trackPlayerEventsEmitter from "../track-player/event";
+import rendererAppConfig from "@/common/app-config/renderer";
 
 function getCurrentMusicData() {
   const currentMusic = trackPlayer.getCurrentMusic();
@@ -137,6 +138,10 @@ async function setupMessageManager() {
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.CurrentLyricChanged, (lyric) => {
+    if (window.globalData.platform === 'darwin' && rendererAppConfig.getAppConfigPath('lyric.enableStatusBarLyric')) {
+      // 只有macos需要同步歌词，用来设置状态栏歌词
+      ipcRendererSend('sync-current-lyric', lyric?.lrc?.lrc ?? '');
+    }
     window.mainPort.broadcast({
       data: lyric,
       type: "sync-current-lyric",

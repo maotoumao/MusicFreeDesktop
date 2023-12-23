@@ -4,11 +4,17 @@ import { useMemo, useState } from "react";
 import groupBy from "@/renderer/utils/groupBy";
 import MusicList from "@/renderer/components/MusicList";
 
-export default function FolderView() {
-  const localMusicList = localMusicListStore.useValue();
+interface IProps {
+  localMusicList: IMusic.IMusicItem[];
+}
+
+export default function FolderView(props: IProps) {
+  const { localMusicList } = props;
 
   const [keys, allMusic] = useMemo(() => {
-    const grouped = groupBy(localMusicList ?? [], (it) => window.path.dirname(it.$$localPath));
+    const grouped = groupBy(localMusicList ?? [], (it) =>
+      window.path.dirname(it.$$localPath)
+    );
     return [Object.keys(grouped).sort((a, b) => a.localeCompare(b)), grouped];
   }, [localMusicList]);
 
@@ -36,7 +42,7 @@ export default function FolderView() {
       <div className="right-part">
         <MusicList
           musicList={allMusic[actualSelectedKey] ?? []}
-          hideRows={['artist']}
+          hideRows={["artist"]}
           virtualProps={{
             fallbackRenderCount: -1,
           }}

@@ -13,16 +13,18 @@ import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import trackPlayer from "@/renderer/core/track-player";
 import { showModal } from "@/renderer/components/Modal";
-import { RequestStateCode, rem } from "@/common/constant";
+import { RequestStateCode, localPluginName, rem } from "@/common/constant";
 import { offsetHeightStore } from "../../store";
 import rendererAppConfig from "@/common/app-config/renderer";
+import MusicSheet from "@/renderer/core/music-sheet";
+import { toMediaBase } from "@/common/media-util";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;
   musicList: IMusic.IMusicItem[];
   state?: RequestStateCode;
   onLoadMore?: () => void;
-  options?: ReactNode
+  options?: ReactNode;
 }
 export default function Body(props: IProps) {
   const { musicList = [], musicSheet, state, onLoadMore, options } = props;
@@ -123,7 +125,7 @@ export default function Body(props: IProps) {
       >
         <MusicList
           musicList={filterMusicList ?? musicList}
-          getAllMusicItems={() => musicList}
+          // getAllMusicItems={() => musicList} // TODO: 过滤歌曲
           musicSheet={musicSheet}
           state={state}
           onPageChange={onLoadMore}
@@ -132,6 +134,12 @@ export default function Body(props: IProps) {
               return document.querySelector("#page-container");
             },
             offsetHeight: () => offsetHeightStore.getValue(),
+          }}
+          enableDrag={musicSheet?.platform === localPluginName}
+          onDragEnd={(newData) => {
+            if (musicSheet?.platform === localPluginName && musicSheet?.id) {
+              MusicSheet.frontend.updateSheetMusicOrder(musicSheet.id, newData);
+            }
           }}
         ></MusicList>
       </Condition>

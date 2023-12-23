@@ -15,13 +15,55 @@ import { getAppConfigPath } from "@/common/app-config/main";
 import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 
 let tray: Tray | null = null;
-Menu.setApplicationMenu(null);
+
+if (process.platform === "darwin") {
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      {
+        label: app.getName(),
+        submenu: [
+          {
+            label: "关于",
+            role: "about",
+          },
+          {
+            label: "退出",
+            click() {
+              app.quit();
+            },
+          },
+        ],
+      },
+      {
+        label: "编辑",
+        submenu: [
+          {
+            label: "撤销",
+            accelerator: "Command+Z",
+            role: "undo",
+          },
+          { label: "恢复", accelerator: "Shift+Command+Z", role: "redo" },
+          { type: "separator" },
+          { label: "剪切", accelerator: "Command+X", role: "cut" },
+          { label: "复制", accelerator: "Command+C", role: "copy" },
+          { label: "粘贴", accelerator: "Command+V", role: "paste" },
+          { type: "separator" },
+          { label: "全选", accelerator: "Command+A", role: "selectAll" },
+        ],
+      },
+    ])
+  );
+} else {
+  Menu.setApplicationMenu(null);
+}
 
 export function setupTray() {
-  tray = new Tray(nativeImage.createFromPath(getResPath('logo.png')).resize({
-    width: 32, 
-    height: 32
-  }));
+  tray = new Tray(
+    nativeImage.createFromPath(getResPath("logo.png")).resize({
+      width: 32,
+      height: 32,
+    })
+  );
 
   tray.on("double-click", () => {
     showMainWindow();
@@ -56,11 +98,12 @@ export async function setupTrayMenu() {
     tray.setToolTip("MusicFree");
   }
   if (currentMusic) {
+    const fullName = `${currentMusic.title ?? "未知音乐"}${
+      currentMusic.artist ? ` - ${currentMusic.artist}` : ""
+    }`;
     ctxMenu.push(
       {
-        label: `${currentMusic.title ?? "未知音乐"}${
-          currentMusic.artist ? ` - ${currentMusic.artist}` : ""
-        }`,
+        label: fullName.length > 12 ? fullName.slice(0, 12) + "..." : fullName,
         click: openMusicDetail,
       },
       {
@@ -216,4 +259,15 @@ export async function setupTrayMenu() {
   });
 
   tray.setContextMenu(Menu.buildFromTemplate(ctxMenu));
+}
+
+export function setTrayTitle(str: string) {
+  if (!str || !str.length) {
+    tray.setTitle("");
+  }
+  if (str.length > 7) {
+    tray?.setTitle(" " + str.slice(0) + "...");
+  } else {
+    tray?.setTitle(" " + str);
+  }
 }

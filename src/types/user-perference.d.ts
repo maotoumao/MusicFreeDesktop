@@ -32,5 +32,7 @@ declare namespace IUserPerference {
         starredMusicSheets: IMedia.IMediaBase[]
         /** 搜索历史 */
         searchHistory: string[];
+        /** 插件数据 */
+        pluginMeta: Record<string, IPlugin.IPluginMeta>
     }
 }

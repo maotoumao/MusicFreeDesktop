@@ -27,7 +27,7 @@ export function encodeUrlHeaders(
 
   for (const key in headers) {
     formalizedKey = key.toLowerCase();
-    _setHeaders[formalizedKey] = headers[formalizedKey];
+    _setHeaders[formalizedKey] = headers[key];
   }
   const encodedUrl = new URL(originalUrl);
   encodedUrl.searchParams.set(

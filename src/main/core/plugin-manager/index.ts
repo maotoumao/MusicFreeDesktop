@@ -7,7 +7,6 @@ import {
   ipcMainOn,
   ipcMainSendMainWindow,
 } from "@/common/ipc-util/main";
-import { getMainWindow } from "@/main/window";
 import { localPluginHash, localPluginName } from "@/common/constant";
 import localPlugin from "./local-plugin";
 import { rimraf } from "rimraf";
@@ -15,13 +14,14 @@ import axios from "axios";
 import { compare } from "compare-versions";
 import { nanoid } from "nanoid";
 import { addRandomHash } from "@/common/normalize-util";
+import { getAppConfigPathSync } from "@/common/app-config/main";
 
 let plugins: Plugin[] = [];
 let clonedPlugins: IPlugin.IPluginDelegate[] = [];
 
 let _pluginBasePath: string;
 function getPluginBasePath() {
-  if(_pluginBasePath) {
+  if (_pluginBasePath) {
     return _pluginBasePath;
   }
   _pluginBasePath = path.resolve(
@@ -92,6 +92,8 @@ function registerEvents() {
 
   /** 刷新插件 */
   ipcMainOn("refresh-plugins", loadAllPlugins);
+  /** 更新所有插件 */
+  ipcMainOn("update-all-plugins", updateAllPlugins);
 
   ipcMainHandle("install-plugin-remote", async (urlLike: string) => {
     try {
@@ -218,7 +220,10 @@ async function installPluginFromRawCode(funcCode: string) {
     return;
   }
   const oldVersionPlugin = plugins.find((p) => p.name === plugin.name);
-  if (oldVersionPlugin) {
+  if (
+    oldVersionPlugin &&
+    !getAppConfigPathSync("plugin.notCheckPluginVersion")
+  ) {
     if (
       compare(
         oldVersionPlugin.instance.version ?? "",
@@ -258,4 +263,13 @@ async function uninstallPlugin(hash: string) {
       setPlugins(newPlugins);
     } catch {}
   }
+}
+
+/** 更新所有插件 */
+async function updateAllPlugins() {
+  return Promise.allSettled(
+    plugins.map((plg) =>
+      plg.instance.srcUrl ? installPluginFromUrl(plg.instance.srcUrl) : null
+    )
+  );
 }

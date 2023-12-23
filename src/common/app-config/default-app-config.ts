@@ -28,6 +28,7 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
   "shortCut.enableGlobal": false,
   "download.concurrency": 5,
   "normal.musicListColumnsShown": [] as any,
+  "backup.resumeBehavior": "append",
 } as const;
 
 export default defaultAppConfig;

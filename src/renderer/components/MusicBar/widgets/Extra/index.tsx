@@ -1,23 +1,20 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
-import Evt from "@/renderer/core/events";
 import "./index.scss";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import trackPlayer from "@/renderer/core/track-player";
 import { RepeatMode } from "@/renderer/core/track-player/enum";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
-import { showContextMenu } from "@/renderer/components/ContextMenu";
-import { toast } from "react-toastify";
 import { showModal } from "@/renderer/components/Modal";
 import rendererAppConfig from "@/common/app-config/renderer";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
-import {
-  sendMessageToLyricWindow,
-  setMainWindowMessagePort,
-} from "@/renderer/utils/lrc-window-message-channel";
+import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import classNames from "@/renderer/utils/classnames";
-import { useLyric } from "@/renderer/core/track-player/player";
+import {
+  getCurrentPanel,
+  hidePanel,
+  showPanel,
+} from "@/renderer/components/Panel";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
@@ -58,7 +55,11 @@ export default function Extra() {
         title="播放列表"
         role="button"
         onClick={() => {
-          Evt.emit("SWITCH_PLAY_LIST");
+          if (getCurrentPanel()?.type === "PlayList") {
+            hidePanel();
+          } else {
+            showPanel("PlayList");
+          }
         }}
       >
         <SvgAsset iconName="playlist"></SvgAsset>
@@ -265,30 +266,30 @@ function QualityBtn() {
 function LyricBtn() {
   const rendererConfig = rendererAppConfig.useAppConfig();
   const enableDesktopLyric = rendererConfig?.lyric?.enableDesktopLyric ?? false;
-  const lyric = useLyric();
+  // const lyric = useLyric();
 
-  useEffect(() => {
-    // 同步歌词 这样写貌似不好 应该用回调
-    // TODO: 挪到bootstrap中
-    if (enableDesktopLyric) {
-      // 同步歌词
-      if (lyric?.currentLrc) {
-        const currentLrc = lyric?.currentLrc;
-        // 同步两句歌词
-        ipcRendererSend("send-to-lyric-window", {
-          timeStamp: Date.now(),
-          lrc: currentLrc
-            ? [currentLrc.lrc, lyric.parser.getLyric()[currentLrc.index + 1]]
-            : [],
-        });
-      } else {
-        ipcRendererSend("send-to-lyric-window", {
-          timeStamp: Date.now(),
-          lrc: [],
-        });
-      }
-    }
-  }, [lyric, enableDesktopLyric]);
+  // useEffect(() => {
+  //   // 同步歌词 这样写貌似不好 应该用回调
+  //   // TODO: 挪到bootstrap中
+  //   if (enableDesktopLyric) {
+  //     // 同步歌词
+  //     if (lyric?.currentLrc) {
+  //       const currentLrc = lyric?.currentLrc;
+  //       // 同步两句歌词
+  //       ipcRendererSend("send-to-lyric-window", {
+  //         timeStamp: Date.now(),
+  //         lrc: currentLrc
+  //           ? [currentLrc.lrc, lyric.parser.getLyric()[currentLrc.index + 1]]
+  //           : [],
+  //       });
+  //     } else {
+  //       ipcRendererSend("send-to-lyric-window", {
+  //         timeStamp: Date.now(),
+  //         lrc: [],
+  //       });
+  //     }
+  //   }
+  // }, [lyric, enableDesktopLyric]);
 
   return (
     <div
@@ -301,7 +302,7 @@ function LyricBtn() {
         ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
       }}
     >
-      <SvgAsset iconName="lyric"></SvgAsset>
+      <SvgAsset iconName="lyric" title="桌面歌词"></SvgAsset>
     </div>
   );
 }

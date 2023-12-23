@@ -1,6 +1,6 @@
 import {
   callPluginDelegateMethod,
-  pluginsStore,
+  useSortedPlugins,
 } from "@/renderer/core/plugin-delegate";
 
 import {
@@ -11,14 +11,19 @@ import {
 } from "@tanstack/react-table";
 import "./index.scss";
 import { CSSProperties, ReactNode } from "react";
-import Condition from "@/renderer/components/Condition";
+import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import { hideModal, showModal } from "@/renderer/components/Modal";
 import Empty from "@/renderer/components/Empty";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import { toast } from "react-toastify";
+import { showPanel } from "@/renderer/components/Panel";
+import rendererAppConfig from "@/common/app-config/renderer";
+import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
+import { produce } from "immer";
 
 function renderOptions(info: any) {
   const row = info.row.original as IPlugin.IPluginDelegate;
+
   return (
     <div>
       <ActionButton
@@ -52,7 +57,9 @@ function renderOptions(info: any) {
             try {
               await ipcRendererInvoke("install-plugin-remote", row.srcUrl);
               toast.success(`插件「${row.platform}」已更新至最新版本`);
-            } catch {}
+            } catch (e) {
+              toast.error(e?.message ?? "更新失败");
+            }
           }}
         >
           更新
@@ -121,13 +128,32 @@ function renderOptions(info: any) {
               },
               onPromiseRejected() {
                 console.log("导入失败");
-                toast.error('导入歌单失败！')
+                toast.error("导入歌单失败！");
               },
               hints: row.hints?.importMusicSheet,
             });
           }}
         >
           导入歌单
+        </ActionButton>
+      </Condition>
+      <Condition condition={row.userVariables?.length}>
+        <ActionButton
+          style={{
+            color: "#0A95C8",
+          }}
+          onClick={() => {
+            showPanel("UserVariables", {
+              variables: row.userVariables,
+              plugin: row,
+              initValues:
+                rendererAppConfig.getAppConfigPath("private.pluginMeta")?.[
+                  row.platform
+                ]?.userVariables,
+            });
+          }}
+        >
+          用户变量
         </ActionButton>
       </Condition>
     </div>
@@ -159,6 +185,13 @@ const columnDef = [
     maxSize: 100,
     size: 100,
   }),
+  columnHelper.accessor("author", {
+    cell: (info) => info.getValue() ?? '未知作者',
+    header: () => "作者",
+    maxSize: 100,
+    minSize: 100,
+    size: 100,
+  }),
   columnHelper.accessor(() => 0, {
     id: "extra",
     cell: renderOptions,
@@ -167,15 +200,39 @@ const columnDef = [
 ];
 
 export default function PluginTable() {
-  const plugins = pluginsStore.useValue();
+  const plugins = useSortedPlugins();
   const table = useReactTable({
     data: plugins,
     columns: columnDef,
     getCoreRowModel: getCoreRowModel(),
   });
 
+  function onDrop(fromIndex: number, toIndex: number) {
+    const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta") ?? {};
+
+    const newPlugins = plugins
+      .slice(0, fromIndex)
+      .concat(plugins.slice(fromIndex + 1));
+    newPlugins.splice(
+      fromIndex < toIndex ? toIndex - 1 : toIndex,
+      0,
+      plugins[fromIndex]
+    );
+
+    const newMeta = produce(meta, (draft) => {
+      newPlugins.forEach((plugin, index) => {
+        if (!draft[plugin.platform]) {
+          draft[plugin.platform] = {};
+        }
+        draft[plugin.platform].order = index;
+      });
+    });
+
+    rendererAppConfig.setAppConfigPath("private.pluginMeta", newMeta);
+  }
+
   return (
-    <div className="plugin-table-wrapper">
+    <div className="plugin-table--container">
       <Condition
         condition={table.getRowModel().rows.length}
         falsy={<Empty></Empty>}
@@ -187,7 +244,7 @@ export default function PluginTable() {
                 <th
                   key={header.id}
                   style={{
-                    width: header.id === "extra" ? undefined : header.getSize(),
+                    width: header.id === "extra" ? "100%" : header.getSize(),
                   }}
                 >
                   {flexRender(
@@ -199,18 +256,41 @@ export default function PluginTable() {
             </tr>
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
+            {table.getRowModel().rows.map((row, index) => (
+              <tr
+                key={row.id}
+                draggable
+                onDragStart={(e) => {
+                  startDrag(e, index);
+                }}
+              >
                 {row.getAllCells().map((cell) => (
                   <td
                     key={cell.id}
                     style={{
                       width: cell.column.getSize(),
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
                     }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
+                <IfTruthy condition={index === 0}>
+                  <DragReceiver
+                    position="top"
+                    rowIndex={0}
+                    insideTable
+                    onDrop={onDrop}
+                  ></DragReceiver>
+                </IfTruthy>
+                <DragReceiver
+                  position="bottom"
+                  rowIndex={index + 1}
+                  insideTable
+                  onDrop={onDrop}
+                ></DragReceiver>
               </tr>
             ))}
           </tbody>
