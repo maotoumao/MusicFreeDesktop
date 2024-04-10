@@ -571,6 +571,23 @@ async function playIndex(nextIndex: number, options: IPlayOptions = {}) {
         setCurrentMusic(musicItem);
         setTrackAndPlay(mediaSource, musicItem);
       }
+      // Get extra information
+      const musicInfo = await callPluginDelegateMethod(
+        {
+          platform: musicItem.platform,
+        },
+        "getMusicInfo",
+        musicItem
+      ).catch(() => {});
+      if (isCurrentMusic(musicItem) && musicInfo) {
+        // Merge music info
+        setCurrentMusic({
+          ...musicItem,
+          ...musicInfo,
+          platform: musicItem.platform,
+          id: musicItem.id,
+        });
+      }
     } catch (e) {
       // 播放失败
       setCurrentMusic(musicItem);
@@ -740,7 +757,7 @@ export async function setQuality(quality: IMusic.IQualityKey) {
         quality,
       }
     );
-    if (isSameMedia(currentMusic, currentMusicStore.getValue())) {
+    if (isCurrentMusic(currentMusic)) {
       setTrackAndPlay(mediaSource, currentMusic, {
         seekTo: progressStore.getValue().currentTime,
         autoPlay:
@@ -758,4 +775,8 @@ export async function setAudioOutputDevice(deviceId?: string) {
   } catch {
     return false;
   }
+}
+
+function isCurrentMusic(musicItem: IMusic.IMusicItem) {
+  return isSameMedia(musicItem, currentMusicStore.getValue());
 }
