@@ -11,12 +11,15 @@ import { musicDetailShownStore } from "../MusicDetail";
 import Condition from "../Condition";
 import SearchHistory from "./widgets/SearchHistory";
 import { addSearchHistory } from "@/renderer/utils/search-history";
+import { useTranslation } from "react-i18next";
 
 export default function AppHeader() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>();
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const isHistoryFocusRef = useRef(false);
+
+  const {t} = useTranslation();
 
   if (!showSearchHistory) {
     isHistoryFocusRef.current = false;
@@ -46,7 +49,7 @@ export default function AppHeader() {
           <input
             ref={inputRef}
             className="header-search-input"
-            placeholder="在这里输入搜索内容"
+            placeholder={t('app_header.search_placeholder')}
             maxLength={50}
             onClick={() => {
               setShowSearchHistory(true);
@@ -102,7 +105,7 @@ export default function AppHeader() {
         <div
           role="button"
           className="header-button"
-          title="设置"
+          title={t('app_header.settings')}
           onClick={() => {
             navigate("/main/setting");
             Evt.emit("HIDE_MUSIC_DETAIL");
@@ -112,7 +115,7 @@ export default function AppHeader() {
         </div>
         <div
           role="button"
-          title="最小化"
+          title={t('app_header.minimize')}
           className="header-button"
           onClick={() => {
             ipcRendererSend("min-window", {});
@@ -122,7 +125,7 @@ export default function AppHeader() {
         </div>
         <div
           role="button"
-          title="退出"
+          title={t('app_header.exit')}
           className="header-button"
           onClick={() => {
             const exitBehavior = rendererAppConfig.getAppConfigPath(

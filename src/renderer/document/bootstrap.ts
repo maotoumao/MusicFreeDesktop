@@ -1,3 +1,4 @@
+import "@/common/i18n";
 import { localPluginHash, supportLocalMediaType } from "@/common/constant";
 import MusicSheet from "../core/music-sheet";
 import {

@@ -49,6 +49,7 @@ import SvgAsset from "../SvgAsset";
 import { getAppConfigPath } from "@/common/app-config/main";
 import musicSheetDB from "@/renderer/core/db/music-sheet-db";
 import DragReceiver, { startDrag } from "../DragReceiver";
+import i18n from "@/common/i18n";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -95,7 +96,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
   }),
   columnHelper.accessor((_, index) => index + 1, {
     cell: (info) => info.getValue(),
-    header: () => "#",
+    header: "#",
     id: "index",
     minSize: 40,
     maxSize: 40,
@@ -103,7 +104,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     enableResizing: false,
   }),
   columnHelper.accessor("title", {
-    header: "标题",
+    header: () => i18n.t('media.media_title'),
     size: 250,
     maxSize: 300,
     minSize: 100,
@@ -116,7 +117,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
   }),
 
   columnHelper.accessor("artist", {
-    header: "作者",
+    header: () => i18n.t('media.media_type_artist'),
     size: 130,
     maxSize: 200,
     minSize: 60,
@@ -125,7 +126,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 2,
   }),
   columnHelper.accessor("album", {
-    header: "专辑",
+    header: () => i18n.t('media.media_type_album'),
     size: 120,
     maxSize: 200,
     minSize: 60,
@@ -134,7 +135,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 2,
   }),
   columnHelper.accessor("duration", {
-    header: "时长",
+    header: () => i18n.t('media.media_duration'),
     size: 64,
     maxSize: 150,
     minSize: 48,
@@ -144,7 +145,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 1,
   }),
   columnHelper.accessor("platform", {
-    header: "来源",
+    header: () => i18n.t('media.media_platform'),
     size: 100,
     minSize: 80,
     maxSize: 300,
@@ -171,11 +172,11 @@ export function showMusicContextMenu(
         icon: "identification",
       },
       {
-        title: `作者: ${musicItems.artist ?? '未知作者'}`,
+        title: `${i18n.t('media.media_type_artist')}: ${musicItems.artist ?? i18n.t('media.unknown_artist')}`,
         icon: "user",
       },
       {
-        title: `专辑: ${musicItems.album ?? '未知专辑'}`,
+        title: `${i18n.t('media.media_type_album')}: ${musicItems.album ?? i18n.t('media.unknown_album')}`,
         icon: "album",
         show: !!musicItems.album,
       },
@@ -186,14 +187,14 @@ export function showMusicContextMenu(
   }
   menuItems.push(
     {
-      title: "下一首播放",
+      title: i18n.t('music_list_context_menu.next_play'),
       icon: "motion-play",
       onClick() {
         trackPlayer.addNext(musicItems);
       },
     },
     {
-      title: "添加到歌单",
+      title: i18n.t('music_list_context_menu.add_to_my_sheets'),
       icon: "document-plus",
       onClick() {
         showModal("AddMusicToSheet", {
@@ -202,7 +203,7 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: "从歌单内删除",
+      title: i18n.t('music_list_context_menu.remove_from_sheet'),
       icon: "trash",
       show: !!localMusicSheetId && localMusicSheetId !== "play-list",
       onClick() {
@@ -210,7 +211,7 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: "删除",
+      title: i18n.t('common.remove'),
       icon: "trash",
       show: localMusicSheetId === "play-list",
       onClick() {
@@ -221,7 +222,7 @@ export function showMusicContextMenu(
 
   menuItems.push(
     {
-      title: "下载",
+      title: i18n.t('common.download'),
       icon: "array-download-tray",
       show: isArray
         ? !musicItems.every(
@@ -235,7 +236,7 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: "删除本地下载",
+      title: i18n.t('music_list_context_menu.delete_local_download'),
       icon: "trash",
       show:
         (isArray && musicItems.every((it) => Downloader.isDownloaded(it))) ||
@@ -247,10 +248,14 @@ export function showMusicContextMenu(
         );
         if (isSuccess) {
           if (isArray) {
-            toast.success(`已删除 ${musicItems.length} 首本地歌曲`);
+            toast.success(i18n.t('music_list_context_menu.delete_local_downloaded_songs_success', {
+              musicNums: musicItems.length
+            }));
           } else {
             toast.success(
-              `已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`
+              i18n.t('music_list_context_menu.delete_local_downloaded_song_success', {
+                songName: (musicItems as IMusic.IMusicItem).title
+              })
             );
           }
         } else if (info?.msg) {
@@ -259,7 +264,7 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: "打开歌曲所在文件夹",
+      title: i18n.t("music_list_context_menu.reveal_local_music_in_file_explorer"),
       icon: "folder-open",
       show:
         !isArray &&

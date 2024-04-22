@@ -8,7 +8,6 @@ import MainPage from "../pages/main-page";
 import { ContextMenuComponent } from "../components/ContextMenu";
 import { ToastContainer } from "react-toastify";
 
-import "@/common/i18n";
 
 import "rc-slider/assets/index.css";
 import "react-toastify/dist/ReactToastify.css";

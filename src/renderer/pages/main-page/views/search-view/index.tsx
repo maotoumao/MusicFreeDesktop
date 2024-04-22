@@ -41,7 +41,7 @@ export default function SearchView() {
   return (
     <div className="search-view-container">
       <div className="search-header">
-        <span className="highlight">「{query}」</span>的搜索结果
+        <span className="highlight">「{query}」</span>{t('search_result_page.search_result_title')}
       </div>
       {plugins.length ? (
         <Tab.Group
@@ -60,7 +60,7 @@ export default function SearchView() {
           <Tab.List className="tab-list-container">
             {supportedMediaType.map((type) => (
               <Tab key={type} as="div" className="tab-list-item">
-                {t(type)}
+                {t(`media.media_type_${type}`)}
               </Tab>
             ))}
           </Tab.List>
@@ -77,7 +77,7 @@ export default function SearchView() {
           </Tab.Panels>
         </Tab.Group>
       ) : (
-        <NoPlugin supportMethod="搜索"></NoPlugin>
+        <NoPlugin supportMethod={t('plugin.method_search')}></NoPlugin>
       )}
     </div>
   );

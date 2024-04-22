@@ -7,6 +7,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import { showModal } from "@/renderer/components/Modal";
 import { localPluginName } from "@/common/constant";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
+import { useTranslation } from "react-i18next";
 
 export default function MySheets() {
   const sheetIdMatch = useMatch(
@@ -16,16 +17,18 @@ export default function MySheets() {
   const musicSheets = MusicSheet.frontend.useAllSheets();
   const navigate = useNavigate();
 
+  const { t } = useTranslation();
+
   return (
     <div className="side-bar-container--my-sheets">
       <div className="divider"></div>
       <Disclosure defaultOpen>
         <Disclosure.Button className="title" as="div" role="button">
-          <div className="my-sheets ">我的歌单</div>
+          <div className="my-sheets ">{t('side_bar.my_sheets')}</div>
           <div
             role="button"
             className="add-new-sheet"
-            title="新建歌单"
+            title={t('side_bar.create_local_sheet')}
             onClick={(e) => {
               e.stopPropagation();
               showModal("AddNewSheet");
@@ -54,7 +57,7 @@ export default function MySheets() {
                   y: e.clientY,
                   menuItems: [
                     {
-                      title: "删除歌单",
+                      title: t('side_bar.delete_sheet'),
                       icon: "trash",
                       show: item.id !== defaultSheet.id,
                       onClick() {

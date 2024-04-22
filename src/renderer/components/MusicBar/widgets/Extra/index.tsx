@@ -15,9 +15,11 @@ import {
   hidePanel,
   showPanel,
 } from "@/renderer/components/Panel";
+import { useTranslation } from "react-i18next";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
+  const {t} =useTranslation();
 
   return (
     <div className="music-extra">
@@ -32,10 +34,10 @@ export default function Extra() {
         }}
         title={
           repeatMode === RepeatMode.Loop
-            ? "单曲循环"
+            ? t('media.music_repeat_mode_loop')
             : repeatMode === RepeatMode.Queue
-            ? "列表循环"
-            : "随机播放"
+            ? t('media.music_repeat_mode_queue')
+            : t('media.music_repeat_mode_shuffle')
         }
       >
         <SwitchCase.Switch switch={repeatMode}>
