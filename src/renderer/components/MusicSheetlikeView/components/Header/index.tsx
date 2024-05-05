@@ -7,6 +7,7 @@ import Condition from "@/renderer/components/Condition";
 import { offsetHeightStore } from "../../store";
 import { useRef } from "react";
 import { rem } from "@/common/constant";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;
@@ -16,6 +17,7 @@ interface IProps {
 export default function Header(props: IProps) {
   const { musicSheet, musicList } = props;
   const containerRef = useRef<HTMLDivElement>();
+  const {t} = useTranslation();
 
   return (
     <div className="music-sheetlike-view--header-container" ref={containerRef}>
@@ -29,25 +31,25 @@ export default function Header(props: IProps) {
           <Condition condition={musicSheet?.platform}>
             <Tag>{musicSheet?.platform}</Tag>
           </Condition>
-          <div className="title">{musicSheet?.title ?? "未命名"}</div>
+          <div className="title">{musicSheet?.title ?? t('media.unknown_title')}</div>
         </div>
         <Condition condition={musicSheet?.createAt || musicSheet?.artist}>
           <div className="info-container">
             <Condition condition={musicSheet?.createAt}>
               <span>
-                发布时间：{dayjs(musicSheet?.createAt).format("YYYY-MM-DD")}
+                {t('media.media_create_at')}: {dayjs(musicSheet?.createAt).format("YYYY-MM-DD")}
               </span>
             </Condition>
             <Condition condition={musicSheet?.artist}>
-              <span>作者：{musicSheet?.artist}</span>
+              <span>{t('media.media_type_artist')}: {musicSheet?.artist}</span>
             </Condition>
           </div>
         </Condition>
         <div className="info-container">
           <Condition condition={musicSheet?.playCount}>
-            <span>播放数：{musicSheet?.playCount}</span>
+            <span>{t('media.media_play_count')}: {musicSheet?.playCount}</span>
           </Condition>
-          <span>歌曲数：{musicSheet?.worksNum ?? musicList?.length ?? 0}</span>
+          <span>{t('media.media_music_count')}: {musicSheet?.worksNum ?? musicList?.length ?? 0}</span>
         </div>
 
         <Condition condition={musicSheet?.description}>
@@ -70,7 +72,7 @@ export default function Header(props: IProps) {
               });
             }}
           >
-            简介：{musicSheet?.description}
+            {t('media.media_description')}： {musicSheet?.description}
           </div>
         </Condition>
       </div>

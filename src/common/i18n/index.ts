@@ -15,7 +15,7 @@ i18n.init({
         'zh-CN': zhCN, 
         'en-US': enUS
     },
-    lng: 'en-US',
+    lng: 'zh-CN',
 });
 
 

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { hideModal } from "../..";
 import Base from "../Base";
 import "./index.scss";
@@ -12,6 +13,7 @@ interface IReconfirmProps {
 
 export default function Reconfirm(props: IReconfirmProps) {
   const { title, content, onConfirm, onCancel } = props;
+  const { t } = useTranslation();
 
   return (
     <Base withBlur={false}>
@@ -19,14 +21,23 @@ export default function Reconfirm(props: IReconfirmProps) {
         <Base.Header>{title}</Base.Header>
         <div className="content-container">{content}</div>
         <div className="opeartion-area">
-          <div role="button" data-type="normalButton" onClick={() => {
-            onCancel?.();
-            hideModal();
-          }}>
-            取消
+          <div
+            role="button"
+            data-type="normalButton"
+            onClick={() => {
+              onCancel?.();
+              hideModal();
+            }}
+          >
+            {t("common.cancel")}
           </div>
-          <div role="button" data-type="dangerButton" data-fill={true} onClick={onConfirm}>
-            确认
+          <div
+            role="button"
+            data-type="dangerButton"
+            data-fill={true}
+            onClick={onConfirm}
+          >
+            {t("common.confirm")}
           </div>
         </div>
       </div>

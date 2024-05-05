@@ -10,8 +10,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import "./index.scss";
+import i18n from "@/common/i18n";
 
 const columnHelper = createColumnHelper<IDownloadingItem>();
+
+const {t} = i18n;
 const columnDef = [
   columnHelper.accessor((_, index) => index + 1, {
     cell: (info) => info.getValue(),
@@ -22,33 +25,33 @@ const columnDef = [
     size: 40,
   }),
   columnHelper.accessor("0.title", {
-    header: "标题",
+    header: t('media.media_title'),
     size: 200,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
 
   columnHelper.accessor("0.artist", {
-    header: "作者",
+    header: t('media.media_type_artist'),
     size: 80,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
   columnHelper.accessor("0.album", {
-    header: "专辑",
+    header: t('media.media_type_album'),
     size: 80,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
   columnHelper.accessor((info) => info[1], {
-    header: "状态",
+    header: t('common.status'),
     size: 180,
     cell: (info) => {
       const downloadState = info.getValue();
       if (downloadState.state === DownloadState.WAITING) {
-        return "等待中...";
+        return t('download_page.waiting');
       }
       if (downloadState.state === DownloadState.ERROR) {
         return (
           <span style={{ color: "var(--dangerColor, #FC5F5F)" }}>
-            下载失败: {downloadState.msg}
+            {t('download_page.failed')}: {downloadState.msg}
           </span>
         );
       }
@@ -67,7 +70,7 @@ const columnDef = [
     },
   }),
   columnHelper.accessor("0.platform", {
-    header: "来源",
+    header: t('media.media_platform'),
     size: 100,
     cell: (info) => <Tag fill>{info.getValue()}</Tag>,
   }),

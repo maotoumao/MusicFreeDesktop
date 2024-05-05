@@ -5,6 +5,7 @@ import { memo, useEffect, useState } from "react";
 import "./index.scss";
 import { localPluginName } from "@/common/constant";
 import Downloader from "@/renderer/core/downloader";
+import { useTranslation } from "react-i18next";
 
 interface IMusicDownloadedProps {
   musicItem: IMusic.IMusicItem;
@@ -16,6 +17,7 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
   // const [loading, setLoading] = useState(false);
 
   const isDownloaded = useDownloaded(musicItem);
+  const {t} = useTranslation();
   const isDownloadedOrLocal =
     isDownloaded || musicItem?.platform === localPluginName;
 
@@ -28,7 +30,7 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
       className={
         isDownloadedOrLocal ? "music-downloaded" : "music-can-download"
       }
-      title={isDownloadedOrLocal ? "已下载" : "下载"}
+      title={isDownloadedOrLocal ? t('common.downloaded') : t("common.download")}
       onClick={() => {
         if (!isDownloadedOrLocal) {
           // TODO 点击的时候切换loading状态

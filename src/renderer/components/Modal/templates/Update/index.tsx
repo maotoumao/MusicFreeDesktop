@@ -4,6 +4,7 @@ import "./index.scss";
 import wcChannelImg from "@/assets/imgs/wechat_channel.jpg";
 import { hideModal } from "../..";
 import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { useTranslation } from "react-i18next";
 
 interface IUpdateProps {
   currentVersion: string;
@@ -13,13 +14,15 @@ export default function Update(props: IUpdateProps) {
   const { currentVersion, update = {} as ICommon.IUpdateInfo["update"] } =
     props;
 
+  const {t} = useTranslation();
+
   return (
     <Base withBlur defaultClose>
       <div className="modal--update-container shadow backdrop-color">
-        <Base.Header>发现新版本</Base.Header>
+        <Base.Header>{t('modal.new_version_found')}</Base.Header>
         <div className="modal--body-container">
-          <div className="version highlight">最新版本：{update.version}</div>
-          <div className="version">当前版本：{currentVersion}</div>
+          <div className="version highlight">{t('modal.latest_version')}{update.version}</div>
+          <div className="version">{t('modal.current_version')}{currentVersion}</div>
           <div className="divider"></div>
           {update.changeLog.map((item, index) => (
             <p key={index}>{item}</p>
@@ -31,12 +34,12 @@ export default function Update(props: IUpdateProps) {
             setUserPerference('skipVersion', update.version);
             hideModal();
           }}>
-            跳过此版本
+            {t('modal.skip_this_version')}
           </div>
           <div role="button" data-type="primaryButton" onClick={() => {
             ipcRendererSend('open-url', update.download[0]);
           }}>
-            更新
+            {t('common.update')}
           </div>
         </div>
       </div>

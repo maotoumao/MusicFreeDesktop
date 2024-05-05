@@ -4,6 +4,7 @@ import "./index.scss";
 import rendererAppConfig from "@/common/app-config/renderer";
 import { hidePanel } from "../..";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 interface IUserVariablesProps {
   plugin: IPlugin.IPluginDelegate;
@@ -15,6 +16,7 @@ export default function (props: IUserVariablesProps) {
   const { variables = [], initValues = {}, plugin } = props;
 
   const valueRef = useRef<Record<string, string>>({ ...(initValues ?? {}) });
+  const {t} = useTranslation();
 
   return (
     <Base>
@@ -29,14 +31,14 @@ export default function (props: IUserVariablesProps) {
                 valueRef.current
               );
               hidePanel();
-              toast.success("设置成功~");
+              toast.success(t('panel.user_variable_setting_success'));
             }}
           >
-            确认
+            {t('common.confirm')}
           </div>
         }
       >
-        {plugin.platform ?? ""} 用户变量
+        {plugin.platform ?? ""} {t('panel.user_variable')}
       </Base.Header>
       <div className="panel--user-variables-container">
         {variables.map((variable) => (

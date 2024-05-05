@@ -21,6 +21,7 @@ import { getLinkedLyric, unlinkLyric } from "@/renderer/core/link-lyric";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import trackPlayerEventsEmitter from "@/renderer/core/track-player/event";
 import { TrackPlayerEvent } from "@/renderer/core/track-player/enum";
+import { useTranslation } from "react-i18next";
 
 export default function Lyric() {
   const currentLrc = trackPlayer.useLyric();
@@ -28,6 +29,7 @@ export default function Lyric() {
   const [fontSize, setFontSize] = useState<string | null>(
     getUserPerference("inlineLyricFontSize")
   );
+  const {t} = useTranslation();
 
   const mountRef = useRef(false);
 
@@ -83,7 +85,7 @@ export default function Lyric() {
             condition={currentLrc?.parser}
             falsy={
               <>
-                <div className="lyric-item">暂无歌词</div>
+                <div className="lyric-item">{t('music_detail.no_lyric')}</div>
                 <div
                   className="lyric-item search-lyric"
                   role="button"
@@ -94,7 +96,7 @@ export default function Lyric() {
                     });
                   }}
                 >
-                  搜索歌词
+                  {t('music_detail.search_lyric')}
                 </div>
               </>
             }
@@ -130,11 +132,12 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
 
   const [linkedLyricInfo, setLinkedLyricInfo] = useState<IMedia.IUnique>(null);
 
+  const {t} = useTranslation();
+
   const currentMusicRef = useRef<IMusic.IMusicItem>(
     getCurrentMusic() ?? ({} as any)
   );
 
-  console.log(currentMusicRef);
 
   useEffect(() => {
     getLinkedLyric(currentMusicRef.current).then((linked) => {
@@ -164,31 +167,31 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
 
     try {
       const result = await ipcRendererInvoke("show-save-dialog", {
-        title: "下载歌词",
+        title: t("music_detail.lyric_ctx_download_lyric"),
         defaultPath:
           currentMusicRef.current.title +
           (fileType === "lrc" ? ".lrc" : ".txt"),
         filters: [
           {
-            name: "歌词",
+            name: t('media.media_type_lyric'),
             extensions: ["lrc", "txt"],
           },
         ],
       });
       if (!result.canceled && result.filePath) {
         await window.fs.writeFile(result.filePath, rawLrc, "utf-8");
-        toast.success("下载成功");
+        toast.success(t("music_detail.lyric_ctx_download_success"));
       } else {
         throw new Error();
       }
     } catch {
-      toast.error("下载失败");
+      toast.error(t("music_detail.lyric_ctx_download_fail"));
     }
   }
 
   return (
     <>
-      <div className="lyric-ctx-menu--set-font-title">设置字号</div>
+      <div className="lyric-ctx-menu--set-font-title">{t("music_detail.lyric_ctx_set_font_size")}</div>
       <div
         className="lyric-ctx-menu--font-container"
         onClick={(e) => e.stopPropagation()}
@@ -255,7 +258,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           downloadLyric("lrc");
         }}
       >
-        下载歌词(lrc)
+        { t("music_detail.lyric_ctx_download_lyric_lrc")}
       </div>
       <div
         className="lyric-ctx-menu--row-container"
@@ -265,7 +268,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           downloadLyric("txt");
         }}
       >
-        下载歌词(纯文本)
+        { t("music_detail.lyric_ctx_download_lyric_txt")}
       </div>
       <div className="divider"></div>
       <div
@@ -280,8 +283,8 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
       >
         <span>
           {linkedLyricInfo
-            ? `已关联歌词: ${getMediaPrimaryKey(linkedLyricInfo)}`
-            : "搜索歌词"}
+            ? `${t("music_detail.media_lyric_linked")} ${getMediaPrimaryKey(linkedLyricInfo)}`
+            :  t("music_detail.search_lyric")}
         </span>
       </div>
       <div
@@ -297,11 +300,11 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
                 true
               );
             }
-            toast.success("已取消关联歌词");
+            toast.success(t('music_detail.toast_media_lyric_unlinked'));
           } catch {}
         }}
       >
-        取消关联歌词
+        {t('music_detail.unlink_media_lyric')}
       </div>
     </>
   );

@@ -13,8 +13,11 @@ import { ipcMainSendMainWindow } from "@/common/ipc-util/main";
 import { getResPath } from "../utils/get-res-path";
 import { getAppConfigPath } from "@/common/app-config/main";
 import { setDesktopLyricLock, setLyricWindow } from "../ipc";
+import i18n from "@/common/i18n";
 
 let tray: Tray | null = null;
+
+const {t} = i18n;
 
 if (process.platform === "darwin") {
   Menu.setApplicationMenu(
@@ -23,11 +26,11 @@ if (process.platform === "darwin") {
         label: app.getName(),
         submenu: [
           {
-            label: "关于",
+            label: t('common.about'),
             role: "about",
           },
           {
-            label: "退出",
+            label: t('common.exit'),
             click() {
               app.quit();
             },
@@ -35,20 +38,20 @@ if (process.platform === "darwin") {
         ],
       },
       {
-        label: "编辑",
+        label: t('common.edit'),
         submenu: [
           {
-            label: "撤销",
+            label: t('common.undo'),
             accelerator: "Command+Z",
             role: "undo",
           },
-          { label: "恢复", accelerator: "Shift+Command+Z", role: "redo" },
+          { label: t('common.redo'), accelerator: "Shift+Command+Z", role: "redo" },
           { type: "separator" },
-          { label: "剪切", accelerator: "Command+X", role: "cut" },
-          { label: "复制", accelerator: "Command+C", role: "copy" },
-          { label: "粘贴", accelerator: "Command+V", role: "paste" },
+          { label: t('common.cut'), accelerator: "Command+X", role: "cut" },
+          { label: t('common.copy'), accelerator: "Command+C", role: "copy" },
+          { label: t('common.cut'), accelerator: "Command+V", role: "paste" },
           { type: "separator" },
-          { label: "全选", accelerator: "Command+A", role: "selectAll" },
+          { label: t('common.select_all'), accelerator: "Command+A", role: "selectAll" },
         ],
       },
     ])
@@ -90,7 +93,7 @@ export async function setupTrayMenu() {
   // 更新一下tooltip
   if (currentMusic) {
     tray.setToolTip(
-      `${currentMusic.title ?? "未知音乐"}${
+      `${currentMusic.title ?? t('media.unknown_title')}${
         currentMusic.artist ? ` - ${currentMusic.artist}` : ""
       }`
     );
@@ -98,7 +101,7 @@ export async function setupTrayMenu() {
     tray.setToolTip("MusicFree");
   }
   if (currentMusic) {
-    const fullName = `${currentMusic.title ?? "未知音乐"}${
+    const fullName = `${currentMusic.title ?? t('media.unknown_title')}${
       currentMusic.artist ? ` - ${currentMusic.artist}` : ""
     }`;
     ctxMenu.push(
@@ -107,7 +110,7 @@ export async function setupTrayMenu() {
         click: openMusicDetail,
       },
       {
-        label: `来源: ${currentMusic.platform}`,
+        label: `${t('media.media_platform')}: ${currentMusic.platform}`,
         click: openMusicDetail,
       }
     );
@@ -122,9 +125,9 @@ export async function setupTrayMenu() {
     {
       label: currentMusic
         ? currentPlayerState === PlayerState.Playing
-          ? "暂停"
-          : "播放"
-        : "播放/暂停",
+          ? t('media.music_state_pause')
+          : t('media.music_state_play')
+        : t('media.music_state_play_or_pause'),
       enabled: !!currentMusic,
       click() {
         if (!currentMusic) {
@@ -160,11 +163,11 @@ export async function setupTrayMenu() {
   );
 
   ctxMenu.push({
-    label: "播放模式",
+    label: t('media.music_repeat_mode'),
     type: "submenu",
     submenu: Menu.buildFromTemplate([
       {
-        label: "单曲循环",
+        label: t("media.music_repeat_mode_loop"),
         id: RepeatMode.Loop,
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Loop,
@@ -176,7 +179,7 @@ export async function setupTrayMenu() {
         },
       },
       {
-        label: "顺序播放",
+        label: t('media.music_repeat_mode_queue'),
         id: RepeatMode.Queue,
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Queue,
@@ -188,7 +191,7 @@ export async function setupTrayMenu() {
         },
       },
       {
-        label: "随机播放",
+        label: t('media.music_repeat_mode_shuffle'),
         id: RepeatMode.Shuffle,
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Shuffle,
@@ -244,14 +247,14 @@ export async function setupTrayMenu() {
   });
   /********* 其他操作 **********/
   ctxMenu.push({
-    label: "设置",
+    label: t('app_header.settings'),
     click() {
       showMainWindow();
       ipcMainSendMainWindow("navigate", "/main/setting");
     },
   });
   ctxMenu.push({
-    label: "退出",
+    label: t('common.exit'),
     role: "quit",
     click() {
       app.exit(0);

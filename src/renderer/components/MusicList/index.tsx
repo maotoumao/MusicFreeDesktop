@@ -291,7 +291,7 @@ export function showMusicContextMenu(
             );
           }
         } catch (e) {
-          toast.error(`打开失败: ${e?.message ?? ""}`);
+          toast.error(`${i18n.t('music_list_context_menu.reveal_local_music_in_file_explorer_fail')} ${e?.message ?? ""}`);
         }
       },
     }

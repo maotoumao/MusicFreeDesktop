@@ -16,6 +16,7 @@ import Base from "../Base";
 import useStateRef from "@/renderer/hooks/useStateRef";
 import { isBetween } from "@/common/normalize-util";
 import hotkeys from "hotkeys-js";
+import { Trans, useTranslation } from "react-i18next";
 
 const estimizeItemHeight = 2.6 * rem;
 
@@ -24,6 +25,7 @@ export default function PlayList() {
   const currentMusic = trackPlayer.useCurrentMusic();
   const scrollElementRef = useRef<HTMLDivElement>();
   const [activeItems, setActiveItems] = useState<number[]>([]);
+  const { t } = useTranslation();
 
   const virtualController = useVirtualList({
     estimizeItemHeight,
@@ -57,7 +59,6 @@ export default function PlayList() {
     };
   }, []);
 
-
   useEffect(() => {
     setActiveItems([]);
   }, [musicQueue]);
@@ -65,14 +66,21 @@ export default function PlayList() {
   return (
     <Base width={"460px"} scrollable={false}>
       <div className="playlist--header">
-        <div className="playlist--title">播放列表({musicQueue.length}首)</div>
+        <div className="playlist--title">
+          <Trans
+            i18nKey={"panel.play_list_song_num"}
+            values={{
+              number: musicQueue.length,
+            }}
+          ></Trans>
+        </div>
         <div
           role="button"
           onClick={() => {
             trackPlayer.clearQueue();
           }}
         >
-          清空
+          {t("common.clear")}
         </div>
       </div>
       <div className="playlist--divider"></div>
@@ -123,7 +131,7 @@ export default function PlayList() {
                         musicQueue.slice(start, end + 1),
                         e.clientX,
                         e.clientY,
-                        'play-list'
+                        "play-list"
                       );
                     } else {
                       setActiveItems([virtualItem.rowIndex]);
@@ -131,7 +139,7 @@ export default function PlayList() {
                         musicItem,
                         e.clientX,
                         e.clientY,
-                        'play-list'
+                        "play-list"
                       );
                     }
                   }}

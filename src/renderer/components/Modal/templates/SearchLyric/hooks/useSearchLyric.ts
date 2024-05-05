@@ -4,11 +4,13 @@ import searchResultStore from "./searchResultStore";
 import { produce } from "immer";
 import delegatePluginsStore from "@/renderer/core/plugin-delegate/internal/store";
 import { callPluginDelegateMethod, getPluginByHash, getSearchablePlugins } from "@/renderer/core/plugin-delegate";
+import { useTranslation } from "react-i18next";
 
 
 export default function (){
     // 当前正在搜索
     const currentQueryRef = useRef<string>('');
+    const {t} = useTranslation();
 
     /**
      * query: 搜索词
@@ -104,7 +106,7 @@ export default function (){
                 }
                 /** 切换到结果页 */
                 if (!result) {
-                    throw new Error('搜索结果为空');
+                    throw new Error(t('modal.serach_lyric_result_empty'));
                 }
                 searchResultStore.setValue(
                     produce(draft => {

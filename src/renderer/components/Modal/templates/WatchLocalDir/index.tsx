@@ -13,6 +13,7 @@ import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import Checkbox from "@/renderer/components/Checkbox";
 import localMusic from "@/renderer/core/local-music";
+import { useTranslation } from "react-i18next";
 
 interface IWatchDirProps {}
 export default function WatchLocalDir(props: IWatchDirProps) {
@@ -21,6 +22,7 @@ export default function WatchLocalDir(props: IWatchDirProps) {
   // 选中的文件夹
   const [checkedDirs, setCheckedDirs] = useState(new Set<string>());
   const changeLogRef = useRef(new Map<string, "add" | "delete">()); // key: path; value: op
+  const {t} = useTranslation();
 
   useEffect(() => {
     (async () => {
@@ -38,16 +40,16 @@ export default function WatchLocalDir(props: IWatchDirProps) {
   return (
     <Base defaultClose>
       <div className="modal--watch-local-dir-container shadow backdrop-color">
-        <Base.Header>扫描本地音乐</Base.Header>
+        <Base.Header>{t('modal.scan_local_music')}</Base.Header>
         <div className="modal--body-container">
           <div className="modal--body-container-title">
-            <span>将自动扫描勾选的文件夹 (文件增删实时同步)</span>
+            <span>{t('modal.scan_local_music_hint')}</span>
             <div
               role="button"
               data-type="normalButton"
               onClick={async () => {
                 const result = await ipcRendererInvoke("show-open-dialog", {
-                  title: "扫描本地音乐",
+                  title: t('modal.scan_local_music'),
                   properties: ["openDirectory", "createDirectory"],
                 });
                 if (!result.canceled) {
@@ -63,7 +65,7 @@ export default function WatchLocalDir(props: IWatchDirProps) {
                 }
               }}
             >
-              添加文件夹
+              {t('modal.add_folder')}
             </div>
           </div>
           <div className="modal--body-scan-content backdrop-color">
@@ -154,7 +156,7 @@ export default function WatchLocalDir(props: IWatchDirProps) {
               hideModal();
             }}
           >
-            确认
+            {t('common.confirm')}
           </div>
         </div>
       </div>

@@ -12,6 +12,8 @@ export default {
             downloaded: 'Downloaded',
             remove: 'Remove',
             delete: 'Delete',
+            default: 'Default',
+            status: 'Status',
         },
 
         music_list_context_menu: {
@@ -28,6 +30,8 @@ export default {
         media: {
             unknown_artist: 'Unknown Artist',
             unknown_album: 'Unknown Album',
+
+            playlist: 'Playlist',
 
 
             media_type_music: 'Music',
@@ -59,6 +63,40 @@ export default {
             method_search: 'Search'
         },
 
+        download_page: {
+            waiting: 'Waiting...',
+            failed: 'Download failed'
+        },
+        plugin_management_page: {
+            plugin_management: 'Plugin Management',
+            choose_plugin: 'Choose plugin',
+            install: 'Install',
+            musicfree_plugin: 'MusicFree Plugin',
+            install_successfully: 'Plugin installed successfully!',
+            install_failed: 'Fail to instlall plugin',
+            invalid_plugin: 'Invalid plugin',
+            install_from_local_file: 'Install from local file',
+            install_from_network: 'Install from network',
+            install_plugin_from_network: 'Install plugin from network',
+            installing: 'Installing',
+            info_hint_install_placeholder: 'Please install ',
+            error_hint_plugin_should_end_with_js_or_json: 'Plugin should end with js or json',
+            info_hint_install_plugin: "The plugin needs to comply with MusicFree's specific plugin protocol, which can be found in the <a>offical site</a>",
+            subscription_setting: 'Subscription setting',
+            update_subscription: 'Update subscription',
+            update_successfully: 'Update successfully',
+            no_subscription: 'Subscription not found'
+        },
+        local_music_page: {
+            local_music: 'Local Music',
+            auto_scan: 'Auto scan',
+            search_local_music: 'Search local music',
+            list_view: 'List view',
+            artist_view: 'Artist view',
+            album_view: 'Album view',
+            folder_view: 'Folder view'
+        },
+
         search_result_page: {
             search_result_title: "'s search result"
         },
@@ -68,7 +106,7 @@ export default {
             'en-US': 'English'
         },
         side_bar: {
-            ranking_list: 'Ranking List',
+            toplist: 'Toplist',
             recommend_sheets: 'Recommend Sheets',
             download_management: 'Download Management',
             local_music: 'Local Music',
@@ -91,11 +129,16 @@ export default {
             exit: 'Exit'
         },
         music_bar: {
-            open_music_detail_page: 'Open Music Detail Page',
-            close_music_detail_page: 'Close Music Detail Page',
+            open_music_detail_page: 'Open music detail page',
+            close_music_detail_page: 'Close music detail page',
             previous_music: 'Previous',
             next_music: 'Next',
-    
+            mute: 'Mute',
+            unmute: 'Unmute',
+            playback_speed: 'Playback speed',
+            choose_music_quality: 'Choose music quality',
+            only_set_for_current_music: 'Only set for current music',
+            desktop_lyric: "Desktop lyric"
     
         }
     },

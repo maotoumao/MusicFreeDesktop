@@ -13,7 +13,7 @@ export default function () {
   const options = [
     {
       iconName: "trophy",
-      title: t("side_bar.ranking_list"),
+      title: t("side_bar.toplist"),
       route: "toplist",
     },
     {

@@ -10,6 +10,7 @@ import Lyric from "./widgets/Lyric";
 import SvgAsset from "../SvgAsset";
 import { OptionItem } from "./widgets/OptionItem";
 import Condition from "../Condition";
+import { useTranslation } from "react-i18next";
 
 export const musicDetailShownStore = new Store(false);
 
@@ -18,6 +19,8 @@ export const isMusicDetailShown = musicDetailShownStore.getValue;
 export default function () {
   const musicItem = useCurrentMusic();
   const musicDetailShown = musicDetailShownStore.useValue();
+
+  const { t } = useTranslation();
 
   Evt.use("SHOW_MUSIC_DETAIL", () => {
     musicDetailShownStore.setValue(true);
@@ -43,7 +46,7 @@ export default function () {
       <div
         className="hide-music-detail"
         role="button"
-        title="关闭歌曲详情页"
+        title={t("music_bar.close_music_detail_page")}
         onClick={() => {
           musicDetailShownStore.setValue(false);
         }}

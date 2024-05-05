@@ -21,6 +21,7 @@ export const mainConfig: Configuration = {
       "@": path.join(__dirname, "../src"),
       "@main": path.join(__dirname, "../src/main"),
       "@native": path.join(__dirname, "../src/main/native_modules"),
+      "@shared": path.join(__dirname, "../src/shared")
     },
   },
   output: {

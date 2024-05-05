@@ -4,6 +4,7 @@ import Base from "../Base";
 import useMounted from "@/renderer/hooks/useMounted";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
+import { useTranslation } from "react-i18next";
 
 interface ISimpleInputWithStateProps<PromiseItem> {
   title: string;
@@ -36,6 +37,7 @@ export default function SimpleInputWithState<PromiseItem>(
   const [loading, setLoading] = useState(false);
   const [inputText, setInputText] = useState("");
   const isMounted = useMounted();
+  const {t} = useTranslation();
 
   return (
     <Base withBlur={false}>
@@ -79,7 +81,7 @@ export default function SimpleInputWithState<PromiseItem>(
                   });
               }}
             >
-              {okText ?? "确认"}
+              {okText ?? t('common.confirm')}
             </div>
           </div>
           <Condition condition={hints}>
