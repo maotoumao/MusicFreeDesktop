@@ -49,7 +49,7 @@ export default function AppHeader() {
           <input
             ref={inputRef}
             className="header-search-input"
-            placeholder={t('app_header.search_placeholder')}
+            placeholder={t("app_header.search_placeholder")}
             maxLength={50}
             onClick={() => {
               setShowSearchHistory(true);
@@ -105,7 +105,7 @@ export default function AppHeader() {
         <div
           role="button"
           className="header-button"
-          title={t('app_header.settings')}
+          title={t("app_header.settings")}
           onClick={() => {
             navigate("/main/setting");
             Evt.emit("HIDE_MUSIC_DETAIL");
@@ -115,7 +115,7 @@ export default function AppHeader() {
         </div>
         <div
           role="button"
-          title={t('app_header.minimize')}
+          title={t("app_header.minimize")}
           className="header-button"
           onClick={() => {
             ipcRendererSend("min-window", {});
@@ -125,7 +125,7 @@ export default function AppHeader() {
         </div>
         <div
           role="button"
-          title={t('app_header.exit')}
+          title={t("app_header.exit")}
           className="header-button"
           onClick={() => {
             const exitBehavior = rendererAppConfig.getAppConfigPath(

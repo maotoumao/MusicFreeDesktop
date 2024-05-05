@@ -30,7 +30,7 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
       className={
         isDownloadedOrLocal ? "music-downloaded" : "music-can-download"
       }
-      title={isDownloadedOrLocal ? t('common.downloaded') : t("common.download")}
+      title={isDownloadedOrLocal ? t("common.downloaded") : t("common.download")}
       onClick={() => {
         if (!isDownloadedOrLocal) {
           // TODO 点击的时候切换loading状态

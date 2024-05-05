@@ -15,7 +15,7 @@ export default async function () {
 
   window.extPort.on((message) => {
     const { type, data } = message ?? {};
-    console.log(`[Message from mainWindow] `, message);
+    console.log("[Message from mainWindow] ", message);
     if (type === "sync-all-data") {
       currentPlayerStore.setValue(data);
       currentProgressStore.setValue(data.progress);

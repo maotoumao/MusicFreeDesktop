@@ -21,9 +21,9 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
       <div className="modal--add-music-to-sheet-container shadow backdrop-color">
         <Base.Header>
           <span>
-            {t('modal.add_to_my_sheets')}{" "}
+            {t("modal.add_to_my_sheets")}{" "}
             <span className="music-length">
-              (<Trans i18nKey={'modal.total_music_num'} values={{
+              (<Trans i18nKey={"modal.total_music_num"} values={{
                 number: Array.isArray(musicItems) ? musicItems.length : 1
               }}></Trans>)
             </span>
@@ -40,7 +40,7 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
             }}
           >
             <img src={addImg}></img>
-            <span>{t('modal.create_local_sheet')}</span>
+            <span>{t("modal.create_local_sheet")}</span>
           </div>
           {allSheets.map((sheet) => (
             <div

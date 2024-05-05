@@ -39,7 +39,7 @@ export default function DragReceiver(props: IDragReceiverProps) {
         const itemTag = e.dataTransfer.getData("itemTag");
         setDraggingOver(false);
 
-        const _itemTag = (itemTag === 'null' || itemTag === 'undefined') ? null : `${itemTag}`;
+        const _itemTag = (itemTag === "null" || itemTag === "undefined") ? null : `${itemTag}`;
         const _tag = tag ? `${tag}` : null;
         if (_itemTag !== _tag) {
           // tag 不一致 忽略

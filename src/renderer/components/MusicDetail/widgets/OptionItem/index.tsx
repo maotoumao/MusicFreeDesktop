@@ -1,5 +1,5 @@
 import SvgAsset, { SvgAssetIconNames } from "@/renderer/components/SvgAsset";
-import './index.scss';
+import "./index.scss";
 
 interface IOptionItemProps {
   iconName: SvgAssetIconNames;

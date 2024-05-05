@@ -14,7 +14,7 @@ export default function Loading(props: ILoadingProps) {
         <div></div>
         <div></div>
       </div>
-      <span>{props.text ?? t('common.loading')}</span>
+      <span>{props.text ?? t("common.loading")}</span>
     </div>
   );
 }

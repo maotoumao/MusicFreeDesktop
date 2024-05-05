@@ -17,9 +17,9 @@ export default function injectGlobalData(targetWindow: BrowserWindow) {
         localFileWatcher: LOCAL_FILE_WATCHER_WEBPACK_ENTRY
       },
       appPath: {
-        downloads: app.getPath('downloads'),
-        temp: app.getPath('temp'),
-        userData: app.getPath('userData')
+        downloads: app.getPath("downloads"),
+        temp: app.getPath("temp"),
+        userData: app.getPath("userData")
       },
       platform: process.platform
     };

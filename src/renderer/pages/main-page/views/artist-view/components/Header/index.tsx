@@ -23,7 +23,7 @@ export default function Header(props: IProps) {
       <div className="artist-info">
         <div className="title-container">
           <Tag>{artistItem?.platform}</Tag>
-          <div className="title">{artistItem?.name ?? t('media.unknown_artist')}</div>
+          <div className="title">{artistItem?.name ?? t("media.unknown_artist")}</div>
         </div>
 
         <Condition condition={artistItem?.description}>

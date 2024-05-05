@@ -98,7 +98,7 @@ export default function PlayMusic(props: IProps) {
         renderItem={(item) => {
           return item ? item.label : "默认";
         }}
-        width={'320px'}
+        width={"320px"}
         onChange={async (item) => {
           const result = await trackPlayer.setAudioOutputDevice(item.deviceId);
           if (result) {

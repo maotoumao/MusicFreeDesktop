@@ -155,7 +155,7 @@ export default function Backup(props: IProps) {
                 }
                 // 临时文件
                 await client.putFileContents(
-                  `/MusicFree/MusicFreeBackup.json`,
+                  "/MusicFree/MusicFreeBackup.json",
                   backUp,
                   {
                     overwrite: true,

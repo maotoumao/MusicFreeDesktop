@@ -8,7 +8,7 @@ import { showContextMenu } from "@/renderer/components/ContextMenu";
 import { useTranslation } from "react-i18next";
 
 export default function StarredSheets() {
-  const sheetIdMatch = useMatch(`/main/musicsheet/:platform/:sheetId`);
+  const sheetIdMatch = useMatch("/main/musicsheet/:platform/:sheetId");
 
   const currentPlatform = sheetIdMatch?.params?.platform;
   const currentSheetId = sheetIdMatch?.params?.sheetId;
@@ -22,7 +22,7 @@ export default function StarredSheets() {
     <div className="side-bar-container--starred-sheets">
       <Disclosure defaultOpen>
         <Disclosure.Button className="title" as="div" role="button">
-          <div className="my-sheets">{t('side_bar.starred_sheets')}</div>
+          <div className="my-sheets">{t("side_bar.starred_sheets")}</div>
         </Disclosure.Button>
         <Disclosure.Panel>
           {starredSheets.map((item) => (

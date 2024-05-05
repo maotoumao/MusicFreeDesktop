@@ -42,7 +42,7 @@ export default function MusicInfo() {
           <div
             className="open-detail"
             role="button"
-            title={musicDetailShown ? t('music_bar.close_music_detail_page') : t('music_bar.open_music_detail_page')}
+            title={musicDetailShown ? t("music_bar.close_music_detail_page") : t("music_bar.open_music_detail_page")}
             onClick={toggleMusicDetail}
           >
             <SvgAsset

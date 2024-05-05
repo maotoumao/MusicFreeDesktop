@@ -31,14 +31,14 @@ export default function (props: IUserVariablesProps) {
                 valueRef.current
               );
               hidePanel();
-              toast.success(t('panel.user_variable_setting_success'));
+              toast.success(t("panel.user_variable_setting_success"));
             }}
           >
-            {t('common.confirm')}
+            {t("common.confirm")}
           </div>
         }
       >
-        {plugin.platform ?? ""} {t('panel.user_variable')}
+        {plugin.platform ?? ""} {t("panel.user_variable")}
       </Base.Header>
       <div className="panel--user-variables-container">
         {variables.map((variable) => (

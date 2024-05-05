@@ -1,4 +1,4 @@
-import {session} from 'electron';
+import {session} from "electron";
 
 interface Cookie {
   name: string;

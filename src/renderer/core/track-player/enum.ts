@@ -73,7 +73,7 @@ export interface TrackPlayerEventParams {
   [TrackPlayerEvent.VolumeChanged]: number;
   [TrackPlayerEvent.MusicChanged]: IMusic.IMusicItem | null;
   [TrackPlayerEvent.RepeatModeChanged]: RepeatMode;
-  [TrackPlayerEvent.CurrentLyricChanged]: ICurrentLyric['currentLrc'];
+  [TrackPlayerEvent.CurrentLyricChanged]: ICurrentLyric["currentLrc"];
   [TrackPlayerEvent.LyricChanged]: LyricParser;
 }
 

@@ -19,10 +19,10 @@ export default function Update(props: IUpdateProps) {
   return (
     <Base withBlur defaultClose>
       <div className="modal--update-container shadow backdrop-color">
-        <Base.Header>{t('modal.new_version_found')}</Base.Header>
+        <Base.Header>{t("modal.new_version_found")}</Base.Header>
         <div className="modal--body-container">
-          <div className="version highlight">{t('modal.latest_version')}{update.version}</div>
-          <div className="version">{t('modal.current_version')}{currentVersion}</div>
+          <div className="version highlight">{t("modal.latest_version")}{update.version}</div>
+          <div className="version">{t("modal.current_version")}{currentVersion}</div>
           <div className="divider"></div>
           {update.changeLog.map((item, index) => (
             <p key={index}>{item}</p>
@@ -31,15 +31,15 @@ export default function Update(props: IUpdateProps) {
         <div className="divider"></div>
         <div className="footer-options">
           <div role="button" data-type="normalButton" onClick={() => {
-            setUserPerference('skipVersion', update.version);
+            setUserPerference("skipVersion", update.version);
             hideModal();
           }}>
-            {t('modal.skip_this_version')}
+            {t("modal.skip_this_version")}
           </div>
           <div role="button" data-type="primaryButton" onClick={() => {
-            ipcRendererSend('open-url', update.download[0]);
+            ipcRendererSend("open-url", update.download[0]);
           }}>
-            {t('common.update')}
+            {t("common.update")}
           </div>
         </div>
       </div>

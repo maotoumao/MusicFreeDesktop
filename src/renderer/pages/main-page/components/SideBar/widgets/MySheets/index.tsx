@@ -24,11 +24,11 @@ export default function MySheets() {
       <div className="divider"></div>
       <Disclosure defaultOpen>
         <Disclosure.Button className="title" as="div" role="button">
-          <div className="my-sheets ">{t('side_bar.my_sheets')}</div>
+          <div className="my-sheets ">{t("side_bar.my_sheets")}</div>
           <div
             role="button"
             className="add-new-sheet"
-            title={t('side_bar.create_local_sheet')}
+            title={t("side_bar.create_local_sheet")}
             onClick={(e) => {
               e.stopPropagation();
               showModal("AddNewSheet");
@@ -57,7 +57,7 @@ export default function MySheets() {
                   y: e.clientY,
                   menuItems: [
                     {
-                      title: t('side_bar.delete_sheet'),
+                      title: t("side_bar.delete_sheet"),
                       icon: "trash",
                       show: item.id !== defaultSheet.id,
                       onClick() {

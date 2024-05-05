@@ -18,7 +18,7 @@ export default function HeaderNavigator() {
       <div
         className="navigator-btn"
         data-disabled={!canBack}
-        title={canBack ? t('app_header.nav_back') : undefined}
+        title={canBack ? t("app_header.nav_back") : undefined}
         role="button"
         onClick={() => {
           if (isMusicDetailShown()) {
@@ -33,7 +33,7 @@ export default function HeaderNavigator() {
       <div
         className="navigator-btn"
         data-disabled={!canGo}
-        title={canGo ? t('app_header.nav_forward') : undefined}
+        title={canGo ? t("app_header.nav_forward") : undefined}
         onClick={() => {
           if (isMusicDetailShown()) {
             Evt.emit("HIDE_MUSIC_DETAIL");

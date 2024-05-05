@@ -85,7 +85,7 @@ export default function Lyric() {
             condition={currentLrc?.parser}
             falsy={
               <>
-                <div className="lyric-item">{t('music_detail.no_lyric')}</div>
+                <div className="lyric-item">{t("music_detail.no_lyric")}</div>
                 <div
                   className="lyric-item search-lyric"
                   role="button"
@@ -96,7 +96,7 @@ export default function Lyric() {
                     });
                   }}
                 >
-                  {t('music_detail.search_lyric')}
+                  {t("music_detail.search_lyric")}
                 </div>
               </>
             }
@@ -173,7 +173,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           (fileType === "lrc" ? ".lrc" : ".txt"),
         filters: [
           {
-            name: t('media.media_type_lyric'),
+            name: t("media.media_type_lyric"),
             extensions: ["lrc", "txt"],
           },
         ],
@@ -300,11 +300,11 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
                 true
               );
             }
-            toast.success(t('music_detail.toast_media_lyric_unlinked'));
+            toast.success(t("music_detail.toast_media_lyric_unlinked"));
           } catch {}
         }}
       >
-        {t('music_detail.unlink_media_lyric')}
+        {t("music_detail.unlink_media_lyric")}
       </div>
     </>
   );

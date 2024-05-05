@@ -36,10 +36,10 @@ export default function Body(props: IBodyProps) {
           {supportedMediaType.map((type) => (
             <Tab.Panel className="tab-panel-container" key={type}>
                 <SwitchCase.Switch switch={type}>
-                    <SwitchCase.Case case={'music'}>
+                    <SwitchCase.Case case={"music"}>
                         <MusicResult artistItem={artistItem}></MusicResult>
                     </SwitchCase.Case>
-                    <SwitchCase.Case case={'album'}>
+                    <SwitchCase.Case case={"album"}>
                         <AlbumResult artistItem={artistItem}></AlbumResult>
                     </SwitchCase.Case>
                 </SwitchCase.Switch>

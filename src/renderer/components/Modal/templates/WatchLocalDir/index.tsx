@@ -40,16 +40,16 @@ export default function WatchLocalDir(props: IWatchDirProps) {
   return (
     <Base defaultClose>
       <div className="modal--watch-local-dir-container shadow backdrop-color">
-        <Base.Header>{t('modal.scan_local_music')}</Base.Header>
+        <Base.Header>{t("modal.scan_local_music")}</Base.Header>
         <div className="modal--body-container">
           <div className="modal--body-container-title">
-            <span>{t('modal.scan_local_music_hint')}</span>
+            <span>{t("modal.scan_local_music_hint")}</span>
             <div
               role="button"
               data-type="normalButton"
               onClick={async () => {
                 const result = await ipcRendererInvoke("show-open-dialog", {
-                  title: t('modal.scan_local_music'),
+                  title: t("modal.scan_local_music"),
                   properties: ["openDirectory", "createDirectory"],
                 });
                 if (!result.canceled) {
@@ -65,7 +65,7 @@ export default function WatchLocalDir(props: IWatchDirProps) {
                 }
               }}
             >
-              {t('modal.add_folder')}
+              {t("modal.add_folder")}
             </div>
           </div>
           <div className="modal--body-scan-content backdrop-color">
@@ -151,12 +151,12 @@ export default function WatchLocalDir(props: IWatchDirProps) {
             data-type="primaryButton"
             onClick={async () => {
               setUserPerferenceIDB("localWatchDir", localDirs);
-              setUserPerferenceIDB('localWatchDirChecked', [...checkedDirs]);
+              setUserPerferenceIDB("localWatchDirChecked", [...checkedDirs]);
               localMusic.changeWatchPath(changeLogRef.current);
               hideModal();
             }}
           >
-            {t('common.confirm')}
+            {t("common.confirm")}
           </div>
         </div>
       </div>

@@ -102,7 +102,7 @@ declare namespace IMusic {
     }
 
     // 音质
-    export type IQualityKey = 'low' | 'standard' | 'high' | 'super';
+    export type IQualityKey = "low" | "standard" | "high" | "super";
  
     type IMusicItemPartial = Partial<IMusicItem>;
 }
@@ -135,7 +135,7 @@ declare namespace IArtist {
         albumList?: IAlbum.IAlbumItem[]
     }
 
-    type ArtistMediaType = 'music' | 'album'
+    type ArtistMediaType = "music" | "album"
 }
 
 

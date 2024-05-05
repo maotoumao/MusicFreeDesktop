@@ -119,7 +119,7 @@ export const createLyricWindow = (): BrowserWindow => {
       }
       lyricWindow.setPosition(position.x, position.y, false);
       if(needMakeup) {
-        await setAppConfigPath('private.lyricWindowPosition', position);
+        await setAppConfigPath("private.lyricWindowPosition", position);
       }
     }
     const lockState = await getAppConfigPath("lyric.lockLyric");

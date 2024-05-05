@@ -29,11 +29,11 @@ export default function AddNewSheet(props: IProps) {
 
   return (
     <SimpleInputWithState
-      title={t('modal.create_local_sheet')}
+      title={t("modal.create_local_sheet")}
       onOk={onCreateNewSheetClick}
-      placeholder={t('modal.create_local_sheet_placeholder')}
+      placeholder={t("modal.create_local_sheet_placeholder")}
       maxLength={30}
-      okText={t('common.create')}
+      okText={t("common.create")}
     ></SimpleInputWithState>
   );
 }

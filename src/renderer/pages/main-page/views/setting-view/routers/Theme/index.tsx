@@ -66,7 +66,7 @@ export default function Theme(props: IProps) {
               buttonLabel: "安装",
               filters: [{
                 "name": "MusicFree主题",
-                "extensions": ["mftheme", 'zip']
+                "extensions": ["mftheme", "zip"]
               }, {
                 name: "全部文件",
                 extensions: ["*"]
@@ -81,7 +81,7 @@ export default function Theme(props: IProps) {
                   themePackPath
                 );
                 if (code) {
-                  toast.success(`安装主题${reason?.name ? `「${reason.name}」` : ''}成功~`);
+                  toast.success(`安装主题${reason?.name ? `「${reason.name}」` : ""}成功~`);
                 } else {
                   toast.error(`安装主题失败: ${reason?.message ?? ""}`);
                 }

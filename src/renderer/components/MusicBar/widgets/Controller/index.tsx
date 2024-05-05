@@ -11,7 +11,7 @@ export default function Controller() {
 
   return (
     <div className="music-controller">
-      <div className="skip controller-btn" title={t('music_bar.previous_music')} onClick={() => {
+      <div className="skip controller-btn" title={t("music_bar.previous_music")} onClick={() => {
           trackPlayer.skipToPrev();
 
       }}>
@@ -35,7 +35,7 @@ export default function Controller() {
       </div>
       <div
         className="skip controller-btn"
-        title={t('music_bar.next_music')}
+        title={t("music_bar.next_music")}
         onClick={() => {
       
           trackPlayer.skipToNext();

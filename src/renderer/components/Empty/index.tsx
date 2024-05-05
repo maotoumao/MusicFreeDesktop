@@ -12,7 +12,7 @@ export default function Empty(props: IEmptyProps) {
 
   return (
     <div className="components--empty-container" style={style}>
-      {t('empty.hint_empty')}
+      {t("empty.hint_empty")}
     </div>
   );
 }

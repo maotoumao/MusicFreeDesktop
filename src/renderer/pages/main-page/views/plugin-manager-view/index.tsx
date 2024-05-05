@@ -101,7 +101,7 @@ export default function PluginManagerView() {
               });
             }}
           >
-            {t('plugin_management_page.install_plugin_from_network')}
+            {t("plugin_management_page.install_plugin_from_network")}
           </div>
           {/* <div
             role="button"
@@ -147,7 +147,7 @@ export default function PluginManagerView() {
               showModal("PluginSubscription");
             }}
           >
-            {t('plugin_management_page.subscription_setting')}
+            {t("plugin_management_page.subscription_setting")}
           </div>
           <div
             role="button"
@@ -162,13 +162,13 @@ export default function PluginManagerView() {
                     subscription[i].srcUrl
                   );
                 }
-                toast.success(t('plugin_management_page.update_successfully'));
+                toast.success(t("plugin_management_page.update_successfully"));
               } else {
-                toast.warn(t('plugin_management_page.no_subscription'));
+                toast.warn(t("plugin_management_page.no_subscription"));
               }
             }}
           >
-            {t('plugin_management_page.update_subscription')}
+            {t("plugin_management_page.update_subscription")}
           </div>
         </div>
       </div>

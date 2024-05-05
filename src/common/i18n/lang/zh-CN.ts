@@ -23,11 +23,11 @@ export default {
       copy: "复制",
       paste: "粘贴",
       select_all: "全选",
-      loading: '加载中',
-      create: '创建',
+      loading: "加载中",
+      create: "创建",
       add: "添加",
       save: "保存",
-      clear: '清空',
+      clear: "清空",
     },
 
     media: {
@@ -61,7 +61,7 @@ export default {
       music_quality_high: "高音质",
       music_quality_super: "超高音质",
 
-      music_repeat_mode: '播放模式',
+      music_repeat_mode: "播放模式",
       music_repeat_mode_loop: "单曲循环",
       music_repeat_mode_queue: "列表循环",
       music_repeat_mode_shuffle: "随机播放",
@@ -203,40 +203,40 @@ export default {
       toast_media_lyric_unlinked: "已取消关联歌词",
     },
     bottom_loading_state: {
-        reached_end: '~~~ 到底啦 ~~~',
-        loading: '加载中...',
-        load_more: '加载更多'
+        reached_end: "~~~ 到底啦 ~~~",
+        loading: "加载中...",
+        load_more: "加载更多"
     },
     empty: {
         hint_empty: "什么都没有呀~~~"
     },
     modal: {
-      add_to_my_sheets: '添加到歌单',
-      total_music_num: '共 {{number}} 首',
+      add_to_my_sheets: "添加到歌单",
+      total_music_num: "共 {{number}} 首",
       create_local_sheet: "新建歌单",
       create_local_sheet_placeholder: "请输入新建歌单名称",
-      exit_confirm: '确认退出?',
-      plugin_subscription: '插件订阅',
-      subscription_remarks: '备注: ',
-      subscription_links: '链接: ',
-      subscription_save_success: '已保存订阅地址',
-      search_lyric: '搜索歌词',
-      search_lyric_result_empty: '搜索结果为空',
+      exit_confirm: "确认退出?",
+      plugin_subscription: "插件订阅",
+      subscription_remarks: "备注: ",
+      subscription_links: "链接: ",
+      subscription_save_success: "已保存订阅地址",
+      search_lyric: "搜索歌词",
+      search_lyric_result_empty: "搜索结果为空",
       media_lyric_linked: "已关联歌词~",
       media_lyric_link_failed: "关联歌词失败:",
-      new_version_found: '发现新版本',
-      latest_version: '最新版本: ',
+      new_version_found: "发现新版本",
+      latest_version: "最新版本: ",
       current_version: "当前版本: ",
-      skip_this_version: '跳过此版本',
-      scan_local_music: '扫描本地音乐',
-      scan_local_music_hint: '将自动扫描勾选的文件夹 (文件增删实时同步)',
-      add_folder: '添加文件夹'
+      skip_this_version: "跳过此版本",
+      scan_local_music: "扫描本地音乐",
+      scan_local_music_hint: "将自动扫描勾选的文件夹 (文件增删实时同步)",
+      add_folder: "添加文件夹"
 
     },
     panel: {
-      play_list_song_num: '播放列表 ({{number}}首)',
-      user_variable: '用户变量',
-      user_variable_setting_success: '设置成功~'
+      play_list_song_num: "播放列表 ({{number}}首)",
+      user_variable: "用户变量",
+      user_variable_setting_success: "设置成功~"
     }
   },
 };

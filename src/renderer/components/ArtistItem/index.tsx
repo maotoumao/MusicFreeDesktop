@@ -48,7 +48,7 @@ function ArtistItem(props: IArtistItemProps) {
         <div className="title" title={artistItem?.name}>
           {artistItem?.name}
         </div>
-        <div className="desc" title={artistItem?.description?.replace?.('\\n', '\n')}>
+        <div className="desc" title={artistItem?.description?.replace?.("\\n", "\n")}>
           {(artistItem?.description ?? "").split("\\n").map((item, index) => (
             <div key={index}>{item}</div>
           ))}

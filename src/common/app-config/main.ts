@@ -23,7 +23,7 @@ let cacheConfig: IAppConfig = null;
 
 async function checkPath() {
   // 路径:
-  const configDirPath = app.getPath('userData');
+  const configDirPath = app.getPath("userData");
   try {
     const res = await fs.stat(configDirPath);
     if (!res.isDirectory()) {

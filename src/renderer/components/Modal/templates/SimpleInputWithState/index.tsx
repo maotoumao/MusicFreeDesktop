@@ -81,7 +81,7 @@ export default function SimpleInputWithState<PromiseItem>(
                   });
               }}
             >
-              {okText ?? t('common.confirm')}
+              {okText ?? t("common.confirm")}
             </div>
           </div>
           <Condition condition={hints}>

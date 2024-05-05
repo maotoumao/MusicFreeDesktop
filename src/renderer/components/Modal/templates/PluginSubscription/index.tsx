@@ -17,18 +17,18 @@ export default function PluginSubscription() {
     getUserPerference("subscription") ?? []
   );
 
-  const {t} = useTranslation('modal.plugin_subscription');
+  const {t} = useTranslation("modal.plugin_subscription");
 
   return (
     <Base withBlur={false}>
       <div className="modal--plugin-subscription shadow backdrop-color">
-        <Base.Header>{t('modal.plugin_subscription')}</Base.Header>
+        <Base.Header>{t("modal.plugin_subscription")}</Base.Header>
         <div className="content-container">
           <Condition condition={subscription.length} falsy={<Empty></Empty>}>
             {subscription.map((item, index) => (
               <div className="content-item" key={index}>
                 <div className="content-item-row">
-                  <span>{t('modal.subscription_remarks')}</span>
+                  <span>{t("modal.subscription_remarks")}</span>
                   <input
                     defaultValue={item.title ?? ""}
                     onChange={(e) => {
@@ -41,7 +41,7 @@ export default function PluginSubscription() {
                   ></input>
                 </div>
                 <div className="content-item-row">
-                  <span>{t('modal.subscription_links')}</span>
+                  <span>{t("modal.subscription_links")}</span>
                   <input
                     defaultValue={item.srcUrl ?? ""}
                     onChange={(e) => {
@@ -71,7 +71,7 @@ export default function PluginSubscription() {
               ]);
             }}
           >
-            {t('common.add')}
+            {t("common.add")}
           </div>
           <div
             role="button"
@@ -84,11 +84,11 @@ export default function PluginSubscription() {
                   item.srcUrl.match(/https?:\/\/.+\.js(on)?/)
                 )
               );
-              toast.success(t('modal.subscription_save_success'))
+              toast.success(t("modal.subscription_save_success"))
               hideModal();
             }}
           >
-            {t('common.save')}
+            {t("common.save")}
           </div>
         </div>
       </div>

@@ -91,7 +91,7 @@ export async function parseLocalMusicItem(
       localPath: filePath,
       url: addFileScheme(filePath),
       artist: "未知作者",
-      album: '未知专辑'
+      album: "未知专辑"
     };
   }
 }

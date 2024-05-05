@@ -17,7 +17,7 @@ export default function ListView(props: IProps) {
       virtualProps={{
         fallbackRenderCount: 40,
         getScrollElement() {
-            return document.querySelector('#page-container');
+            return document.querySelector("#page-container");
         },
         offsetHeight: 102
       }}

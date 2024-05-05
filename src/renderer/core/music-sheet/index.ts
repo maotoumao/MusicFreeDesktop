@@ -1,4 +1,4 @@
-import * as frontend from './frontend';
+import * as frontend from "./frontend";
 import defaultSheet from "./common/default-sheet";
 
 const MusicSheet = {

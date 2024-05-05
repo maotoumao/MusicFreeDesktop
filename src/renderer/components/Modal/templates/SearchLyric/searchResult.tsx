@@ -56,10 +56,10 @@ function SearchResult(props: ISearchResultProps) {
                                 true
                               );
                             }
-                            toast.success(t('modal.media_lyric_linked'));
+                            toast.success(t("modal.media_lyric_linked"));
                             hideModal();
                           } catch (e) {
-                            toast.error(`${t('modal.media_lyric_link_failed')} ${e?.message ?? e}`);
+                            toast.error(`${t("modal.media_lyric_link_failed")} ${e?.message ?? e}`);
                           }
                         }
                       }}

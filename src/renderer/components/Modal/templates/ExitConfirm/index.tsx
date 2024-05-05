@@ -8,7 +8,7 @@ export default function ExitConfirm() {
   return (
     <Base withBlur>
       <div className="modal--exit-confirm-container shadow backdrop-color">
-        {t('modal.exit_confirm')}
+        {t("modal.exit_confirm")}
       </div>
     </Base>
   );

@@ -104,7 +104,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     enableResizing: false,
   }),
   columnHelper.accessor("title", {
-    header: () => i18n.t('media.media_title'),
+    header: () => i18n.t("media.media_title"),
     size: 250,
     maxSize: 300,
     minSize: 100,
@@ -117,7 +117,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
   }),
 
   columnHelper.accessor("artist", {
-    header: () => i18n.t('media.media_type_artist'),
+    header: () => i18n.t("media.media_type_artist"),
     size: 130,
     maxSize: 200,
     minSize: 60,
@@ -126,7 +126,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 2,
   }),
   columnHelper.accessor("album", {
-    header: () => i18n.t('media.media_type_album'),
+    header: () => i18n.t("media.media_type_album"),
     size: 120,
     maxSize: 200,
     minSize: 60,
@@ -135,7 +135,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 2,
   }),
   columnHelper.accessor("duration", {
-    header: () => i18n.t('media.media_duration'),
+    header: () => i18n.t("media.media_duration"),
     size: 64,
     maxSize: 150,
     minSize: 48,
@@ -145,7 +145,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 1,
   }),
   columnHelper.accessor("platform", {
-    header: () => i18n.t('media.media_platform'),
+    header: () => i18n.t("media.media_platform"),
     size: 100,
     minSize: 80,
     maxSize: 300,
@@ -172,11 +172,11 @@ export function showMusicContextMenu(
         icon: "identification",
       },
       {
-        title: `${i18n.t('media.media_type_artist')}: ${musicItems.artist ?? i18n.t('media.unknown_artist')}`,
+        title: `${i18n.t("media.media_type_artist")}: ${musicItems.artist ?? i18n.t("media.unknown_artist")}`,
         icon: "user",
       },
       {
-        title: `${i18n.t('media.media_type_album')}: ${musicItems.album ?? i18n.t('media.unknown_album')}`,
+        title: `${i18n.t("media.media_type_album")}: ${musicItems.album ?? i18n.t("media.unknown_album")}`,
         icon: "album",
         show: !!musicItems.album,
       },
@@ -187,14 +187,14 @@ export function showMusicContextMenu(
   }
   menuItems.push(
     {
-      title: i18n.t('music_list_context_menu.next_play'),
+      title: i18n.t("music_list_context_menu.next_play"),
       icon: "motion-play",
       onClick() {
         trackPlayer.addNext(musicItems);
       },
     },
     {
-      title: i18n.t('music_list_context_menu.add_to_my_sheets'),
+      title: i18n.t("music_list_context_menu.add_to_my_sheets"),
       icon: "document-plus",
       onClick() {
         showModal("AddMusicToSheet", {
@@ -203,7 +203,7 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: i18n.t('music_list_context_menu.remove_from_sheet'),
+      title: i18n.t("music_list_context_menu.remove_from_sheet"),
       icon: "trash",
       show: !!localMusicSheetId && localMusicSheetId !== "play-list",
       onClick() {
@@ -211,7 +211,7 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: i18n.t('common.remove'),
+      title: i18n.t("common.remove"),
       icon: "trash",
       show: localMusicSheetId === "play-list",
       onClick() {
@@ -222,7 +222,7 @@ export function showMusicContextMenu(
 
   menuItems.push(
     {
-      title: i18n.t('common.download'),
+      title: i18n.t("common.download"),
       icon: "array-download-tray",
       show: isArray
         ? !musicItems.every(
@@ -236,7 +236,7 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: i18n.t('music_list_context_menu.delete_local_download'),
+      title: i18n.t("music_list_context_menu.delete_local_download"),
       icon: "trash",
       show:
         (isArray && musicItems.every((it) => Downloader.isDownloaded(it))) ||
@@ -248,12 +248,12 @@ export function showMusicContextMenu(
         );
         if (isSuccess) {
           if (isArray) {
-            toast.success(i18n.t('music_list_context_menu.delete_local_downloaded_songs_success', {
+            toast.success(i18n.t("music_list_context_menu.delete_local_downloaded_songs_success", {
               musicNums: musicItems.length
             }));
           } else {
             toast.success(
-              i18n.t('music_list_context_menu.delete_local_downloaded_song_success', {
+              i18n.t("music_list_context_menu.delete_local_downloaded_song_success", {
                 songName: (musicItems as IMusic.IMusicItem).title
               })
             );
@@ -291,7 +291,7 @@ export function showMusicContextMenu(
             );
           }
         } catch (e) {
-          toast.error(`${i18n.t('music_list_context_menu.reveal_local_music_in_file_explorer_fail')} ${e?.message ?? ""}`);
+          toast.error(`${i18n.t("music_list_context_menu.reveal_local_music_in_file_explorer_fail")} ${e?.message ?? ""}`);
         }
       },
     }

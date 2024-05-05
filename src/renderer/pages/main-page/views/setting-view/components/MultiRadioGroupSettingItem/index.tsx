@@ -57,9 +57,9 @@ export default function MultiRadioGroupSettingItem<T extends IAppConfigKeyPath>(
               key={index}
               onClick={() => {
                 if(checked) {
-                  rendererAppConfig.setAppConfigPath('normal.musicListColumnsShown', (value as Array<any>)?.filter(it => it !== option.value) ?? []);
+                  rendererAppConfig.setAppConfigPath("normal.musicListColumnsShown", (value as Array<any>)?.filter(it => it !== option.value) ?? []);
                 } else {
-                  rendererAppConfig.setAppConfigPath('normal.musicListColumnsShown', [...((value as Array<any>) ?? []), option.value])
+                  rendererAppConfig.setAppConfigPath("normal.musicListColumnsShown", [...((value as Array<any>) ?? []), option.value])
                 }
               }}
             >

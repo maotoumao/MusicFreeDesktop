@@ -26,11 +26,11 @@ if (process.platform === "darwin") {
         label: app.getName(),
         submenu: [
           {
-            label: t('common.about'),
+            label: t("common.about"),
             role: "about",
           },
           {
-            label: t('common.exit'),
+            label: t("common.exit"),
             click() {
               app.quit();
             },
@@ -38,20 +38,20 @@ if (process.platform === "darwin") {
         ],
       },
       {
-        label: t('common.edit'),
+        label: t("common.edit"),
         submenu: [
           {
-            label: t('common.undo'),
+            label: t("common.undo"),
             accelerator: "Command+Z",
             role: "undo",
           },
-          { label: t('common.redo'), accelerator: "Shift+Command+Z", role: "redo" },
+          { label: t("common.redo"), accelerator: "Shift+Command+Z", role: "redo" },
           { type: "separator" },
-          { label: t('common.cut'), accelerator: "Command+X", role: "cut" },
-          { label: t('common.copy'), accelerator: "Command+C", role: "copy" },
-          { label: t('common.cut'), accelerator: "Command+V", role: "paste" },
+          { label: t("common.cut"), accelerator: "Command+X", role: "cut" },
+          { label: t("common.copy"), accelerator: "Command+C", role: "copy" },
+          { label: t("common.cut"), accelerator: "Command+V", role: "paste" },
           { type: "separator" },
-          { label: t('common.select_all'), accelerator: "Command+A", role: "selectAll" },
+          { label: t("common.select_all"), accelerator: "Command+A", role: "selectAll" },
         ],
       },
     ])
@@ -93,7 +93,7 @@ export async function setupTrayMenu() {
   // 更新一下tooltip
   if (currentMusic) {
     tray.setToolTip(
-      `${currentMusic.title ?? t('media.unknown_title')}${
+      `${currentMusic.title ?? t("media.unknown_title")}${
         currentMusic.artist ? ` - ${currentMusic.artist}` : ""
       }`
     );
@@ -101,7 +101,7 @@ export async function setupTrayMenu() {
     tray.setToolTip("MusicFree");
   }
   if (currentMusic) {
-    const fullName = `${currentMusic.title ?? t('media.unknown_title')}${
+    const fullName = `${currentMusic.title ?? t("media.unknown_title")}${
       currentMusic.artist ? ` - ${currentMusic.artist}` : ""
     }`;
     ctxMenu.push(
@@ -110,7 +110,7 @@ export async function setupTrayMenu() {
         click: openMusicDetail,
       },
       {
-        label: `${t('media.media_platform')}: ${currentMusic.platform}`,
+        label: `${t("media.media_platform")}: ${currentMusic.platform}`,
         click: openMusicDetail,
       }
     );
@@ -125,9 +125,9 @@ export async function setupTrayMenu() {
     {
       label: currentMusic
         ? currentPlayerState === PlayerState.Playing
-          ? t('media.music_state_pause')
-          : t('media.music_state_play')
-        : t('media.music_state_play_or_pause'),
+          ? t("media.music_state_pause")
+          : t("media.music_state_play")
+        : t("media.music_state_play_or_pause"),
       enabled: !!currentMusic,
       click() {
         if (!currentMusic) {
@@ -163,7 +163,7 @@ export async function setupTrayMenu() {
   );
 
   ctxMenu.push({
-    label: t('media.music_repeat_mode'),
+    label: t("media.music_repeat_mode"),
     type: "submenu",
     submenu: Menu.buildFromTemplate([
       {
@@ -179,7 +179,7 @@ export async function setupTrayMenu() {
         },
       },
       {
-        label: t('media.music_repeat_mode_queue'),
+        label: t("media.music_repeat_mode_queue"),
         id: RepeatMode.Queue,
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Queue,
@@ -191,7 +191,7 @@ export async function setupTrayMenu() {
         },
       },
       {
-        label: t('media.music_repeat_mode_shuffle'),
+        label: t("media.music_repeat_mode_shuffle"),
         id: RepeatMode.Shuffle,
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Shuffle,
@@ -247,14 +247,14 @@ export async function setupTrayMenu() {
   });
   /********* 其他操作 **********/
   ctxMenu.push({
-    label: t('app_header.settings'),
+    label: t("app_header.settings"),
     click() {
       showMainWindow();
       ipcMainSendMainWindow("navigate", "/main/setting");
     },
   });
   ctxMenu.push({
-    label: t('common.exit'),
+    label: t("common.exit"),
     role: "quit",
     click() {
       app.exit(0);

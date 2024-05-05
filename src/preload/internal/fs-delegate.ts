@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from "fs/promises";
 
 const originalFsWriteFile = fs.writeFile;
 const originalFsReadFile = fs.readFile;

@@ -41,7 +41,7 @@ export default function SearchView() {
   return (
     <div className="search-view-container">
       <div className="search-header">
-        <span className="highlight">「{query}」</span>{t('search_result_page.search_result_title')}
+        <span className="highlight">「{query}」</span>{t("search_result_page.search_result_title")}
       </div>
       {plugins.length ? (
         <Tab.Group
@@ -77,7 +77,7 @@ export default function SearchView() {
           </Tab.Panels>
         </Tab.Group>
       ) : (
-        <NoPlugin supportMethod={t('plugin.method_search')}></NoPlugin>
+        <NoPlugin supportMethod={t("plugin.method_search")}></NoPlugin>
       )}
     </div>
   );

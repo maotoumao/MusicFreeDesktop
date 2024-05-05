@@ -1,5 +1,5 @@
 import { app } from "electron";
-import path from 'path';
+import path from "path";
 
 const resPath = app.isPackaged
   ? path.resolve(process.resourcesPath, "res")

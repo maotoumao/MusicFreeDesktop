@@ -86,7 +86,7 @@ interface IConfig {
 
   backup: {
     /** 恢复歌单时行为 */
-    resumeBehavior: 'append' | 'overwrite',
+    resumeBehavior: "append" | "overwrite",
     webdav: {
       url: string;
       username: string;

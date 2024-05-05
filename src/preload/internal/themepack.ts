@@ -8,7 +8,7 @@ import { nanoid } from "nanoid";
 import { createReadStream } from "original-fs";
 import unzipper from "unzipper";
 
-const themeNodeId = `themepack-node`;
+const themeNodeId = "themepack-node";
 const themePathKey = "themepack-path";
 
 const validIframeMap = new Map<

@@ -54,7 +54,7 @@ function Root() {
         }
       }, 20);
     };
-    if(document.readyState === 'complete') {
+    if(document.readyState === "complete") {
       moveWindowHandler();
     } else {
       document.onload = moveWindowHandler;

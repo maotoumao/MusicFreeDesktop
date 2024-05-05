@@ -34,7 +34,7 @@ export default function SearchHistory(props: ISearchHistoryProps) {
       onBlur={onHistoryPanelBlur}
     >
       <div className="search-history--header">
-        {t('app_header.search_history')}
+        {t("app_header.search_history")}
         <div
           className="search-history--header-clear"
           role="button"

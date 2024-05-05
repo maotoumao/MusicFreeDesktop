@@ -41,7 +41,7 @@ export default function ArtistView(props: IProps) {
       <div className="right-part">
         <MusicList
           musicList={allMusic[actualSelectedKey] ?? []}
-          hideRows={['artist']}
+          hideRows={["artist"]}
           virtualProps={{
             fallbackRenderCount: -1,
           }}

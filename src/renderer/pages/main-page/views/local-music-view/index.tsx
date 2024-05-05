@@ -77,7 +77,7 @@ export default function LocalMusicView() {
       className="local-music-view--container"
       data-full-page={displayView !== DisplayView.LIST}
     >
-      <div className="header">{t('local_music_page.local_music')}</div>
+      <div className="header">{t("local_music_page.local_music")}</div>
       <div className="operations">
         <div
           data-type="normalButton"
@@ -86,7 +86,7 @@ export default function LocalMusicView() {
             showModal("WatchLocalDir");
           }}
         >
-          {t('local_music_page.auto_scan')}
+          {t("local_music_page.auto_scan")}
         </div>
         <div className="operations-layout">
           <input
@@ -95,12 +95,12 @@ export default function LocalMusicView() {
             onChange={(evt) => {
               setInputSearch(evt.target.value);
             }}
-            placeholder={t('local_music_page.search_local_music')}
+            placeholder={t("local_music_page.search_local_music")}
           ></input>
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.LIST}
-            title={t('local_music_page.list_view')}
+            title={t("local_music_page.list_view")}
             onClick={() => {
               setDisplayView(DisplayView.LIST);
             }}
@@ -110,7 +110,7 @@ export default function LocalMusicView() {
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.ARTIST}
-            title={t('local_music_page.artist_view')}
+            title={t("local_music_page.artist_view")}
             onClick={() => {
               setDisplayView(DisplayView.ARTIST);
             }}
@@ -120,7 +120,7 @@ export default function LocalMusicView() {
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.ALBUM}
-            title={t('local_music_page.album_view')}
+            title={t("local_music_page.album_view")}
             onClick={() => {
               setDisplayView(DisplayView.ALBUM);
             }}
@@ -130,7 +130,7 @@ export default function LocalMusicView() {
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.FOLDER}
-            title={t('local_music_page.folder_view')}
+            title={t("local_music_page.folder_view")}
             onClick={() => {
               setDisplayView(DisplayView.FOLDER);
             }}

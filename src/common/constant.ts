@@ -84,7 +84,7 @@ export const shortCutKeys: IShortCutKeys[] = [
   "volume-up",
   "volume-down",
   "toggle-desktop-lyric",
-  'like/dislike'
+  "like/dislike"
 ];
 
 // 快捷键列表对应的事件
@@ -95,7 +95,7 @@ export const shortCutKeysEvts: Record<IShortCutKeys, keyof IEventType.IEvents> =
   "volume-down": "VOLUME_DOWN",
   "volume-up": "VOLUME_UP",
   "toggle-desktop-lyric": "TOGGLE_DESKTOP_LYRIC",
-  'like/dislike': 'TOGGLE_LIKE'
+  "like/dislike": "TOGGLE_LIKE"
 };
 
 /** 下载状态 */

@@ -1,2 +1,2 @@
-export * from './main-window';
-export * from './lyric-window';
+export * from "./main-window";
+export * from "./lyric-window";

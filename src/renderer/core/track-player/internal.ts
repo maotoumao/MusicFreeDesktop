@@ -145,7 +145,7 @@ class TrackPlayerInternal {
           })
             .then((res) => res.arrayBuffer())
             .then((buf) => {
-              sourceBuffer.addEventListener('updateend', () => {
+              sourceBuffer.addEventListener("updateend", () => {
                 mediaSource.endOfStream();
               })
               sourceBuffer.appendBuffer(buf);

@@ -138,9 +138,9 @@ async function setupMessageManager() {
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.CurrentLyricChanged, (lyric) => {
-    if (window.globalData.platform === 'darwin' && rendererAppConfig.getAppConfigPath('lyric.enableStatusBarLyric')) {
+    if (window.globalData.platform === "darwin" && rendererAppConfig.getAppConfigPath("lyric.enableStatusBarLyric")) {
       // 只有macos需要同步歌词，用来设置状态栏歌词
-      ipcRendererSend('sync-current-lyric', lyric?.lrc?.lrc ?? '');
+      ipcRendererSend("sync-current-lyric", lyric?.lrc?.lrc ?? "");
     }
     window.mainPort.broadcast({
       data: lyric,

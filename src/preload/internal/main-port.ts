@@ -25,7 +25,7 @@ window.__extPorts = extPorts;
 
 ipcRenderer.on("port", (e, message) => {
   // 接收到端口，使其全局可用。
-  if(message.type === 'mount') {
+  if(message.type === "mount") {
     const mainPort = e.ports[0];
     extPorts.set(message.id, mainPort);
     mainPort.onmessage = evt => {
@@ -36,7 +36,7 @@ ipcRenderer.on("port", (e, message) => {
     }
     onMountHandler?.(message.id);
 
-  } else if(message.type === 'unmount') {
+  } else if(message.type === "unmount") {
     const mainPort = extPorts.get(message.id);
     if(mainPort) {
         onUnMountHandler?.(message.id);

@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 
 export default function (){
     // 当前正在搜索
-    const currentQueryRef = useRef<string>('');
+    const currentQueryRef = useRef<string>("");
     const {t} = useTranslation();
 
     /**
@@ -23,7 +23,7 @@ export default function (){
         pluginHash?: string,
     ) {
         /** 如果没有指定插件，就用所有插件搜索 */
-        console.log('SEARCH LRC', query, queryPage);
+        console.log("SEARCH LRC", query, queryPage);
         let plugins: IPlugin.IPluginDelegate[] = [];
         if (pluginHash) {
            callPluginDelegateMethod
@@ -32,7 +32,7 @@ export default function (){
                 plugins = [tgtPlugin];
             }
         } else {
-            plugins = getSearchablePlugins('lyric');
+            plugins = getSearchablePlugins("lyric");
         }
         if (plugins.length === 0) {
             searchResultStore.setValue(
@@ -77,7 +77,7 @@ export default function (){
 
             // 本次搜索关键词
             currentQueryRef.current = query =
-                query ?? searchResultStore.getValue().query ?? '';
+                query ?? searchResultStore.getValue().query ?? "";
 
             /** 搜索的页码 */
             const page =
@@ -98,7 +98,7 @@ export default function (){
                         };
                     }),
                 );
-                const result = await callPluginDelegateMethod(plugin, 'search', query, page, 'lyric');
+                const result = await callPluginDelegateMethod(plugin, "search", query, page, "lyric");
                 console.log(result);
                 /** 如果搜索结果不是本次结果 */
                 if (currentQueryRef.current !== query) {
@@ -106,7 +106,7 @@ export default function (){
                 }
                 /** 切换到结果页 */
                 if (!result) {
-                    throw new Error(t('modal.serach_lyric_result_empty'));
+                    throw new Error(t("modal.serach_lyric_result_empty"));
                 }
                 searchResultStore.setValue(
                     produce(draft => {
