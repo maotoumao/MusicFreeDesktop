@@ -1,21 +1,20 @@
 import { Route, Routes } from "react-router-dom";
-import "./index.scss";
 import SideBar from "./components/SideBar";
 import PluginManagerView from "./views/plugin-manager-view";
 import MusicSheetView from "./views/music-sheet-view";
 import SearchView from "./views/search-view";
 import MusicDetail from "@/renderer/components/MusicDetail";
-import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
 import AlbumView from "./views/album-view";
 import ArtistView from "./views/artist-view";
 import ToplistView from "./views/toplist-view";
 import TopListDetailView from "./views/toplist-detail-view";
 import RecommendSheetsView from "./views/recommend-sheets-view";
 import SettingView from "./views/setting-view";
-import { showModal } from "@/renderer/components/Modal";
 import LocalMusicView from "./views/local-music-view";
 import Empty from "@/renderer/components/Empty";
 import DownloadView from "./views/download-view";
+
+import "./index.scss";
 
 export default function MainPage() {
   return (
