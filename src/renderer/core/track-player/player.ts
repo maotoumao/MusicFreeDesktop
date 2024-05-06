@@ -25,11 +25,11 @@ import {
   setUserPerference,
   setUserPerferenceIDB,
 } from "@/renderer/utils/user-perference";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { delay } from "@/common/time-util";
 import { ipcRendererOn, ipcRendererSend } from "@/common/ipc-util/renderer";
 import Evt from "../events";
 import { getLinkedLyric } from "../link-lyric";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 
 const initProgress = {
   currentTime: 0,
@@ -84,7 +84,7 @@ export async function setupPlayer() {
 
   setCurrentMusic(currentMusic);
   setAudioOutputDevice(
-    rendererAppConfig.getAppConfigPath("playMusic.audioOutputDevice.deviceId")
+    getAppConfigPath("playMusic.audioOutputDevice.deviceId")
   );
 
   const [volume, speed] = [
@@ -106,7 +106,7 @@ export async function setupPlayer() {
   getMediaSource(currentMusic, {
     quality:
       getUserPerference("currentQuality") ||
-      rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
+      getAppConfigPath("playMusic.defaultQuality"),
   })
     .then(({ mediaSource, quality }) => {
       if (isSameMedia(currentMusic, currentMusicStore.getValue())) {
@@ -176,7 +176,7 @@ function setupEvents() {
     // 播放错误时自动跳到下一首, 间隔500ms，防止疯狂循环。。
     if (
       musicQueueStore.getValue().length > 1 &&
-      rendererAppConfig.getAppConfigPath("playMusic.playError") === "skip"
+      getAppConfigPath("playMusic.playError") === "skip"
     ) {
       await delay(500);
       if (isSameMedia(currentMusic, currentMusicStore.getValue())) {
@@ -478,8 +478,8 @@ async function getMediaSource(
 ) {
   const qualityOrder = getQualityOrder(
     options.quality ??
-      rendererAppConfig.getAppConfigPath("playMusic.defaultQuality"),
-    rendererAppConfig.getAppConfigPath("playMusic.whenQualityMissing")
+      getAppConfigPath("playMusic.defaultQuality"),
+    getAppConfigPath("playMusic.whenQualityMissing")
   );
   let mediaSource: IPlugin.IMediaSourceResult | null = null;
   let realQuality: IMusic.IQualityKey = qualityOrder[0];
@@ -592,7 +592,7 @@ async function playIndex(nextIndex: number, options: IPlayOptions = {}) {
       // 播放失败
       setCurrentMusic(musicItem);
       setCurrentQuality(
-        rendererAppConfig.getAppConfigPath("playMusic.defaultQuality")
+        getAppConfigPath("playMusic.defaultQuality")
       );
       trackPlayer.clear();
       trackPlayerEventsEmitter.emit(TrackPlayerEvent.Error, e);

@@ -1,4 +1,3 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
@@ -8,6 +7,7 @@ import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
 import defaultAppConfig from "@/common/app-config/default-app-config";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface IRadioGroupSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -37,7 +37,7 @@ export default function RadioGroupSettingItem<T extends IAppConfigKeyPath>(
       <RadioGroup
         value={value}
         onChange={(val) => {
-          rendererAppConfig.setAppConfigPath(keyPath, val);
+          setAppConfigPath(keyPath, val);
         }}
       >
         <RadioGroup.Label className={"label-container"}>

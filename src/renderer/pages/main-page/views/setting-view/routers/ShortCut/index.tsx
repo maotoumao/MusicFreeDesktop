@@ -4,9 +4,9 @@ import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import hotkeys from "hotkeys-js";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { bindShortCut } from "@/renderer/core/shortcut";
 import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface IProps {
   data: IAppConfig["shortCut"];
@@ -78,7 +78,7 @@ function ShortCutTable(props: IShortCutTableProps) {
               value={shortCuts[it]?.local}
               onChange={(val) => {
                 bindShortCut(it as IShortCutKeys, val);
-                rendererAppConfig.setAppConfigPath(
+                setAppConfigPath(
                   `shortCut.shortcuts.${it}.local`,
                   val
                 );

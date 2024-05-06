@@ -1,12 +1,12 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import "./index.scss";
 import routers from "./routers";
 import { useEffect, useRef, useState } from "react";
 import { IConfig } from "@/common/app-config/type";
 import Condition from "@/renderer/components/Condition";
+import { useAppConfig } from "@/common/app-config/renderer";
 
 export default function SettingView() {
-  const appConfig = rendererAppConfig.useAppConfig();
+  const appConfig = useAppConfig();
   console.log(appConfig);
   const [selected, setSelected] = useState(routers[0].id);
 

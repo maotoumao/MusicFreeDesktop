@@ -1,4 +1,3 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   getQualityOrder,
   isSameMedia,
@@ -18,6 +17,7 @@ import {
   useDownloaded,
   useDownloadedMusicList,
 } from "./downloaded-sheet";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 
 type ProxyMarkedFunction<T extends (...args: any) => void> = T &
   Comlink.ProxyMarked;
@@ -61,7 +61,7 @@ function setupDownloaderWorker() {
     downloaderWorker = Comlink.wrap(worker);
   }
   setDownloadingConcurrency(
-    rendererAppConfig.getAppConfigPath("download.concurrency")
+    getAppConfigPath("download.concurrency")
   );
 }
 
@@ -140,8 +140,8 @@ async function downloadMusic(
   onStateChange: IOnStateChangeFunc
 ) {
   const [defaultQuality, whenQualityMissing] = [
-    rendererAppConfig.getAppConfigPath("download.defaultQuality"),
-    rendererAppConfig.getAppConfigPath("download.whenQualityMissing"),
+    getAppConfigPath("download.defaultQuality"),
+    getAppConfigPath("download.whenQualityMissing"),
   ];
   const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
   let mediaSource: IPlugin.IMediaSourceResult | null = null;
@@ -166,7 +166,7 @@ async function downloadMusic(
     if (mediaSource?.url) {
       const ext = mediaSource.url.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
       const downloadBasePath =
-        rendererAppConfig.getAppConfigPath("download.path") ??
+        getAppConfigPath("download.path") ??
         window.globalData.appPath.downloads;
       const downloadPath = window.path.resolve(
         downloadBasePath,

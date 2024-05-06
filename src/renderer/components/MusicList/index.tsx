@@ -37,19 +37,17 @@ import {
 } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { isBetween } from "@/common/normalize-util";
 import { ipcRendererSend } from "@/common/ipc-util/renderer";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
 import { toast } from "react-toastify";
-import classNames from "@/renderer/utils/classnames";
 import SwitchCase from "../SwitchCase";
 import SvgAsset from "../SvgAsset";
-import { getAppConfigPath } from "@/common/app-config/main";
 import musicSheetDB from "@/renderer/core/db/music-sheet-db";
 import DragReceiver, { startDrag } from "../DragReceiver";
 import i18n from "@/common/i18n";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -323,7 +321,7 @@ function _MusicList(props: IMusicListProps) {
 
   const musicListRef = useRef(musicList);
   const columnShownRef = useRef(
-    rendererAppConfig.getAppConfigPath("normal.musicListColumnsShown").reduce(
+    getAppConfigPath("normal.musicListColumnsShown").reduce(
       (prev, curr) => ({
         ...prev,
         [curr]: false,
@@ -541,7 +539,7 @@ function _MusicList(props: IMusicListProps) {
                 onDoubleClick={() => {
                   const config =
                     doubleClickBehavior ??
-                    rendererAppConfig.getAppConfigPath(
+                    getAppConfigPath(
                       "playMusic.clickMusicList"
                     );
                   if (config === "replace") {

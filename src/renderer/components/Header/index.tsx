@@ -6,12 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import HeaderNavigator from "./widgets/Navigator";
 import Evt from "@/renderer/core/events";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { musicDetailShownStore } from "../MusicDetail";
 import Condition from "../Condition";
 import SearchHistory from "./widgets/SearchHistory";
 import { addSearchHistory } from "@/renderer/utils/search-history";
 import { useTranslation } from "react-i18next";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 
 export default function AppHeader() {
   const navigate = useNavigate();
@@ -128,7 +128,7 @@ export default function AppHeader() {
           title={t("app_header.exit")}
           className="header-button"
           onClick={() => {
-            const exitBehavior = rendererAppConfig.getAppConfigPath(
+            const exitBehavior = getAppConfigPath(
               "normal.closeBehavior"
             );
             if (exitBehavior === "minimize") {

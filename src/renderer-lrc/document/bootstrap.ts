@@ -1,13 +1,13 @@
 import { ipcRendererOn, ipcRendererSend } from "@/common/ipc-util/renderer";
 import currentPlayerStore from "../store/current-player-store";
-import rendererAppConfig from "@/common/app-config/renderer";
+import {setupRendererAppConfig} from "@/common/app-config/renderer";
 import currentProgressStore from "../store/current-progress-store";
 import currentLyricStore from "../store/current-lyric-store";
 
 export default async function () {
   // let prevTimestamp = 0;
   // TODO: broadcast
-  await rendererAppConfig.setupRendererAppConfig();
+  await setupRendererAppConfig();
 
   window.extPort.sendToMain({
     type: "sync-all-data",

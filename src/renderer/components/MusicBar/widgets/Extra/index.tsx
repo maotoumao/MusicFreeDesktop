@@ -7,7 +7,6 @@ import { useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
 import { showModal } from "@/renderer/components/Modal";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import classNames from "@/renderer/utils/classnames";
 import {
@@ -16,6 +15,7 @@ import {
   showPanel,
 } from "@/renderer/components/Panel";
 import { useTranslation } from "react-i18next";
+import { setAppConfigPath, useAppConfig } from "@/common/app-config/renderer";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
@@ -244,7 +244,7 @@ function QualityBtn() {
           onOk(value, extra) {
             trackPlayer.setQuality(value as IMusic.IQualityKey);
             if (!extra) {
-              rendererAppConfig.setAppConfigPath(
+              setAppConfigPath(
                 "playMusic.defaultQuality",
                 value
               );
@@ -281,7 +281,7 @@ function QualityBtn() {
 }
 
 function LyricBtn() {
-  const rendererConfig = rendererAppConfig.useAppConfig();
+  const rendererConfig = useAppConfig();
   const enableDesktopLyric = rendererConfig?.lyric?.enableDesktopLyric ?? false;
   const { t } = useTranslation();
 

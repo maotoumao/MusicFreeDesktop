@@ -1,4 +1,4 @@
-import rendererAppConfig from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 import { getUserPerferenceIDB, setUserPerferenceIDB } from "./user-perference";
 
 export async function getSearchHistory() {
@@ -8,7 +8,7 @@ export async function getSearchHistory() {
 
 export async function addSearchHistory(searchItem: string){
     const oldSearchHistory = await getSearchHistory();
-    const maxHistoryLen = rendererAppConfig.getAppConfigPath("normal.maxHistoryLength");
+    const maxHistoryLen = getAppConfigPath("normal.maxHistoryLength");
     const newSearchHistory = [searchItem, ...oldSearchHistory.filter(item => item !== searchItem)].slice(0, maxHistoryLen);
     await setUserPerferenceIDB("searchHistory", newSearchHistory);
 }

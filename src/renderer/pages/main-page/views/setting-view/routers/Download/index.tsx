@@ -3,8 +3,8 @@ import "./index.scss";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import Downloader from "@/renderer/core/downloader";
-import rendererAppConfig from "@/common/app-config/renderer";
 import PathSettingItem from "../../components/PathSettingItem";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface IProps {
   data: IAppConfig["download"];
@@ -25,7 +25,7 @@ export default function Download(props: IProps) {
         options={concurrencyList}
         onChange={(newVal) => {
           Downloader.setDownloadingConcurrency(newVal);
-          rendererAppConfig.setAppConfigPath("download.concurrency", newVal);
+          setAppConfigPath("download.concurrency", newVal);
         }}
         label="最多同时下载歌曲数"
       ></ListBoxSettingItem>

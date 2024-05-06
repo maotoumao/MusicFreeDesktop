@@ -1,5 +1,4 @@
 import defaultAppConfig from "@/common/app-config/default-app-config";
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
@@ -9,6 +8,7 @@ import { Popover } from "@headlessui/react";
 import "./index.scss";
 import { useRef, useState } from "react";
 import { HexAlphaColorPicker, HexColorInput } from "react-colorful";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface IColorPickerSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -54,7 +54,7 @@ export default function ColorPickerSettingItem<T extends IAppConfigKeyPath>(
                 <div
                   role="button"
                   onClick={() => {
-                    rendererAppConfig.setAppConfigPath(keyPath, color as any);
+                    setAppConfigPath(keyPath, color as any);
                     close();
                   }}
                 >
@@ -70,7 +70,7 @@ export default function ColorPickerSettingItem<T extends IAppConfigKeyPath>(
     //   className="setting-row"
     //   role="button"
     //   onClick={() => {
-    //     rendererAppConfig.setAppConfigPath(keyPath, !checked as any);
+    //     setAppConfigPath(keyPath, !checked as any);
     //   }}
     // >
     //   <div

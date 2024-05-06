@@ -6,7 +6,6 @@ import {
   registerPluginEvents,
 } from "../core/plugin-delegate";
 import trackPlayer from "../core/track-player";
-import rendererAppConfig from "@/common/app-config/renderer";
 import localMusic from "../core/local-music";
 import { setupLocalShortCut } from "../core/shortcut";
 import { setAutoFreeze } from "immer";
@@ -15,12 +14,13 @@ import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 
 import Downloader from "../core/downloader";
 import MessageManager from "../core/message-manager";
+import { getAppConfigPath, setAppConfigPath, setupRendererAppConfig } from "@/common/app-config/renderer";
 
 setAutoFreeze(false);
 
 export default async function () {
   await Promise.all([
-    rendererAppConfig.setupRendererAppConfig(),
+    setupRendererAppConfig(),
     registerPluginEvents(),
     MusicSheet.frontend.setupMusicSheets(),
     trackPlayer.setupPlayer(),
@@ -35,7 +35,7 @@ export default async function () {
   await Downloader.setupDownloader();
 
   // 自动更新插件
-  if (rendererAppConfig.getAppConfigPath("plugin.autoUpdatePlugin")) {
+  if (getAppConfigPath("plugin.autoUpdatePlugin")) {
     const lastUpdated = +(localStorage.getItem("pluginLastupdatedTime") || 0);
     const now = Date.now();
     if (Math.abs(now - lastUpdated) > 86400000) {
@@ -120,12 +120,12 @@ function clearDefaultBehavior() {
 /** 设置事件 */
 function setupEvents() {
   Evt.on("TOGGLE_DESKTOP_LYRIC", () => {
-    const enableDesktopLyric = rendererAppConfig.getAppConfigPath(
+    const enableDesktopLyric = getAppConfigPath(
       "lyric.enableDesktopLyric"
     );
 
     ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
-    rendererAppConfig.setAppConfigPath(
+    setAppConfigPath(
       "lyric.enableDesktopLyric",
       !enableDesktopLyric
     );

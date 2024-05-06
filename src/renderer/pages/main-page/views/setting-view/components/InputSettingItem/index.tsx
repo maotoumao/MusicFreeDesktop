@@ -1,23 +1,14 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
 } from "@/common/app-config/type";
-import { Listbox } from "@headlessui/react";
 import "./index.scss";
 import defaultAppConfig from "@/common/app-config/default-app-config";
-import Condition from "@/renderer/components/Condition";
-import Loading from "@/renderer/components/Loading";
-import { isBasicType } from "@/common/normalize-util";
-import useVirtualList from "@/renderer/hooks/useVirtualList";
-import { rem } from "@/common/constant";
 import {
-  Fragment,
   HTMLInputTypeAttribute,
-  useEffect,
-  useRef,
   useState,
 } from "react";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface InputSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -68,7 +59,7 @@ export default function InputSettingItem<T extends IAppConfigKeyPath>(
           if (onChange) {
             onChange(tmpValue as any);
           } else {
-            rendererAppConfig.setAppConfigPath(keyPath, tmpValue.trim() as any);
+            setAppConfigPath(keyPath, tmpValue.trim() as any);
           }
           setTmpValue(null);
         }}

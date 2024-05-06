@@ -1,4 +1,3 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import "./index.scss";
 import classNames from "@/renderer/utils/classnames";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -11,11 +10,12 @@ import command from "../utils/command";
 import currentPlayerStore from "../store/current-player-store";
 import currentProgressStore from "../store/current-progress-store";
 import currentLyricStore from "../store/current-lyric-store";
+import { useAppConfig } from "@/common/app-config/renderer";
 
 export default function LyricWindowPage() {
   const playerStore = currentPlayerStore.useValue();
   const { music: currentMusic, playerState } = playerStore;
-  const lyricAppConfig = rendererAppConfig.useAppConfig()?.lyric;
+  const lyricAppConfig = useAppConfig()?.lyric;
 
   const lockLyric = lyricAppConfig?.lockLyric;
   const [showOperations, setShowOperations] = useState(false);
@@ -160,7 +160,7 @@ function LyricContent() {
 
   const { lyric = [], music: currentMusic } = lyricStore;
 
-  const lyricAppConfig = rendererAppConfig.useAppConfig()?.lyric;
+  const lyricAppConfig = useAppConfig()?.lyric;
 
 
 

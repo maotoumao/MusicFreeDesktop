@@ -1,4 +1,3 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
@@ -8,6 +7,7 @@ import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
 import defaultAppConfig from "@/common/app-config/default-app-config";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 type Extract<T> = T extends Array<infer R> ? R : never;
 
@@ -57,9 +57,9 @@ export default function MultiRadioGroupSettingItem<T extends IAppConfigKeyPath>(
               key={index}
               onClick={() => {
                 if(checked) {
-                  rendererAppConfig.setAppConfigPath("normal.musicListColumnsShown", (value as Array<any>)?.filter(it => it !== option.value) ?? []);
+                  setAppConfigPath("normal.musicListColumnsShown", (value as Array<any>)?.filter(it => it !== option.value) ?? []);
                 } else {
-                  rendererAppConfig.setAppConfigPath("normal.musicListColumnsShown", [...((value as Array<any>) ?? []), option.value])
+                  setAppConfigPath("normal.musicListColumnsShown", [...((value as Array<any>) ?? []), option.value])
                 }
               }}
             >

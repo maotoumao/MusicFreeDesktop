@@ -4,8 +4,8 @@ import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import { useOutputAudioDevices } from "@/renderer/hooks/useMediaDevices";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
-import rendererAppConfig from "@/common/app-config/renderer";
 import trackPlayer from "@/renderer/core/track-player";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface IProps {
   data: IAppConfig["playMusic"];
@@ -102,7 +102,7 @@ export default function PlayMusic(props: IProps) {
         onChange={async (item) => {
           const result = await trackPlayer.setAudioOutputDevice(item.deviceId);
           if (result) {
-            rendererAppConfig.setAppConfigPath(
+            setAppConfigPath(
               "playMusic.audioOutputDevice",
               item.toJSON()
             );

@@ -9,7 +9,7 @@ import defaultAppConfig from "./default-app-config";
 
 const appConfigStore = new Store<IAppConfig>({});
 
-async function setupRendererAppConfig() {
+export async function setupRendererAppConfig() {
   ipcRendererOn("sync-app-config", (config) => {
     appConfigStore.setValue(config);
   });
@@ -18,7 +18,7 @@ async function setupRendererAppConfig() {
   appConfigStore.setValue(appConfig);
 }
 
-function getAppConfigPath<K extends IAppConfigKeyPath>(
+export function getAppConfigPath<K extends IAppConfigKeyPath>(
   keyPath: K
 ): IAppConfigKeyPathValue<K> {
   const value = appConfigStore.getValue();
@@ -35,21 +35,9 @@ export async function setAppConfigPath<K extends IAppConfigKeyPath>(
   });
 }
 
-async function setAppConfig(appConfig: IAppConfig) {
+export async function setAppConfig(appConfig: IAppConfig) {
   return ipcRendererInvoke("set-app-config", appConfig);
 }
 
-const getAppConfig = appConfigStore.getValue;
-const useAppConfig = appConfigStore.useValue;
-
-
-const rendererAppConfig = {
-    setupRendererAppConfig,
-    getAppConfig,
-    getAppConfigPath,
-    useAppConfig,
-    setAppConfig,
-    setAppConfigPath
-}
-
-export default rendererAppConfig;
+export const getAppConfig = appConfigStore.getValue;
+export const useAppConfig = appConfigStore.useValue;

@@ -15,9 +15,9 @@ import trackPlayer from "@/renderer/core/track-player";
 import { showModal } from "@/renderer/components/Modal";
 import { RequestStateCode, localPluginName, rem } from "@/common/constant";
 import { offsetHeightStore } from "../../store";
-import rendererAppConfig from "@/common/app-config/renderer";
 import MusicSheet from "@/renderer/core/music-sheet";
 import { toMediaBase } from "@/common/media-util";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;
@@ -40,7 +40,7 @@ export default function Body(props: IProps) {
       setFilterMusicList(null);
     } else {
       startTransition(() => {
-        const caseSensitive = rendererAppConfig.getAppConfigPath(
+        const caseSensitive = getAppConfigPath(
           "playMusic.caseSensitiveInSearch"
         );
         if (caseSensitive) {

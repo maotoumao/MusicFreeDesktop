@@ -4,11 +4,10 @@ import MusicSheet from "@/renderer/core/music-sheet";
 import { toast } from "react-toastify";
 import { IAppConfig } from "@/common/app-config/type";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
-import rendererAppConfig from "@/common/app-config/renderer";
 import InputSettingItem from "../../components/InputSettingItem";
 import { AuthType, createClient } from "webdav";
-import { createTmpFile } from "@/renderer/utils/create-tmp-file";
 import BackupResume from "@/renderer/core/backup-resume";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 
 interface IProps {
   data: IAppConfig["backup"];
@@ -85,7 +84,7 @@ export default function Backup(props: IProps) {
 
                 await BackupResume.resume(
                   rawSheets,
-                  rendererAppConfig.getAppConfigPath(
+                  getAppConfigPath(
                     "backup.resumeBehavior"
                   ) === "overwrite"
                 );
@@ -199,7 +198,7 @@ export default function Backup(props: IProps) {
                 );
                 await BackupResume.resume(
                   resumeData,
-                  rendererAppConfig.getAppConfigPath(
+                  getAppConfigPath(
                     "backup.resumeBehavior"
                   ) === "overwrite"
                 );

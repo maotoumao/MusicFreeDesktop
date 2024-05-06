@@ -1,4 +1,3 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
@@ -12,6 +11,7 @@ import { isBasicType } from "@/common/normalize-util";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import { rem } from "@/common/constant";
 import { Fragment, useEffect, useRef } from "react";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface ListBoxSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -43,7 +43,7 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
         onChange={
           onChange ??
           ((val) => {
-            rendererAppConfig.setAppConfigPath(keyPath, val);
+            setAppConfigPath(keyPath, val);
           })
         }
       >

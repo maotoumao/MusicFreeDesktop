@@ -1,19 +1,11 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
 } from "@/common/app-config/type";
-import { Listbox } from "@headlessui/react";
 import "./index.scss";
-import defaultAppConfig from "@/common/app-config/default-app-config";
-import Condition from "@/renderer/components/Condition";
-import Loading from "@/renderer/components/Loading";
-import { isBasicType } from "@/common/normalize-util";
-import useVirtualList from "@/renderer/hooks/useVirtualList";
-import { rem } from "@/common/constant";
-import { Fragment, useEffect, useRef } from "react";
 import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
 import { toast } from "react-toastify";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface PathSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -44,7 +36,7 @@ export default function PathSettingItem<T extends IAppConfigKeyPath>(
               buttonLabel: "确认",
             });
             if (!result.canceled) {
-              rendererAppConfig.setAppConfigPath(
+              setAppConfigPath(
                 keyPath,
                 result.filePaths[0]! as any
               );

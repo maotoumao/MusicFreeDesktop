@@ -13,7 +13,7 @@ import ListView from "./views/list";
 import ArtistView from "./views/artist";
 import AlbumView from "./views/album";
 import FolderView from "./views/folder";
-import rendererAppConfig from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 
 enum DisplayView {
   LIST,
@@ -39,7 +39,7 @@ export default function LocalMusicView() {
       setFilterMusicList(null);
     } else {
       startTransition(() => {
-        const caseSensitive = rendererAppConfig.getAppConfigPath(
+        const caseSensitive = getAppConfigPath(
           "playMusic.caseSensitiveInSearch"
         );
         if (caseSensitive) {

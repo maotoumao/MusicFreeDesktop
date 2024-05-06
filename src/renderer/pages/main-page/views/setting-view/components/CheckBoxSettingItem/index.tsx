@@ -1,5 +1,5 @@
 import defaultAppConfig from "@/common/app-config/default-app-config";
-import rendererAppConfig from "@/common/app-config/renderer";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
@@ -37,7 +37,7 @@ export default function CheckBoxSettingItem<T extends IAppConfigKeyPath>(
           if (onCheckChanged) {
             onCheckChanged(!checked);
           } else {
-            rendererAppConfig.setAppConfigPath(keyPath, !checked as any);
+            setAppConfigPath(keyPath, !checked as any);
           }
         }}
       >

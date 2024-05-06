@@ -1,10 +1,10 @@
 import { useRef } from "react";
 import Base from "../Base";
 import "./index.scss";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { hidePanel } from "../..";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface IUserVariablesProps {
   plugin: IPlugin.IPluginDelegate;
@@ -26,7 +26,7 @@ export default function (props: IUserVariablesProps) {
             role="button"
             className="panel--user-variables-submit"
             onClick={() => {
-              rendererAppConfig.setAppConfigPath(
+              setAppConfigPath(
                 `private.pluginMeta.${plugin.platform}.userVariables`,
                 valueRef.current
               );

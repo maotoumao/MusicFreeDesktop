@@ -17,10 +17,10 @@ import Empty from "@/renderer/components/Empty";
 import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
 import { toast } from "react-toastify";
 import { showPanel } from "@/renderer/components/Panel";
-import rendererAppConfig from "@/common/app-config/renderer";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 import { produce } from "immer";
 import i18n from "@/common/i18n";
+import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/renderer";
 
 const t = i18n.t;
 
@@ -160,7 +160,7 @@ function renderOptions(info: any) {
               variables: row.userVariables,
               plugin: row,
               initValues:
-                rendererAppConfig.getAppConfigPath("private.pluginMeta")?.[
+                getAppConfigPath("private.pluginMeta")?.[
                   row.platform
                 ]?.userVariables,
             });
@@ -221,7 +221,7 @@ export default function PluginTable() {
   });
 
   function onDrop(fromIndex: number, toIndex: number) {
-    const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta") ?? {};
+    const meta = getAppConfigPath("private.pluginMeta") ?? {};
 
     const newPlugins = plugins
       .slice(0, fromIndex)
@@ -241,7 +241,7 @@ export default function PluginTable() {
       });
     });
 
-    rendererAppConfig.setAppConfigPath("private.pluginMeta", newMeta);
+    setAppConfigPath("private.pluginMeta", newMeta);
   }
 
   return (

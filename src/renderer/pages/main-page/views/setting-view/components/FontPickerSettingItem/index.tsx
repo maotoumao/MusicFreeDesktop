@@ -1,4 +1,3 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
@@ -8,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import ListBoxSettingItem from "../ListBoxSettingItem";
 import { defaultFont } from "@/common/constant";
 import useLocalFonts from "@/renderer/hooks/useLocalFonts";
+import { setAppConfigPath } from "@/common/app-config/renderer";
 
 interface FontPickerSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -40,7 +40,7 @@ export default function FontPickerSettingItem<T extends IAppConfigKeyPath>(
       options={fonts ?? (null as any)}
       onChange={(val) => {
         // 字体不可序列化 不知道为啥 json.stringify是空对象
-        rendererAppConfig.setAppConfigPath(keyPath, {
+        setAppConfigPath(keyPath, {
           family: (val as FontData).family,
           fullName: (val as FontData).fullName,
           postscriptName: (val as FontData).postscriptName,

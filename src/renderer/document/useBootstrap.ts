@@ -5,8 +5,8 @@ import Evt from "../core/events";
 import { getUserPerference } from "../utils/user-perference";
 import { compare } from "compare-versions";
 import { showModal } from "../components/Modal";
-import rendererAppConfig from "@/common/app-config/renderer";
 import checkUpdate from "../utils/check-update";
+import { getAppConfigPath } from "@/common/app-config/renderer";
 
 export default function useBootstrap() {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ export default function useBootstrap() {
       }
     });
 
-    if (rendererAppConfig.getAppConfigPath("normal.checkUpdate")) {
+    if (getAppConfigPath("normal.checkUpdate")) {
       checkUpdate();
     }
   }, []);
