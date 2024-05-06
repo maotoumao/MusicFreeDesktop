@@ -8,6 +8,7 @@ import { showModal } from "@/renderer/components/Modal";
 import { localPluginName } from "@/common/constant";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
 import { useTranslation } from "react-i18next";
+import { useSupportedPlugin } from "@/renderer/core/plugin-delegate";
 
 export default function MySheets() {
   const sheetIdMatch = useMatch(
@@ -16,25 +17,40 @@ export default function MySheets() {
   const currentSheetId = sheetIdMatch?.params?.sheetId;
   const musicSheets = MusicSheet.frontend.useAllSheets();
   const navigate = useNavigate();
-
   const { t } = useTranslation();
+
+  const importablePlugins = useSupportedPlugin("importMusicSheet");
 
   return (
     <div className="side-bar-container--my-sheets">
       <div className="divider"></div>
       <Disclosure defaultOpen>
         <Disclosure.Button className="title" as="div" role="button">
-          <div className="my-sheets ">{t("side_bar.my_sheets")}</div>
+          <div className="my-sheets">{t("side_bar.my_sheets")}</div>
           <div
             role="button"
-            className="add-new-sheet"
+            className="option-btn"
+            title={t("plugin.method_import_music_sheet")}
+            onClick={(e) => {
+              e.stopPropagation();
+              showModal("ImportMusicSheet", {
+                plugins: importablePlugins
+              })
+            }}
+          >
+            <SvgAsset iconName="arrow-left-end-on-rectangle"></SvgAsset>
+
+          </div>
+          <div
+            role="button"
+            className="option-btn"
             title={t("side_bar.create_local_sheet")}
             onClick={(e) => {
               e.stopPropagation();
               showModal("AddNewSheet");
             }}
           >
-            <SvgAsset iconName="plus-circle"></SvgAsset>
+            <SvgAsset iconName="plus"></SvgAsset>
           </div>
         </Disclosure.Button>
         <Disclosure.Panel>

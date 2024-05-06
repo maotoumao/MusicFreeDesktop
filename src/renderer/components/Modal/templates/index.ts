@@ -2,6 +2,7 @@ import AddMusicToSheet from "./AddMusicToSheet";
 import AddNewSheet from "./AddNewSheet";
 import Base from "./Base";
 import ExitConfirm from "./ExitConfirm";
+import ImportMusicSheet from "./ImportMusicSheet";
 import PluginSubscription from "./PluginSubscription";
 import Reconfirm from "./Reconfirm";
 import SearchLyric from "./SearchLyric";
@@ -23,5 +24,6 @@ export default {
     WatchLocalDir,
     SelectOne,
     PluginSubscription,
-    SearchLyric
+    SearchLyric,
+    ImportMusicSheet
 }

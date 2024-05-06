@@ -3,6 +3,7 @@ import { memo } from "react";
 export type SvgAssetIconNames =
   | "album"
   | "array-download-tray"
+  | "arrow-left-end-on-rectangle"
   | "cd"
   | "check"
   | "check-circle"
