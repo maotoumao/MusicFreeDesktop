@@ -1,11 +1,11 @@
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
-} from "@/common/app-config/type";
+} from "@/shared/app-config/type";
 import "./index.scss";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface PathSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;

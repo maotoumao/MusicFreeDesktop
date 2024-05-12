@@ -15,7 +15,7 @@ import { toastDuration } from "@/common/constant";
 import useBootstrap from "./useBootstrap";
 import LyricWindowPage from "../pages";
 import { useEffect, useRef } from "react";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
 
 bootstrap().then(() => {
   ReactDOM.createRoot(document.getElementById("root")).render(<Root></Root>);

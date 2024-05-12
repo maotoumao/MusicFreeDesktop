@@ -12,7 +12,7 @@ import {
   getAppConfigPath,
   setAppConfigPath,
   setupMainAppConfig,
-} from "@/common/app-config/main";
+} from "@/shared/app-config/main";
 import { setupTray } from "./tray";
 import { setupGlobalShortCut } from "./core/global-short-cut";
 import fs from "fs";

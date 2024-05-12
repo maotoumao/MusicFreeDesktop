@@ -9,9 +9,9 @@ import {
 import { showMainWindow } from "../window";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
-import { ipcMainSendMainWindow } from "@/common/ipc-util/main";
+import { ipcMainSendMainWindow } from "@/shared/ipc/main";
 import { getResPath } from "../utils/get-res-path";
-import { getAppConfigPath } from "@/common/app-config/main";
+import { getAppConfigPath } from "@/shared/app-config/main";
 import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 import i18n from "@/common/i18n";
 

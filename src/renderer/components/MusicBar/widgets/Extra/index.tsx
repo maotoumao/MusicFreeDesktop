@@ -7,7 +7,7 @@ import { useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
 import { showModal } from "@/renderer/components/Modal";
-import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import classNames from "@/renderer/utils/classnames";
 import {
   getCurrentPanel,
@@ -15,7 +15,7 @@ import {
   showPanel,
 } from "@/renderer/components/Panel";
 import { useTranslation } from "react-i18next";
-import { setAppConfigPath, useAppConfig } from "@/common/app-config/renderer";
+import { setAppConfigPath, useAppConfig } from "@/shared/app-config/renderer";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();

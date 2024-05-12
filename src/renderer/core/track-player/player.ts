@@ -26,10 +26,10 @@ import {
   setUserPerferenceIDB,
 } from "@/renderer/utils/user-perference";
 import { delay } from "@/common/time-util";
-import { ipcRendererOn, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererOn, ipcRendererSend } from "@/shared/ipc/renderer";
 import Evt from "../events";
 import { getLinkedLyric } from "../link-lyric";
-import { getAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 const initProgress = {
   currentTime: 0,

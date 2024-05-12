@@ -1,6 +1,6 @@
 import { nativeImage } from "electron";
 import { getMainWindow } from "../window";
-import { ipcMainSendMainWindow } from "@/common/ipc-util/main";
+import { ipcMainSendMainWindow } from "@/shared/ipc/main";
 import { getResPath } from "./get-res-path";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 

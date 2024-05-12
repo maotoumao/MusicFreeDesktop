@@ -1,4 +1,4 @@
-import { getAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 import { getUserPerferenceIDB, setUserPerferenceIDB } from "./user-perference";
 
 export async function getSearchHistory() {

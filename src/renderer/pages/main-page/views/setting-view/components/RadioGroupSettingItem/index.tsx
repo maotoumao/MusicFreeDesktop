@@ -1,13 +1,13 @@
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
-} from "@/common/app-config/type";
+} from "@/shared/app-config/type";
 import { RadioGroup } from "@headlessui/react";
 import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
-import defaultAppConfig from "@/common/app-config/default-app-config";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import defaultAppConfig from "@/shared/app-config/default-app-config";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface IRadioGroupSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;

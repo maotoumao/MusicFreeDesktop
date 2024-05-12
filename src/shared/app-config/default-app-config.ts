@@ -1,4 +1,4 @@
-import { defaultFont } from "../constant";
+import { defaultFont } from "../../common/constant";
 import { IAppConfigKeyPath, IAppConfigKeyPathValue } from "./type";
 
 type IDefaultAppConfig<T extends IAppConfigKeyPath> = {

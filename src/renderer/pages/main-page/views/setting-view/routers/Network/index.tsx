@@ -1,8 +1,8 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import InputSettingItem from "../../components/InputSettingItem";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import { useEffect, useState } from "react";
 import { normalizeFileSize } from "@/common/normalize-util";
 

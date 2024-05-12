@@ -5,7 +5,7 @@ import path from "path";
 import { IAppConfig, IAppConfigKeyPath, IAppConfigKeyPathValue } from "./type";
 import { produce } from "immer";
 import objectPath from "object-path";
-import { ipcMainHandle, ipcMainSend } from "../ipc-util/main";
+import { ipcMainHandle, ipcMainSend } from "@/shared/ipc/main";
 import { getLyricWindow, getMainWindow } from "@/main/window";
 import defaultAppConfig from "./default-app-config";
 

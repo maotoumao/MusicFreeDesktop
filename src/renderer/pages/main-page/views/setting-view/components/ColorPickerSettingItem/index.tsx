@@ -1,14 +1,14 @@
-import defaultAppConfig from "@/common/app-config/default-app-config";
+import defaultAppConfig from "@/shared/app-config/default-app-config";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
-} from "@/common/app-config/type";
+} from "@/shared/app-config/type";
 
 import { Popover } from "@headlessui/react";
 import "./index.scss";
 import { useRef, useState } from "react";
 import { HexAlphaColorPicker, HexColorInput } from "react-colorful";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface IColorPickerSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;

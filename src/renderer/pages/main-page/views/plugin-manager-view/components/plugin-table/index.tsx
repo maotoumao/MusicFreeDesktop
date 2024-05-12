@@ -14,13 +14,13 @@ import { CSSProperties, ReactNode } from "react";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import { hideModal, showModal } from "@/renderer/components/Modal";
 import Empty from "@/renderer/components/Empty";
-import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import { showPanel } from "@/renderer/components/Panel";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 import { produce } from "immer";
 import i18n from "@/common/i18n";
-import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath, setAppConfigPath } from "@/shared/app-config/renderer";
 
 const t = i18n.t;
 

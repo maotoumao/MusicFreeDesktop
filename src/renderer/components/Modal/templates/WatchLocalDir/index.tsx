@@ -9,7 +9,7 @@ import { hideModal } from "../..";
 import { useEffect, useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import Checkbox from "@/renderer/components/Checkbox";
 import localMusic from "@/renderer/core/local-music";

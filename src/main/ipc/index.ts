@@ -1,4 +1,4 @@
-import { ipcMainHandle, ipcMainOn } from "@/common/ipc-util/main";
+import { ipcMainHandle, ipcMainOn } from "@/shared/ipc/main";
 import {
   closeLyricWindow,
   createLyricWindow,
@@ -14,12 +14,12 @@ import { compare } from "compare-versions";
 import {
   getAppConfigPathSync,
   setAppConfigPath,
-} from "@/common/app-config/main";
+} from "@/shared/app-config/main";
 // import { getExtensionWindow, syncExtensionData } from "../core/extensions";
 import setThumbImg from "../utils/set-thumb-img";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
 import { HttpsProxyAgent } from "https-proxy-agent";
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {

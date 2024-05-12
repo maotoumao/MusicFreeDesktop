@@ -1,4 +1,4 @@
-import { ipcRendererInvoke, ipcRendererOn } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererOn } from "@/shared/ipc/renderer";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Evt from "../core/events";
@@ -6,7 +6,7 @@ import { getUserPerference } from "../utils/user-perference";
 import { compare } from "compare-versions";
 import { showModal } from "../components/Modal";
 import checkUpdate from "../utils/check-update";
-import { getAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 export default function useBootstrap() {
   const navigate = useNavigate();

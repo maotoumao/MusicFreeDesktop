@@ -1,14 +1,14 @@
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
-} from "@/common/app-config/type";
+} from "@/shared/app-config/type";
 import "./index.scss";
-import defaultAppConfig from "@/common/app-config/default-app-config";
+import defaultAppConfig from "@/shared/app-config/default-app-config";
 import {
   HTMLInputTypeAttribute,
   useState,
 } from "react";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface InputSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;

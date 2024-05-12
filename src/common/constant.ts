@@ -1,4 +1,4 @@
-import { IAppConfig } from "./app-config/type";
+import { IAppConfig } from "../shared/app-config/type";
 
 export const internalDataKey = "$";
 export const internalDataSymbol = Symbol.for("internal");

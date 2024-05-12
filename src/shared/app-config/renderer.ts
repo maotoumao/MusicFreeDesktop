@@ -2,8 +2,8 @@ import objectPath from "object-path";
 import {
   ipcRendererInvoke,
   ipcRendererOn,
-} from "../ipc-util/renderer";
-import Store from "../store";
+} from "@/shared/ipc/renderer";
+import Store from "../../common/store";
 import { IAppConfig, IAppConfigKeyPath, IAppConfigKeyPathValue } from "./type";
 import defaultAppConfig from "./default-app-config";
 

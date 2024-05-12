@@ -1,13 +1,13 @@
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
-} from "@/common/app-config/type";
-import defaultAppConfig from "@/common/app-config/default-app-config";
+} from "@/shared/app-config/type";
+import defaultAppConfig from "@/shared/app-config/default-app-config";
 import { useEffect, useMemo, useState } from "react";
 import ListBoxSettingItem from "../ListBoxSettingItem";
 import { defaultFont } from "@/common/constant";
 import useLocalFonts from "@/renderer/hooks/useLocalFonts";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface FontPickerSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;

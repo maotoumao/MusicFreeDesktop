@@ -1,12 +1,12 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import hotkeys from "hotkeys-js";
 import { bindShortCut } from "@/renderer/core/shortcut";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface IProps {
   data: IAppConfig["shortCut"];

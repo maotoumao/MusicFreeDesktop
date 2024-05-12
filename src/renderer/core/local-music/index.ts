@@ -1,4 +1,4 @@
-import { ipcRendererSend, ipcRendererOn } from "@/common/ipc-util/renderer";
+import { ipcRendererSend, ipcRendererOn } from "@/shared/ipc/renderer";
 import localMusicListStore from "./store";
 import {
   getUserPerferenceIDB,

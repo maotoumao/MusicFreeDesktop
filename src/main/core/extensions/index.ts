@@ -1,6 +1,6 @@
 // 同步某些状态到其他
 
-import { ipcMainSend } from "@/common/ipc-util/main";
+import { ipcMainSend } from "@/shared/ipc/main";
 import { getMainWindow } from "@/main/window";
 import { BrowserWindow, MessageChannelMain, MessagePortMain } from "electron";
 

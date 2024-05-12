@@ -1,4 +1,4 @@
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
 import SvgAsset from "../SvgAsset";
 import "./index.scss";
 import { showModal } from "../Modal";
@@ -11,7 +11,7 @@ import Condition from "../Condition";
 import SearchHistory from "./widgets/SearchHistory";
 import { addSearchHistory } from "@/renderer/utils/search-history";
 import { useTranslation } from "react-i18next";
-import { getAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 export default function AppHeader() {
   const navigate = useNavigate();

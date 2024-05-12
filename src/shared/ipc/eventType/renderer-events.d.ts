@@ -61,10 +61,10 @@ declare namespace IpcEvents {
 
 /** 需要回执 */
 declare namespace IpcInvoke {
-  type IAppConfig = import("@/common/app-config/type").IAppConfig;
-  type IAppConfigKeyPath = import("@/common/app-config/type").IAppConfigKeyPath;
+  type IAppConfig = import("@/shared/app-config/type").IAppConfig;
+  type IAppConfigKeyPath = import("@/shared/app-config/type").IAppConfigKeyPath;
   type IAppConfigKeyPathValue =
-    import("@/common/app-config/type").IAppConfigKeyPathValue;
+    import("@/shared/app-config/type").IAppConfigKeyPathValue;
 
   interface Renderer {
     "get-all-plugins": () => IPlugin.IPluginDelegate[];

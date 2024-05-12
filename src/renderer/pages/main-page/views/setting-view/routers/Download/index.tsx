@@ -1,10 +1,10 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import "./index.scss";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import Downloader from "@/renderer/core/downloader";
 import PathSettingItem from "../../components/PathSettingItem";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface IProps {
   data: IAppConfig["download"];

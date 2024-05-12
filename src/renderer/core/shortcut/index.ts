@@ -2,11 +2,11 @@ import hotkeys from "hotkeys-js";
 
 import trackPlayer from "../track-player";
 import { PlayerState, TrackPlayerEvent } from "../track-player/enum";
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import Evt from "../events";
 import { shortCutKeys, shortCutKeysEvts } from "@/common/constant";
-import { getAppConfigPath } from "@/common/app-config/renderer";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
 
 const originalHotkeysFilter = hotkeys.filter;
 

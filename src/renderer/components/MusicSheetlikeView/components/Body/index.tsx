@@ -17,7 +17,7 @@ import { RequestStateCode, localPluginName, rem } from "@/common/constant";
 import { offsetHeightStore } from "../../store";
 import MusicSheet from "@/renderer/core/music-sheet";
 import { toMediaBase } from "@/common/media-util";
-import { getAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 interface IProps {
   musicSheet: IMusic.IMusicSheetItem;

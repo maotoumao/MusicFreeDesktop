@@ -4,7 +4,7 @@ import "./index.scss";
 import { hidePanel } from "../..";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface IUserVariablesProps {
   plugin: IPlugin.IPluginDelegate;

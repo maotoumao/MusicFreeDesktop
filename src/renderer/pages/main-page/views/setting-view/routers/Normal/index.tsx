@@ -1,4 +1,4 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";

@@ -1,13 +1,13 @@
-import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import "./index.scss";
 import MusicSheet from "@/renderer/core/music-sheet";
 import { toast } from "react-toastify";
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import InputSettingItem from "../../components/InputSettingItem";
 import { AuthType, createClient } from "webdav";
 import BackupResume from "@/renderer/core/backup-resume";
-import { getAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 interface IProps {
   data: IAppConfig["backup"];

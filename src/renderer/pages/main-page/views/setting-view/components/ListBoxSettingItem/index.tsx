@@ -1,17 +1,17 @@
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
-} from "@/common/app-config/type";
+} from "@/shared/app-config/type";
 import { Listbox } from "@headlessui/react";
 import "./index.scss";
-import defaultAppConfig from "@/common/app-config/default-app-config";
+import defaultAppConfig from "@/shared/app-config/default-app-config";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import { isBasicType } from "@/common/normalize-util";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import { rem } from "@/common/constant";
 import { Fragment, useEffect, useRef } from "react";
-import { setAppConfigPath } from "@/common/app-config/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 interface ListBoxSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;

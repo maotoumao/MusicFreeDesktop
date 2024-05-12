@@ -3,14 +3,14 @@ import classNames from "@/renderer/utils/classnames";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import getTextWidth from "@/renderer/utils/get-text-width";
 import command from "../utils/command";
 import currentPlayerStore from "../store/current-player-store";
 import currentProgressStore from "../store/current-progress-store";
 import currentLyricStore from "../store/current-lyric-store";
-import { useAppConfig } from "@/common/app-config/renderer";
+import { useAppConfig } from "@/shared/app-config/renderer";
 
 export default function LyricWindowPage() {
   const playerStore = currentPlayerStore.useValue();

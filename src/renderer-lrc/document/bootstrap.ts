@@ -1,6 +1,6 @@
-import { ipcRendererOn, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererOn, ipcRendererSend } from "@/shared/ipc/renderer";
 import currentPlayerStore from "../store/current-player-store";
-import {setupRendererAppConfig} from "@/common/app-config/renderer";
+import {setupRendererAppConfig} from "@/shared/app-config/renderer";
 import currentProgressStore from "../store/current-progress-store";
 import currentLyricStore from "../store/current-lyric-store";
 

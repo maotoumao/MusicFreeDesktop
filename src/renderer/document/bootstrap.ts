@@ -10,11 +10,11 @@ import localMusic from "../core/local-music";
 import { setupLocalShortCut } from "../core/shortcut";
 import { setAutoFreeze } from "immer";
 import Evt from "../core/events";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 
 import Downloader from "../core/downloader";
 import MessageManager from "../core/message-manager";
-import { getAppConfigPath, setAppConfigPath, setupRendererAppConfig } from "@/common/app-config/renderer";
+import { getAppConfigPath, setAppConfigPath, setupRendererAppConfig } from "@/shared/app-config/renderer";
 
 setAutoFreeze(false);
 

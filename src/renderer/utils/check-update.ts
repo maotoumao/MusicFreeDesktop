@@ -1,4 +1,4 @@
-import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { compare } from "compare-versions";
 import { showModal } from "../components/Modal";
 import { getUserPerference } from "./user-perference";

@@ -3,7 +3,7 @@ import Base from "../Base";
 import "./index.scss";
 import wcChannelImg from "@/assets/imgs/wechat_channel.jpg";
 import { hideModal } from "../..";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
 import { useTranslation } from "react-i18next";
 
 interface IUpdateProps {

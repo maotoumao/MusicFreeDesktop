@@ -7,7 +7,7 @@ import * as cheerio from "cheerio";
 import he from "he";
 import PluginMethods from "./plugin-methods";
 import reactNativeCookies from "./polyfill/react-native-cookies";
-import { getAppConfigPathSync } from "@/common/app-config/main";
+import { getAppConfigPathSync } from "@/shared/app-config/main";
 import { app } from "electron";
 import * as webdav from "webdav";
 

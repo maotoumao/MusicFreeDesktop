@@ -1,7 +1,7 @@
-import { getAppConfigPath, setAppConfigPath } from "@/common/app-config/main";
-import { IAppConfig } from "@/common/app-config/type";
+import { getAppConfigPath, setAppConfigPath } from "@/shared/app-config/main";
+import { IAppConfig } from "@/shared/app-config/type";
 import { shortCutKeys, shortCutKeysEvts } from "@/common/constant";
-import { ipcMainOn, ipcMainSendMainWindow } from "@/common/ipc-util/main";
+import { ipcMainOn, ipcMainSendMainWindow } from "@/shared/ipc/main";
 import { globalShortcut } from "electron";
 
 type IShortCutKeys = keyof IAppConfig["shortCut"]["shortcuts"];

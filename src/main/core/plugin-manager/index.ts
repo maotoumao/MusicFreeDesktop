@@ -6,7 +6,7 @@ import {
   ipcMainHandle,
   ipcMainOn,
   ipcMainSendMainWindow,
-} from "@/common/ipc-util/main";
+} from "@/shared/ipc/main";
 import { localPluginHash, localPluginName } from "@/common/constant";
 import localPlugin from "./local-plugin";
 import { rimraf } from "rimraf";
@@ -14,7 +14,7 @@ import axios from "axios";
 import { compare } from "compare-versions";
 import { nanoid } from "nanoid";
 import { addRandomHash } from "@/common/normalize-util";
-import { getAppConfigPathSync } from "@/common/app-config/main";
+import { getAppConfigPathSync } from "@/shared/app-config/main";
 
 let plugins: Plugin[] = [];
 let clonedPlugins: IPlugin.IPluginDelegate[] = [];

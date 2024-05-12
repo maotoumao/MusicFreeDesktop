@@ -1,4 +1,4 @@
-import { ipcRendererOn, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererOn, ipcRendererSend } from "@/shared/ipc/renderer";
 import trackPlayer from "../track-player";
 import {
   PlayerState,
@@ -6,7 +6,7 @@ import {
   TrackPlayerEvent,
 } from "../track-player/enum";
 import trackPlayerEventsEmitter from "../track-player/event";
-import { getAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 function getCurrentMusicData() {
   const currentMusic = trackPlayer.getCurrentMusic();

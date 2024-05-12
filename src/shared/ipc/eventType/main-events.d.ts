@@ -2,7 +2,7 @@ declare namespace IpcEvents {
   type IPlayerCmd = "skip-prev" | "skip-next" | "set-repeat-mode" | "set-player-state";
   // 由 Main 发出的ipc通信
   type Plugin = import("@main/core/plugin-manager/plugin").Plugin;
-  type AppConfig = import("@/common/app-config/type").IAppConfig;
+  type AppConfig = import("@/shared/app-config/type").IAppConfig;
 
   type IExtensionWindowSyncData = {
     timeStamp: number;

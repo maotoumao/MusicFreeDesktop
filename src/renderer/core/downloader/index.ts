@@ -17,7 +17,7 @@ import {
   useDownloaded,
   useDownloadedMusicList,
 } from "./downloaded-sheet";
-import { getAppConfigPath } from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 type ProxyMarkedFunction<T extends (...args: any) => void> = T &
   Comlink.ProxyMarked;

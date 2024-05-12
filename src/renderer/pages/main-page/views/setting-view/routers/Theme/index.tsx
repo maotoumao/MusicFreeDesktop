@@ -1,4 +1,4 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import "./index.scss";
 import classNames from "@/renderer/utils/classnames";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import {
 } from "@/renderer/components/ContextMenu";
 import { toast } from "react-toastify";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import A from "@/renderer/components/A";
 
 interface IProps {

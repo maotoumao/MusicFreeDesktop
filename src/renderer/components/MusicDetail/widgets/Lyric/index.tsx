@@ -11,7 +11,7 @@ import {
   getUserPerference,
   setUserPerference,
 } from "@/renderer/utils/user-perference";
-import { ipcRendererInvoke } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import { showModal } from "@/renderer/components/Modal";
 import { getCurrentMusic } from "@/renderer/core/track-player/player";

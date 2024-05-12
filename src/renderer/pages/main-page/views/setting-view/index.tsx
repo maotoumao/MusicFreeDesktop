@@ -1,9 +1,9 @@
 import "./index.scss";
 import routers from "./routers";
 import { useEffect, useRef, useState } from "react";
-import { IConfig } from "@/common/app-config/type";
+import { IConfig } from "@/shared/app-config/type";
 import Condition from "@/renderer/components/Condition";
-import { useAppConfig } from "@/common/app-config/renderer";
+import { useAppConfig } from "@/shared/app-config/renderer";
 
 export default function SettingView() {
   const appConfig = useAppConfig();

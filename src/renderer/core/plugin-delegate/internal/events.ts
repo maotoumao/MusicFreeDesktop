@@ -1,4 +1,4 @@
-import { ipcRendererOn } from "@/common/ipc-util/renderer";
+import { ipcRendererOn } from "@/shared/ipc/renderer";
 import delegatePluginsStore from "./store";
 import { refreshPlugins } from "./methods";
 
