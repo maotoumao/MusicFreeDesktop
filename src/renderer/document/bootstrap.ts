@@ -24,7 +24,6 @@ export default async function () {
     registerPluginEvents(),
     MusicSheet.frontend.setupMusicSheets(),
     trackPlayer.setupPlayer(),
-    localMusic.setupLocalMusic(),
   ]);
   await MessageManager.setupMessageManager();
   await window.themepack.setupThemePacks();
@@ -32,7 +31,11 @@ export default async function () {
   dropHandler();
   clearDefaultBehavior();
   setupEvents();
+  localMusic.setupLocalMusic(),
+
   await Downloader.setupDownloader();
+
+  
 
   // 自动更新插件
   if (getAppConfigPath("plugin.autoUpdatePlugin")) {

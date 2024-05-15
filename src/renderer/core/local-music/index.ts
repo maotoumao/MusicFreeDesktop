@@ -53,7 +53,16 @@ async function setupLocalMusic() {
       await localFileWatcherWorker.setupWatcher(localWatchDir);
     }
 
-    const allMusic = await musicSheetDB.localMusicStore.toArray();
+    const a = Date.now();
+    const count = await musicSheetDB.localMusicStore.count();
+    const batchSize = 800;
+    let allMusic: any = [];
+    for (let i = 0; i < Math.ceil(count / batchSize); ++i) {
+      const res = await musicSheetDB.localMusicStore.offset(i * batchSize).limit(batchSize).toArray()
+      allMusic = allMusic.concat(res);
+    }
+
+
     localMusicListStore.setValue(allMusic);
     localFileWatcherWorker.onAdd(
       Comlink.proxy(async (musicItems: IMusicItemWithLocalPath[]) => {
