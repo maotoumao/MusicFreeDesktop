@@ -4,7 +4,8 @@ import { localFilePathSymbol } from "@/common/constant";
 import fs from "fs/promises";
 import { delay } from "@/common/time-util";
 import axios from "axios";
-import { addFileScheme } from "@/common/file-util";
+import { addFileScheme, safeStat } from "@/common/file-util";
+import path from "path";
 
 export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
   private plugin;
@@ -123,6 +124,27 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
         rawLrc,
         lrc: lrcUrl,
       };
+    }
+    // 2. 读取路径下的同名lrc文件
+    const localPath = getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData")?.path || musicItem.$$localPath;
+    if (localPath) {
+      const fileName = path.parse(localPath).name;
+      const lrcPathWithoutExt = path.resolve(localPath, `../${fileName}`);
+      const exts = [".lrc", ".LRC", ".txt"];
+
+      for (const ext of exts) {
+        const lrcFilePath = lrcPathWithoutExt + ext;
+        if ((await safeStat(lrcFilePath))?.isFile()) {
+          rawLrc = await fs.readFile(lrcFilePath, "utf8");
+          if (rawLrc) {
+            return {
+              rawLrc,
+              lrc: lrcUrl
+            }
+          }
+        }
+      }
+
     }
     // // 2.本地缓存
     // const localLrc =

@@ -278,6 +278,7 @@ export function showMusicContextMenu(
                 musicItems.id,
               ]);
             }
+            console.log(realTimeMusicItem)
             ipcRendererSend(
               "open-path",
               window.path.dirname(
@@ -287,6 +288,7 @@ export function showMusicContextMenu(
                 )?.path
               )
             );
+            
           }
         } catch (e) {
           toast.error(`${i18n.t("music_list_context_menu.reveal_local_music_in_file_explorer_fail")} ${e?.message ?? ""}`);
