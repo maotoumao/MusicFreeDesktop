@@ -38,7 +38,7 @@ import {
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import { isBetween } from "@/common/normalize-util";
-import { ipcRendererSend } from "@/shared/ipc/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
 import { toast } from "react-toastify";
@@ -278,17 +278,16 @@ export function showMusicContextMenu(
                 musicItems.id,
               ]);
             }
-            console.log(realTimeMusicItem)
-            ipcRendererSend(
-              "open-path",
-              window.path.dirname(
+            const result = await ipcRendererInvoke(
+              "show-item-in-folder",
                 getInternalData<IMusic.IMusicItemInternalData>(
                   realTimeMusicItem,
                   "downloadData"
                 )?.path
-              )
             );
-            
+            if (!result) {
+              throw new Error();
+            }
           }
         } catch (e) {
           toast.error(`${i18n.t("music_list_context_menu.reveal_local_music_in_file_explorer_fail")} ${e?.message ?? ""}`);

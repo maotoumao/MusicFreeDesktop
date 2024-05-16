@@ -6,6 +6,7 @@ import {
   getMainWindow,
 } from "../window";
 import { app, dialog, shell } from "electron";
+import fs from "fs/promises";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import { setTrayTitle, setupTrayMenu } from "../tray";
@@ -41,6 +42,16 @@ export default function setupIpcMain() {
   ipcMainOn("open-path", (path) => {
     shell.openPath(path);
   });
+
+  ipcMainHandle("show-item-in-folder", async (fullPath: string) => {
+    try {
+      await fs.stat(fullPath);
+      shell.showItemInFolder(fullPath);
+      return true;
+    } catch {
+      return false;
+    }
+  })
 
   ipcMainHandle("show-open-dialog", (options) => {
     const mainWindow = getMainWindow();

@@ -67,6 +67,7 @@ declare namespace IpcInvoke {
     import("@/shared/app-config/type").IAppConfigKeyPathValue;
 
   interface Renderer {
+    "show-item-in-folder": (fullPath: string) => boolean;
     "get-all-plugins": () => IPlugin.IPluginDelegate[];
     "call-plugin-method": <
       T extends keyof IPlugin.IPluginInstanceMethods
