@@ -13,11 +13,10 @@ import { ipcMainSendMainWindow } from "@/shared/ipc/main";
 import { getResPath } from "../utils/get-res-path";
 import { getAppConfigPath } from "@/shared/app-config/main";
 import { setDesktopLyricLock, setLyricWindow } from "../ipc";
-import i18n from "@/common/i18n";
+import { t } from "@/shared/i18n/main";
+
 
 let tray: Tray | null = null;
-
-const {t} = i18n;
 
 if (process.platform === "darwin") {
   Menu.setApplicationMenu(

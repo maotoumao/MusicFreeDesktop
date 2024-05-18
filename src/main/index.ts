@@ -18,6 +18,7 @@ import { setupGlobalShortCut } from "./core/global-short-cut";
 import fs from "fs";
 import path from "path";
 import { setAutoFreeze } from "immer";
+import { setupI18n } from "@/shared/i18n/main";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require("electron-squirrel-startup")) {
@@ -82,6 +83,7 @@ app.on("will-quit", () => {
 // code. You can also put them in separate files and import them here.
 app.whenReady().then(async () => {
   await setupMainAppConfig();
+  setupI18n(() => "zh-CN");
   setupIpcMain();
   setupPluginManager();
   setupTray();

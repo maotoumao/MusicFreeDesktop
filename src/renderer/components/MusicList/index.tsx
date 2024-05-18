@@ -46,7 +46,7 @@ import SwitchCase from "../SwitchCase";
 import SvgAsset from "../SvgAsset";
 import musicSheetDB from "@/renderer/core/db/music-sheet-db";
 import DragReceiver, { startDrag } from "../DragReceiver";
-import i18n from "@/common/i18n";
+import { i18n } from "@/shared/i18n/renderer";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 interface IMusicListProps {

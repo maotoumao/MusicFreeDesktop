@@ -1,0 +1,236 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "download": "Download",
+    "downloading": "Downloading",
+    "downloaded": "Downloaded",
+    "remove": "Remove",
+    "delete": "Delete",
+    "default": "Default",
+    "version_code": "Version Code",
+    "operation": "Operation",
+    "update": "Update",
+    "uninstall": "Uninstall",
+    "install": "Install",
+    "about": "About",
+    "exit": "Exit",
+    "edit": "Edit",
+    "undo": "Undo",
+    "redo": "Redo",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste",
+    "select_all": "Select All",
+    "loading": "Loading",
+    "create": "Create",
+    "add": "Add",
+    "save": "Save",
+    "clear": "Clear"
+  },
+
+  "media": {
+    "unknown_title": "Untitled",
+    "unknown_artist": "Unknown Artist",
+    "unknown_album": "Unknown Album",
+
+    "default_favorite_sheet_name": "Favorites",
+
+    "playlist": "Playlist",
+
+    "media_type_music": "Music",
+    "media_type_album": "Album",
+    "media_type_artist": "Artist",
+    "media_type_sheet": "Playlist",
+    "media_type_lyric": "Lyrics",
+
+    "media_title": "Title",
+    "media_platform": "Source",
+    "media_duration": "Duration",
+    "media_create_at": "Creation Time",
+    "media_play_count": "Play Count",
+    "media_music_count": "Number of Songs",
+    "media_description": "Description",
+
+    "music_state_pause": "Pause",
+    "music_state_play": "Play",
+    "music_state_play_or_pause": "Play/Pause",
+    "music_quality_low": "Low Quality",
+    "music_quality_standard": "Standard Quality",
+    "music_quality_high": "High Quality",
+    "music_quality_super": "Super Quality",
+
+    "music_repeat_mode": "Repeat Mode",
+    "music_repeat_mode_loop": "Single Loop",
+    "music_repeat_mode_queue": "Queue Loop",
+    "music_repeat_mode_shuffle": "Shuffle"
+  },
+
+  "plugin": {
+    "prop_user_variable": "User Variable",
+    "method_search": "Search",
+    "method_import_music_item": "Import Track",
+    "method_import_music_sheet": "Import Playlist",
+    "method_get_top_lists": "Top Lists",
+
+    "info_hint_you_have_no_plugin": "You have not installed any plugins",
+    "info_hint_you_have_no_plugin_with_supported_method": "You have not installed any plugins that support <highlight> {{supportMethod}} </highlight> function",
+    "info_hint_install_plugin_before_use": "Go to <a>Plugin Management</a> to install a plugin first~"
+  },
+
+  "download_page": {
+    "waiting": "Waiting...",
+    "failed": "Download Failed"
+  },
+  "plugin_management_page": {
+    "plugin_management": "Plugin Management",
+    "choose_plugin": "Choose Plugin",
+    "install": "Install",
+    "musicfree_plugin": "MusicFree Plugin",
+    "install_successfully": "Plugin Installed Successfully",
+    "install_failed": "Installation Failed",
+    "invalid_plugin": "Invalid Plugin",
+    "install_from_local_file": "Install from Local File",
+    "install_from_network": "Install from Network",
+    "install_plugin_from_network": "Install Plugin from Network",
+    "installing": "Installing",
+    "info_hint_install_placeholder": "Please enter the plugin source address (link ends with json or js)",
+    "error_hint_plugin_should_end_with_js_or_json": "Plugin link must end with json or js",
+    "info_hint_install_plugin": "Plugins must comply with the MusicFree specific plugin protocol, details can be found on the <a>official website</a>",
+    "subscription_setting": "Subscription Settings",
+    "update_subscription": "Update Subscription",
+    "update_successfully": "Update Successful",
+    "no_subscription": "No Subscription Currently",
+
+    "uninstall": "Uninstall",
+    "uninstall_plugin": "Uninstall Plugin",
+    "confirm_text_uninstall_plugin": "Confirm to uninstall plugin {{plugin}}?",
+    "uninstall_successfully": "Uninstalled {{plugin}}",
+    "uninstall_failed": "Uninstallation Failed",
+
+    "toast_plugin_is_latest": "Plugin {{plugin}} is up to date",
+    "update_failed": "Update Failed",
+
+    "update": "Update",
+
+    "importing_media": "Importing Media",
+    "placeholder_import_music_item": "Enter {{plugin}} track link",
+    "import_failed": "Import Failed",
+    "placeholder_import_music_sheet": "Enter {{plugin}} playlist link"
+  },
+  "local_music_page": {
+    "local_music": "Local Music",
+    "auto_scan": "Auto Scan",
+    "search_local_music": "Search Local Music",
+    "list_view": "List View",
+    "artist_view": "Artist View",
+    "album_view": "Album View",
+    "folder_view": "Folder View"
+  },
+
+  "music_list_context_menu": {
+    "next_play": "Next Play",
+    "add_to_my_sheets": "Add to Playlist",
+    "remove_from_sheet": "Remove from Playlist",
+    "delete_local_download": "Delete Local Download",
+    "reveal_local_music_in_file_explorer": "Open Folder Containing Song",
+    "reveal_local_music_in_file_explorer_fail": "Failed to Open: ",
+
+    "delete_local_downloaded_songs_success": "Deleted {{musicNums}} local songs",
+    "delete_local_downloaded_song_success": "Deleted local song [{{songName}}]"
+  },
+
+  "search_result_page": {
+    "search_result_title": "Search Results for"
+  },
+
+  "languages": {
+    "zh-CN": "Simplified Chinese",
+    "en-US": "English"
+  },
+  "side_bar": {
+    "toplist": "Top Lists",
+    "recommend_sheets": "Recommended Playlists",
+    "download_management": "Download Management",
+    "local_music": "Local Music",
+    "plugin_management": "Plugin Management",
+
+    "my_sheets": "My Playlists",
+    "create_local_sheet": "Create Playlist",
+    "starred_sheets": "Favorites",
+
+    "delete_sheet": "Delete Playlist"
+  },
+  "app_header": {
+    "nav_back": "Back",
+    "nav_forward": "Forward",
+    "search_placeholder": "Enter search content here",
+    "search_history": "Search History",
+    "settings": "Settings",
+    "minimize": "Minimize",
+    "exit": "Exit"
+  },
+  "music_bar": {
+    "open_music_detail_page": "Open Music Detail Page",
+    "close_music_detail_page": "Close Music Detail Page",
+    "previous_music": "Previous Song",
+    "next_music": "Next Song",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "playback_speed": "Playback Speed",
+    "choose_music_quality": "Select Music Quality",
+    "only_set_for_current_music": "Set Only for Current Song",
+    "desktop_lyric": "Desktop Lyrics"
+  },
+  "music_detail": {
+    "search_lyric": "Search for Lyrics",
+    "no_lyric": "No Lyrics Available",
+
+    "lyric_ctx_download_lyric": "Download Lyrics",
+    "lyric_ctx_download_lyric_lrc": "Download Lyrics (.lrc)",
+    "lyric_ctx_download_lyric_txt": "Download Lyrics (.txt)",
+    "lyric_ctx_download_success": "Download Successful",
+    "lyric_ctx_download_fail": "Download Failed",
+    "lyric_ctx_set_font_size": "Set Font Size",
+
+    "link_media_lyric": "Link Lyrics",
+    "media_lyric_linked": "Linked Lyrics: ",
+    "unlink_media_lyric": "Unlink Lyrics",
+    "toast_media_lyric_unlinked": "Unlinked Lyrics"
+  },
+  "bottom_loading_state": {
+    "reached_end": "~~~ End of List ~~~",
+    "loading": "Loading...",
+    "load_more": "Load More"
+  },
+  "empty": {
+    "hint_empty": "Nothing here~~~"
+  },
+  "modal": {
+    "add_to_my_sheets": "Add to Playlist",
+    "total_music_num": "Total {{number}} Songs",
+    "create_local_sheet": "Create Playlist",
+    "create_local_sheet_placeholder": "Enter new playlist name",
+    "exit_confirm": "Confirm Exit?",
+    "plugin_subscription": "Plugin Subscription",
+    "subscription_remarks": "Remarks: ",
+    "subscription_links": "Links: ",
+    "subscription_save_success": "Subscription Address Saved",
+    "search_lyric": "Search Lyrics",
+    "search_lyric_result_empty": "No Search Results",
+    "media_lyric_linked": "Lyrics Linked~",
+    "media_lyric_link_failed": "Failed to Link Lyrics:",
+    "new_version_found": "New Version Found",
+    "latest_version": "Latest Version: ",
+    "current_version": "Current Version: ",
+    "skip_this_version": "Skip This Version",
+    "scan_local_music": "Scan Local Music",
+    "scan_local_music_hint": "Automatically scan selected folders (real-time sync with file additions and deletions)",
+    "add_folder": "Add Folder"
+  },
+  "panel": {
+    "play_list_song_num": "Playlist ({{number}} Songs)",
+    "user_variable": "User Variable",
+    "user_variable_setting_success": "Settings Saved Successfully~"
+  }
+}

@@ -1,4 +1,3 @@
-import "@/common/i18n";
 import { localPluginHash, supportLocalMediaType } from "@/common/constant";
 import MusicSheet from "../core/music-sheet";
 import {
@@ -15,6 +14,7 @@ import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import Downloader from "../core/downloader";
 import MessageManager from "../core/message-manager";
 import { getAppConfigPath, setAppConfigPath, setupRendererAppConfig } from "@/shared/app-config/renderer";
+import { setupI18n } from "@/shared/i18n/renderer";
 
 setAutoFreeze(false);
 
@@ -27,6 +27,7 @@ export default async function () {
   ]);
   await MessageManager.setupMessageManager();
   await window.themepack.setupThemePacks();
+  setupI18n();
   setupLocalShortCut();
   dropHandler();
   clearDefaultBehavior();

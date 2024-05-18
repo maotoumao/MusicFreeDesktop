@@ -1,4 +1,4 @@
-export function normalizeNumber(number: number): string {
+export function normalizeNumberCN(number: number): string {
   if (number < 10000) {
     return `${number}`;
   }
@@ -8,6 +8,32 @@ export function normalizeNumber(number: number): string {
   }
   number = number / 10000;
   return `${number.toFixed(number < 1000 ? 1 : 0)}亿`;
+}
+
+export function normalizeNumberEN(number: number): string {
+  if (number < 10000) {
+    return `${number}`;
+  }
+  number = number / 1000;
+  if (number < 1000) {
+    return `${number.toFixed(number < 1000 ? 1 : 0)} K`;
+  }
+  number = number / 1000;
+  if (number < 1000) {
+    return `${number.toFixed(number < 1000 ? 1 : 0)} M`;
+  }
+
+  number = number / 100;
+  return `${number.toFixed(number < 1000 ? 1 : 0)} B`;
+}
+
+export function normalizeNumber(number: number, en?: boolean): string {
+  const _n = +number;
+  if (isNaN(_n) || !isFinite(_n)) {
+    return "-";
+  } else if (isFinite(_n)) {
+    return en ? normalizeNumberEN(_n) : normalizeNumberCN(_n);
+  }
 }
 
 export function addRandomHash(url: string) {

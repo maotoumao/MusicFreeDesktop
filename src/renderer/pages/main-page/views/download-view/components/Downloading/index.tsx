@@ -10,11 +10,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import "./index.scss";
-import i18n from "@/common/i18n";
+import { i18n } from "@/shared/i18n/renderer";
 
 const columnHelper = createColumnHelper<IDownloadingItem>();
 
-const {t} = i18n;
+const { t } = i18n;
 const columnDef = [
   columnHelper.accessor((_, index) => index + 1, {
     cell: (info) => info.getValue(),

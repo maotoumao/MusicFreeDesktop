@@ -1,0 +1,236 @@
+{
+  "common": {
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "download": "ダウンロード",
+    "downloading": "ダウンロード中",
+    "downloaded": "ダウンロード済み",
+    "remove": "削除",
+    "delete": "削除",
+    "default": "デフォルト",
+    "version_code": "バージョンコード",
+    "operation": "操作",
+    "update": "更新",
+    "uninstall": "アンインストール",
+    "install": "インストール",
+    "about": "について",
+    "exit": "終了",
+    "edit": "編集",
+    "undo": "元に戻す",
+    "redo": "やり直し",
+    "cut": "切り取り",
+    "copy": "コピー",
+    "paste": "貼り付け",
+    "select_all": "すべて選択",
+    "loading": "読み込み中",
+    "create": "作成",
+    "add": "追加",
+    "save": "保存",
+    "clear": "クリア"
+  },
+
+  "media": {
+    "unknown_title": "タイトル未定",
+    "unknown_artist": "アーティスト不明",
+    "unknown_album": "アルバム不明",
+
+    "default_favorite_sheet_name": "マイフェイバリット",
+
+    "playlist": "プレイリスト",
+
+    "media_type_music": "音楽",
+    "media_type_album": "アルバム",
+    "media_type_artist": "アーティスト",
+    "media_type_sheet": "プレイリスト",
+    "media_type_lyric": "歌詞",
+
+    "media_title": "タイトル",
+    "media_platform": "プラットフォーム",
+    "media_duration": "期間",
+    "media_create_at": "作成日時",
+    "media_play_count": "再生回数",
+    "media_music_count": "楽曲数",
+    "media_description": "説明",
+
+    "music_state_pause": "一時停止",
+    "music_state_play": "再生",
+    "music_state_play_or_pause": "再生/一時停止",
+    "music_quality_low": "低品質",
+    "music_quality_standard": "標準品質",
+    "music_quality_high": "高品質",
+    "music_quality_super": "最高品質",
+
+    "music_repeat_mode": "繰り返しモード",
+    "music_repeat_mode_loop": "一曲繰り返し",
+    "music_repeat_mode_queue": "プレイリスト繰り返し",
+    "music_repeat_mode_shuffle": "ランダム再生"
+  },
+
+  "plugin": {
+    "prop_user_variable": "ユーザー変数",
+    "method_search": "検索",
+    "method_import_music_item": "楽曲をインポート",
+    "method_import_music_sheet": "プレイリストをインポート",
+    "method_get_top_lists": "トップリスト",
+
+    "info_hint_you_have_no_plugin": "プラグインがインストールされていません",
+    "info_hint_you_have_no_plugin_with_supported_method": "サポートされている<highlight> {{supportMethod}} </highlight>機能のプラグインがインストールされていません",
+    "info_hint_install_plugin_before_use": "まず<a>プラグイン管理</a>からプラグインをインストールしてください~"
+  },
+
+  "download_page": {
+    "waiting": "待機中...",
+    "failed": "ダウンロード失敗"
+  },
+  "plugin_management_page": {
+    "plugin_management": "プラグイン管理",
+    "choose_plugin": "プラグインの選択",
+    "install": "インストール",
+    "musicfree_plugin": "MusicFreeプラグイン",
+    "install_successfully": "プラグインのインストールに成功しました",
+    "install_failed": "インストール失敗",
+    "invalid_plugin": "無効なプラグイン",
+    "install_from_local_file": "ローカルファイルからインストール",
+    "install_from_network": "ネットワークからインストール",
+    "install_plugin_from_network": "ネットワークからプラグインをインストール",
+    "installing": "インストール中",
+    "info_hint_install_placeholder": "プラグインのソースアドレスを入力してください（リンクはjsonまたはjsで終わる必要があります）",
+    "error_hint_plugin_should_end_with_js_or_json": "プラグインのリンクはjsonまたはjsで終わる必要があります",
+    "info_hint_install_plugin": "プラグインはMusicFreeの特定のプラグインプロトコルに準拠する必要があります。詳細は<a>公式ウェブサイト</a>でご覧いただけます",
+    "subscription_setting": "サブスクリプション設定",
+    "update_subscription": "サブスクリプションを更新",
+    "update_successfully": "更新成功",
+    "no_subscription": "現在のサブスクリプションはありません",
+
+    "uninstall": "アンインストール",
+    "uninstall_plugin": "プラグインのアンインストール",
+    "confirm_text_uninstall_plugin": "{{plugin}}のプラグインをアンインストールしてもよろしいですか？",
+    "uninstall_successfully": "{{plugin}}をアンインストールしました",
+    "uninstall_failed": "アンインストール失敗",
+
+    "toast_plugin_is_latest": "{{plugin}}のプラグインは最新バージョンです",
+    "update_failed": "更新失敗",
+
+    "update": "更新",
+
+    "importing_media": "メディアをインポート中",
+    "placeholder_import_music_item": "{{plugin}}の楽曲リンクを入力",
+    "import_failed": "インポート失敗",
+    "placeholder_import_music_sheet": "{{plugin}}のプレイリストリンクを入力"
+  },
+  "local_music_page": {
+    "local_music": "ローカル音楽",
+    "auto_scan": "自動スキャン",
+    "search_local_music": "ローカル音楽を検索",
+    "list_view": "リスト表示",
+    "artist_view": "アーティスト表示",
+    "album_view": "アルバム表示",
+    "folder_view": "フォルダ表示"
+  },
+
+  "music_list_context_menu": {
+    "next_play": "次を再生",
+    "add_to_my_sheets": "プレイリストに追加",
+    "remove_from_sheet": "プレイリストから削除",
+    "delete_local_download": "ローカルダウンロードを削除",
+    "reveal_local_music_in_file_explorer": "曲が格納されているフォルダを開く",
+    "reveal_local_music_in_file_explorer_fail": "開けませんでした: ",
+
+    "delete_local_downloaded_songs_success": "{{musicNums}}曲のローカル音楽を削除しました",
+    "delete_local_downloaded_song_success": "ローカル音楽[{{songName}}]を削除しました"
+  },
+
+  "search_result_page": {
+    "search_result_title": "の検索結果"
+  },
+
+  "languages": {
+    "zh-CN": "中国語（簡体）",
+    "en-US": "英語"
+  },
+  "side_bar": {
+    "toplist": "トップリスト",
+    "recommend_sheets": "人気プレイリスト",
+    "download_management": "ダウンロード管理",
+    "local_music": "ローカル音楽",
+    "plugin_management": "プラグイン管理",
+
+    "my_sheets": "マイプレイリスト",
+    "create_local_sheet": "プレイリストを作成",
+    "starred_sheets": "お気に入り",
+
+    "delete_sheet": "プレイリストを削除"
+  },
+  "app_header": {
+    "nav_back": "戻る",
+    "nav_forward": "進む",
+    "search_placeholder": "ここに検索内容を入力",
+    "search_history": "検索履歴",
+    "settings": "設定",
+    "minimize": "最小化",
+    "exit": "終了"
+  },
+  "music_bar": {
+    "open_music_detail_page": "音楽詳細ページを開く",
+    "close_music_detail_page": "音楽詳細ページを閉じる",
+    "previous_music": "前の曲",
+    "next_music": "次の曲",
+    "mute": "ミュート",
+    "unmute": "ミュート解除",
+    "playback_speed": "再生速度",
+    "choose_music_quality": "音楽の品質を選択",
+    "only_set_for_current_music": "現在の曲のみに設定",
+    "desktop_lyric": "デスクトップ歌詞"
+  },
+  "music_detail": {
+    "search_lyric": "歌詞を検索",
+    "no_lyric": "歌詞がありません",
+
+    "lyric_ctx_download_lyric": "歌詞をダウンロード",
+    "lyric_ctx_download_lyric_lrc": "歌詞をダウンロード (.lrc)",
+    "lyric_ctx_download_lyric_txt": "歌詞をダウンロード (.txt)",
+    "lyric_ctx_download_success": "ダウンロード成功",
+    "lyric_ctx_download_fail": "ダウンロード失敗",
+    "lyric_ctx_set_font_size": "フォントサイズを設定",
+
+    "link_media_lyric": "歌詞をリンク",
+    "media_lyric_linked": "リンクされた歌詞: ",
+    "unlink_media_lyric": "歌詞のリンクを解除",
+    "toast_media_lyric_unlinked": "歌詞のリンクを解除しました"
+  },
+  "bottom_loading_state": {
+    "reached_end": "~~~ ページの最後です ~~~",
+    "loading": "読み込み中...",
+    "load_more": "もっと読み込む"
+  },
+  "empty": {
+    "hint_empty": "何もありません~~~"
+  },
+  "modal": {
+    "add_to_my_sheets": "マイプレイリストに追加",
+    "total_music_num": "合計 {{number}} 曲",
+    "create_local_sheet": "プレイリストを作成",
+    "create_local_sheet_placeholder": "新しいプレイリストの名前を入力してください",
+    "exit_confirm": "本当に終了しますか？",
+    "plugin_subscription": "プラグインのサブスクリプション",
+    "subscription_remarks": "注意: ",
+    "subscription_links": "リンク: ",
+    "subscription_save_success": "サブスクリプションアドレスを保存しました",
+    "search_lyric": "歌詞を検索",
+    "search_lyric_result_empty": "検索結果が空です",
+    "media_lyric_linked": "歌詞がリンクされました~",
+    "media_lyric_link_failed": "歌詞のリンクに失敗しました:",
+    "new_version_found": "新しいバージョンが見つかりました",
+    "latest_version": "最新バージョン: ",
+    "current_version": "現在のバージョン: ",
+    "skip_this_version": "このバージョンをスキップ",
+    "scan_local_music": "ローカル音楽をスキャン",
+    "scan_local_music_hint": "選択したフォルダを自動的にスキャンします（ファイルの追加・削除はリアルタイムで同期されます）",
+    "add_folder": "フォルダを追加"
+  },
+  "panel": {
+    "play_list_song_num": "プレイリスト ({{number}}曲)",
+    "user_variable": "ユーザー変数",
+    "user_variable_setting_success": "設定が成功しました~"
+  }
+}

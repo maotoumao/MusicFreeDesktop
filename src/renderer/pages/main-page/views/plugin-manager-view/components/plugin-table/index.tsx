@@ -19,7 +19,7 @@ import { toast } from "react-toastify";
 import { showPanel } from "@/renderer/components/Panel";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 import { produce } from "immer";
-import i18n from "@/common/i18n";
+import { i18n } from "@/shared/i18n/renderer";
 import { getAppConfigPath, setAppConfigPath } from "@/shared/app-config/renderer";
 
 const t = i18n.t;
