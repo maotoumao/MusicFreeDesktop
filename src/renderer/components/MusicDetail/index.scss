@@ -19,6 +19,7 @@
     mask-image: linear-gradient(to bottom, #fff, transparent);
     -webkit-mask-image: linear-gradient(to bottom, #fff, transparent);
     z-index: -1;
+    transition: background-image ease 300ms;
   }
 
   & .hide-music-detail {
