@@ -24,7 +24,6 @@ class TrackPlayerInternal {
     this.hls.attachMedia(this.audio);
     // @ts-ignore
     this.hls.on("hlsError", () => {
-      console.log("???");
       this.throwError(ErrorReason.EmptyResource);
     });
 

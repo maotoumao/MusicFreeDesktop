@@ -18,6 +18,8 @@ interface IGlobalData {
         downloader: string;
         /** 本地文件监听器worker */
         localFileWatcher: string;
+        /** 用于备份文件的worker */
+        backup: string
     },
     appPath: {
         userData: string;
