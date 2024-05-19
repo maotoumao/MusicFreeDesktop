@@ -29,11 +29,18 @@ async function readLangContent(langCode: string, enableRedirect = true) {
   }
 }
 
-export async function setupI18n(getDefaultLang?: () => string | null) {
+interface ISetupI18nOptions {
+  getDefaultLang?: () => string | null;
+  onLanguageChanged?: (lang: string) => void;
+}
+
+export async function setupI18n(options?: ISetupI18nOptions) {
+  const { getDefaultLang, onLanguageChanged } = options || {};
+
   const basicDir = getResPath("./lang");
   try {
-    i18n.init({
-      resources: {}
+    await i18n.init({
+      resources: {},
     });
 
     const dirContents = await fs.readdir(basicDir, {
@@ -49,16 +56,8 @@ export async function setupI18n(getDefaultLang?: () => string | null) {
       defaultLang = undefined;
     }
     if (!defaultLang) {
-      const preferredLangs = app.getPreferredSystemLanguages();
-      for (const lang of preferredLangs) {
-        if (allLangs.includes(lang)) {
-          defaultLang = lang;
-          break;
-        }
-      }
-    }
-    if (!defaultLang) {
-      defaultLang = allLangs[0];
+      defaultLang =
+        app.getLocale() || allLangs.includes("en-US") ? "en-US" : allLangs[0];
     }
 
     const langContent = await readLangContent(defaultLang);
@@ -67,17 +66,15 @@ export async function setupI18n(getDefaultLang?: () => string | null) {
       i18n.changeLanguage(defaultLang);
     }
 
-
-
     ipcMain.handle("shared/i18n/setup", async () => {
       const currentLang = i18n.language;
-      const langContent = await readLangContent(defaultLang);
+      const langContent = await readLangContent(currentLang);
       if (langContent) {
         return {
           lang: currentLang,
           content: langContent,
-          allLangs
-        }
+          allLangs,
+        };
       }
       return null;
     });
@@ -85,25 +82,26 @@ export async function setupI18n(getDefaultLang?: () => string | null) {
     ipcMain.handle("shared/i18n/changeLang", async (_, lang: string) => {
       if (i18n.hasResourceBundle(lang, ns)) {
         await i18n.changeLanguage(lang);
+        onLanguageChanged?.(lang);
         return {
           lang,
-          content: i18n.getResourceBundle(lang, ns)
-        }
+          content: i18n.getResourceBundle(lang, ns),
+        };
       } else {
         const langContent = await readLangContent(lang);
         if (langContent) {
           i18n.addResourceBundle(lang, ns, langContent);
           await i18n.changeLanguage(lang);
+          onLanguageChanged?.(lang);
           return {
             lang,
-            content: langContent
-          }
+            content: langContent,
+          };
         }
       }
 
       return null;
-
-    })
+    });
   } catch {}
 }
 
@@ -111,5 +109,5 @@ export const t = i18n.t.bind(i18n);
 
 export default {
   setup: setupI18n,
-  t: i18n.t
+  t: i18n.t,
 };

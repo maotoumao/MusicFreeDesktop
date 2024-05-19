@@ -9,6 +9,7 @@ export default function () {
   const navigate = useNavigate();
   const routePathMatch = useMatch("/main/:routePath");
   const { t } = useTranslation();
+  console.log("update");
 
   const options = [
     {

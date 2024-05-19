@@ -6,6 +6,7 @@ import "./index.scss";
 import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import { setAppConfigPath } from "@/shared/app-config/renderer";
+import { useTranslation } from "react-i18next";
 
 interface PathSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -17,6 +18,8 @@ export default function PathSettingItem<T extends IAppConfigKeyPath>(
   props: PathSettingItemProps<T>
 ) {
   const { keyPath, label, value } = props;
+
+  const { t } = useTranslation();
 
   return (
     <div className="setting-view--path-setting-item-container setting-row">
@@ -30,20 +33,17 @@ export default function PathSettingItem<T extends IAppConfigKeyPath>(
           data-type="primaryButton"
           onClick={async () => {
             const result = await ipcRendererInvoke("show-open-dialog", {
-              title: "选择路径",
+              title: t("settings.choose_path"),
               defaultPath: value as string,
               properties: ["openDirectory"],
-              buttonLabel: "确认",
+              buttonLabel: t("common.confirm"),
             });
             if (!result.canceled) {
-              setAppConfigPath(
-                keyPath,
-                result.filePaths[0]! as any
-              );
+              setAppConfigPath(keyPath, result.filePaths[0]! as any);
             }
           }}
         >
-          更改路径
+          {t("settings.change_path")}
         </div>
         <div
           role="button"
@@ -52,11 +52,11 @@ export default function PathSettingItem<T extends IAppConfigKeyPath>(
             if (await window.fs.isFolder(value as string)) {
               ipcRendererSend("open-path", value as string);
             } else {
-              toast.error("文件夹不存在");
+              toast.error(t("settings.folder_not_exist"));
             }
           }}
         >
-          打开文件夹
+          {t("settings.open_folder")}
         </div>
       </div>
       {/* </Listbox> */}

@@ -1,11 +1,5 @@
-
-
-// See the Electron documentation for details on how to use preload scripts:
-import { app, contextBridge, ipcRenderer } from "electron";
-import { IChangeLangData, ISetupData } from "./type";
-
-// https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
-
+import { contextBridge, ipcRenderer } from "electron";
+import type { IChangeLangData, ISetupData } from "./type";
 
 async function setupLang() {
     const data: ISetupData = await ipcRenderer.invoke("shared/i18n/setup");

@@ -26,7 +26,8 @@
     "create": "创建",
     "add": "添加",
     "save": "保存",
-    "clear": "清空"
+    "clear": "清空",
+    "open": "打开"
   },
 
   "media": {
@@ -125,7 +126,8 @@
     "list_view": "列表视图",
     "artist_view": "作者视图",
     "album_view": "专辑视图",
-    "folder_view": "文件夹视图"
+    "folder_view": "文件夹视图",
+    "total_music_num": "共 {{number}} 首"
   },
 
   "music_list_context_menu": {
@@ -142,11 +144,6 @@
 
   "search_result_page": {
     "search_result_title": "的搜索结果"
-  },
-
-  "languages": {
-    "zh-CN": "简体中文",
-    "en-US": "英语"
   },
   "side_bar": {
     "toplist": "排行榜",
@@ -232,5 +229,140 @@
     "play_list_song_num": "播放列表 ({{number}}首)",
     "user_variable": "用户变量",
     "user_variable_setting_success": "设置成功~"
+  },
+  "music_sheet_like_view": {
+    "play_all": "播放全部",
+    "add_to_sheet": "添加到歌单"
+  },
+  "settings": {
+    "choose_path": "选择路径",
+    "change_path": "更改路径",
+    "folder_not_exist": "文件夹不存在",
+    "open_folder": "打开文件夹",
+
+    "section_name": {
+      "normal": "常规",
+      "play_music": "播放",
+      "download": "下载",
+      "lyric": "歌词",
+      "plugin": "插件",
+      "theme": "主题",
+      "short_cut": "快捷键",
+      "network": "网络",
+      "backup": "备份与恢复",
+      "about": "关于 MusicFree"
+    },
+    "normal": {
+      "check_update": "应用启动时检测软件版本更新",
+      "close_behavior": "单击退出按钮时",
+      "exit_app": "退出应用",
+      "minimize": "最小化到托盘",
+      "taskbar_thumb": "任务栏缩略图样式（重启应用后生效）",
+      "current_artwork": "当前播放歌曲的封面",
+      "main_window": "主窗口界面",
+      "max_history_length": "搜索历史记录最多保存条数",
+      "music_list_hide_columns": "歌曲列表隐藏列",
+      "languages": "语言",
+      "toast_switch_language_fail": "切换语言失败"
+    },
+    "play_music": {
+      "case_sensitive_in_search": "歌单内搜索时区分大小写",
+      "default_play_quality": "默认播放音质",
+      "when_quality_missing": "播放音质缺失时",
+      "play_lower_quality_version": "播放更低音质",
+      "play_higher_quality_version": "播放更高音质",
+      "when_play_error": "播放失败时",
+      "pause": "暂停",
+      "skip_to_next": "自动播放下一首",
+      "double_click_music_list": "双击音乐列表时",
+      "add_music_to_playlist": "将目标单曲添加到播放队列",
+      "replace_playlist_with_musiclist": "使用当前音乐列表替换播放队列",
+      "audio_output_device": "音频输出设备"
+    },
+    "download": {
+      "download_folder": "下载目录",
+      "max_concurrency": "最多同时下载歌曲数",
+      "default_download_quality": "默认下载音质",
+      "when_quality_missing": "下载音质缺失时",
+      "download_lower_quality_version": "播放更低音质",
+      "download_higher_quality_version": "播放更高音质"
+    },
+    "lyric": {
+      "enable_status_bar_lyric": "启用状态栏歌词",
+      "enable_desktop_lyric": "启用桌面歌词",
+      "lock_desktop_lyric": "锁定桌面歌词",
+      "font": "字体",
+      "font_size": "字体大小",
+      "font_color": "字体颜色",
+      "stroke_color": "描边颜色"
+    },
+    "plugin": {
+      "auto_update_plugin": "打开软件时自动更新插件",
+      "not_check_plugin_version": "安装插件时不校验版本"
+    },
+    "theme": {
+      "example_theme_hint": "这里有些示例主题：",
+      "example_theme_subscription_hint": "也可以关注微信公众号：<highlight>一只猫头猫 </highlight>，回复<highlight> MusicFree主题包 </highlight>获取下载地址(不定期更新)",
+      "install_theme": "安装主题包",
+      "uninstall_theme": "卸载主题包",
+      "musicfree_theme": "MusicFree 主题",
+      "all_files": "全部文件",
+      "install_theme_success": "安装主题{{name}}成功~",
+      "install_theme_fail": "安装主题失败: {{reason}}",
+      "uninstall_theme_success": "卸载主题{{name}}成功~",
+      "uninstall_theme_fail": "卸载主题失败: {{reason}}"
+    },
+    "short_cut": {
+      "enable_local": "启用软件内快捷键",
+      "enable_global": "启用全局快捷键",
+      "ability": "功能",
+      "local_short_cut": "软件快捷键",
+      "global_short_cut": "全局快捷键",
+      "play/pause": "播放/暂停",
+      "skip-next": "播放下一首",
+      "skip-previous": "播放上一首",
+      "volume-up": "增加音量",
+      "volume-down": "降低音量",
+      "toggle-desktop-lyric": "打开/关闭桌面歌词",
+      "like/dislike": "喜欢/不喜欢当前歌曲",
+      "no_short_cut": "空"
+    },
+    "network": {
+      "host": "主机",
+      "port": "端口",
+      "username": "账号",
+      "password": "密码",
+      "local_cache": "本地缓存：{{cacheSize}}",
+      "clear_cache": "清空缓存",
+      "enable_network_proxy": "启用网络代理"
+    },
+    "backup": {
+      "resume_mode_append": "追加到已有歌单末尾",
+      "resume_mode_overwrite": "覆盖已有歌单",
+      "backup_by_file": "文件备份",
+      "musicfree_backup_file": "MusicFree 备份文件",
+      "backup_to": "备份到...",
+      "backup_by_webdav": "WebDAV 备份",
+      "backup_success": "备份成功~",
+      "backup_fail": "备份失败：{{reason}}",
+      "resume_success": "恢复成功~",
+      "resume_fail": "恢复失败：{{reason}}",
+      "backup_music_sheet": "备份歌单",
+      "resume_music_sheet": "恢复歌单",
+      "webdav_server_url": "URL",
+      "username": "账号",
+      "password": "密码",
+      "webdav_data_not_complete": "URL、账号、密码不可为空",
+      "webdav_backup_file_not_exist": "备份文件不存在"
+    },
+    "about": {
+      "current_version": "当前版本: {{version}}",
+      "already_latest": "当前已是最新版本!",
+      "check_update": "检查更新",
+      "software_author": "软件作者: ",
+      "open_source_declaration": "源代码: 软件基于 GPL3.0 协议开源.  <Github>Github地址</Github>  <Gitee>Gitee地址</Gitee>",
+      "official_site": "软件官网",
+      "mobile_version": "移动版"
+    }
   }
 }

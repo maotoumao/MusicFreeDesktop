@@ -4,11 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { IConfig } from "@/shared/app-config/type";
 import Condition from "@/renderer/components/Condition";
 import { useAppConfig } from "@/shared/app-config/renderer";
+import { useTranslation } from "react-i18next";
+import camelToSnake from "@/common/camel-to-snake";
 
 export default function SettingView() {
   const appConfig = useAppConfig();
   console.log(appConfig);
   const [selected, setSelected] = useState(routers[0].id);
+  const { t } = useTranslation();
 
   const intersectionObserverRef = useRef<IntersectionObserver>();
   const bodyContainerRef = useRef<HTMLDivElement>();
@@ -78,7 +81,7 @@ export default function SettingView() {
                   });
               }}
             >
-              {setting.title}
+              {t(`settings.section_name.${camelToSnake(setting.id)}`)}
             </div>
           ))}
         </div>
@@ -93,7 +96,9 @@ export default function SettingView() {
               id={`setting-${setting.id}`}
               key={setting.id}
             >
-              <div className="setting-view--body-title">{setting.title}</div>
+              <div className="setting-view--body-title">
+                {t(`settings.section_name.${camelToSnake(setting.id)}`)}
+              </div>
               <Component
                 data={appConfig[setting.id as keyof IConfig]}
               ></Component>

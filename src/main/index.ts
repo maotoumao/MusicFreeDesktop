@@ -10,6 +10,7 @@ import setupIpcMain, { handleProxy } from "./ipc";
 import { setupPluginManager } from "./core/plugin-manager";
 import {
   getAppConfigPath,
+  getAppConfigPathSync,
   setAppConfigPath,
   setupMainAppConfig,
 } from "@/shared/app-config/main";
@@ -83,7 +84,14 @@ app.on("will-quit", () => {
 // code. You can also put them in separate files and import them here.
 app.whenReady().then(async () => {
   await setupMainAppConfig();
-  setupI18n(() => "zh-CN");
+  setupI18n({
+    getDefaultLang() {
+      return getAppConfigPathSync("normal.language")
+    },
+    onLanguageChanged(lang) {
+        setAppConfigPath("normal.language", lang);
+    },
+  });
   setupIpcMain();
   setupPluginManager();
   setupTray();

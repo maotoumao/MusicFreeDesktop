@@ -5,6 +5,7 @@ interface IConfig {
     checkUpdate: boolean;
     taskbarThumb: "window" | "artwork";
     musicListColumnsShown: Array<"duration" | "platform">;
+    language: string;
   };
   playMusic: {
     /** 歌单内搜索区分大小写 */

@@ -8,6 +8,7 @@ import InputSettingItem from "../../components/InputSettingItem";
 import { AuthType, createClient } from "webdav";
 import BackupResume from "@/renderer/core/backup-resume";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   data: IAppConfig["backup"];
@@ -15,6 +16,8 @@ interface IProps {
 
 export default function Backup(props: IProps) {
   const { data } = props;
+
+  const { t } = useTranslation();
 
   return (
     <div className="setting-view--backup-container">
@@ -24,15 +27,17 @@ export default function Backup(props: IProps) {
         options={[
           {
             value: "append",
-            title: "追加到已有歌单末尾",
+            title: t("settings.backup.resume_mode_append"),
           },
           {
             value: "overwrite",
-            title: "覆盖已有歌单",
+            title: t("settings.backup.resume_mode_overwrite"),
           },
         ]}
       ></RadioGroupSettingItem>
-      <div className={"label-container"}>文件备份</div>
+      <div className={"label-container"}>
+        {t("settings.backup.backup_by_file")}
+      </div>
       <div className="setting-row backup-row">
         <div
           role="button"
@@ -42,11 +47,11 @@ export default function Backup(props: IProps) {
               properties: ["showOverwriteConfirmation", "createDirectory"],
               filters: [
                 {
-                  name: "MusicFree备份文件",
+                  name: t("settings.backup.musicfree_backup_file"),
                   extensions: ["json", "txt"],
                 },
               ],
-              title: "备份到...",
+              title: t("settings.backup.backup_to"),
             });
             if (!result.canceled && result.filePath) {
               const sheetDetails =
@@ -55,11 +60,11 @@ export default function Backup(props: IProps) {
                 musicSheets: sheetDetails,
               });
               await window.fs.writeFile(result.filePath, backUp, "utf-8");
-              toast.success("备份成功~");
+              toast.success(t("settings.backup.backup_success"));
             }
           }}
         >
-          备份歌单
+          {t("settings.backup.backup_music_sheet")}
         </div>
         <div
           role="button"
@@ -69,11 +74,11 @@ export default function Backup(props: IProps) {
               properties: ["openFile"],
               filters: [
                 {
-                  name: "MusicFree备份文件",
+                  name: t("settings.backup.musicfree_backup_file"),
                   extensions: ["json", "txt"],
                 },
               ],
-              title: "打开",
+              title: t("common.open"),
             });
             if (!result.canceled && result.filePaths) {
               try {
@@ -84,40 +89,44 @@ export default function Backup(props: IProps) {
 
                 await BackupResume.resume(
                   rawSheets,
-                  getAppConfigPath(
-                    "backup.resumeBehavior"
-                  ) === "overwrite"
+                  getAppConfigPath("backup.resumeBehavior") === "overwrite"
                 );
 
-                toast.success("恢复成功~");
+                toast.success(t("backup.backup_success"));
               } catch (e) {
-                toast.error(`恢复失败: ${e.message}`);
+                toast.error(
+                  t("backup.backup_fail", {
+                    reason: e?.message,
+                  })
+                );
               }
             }
           }}
         >
-          恢复歌单
+          {t("settings.backup.resume_music_sheet")}
         </div>
       </div>
-      <div className={"label-container setting-row"}>WebDAV 备份</div>
+      <div className={"label-container setting-row"}>
+        {t("settings.backup.backup_by_webdav")}
+      </div>
       <div className="webdav-backup-container">
         <InputSettingItem
           width="100%"
-          label="URL"
+          label={t("settings.backup.webdav_server_url")}
           trim
           keyPath="backup.webdav.url"
           value={data?.webdav?.url}
         ></InputSettingItem>
         <InputSettingItem
           width="100%"
-          label="账号"
+          label={t("settings.backup.username")}
           trim
           keyPath="backup.webdav.username"
           value={data?.webdav?.username}
         ></InputSettingItem>
         <InputSettingItem
           width="100%"
-          label="密码"
+          label={t("settings.backup.password")}
           type="password"
           trim
           keyPath="backup.webdav.password"
@@ -160,16 +169,20 @@ export default function Backup(props: IProps) {
                     overwrite: true,
                   }
                 );
-                toast.success("备份成功");
+                toast.success(t("settings.backup.backup_success"));
               } else {
-                toast.error("URL、账号、密码不可为空");
+                toast.error(t("settings.backup.webdav_data_not_complete"));
               }
             } catch (e) {
-              toast.error(`备份失败: ${e.message}`);
+              toast.error(
+                t("settings.backup.backup_fail", {
+                  reason: e?.message,
+                })
+              );
             }
           }}
         >
-          备份歌单
+          {t("settings.backup.backup_music_sheet")}
         </div>
         <div
           role="button"
@@ -188,7 +201,9 @@ export default function Backup(props: IProps) {
                 });
 
                 if (!(await client.exists("/MusicFree/MusicFreeBackup.json"))) {
-                  throw new Error("备份文件不存在");
+                  throw new Error(
+                    t("settings.backup.webdav_backup_file_not_exist")
+                  );
                 }
                 const resumeData = await client.getFileContents(
                   "/MusicFree/MusicFreeBackup.json",
@@ -198,20 +213,22 @@ export default function Backup(props: IProps) {
                 );
                 await BackupResume.resume(
                   resumeData,
-                  getAppConfigPath(
-                    "backup.resumeBehavior"
-                  ) === "overwrite"
+                  getAppConfigPath("backup.resumeBehavior") === "overwrite"
                 );
-                toast.success("恢复成功");
+                toast.success(t("settings.backup.resume_success"));
               } else {
-                toast.error("URL、账号、密码不可为空");
+                toast.error(t("settings.backup.webdav_data_not_complete"));
               }
             } catch (e) {
-              toast.error(`恢复失败: ${e.message}`);
+              toast.error(
+                t("settings.backup.resume_fail", {
+                  reason: e?.message,
+                })
+              );
             }
           }}
         >
-          恢复歌单
+          {t("settings.backup.resume_music_sheet")}
         </div>
       </div>
     </div>

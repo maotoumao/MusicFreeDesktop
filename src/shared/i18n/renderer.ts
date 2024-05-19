@@ -12,14 +12,16 @@ const langListStore = new Store<string[]>([]);
 const mod = window["@shared/i18n" as any] as unknown as IMod;
 
 export async function setupI18n() {
-  i18n.init({
-    resources: {},
-  });
   const { allLangs = [], content, lang } = (await mod.setupLang()) || {};
   langListStore.setValue(allLangs);
-
-  i18n.addResourceBundle(lang, ns, content);
-  await i18n.changeLanguage(lang);
+  await i18n.init({
+    resources: {
+        [lang]: {
+            [ns]: content
+        }
+    },
+    lng: lang
+  })
 }
 
 export async function changeLang(lang: string): Promise<boolean> {
@@ -53,12 +55,3 @@ export default {
   i18n
 };
 
-// @ts-ignore
-window.fk = {
-    setupI18n,
-    changeLang,
-    useLangList,
-    getLangList,
-    i18n
-  };
-  

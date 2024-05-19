@@ -10,14 +10,13 @@ import { toast } from "react-toastify";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import A from "@/renderer/components/A";
+import { Trans, useTranslation } from "react-i18next";
 
 interface IProps {
   data: IAppConfig["theme"];
 }
 
 export default function Theme(props: IProps) {
-  // const { data = {} as IAppConfig["theme"] } = props;
-  // console.log(data);
   const allThemePacksStore = window.themepack.allThemePacksStore;
   const currentThemePackStore = window.themepack.currentThemePackStore;
   const [currentThemePack, setCurrentThemePack] = useState<ICommon.IThemePack>(
@@ -26,6 +25,8 @@ export default function Theme(props: IProps) {
   const [allThemePacks, setAllThemePacks] = useState<
     Array<ICommon.IThemePack | null>
   >(allThemePacksStore.getValue());
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const unsub1 = allThemePacksStore.onValueChange((newValue) => {
@@ -42,8 +43,21 @@ export default function Theme(props: IProps) {
 
   return (
     <div className="setting-view--theme-container">
-      <div className="setting-row">💡这里有些示例主题：<A href="https://github.com/maotoumao/MusicFreeThemePacks">https://github.com/maotoumao/MusicFreeThemePacks</A></div>
-      <div className="setting-row">⭐也可以关注公众号：<span className="highlight"> 一只猫头猫 </span>，回复<span className="highlight"> MusicFree主题包 </span>获取下载地址 (不定期更新)</div>
+      <div className="setting-row">
+        💡{t("settings.theme.example_theme_hint")}
+        <A href="https://github.com/maotoumao/MusicFreeThemePacks">
+          https://github.com/maotoumao/MusicFreeThemePacks
+        </A>
+      </div>
+      <div className="setting-row">
+        ⭐
+        <Trans
+          i18nKey={"settings.theme.example_theme_subscription_hint"}
+          components={{
+            highlight: <span className="highlight"></span>,
+          }}
+        ></Trans>
+      </div>
       <div className="setting-view--theme-items">
         <ThemeItem
           selected={currentThemePack === null}
@@ -59,31 +73,40 @@ export default function Theme(props: IProps) {
         <div
           className="theme-item-container"
           role="button"
-          title="安装主题"
+          title={t("settings.theme.install_theme")}
           onClick={async () => {
             const result = await ipcRendererInvoke("show-open-dialog", {
-              title: "安装主题包",
-              buttonLabel: "安装",
-              filters: [{
-                "name": "MusicFree主题",
-                "extensions": ["mftheme", "zip"]
-              }, {
-                name: "全部文件",
-                extensions: ["*"]
-              }],
+              title: t("settings.theme.install_theme"),
+              buttonLabel: t("common.install"),
+              filters: [
+                {
+                  name: t("settings.theme.musicfree_theme"),
+                  extensions: ["mftheme", "zip"],
+                },
+                {
+                  name: t("settings.theme.all_files"),
+                  extensions: ["*"],
+                },
+              ],
               properties: ["openFile", "multiSelections"],
             });
             console.log(result);
             if (!result.canceled) {
               const themePackPaths = result.filePaths;
-              for(const themePackPath of themePackPaths) {
+              for (const themePackPath of themePackPaths) {
                 const [code, reason] = await window.themepack.installThemePack(
                   themePackPath
                 );
                 if (code) {
-                  toast.success(`安装主题${reason?.name ? `「${reason.name}」` : ""}成功~`);
+                  toast.success(
+                    t("settings.theme.install_theme_success", {
+                      name: reason?.name ? `「${reason.name}」` : "",
+                    })
+                  );
                 } else {
-                  toast.error(`安装主题失败: ${reason?.message ?? ""}`);
+                  t("settings.theme.install_theme_fail", {
+                    reason: reason?.message,
+                  });
                 }
               }
             }
@@ -110,6 +133,8 @@ export function showThemeContextMenu(
 ) {
   const menuItems: IContextMenuItem[] = [];
 
+  const { t } = useTranslation();
+
   menuItems.push(
     // {
     //   title: "刷新主题",
@@ -119,7 +144,7 @@ export function showThemeContextMenu(
     //   },
     // },
     {
-      title: "卸载主题",
+      title: t("settings.theme.uninstall_theme"),
       icon: "trash",
       async onClick() {
         const [code, reason] = await window.themepack.uninstallThemePack(
@@ -127,9 +152,17 @@ export function showThemeContextMenu(
         );
 
         if (code) {
-          toast.success("卸载成功~");
+          toast.success(
+            t("settings.theme.uninstall_theme_success", {
+              name: themePack?.name ? `「${themePack.name}」` : "",
+            })
+          );
         } else {
-          toast.error(`卸载失败: ${reason?.message ?? ""}`);
+          toast.error(
+            t("settings.theme.uninstall_theme_fail", {
+              reason: reason?.message ?? "",
+            })
+          );
         }
       },
     }
@@ -144,6 +177,9 @@ export function showThemeContextMenu(
 
 function ThemeItem(props: IThemeItemProps) {
   const { selected, themePack } = props;
+
+  const { t } = useTranslation();
+
   return (
     <div
       className="theme-item-container"
@@ -174,7 +210,7 @@ function ThemeItem(props: IThemeItemProps) {
         }}
       ></div>
       <div className="theme-item-title">
-        {themePack ? themePack.name : "默认"}
+        {themePack ? themePack.name : t("common.default")}
       </div>
     </div>
   );

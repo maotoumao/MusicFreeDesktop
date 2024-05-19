@@ -16,6 +16,7 @@ import {
 } from "@/renderer/components/Panel";
 import { useTranslation } from "react-i18next";
 import { setAppConfigPath, useAppConfig } from "@/shared/app-config/renderer";
+import { isCN } from "@/shared/i18n/renderer";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
@@ -244,10 +245,7 @@ function QualityBtn() {
           onOk(value, extra) {
             trackPlayer.setQuality(value as IMusic.IQualityKey);
             if (!extra) {
-              setAppConfigPath(
-                "playMusic.defaultQuality",
-                value
-              );
+              setAppConfigPath("playMusic.defaultQuality", value);
             }
           },
         });
@@ -322,7 +320,7 @@ function LyricBtn() {
       }}
     >
       <SvgAsset
-        iconName="lyric"
+        iconName={isCN() ? "lyric" : "lyric-en"}
         title={t("music_bar.desktop_lyric")}
       ></SvgAsset>
     </div>

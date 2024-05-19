@@ -22,7 +22,9 @@ export default function NoPlugin(props: INoPluginProps) {
       <span>
         {supportMethod ? (
           <Trans
-            i18nKey={"plugin.hint_you_have_no_plugin_with_supported_method"}
+            i18nKey={
+              "plugin.info_hint_you_have_no_plugin_with_supported_method"
+            }
             components={{
               highlight: <span className="highlight"></span>,
             }}
@@ -31,7 +33,7 @@ export default function NoPlugin(props: INoPluginProps) {
             }}
           ></Trans>
         ) : (
-          t("plugin.hint_you_have_no_plugin")
+          t("plugin.info_hint_you_have_no_plugin")
         )}
       </span>
       <span>

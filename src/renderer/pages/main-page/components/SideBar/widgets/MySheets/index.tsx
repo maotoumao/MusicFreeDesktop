@@ -93,7 +93,7 @@ export default function MySheets() {
                 });
               }}
               selected={currentSheetId === item.id}
-              title={item.title}
+              title={item.id === defaultSheet.id ? t("media.default_favorite_sheet_name"): item.title}
             ></ListItem>
           ))}
         </Disclosure.Panel>

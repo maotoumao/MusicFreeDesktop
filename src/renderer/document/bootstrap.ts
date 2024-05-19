@@ -27,7 +27,7 @@ export default async function () {
   ]);
   await MessageManager.setupMessageManager();
   await window.themepack.setupThemePacks();
-  setupI18n();
+  await setupI18n();
   setupLocalShortCut();
   dropHandler();
   clearDefaultBehavior();

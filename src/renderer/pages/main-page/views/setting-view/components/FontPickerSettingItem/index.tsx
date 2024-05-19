@@ -5,9 +5,10 @@ import {
 import defaultAppConfig from "@/shared/app-config/default-app-config";
 import { useEffect, useMemo, useState } from "react";
 import ListBoxSettingItem from "../ListBoxSettingItem";
-import { defaultFont } from "@/common/constant";
+import { defaultFont as _defaultFont } from "@/common/constant";
 import useLocalFonts from "@/renderer/hooks/useLocalFonts";
 import { setAppConfigPath } from "@/shared/app-config/renderer";
+import { useTranslation } from "react-i18next";
 
 interface FontPickerSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -17,6 +18,13 @@ interface FontPickerSettingItemProps<T extends IAppConfigKeyPath> {
 
 function useFonts() {
   const allLocalFonts = useLocalFonts();
+  const { t } = useTranslation();
+
+  const defaultFont = {
+    ..._defaultFont,
+    fullName: t("common.default"),
+  };
+
   const fonts = useMemo(
     () => (allLocalFonts ? [defaultFont, ...allLocalFonts] : null),
     [allLocalFonts]

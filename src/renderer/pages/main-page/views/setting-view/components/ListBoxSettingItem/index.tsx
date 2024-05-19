@@ -5,13 +5,15 @@ import {
 import { Listbox } from "@headlessui/react";
 import "./index.scss";
 import defaultAppConfig from "@/shared/app-config/default-app-config";
-import Condition from "@/renderer/components/Condition";
+import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import { isBasicType } from "@/common/normalize-util";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
 import { rem } from "@/common/constant";
 import { Fragment, useEffect, useRef } from "react";
 import { setAppConfigPath } from "@/shared/app-config/renderer";
+import SvgAsset from "@/renderer/components/SvgAsset";
+import { Tooltip } from "react-tooltip";
 
 interface ListBoxSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -21,6 +23,7 @@ interface ListBoxSettingItemProps<T extends IAppConfigKeyPath> {
   onChange?: (val: IAppConfigKeyPathValue<T>) => void;
   renderItem?: (item: IAppConfigKeyPathValue<T>) => string;
   width?: number | string;
+  toolTip?: string;
 }
 
 export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
@@ -34,10 +37,14 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
     onChange,
     renderItem,
     width,
+    toolTip,
   } = props;
 
   return (
     <div className="setting-view--list-box-setting-item-container setting-row">
+      <IfTruthy condition={toolTip}>
+        <Tooltip id={`tt-${keyPath}`}></Tooltip>
+      </IfTruthy>
       <Listbox
         value={value}
         onChange={
@@ -47,7 +54,18 @@ export default function ListBoxSettingItem<T extends IAppConfigKeyPath>(
           })
         }
       >
-        <div className={"label-container"}>{label}</div>
+        <div className={"label-container"}>
+          {label}
+          <IfTruthy condition={toolTip}>
+            <div
+              className="question-mark-container"
+              data-tooltip-id={`tt-${keyPath}`}
+              data-tooltip-content={toolTip}
+            >
+              <SvgAsset iconName="question-mark-circle"></SvgAsset>
+            </div>
+          </IfTruthy>
+        </div>
         <div className="options-container">
           <Listbox.Button
             as="div"
