@@ -364,5 +364,14 @@
       "official_site": "Official Website",
       "mobile_version": "Mobile Version"
     }
+  },
+  "main": {
+    "previous_music": "Previous Song",
+    "next_music": "Next Song",
+    "close_desktop_lyric": "Close Desktop Lyrics",
+    "open_desktop_lyric": "Open Desktop Lyrics",
+    "unlock_desktop_lyric": "Unlock Desktop Lyrics",
+    "lock_desktop_lyric": "Lock Desktop Lyrics",
+    "no_playing_music": "No Music Playing"
   }
 }

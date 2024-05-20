@@ -14,12 +14,16 @@ import {
   setAppConfigPath,
   setupMainAppConfig,
 } from "@/shared/app-config/main";
-import { setupTray } from "./tray";
+import { setupTray, setupTrayMenu } from "./tray";
 import { setupGlobalShortCut } from "./core/global-short-cut";
 import fs from "fs";
 import path from "path";
 import { setAutoFreeze } from "immer";
 import { setupI18n } from "@/shared/i18n/main";
+import setThumbbarBtns from "./utils/set-thumbbar-btns";
+import { currentMusicInfoStore } from "./store/current-music";
+// TODO: Main process should not depends on files in renderer process
+import { PlayerState } from "@/renderer/core/track-player/enum";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require("electron-squirrel-startup")) {
@@ -86,10 +90,17 @@ app.whenReady().then(async () => {
   await setupMainAppConfig();
   setupI18n({
     getDefaultLang() {
-      return getAppConfigPathSync("normal.language")
+      return getAppConfigPathSync("normal.language");
     },
     onLanguageChanged(lang) {
-        setAppConfigPath("normal.language", lang);
+      setAppConfigPath("normal.language", lang);
+      setupTrayMenu();
+      if (process.platform === "win32") {
+        setThumbbarBtns(
+          currentMusicInfoStore.getValue().currentPlayerState ===
+            PlayerState.Playing
+        );
+      }
     },
   });
   setupIpcMain();

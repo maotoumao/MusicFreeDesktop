@@ -364,5 +364,14 @@
       "official_site": "官方網站",
       "mobile_version": "移動版"
     }
+  },
+  "main": {
+    "previous_music": "上一首歌曲",
+    "next_music": "下一首歌曲",
+    "close_desktop_lyric": "關閉桌面歌詞",
+    "open_desktop_lyric": "開啟桌面歌詞",
+    "unlock_desktop_lyric": "解鎖桌面歌詞",
+    "lock_desktop_lyric": "鎖定桌面歌詞",
+    "no_playing_music": "目前無正在播放的音樂"
   }
 }

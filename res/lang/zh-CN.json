@@ -364,5 +364,14 @@
       "official_site": "软件官网",
       "mobile_version": "移动版"
     }
+  },
+  "main": {
+    "previous_music": "上一首",
+    "next_music": "下一首",
+    "close_desktop_lyric": "关闭桌面歌词",
+    "open_desktop_lyric": "开启桌面歌词",
+    "unlock_desktop_lyric": "解锁桌面歌词",
+    "lock_desktop_lyric": "锁定桌面歌词",
+    "no_playing_music": "当前无正在播放的音乐"
   }
 }

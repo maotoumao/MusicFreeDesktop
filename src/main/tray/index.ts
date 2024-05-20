@@ -15,7 +15,6 @@ import { getAppConfigPath } from "@/shared/app-config/main";
 import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 import { t } from "@/shared/i18n/main";
 
-
 let tray: Tray | null = null;
 
 if (process.platform === "darwin") {
@@ -44,13 +43,21 @@ if (process.platform === "darwin") {
             accelerator: "Command+Z",
             role: "undo",
           },
-          { label: t("common.redo"), accelerator: "Shift+Command+Z", role: "redo" },
+          {
+            label: t("common.redo"),
+            accelerator: "Shift+Command+Z",
+            role: "redo",
+          },
           { type: "separator" },
           { label: t("common.cut"), accelerator: "Command+X", role: "cut" },
           { label: t("common.copy"), accelerator: "Command+C", role: "copy" },
           { label: t("common.cut"), accelerator: "Command+V", role: "paste" },
           { type: "separator" },
-          { label: t("common.select_all"), accelerator: "Command+A", role: "selectAll" },
+          {
+            label: t("common.select_all"),
+            accelerator: "Command+A",
+            role: "selectAll",
+          },
         ],
       },
     ])
@@ -115,7 +122,7 @@ export async function setupTrayMenu() {
     );
   } else {
     ctxMenu.push({
-      label: "当前无正在播放的音乐",
+      label: t("main.no_playing_music"),
       enabled: false,
     });
   }
@@ -142,7 +149,7 @@ export async function setupTrayMenu() {
       },
     },
     {
-      label: "上一首",
+      label: t("main.previous_music"),
       enabled: !!currentMusic,
       click() {
         ipcMainSendMainWindow("player-cmd", {
@@ -151,7 +158,7 @@ export async function setupTrayMenu() {
       },
     },
     {
-      label: "下一首",
+      label: t("main.next_music"),
       enabled: !!currentMusic,
       click() {
         ipcMainSendMainWindow("player-cmd", {
@@ -211,14 +218,14 @@ export async function setupTrayMenu() {
   const lyricConfig = await getAppConfigPath("lyric");
   if (lyricConfig?.enableDesktopLyric) {
     ctxMenu.push({
-      label: "关闭桌面歌词",
+      label: t("main.close_desktop_lyric"),
       click() {
         setLyricWindow(false);
       },
     });
   } else {
     ctxMenu.push({
-      label: "开启桌面歌词",
+      label: t("main.open_desktop_lyric"),
       click() {
         setLyricWindow(true);
       },
@@ -227,14 +234,14 @@ export async function setupTrayMenu() {
 
   if (lyricConfig?.lockLyric) {
     ctxMenu.push({
-      label: "解锁桌面歌词",
+      label: t("main.unlock_desktop_lyric"),
       click() {
         setDesktopLyricLock(false);
       },
     });
   } else {
     ctxMenu.push({
-      label: "锁定桌面歌词",
+      label: t("main.lock_desktop_lyric"),
       click() {
         setDesktopLyricLock(true);
       },

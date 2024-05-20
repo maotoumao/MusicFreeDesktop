@@ -3,6 +3,7 @@ import { getMainWindow } from "../window";
 import { ipcMainSendMainWindow } from "@/shared/ipc/main";
 import { getResPath } from "./get-res-path";
 import { PlayerState } from "@/renderer/core/track-player/enum";
+import { t } from "@/shared/i18n/main";
 
 export default function (isPlaying?: boolean) {
   const mainWindow = getMainWindow();
@@ -13,7 +14,7 @@ export default function (isPlaying?: boolean) {
   mainWindow.setThumbarButtons([
     {
       icon: nativeImage.createFromPath(getResPath("skip-left.png")),
-      tooltip: "上一首",
+      tooltip: t("main.previous_music"),
       click() {
         ipcMainSendMainWindow("player-cmd", {
           cmd: "skip-prev",
@@ -24,7 +25,9 @@ export default function (isPlaying?: boolean) {
       icon: nativeImage.createFromPath(
         getResPath(isPlaying ? "pause.png" : "play.png")
       ),
-      tooltip: isPlaying ? "暂停" : "播放",
+      tooltip: isPlaying
+        ? t("media.music_state_pause")
+        : t("media.music_state_play"),
       click() {
         ipcMainSendMainWindow("player-cmd", {
           cmd: "set-player-state",
@@ -34,7 +37,7 @@ export default function (isPlaying?: boolean) {
     },
     {
       icon: nativeImage.createFromPath(getResPath("skip-right.png")),
-      tooltip: "下一首",
+      tooltip: t("main.next_music"),
       click() {
         ipcMainSendMainWindow("player-cmd", {
           cmd: "skip-next",

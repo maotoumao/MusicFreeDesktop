@@ -364,5 +364,14 @@
       "official_site": "Sitio oficial",
       "mobile_version": "Versión móvil"
     }
+  },
+  "main": {
+    "previous_music": "Canción anterior",
+    "next_music": "Siguiente canción",
+    "close_desktop_lyric": "Cerrar letra en pantalla",
+    "open_desktop_lyric": "Abrir letra en pantalla",
+    "unlock_desktop_lyric": "Desbloquear letra en pantalla",
+    "lock_desktop_lyric": "Bloquear letra en pantalla",
+    "no_playing_music": "No hay música reproduciéndose actualmente"
   }
 }
