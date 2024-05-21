@@ -15,7 +15,10 @@ export const getResPath = (resourceName: string) => {
 
 let allLangs: string[] = [];
 
-async function readLangContent(langCode: string, enableRedirect = true) {
+async function readLangContent(
+  langCode: string,
+  enableRedirect = true
+): Promise<object | null> {
   const langPath = path.resolve(getResPath(`./lang/${langCode}.json`));
   try {
     const content = await fs.readFile(langPath, "utf8");
