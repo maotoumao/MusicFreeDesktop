@@ -15,9 +15,7 @@ const config: ForgeConfig = {
     appBundleId: "fun.upup.musicfree",
     icon: path.resolve(__dirname, "res/logo"),
     executableName: "MusicFree",
-    extraResource: [
-      path.resolve(__dirname, 'res')
-    ],
+    extraResource: [path.resolve(__dirname, "res")],
   },
   rebuildConfig: {},
   makers: [
@@ -27,16 +25,19 @@ const config: ForgeConfig = {
     //   setupMsi: "MusicFreeInstaller",
     // }),
     new MakerZIP({}, ["darwin"]),
-    new MakerDMG({
-      // background
-      format: 'ULFO'
-    }, ['darwin']),
+    new MakerDMG(
+      {
+        // background
+        format: "ULFO",
+      },
+      ["darwin"]
+    ),
     // new MakerRpm({}),
     new MakerDeb({
       options: {
         name: "MusicFree",
-        bin: "MusicFree"
-      }
+        bin: "MusicFree",
+      },
     }),
   ],
   plugins: [
@@ -65,29 +66,29 @@ const config: ForgeConfig = {
           /** webworkers */
           {
             js: "./src/webworkers/downloader.ts",
-            name: 'worker_downloader',
-            nodeIntegration: true
+            name: "worker_downloader",
+            nodeIntegration: true,
           },
           {
             js: "./src/webworkers/local-file-watcher.ts",
-            name: 'local_file_watcher',
-            nodeIntegration: true
+            name: "local_file_watcher",
+            nodeIntegration: true,
           },
           {
             js: "./src/webworkers/backup-worker.ts",
-            name: 'backup',
-            nodeIntegration: true
-          }
+            name: "backup",
+            nodeIntegration: true,
+          },
         ],
       },
     }),
     {
-      name: '@timfish/forge-externals-plugin',
+      name: "@timfish/forge-externals-plugin",
       config: {
-        externals: ['sharp'],
-        includeDeps: true
-      }
-    }
+        externals: ["sharp"],
+        includeDeps: true,
+      },
+    },
   ],
 };
 
