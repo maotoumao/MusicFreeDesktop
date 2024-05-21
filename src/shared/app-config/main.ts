@@ -7,13 +7,12 @@ import { produce } from "immer";
 import objectPath from "object-path";
 import { ipcMainHandle, ipcMainSend } from "@/shared/ipc/main";
 import { getLyricWindow, getMainWindow } from "@/main/window";
-import defaultAppConfig from "./default-app-config";
-
+import defaultAppConfig from "./internal/default-app-config";
 
 let _configPath: string;
 
-function getConfigPath(){
-  if(!_configPath) {
+function getConfigPath() {
+  if (!_configPath) {
     _configPath = path.resolve(app.getPath("userData"), "config.json");
   }
   return _configPath;
@@ -62,7 +61,6 @@ export async function setupMainAppConfig() {
   ipcMainHandle("set-app-config-path", ({ keyPath, value }) => {
     return setAppConfigPath(keyPath, value);
   });
-
 }
 
 export async function getAppConfig(): Promise<IAppConfig> {
@@ -148,7 +146,7 @@ export async function getAppConfigPath<K extends IAppConfigKeyPath>(
 export function getAppConfigPathSync<K extends IAppConfigKeyPath>(
   keyPath: K
 ): IAppConfigKeyPathValue<K> | undefined {
-  if(!cacheConfig) {
+  if (!cacheConfig) {
     return null;
   }
   return objectPath.get(cacheConfig, keyPath) ?? defaultAppConfig[keyPath];

@@ -1,6 +1,5 @@
 import { BrowserWindow, app, screen, nativeImage } from "electron";
 import { getResPath } from "../utils/get-res-path";
-import injectGlobalData from "./common/inject-global-data";
 import makeWindowFullyDraggable from "./common/make-window-fully-draggable";
 import {
   getAppConfig,
@@ -61,10 +60,6 @@ export const createLyricWindow = (): BrowserWindow => {
     lyricWindow.webContents.openDevTools();
   }
 
-  lyricWindow.webContents.on("did-finish-load", () => {
-    // 注入全局变量
-    injectGlobalData(lyricWindow);
-  });
   if (process.platform === "win32") {
     // windows系统移动桌面歌词
     makeWindowFullyDraggable(lyricWindow, {

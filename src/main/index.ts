@@ -8,22 +8,24 @@ import {
 } from "./window";
 import setupIpcMain, { handleProxy } from "./ipc";
 import { setupPluginManager } from "./core/plugin-manager";
+import { setupTray, setupTrayMenu } from "./tray";
+import { setupGlobalShortCut } from "./core/global-short-cut";
+import fs from "fs";
+import path from "path";
+import { setAutoFreeze } from "immer";
+import setThumbbarBtns from "./utils/set-thumbbar-btns";
+import { currentMusicInfoStore } from "./store/current-music";
+// TODO: Main process should not depends on files in renderer process
+import { PlayerState } from "@/renderer/core/track-player/enum";
+
 import {
   getAppConfigPath,
   getAppConfigPathSync,
   setAppConfigPath,
   setupMainAppConfig,
 } from "@/shared/app-config/main";
-import { setupTray, setupTrayMenu } from "./tray";
-import { setupGlobalShortCut } from "./core/global-short-cut";
-import fs from "fs";
-import path from "path";
-import { setAutoFreeze } from "immer";
+import { setupGlobalContext } from "@/shared/global-context/main";
 import { setupI18n } from "@/shared/i18n/main";
-import setThumbbarBtns from "./utils/set-thumbbar-btns";
-import { currentMusicInfoStore } from "./store/current-music";
-// TODO: Main process should not depends on files in renderer process
-import { PlayerState } from "@/renderer/core/track-player/enum";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require("electron-squirrel-startup")) {
@@ -48,10 +50,6 @@ if (process.platform === "win32") {
 }
 
 setAutoFreeze(false);
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on("ready", createMainWindow);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -87,7 +85,7 @@ app.on("will-quit", () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 app.whenReady().then(async () => {
-  await setupMainAppConfig();
+  await Promise.allSettled([setupGlobalContext(), setupMainAppConfig()]);
   setupI18n({
     getDefaultLang() {
       return getAppConfigPathSync("normal.language");
@@ -108,6 +106,7 @@ app.whenReady().then(async () => {
   setupTray();
   bootstrap();
   setupGlobalShortCut();
+  createMainWindow();
 });
 
 async function bootstrap() {

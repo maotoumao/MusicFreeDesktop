@@ -18,6 +18,7 @@ import {
   useDownloadedMusicList,
 } from "./downloaded-sheet";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 type ProxyMarkedFunction<T extends (...args: any) => void> = T &
   Comlink.ProxyMarked;
@@ -55,21 +56,18 @@ const tForceUpdatePendingQueue = throttle(forceUpdatePendingQueue, 32, {
 
 function setupDownloaderWorker() {
   // 初始化worker
-  const downloaderWorkerPath = window.globalData?.workersPath?.downloader;
+  const downloaderWorkerPath = getGlobalContext().workersPath.downloader;
   if (downloaderWorkerPath) {
     const worker = new Worker(downloaderWorkerPath);
     downloaderWorker = Comlink.wrap(worker);
   }
-  setDownloadingConcurrency(
-    getAppConfigPath("download.concurrency")
-  );
+  setDownloadingConcurrency(getAppConfigPath("download.concurrency"));
 }
 
 const concurrencyLimit = 20;
 const downloadingQueue = new PQueue({
   concurrency: 5,
 });
-
 
 function setDownloadingConcurrency(concurrency: number) {
   downloadingQueue.concurrency = Math.min(
@@ -167,7 +165,7 @@ async function downloadMusic(
       const ext = mediaSource.url.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
       const downloadBasePath =
         getAppConfigPath("download.path") ??
-        window.globalData.appPath.downloads;
+        getGlobalContext().appPath.downloads;
       const downloadPath = window.path.resolve(
         downloadBasePath,
         `./${fileName}.${ext}`

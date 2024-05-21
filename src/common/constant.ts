@@ -6,7 +6,7 @@ export const internalDataSymbol = Symbol.for("internal");
 export const timeStampSymbol = Symbol.for("time-stamp");
 // 加入播放列表的辅助顺序
 export const sortIndexSymbol = Symbol.for("sort-index");
-/** 
+/**
  * 歌曲引用次数
  * TODO: 没必要算引用 如果真有需要直接取异或就可以了
  */
@@ -84,19 +84,20 @@ export const shortCutKeys: IShortCutKeys[] = [
   "volume-up",
   "volume-down",
   "toggle-desktop-lyric",
-  "like/dislike"
+  "like/dislike",
 ];
 
 // 快捷键列表对应的事件
-export const shortCutKeysEvts: Record<IShortCutKeys, keyof IEventType.IEvents> = {
-  "play/pause": "TOGGLE_PLAYER_STATE",
-  "skip-next": "SKIP_NEXT",
-  "skip-previous": "SKIP_PREVIOUS",
-  "volume-down": "VOLUME_DOWN",
-  "volume-up": "VOLUME_UP",
-  "toggle-desktop-lyric": "TOGGLE_DESKTOP_LYRIC",
-  "like/dislike": "TOGGLE_LIKE"
-};
+export const shortCutKeysEvts: Record<IShortCutKeys, keyof IEventType.IEvents> =
+  {
+    "play/pause": "TOGGLE_PLAYER_STATE",
+    "skip-next": "SKIP_NEXT",
+    "skip-previous": "SKIP_PREVIOUS",
+    "volume-down": "VOLUME_DOWN",
+    "volume-up": "VOLUME_UP",
+    "toggle-desktop-lyric": "TOGGLE_DESKTOP_LYRIC",
+    "like/dislike": "TOGGLE_LIKE",
+  };
 
 /** 下载状态 */
 export enum DownloadState {

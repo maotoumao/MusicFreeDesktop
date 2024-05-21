@@ -6,6 +6,7 @@ import {
 } from "@/renderer/utils/user-perference";
 import * as Comlink from "comlink";
 import musicSheetDB from "../db/music-sheet-db";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 type ProxyMarkedFunction<T extends (...args: any) => void> = T &
   Comlink.ProxyMarked;
@@ -46,7 +47,7 @@ async function setupLocalMusic() {
     // });
 
     const localFileWatcherWorkerPath =
-      window.globalData?.workersPath?.localFileWatcher;
+      getGlobalContext().workersPath.localFileWatcher;
     if (localFileWatcherWorkerPath) {
       const worker = new Worker(localFileWatcherWorkerPath);
       localFileWatcherWorker = Comlink.wrap(worker);
@@ -54,7 +55,7 @@ async function setupLocalMusic() {
     }
 
     const allMusic = await musicSheetDB.localMusicStore.toArray();
-    
+
     localMusicListStore.setValue(allMusic);
     localFileWatcherWorker.onAdd(
       Comlink.proxy(async (musicItems: IMusicItemWithLocalPath[]) => {
@@ -80,14 +81,16 @@ async function setupLocalMusic() {
             const cachedLocalMusic = localMusicListStore.getValue();
             const tobeDeletedPrimaryKeys: any[] = [];
             const newCachedLocalMusic: IMusicItemWithLocalPath[] = [];
-            cachedLocalMusic.forEach(it => {
-              if(tobeDeletedFilePaths.has(it.$$localPath)) {
+            cachedLocalMusic.forEach((it) => {
+              if (tobeDeletedFilePaths.has(it.$$localPath)) {
                 tobeDeletedPrimaryKeys.push([it.platform, it.id]);
               } else {
                 newCachedLocalMusic.push(it);
               }
-            })
-            await musicSheetDB.localMusicStore.bulkDelete(tobeDeletedPrimaryKeys);
+            });
+            await musicSheetDB.localMusicStore.bulkDelete(
+              tobeDeletedPrimaryKeys
+            );
             localMusicListStore.setValue(newCachedLocalMusic);
           }
         );

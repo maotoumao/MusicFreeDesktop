@@ -8,6 +8,7 @@ import "./index.scss";
 import { changeLang, getLangList } from "@/shared/i18n/renderer";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 interface IProps {
   data: IAppConfig["normal"];
@@ -42,7 +43,7 @@ export default function Normal(props: IProps) {
           },
         ]}
       ></RadioGroupSettingItem>
-      {window.globalData.platform === "win32" ? (
+      {getGlobalContext().platform === "win32" ? (
         <RadioGroupSettingItem
           label={t("settings.normal.taskbar_thumb")}
           keyPath="normal.taskbarThumb"

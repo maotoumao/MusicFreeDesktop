@@ -4,7 +4,7 @@ import {
 } from "@/shared/app-config/type";
 import { Listbox } from "@headlessui/react";
 import "./index.scss";
-import defaultAppConfig from "@/shared/app-config/default-app-config";
+import defaultAppConfig from "@/shared/app-config/internal/default-app-config";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import { isBasicType } from "@/common/normalize-util";

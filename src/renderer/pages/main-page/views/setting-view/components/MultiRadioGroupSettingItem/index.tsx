@@ -6,7 +6,7 @@ import { RadioGroup } from "@headlessui/react";
 import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
-import defaultAppConfig from "@/shared/app-config/default-app-config";
+import defaultAppConfig from "@/shared/app-config/internal/default-app-config";
 import { setAppConfigPath } from "@/shared/app-config/renderer";
 
 type Extract<T> = T extends Array<infer R> ? R : never;
@@ -56,10 +56,18 @@ export default function MultiRadioGroupSettingItem<T extends IAppConfigKeyPath>(
               title={option.title}
               key={index}
               onClick={() => {
-                if(checked) {
-                  setAppConfigPath("normal.musicListColumnsShown", (value as Array<any>)?.filter(it => it !== option.value) ?? []);
+                if (checked) {
+                  setAppConfigPath(
+                    "normal.musicListColumnsShown",
+                    (value as Array<any>)?.filter(
+                      (it) => it !== option.value
+                    ) ?? []
+                  );
                 } else {
-                  setAppConfigPath("normal.musicListColumnsShown", [...((value as Array<any>) ?? []), option.value])
+                  setAppConfigPath("normal.musicListColumnsShown", [
+                    ...((value as Array<any>) ?? []),
+                    option.value,
+                  ]);
                 }
               }}
             >

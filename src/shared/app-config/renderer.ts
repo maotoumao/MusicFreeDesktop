@@ -1,11 +1,8 @@
 import objectPath from "object-path";
-import {
-  ipcRendererInvoke,
-  ipcRendererOn,
-} from "@/shared/ipc/renderer";
+import { ipcRendererInvoke, ipcRendererOn } from "@/shared/ipc/renderer";
 import Store from "../../common/store";
 import { IAppConfig, IAppConfigKeyPath, IAppConfigKeyPathValue } from "./type";
-import defaultAppConfig from "./default-app-config";
+import defaultAppConfig from "./internal/default-app-config";
 
 const appConfigStore = new Store<IAppConfig>({});
 

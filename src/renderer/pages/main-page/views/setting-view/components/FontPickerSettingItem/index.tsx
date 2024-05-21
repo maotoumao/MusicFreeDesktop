@@ -2,7 +2,7 @@ import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
 } from "@/shared/app-config/type";
-import defaultAppConfig from "@/shared/app-config/default-app-config";
+import defaultAppConfig from "@/shared/app-config/internal/default-app-config";
 import { useEffect, useMemo, useState } from "react";
 import ListBoxSettingItem from "../ListBoxSettingItem";
 import { defaultFont as _defaultFont } from "@/common/constant";

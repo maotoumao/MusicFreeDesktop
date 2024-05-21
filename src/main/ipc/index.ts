@@ -51,7 +51,7 @@ export default function setupIpcMain() {
     } catch {
       return false;
     }
-  })
+  });
 
   ipcMainHandle("show-open-dialog", (options) => {
     const mainWindow = getMainWindow();

@@ -7,6 +7,7 @@ import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import FontPickerSettingItem from "../../components/FontPickerSettingItem";
 import { IfTruthy } from "@/renderer/components/Condition";
 import { useTranslation } from "react-i18next";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 interface IProps {
   data: IAppConfig["lyric"];
@@ -23,7 +24,7 @@ export default function Lyric(props: IProps) {
 
   return (
     <div className="setting-view--lyric-container">
-      <IfTruthy condition={window.globalData.platform === "darwin"}>
+      <IfTruthy condition={getGlobalContext().platform === "darwin"}>
         <CheckBoxSettingItem
           label={t("settings.lyric.enable_status_bar_lyric")}
           checked={data.enableStatusBarLyric}

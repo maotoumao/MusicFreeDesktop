@@ -1,4 +1,4 @@
-import defaultAppConfig from "@/shared/app-config/default-app-config";
+import defaultAppConfig from "@/shared/app-config/internal/default-app-config";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,

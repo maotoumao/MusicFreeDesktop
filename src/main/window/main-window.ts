@@ -1,7 +1,6 @@
 import { localPluginName } from "@/common/constant";
 import { BrowserWindow, app, nativeImage } from "electron";
 import { getResPath } from "../utils/get-res-path";
-import injectGlobalData from "./common/inject-global-data";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState } from "@/renderer/core/track-player/enum";
@@ -78,10 +77,6 @@ export const createMainWindow = (): BrowserWindow => {
       }
     }
   );
-
-  mainWindow.webContents.on("did-finish-load", () => {
-    injectGlobalData(mainWindow);
-  });
 
   setThumbbarBtns(false);
 

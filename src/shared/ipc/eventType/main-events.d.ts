@@ -1,5 +1,9 @@
 declare namespace IpcEvents {
-  type IPlayerCmd = "skip-prev" | "skip-next" | "set-repeat-mode" | "set-player-state";
+  type IPlayerCmd =
+    | "skip-prev"
+    | "skip-next"
+    | "set-repeat-mode"
+    | "set-player-state";
   // 由 Main 发出的ipc通信
   type Plugin = import("@main/core/plugin-manager/plugin").Plugin;
   type AppConfig = import("@/shared/app-config/type").IAppConfig;
@@ -12,18 +16,18 @@ declare namespace IpcEvents {
       // 播放状态
       playerState: import("@/renderer/core/track-player/enum").PlayerState;
       // 当前音乐
-      currentMusic: IMusic.IMusicItem,
-    }>
-  }
+      currentMusic: IMusic.IMusicItem;
+    }>;
+  };
   interface Main {
     /** 插件 */
     "plugin-loaded": IPlugin.IPluginDelegate[];
     "sync-app-config": AppConfig;
     /** 切换播放状态 */
     "player-cmd": {
-      cmd: IPlayerCmd,
-      payload?: any
-    }
+      cmd: IPlayerCmd;
+      payload?: any;
+    };
     navigate:
       | string
       | {
@@ -32,8 +36,8 @@ declare namespace IpcEvents {
         };
 
     "sync-local-music": IMusic.IMusicItem[];
-      
+
     // 向扩展进程同步数据
-    "sync-extension-data": IExtensionWindowSyncData
+    "sync-extension-data": IExtensionWindowSyncData;
   }
 }

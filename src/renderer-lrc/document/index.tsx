@@ -14,6 +14,7 @@ import useBootstrap from "./useBootstrap";
 import LyricWindowPage from "../pages";
 import { useEffect, useRef } from "react";
 import { ipcRendererSend } from "@/shared/ipc/renderer";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 bootstrap().then(() => {
   ReactDOM.createRoot(document.getElementById("root")).render(<Root></Root>);
@@ -27,7 +28,7 @@ function Root() {
     const moveWindowHandler = () => {
       setTimeout(() => {
         // hack: inject数据延迟
-        if (window.globalData.platform !== "win32") {
+        if (getGlobalContext().platform !== "win32") {
           // win32使用make-window-fully-draggable方案
           window.addEventListener("mousedown", (e) => {
             startClientPosRef.current = {
@@ -44,7 +45,7 @@ function Root() {
               });
             }
           });
-    
+
           window.addEventListener("mouseup", () => {
             isMovingRef.current = false;
             startClientPosRef.current = null;
@@ -52,12 +53,11 @@ function Root() {
         }
       }, 20);
     };
-    if(document.readyState === "complete") {
+    if (document.readyState === "complete") {
       moveWindowHandler();
     } else {
       document.onload = moveWindowHandler;
     }
-    
   }, []);
 
   return <LyricWindowPage></LyricWindowPage>;

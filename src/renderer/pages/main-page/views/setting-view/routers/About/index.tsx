@@ -4,6 +4,7 @@ import checkUpdate from "@/renderer/utils/check-update";
 import { toast } from "react-toastify";
 import "./index.scss";
 import { Trans, useTranslation } from "react-i18next";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 export default function About() {
   const { t } = useTranslation();
@@ -14,7 +15,7 @@ export default function About() {
         <Trans
           i18nKey={"settings.about.current_version"}
           values={{
-            version: window.globalData.appVersion,
+            version: getGlobalContext().appVersion,
           }}
         ></Trans>
         <A
