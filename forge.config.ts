@@ -73,8 +73,8 @@ const config: ForgeConfig = {
             nodeIntegration: true,
           },
           {
-            js: "./src/webworkers/backup-worker.ts",
-            name: "backup",
+            js: "./src/webworkers/db-worker.ts",
+            name: "db",
             nodeIntegration: true,
           },
         ],

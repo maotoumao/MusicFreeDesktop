@@ -13,7 +13,7 @@ interface IAddMusicToSheetProps {
 
 export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
   const { musicItems } = props;
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const allSheets = MusicSheet.frontend.useAllSheets();
   return (
@@ -23,9 +23,14 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
           <span>
             {t("modal.add_to_my_sheets")}{" "}
             <span className="music-length">
-              (<Trans i18nKey={"modal.total_music_num"} values={{
-                number: Array.isArray(musicItems) ? musicItems.length : 1
-              }}></Trans>)
+              (
+              <Trans
+                i18nKey={"modal.total_music_num"}
+                values={{
+                  number: Array.isArray(musicItems) ? musicItems.length : 1,
+                }}
+              ></Trans>
+              )
             </span>
           </span>
         </Base.Header>

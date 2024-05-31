@@ -159,7 +159,7 @@ export function showMusicContextMenu(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
   x: number,
   y: number,
-  localMusicSheetId?: string
+  sheetType?: string
 ) {
   const menuItems: IContextMenuItem[] = [];
   const isArray = Array.isArray(musicItems);
@@ -170,11 +170,15 @@ export function showMusicContextMenu(
         icon: "identification",
       },
       {
-        title: `${i18n.t("media.media_type_artist")}: ${musicItems.artist ?? i18n.t("media.unknown_artist")}`,
+        title: `${i18n.t("media.media_type_artist")}: ${
+          musicItems.artist ?? i18n.t("media.unknown_artist")
+        }`,
         icon: "user",
       },
       {
-        title: `${i18n.t("media.media_type_album")}: ${musicItems.album ?? i18n.t("media.unknown_album")}`,
+        title: `${i18n.t("media.media_type_album")}: ${
+          musicItems.album ?? i18n.t("media.unknown_album")
+        }`,
         icon: "album",
         show: !!musicItems.album,
       },
@@ -203,15 +207,15 @@ export function showMusicContextMenu(
     {
       title: i18n.t("music_list_context_menu.remove_from_sheet"),
       icon: "trash",
-      show: !!localMusicSheetId && localMusicSheetId !== "play-list",
+      show: !!sheetType && sheetType !== "play-list",
       onClick() {
-        MusicSheet.frontend.removeMusicFromSheet(musicItems, localMusicSheetId);
+        MusicSheet.frontend.removeMusicFromSheet(musicItems, sheetType);
       },
     },
     {
       title: i18n.t("common.remove"),
       icon: "trash",
-      show: localMusicSheetId === "play-list",
+      show: sheetType === "play-list",
       onClick() {
         trackPlayer.removeFromQueue(musicItems);
       },
@@ -246,14 +250,22 @@ export function showMusicContextMenu(
         );
         if (isSuccess) {
           if (isArray) {
-            toast.success(i18n.t("music_list_context_menu.delete_local_downloaded_songs_success", {
-              musicNums: musicItems.length
-            }));
+            toast.success(
+              i18n.t(
+                "music_list_context_menu.delete_local_downloaded_songs_success",
+                {
+                  musicNums: musicItems.length,
+                }
+              )
+            );
           } else {
             toast.success(
-              i18n.t("music_list_context_menu.delete_local_downloaded_song_success", {
-                songName: (musicItems as IMusic.IMusicItem).title
-              })
+              i18n.t(
+                "music_list_context_menu.delete_local_downloaded_song_success",
+                {
+                  songName: (musicItems as IMusic.IMusicItem).title,
+                }
+              )
             );
           }
         } else if (info?.msg) {
@@ -262,7 +274,9 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: i18n.t("music_list_context_menu.reveal_local_music_in_file_explorer"),
+      title: i18n.t(
+        "music_list_context_menu.reveal_local_music_in_file_explorer"
+      ),
       icon: "folder-open",
       show:
         !isArray &&
@@ -280,17 +294,21 @@ export function showMusicContextMenu(
             }
             const result = await ipcRendererInvoke(
               "show-item-in-folder",
-                getInternalData<IMusic.IMusicItemInternalData>(
-                  realTimeMusicItem,
-                  "downloadData"
-                )?.path
+              getInternalData<IMusic.IMusicItemInternalData>(
+                realTimeMusicItem,
+                "downloadData"
+              )?.path
             );
             if (!result) {
               throw new Error();
             }
           }
         } catch (e) {
-          toast.error(`${i18n.t("music_list_context_menu.reveal_local_music_in_file_explorer_fail")} ${e?.message ?? ""}`);
+          toast.error(
+            `${i18n.t(
+              "music_list_context_menu.reveal_local_music_in_file_explorer_fail"
+            )} ${e?.message ?? ""}`
+          );
         }
       },
     }
@@ -540,9 +558,7 @@ function _MusicList(props: IMusicListProps) {
                 onDoubleClick={() => {
                   const config =
                     doubleClickBehavior ??
-                    getAppConfigPath(
-                      "playMusic.clickMusicList"
-                    );
+                    getAppConfigPath("playMusic.clickMusicList");
                   if (config === "replace") {
                     trackPlayer.playMusicWithReplaceQueue(
                       table.getRowModel().rows.map((it) => it.original),

@@ -126,7 +126,9 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
       };
     }
     // 2. 读取路径下的同名lrc文件
-    const localPath = getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData")?.path || musicItem.$$localPath;
+    const localPath =
+      getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData")
+        ?.path || musicItem.$$localPath;
     if (localPath) {
       const fileName = path.parse(localPath).name;
       const lrcPathWithoutExt = path.resolve(localPath, `../${fileName}`);
@@ -139,12 +141,11 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
           if (rawLrc) {
             return {
               rawLrc,
-              lrc: lrcUrl
-            }
+              lrc: lrcUrl,
+            };
           }
         }
       }
-
     }
     // // 2.本地缓存
     // const localLrc =
@@ -236,7 +237,9 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     if (!this.plugin.instance.getAlbumInfo) {
       return {
         albumItem,
-        musicList: (albumItem?.musicList ?? []).map(it => resetMediaItem(it, this.plugin.name)),
+        musicList: (albumItem?.musicList ?? []).map((it) =>
+          resetMediaItem(it, this.plugin.name)
+        ),
         isEnd: true,
       };
     }

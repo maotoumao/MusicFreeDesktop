@@ -16,7 +16,7 @@ import { currentMediaTypeStore, resetStore } from "./store/search-result";
 
 export default function SearchView() {
   const match = useMatch("/main/search/:query");
-  const query = match?.params?.query;
+  const query = decodeURIComponent(match?.params?.query ?? "");
 
   const plugins = useSortedSupportedPlugin("search");
 
@@ -41,7 +41,8 @@ export default function SearchView() {
   return (
     <div className="search-view-container">
       <div className="search-header">
-        <span className="highlight">「{query}」</span>{t("search_result_page.search_result_title")}
+        <span className="highlight">「{decodeURIComponent(query)}」</span>
+        {t("search_result_page.search_result_title")}
       </div>
       {plugins.length ? (
         <Tab.Group

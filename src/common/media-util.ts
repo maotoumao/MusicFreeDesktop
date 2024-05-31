@@ -74,6 +74,35 @@ export function addSortProperty(
   }
 }
 
+export function flatMediaItem<T extends IMedia.IMediaBase>(mediaItem: T) {
+  if (!mediaItem) {
+    return mediaItem;
+  }
+
+  return {
+    ...mediaItem,
+    ...(mediaItem?.$raw || {}),
+    platform: mediaItem.platform || mediaItem?.$raw?.platform,
+    id: mediaItem.id || mediaItem?.$raw?.id,
+  } as T;
+}
+
+export function removeInternalProperties<T extends IMedia.IMediaBase>(
+  mediaItem: T
+) {
+  if (!mediaItem) {
+    return mediaItem;
+  }
+
+  const keys = Object.keys(mediaItem);
+  return keys.reduce((obj, key) => {
+    if (!key.startsWith("$")) {
+      obj[key] = mediaItem[key];
+    }
+    return obj;
+  }, {} as any) as T;
+}
+
 /**
  *  获取音质顺序
  *

@@ -8,6 +8,7 @@ import { rimraf } from "rimraf";
 import utils from "./internal/utils";
 import "@shared/i18n/preload";
 import "@shared/global-context/preload";
+import "@shared/app-db/preload";
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 contextBridge.exposeInMainWorld("ipcRenderer", ipcRendererDelegate);
