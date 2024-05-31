@@ -11,6 +11,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import A from "@/renderer/components/A";
 import { Trans, useTranslation } from "react-i18next";
+import { i18n } from "@/shared/i18n/renderer";
 
 interface IProps {
   data: IAppConfig["theme"];
@@ -133,8 +134,7 @@ export function showThemeContextMenu(
 ) {
   const menuItems: IContextMenuItem[] = [];
 
-  const { t } = useTranslation();
-
+  const { t } = i18n;
   menuItems.push(
     // {
     //   title: "刷新主题",
