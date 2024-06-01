@@ -13,8 +13,13 @@ import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 
 import Downloader from "../core/downloader";
 import MessageManager from "../core/message-manager";
-import { getAppConfigPath, setAppConfigPath, setupRendererAppConfig } from "@/shared/app-config/renderer";
+import {
+  getAppConfigPath,
+  setAppConfigPath,
+  setupRendererAppConfig,
+} from "@/shared/app-config/renderer";
 import { setupI18n } from "@/shared/i18n/renderer";
+import Themepack from "@/shared/themepack/renderer";
 
 setAutoFreeze(false);
 
@@ -26,17 +31,13 @@ export default async function () {
     trackPlayer.setupPlayer(),
   ]);
   await MessageManager.setupMessageManager();
-  await window.themepack.setupThemePacks();
+  await Themepack.setupThemePacks();
   await setupI18n();
   setupLocalShortCut();
   dropHandler();
   clearDefaultBehavior();
   setupEvents();
-  localMusic.setupLocalMusic(),
-
-  await Downloader.setupDownloader();
-
-  
+  localMusic.setupLocalMusic(), await Downloader.setupDownloader();
 
   // 自动更新插件
   if (getAppConfigPath("plugin.autoUpdatePlugin")) {
@@ -124,15 +125,10 @@ function clearDefaultBehavior() {
 /** 设置事件 */
 function setupEvents() {
   Evt.on("TOGGLE_DESKTOP_LYRIC", () => {
-    const enableDesktopLyric = getAppConfigPath(
-      "lyric.enableDesktopLyric"
-    );
+    const enableDesktopLyric = getAppConfigPath("lyric.enableDesktopLyric");
 
     ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
-    setAppConfigPath(
-      "lyric.enableDesktopLyric",
-      !enableDesktopLyric
-    );
+    setAppConfigPath("lyric.enableDesktopLyric", !enableDesktopLyric);
   });
 
   Evt.on("TOGGLE_LIKE", async (item) => {

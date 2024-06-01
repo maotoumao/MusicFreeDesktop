@@ -15,6 +15,7 @@ import Empty from "@/renderer/components/Empty";
 import DownloadView from "./views/download-view";
 
 import "./index.scss";
+import ThemeView from "./views/theme-view";
 
 export default function MainPage() {
   return (
@@ -60,6 +61,7 @@ export default function MainPage() {
             element={<DownloadView></DownloadView>}
           ></Route>
           <Route path="setting" element={<SettingView></SettingView>}></Route>
+          <Route path="theme" element={<ThemeView></ThemeView>}></Route>
           <Route path="*" element={<Empty></Empty>}></Route>
         </Routes>
       </div>

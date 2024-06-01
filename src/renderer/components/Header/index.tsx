@@ -19,7 +19,7 @@ export default function AppHeader() {
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const isHistoryFocusRef = useRef(false);
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   if (!showSearchHistory) {
     isHistoryFocusRef.current = false;
@@ -101,7 +101,17 @@ export default function AppHeader() {
         >
           <SvgAsset iconName="sparkles"></SvgAsset>
         </div>
-        <div className="header-divider"></div>
+        <div
+          role="button"
+          className="header-button"
+          title={t("app_header.theme")}
+          onClick={() => {
+            navigate("/main/theme");
+            Evt.emit("HIDE_MUSIC_DETAIL");
+          }}
+        >
+          <SvgAsset iconName="t-shirt-line"></SvgAsset>
+        </div>
         <div
           role="button"
           className="header-button"
@@ -113,6 +123,8 @@ export default function AppHeader() {
         >
           <SvgAsset iconName="cog-8-tooth"></SvgAsset>
         </div>
+        <div className="header-divider"></div>
+
         <div
           role="button"
           title={t("app_header.minimize")}
@@ -128,9 +140,7 @@ export default function AppHeader() {
           title={t("app_header.exit")}
           className="header-button"
           onClick={() => {
-            const exitBehavior = getAppConfigPath(
-              "normal.closeBehavior"
-            );
+            const exitBehavior = getAppConfigPath("normal.closeBehavior");
             if (exitBehavior === "minimize") {
               ipcRendererSend("min-window", {
                 skipTaskBar: true,

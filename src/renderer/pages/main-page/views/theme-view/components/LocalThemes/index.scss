@@ -1,0 +1,10 @@
+.local-themes-container {
+  width: 100%;
+  margin-top: 14px;
+
+  & .local-themes-inner-container {
+    display: grid;
+    gap: 24px 36px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}

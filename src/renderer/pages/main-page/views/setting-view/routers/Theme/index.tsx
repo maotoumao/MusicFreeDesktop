@@ -12,14 +12,15 @@ import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import A from "@/renderer/components/A";
 import { Trans, useTranslation } from "react-i18next";
 import { i18n } from "@/shared/i18n/renderer";
+import Themepack from "@/shared/themepack/renderer";
 
 interface IProps {
   data: IAppConfig["theme"];
 }
 
 export default function Theme(props: IProps) {
-  const allThemePacksStore = window.themepack.allThemePacksStore;
-  const currentThemePackStore = window.themepack.currentThemePackStore;
+  const allThemePacksStore = Themepack.allThemePacksStore;
+  const currentThemePackStore = Themepack.currentThemePackStore;
   const [currentThemePack, setCurrentThemePack] = useState<ICommon.IThemePack>(
     currentThemePackStore.getValue()
   );
@@ -95,7 +96,7 @@ export default function Theme(props: IProps) {
             if (!result.canceled) {
               const themePackPaths = result.filePaths;
               for (const themePackPath of themePackPaths) {
-                const [code, reason] = await window.themepack.installThemePack(
+                const [code, reason] = await Themepack.installThemePack(
                   themePackPath
                 );
                 if (code) {
@@ -147,9 +148,7 @@ export function showThemeContextMenu(
       title: t("settings.theme.uninstall_theme"),
       icon: "trash",
       async onClick() {
-        const [code, reason] = await window.themepack.uninstallThemePack(
-          themePack
-        );
+        const [code, reason] = await Themepack.uninstallThemePack(themePack);
 
         if (code) {
           toast.success(
@@ -185,7 +184,7 @@ function ThemeItem(props: IThemeItemProps) {
       className="theme-item-container"
       role="button"
       onClick={() => {
-        window.themepack.selectTheme(themePack);
+        Themepack.selectTheme(themePack);
       }}
       onContextMenu={(e) => {
         if (!themePack) {

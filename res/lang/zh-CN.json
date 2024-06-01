@@ -165,7 +165,8 @@
     "search_history": "搜索历史",
     "settings": "设置",
     "minimize": "最小化",
-    "exit": "退出"
+    "exit": "退出",
+    "theme": "主题"
   },
   "music_bar": {
     "open_music_detail_page": "打开歌曲详情页",
@@ -300,18 +301,7 @@
       "auto_update_plugin": "打开软件时自动更新插件",
       "not_check_plugin_version": "安装插件时不校验版本"
     },
-    "theme": {
-      "example_theme_hint": "这里有些示例主题：",
-      "example_theme_subscription_hint": "也可以关注微信公众号：<highlight>一只猫头猫 </highlight>，回复<highlight> MusicFree主题包 </highlight>获取下载地址(不定期更新)",
-      "install_theme": "安装主题包",
-      "uninstall_theme": "卸载主题包",
-      "musicfree_theme": "MusicFree 主题",
-      "all_files": "全部文件",
-      "install_theme_success": "安装主题{{name}}成功~",
-      "install_theme_fail": "安装主题失败: {{reason}}",
-      "uninstall_theme_success": "卸载主题{{name}}成功~",
-      "uninstall_theme_fail": "卸载主题失败: {{reason}}"
-    },
+
     "short_cut": {
       "enable_local": "启用软件内快捷键",
       "enable_global": "启用全局快捷键",
@@ -373,5 +363,22 @@
     "unlock_desktop_lyric": "解锁桌面歌词",
     "lock_desktop_lyric": "锁定桌面歌词",
     "no_playing_music": "当前无正在播放的音乐"
+  },
+  "theme": {
+    "tab_local": "本地主题",
+    "tab_remote": "主题市场",
+    "download_and_use": "下载并使用",
+    "use_theme": "使用主题",
+
+    "example_theme_hint": "这里有些示例主题：",
+    "example_theme_subscription_hint": "也可以关注微信公众号：<highlight>一只猫头猫 </highlight>，回复<highlight> MusicFree主题包 </highlight>获取下载地址(不定期更新)",
+    "install_theme": "安装主题包",
+    "uninstall_theme": "卸载主题包",
+    "musicfree_theme": "MusicFree 主题",
+    "all_files": "全部文件",
+    "install_theme_success": "安装主题{{name}}成功~",
+    "install_theme_fail": "安装主题失败: {{reason}}",
+    "uninstall_theme_success": "卸载主题{{name}}成功~",
+    "uninstall_theme_fail": "卸载主题失败: {{reason}}"
   }
 }

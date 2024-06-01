@@ -23,12 +23,18 @@ declare namespace ICommon {
   }
 
   interface IThemePack {
+    /** 主题 */
     name: string;
+    /** 加载之后的路径，内部属性 */
     path: string;
+    /** 缩略图 */
+    thumb?: string;
     /** 预览图 */
     preview: string;
     /** 主题更新链接 */
     srcUrl?: string;
+    /** 主题作者 */
+    author?: string;
     /** 版本号 */
     version?: string;
     description?: string;

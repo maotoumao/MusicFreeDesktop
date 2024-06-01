@@ -110,3 +110,10 @@ export enum DownloadState {
   /** 下载完成 */
   DONE,
 }
+
+// 主题包链接
+export const themePackStoreBaseUrl = [
+  "https://raw.githubusercontent.com/maotoumao/MusicFreeThemePacks/master/", //github
+  "https://cdn.jsdelivr.net/gh/maotoumao/MusicFreeThemePacks@master/",
+  "https://gitee.com/maotoumao/MusicFreeThemePacks/raw/master/", // gitee
+];

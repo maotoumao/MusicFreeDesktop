@@ -7,15 +7,14 @@ import { compare } from "compare-versions";
 import { showModal } from "../components/Modal";
 import checkUpdate from "../utils/check-update";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
+import Themepack from "@/shared/themepack/renderer";
 
 export default function useBootstrap() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (window.themepack.currentThemePackStore.getValue()) {
-      window.themepack.selectTheme(
-        window.themepack.currentThemePackStore.getValue()
-      );
+    if (Themepack.currentThemePackStore.getValue()) {
+      Themepack.selectTheme(Themepack.currentThemePackStore.getValue());
     }
 
     const navigateCallback = (url: string, payload?: any) => {

@@ -54,6 +54,7 @@ export type SvgAssetIconNames =
   | "speaker-x-mark"
   | "trash"
   | "trophy"
+  | "t-shirt-line"
   | "user"
   | "lq"
   | "sd"

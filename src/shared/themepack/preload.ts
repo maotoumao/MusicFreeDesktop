@@ -1,12 +1,14 @@
 import { addFileScheme, addTailSlash } from "@/common/file-util";
 import path from "path";
 import fs from "fs/promises";
-import { ipcRenderer } from "electron";
+import { Readable } from "stream";
 import { rimraf } from "rimraf";
 import Store from "@/common/store";
 import { nanoid } from "nanoid";
-import { createReadStream } from "original-fs";
+import { createReadStream, createWriteStream } from "original-fs";
 import unzipper from "unzipper";
+import { getGlobalContext } from "../global-context/preload";
+import { contextBridge } from "electron";
 
 const themeNodeId = "themepack-node";
 const themePathKey = "themepack-path";
@@ -28,6 +30,7 @@ const currentThemePackStore = new Store<ICommon.IThemePack | null>(null);
 /**
  * TODO: iframe需要运行在独立的进程中，不然会影响到app的fps 得想个办法
  */
+
 /** 选择某个主题 */
 async function selectTheme(themePack: ICommon.IThemePack | null) {
   try {
@@ -112,10 +115,6 @@ function replaceAlias(
   );
 }
 
-async function appGetPath(pathName: string) {
-  return ipcRenderer.invoke("app-get-path", pathName);
-}
-
 let themePackBasePath: string;
 
 async function checkPath() {
@@ -137,7 +136,7 @@ async function checkPath() {
 async function setupThemePacks() {
   try {
     themePackBasePath = path.resolve(
-      await appGetPath("userData"),
+      getGlobalContext().appPath.userData,
       "./musicfree-themepacks"
     );
     await checkPath();
@@ -194,6 +193,7 @@ async function parseThemePack(
     const jsonData = JSON.parse(
       await fs.readFile(path.resolve(themePackPath, "config.json"), "utf-8")
     );
+
     const themePack: ICommon.IThemePack = {
       ...jsonData,
       preview: jsonData.preview?.startsWith?.("#")
@@ -206,8 +206,52 @@ async function parseThemePack(
     };
     return themePack;
   } catch (e) {
-    console.log("eeee", e);
+    console.error(e);
     return null;
+  }
+}
+
+const downloadResponse = async (response: Response, filePath: string) => {
+  const reader = response.body.getReader();
+  let size = 0;
+
+  return new Promise<void>((resolve, reject) => {
+    const rs = new Readable();
+
+    rs._read = async () => {
+      const result = await reader.read();
+      if (!result.done) {
+        rs.push(Buffer.from(result.value));
+        size += result.value.byteLength;
+      } else {
+        return;
+      }
+    };
+    rs.on("error", reject);
+
+    const stm = rs.pipe(createWriteStream(filePath));
+
+    stm.on("close", resolve);
+    stm.on("error", reject);
+  });
+};
+
+async function installRemoteThemePack(remoteUrl: string) {
+  const cacheFilePath = path.resolve(
+    getGlobalContext().appPath.temp,
+    `./${nanoid()}.mftheme`
+  );
+  try {
+    const resp = await fetch(remoteUrl);
+    await downloadResponse(resp, cacheFilePath);
+    const [success, error] = await installThemePack(cacheFilePath);
+    if (!success) {
+      throw new Error(error);
+    }
+  } catch (e: any) {
+    throw e;
+  } finally {
+    await rimraf(cacheFilePath);
   }
 }
 
@@ -254,11 +298,15 @@ async function uninstallThemePack(themePack: ICommon.IThemePack) {
   }
 }
 
-export default {
+export const mod = {
   selectTheme,
   setupThemePacks,
   allThemePacksStore,
   currentThemePackStore,
   installThemePack,
   uninstallThemePack,
+  installRemoteThemePack,
+  replaceAlias,
 };
+
+contextBridge.exposeInMainWorld("@shared/themepack", mod);
