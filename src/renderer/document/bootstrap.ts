@@ -12,14 +12,16 @@ import Evt from "../core/events";
 import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 
 import Downloader from "../core/downloader";
-import MessageManager from "../core/message-manager";
 import {
   getAppConfigPath,
   setAppConfigPath,
   setupRendererAppConfig,
 } from "@/shared/app-config/renderer";
 import { setupI18n } from "@/shared/i18n/renderer";
-import Themepack from "@/shared/themepack/renderer";
+import {
+  setupCommandHandler,
+  setupPlayerSyncHandler,
+} from "../core/command-handler";
 
 setAutoFreeze(false);
 
@@ -30,7 +32,8 @@ export default async function () {
     MusicSheet.frontend.setupMusicSheets(),
     trackPlayer.setupPlayer(),
   ]);
-  await MessageManager.setupMessageManager();
+  setupCommandHandler();
+  setupPlayerSyncHandler();
   await setupI18n();
   setupLocalShortCut();
   dropHandler();

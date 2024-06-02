@@ -6,15 +6,23 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import getTextWidth from "@/renderer/utils/get-text-width";
-import command from "../utils/command";
-import currentPlayerStore from "../store/current-player-store";
-import currentProgressStore from "../store/current-progress-store";
-import currentLyricStore from "../store/current-lyric-store";
 import { useAppConfig } from "@/shared/app-config/renderer";
+import {
+  PlayerSyncStore,
+  sendCommand,
+} from "@/shared/player-command-sync/renderer";
+
+const {
+  currentLyricStore,
+  currentMusicItemStore,
+  playerStateStore,
+  lyricStore,
+} = PlayerSyncStore;
 
 export default function LyricWindowPage() {
-  const playerStore = currentPlayerStore.useValue();
-  const { music: currentMusic, playerState } = playerStore;
+  const currentMusic = currentMusicItemStore.useValue();
+  const playerState = playerStateStore.useValue();
+
   const lyricAppConfig = useAppConfig()?.lyric;
 
   const lockLyric = lyricAppConfig?.lockLyric;
@@ -95,7 +103,7 @@ export default function LyricWindowPage() {
             <div
               className="operation-button"
               onClick={() => {
-                command("skip-prev");
+                sendCommand("SkipToPrevious");
               }}
             >
               <SvgAsset iconName="skip-left"></SvgAsset>
@@ -104,8 +112,8 @@ export default function LyricWindowPage() {
               className="operation-button"
               onClick={() => {
                 if (currentMusic) {
-                  command(
-                    "set-player-state",
+                  sendCommand(
+                    "SetPlayerState",
                     playerState === PlayerState.Playing
                       ? PlayerState.Paused
                       : PlayerState.Playing
@@ -122,7 +130,7 @@ export default function LyricWindowPage() {
             <div
               className="operation-button"
               onClick={() => {
-                command("skip-next");
+                sendCommand("SkipToNext");
               }}
             >
               <SvgAsset iconName="skip-right"></SvgAsset>
@@ -154,15 +162,13 @@ export default function LyricWindowPage() {
 }
 
 function LyricContent() {
-  const lyricStore = currentPlayerStore.useValue();
   // const progress = currentProgressStore.useValue();
   const currentLyric = currentLyricStore.useValue();
 
-  const { lyric = [], music: currentMusic } = lyricStore;
+  const currentMusic = currentMusicItemStore.useValue();
+  // const lyric = lyricStore.useValue();
 
   const lyricAppConfig = useAppConfig()?.lyric;
-
-
 
   const textWidth = useMemo(() => {
     if (currentLyric?.lrc?.lrc) {

@@ -59,4 +59,11 @@ declare namespace ICommon {
       [k: string]: any;
     }?
   ];
+
+  interface ICommand {
+    SetPlayerState: PlayerState;
+    SkipToPrevious: void;
+    SkipToNext: void;
+    SetRepeatMode: RepeatMode;
+  }
 }

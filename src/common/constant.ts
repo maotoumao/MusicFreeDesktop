@@ -117,3 +117,13 @@ export const themePackStoreBaseUrl = [
   "https://cdn.jsdelivr.net/gh/maotoumao/MusicFreeThemePacks@master/",
   "https://gitee.com/maotoumao/MusicFreeThemePacks/raw/master/", // gitee
 ];
+
+export enum TrackPlayerSyncType {
+  SyncPlayerState = "SyncPlayerState",
+  MusicChanged = "MusicChanged",
+  PlayerStateChanged = "PlayerStateChanged",
+  RepeatModeChanged = "RepeatModeChanged",
+  LyricChanged = "LyricChanged",
+  CurrentLyricChanged = "CurrentLyricChanged",
+  ProgressChanged = "ProgressChanged",
+}

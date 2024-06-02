@@ -4,6 +4,7 @@ import { ipcMainSendMainWindow } from "@/shared/ipc/main";
 import { getResPath } from "./get-res-path";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import { t } from "@/shared/i18n/main";
+import { sendCommand } from "@/shared/player-command-sync/main";
 
 export default function (isPlaying?: boolean) {
   const mainWindow = getMainWindow();
@@ -16,9 +17,7 @@ export default function (isPlaying?: boolean) {
       icon: nativeImage.createFromPath(getResPath("skip-left.png")),
       tooltip: t("main.previous_music"),
       click() {
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "skip-prev",
-        });
+        sendCommand("SkipToPrevious");
       },
     },
     {
@@ -29,19 +28,17 @@ export default function (isPlaying?: boolean) {
         ? t("media.music_state_pause")
         : t("media.music_state_play"),
       click() {
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "set-player-state",
-          payload: isPlaying ? PlayerState.Paused : PlayerState.Playing,
-        });
+        sendCommand(
+          "SetPlayerState",
+          isPlaying ? PlayerState.Paused : PlayerState.Playing
+        );
       },
     },
     {
       icon: nativeImage.createFromPath(getResPath("skip-right.png")),
       tooltip: t("main.next_music"),
       click() {
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "skip-next",
-        });
+        sendCommand("SkipToNext");
       },
     },
   ]);

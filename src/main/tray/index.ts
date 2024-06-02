@@ -14,6 +14,7 @@ import { getResPath } from "../utils/get-res-path";
 import { getAppConfigPath } from "@/shared/app-config/main";
 import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 import { t } from "@/shared/i18n/main";
+import { sendCommand } from "@/shared/player-command-sync/main";
 
 let tray: Tray | null = null;
 
@@ -139,31 +140,26 @@ export async function setupTrayMenu() {
         if (!currentMusic) {
           return;
         }
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "set-player-state",
-          payload:
-            currentPlayerState === PlayerState.Playing
-              ? PlayerState.Paused
-              : PlayerState.Playing,
-        });
+        sendCommand(
+          "SetPlayerState",
+          currentPlayerState === PlayerState.Playing
+            ? PlayerState.Paused
+            : PlayerState.Playing
+        );
       },
     },
     {
       label: t("main.previous_music"),
       enabled: !!currentMusic,
       click() {
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "skip-prev",
-        });
+        sendCommand("SkipToPrevious");
       },
     },
     {
       label: t("main.next_music"),
       enabled: !!currentMusic,
       click() {
-        ipcMainSendMainWindow("player-cmd", {
-          cmd: "skip-next",
-        });
+        sendCommand("SkipToNext");
       },
     }
   );
@@ -178,10 +174,7 @@ export async function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Loop,
         click() {
-          ipcMainSendMainWindow("player-cmd", {
-            cmd: "set-repeat-mode",
-            payload: RepeatMode.Loop,
-          });
+          sendCommand("SetRepeatMode", RepeatMode.Loop);
         },
       },
       {
@@ -190,10 +183,7 @@ export async function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Queue,
         click() {
-          ipcMainSendMainWindow("player-cmd", {
-            cmd: "set-repeat-mode",
-            payload: RepeatMode.Queue,
-          });
+          sendCommand("SetRepeatMode", RepeatMode.Queue);
         },
       },
       {
@@ -202,10 +192,7 @@ export async function setupTrayMenu() {
         type: "radio",
         checked: currentRepeatMode === RepeatMode.Shuffle,
         click() {
-          ipcMainSendMainWindow("player-cmd", {
-            cmd: "set-repeat-mode",
-            payload: RepeatMode.Shuffle,
-          });
+          sendCommand("SetRepeatMode", RepeatMode.Shuffle);
         },
       },
     ]),

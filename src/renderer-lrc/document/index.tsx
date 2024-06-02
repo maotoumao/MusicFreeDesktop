@@ -62,9 +62,3 @@ function Root() {
 
   return <LyricWindowPage></LyricWindowPage>;
 }
-
-// function BootstrapComponent(): null {
-//   useBootstrap();
-
-//   return null;
-// }
