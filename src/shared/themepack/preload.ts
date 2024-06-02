@@ -242,11 +242,11 @@ async function installRemoteThemePack(remoteUrl: string) {
     await downloadResponse(resp, cacheFilePath);
     const config = await installThemePack(cacheFilePath);
     if (!config) {
-      throw new Error();
+      throw new Error("Download fail");
     }
     return config;
   } catch (e: any) {
-    return null;
+    throw e;
   } finally {
     await rimraf(cacheFilePath);
   }

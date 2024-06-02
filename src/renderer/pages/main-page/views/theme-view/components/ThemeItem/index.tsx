@@ -29,7 +29,13 @@ export default function ThemeItem(props: IProps) {
         const cfg = await Themepack.installRemoteThemePack(config.srcUrl);
         await Themepack.selectTheme(cfg);
       }
-    } catch (e) {}
+    } catch (e) {
+      toast.error(
+        t("theme.install_theme_fail", {
+          reason: e?.message ?? "",
+        })
+      );
+    }
     setIsLoading(false);
   };
 
