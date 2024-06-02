@@ -4,10 +4,11 @@ import useRemoteThemes from "./hooks/useRemoteThemes";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import { RequestStateCode } from "@/common/constant";
 import ThemeItem from "../ThemeItem";
+import ThemePack from "@/shared/themepack/renderer";
 
 export default function RemoteThemes() {
   const [themes, loadingState] = useRemoteThemes();
-  console.log(JSON.stringify(themes));
+  const currentTheme = ThemePack.useCurrentThemePack();
 
   return (
     <div className="remote-themes-container">
@@ -22,6 +23,7 @@ export default function RemoteThemes() {
                 config={it.config}
                 key={it.publishName}
                 type="remote"
+                selected={it.hash && it.hash === currentTheme?.hash}
               ></ThemeItem>
             ))}
           </div>

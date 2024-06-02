@@ -9,6 +9,7 @@ import { createReadStream, createWriteStream } from "original-fs";
 import unzipper from "unzipper";
 import { getGlobalContext } from "../global-context/preload";
 import { contextBridge } from "electron";
+import CryptoJS from "crypto-js";
 
 const themeNodeId = "themepack-node";
 const themePathKey = "themepack-path";
@@ -25,81 +26,79 @@ const validIframeMap = new Map<
   ["page", null],
 ]);
 
-const allThemePacksStore = new Store<Array<ICommon.IThemePack | null>>([]);
-const currentThemePackStore = new Store<ICommon.IThemePack | null>(null);
+const themePackBasePath: string = path.resolve(
+  getGlobalContext().appPath.userData,
+  "./musicfree-themepacks"
+);
+
 /**
  * TODO: iframe需要运行在独立的进程中，不然会影响到app的fps 得想个办法
  */
 
 /** 选择某个主题 */
 async function selectTheme(themePack: ICommon.IThemePack | null) {
-  try {
-    const themeNode = document.querySelector(`#${themeNodeId}`);
-    if (themePack === null) {
-      // 移除
-      themeNode.innerHTML = "";
+  const themeNode = document.querySelector(`#${themeNodeId}`);
+  if (themePack === null) {
+    // 移除
+    themeNode.innerHTML = "";
+    validIframeMap.forEach((value, key) => {
+      if (value !== null) {
+        value.remove();
+        validIframeMap.set(key, null);
+      }
+    });
+    localStorage.removeItem(themePathKey);
+  } else {
+    const rawStyle = await fs.readFile(
+      path.resolve(themePack.path, "index.css"),
+      "utf-8"
+    );
+    themeNode.innerHTML = replaceAlias(rawStyle, themePack.path);
+
+    if (themePack.iframe) {
+      validIframeMap.forEach(async (value, key) => {
+        const themePackIframeSource = themePack.iframe[key];
+        if (themePackIframeSource) {
+          // 如果有，且当前也有
+          let iframeNode = null;
+          if (value !== null) {
+            // 移除旧的
+            value.remove();
+            validIframeMap.set(key, null);
+          }
+          // 新的iframe
+          iframeNode = document.createElement("iframe");
+          iframeNode.scrolling = "no";
+          document.querySelector(`.${key}-container`)?.prepend?.(iframeNode);
+          validIframeMap.set(key, iframeNode);
+
+          if (themePackIframeSource.startsWith("http")) {
+            iframeNode.src = themePackIframeSource;
+          } else {
+            const rawHtml = await fs.readFile(
+              replaceAlias(themePackIframeSource, themePack.path, false),
+              "utf-8"
+            );
+            iframeNode.contentWindow.document.open();
+            iframeNode.contentWindow.document.write(
+              replaceAlias(rawHtml, themePack.path)
+            );
+            iframeNode.contentWindow.document.close();
+          }
+        } else if (value) {
+          value.remove();
+          validIframeMap.set(key, null);
+        }
+      });
+    } else {
       validIframeMap.forEach((value, key) => {
         if (value !== null) {
           value.remove();
           validIframeMap.set(key, null);
         }
       });
-      localStorage.removeItem(themePathKey);
-    } else {
-      const rawStyle = await fs.readFile(
-        path.resolve(themePack.path, "index.css"),
-        "utf-8"
-      );
-      themeNode.innerHTML = replaceAlias(rawStyle, themePack.path);
-
-      if (themePack.iframe) {
-        validIframeMap.forEach(async (value, key) => {
-          const themePackIframeSource = themePack.iframe[key];
-          if (themePackIframeSource) {
-            // 如果有，且当前也有
-            let iframeNode = null;
-            if (value !== null) {
-              // 移除旧的
-              value.remove();
-              validIframeMap.set(key, null);
-            }
-            // 新的iframe
-            iframeNode = document.createElement("iframe");
-            iframeNode.scrolling = "no";
-            document.querySelector(`.${key}-container`)?.prepend?.(iframeNode);
-            validIframeMap.set(key, iframeNode);
-
-            if (themePackIframeSource.startsWith("http")) {
-              iframeNode.src = themePackIframeSource;
-            } else {
-              const rawHtml = await fs.readFile(
-                replaceAlias(themePackIframeSource, themePack.path, false),
-                "utf-8"
-              );
-              iframeNode.contentWindow.document.open();
-              iframeNode.contentWindow.document.write(
-                replaceAlias(rawHtml, themePack.path)
-              );
-              iframeNode.contentWindow.document.close();
-            }
-          } else if (value) {
-            value.remove();
-            validIframeMap.set(key, null);
-          }
-        });
-      } else {
-        validIframeMap.forEach((value, key) => {
-          if (value !== null) {
-            value.remove();
-            validIframeMap.set(key, null);
-          }
-        });
-      }
-      localStorage.setItem(themePathKey, themePack.path);
     }
-    currentThemePackStore.setValue(themePack);
-  } catch (e) {
-    console.log("切换主题失败", e);
+    localStorage.setItem(themePathKey, themePack.path);
   }
 }
 
@@ -114,8 +113,6 @@ function replaceAlias(
     addTailSlash(withFileScheme ? addFileScheme(basePath) : basePath)
   );
 }
-
-let themePackBasePath: string;
 
 async function checkPath() {
   // 路径:
@@ -132,54 +129,40 @@ async function checkPath() {
   }
 }
 
-/** 加载所有的主题包 */
-async function setupThemePacks() {
-  try {
-    themePackBasePath = path.resolve(
-      getGlobalContext().appPath.userData,
-      "./musicfree-themepacks"
-    );
-    await checkPath();
-    const allThemePacks = await loadThemePacks();
-    const currentThemePath = localStorage.getItem(themePathKey);
-    let currentTheme: ICommon.IThemePack | null = null;
-    if (currentThemePath) {
-      currentTheme = allThemePacks.find(
-        (item) => item.path === currentThemePath
-      );
-      if (!currentTheme) {
-        localStorage.removeItem(themePathKey);
+const downloadResponse = async (response: Response, filePath: string) => {
+  const reader = response.body.getReader();
+  let size = 0;
+
+  return new Promise<void>((resolve, reject) => {
+    const rs = new Readable();
+
+    rs._read = async () => {
+      const result = await reader.read();
+      if (!result.done) {
+        rs.push(Buffer.from(result.value));
+        size += result.value.byteLength;
+      } else {
+        rs.push(null);
+        return;
       }
-    }
-    allThemePacksStore.setValue(allThemePacks);
-    currentThemePackStore.setValue(currentTheme ?? null);
-    // selectTheme(currentTheme ?? null);
-  } catch (e) {
-    console.log("主题包加载失败", e);
-  }
-}
+    };
+    rs.on("error", reject);
 
-async function loadThemePacks() {
-  const themePackDirNames = await fs.readdir(themePackBasePath);
-  // 读取所有的文件夹
-  const parsedThemePacks: ICommon.IThemePack[] = [];
+    const stm = rs.pipe(createWriteStream(filePath));
 
-  for (const themePackDir of themePackDirNames) {
-    const parsedThemePack = await parseThemePack(
-      path.resolve(themePackBasePath, themePackDir)
-    );
-    if (parseThemePack) {
-      parsedThemePacks.push(parsedThemePack);
-    }
-  }
-
-  return parsedThemePacks;
-}
+    stm.on("finish", resolve);
+    stm.on("close", resolve);
+    stm.on("error", reject);
+  });
+};
 
 async function parseThemePack(
   themePackPath: string
 ): Promise<ICommon.IThemePack | null> {
   try {
+    if (!themePackPath) {
+      return null;
+    }
     const packContent = await fs.readdir(themePackPath);
     if (
       !(
@@ -189,13 +172,16 @@ async function parseThemePack(
       throw new Error("Not Valid Theme Pack");
     }
 
-    // 读取json
-    const jsonData = JSON.parse(
-      await fs.readFile(path.resolve(themePackPath, "config.json"), "utf-8")
+    const rawConfig = await fs.readFile(
+      path.resolve(themePackPath, "config.json"),
+      "utf-8"
     );
+    // 读取json
+    const jsonData = JSON.parse(rawConfig);
 
     const themePack: ICommon.IThemePack = {
       ...jsonData,
+      hash: CryptoJS.MD5(rawConfig).toString(CryptoJS.enc.Hex),
       preview: jsonData.preview?.startsWith?.("#")
         ? jsonData.preview
         : jsonData.preview?.replace?.(
@@ -211,30 +197,40 @@ async function parseThemePack(
   }
 }
 
-const downloadResponse = async (response: Response, filePath: string) => {
-  const reader = response.body.getReader();
-  let size = 0;
+/** 加载所有的主题包 */
+async function initCurrentTheme() {
+  try {
+    await checkPath();
+    const currentThemePath = localStorage.getItem(themePathKey);
 
-  return new Promise<void>((resolve, reject) => {
-    const rs = new Readable();
+    console.log(currentThemePath, themePathKey);
 
-    rs._read = async () => {
-      const result = await reader.read();
-      if (!result.done) {
-        rs.push(Buffer.from(result.value));
-        size += result.value.byteLength;
-      } else {
-        return;
+    const currentTheme: ICommon.IThemePack | null = await parseThemePack(
+      currentThemePath
+    );
+    return currentTheme;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function loadThemePacks() {
+  const themePackDirNames = await fs.readdir(themePackBasePath);
+  // 读取所有的文件夹
+  const parsedThemePacks: ICommon.IThemePack[] = [];
+
+  for (const themePackDir of themePackDirNames) {
+    try {
+      const parsedThemePack = await parseThemePack(
+        path.resolve(themePackBasePath, themePackDir)
+      );
+      if (parsedThemePack) {
+        parsedThemePacks.push(parsedThemePack);
       }
-    };
-    rs.on("error", reject);
-
-    const stm = rs.pipe(createWriteStream(filePath));
-
-    stm.on("close", resolve);
-    stm.on("error", reject);
-  });
-};
+    } catch {}
+  }
+  return parsedThemePacks;
+}
 
 async function installRemoteThemePack(remoteUrl: string) {
   const cacheFilePath = path.resolve(
@@ -244,12 +240,13 @@ async function installRemoteThemePack(remoteUrl: string) {
   try {
     const resp = await fetch(remoteUrl);
     await downloadResponse(resp, cacheFilePath);
-    const [success, error] = await installThemePack(cacheFilePath);
-    if (!success) {
-      throw new Error(error);
+    const config = await installThemePack(cacheFilePath);
+    if (!config) {
+      throw new Error();
     }
+    return config;
   } catch (e: any) {
-    throw e;
+    return null;
   } finally {
     await rimraf(cacheFilePath);
   }
@@ -270,39 +267,25 @@ async function installThemePack(themePackPath: string) {
 
     if (parsedThemePack) {
       parsedThemePack.path = cacheFolder;
-      allThemePacksStore.setValue((prev) => [...prev, parsedThemePack]);
-      return [true, parsedThemePack];
+      return parsedThemePack;
     } else {
       // 无效的主题包
       await rimraf(cacheFolder);
-      return [false, new Error("主题包无效")];
+      return null;
     }
   } catch (e) {
-    return [false, e];
+    return null;
   }
 }
 
 async function uninstallThemePack(themePack: ICommon.IThemePack) {
-  try {
-    await rimraf(themePack.path);
-    allThemePacksStore.setValue((prev) =>
-      prev.filter((item) => item.path !== themePack.path)
-    );
-    if (currentThemePackStore.getValue()?.path === themePack.path) {
-      selectTheme(null);
-    }
-    return [true, null];
-  } catch (e) {
-    console.log(e);
-    return [false, e];
-  }
+  await rimraf(themePack.path);
 }
 
 export const mod = {
   selectTheme,
-  setupThemePacks,
-  allThemePacksStore,
-  currentThemePackStore,
+  initCurrentTheme,
+  loadThemePacks,
   installThemePack,
   uninstallThemePack,
   installRemoteThemePack,

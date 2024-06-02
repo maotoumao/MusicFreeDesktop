@@ -26,6 +26,7 @@ declare namespace ICommon {
     /** 主题 */
     name: string;
     /** 加载之后的路径，内部属性 */
+    hash?: string;
     path: string;
     /** 缩略图 */
     thumb?: string;

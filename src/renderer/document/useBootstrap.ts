@@ -1,5 +1,5 @@
 import { ipcRendererInvoke, ipcRendererOn } from "@/shared/ipc/renderer";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Evt from "../core/events";
 import { getUserPerference } from "../utils/user-perference";
@@ -12,11 +12,11 @@ import Themepack from "@/shared/themepack/renderer";
 export default function useBootstrap() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (Themepack.currentThemePackStore.getValue()) {
-      Themepack.selectTheme(Themepack.currentThemePackStore.getValue());
-    }
+  useLayoutEffect(() => {
+    Themepack.setupThemePacks();
+  }, []);
 
+  useEffect(() => {
     const navigateCallback = (url: string, payload?: any) => {
       /**
        * evt:// 协议 触发任意事件

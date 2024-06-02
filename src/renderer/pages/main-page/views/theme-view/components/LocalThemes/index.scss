@@ -8,3 +8,16 @@
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
+
+.theme-install-local {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--dividerColor);
+  cursor: pointer;
+
+  & svg {
+    height: 60%;
+    opacity: 0.6;
+  }
+}

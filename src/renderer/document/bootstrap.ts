@@ -31,7 +31,6 @@ export default async function () {
     trackPlayer.setupPlayer(),
   ]);
   await MessageManager.setupMessageManager();
-  await Themepack.setupThemePacks();
   await setupI18n();
   setupLocalShortCut();
   dropHandler();

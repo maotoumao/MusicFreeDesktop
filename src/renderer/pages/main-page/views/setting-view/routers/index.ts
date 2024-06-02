@@ -8,7 +8,6 @@ import Normal from "./Normal";
 import PlayMusic from "./PlayMusic";
 import Plugin from "./Plugin";
 import ShortCut from "./ShortCut";
-import Theme from "./Theme";
 
 export default [
   {
@@ -30,10 +29,6 @@ export default [
   {
     id: "plugin",
     component: Plugin,
-  },
-  {
-    id: "theme",
-    component: Theme,
   },
   {
     id: "shortCut",

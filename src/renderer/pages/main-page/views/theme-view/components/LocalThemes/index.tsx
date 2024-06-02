@@ -1,106 +1,94 @@
-import { IAppConfig } from "@/shared/app-config/type";
-import "./index.scss";
-import classNames from "@/renderer/utils/classnames";
-import { useEffect, useState } from "react";
-import {
-  IContextMenuItem,
-  showContextMenu,
-} from "@/renderer/components/ContextMenu";
 import { toast } from "react-toastify";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke } from "@/shared/ipc/renderer";
-import A from "@/renderer/components/A";
-import { Trans, useTranslation } from "react-i18next";
-import { i18n } from "@/shared/i18n/renderer";
-import Themepack from "@/shared/themepack/renderer";
+import { useTranslation } from "react-i18next";
+import ThemePack from "@/shared/themepack/renderer";
 import ThemeItem from "../ThemeItem";
 
-const allThemePacksStore = Themepack.allThemePacksStore;
-const currentThemePackStore = Themepack.currentThemePackStore;
+import "./index.scss";
 
 export default function LocalThemes() {
-  const [currentThemePack, setCurrentThemePack] = useState<ICommon.IThemePack>(
-    currentThemePackStore.getValue()
-  );
-  const [allThemePacks, setAllThemePacks] = useState<
-    Array<ICommon.IThemePack | null>
-  >(allThemePacksStore.getValue());
+  const currentThemePack = ThemePack.useCurrentThemePack();
+  const localThemePacks = ThemePack.useLocalThemePacks();
+
+  console.log(localThemePacks);
 
   const { t } = useTranslation();
-
-  useEffect(() => {
-    const unsub1 = allThemePacksStore.onValueChange((newValue) => {
-      setAllThemePacks(newValue);
-    });
-    const unsub2 = currentThemePackStore.onValueChange((newValue) => {
-      setCurrentThemePack(newValue);
-    });
-    return () => {
-      unsub1();
-      unsub2();
-    };
-  }, []);
 
   return (
     <div className="local-themes-container">
       <div className="local-themes-inner-container">
-        {allThemePacks.map((it) => (
-          <ThemeItem config={it} key={it.path} type="local"></ThemeItem>
+        <div className="theme-item-container">
+          <div
+            title={t("theme.install_theme")}
+            className="theme-thumb-container theme-install-local"
+            onClick={async () => {
+              try {
+                const result = await ipcRendererInvoke("show-open-dialog", {
+                  title: t("theme.install_theme"),
+                  buttonLabel: t("common.install"),
+                  filters: [
+                    {
+                      name: t("theme.musicfree_theme"),
+                      extensions: ["mftheme", "zip"],
+                    },
+                    {
+                      name: t("theme.all_files"),
+                      extensions: ["*"],
+                    },
+                  ],
+                  properties: ["openFile", "multiSelections"],
+                });
+
+                if (!result.canceled) {
+                  const themePackPaths = result.filePaths;
+                  for (const themePackPath of themePackPaths) {
+                    const themePackConfig = await ThemePack.installThemePack(
+                      themePackPath
+                    );
+                    toast.success(
+                      t("theme.install_theme_success", {
+                        name: themePackConfig?.name
+                          ? `「${themePackConfig.name}」`
+                          : "",
+                      })
+                    );
+                  }
+                }
+              } catch (e) {
+                toast.warn(
+                  t("theme.install_theme_fail", {
+                    name: e?.message ? `「${e.message}」` : "",
+                  })
+                );
+              }
+            }}
+          >
+            <SvgAsset iconName="plus"></SvgAsset>
+          </div>
+        </div>
+
+        {localThemePacks.map((it) => (
+          <ThemeItem
+            config={it}
+            key={it.path}
+            type="local"
+            selected={it.hash === currentThemePack?.hash}
+          ></ThemeItem>
         ))}
+        <ThemeItem
+          config={
+            {
+              name: t("common.default"),
+              preview: "#f17d34",
+            } as any
+          }
+          type="local"
+          selected={!currentThemePack}
+        ></ThemeItem>
       </div>
     </div>
   );
-}
-
-interface IThemeItemProps {
-  selected: boolean;
-  themePack: ICommon.IThemePack | null;
-}
-
-export function showThemeContextMenu(
-  themePack: ICommon.IThemePack,
-  x: number,
-  y: number
-) {
-  const menuItems: IContextMenuItem[] = [];
-
-  const { t } = i18n;
-  menuItems.push(
-    // {
-    //   title: "刷新主题",
-    //   icon: "motion-play",
-    //   onClick() {
-    //     trackPlayer.addNext(musicItems);
-    //   },
-    // },
-    {
-      title: t("settings.theme.uninstall_theme"),
-      icon: "trash",
-      async onClick() {
-        const [code, reason] = await Themepack.uninstallThemePack(themePack);
-
-        if (code) {
-          toast.success(
-            t("settings.theme.uninstall_theme_success", {
-              name: themePack?.name ? `「${themePack.name}」` : "",
-            })
-          );
-        } else {
-          toast.error(
-            t("settings.theme.uninstall_theme_fail", {
-              reason: reason?.message ?? "",
-            })
-          );
-        }
-      },
-    }
-  );
-
-  showContextMenu({
-    x,
-    y,
-    menuItems,
-  });
 }
 
 // function ThemeItem(props: IThemeItemProps) {

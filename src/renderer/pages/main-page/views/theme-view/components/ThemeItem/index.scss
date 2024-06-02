@@ -11,6 +11,19 @@
     overflow: hidden;
     border-radius: 6px;
 
+    & .theme-selected {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      border-radius: 6px;
+      border: 4px solid var(--primaryColor);
+    }
+
     & .theme-thumb {
       position: absolute;
       top: 0;
@@ -38,9 +51,13 @@
       gap: 8px;
       opacity: 0;
 
-      &[data-hover="true"] {
+      &[data-show="true"] {
         opacity: 1;
         background-color: rgba($color: #000, $alpha: 0.8);
+      }
+
+      & .theme-downloading {
+        transform: scale(0.7);
       }
 
       & .theme-option-button {
