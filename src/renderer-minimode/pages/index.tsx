@@ -20,8 +20,6 @@ export default function MinimodePage() {
   const playerState = playerStateStore.useValue();
   const currentLyric = currentLyricStore.useValue();
 
-  console.log(currentMusicItem);
-
   const { t } = useTranslation();
 
   const textContent = (
