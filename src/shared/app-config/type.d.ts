@@ -87,12 +87,12 @@ interface IConfig {
 
   backup: {
     /** 恢复歌单时行为 */
-    resumeBehavior: "append" | "overwrite",
+    resumeBehavior: "append" | "overwrite";
     webdav: {
       url: string;
       username: string;
-      password: string
-    }
+      password: string;
+    };
   };
   /** 本地音乐配置 */
   localMusic: {
@@ -105,11 +105,10 @@ interface IConfig {
 
   /** 不需要用户配置的数据 */
   private: {
-    lyricWindowPosition: {
-      x: number;
-      y: number;
-    };
+    lyricWindowPosition: ICommon.IPoint;
+    minimodeWindowPosition: ICommon.IPoint;
     pluginMeta: Record<string, IPlugin.IPluginMeta>;
+    minimode: boolean;
   };
 }
 

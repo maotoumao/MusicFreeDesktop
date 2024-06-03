@@ -30,16 +30,6 @@ export default function LyricWindowPage() {
 
   const mouseOverTimerRef = useRef<number | null>(null);
 
-  // useEffect(() => {
-  //   setInterval(() => {
-  //     window.extPort.sendToMain({
-  //       cmd: " from lyric window!!!",
-  //     });
-  //   }, 2000);
-
-  //   window.extPort.on(console.log);
-  // }, []);
-
   useEffect(() => {
     if (lockLyric) {
       setShowOperations(false);

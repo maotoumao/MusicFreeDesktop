@@ -10,6 +10,9 @@ declare namespace IpcEvents {
     /** 退出应用 */
     "exit-app": undefined;
 
+    /** 展示主窗口 */
+    "show-mainwindow": undefined;
+
     /** 刷新插件 */
     "refresh-plugins": undefined;
     /** 更新所有插件 */
@@ -17,6 +20,8 @@ declare namespace IpcEvents {
 
     "open-url": string;
     "open-path": string;
+
+    "set-minimode": boolean;
 
     "sync-current-music": IMusic.IMusicItem;
     "sync-current-playing-state": import("@/renderer/core/track-player/enum").PlayerState;
@@ -35,6 +40,7 @@ declare namespace IpcEvents {
     };
     /** 设置歌词窗口位置 */
     "set-lyric-window-pos": ICommon.IPoint;
+    "set-minimode-window-pos": ICommon.IPoint;
 
     /** 快捷键 */
     "enable-global-short-cut": boolean;

@@ -4,6 +4,7 @@ import {
   createLyricWindow,
   getLyricWindow,
   getMainWindow,
+  showMainWindow,
 } from "../window";
 import { app, dialog, shell } from "electron";
 import fs from "fs/promises";
@@ -21,6 +22,12 @@ import setThumbImg from "../utils/set-thumb-img";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { IAppConfig } from "@/shared/app-config/type";
+import {
+  closeMinimodeWindow,
+  createMiniModeWindow,
+  getMinimodeWindow,
+  showMinimodeWindow,
+} from "../window/minimode-window";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -178,6 +185,19 @@ export default function setupIpcMain() {
     return NaN;
   });
 
+  ipcMainOn("set-minimode", (enabled) => {
+    if (enabled && !getMinimodeWindow()) {
+      showMinimodeWindow();
+      setAppConfigPath("private.minimode", true);
+    } else if (!enabled) {
+      closeMinimodeWindow();
+      setAppConfigPath("private.minimode", false);
+    }
+  });
+
+  ipcMainOn("show-mainwindow", () => {
+    showMainWindow();
+  });
   // ipcMainOn("send-to-lyric-window", (data) => {
   //   const lyricWindow = getLyricWindow();
   //   if (!lyricWindow) {

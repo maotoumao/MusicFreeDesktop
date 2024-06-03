@@ -26,6 +26,11 @@ import {
 } from "@/shared/app-config/main";
 import { setupGlobalContext } from "@/shared/global-context/main";
 import { setupI18n } from "@/shared/i18n/main";
+import {
+  createMiniModeWindow,
+  getMinimodeWindow,
+  showMinimodeWindow,
+} from "./window/minimode-window";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require("electron-squirrel-startup")) {
@@ -121,6 +126,14 @@ async function bootstrap() {
     if (result) {
       if (!getLyricWindow()) {
         createLyricWindow();
+      }
+    }
+  });
+
+  getAppConfigPath("private.minimode").then((enabled) => {
+    if (enabled) {
+      if (!getMinimodeWindow()) {
+        showMinimodeWindow();
       }
     }
   });

@@ -11,13 +11,15 @@ import Condition from "../Condition";
 import SearchHistory from "./widgets/SearchHistory";
 import { addSearchHistory } from "@/renderer/utils/search-history";
 import { useTranslation } from "react-i18next";
-import { getAppConfigPath } from "@/shared/app-config/renderer";
+import { getAppConfigPath, useAppConfig } from "@/shared/app-config/renderer";
 
 export default function AppHeader() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>();
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const isHistoryFocusRef = useRef(false);
+
+  const isMiniMode = useAppConfig()?.private?.minimode;
 
   const { t } = useTranslation();
 
@@ -124,7 +126,19 @@ export default function AppHeader() {
           <SvgAsset iconName="cog-8-tooth"></SvgAsset>
         </div>
         <div className="header-divider"></div>
-
+        <div
+          role="button"
+          title={t("app_header.minimode")}
+          className="header-button"
+          onClick={() => {
+            ipcRendererSend("set-minimode", !isMiniMode);
+            if (!isMiniMode) {
+              ipcRendererSend("min-window", { skipTaskBar: true });
+            }
+          }}
+        >
+          <SvgAsset iconName="picture-in-picture-line"></SvgAsset>
+        </div>
         <div
           role="button"
           title={t("app_header.minimize")}

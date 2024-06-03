@@ -1,13 +1,8 @@
 import { BrowserWindow, app, screen, nativeImage } from "electron";
 import { getResPath } from "../utils/get-res-path";
 import makeWindowFullyDraggable from "./common/make-window-fully-draggable";
-import {
-  getAppConfig,
-  getAppConfigPath,
-  setAppConfigPath,
-} from "@/shared/app-config/main";
-import { registerExtension } from "../core/extensions";
-import { ipcMainOn, ipcMainSend } from "@/shared/ipc/main";
+import { getAppConfigPath, setAppConfigPath } from "@/shared/app-config/main";
+import { ipcMainOn } from "@/shared/ipc/main";
 import debounce from "lodash.debounce";
 import { registerExtensionWindow } from "@/shared/message-hub/main";
 

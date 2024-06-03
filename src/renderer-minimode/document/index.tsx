@@ -2,7 +2,7 @@ import ReactDOM from "react-dom/client";
 
 import bootstrap from "./bootstrap";
 
-import LyricWindowPage from "../pages";
+import MinimodePage from "../pages";
 import { useEffect, useRef } from "react";
 import { ipcRendererSend } from "@/shared/ipc/renderer";
 import { getGlobalContext } from "@/shared/global-context/renderer";
@@ -36,7 +36,7 @@ function Root() {
           });
           window.addEventListener("mousemove", (e) => {
             if (startClientPosRef.current && isMovingRef.current) {
-              ipcRendererSend("set-lyric-window-pos", {
+              ipcRendererSend("set-minimode-window-pos", {
                 x: e.screenX - startClientPosRef.current.x,
                 y: e.screenY - startClientPosRef.current.y,
               });
@@ -57,5 +57,11 @@ function Root() {
     }
   }, []);
 
-  return <LyricWindowPage></LyricWindowPage>;
+  return <MinimodePage></MinimodePage>;
 }
+
+// function BootstrapComponent(): null {
+//   useBootstrap();
+
+//   return null;
+// }

@@ -61,6 +61,14 @@ const config: ForgeConfig = {
               js: "./src/preload/extension.ts",
             },
           },
+          {
+            html: "./src/renderer-minimode/document/index.html",
+            js: "./src/renderer-minimode/document/index.tsx",
+            name: "minimode_window",
+            preload: {
+              js: "./src/preload/extension.ts",
+            },
+          },
           /** webworkers */
           {
             js: "./src/webworkers/downloader.ts",
