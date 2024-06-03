@@ -22,6 +22,7 @@ import {
   setupCommandHandler,
   setupPlayerSyncHandler,
 } from "../core/command-handler";
+import ThemePack from "@/shared/themepack/renderer";
 
 setAutoFreeze(false);
 
@@ -56,6 +57,7 @@ function dropHandler() {
   document.addEventListener("drop", async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    console.log(event);
 
     const validMusicList: IMusic.IMusicItem[] = [];
     for (const f of event.dataTransfer.files) {
@@ -81,6 +83,12 @@ function dropHandler() {
             f.path
           )
         );
+      } else if (f.path.endsWith(".mftheme")) {
+        // 主题包
+        const themeConfig = await ThemePack.installThemePack(f.path);
+        if (themeConfig) {
+          await ThemePack.selectTheme(themeConfig);
+        }
       }
     }
     if (validMusicList.length) {

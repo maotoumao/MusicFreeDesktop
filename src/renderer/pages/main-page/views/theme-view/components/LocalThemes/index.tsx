@@ -11,8 +11,6 @@ export default function LocalThemes() {
   const currentThemePack = ThemePack.useCurrentThemePack();
   const localThemePacks = ThemePack.useLocalThemePacks();
 
-  console.log(localThemePacks);
-
   const { t } = useTranslation();
 
   return (
