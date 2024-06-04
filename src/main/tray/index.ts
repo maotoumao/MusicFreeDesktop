@@ -75,9 +75,15 @@ export function setupTray() {
     })
   );
 
-  tray.on("double-click", () => {
-    showMainWindow();
-  });
+  if (process.platform === "linux") {
+    tray.on("click", () => {
+      showMainWindow();
+    });
+  } else {
+    tray.on("double-click", () => {
+      showMainWindow();
+    });
+  }
 
   setupTrayMenu();
 }
