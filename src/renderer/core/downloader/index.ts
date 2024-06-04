@@ -71,7 +71,7 @@ const downloadingQueue = new PQueue({
 
 function setDownloadingConcurrency(concurrency: number) {
   downloadingQueue.concurrency = Math.min(
-    concurrency < 0 ? 1 : concurrency,
+    concurrency < 1 ? 1 : concurrency,
     concurrencyLimit
   );
 }
@@ -111,7 +111,7 @@ async function generateDownloadMusicTask(
         state: DownloadState.PENDING,
       };
       tForceUpdatePendingQueue();
-      const fileName = `${mi.title}-${mi.artist}`.replace(/[:/\\]/g, "_");
+      const fileName = `${mi.title}-${mi.artist}`.replace(/[/|\\?*"<>:]/g, "_");
       await new Promise<void>((resolve) => {
         downloadMusic(mi, fileName, (data) => {
           console.log(data);

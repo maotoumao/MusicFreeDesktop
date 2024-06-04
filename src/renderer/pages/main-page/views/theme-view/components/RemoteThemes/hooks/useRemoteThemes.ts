@@ -13,6 +13,29 @@ interface IThemeStoreItem {
   config: ICommon.IThemePack;
 }
 
+function raceWithData<T>(promises: Array<Promise<T>>): Promise<T> {
+  const promiseCount = promises.length;
+  return new Promise((resolve, reject) => {
+    let isResolved = false;
+    let rejectedNum = 0;
+    promises.forEach((promise) => {
+      promise
+        .then((data) => {
+          if (!isResolved) {
+            isResolved = true;
+            resolve(data);
+          }
+        })
+        .catch((e) => {
+          ++rejectedNum;
+          if (rejectedNum === promiseCount) {
+            reject(e);
+          }
+        });
+    });
+  });
+}
+
 export default function () {
   const [themes, setThemes] = useState(themeStoreConfig || []);
   const [loadingState, setLoadingState] = useState(
@@ -25,7 +48,7 @@ export default function () {
       setThemes(themeStoreConfig);
       setLoadingState(RequestStateCode.FINISHED);
     } else {
-      Promise.race(
+      raceWithData(
         themePackStoreBaseUrl.map(
           async (it, index) =>
             [await axios.get(it + ".publish/publish.json"), index] as const

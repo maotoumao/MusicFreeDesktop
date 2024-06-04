@@ -41,6 +41,11 @@ export default function RemoteThemes() {
             ))}
           </div>
         </SwitchCase.Case>
+        <SwitchCase.Case case={RequestStateCode.ERROR}>
+          <div className="remote-themes-load-error">
+            {t("theme.load_remote_theme_error")}
+          </div>
+        </SwitchCase.Case>
       </SwitchCase.Switch>
     </div>
   );

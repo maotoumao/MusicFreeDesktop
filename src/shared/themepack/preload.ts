@@ -192,7 +192,7 @@ async function parseThemePack(
     };
     return themePack;
   } catch (e) {
-    console.error(e);
+    console.warn(e);
     return null;
   }
 }

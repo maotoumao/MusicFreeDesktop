@@ -11,4 +11,12 @@
   & .remote-themes-description {
     margin: 1em 0;
   }
+
+  & .remote-themes-load-error {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
