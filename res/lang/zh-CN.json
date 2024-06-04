@@ -27,7 +27,8 @@
     "add": "添加",
     "save": "保存",
     "clear": "清空",
-    "open": "打开"
+    "open": "打开",
+    "status": "状态"
   },
 
   "media": {

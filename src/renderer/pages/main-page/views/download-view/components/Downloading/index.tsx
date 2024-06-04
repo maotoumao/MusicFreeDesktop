@@ -25,24 +25,25 @@ const columnDef = [
     size: 40,
   }),
   columnHelper.accessor("0.title", {
-    header: t("media.media_title"),
+    header: () => t("media.media_title"),
     size: 200,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
 
   columnHelper.accessor("0.artist", {
-    header: t("media.media_type_artist"),
+    header: () => t("media.media_type_artist"),
     size: 80,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
   columnHelper.accessor("0.album", {
-    header: t("media.media_type_album"),
+    header: () => t("media.media_type_album"),
     size: 80,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
   columnHelper.accessor((info) => info[1], {
-    header: t("common.status"),
+    header: () => t("common.status"),
     size: 180,
+    id: "status",
     cell: (info) => {
       const downloadState = info.getValue();
       if (downloadState.state === DownloadState.WAITING) {
@@ -70,7 +71,7 @@ const columnDef = [
     },
   }),
   columnHelper.accessor("0.platform", {
-    header: t("media.media_platform"),
+    header: () => t("media.media_platform"),
     size: 100,
     cell: (info) => <Tag fill>{info.getValue()}</Tag>,
   }),
