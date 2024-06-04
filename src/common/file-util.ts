@@ -92,7 +92,7 @@ export async function parseLocalMusicItem(
       localPath: filePath,
       url: addFileScheme(filePath),
       artist: "未知作者",
-      album: "未知专辑"
+      album: "未知专辑",
     };
   }
 }
@@ -136,10 +136,10 @@ export function addTailSlash(filePath: string) {
     : filePath + "/";
 }
 
-
-
-
-export async function safeStat(path: PathLike, opts?: StatOptions): Promise<Stats | BigIntStats | null> {
+export async function safeStat(
+  path: PathLike,
+  opts?: StatOptions
+): Promise<Stats | BigIntStats | null> {
   try {
     return await fs.stat(path, opts);
   } catch {
