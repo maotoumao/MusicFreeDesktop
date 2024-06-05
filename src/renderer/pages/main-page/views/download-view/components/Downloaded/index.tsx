@@ -1,6 +1,6 @@
 import MusicList from "@/renderer/components/MusicList";
 import Downloader from "@/renderer/core/downloader";
-import React, { useRef } from "react";
+import { useRef } from "react";
 
 export default function Downloaded() {
   const downloadedList = Downloader.useDownloadedMusicList();

@@ -12,7 +12,7 @@ export default function DownloadView() {
       <Tab.Group>
         <Tab.List className="tab-list-container">
           <Tab as="div" className="tab-list-item">
-            {t("common.download")}
+            {t("common.downloaded")}
           </Tab>
           <Tab as="div" className="tab-list-item">
             {t("common.downloading")}

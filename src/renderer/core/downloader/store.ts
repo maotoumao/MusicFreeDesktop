@@ -12,3 +12,5 @@ export type IDownloadingItem = [
 ];
 
 export const downloadingQueueStore = new Store<Array<IDownloadingItem>>([]);
+
+export const downloadingMusic = new Store<Array<IMusic.IMusicItem>>([]);

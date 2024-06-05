@@ -1,4 +1,5 @@
 import {
+  getMediaPrimaryKey,
   getQualityOrder,
   isSameMedia,
   setInternalData,
@@ -7,8 +8,6 @@ import * as Comlink from "comlink";
 import { callPluginDelegateMethod } from "../plugin-delegate";
 import { DownloadState, localPluginName } from "@/common/constant";
 import PQueue from "p-queue";
-import { downloadingQueueStore } from "./store";
-import throttle from "lodash.throttle";
 import {
   addDownloadedMusicToList,
   isDownloaded,
@@ -19,16 +18,24 @@ import {
 } from "./downloaded-sheet";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
 import { getGlobalContext } from "@/shared/global-context/renderer";
+import EventEmitter from "eventemitter3";
+import Store from "@/common/store";
+import { useEffect, useState } from "react";
 
-type ProxyMarkedFunction<T extends (...args: any) => void> = T &
-  Comlink.ProxyMarked;
-
-type IOnStateChangeFunc = (data: {
+export interface IDownloadStatus {
   state: DownloadState;
   downloaded?: number;
   total?: number;
   msg?: string;
-}) => void;
+}
+
+const downloadingMusicStore = new Store<Array<IMusic.IMusicItem>>([]);
+const downloadingProgress = new Map<string, IDownloadStatus>();
+
+type ProxyMarkedFunction<T extends (...args: any) => void> = T &
+  Comlink.ProxyMarked;
+
+type IOnStateChangeFunc = (data: IDownloadStatus) => void;
 
 interface IDownloaderWorker {
   downloadFile: (
@@ -40,19 +47,12 @@ interface IDownloaderWorker {
 
 let downloaderWorker: IDownloaderWorker;
 
+const ee = new EventEmitter();
+
 async function setupDownloader() {
   setupDownloaderWorker();
   setupDownloadedMusicList();
 }
-
-function forceUpdatePendingQueue() {
-  downloadingQueueStore.setValue((prev) => [...prev]);
-}
-
-const tForceUpdatePendingQueue = throttle(forceUpdatePendingQueue, 32, {
-  leading: true,
-  trailing: true,
-});
 
 function setupDownloaderWorker() {
   // 初始化worker
@@ -76,63 +76,57 @@ function setDownloadingConcurrency(concurrency: number) {
   );
 }
 
-async function generateDownloadMusicTask(
+async function startDownload(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]
 ) {
   if (!downloaderWorker) {
     setupDownloaderWorker();
   }
+
   const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
   // 过滤掉已下载的、本地音乐、任务中的音乐
   const _validMusicItems = _musicItems.filter(
     (it) => !isDownloaded(it) && it.platform !== localPluginName
   );
-  // @ts-ignore
-  downloadingQueueStore.setValue((prev) => {
-    return [
-      ...prev,
-      ..._validMusicItems.map(
-        (mi) =>
-          [
-            mi,
-            {
-              state: DownloadState.WAITING,
-            },
-          ] as const
-      ),
-    ];
-  });
-  const downloadingFuncs = _validMusicItems.map((mi) => async () => {
-    const queueItem = downloadingQueueStore
-      .getValue()
-      .find((it) => isSameMedia(it[0], mi));
-    if (queueItem) {
-      queueItem[1] = {
-        state: DownloadState.PENDING,
-      };
-      tForceUpdatePendingQueue();
-      const fileName = `${mi.title}-${mi.artist}`.replace(/[/|\\?*"<>:]/g, "_");
+
+  const downloadCallbacks = _validMusicItems.map((it) => {
+    const pk = getMediaPrimaryKey(it);
+    downloadingProgress.set(pk, {
+      state: DownloadState.WAITING,
+    });
+
+    return async () => {
+      // Not on waiting list
+      if (!downloadingProgress.has(pk)) {
+        return;
+      }
+
+      downloadingProgress.get(pk).state = DownloadState.PENDING;
+      const fileName = `${it.title}-${it.artist}`.replace(/[/|\\?*"<>:]/g, "_");
       await new Promise<void>((resolve) => {
-        downloadMusic(mi, fileName, (data) => {
-          console.log(data);
-          queueItem[1] = data;
-          if (data.state === DownloadState.DONE) {
-            downloadingQueueStore.setValue((prev) =>
-              prev.filter((it) => !isSameMedia(it[0], mi))
+        downloadMusicImpl(it, fileName, (stateData) => {
+          downloadingProgress.set(pk, stateData);
+          console.log("State update", stateData);
+          ee.emit("DownloadUpdated", it, stateData);
+          if (stateData.state === DownloadState.DONE) {
+            downloadingMusicStore.setValue((prev) =>
+              prev.filter((di) => !isSameMedia(it, di))
             );
+            downloadingProgress.delete(pk);
             resolve();
-          } else if (data.state === DownloadState.ERROR) {
+          } else if (stateData.state === DownloadState.ERROR) {
             resolve();
           }
-          tForceUpdatePendingQueue();
         });
       });
-    }
+    };
   });
-  downloadingQueue.addAll(downloadingFuncs);
+
+  downloadingMusicStore.setValue((prev) => [...prev, ..._validMusicItems]);
+  downloadingQueue.addAll(downloadCallbacks);
 }
 
-async function downloadMusic(
+async function downloadMusicImpl(
   musicItem: IMusic.IMusicItem,
   fileName: string,
   onStateChange: IOnStateChangeFunc
@@ -202,14 +196,41 @@ async function downloadMusic(
   }
 }
 
+function useDownloadStatus(musicItem: IMusic.IMusicItem) {
+  const [downloadStatus, setDownloadStatus] = useState<IDownloadStatus | null>(
+    null
+  );
+
+  useEffect(() => {
+    setDownloadStatus(
+      downloadingProgress.get(getMediaPrimaryKey(musicItem)) || null
+    );
+
+    const updateFn = (mi: IMusic.IMusicItem, stateData: IDownloadStatus) => {
+      if (isSameMedia(mi, musicItem)) {
+        setDownloadStatus(stateData);
+      }
+    };
+
+    ee.on("DownloadUpdated", updateFn);
+
+    return () => {
+      ee.off("DownloadUpdated", updateFn);
+    };
+  }, [musicItem]);
+
+  return downloadStatus;
+}
+
 const Downloader = {
   setupDownloader,
-  generateDownloadMusicTask,
+  startDownload,
+  useDownloadStatus,
+  useDownloadingMusicList: downloadingMusicStore.useValue,
   useDownloaded,
   isDownloaded,
   useDownloadedMusicList,
   removeDownloadedMusic,
-  useDownloadingQueue: downloadingQueueStore.useValue,
   setDownloadingConcurrency,
 };
 export default Downloader;

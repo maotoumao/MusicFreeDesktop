@@ -3,11 +3,10 @@ import * as backend from "../backend/index.new";
 import defaultSheet from "../common/default-sheet";
 import { useEffect, useRef, useState } from "react";
 import { RequestStateCode, localPluginName } from "@/common/constant";
-import { toMediaBase } from "@/common/media-util";
 import EventEmitter from "eventemitter3";
 import { createUniqueMap } from "@/common/unique-map";
 
-const evtHub = new EventEmitter();
+const ee = new EventEmitter();
 
 enum EvtNames {
   Favorite_MusicSheet_Change = "Favorite_MusicSheet_Change", // 收藏歌单变化
@@ -31,7 +30,7 @@ export const getAllSheets = musicSheetsStore.getValue;
 async function refetchSheetDetail(sheetId: string) {
   const evtName = EvtNames.MusicSheet_Updated + sheetId;
 
-  if (!evtHub.listenerCount(evtName)) {
+  if (!ee.listenerCount(evtName)) {
     return;
   }
   let sheetDetail = await backend.getSheetItemDetail(sheetId);
@@ -44,7 +43,7 @@ async function refetchSheetDetail(sheetId: string) {
       platform: localPluginName,
     };
   }
-  evtHub.emit(evtName, sheetDetail);
+  ee.emit(evtName, sheetDetail);
 }
 
 /**
@@ -186,7 +185,7 @@ export async function addMusicToSheet(
 
   if (sheetId === defaultSheet.id) {
     defaultMusicUniqueMap.add(musicItems);
-    evtHub.emit(EvtNames.Favorite_MusicSheet_Change);
+    ee.emit(EvtNames.Favorite_MusicSheet_Change);
   }
   refetchSheetDetail(sheetId);
 }
@@ -212,7 +211,7 @@ export function removeMusicFromSheet(
 
   if (sheetId === defaultSheet.id) {
     defaultMusicUniqueMap.remove(musicItems);
-    evtHub.emit(EvtNames.Favorite_MusicSheet_Change);
+    ee.emit(EvtNames.Favorite_MusicSheet_Change);
   }
   refetchSheetDetail(sheetId);
 }
@@ -239,9 +238,9 @@ export function useMusicIsFavorite(musicItem: IMusic.IMusicItem) {
       setIsFav(isFavoriteMusic(musicItem));
     };
     cb();
-    evtHub.on(EvtNames.Favorite_MusicSheet_Change, cb);
+    ee.on(EvtNames.Favorite_MusicSheet_Change, cb);
     return () => {
-      evtHub.off(EvtNames.Favorite_MusicSheet_Change, cb);
+      ee.off(EvtNames.Favorite_MusicSheet_Change, cb);
     };
   }, [musicItem]);
 
@@ -280,7 +279,7 @@ export function useMusicSheet(sheetId: string) {
 
     const evtName = EvtNames.MusicSheet_Updated + sheetId;
 
-    evtHub.on(evtName, updateSheet);
+    ee.on(evtName, updateSheet);
 
     const targetSheet = musicSheetsStore
       .getValue()
@@ -295,7 +294,7 @@ export function useMusicSheet(sheetId: string) {
     refetchSheetDetail(sheetId);
 
     return () => {
-      evtHub.off(evtName, updateSheet);
+      ee.off(evtName, updateSheet);
     };
   }, [sheetId]);
 

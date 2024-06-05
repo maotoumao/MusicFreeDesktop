@@ -1,8 +1,5 @@
-import { DownloadState } from "@/common/constant";
-import { normalizeFileSize } from "@/common/normalize-util";
 import Tag from "@/renderer/components/Tag";
 import Downloader from "@/renderer/core/downloader";
-import { IDownloadingItem } from "@/renderer/core/downloader/store";
 import {
   createColumnHelper,
   flexRender,
@@ -11,8 +8,12 @@ import {
 } from "@tanstack/react-table";
 import "./index.scss";
 import { i18n } from "@/shared/i18n/renderer";
+import useVirtualList from "@/renderer/hooks/useVirtualList";
+import DownloadStatus from "./DownloadStatus";
 
-const columnHelper = createColumnHelper<IDownloadingItem>();
+const columnHelper = createColumnHelper<IMusic.IMusicItem>();
+
+const estimizeItemHeight = 2.6 * 13; // lineheight 2.6rem
 
 const { t } = i18n;
 const columnDef = [
@@ -24,53 +25,31 @@ const columnDef = [
     maxSize: 40,
     size: 40,
   }),
-  columnHelper.accessor("0.title", {
+  columnHelper.accessor("title", {
     header: () => t("media.media_title"),
     size: 200,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
 
-  columnHelper.accessor("0.artist", {
+  columnHelper.accessor("artist", {
     header: () => t("media.media_type_artist"),
     size: 80,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
-  columnHelper.accessor("0.album", {
+  columnHelper.accessor("album", {
     header: () => t("media.media_type_album"),
     size: 80,
     cell: (info) => <span title={info.getValue()}>{info.getValue()}</span>,
   }),
-  columnHelper.accessor((info) => info[1], {
+  columnHelper.display({
     header: () => t("common.status"),
     size: 180,
     id: "status",
     cell: (info) => {
-      const downloadState = info.getValue();
-      if (downloadState.state === DownloadState.WAITING) {
-        return t("download_page.waiting");
-      }
-      if (downloadState.state === DownloadState.ERROR) {
-        return (
-          <span style={{ color: "var(--dangerColor, #FC5F5F)" }}>
-            {t("download_page.failed")}: {downloadState.msg}
-          </span>
-        );
-      }
-      if (downloadState.state === DownloadState.PENDING) {
-        return (
-          <span
-            style={{
-              color: "var(--infoColor, #0A95C8)",
-            }}
-          >
-            {normalizeFileSize(downloadState.downloaded ?? 0)} /{" "}
-            {normalizeFileSize(downloadState.total ?? 0)}
-          </span>
-        );
-      }
+      return <DownloadStatus musicItem={info.row.original}></DownloadStatus>;
     },
   }),
-  columnHelper.accessor("0.platform", {
+  columnHelper.accessor("platform", {
     header: () => t("media.media_platform"),
     size: 100,
     cell: (info) => <Tag fill>{info.getValue()}</Tag>,
@@ -78,7 +57,7 @@ const columnDef = [
 ];
 
 export default function Downloading() {
-  const downloadingQueue = Downloader.useDownloadingQueue();
+  const downloadingQueue = Downloader.useDownloadingMusicList();
 
   const table = useReactTable({
     debugAll: false,
@@ -87,9 +66,20 @@ export default function Downloading() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const virtualController = useVirtualList({
+    data: table.getRowModel().rows,
+    scrollElementQuery: "#page-container",
+    estimizeItemHeight,
+  });
+
   return (
     <div className="downloading-container">
-      <table>
+      <table
+        style={{
+          tableLayout: "fixed",
+          height: virtualController.totalHeight + estimizeItemHeight,
+        }}
+      >
         <thead>
           <tr>
             {table.getHeaderGroups()[0].headers.map((header) => (
@@ -107,10 +97,14 @@ export default function Downloading() {
             ))}
           </tr>
         </thead>
-        <tbody>
-          {table.getRowModel().rows.map((dataItem) => {
-            const row = dataItem.original;
-            const [musicItem, downloadingState] = row;
+        <tbody
+          style={{
+            transform: `translateY(${virtualController.startTop}px)`,
+          }}
+        >
+          {virtualController.virtualItems.map((virtualItem, index) => {
+            const dataItem = virtualItem.dataItem;
+            const musicItem = dataItem.original;
             // todo 拆出一个组件
             return (
               <tr
@@ -143,6 +137,13 @@ export default function Downloading() {
             );
           })}
         </tbody>
+        <tfoot
+          style={{
+            height:
+              virtualController.totalHeight -
+              virtualController.virtualItems.length * estimizeItemHeight,
+          }}
+        ></tfoot>
       </table>
     </div>
   );

@@ -4,14 +4,14 @@ import type { IContext, IHandlerType } from "../type";
 
 const extPorts = new Map<number, MessagePort>();
 
-const evtHub = new EventEmitter();
+const ee = new EventEmitter();
 
 function on<K extends keyof IHandlerType>(type: K, handler: IHandlerType[K]) {
-  evtHub.on(type, handler);
+  ee.on(type, handler);
 }
 
 function off<K extends keyof IHandlerType>(type: K, handler: IHandlerType[K]) {
-  evtHub.off(type, handler);
+  ee.off(type, handler);
 }
 
 //@ts-ignore
@@ -32,9 +32,9 @@ ipcRenderer.on("port", (e, message) => {
         ...(data?.context || {}),
       };
       if (data?.data?.type === "ready") {
-        evtHub.emit("ready", message.id);
+        ee.emit("ready", message.id);
       } else {
-        evtHub.emit("data", data.data, context);
+        ee.emit("data", data.data, context);
       }
 
       if (context.broadcast) {
@@ -43,18 +43,18 @@ ipcRenderer.on("port", (e, message) => {
         });
       }
     };
-    evtHub.emit("mount", message.id);
+    ee.emit("mount", message.id);
   } else if (message.type === "unmount") {
     const expPort = extPorts.get(message.id);
     if (expPort) {
-      evtHub.emit("unmount", message.id);
+      ee.emit("unmount", message.id);
       expPort.close();
       extPorts.delete(message.id);
     }
   } else if (message.type === "broadcast") {
     broadcast(message.data);
   } else if (message.type === "data") {
-    evtHub.emit("data", message.data, {
+    ee.emit("data", message.data, {
       fromMainProcess: true,
       recvTime: Date.now(),
     });

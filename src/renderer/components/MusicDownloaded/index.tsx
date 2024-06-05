@@ -17,7 +17,7 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
   // const [loading, setLoading] = useState(false);
 
   const isDownloaded = useDownloaded(musicItem);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const isDownloadedOrLocal =
     isDownloaded || musicItem?.platform === localPluginName;
 
@@ -30,11 +30,12 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
       className={
         isDownloadedOrLocal ? "music-downloaded" : "music-can-download"
       }
-      title={isDownloadedOrLocal ? t("common.downloaded") : t("common.download")}
+      title={
+        isDownloadedOrLocal ? t("common.downloaded") : t("common.download")
+      }
       onClick={() => {
         if (!isDownloadedOrLocal) {
-          // TODO 点击的时候切换loading状态
-          Downloader.generateDownloadMusicTask(musicItem);
+          Downloader.startDownload(musicItem);
         }
       }}
     >

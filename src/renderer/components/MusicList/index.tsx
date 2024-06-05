@@ -233,7 +233,7 @@ export function showMusicContextMenu(
         : musicItems.platform !== localPluginName &&
           !Downloader.isDownloaded(musicItems),
       onClick() {
-        Downloader.generateDownloadMusicTask(musicItems);
+        Downloader.startDownload(musicItems);
       },
     },
     {
