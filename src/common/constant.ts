@@ -101,14 +101,16 @@ export const shortCutKeysEvts: Record<IShortCutKeys, keyof IEventType.IEvents> =
 
 /** 下载状态 */
 export enum DownloadState {
-  /** 等待中 */
-  WAITING,
+  /** 空闲状态 */
+  NONE = "NONE",
+  /** 排队等待中 */
+  WAITING = "WAITING",
   /** 下载中 */
-  PENDING,
+  DOWNLOADING = "DOWNLOADING",
   /** 失败 */
-  ERROR,
+  ERROR = "ERROR",
   /** 下载完成 */
-  DONE,
+  DONE = "DONE",
 }
 
 // 主题包链接

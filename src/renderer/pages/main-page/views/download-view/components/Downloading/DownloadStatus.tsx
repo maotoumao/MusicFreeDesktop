@@ -25,7 +25,7 @@ function DownloadStatus(props: IProps) {
         {t("download_page.failed")}: {downloadStatus.msg}
       </span>
     );
-  } else if (downloadStatus.state === DownloadState.PENDING) {
+  } else if (downloadStatus.state === DownloadState.DOWNLOADING) {
     return (
       <span
         style={{

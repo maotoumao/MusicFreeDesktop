@@ -12,7 +12,7 @@ import {
 import musicSheetDB from "../db/music-sheet-db";
 import { internalDataKey, musicRefSymbol } from "@/common/constant";
 import { useEffect, useState } from "react";
-import Evt from "../events";
+import { DownloadEvts, ee } from "./ee";
 
 const downloadedMusicListStore = new Store<IMusic.IMusicItem[]>([]);
 const downloadedSet = new Set<string>();
@@ -83,7 +83,7 @@ export async function addDownloadedMusicToList(
       allMusic.forEach((it) => {
         downloadedSet.add(getMediaPrimaryKey(it));
       });
-      Evt.emit("MUSIC_DOWNLOADED", allMusic);
+      ee.emit(DownloadEvts.Downloaded, allMusic);
       setUserPerferenceIDB(
         "downloadedList",
         downloadedMusicListStore.getValue().map(primaryKeyMap)
@@ -171,7 +171,7 @@ export async function removeDownloadedMusic(
         )
       );
       // 触发事件
-      Evt.emit("MUSIC_REMOVE_DOWNLOADED", _musicItems);
+      ee.emit(DownloadEvts.RemoveDownload, _musicItems);
       _musicItems.forEach((it) => {
         downloadedSet.delete(getMediaPrimaryKey(it));
       });
@@ -233,12 +233,12 @@ export function useDownloaded(musicItem: IMedia.IMediaBase) {
       setDownloaded(isDownloaded(musicItem));
     }
 
-    Evt.on("MUSIC_DOWNLOADED", dlCb);
-    Evt.on("MUSIC_REMOVE_DOWNLOADED", rmCb);
+    ee.on(DownloadEvts.Downloaded, dlCb);
+    ee.on(DownloadEvts.RemoveDownload, rmCb);
 
     return () => {
-      Evt.off("MUSIC_DOWNLOADED", dlCb);
-      Evt.off("MUSIC_REMOVE_DOWNLOADED", rmCb);
+      ee.off(DownloadEvts.Downloaded, dlCb);
+      ee.off(DownloadEvts.RemoveDownload, rmCb);
     };
   }, [musicItem]);
 

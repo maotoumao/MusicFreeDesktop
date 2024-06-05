@@ -51,7 +51,7 @@ async function downloadFile(
   // onDone?: () => void,
   // onError?: (reason: Error) => Promise<void>
 ) {
-  let state = DownloadState.PENDING;
+  let state = DownloadState.DOWNLOADING;
   try {
     const stat = fs.statSync(filePath);
     // if (stat.isFile()) {
@@ -102,10 +102,10 @@ async function downloadFile(
     });
     const stm = responseToReadable(res, {
       onRead(size) {
-        if (state !== DownloadState.PENDING) {
+        if (state !== DownloadState.DOWNLOADING) {
           return;
         }
-        state = DownloadState.PENDING;
+        state = DownloadState.DOWNLOADING;
         console.log(state, size, totalSize);
         onStateChange({
           state,

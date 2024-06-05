@@ -1,3 +1,4 @@
+// todo: need refactor
 import {
   getMediaPrimaryKey,
   getQualityOrder,
@@ -18,9 +19,9 @@ import {
 } from "./downloaded-sheet";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
 import { getGlobalContext } from "@/shared/global-context/renderer";
-import EventEmitter from "eventemitter3";
 import Store from "@/common/store";
 import { useEffect, useState } from "react";
+import { DownloadEvts, ee } from "./ee";
 
 export interface IDownloadStatus {
   state: DownloadState;
@@ -46,8 +47,6 @@ interface IDownloaderWorker {
 }
 
 let downloaderWorker: IDownloaderWorker;
-
-const ee = new EventEmitter();
 
 async function setupDownloader() {
   setupDownloaderWorker();
@@ -101,13 +100,12 @@ async function startDownload(
         return;
       }
 
-      downloadingProgress.get(pk).state = DownloadState.PENDING;
+      downloadingProgress.get(pk).state = DownloadState.DOWNLOADING;
       const fileName = `${it.title}-${it.artist}`.replace(/[/|\\?*"<>:]/g, "_");
       await new Promise<void>((resolve) => {
         downloadMusicImpl(it, fileName, (stateData) => {
           downloadingProgress.set(pk, stateData);
-          console.log("State update", stateData);
-          ee.emit("DownloadUpdated", it, stateData);
+          ee.emit(DownloadEvts.DownloadStatusUpdated, it, stateData);
           if (stateData.state === DownloadState.DONE) {
             downloadingMusicStore.setValue((prev) =>
               prev.filter((di) => !isSameMedia(it, di))
@@ -212,14 +210,26 @@ function useDownloadStatus(musicItem: IMusic.IMusicItem) {
       }
     };
 
-    ee.on("DownloadUpdated", updateFn);
+    ee.on(DownloadEvts.DownloadStatusUpdated, updateFn);
 
     return () => {
-      ee.off("DownloadUpdated", updateFn);
+      ee.off(DownloadEvts.DownloadStatusUpdated, updateFn);
     };
   }, [musicItem]);
 
   return downloadStatus;
+}
+
+// 下载状态
+function useDownloadState(musicItem: IMusic.IMusicItem) {
+  const musicStatus = useDownloadStatus(musicItem);
+  const downloaded = useDownloaded(musicItem);
+
+  console.log(musicStatus, "FF", musicItem);
+
+  return (
+    musicStatus?.state || (downloaded ? DownloadState.DONE : DownloadState.NONE)
+  );
 }
 
 const Downloader = {
@@ -232,5 +242,6 @@ const Downloader = {
   useDownloadedMusicList,
   removeDownloadedMusic,
   setDownloadingConcurrency,
+  useDownloadState,
 };
 export default Downloader;
