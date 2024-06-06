@@ -26,6 +26,7 @@ export const createMainWindow = (): BrowserWindow => {
       nodeIntegrationInWorker: true,
       webSecurity: false,
       sandbox: false,
+      webviewTag: true,
     },
     resizable: false,
     frame: false,

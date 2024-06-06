@@ -18,8 +18,6 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
 
   const downloadState = Downloader.useDownloadState(musicItem);
 
-  console.log("d", downloadState);
-
   const { t } = useTranslation();
   const isDownloadedOrLocal =
     downloadState === DownloadState.DONE ||

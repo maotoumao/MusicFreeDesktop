@@ -375,7 +375,7 @@ function _MusicList(props: IMusicListProps) {
       virtualProps?.getScrollElement || virtualProps?.offsetHeight
     )
       ? -1
-      : virtualProps?.fallbackRenderCount ?? 100,
+      : virtualProps?.fallbackRenderCount ?? 50,
   });
 
   const [activeItems, setActiveItems] = useState<number[]>([]);
