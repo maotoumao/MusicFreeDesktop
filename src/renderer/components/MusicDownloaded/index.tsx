@@ -29,7 +29,10 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
 
   if (isDownloadedOrLocal) {
     iconName = "check-circle";
-  } else if (downloadState !== DownloadState.NONE) {
+  } else if (
+    downloadState !== DownloadState.NONE &&
+    downloadState !== DownloadState.ERROR
+  ) {
     iconName = "rolling-1s";
   }
 
@@ -42,7 +45,10 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
         isDownloadedOrLocal ? t("common.downloaded") : t("common.download")
       }
       onClick={() => {
-        if (!isDownloadedOrLocal) {
+        if (
+          downloadState === DownloadState.NONE ||
+          downloadState === DownloadState.ERROR
+        ) {
           Downloader.startDownload(musicItem);
         }
       }}

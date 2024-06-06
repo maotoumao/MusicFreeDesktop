@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 interface ISimpleInputWithStateProps<PromiseItem> {
   title: string;
+  defaultValue?: string;
   placeholder?: string;
   hints?: ReactNode[];
   maxLength?: number;
@@ -24,6 +25,7 @@ export default function SimpleInputWithState<PromiseItem>(
 ) {
   const {
     title,
+    defaultValue,
     placeholder,
     hints,
     maxLength,
@@ -35,9 +37,9 @@ export default function SimpleInputWithState<PromiseItem>(
     onPromiseResolved,
   } = props;
   const [loading, setLoading] = useState(false);
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText] = useState(defaultValue ?? "");
   const isMounted = useMounted();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <Base withBlur={false}>
@@ -49,6 +51,7 @@ export default function SimpleInputWithState<PromiseItem>(
         >
           <div className="input-area">
             <input
+              autoFocus
               placeholder={placeholder}
               onChange={(e) => {
                 setInputText(e.target.value.slice(0, maxLength));

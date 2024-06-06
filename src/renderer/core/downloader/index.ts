@@ -225,8 +225,6 @@ function useDownloadState(musicItem: IMusic.IMusicItem) {
   const musicStatus = useDownloadStatus(musicItem);
   const downloaded = useDownloaded(musicItem);
 
-  console.log(musicStatus, "FF", musicItem);
-
   return (
     musicStatus?.state || (downloaded ? DownloadState.DONE : DownloadState.NONE)
   );

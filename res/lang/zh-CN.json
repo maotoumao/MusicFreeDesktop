@@ -157,7 +157,8 @@
     "create_local_sheet": "新建歌单",
     "starred_sheets": "我的收藏",
 
-    "delete_sheet": "删除歌单"
+    "delete_sheet": "删除歌单",
+    "rename_sheet": "重命名歌单"
   },
   "app_header": {
     "nav_back": "后退",

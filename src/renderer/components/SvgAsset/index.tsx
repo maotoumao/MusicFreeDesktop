@@ -35,6 +35,7 @@ export type SvgAssetIconNames =
   | "motion-play"
   | "musical-note"
   | "pause"
+  | "pencil-square"
   | "picture-in-picture-line"
   | "play"
   | "playlist"

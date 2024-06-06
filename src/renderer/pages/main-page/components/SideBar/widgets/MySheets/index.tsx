@@ -4,7 +4,7 @@ import { useMatch, useNavigate } from "react-router-dom";
 import { Disclosure } from "@headlessui/react";
 import MusicSheet, { defaultSheet } from "@/renderer/core/music-sheet";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { showModal } from "@/renderer/components/Modal";
+import { hideModal, showModal } from "@/renderer/components/Modal";
 import { localPluginName } from "@/common/constant";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
 import { useTranslation } from "react-i18next";
@@ -34,12 +34,11 @@ export default function MySheets() {
             onClick={(e) => {
               e.stopPropagation();
               showModal("ImportMusicSheet", {
-                plugins: importablePlugins
-              })
+                plugins: importablePlugins,
+              });
             }}
           >
             <SvgAsset iconName="arrow-left-end-on-rectangle"></SvgAsset>
-
           </div>
           <div
             role="button"
@@ -73,6 +72,27 @@ export default function MySheets() {
                   y: e.clientY,
                   menuItems: [
                     {
+                      title: t("side_bar.rename_sheet"),
+                      icon: "pencil-square",
+                      show: item.id !== defaultSheet.id,
+                      onClick() {
+                        showModal("SimpleInputWithState", {
+                          placeholder: t(
+                            "modal.create_local_sheet_placeholder"
+                          ),
+                          maxLength: 30,
+                          title: t("side_bar.rename_sheet"),
+                          defaultValue: item.title,
+                          async onOk(text) {
+                            await MusicSheet.frontend.updateSheet(item.id, {
+                              title: text,
+                            });
+                            hideModal();
+                          },
+                        });
+                      },
+                    },
+                    {
                       title: t("side_bar.delete_sheet"),
                       icon: "trash",
                       show: item.id !== defaultSheet.id,
@@ -93,7 +113,11 @@ export default function MySheets() {
                 });
               }}
               selected={currentSheetId === item.id}
-              title={item.id === defaultSheet.id ? t("media.default_favorite_sheet_name"): item.title}
+              title={
+                item.id === defaultSheet.id
+                  ? t("media.default_favorite_sheet_name")
+                  : item.title
+              }
             ></ListItem>
           ))}
         </Disclosure.Panel>
