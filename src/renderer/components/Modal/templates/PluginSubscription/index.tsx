@@ -11,13 +11,12 @@ import Empty from "@/renderer/components/Empty";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
-
 export default function PluginSubscription() {
   const [subscription, setSubscription] = useState(
     getUserPerference("subscription") ?? []
   );
 
-  const {t} = useTranslation("modal.plugin_subscription");
+  const { t } = useTranslation();
 
   return (
     <Base withBlur={false}>
@@ -84,7 +83,7 @@ export default function PluginSubscription() {
                   item.srcUrl.match(/https?:\/\/.+\.js(on)?/)
                 )
               );
-              toast.success(t("modal.subscription_save_success"))
+              toast.success(t("modal.subscription_save_success"));
               hideModal();
             }}
           >
