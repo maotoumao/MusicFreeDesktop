@@ -20,10 +20,12 @@ import { showPanel } from "@/renderer/components/Panel";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 import { produce } from "immer";
 import { i18n } from "@/shared/i18n/renderer";
-import { getAppConfigPath, setAppConfigPath } from "@/shared/app-config/renderer";
+import {
+  getAppConfigPath,
+  setAppConfigPath,
+} from "@/shared/app-config/renderer";
 
 const t = i18n.t;
-
 
 function renderOptions(info: any) {
   const row = info.row.original as IPlugin.IPluginDelegate;
@@ -38,15 +40,17 @@ function renderOptions(info: any) {
           showModal("Reconfirm", {
             title: t("plugin_management_page.uninstall_plugin"),
             content: t("plugin_management_page.confirm_text_uninstall_plugin", {
-              plugin: row.platform
+              plugin: row.platform,
             }),
             async onConfirm() {
               hideModal();
               try {
                 await ipcRendererInvoke("uninstall-plugin", row.hash);
-                toast.success(t("plugin_management_page.uninstall_plugin_successfully", {
-                  plugin: row.platform
-                }));
+                toast.success(
+                  t("plugin_management_page.uninstall_successfully", {
+                    plugin: row.platform,
+                  })
+                );
               } catch {
                 toast.error(t("plugin_management_page.uninstall_failed"));
               }
@@ -64,11 +68,15 @@ function renderOptions(info: any) {
           onClick={async () => {
             try {
               await ipcRendererInvoke("install-plugin-remote", row.srcUrl);
-              toast.success(t("plugin_management_page.toast_plugin_is_latest", {
-                plugin: row.platform
-              }));
+              toast.success(
+                t("plugin_management_page.toast_plugin_is_latest", {
+                  plugin: row.platform,
+                })
+              );
             } catch (e) {
-              toast.error(e?.message ?? t("plugin_management_page.update_failed"));
+              toast.error(
+                e?.message ?? t("plugin_management_page.update_failed")
+              );
             }
           }}
         >
@@ -86,9 +94,12 @@ function renderOptions(info: any) {
               title: t("plugin.method_import_music_item"),
               withLoading: true,
               loadingText: t("plugin_management_page.importing_media"),
-              placeholder: t("plugin_management_page.placeholder_import_music_item", {
-                plugin: row.platform
-              }),
+              placeholder: t(
+                "plugin_management_page.placeholder_import_music_item",
+                {
+                  plugin: row.platform,
+                }
+              ),
               maxLength: 1000,
               onOk(text) {
                 return callPluginDelegateMethod(
@@ -123,9 +134,12 @@ function renderOptions(info: any) {
               title: t("plugin.method_import_music_sheet"),
               withLoading: true,
               loadingText: t("plugin_management_page.importing_media"),
-              placeholder: t("plugin_management_page.placeholder_import_music_sheet", {
-                plugin: row.platform
-              }),
+              placeholder: t(
+                "plugin_management_page.placeholder_import_music_sheet",
+                {
+                  plugin: row.platform,
+                }
+              ),
               maxLength: 1000,
               onOk(text) {
                 return callPluginDelegateMethod(
@@ -160,9 +174,8 @@ function renderOptions(info: any) {
               variables: row.userVariables,
               plugin: row,
               initValues:
-                getAppConfigPath("private.pluginMeta")?.[
-                  row.platform
-                ]?.userVariables,
+                getAppConfigPath("private.pluginMeta")?.[row.platform]
+                  ?.userVariables,
             });
           }}
         >
@@ -284,7 +297,7 @@ export default function PluginTable() {
                       width: cell.column.getSize(),
                       whiteSpace: "nowrap",
                       overflow: "hidden",
-                      textOverflow: "ellipsis"
+                      textOverflow: "ellipsis",
                     }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -31,6 +31,7 @@ import {
   getMinimodeWindow,
   showMinimodeWindow,
 } from "./window/minimode-window";
+import { handleDeepLink } from "./utils/deep-link";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require("electron-squirrel-startup")) {
@@ -56,6 +57,16 @@ if (process.platform === "win32") {
 
 setAutoFreeze(false);
 
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient("musicfree", process.execPath, [
+      path.resolve(process.argv[1]),
+    ]);
+  }
+} else {
+  app.setAsDefaultProtocolClient("musicfree");
+}
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
@@ -77,10 +88,18 @@ if (!app.requestSingleInstanceLock()) {
   app.exit(0);
 }
 
-app.on("second-instance", () => {
+app.on("second-instance", (_evt, commandLine) => {
   if (getMainWindow()) {
     showMainWindow();
   }
+
+  if (process.platform !== "darwin") {
+    handleDeepLink(commandLine.pop());
+  }
+});
+
+app.on("open-url", (_evt, url) => {
+  handleDeepLink(url);
 });
 
 app.on("will-quit", () => {

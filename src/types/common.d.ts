@@ -65,5 +65,8 @@ declare namespace ICommon {
     SkipToPrevious: void;
     SkipToNext: void;
     SetRepeatMode: RepeatMode;
+    PlayMusic: IMusic.IMusicItem;
   }
+
+  type ICommandKey = keyof ICommand;
 }

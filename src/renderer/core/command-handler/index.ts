@@ -29,6 +29,9 @@ export function setupCommandHandler<T extends keyof ICommon.ICommand>() {
           ? trackPlayer.resumePlay()
           : trackPlayer.pause();
         break;
+      case "PlayMusic": {
+        trackPlayer.playMusic(data);
+      }
     }
   });
 }

@@ -14,6 +14,12 @@ const config: ForgeConfig = {
     icon: path.resolve(__dirname, "res/logo"),
     executableName: "MusicFree",
     extraResource: [path.resolve(__dirname, "res")],
+    protocols: [
+      {
+        name: "MusicFree",
+        schemes: ["musicfree"],
+      },
+    ],
   },
   rebuildConfig: {},
   makers: [
@@ -35,6 +41,7 @@ const config: ForgeConfig = {
       options: {
         name: "MusicFree",
         bin: "MusicFree",
+        mimeType: ["x-scheme-handler/musicfree"],
       },
     }),
   ],
