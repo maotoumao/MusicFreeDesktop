@@ -20,6 +20,8 @@ interface IConfig {
     playError: "pause" | "skip";
     /** 输出设备 */
     audioOutputDevice: MediaDeviceInfo | null;
+    /** 设备变化时 */
+    whenDeviceRemoved: "pause" | "play";
   };
   lyric: {
     /** [darwin only] 显示状态栏歌词 */

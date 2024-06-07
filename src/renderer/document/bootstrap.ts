@@ -40,7 +40,9 @@ export default async function () {
   dropHandler();
   clearDefaultBehavior();
   setupEvents();
-  localMusic.setupLocalMusic(), await Downloader.setupDownloader();
+  setupDeviceChange();
+  localMusic.setupLocalMusic();
+  await Downloader.setupDownloader();
 
   // 自动更新插件
   if (getAppConfigPath("plugin.autoUpdatePlugin")) {
@@ -150,4 +152,21 @@ function setupEvents() {
       MusicSheet.frontend.addMusicToFavorite(realItem);
     }
   });
+}
+
+async function setupDeviceChange() {
+  const getAudioDevices = async () =>
+    await navigator.mediaDevices.enumerateDevices().catch(() => []);
+  let devices = (await getAudioDevices()) || [];
+
+  navigator.mediaDevices.ondevicechange = async (evt) => {
+    const newDevices = await getAudioDevices();
+    if (
+      newDevices.length < devices.length &&
+      getAppConfigPath("playMusic.whenDeviceRemoved") === "pause"
+    ) {
+      trackPlayer.pause();
+    }
+    devices = newDevices;
+  };
 }

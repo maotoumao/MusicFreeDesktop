@@ -109,6 +109,21 @@ export default function PlayMusic(props: IProps) {
         }}
         options={audioDevices}
       ></ListBoxSettingItem>
+      <RadioGroupSettingItem
+        label={t("settings.play_music.when_device_removed")}
+        keyPath="playMusic.whenDeviceRemoved"
+        value={data.whenDeviceRemoved}
+        options={[
+          {
+            value: "pause",
+            title: t("settings.play_music.pause"),
+          },
+          {
+            value: "play",
+            title: t("settings.play_music.continue_playing"),
+          },
+        ]}
+      ></RadioGroupSettingItem>
     </div>
   );
 }

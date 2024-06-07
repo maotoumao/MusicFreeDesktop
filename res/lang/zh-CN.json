@@ -281,7 +281,9 @@
       "double_click_music_list": "双击音乐列表时",
       "add_music_to_playlist": "将目标单曲添加到播放队列",
       "replace_playlist_with_musiclist": "使用当前音乐列表替换播放队列",
-      "audio_output_device": "音频输出设备"
+      "audio_output_device": "音频输出设备",
+      "when_device_removed": "音频设备移除时",
+      "continue_playing": "继续播放"
     },
     "download": {
       "download_folder": "下载目录",

@@ -11,6 +11,7 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
   "playMusic.clickMusicList": "replace",
   "playMusic.caseSensitiveInSearch": false,
   "playMusic.playError": "skip",
+  "playMusic.whenDeviceRemoved": "play",
   "normal.taskbarThumb": "window",
   "normal.closeBehavior": "minimize",
   "normal.checkUpdate": true,
