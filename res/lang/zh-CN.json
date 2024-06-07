@@ -383,6 +383,7 @@
     "uninstall_theme_success": "卸载主题{{name}}成功~",
     "uninstall_theme_fail": "卸载主题失败: {{reason}}",
     "how_to_submit_new_theme": "💡如何提交新主题: 主题市场中的主题与 <Github>MusicFreeThemePacks</Github> 仓库同步，如果需要提交新主题请直接提PR。",
-    "load_remote_theme_error": "出错啦..."
+    "load_remote_theme_error": "出错啦...",
+    "invalid_theme": "主题无效: {{reason}}"
   }
 }

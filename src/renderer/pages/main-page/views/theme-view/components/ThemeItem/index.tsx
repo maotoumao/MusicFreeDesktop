@@ -31,7 +31,7 @@ export default function ThemeItem(props: IProps) {
       }
     } catch (e) {
       toast.error(
-        t("theme.install_theme_fail", {
+        t("theme.invalid_theme", {
           reason: e?.message ?? "",
         })
       );
