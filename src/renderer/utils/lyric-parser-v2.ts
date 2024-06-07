@@ -26,10 +26,20 @@ interface ILyricInfo {
 const lyricTypes = ["raw", "translation"] as const;
 type ILyricType = (typeof lyricTypes)[number];
 
+/**
+ *
+ * 1. 歌词和翻译的meta信息应该相同，以原始歌词为准
+ *
+ */
 export default class LyricParser {
   private _musicItem?: IMusic.IMusicItem;
 
-  private lyricInfo: Partial<Record<"raw" | "translation", ILyricInfo>>;
+  private meta: LyricMeta;
+  private lrcItems: Array<IParsedLrcItem>;
+  private transLrcItems: Array<IParsedLrcItem>;
+
+  private lastIndex = 0;
+  private transLastIndex = 0;
 
   public hasTranslation = false;
 
@@ -47,64 +57,67 @@ export default class LyricParser {
     }
 
     const { lrcItems, meta } = this.parseLyricImpl(raw);
-    this.lyricInfo = {
-      raw: {
-        lastIndex: 0,
-        lrcItems,
-        meta,
-      },
-    };
+    this.meta = meta;
+    this.lrcItems = lrcItems;
 
     if (translation) {
       this.hasTranslation = true;
-      const { lrcItems: tLrcItems, meta: tMeta } = this.parseLyricImpl(raw);
-      this.lyricInfo.translation = {
-        lastIndex: 0,
-        lrcItems: tLrcItems,
-        meta: tMeta,
-      };
+      this.transLrcItems = this.parseLyricImpl(translation).lrcItems;
     }
   }
 
   getPosition(position: number) {
     const result: Partial<Record<ILyricType, IParsedLrcItem>> = {};
-    for (const lyricType of lyricTypes) {
-      const info = this.lyricInfo[lyricType];
 
-      if (info) {
-        const lrc = this.getPositionImpl(position, {
-          meta: info.meta,
-          lrcItems: info.lrcItems,
-          searchFromIndex: info.lastIndex,
-        });
-        if (!lrc) {
-          info.lastIndex = 0;
-        } else {
-          info.lastIndex = lrc.index;
-        }
+    const lrc = this.getPositionImpl(position, {
+      meta: this.meta,
+      lrcItems: this.lrcItems,
+      searchFromIndex: this.lastIndex,
+    });
 
-        result[lyricType] = lrc;
-      }
+    if (!lrc) {
+      this.lastIndex = 0;
+    } else {
+      this.lastIndex = lrc.index;
     }
+
+    result.raw = lrc;
+
+    if (this.hasTranslation) {
+      const lrc = this.getPositionImpl(position, {
+        meta: this.meta,
+        lrcItems: this.transLrcItems,
+        searchFromIndex: this.transLastIndex,
+      });
+
+      if (!lrc) {
+        this.transLastIndex = 0;
+      } else {
+        this.transLastIndex = lrc.index;
+      }
+      result.translation = lrc;
+    }
+
     return result;
   }
 
   getLyricItems(type?: ILyricType) {
-    if (type) {
-      return this.lyricInfo[type];
+    if (type === "raw") {
+      return this.lrcItems;
     } else {
-      return this.lyricInfo;
+      return this.transLrcItems;
     }
   }
 
-  getMeta(type: ILyricType) {
-    return this.lyricInfo[type];
+  getMeta() {
+    return this.meta;
   }
 
   toString(options?: { withTimestamp?: boolean; type?: ILyricType }) {
     const { type = "raw", withTimestamp = true } = options || {};
 
-    const lrcItems = this.lyricInfo[type]?.lrcItems || [];
+    const lrcItems =
+      (type === "raw" ? this.lrcItems : this.transLrcItems) || [];
     if (withTimestamp) {
       return lrcItems
         .map((item) => `${this.timeToLrctime(item.time)} ${item.lrc}`)
