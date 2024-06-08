@@ -1,8 +1,8 @@
 import { ipcRendererSend, ipcRendererOn } from "@/shared/ipc/renderer";
 import localMusicListStore from "./store";
 import {
-  getUserPerferenceIDB,
-  setUserPerferenceIDB,
+  getUserPreferenceIDB,
+  setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
 import * as Comlink from "comlink";
 import musicSheetDB from "../db/music-sheet-db";
@@ -38,7 +38,7 @@ function isSubDir(parent: string, target: string) {
 async function setupLocalMusic() {
   try {
     const localWatchDir =
-      (await getUserPerferenceIDB("localWatchDirChecked")) ?? [];
+      (await getUserPreferenceIDB("localWatchDirChecked")) ?? [];
 
     // ipcRendererSend("add-watch-dir", localWatchDir);
     // ipcRendererOn("sync-local-music", (items) => {

@@ -3,6 +3,7 @@ import Store from "@/common/store";
 import MessageHub from "../message-hub/renderer";
 import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
 import { TrackPlayerSyncType } from "@/common/constant";
+import { IParsedLrcItem } from "@/renderer/utils/lyric-parser";
 
 export function sendCommand<T extends keyof ICommon.ICommand>(
   type: T,
@@ -17,11 +18,8 @@ export function sendCommand<T extends keyof ICommon.ICommand>(
 const currentMusicItemStore = new Store<IMusic.IMusicItem | null>(null);
 const playerStateStore = new Store<PlayerState>(PlayerState.None);
 const repeatModeStore = new Store<RepeatMode>(RepeatMode.Queue);
-const lyricStore = new Store<ILyric.IParsedLrcItem[] | null>(null);
-const currentLyricStore = new Store<{
-  lrc: ILyric.IParsedLrcItem;
-  index: number;
-} | null>(null);
+const lyricStore = new Store<IParsedLrcItem[] | null>(null);
+const currentLyricStore = new Store<IParsedLrcItem | null>(null);
 const currentProgressStore = new Store<{
   currentTime: number;
   duration: number;

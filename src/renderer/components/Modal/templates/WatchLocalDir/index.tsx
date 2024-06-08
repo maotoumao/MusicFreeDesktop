@@ -1,7 +1,7 @@
 import {
-  getUserPerferenceIDB,
-  setUserPerference,
-  setUserPerferenceIDB,
+  getUserPreferenceIDB,
+  setUserPreference,
+  setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
 import Base from "../Base";
 import "./index.scss";
@@ -22,20 +22,19 @@ export default function WatchLocalDir(props: IWatchDirProps) {
   // 选中的文件夹
   const [checkedDirs, setCheckedDirs] = useState(new Set<string>());
   const changeLogRef = useRef(new Map<string, "add" | "delete">()); // key: path; value: op
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     (async () => {
-      const allDirs = (await getUserPerferenceIDB("localWatchDir")) ?? [];
+      const allDirs = (await getUserPreferenceIDB("localWatchDir")) ?? [];
       const checked =
-        (await getUserPerferenceIDB("localWatchDirChecked")) ?? [];
+        (await getUserPreferenceIDB("localWatchDirChecked")) ?? [];
       const allDirsSet = new Set(allDirs);
       const validChecked = checked.filter((it) => allDirsSet.has(it));
       setLocalDirs([...allDirsSet]);
       setCheckedDirs(new Set(validChecked));
     })();
   }, []);
-
 
   return (
     <Base defaultClose>
@@ -150,8 +149,8 @@ export default function WatchLocalDir(props: IWatchDirProps) {
             role="button"
             data-type="primaryButton"
             onClick={async () => {
-              setUserPerferenceIDB("localWatchDir", localDirs);
-              setUserPerferenceIDB("localWatchDirChecked", [...checkedDirs]);
+              setUserPreferenceIDB("localWatchDir", localDirs);
+              setUserPreferenceIDB("localWatchDirChecked", [...checkedDirs]);
               localMusic.changeWatchPath(changeLogRef.current);
               hideModal();
             }}

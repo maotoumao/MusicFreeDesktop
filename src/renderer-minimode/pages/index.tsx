@@ -24,9 +24,7 @@ export default function MinimodePage() {
 
   const textContent = (
     <div className="text-container">
-      {currentLyric?.lrc?.lrc ||
-        currentMusicItem?.title ||
-        t("media.unknown_title")}
+      {currentLyric?.lrc || currentMusicItem?.title || t("media.unknown_title")}
     </div>
   );
 

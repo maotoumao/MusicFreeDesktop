@@ -6,8 +6,8 @@ import {
 } from "@/common/media-util";
 import Store from "@/common/store";
 import {
-  getUserPerferenceIDB,
-  setUserPerferenceIDB,
+  getUserPreferenceIDB,
+  setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
 import musicSheetDB from "../db/music-sheet-db";
 import { internalDataKey, musicRefSymbol } from "@/common/constant";
@@ -19,7 +19,7 @@ const downloadedSet = new Set<string>();
 
 // 在初始化歌单时一起初始化
 export async function setupDownloadedMusicList() {
-  const downloadedPKs = (await getUserPerferenceIDB("downloadedList")) ?? [];
+  const downloadedPKs = (await getUserPreferenceIDB("downloadedList")) ?? [];
   downloadedMusicListStore.setValue(await getDownloadedDetails(downloadedPKs));
   downloadedPKs.forEach((it) => {
     downloadedSet.add(getMediaPrimaryKey(it));
@@ -84,7 +84,7 @@ export async function addDownloadedMusicToList(
         downloadedSet.add(getMediaPrimaryKey(it));
       });
       ee.emit(DownloadEvts.Downloaded, allMusic);
-      setUserPerferenceIDB(
+      setUserPreferenceIDB(
         "downloadedList",
         downloadedMusicListStore.getValue().map(primaryKeyMap)
       );
@@ -175,7 +175,7 @@ export async function removeDownloadedMusic(
       _musicItems.forEach((it) => {
         downloadedSet.delete(getMediaPrimaryKey(it));
       });
-      setUserPerferenceIDB(
+      setUserPreferenceIDB(
         "downloadedList",
         downloadedMusicListStore.getValue()
       );

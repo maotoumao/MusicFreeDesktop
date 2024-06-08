@@ -1,6 +1,6 @@
 import {
-  getUserPerference,
-  setUserPerference,
+  getUserPreference,
+  setUserPreference,
 } from "@/renderer/utils/user-perference";
 import { hideModal } from "../..";
 import Base from "../Base";
@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 
 export default function PluginSubscription() {
   const [subscription, setSubscription] = useState(
-    getUserPerference("subscription") ?? []
+    getUserPreference("subscription") ?? []
   );
 
   const { t } = useTranslation();
@@ -77,7 +77,7 @@ export default function PluginSubscription() {
             data-type="dangerButton"
             data-fill={true}
             onClick={() => {
-              setUserPerference(
+              setUserPreference(
                 "subscription",
                 subscription.filter((item) =>
                   item.srcUrl.match(/https?:\/\/.+\.js(on)?/)

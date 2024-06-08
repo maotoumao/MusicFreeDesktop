@@ -6,8 +6,8 @@
 
 import { isSameMedia } from "@/common/media-util";
 import {
-  getUserPerferenceIDB,
-  setUserPerferenceIDB,
+  getUserPreferenceIDB,
+  setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
 import AppDB from "@/shared/app-db/renderer";
 import { getGlobalContext } from "@/shared/global-context/renderer";
@@ -39,7 +39,7 @@ export function queryAllSheets() {
  */
 export async function queryAllStarredSheets() {
   try {
-    starredMusicSheets = await getUserPerferenceIDB("starredMusicSheets");
+    starredMusicSheets = await getUserPreferenceIDB("starredMusicSheets");
     return starredMusicSheets ?? [];
   } catch {
     return [];
@@ -122,7 +122,7 @@ export function clearSheet(sheetId: string) {
  */
 export async function starMusicSheet(sheet: IMedia.IMediaBase) {
   const newSheets = [...starredMusicSheets, sheet];
-  await setUserPerferenceIDB("starredMusicSheets", newSheets);
+  await setUserPreferenceIDB("starredMusicSheets", newSheets);
   starredMusicSheets = newSheets;
 }
 
@@ -134,7 +134,7 @@ export async function unstarMusicSheet(sheet: IMedia.IMediaBase) {
   const newSheets = starredMusicSheets.filter(
     (item) => !isSameMedia(item, sheet)
   );
-  await setUserPerferenceIDB("starredMusicSheets", newSheets);
+  await setUserPreferenceIDB("starredMusicSheets", newSheets);
   starredMusicSheets = newSheets;
 }
 
@@ -143,7 +143,7 @@ export async function unstarMusicSheet(sheet: IMedia.IMediaBase) {
  */
 
 export async function setStarredMusicSheets(sheets: IMedia.IMediaBase[]) {
-  await setUserPerferenceIDB("starredMusicSheets", sheets);
+  await setUserPreferenceIDB("starredMusicSheets", sheets);
   starredMusicSheets = sheets;
 }
 

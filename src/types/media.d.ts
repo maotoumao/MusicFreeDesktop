@@ -144,13 +144,4 @@ declare namespace ILyric {
     rawLrc?: string;
     translation?: string;
   }
-
-  interface IParsedLrcItem {
-    /** 时间 s */
-    time: number;
-    /** 歌词 */
-    lrc: string;
-  }
-
-  export type IParsedLrc = IParsedLrcItem[];
 }

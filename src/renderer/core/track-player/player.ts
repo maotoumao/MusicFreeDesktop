@@ -19,11 +19,11 @@ import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
 import { callPluginDelegateMethod } from "../plugin-delegate";
 import LyricParser from "@/renderer/utils/lyric-parser";
 import {
-  getUserPerference,
-  getUserPerferenceIDB,
-  removeUserPerference,
-  setUserPerference,
-  setUserPerferenceIDB,
+  getUserPreference,
+  getUserPreferenceIDB,
+  removeUserPreference,
+  setUserPreference,
+  setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
 import { delay } from "@/common/time-util";
 import { ipcRendererOn, ipcRendererSend } from "@/shared/ipc/renderer";
@@ -69,13 +69,13 @@ let currentIndex = -1;
 /** 初始化 */
 export async function setupPlayer() {
   setupEvents();
-  const _repeatMode = getUserPerference("repeatMode");
+  const _repeatMode = getUserPreference("repeatMode");
 
   const [currentMusic, currentProgress] = [
-    getUserPerference("currentMusic"),
-    getUserPerference("currentProgress"),
+    getUserPreference("currentMusic"),
+    getUserPreference("currentProgress"),
   ];
-  const playList = (await getUserPerferenceIDB("playList")) ?? [];
+  const playList = (await getUserPreferenceIDB("playList")) ?? [];
   musicQueueStore.setValue(playList);
 
   if (_repeatMode) {
@@ -88,8 +88,8 @@ export async function setupPlayer() {
   );
 
   const [volume, speed] = [
-    getUserPerference("volume"),
-    getUserPerference("speed"),
+    getUserPreference("volume"),
+    getUserPreference("speed"),
   ];
   if (volume) {
     currentVolumeStore.setValue(volume);
@@ -105,7 +105,7 @@ export async function setupPlayer() {
   // 不能阻塞加载
   getMediaSource(currentMusic, {
     quality:
-      getUserPerference("currentQuality") ||
+      getUserPreference("currentQuality") ||
       getAppConfigPath("playMusic.defaultQuality"),
   })
     .then(({ mediaSource, quality }) => {
@@ -126,7 +126,7 @@ export async function setupPlayer() {
 function setupEvents() {
   trackPlayerEventsEmitter.on(TrackPlayerEvent.PlayEnd, () => {
     progressStore.setValue(initProgress);
-    removeUserPerference("currentProgress");
+    removeUserPreference("currentProgress");
     switch (repeatModeStore.getValue()) {
       case RepeatMode.Queue:
       case RepeatMode.Shuffle: {
@@ -142,26 +142,26 @@ function setupEvents() {
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.ProgressChanged, (res) => {
     progressStore.setValue(res);
-    setUserPerference("currentProgress", res.currentTime);
+    setUserPreference("currentProgress", res.currentTime);
     const currentLyric = currentLyricStore.getValue();
     if (currentLyric?.parser) {
-      const lrcItem = currentLyric.parser.getPosition(res.currentTime);
-      if (lrcItem?.lrc !== currentLyric.currentLrc?.lrc) {
+      const lyricItem = currentLyric.parser.getPosition(res.currentTime);
+      if (lyricItem?.lrc !== currentLyric.currentLrc?.lrc) {
         setCurrentLyric({
           parser: currentLyric.parser,
-          currentLrc: lrcItem,
+          currentLrc: lyricItem,
         });
       }
     }
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.VolumeChanged, (res) => {
-    setUserPerference("volume", res);
+    setUserPreference("volume", res);
     currentVolumeStore.setValue(res);
   });
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.SpeedChanged, (res) => {
-    setUserPerference("speed", res);
+    setUserPreference("speed", res);
     currentSpeedStore.setValue(res);
   });
 
@@ -171,7 +171,7 @@ function setupEvents() {
 
   trackPlayerEventsEmitter.on(TrackPlayerEvent.Error, async () => {
     progressStore.setValue(initProgress);
-    removeUserPerference("currentProgress");
+    removeUserPreference("currentProgress");
     const currentMusic = currentMusicStore.getValue();
     // 播放错误时自动跳到下一首, 间隔500ms，防止疯狂循环。。
     if (
@@ -188,7 +188,7 @@ function setupEvents() {
   // 更新当前音乐的歌词
   trackPlayerEventsEmitter.on(
     TrackPlayerEvent.NeedRefreshLyric,
-    async (force) => {
+    async (forceRefresh) => {
       const currentMusic = currentMusicStore.getValue();
       // 当前没有歌曲
       if (!currentMusic) {
@@ -199,9 +199,9 @@ function setupEvents() {
       const currentLyric = currentLyricStore.getValue();
       // 已经有了
       if (
-        !force &&
+        !forceRefresh &&
         currentLyric &&
-        isSameMedia(currentLyric?.parser?.getCurrentMusicItem?.(), currentMusic)
+        isSameMedia(currentLyric?.parser?.musicItem, currentMusic)
       ) {
         return;
       } else {
@@ -227,12 +227,15 @@ function setupEvents() {
           if (!isSameMedia(currentMusic, currentMusicStore.getValue())) {
             return;
           }
-          if (!lyric?.rawLrc) {
+          if (!lyric?.rawLrc && !lyric?.translation) {
             setCurrentLyric({});
             return;
           }
           const rawLrc = lyric?.rawLrc;
-          const parser = new LyricParser(rawLrc, currentMusic);
+          const parser = new LyricParser(rawLrc, {
+            musicItem: currentMusic,
+            translation: lyric?.translation,
+          });
           setCurrentLyric({
             parser,
           });
@@ -278,7 +281,7 @@ function setupEvents() {
 
 function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
   musicQueueStore.setValue(musicQueue);
-  setUserPerferenceIDB("playList", musicQueue);
+  setUserPreferenceIDB("playList", musicQueue);
 }
 
 /** 设置当前播放的音乐 */
@@ -288,9 +291,9 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
     setCurrentLyric(null);
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.NeedRefreshLyric);
     if (music) {
-      setUserPerference("currentMusic", music);
+      setUserPreference("currentMusic", music);
     } else {
-      removeUserPerference("currentMusic");
+      removeUserPreference("currentMusic");
     }
 
     trackPlayerEventsEmitter.emit(TrackPlayerEvent.MusicChanged, music ?? null);
@@ -301,7 +304,7 @@ function setCurrentMusic(music: IMusic.IMusicItem | null) {
 }
 
 function setCurrentQuality(quality: IMusic.IQualityKey) {
-  setUserPerference("currentQuality", quality);
+  setUserPreference("currentQuality", quality);
   currentQualityStore.setValue(quality);
 }
 
@@ -371,7 +374,7 @@ export function setRepeatMode(repeatMode: RepeatMode) {
     setMusicQueue(sortByTimestampAndIndex(musicQueueStore.getValue(), true));
   }
   repeatModeStore.setValue(repeatMode);
-  setUserPerference("repeatMode", repeatMode);
+  setUserPreference("repeatMode", repeatMode);
   currentIndex = findMusicIndex(currentMusicStore.getValue());
   trackPlayerEventsEmitter.emit(TrackPlayerEvent.RepeatModeChanged, repeatMode);
 }
@@ -477,8 +480,7 @@ async function getMediaSource(
   options?: IGetMediaSourceOptions
 ) {
   const qualityOrder = getQualityOrder(
-    options.quality ??
-      getAppConfigPath("playMusic.defaultQuality"),
+    options.quality ?? getAppConfigPath("playMusic.defaultQuality"),
     getAppConfigPath("playMusic.whenQualityMissing")
   );
   let mediaSource: IPlugin.IMediaSourceResult | null = null;
@@ -591,9 +593,7 @@ async function playIndex(nextIndex: number, options: IPlayOptions = {}) {
     } catch (e) {
       // 播放失败
       setCurrentMusic(musicItem);
-      setCurrentQuality(
-        getAppConfigPath("playMusic.defaultQuality")
-      );
+      setCurrentQuality(getAppConfigPath("playMusic.defaultQuality"));
       trackPlayer.clear();
       trackPlayerEventsEmitter.emit(TrackPlayerEvent.Error, e);
     }
@@ -659,7 +659,7 @@ function setTrackAndPlay(
   }
 ) {
   progressStore.setValue(initProgress);
-  removeUserPerference("currentProgress");
+  removeUserPreference("currentProgress");
   trackPlayer.setTrackSource(mediaSource, musicItem);
   if (options.seekTo) {
     trackPlayer.seekTo(options.seekTo);

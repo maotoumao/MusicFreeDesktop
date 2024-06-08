@@ -12,7 +12,7 @@ declare namespace IpcEvents {
     timeStamp: number;
     data: Partial<{
       // 同步歌词
-      lrc: ILyric.IParsedLrcItem[];
+      lrc: import("@/renderer/utils/lyric-parser").IParsedLrcItem[];
       // 播放状态
       playerState: import("@/renderer/core/track-player/enum").PlayerState;
       // 当前音乐

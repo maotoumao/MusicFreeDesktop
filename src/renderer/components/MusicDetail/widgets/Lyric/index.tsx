@@ -1,6 +1,6 @@
 import trackPlayer from "@/renderer/core/track-player";
 import "./index.scss";
-import Condition from "@/renderer/components/Condition";
+import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -8,8 +8,9 @@ import {
   showCustomContextMenu,
 } from "@/renderer/components/ContextMenu";
 import {
-  getUserPerference,
-  setUserPerference,
+  getUserPreference,
+  setUserPreference,
+  useUserPreference,
 } from "@/renderer/utils/user-perference";
 import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
@@ -24,24 +25,34 @@ import { TrackPlayerEvent } from "@/renderer/core/track-player/enum";
 import { useTranslation } from "react-i18next";
 
 export default function Lyric() {
-  const currentLrc = trackPlayer.useLyric();
+  const lyricContext = trackPlayer.useLyric();
+  const lyricParser = lyricContext?.parser;
+  const currentLrc = lyricContext?.currentLrc;
+
   const containerRef = useRef<HTMLDivElement>();
+
   const [fontSize, setFontSize] = useState<string | null>(
-    getUserPerference("inlineLyricFontSize")
+    getUserPreference("inlineLyricFontSize")
   );
-  const {t} = useTranslation();
+
+  const [showTranslation, setShowTranslation] =
+    useUserPreference("showTranslation");
+  const { t } = useTranslation();
 
   const mountRef = useRef(false);
 
   useEffect(() => {
     if (containerRef.current) {
-      const currentIndex = currentLrc?.currentLrc?.index;
+      const currentIndex = lyricContext?.currentLrc?.index;
       if (currentIndex >= 0) {
         const dom = document.querySelector(`#lyric-item-id-${currentIndex}`) as
           | HTMLDivElement
           | undefined;
         if (dom) {
-          const offsetTop = dom.offsetTop - 210 + dom.clientHeight / 2;
+          const offsetTop =
+            dom.offsetTop -
+            containerRef.current.clientHeight / 2 +
+            dom.clientHeight / 2;
           containerRef.current.scrollTo({
             behavior: mountRef.current ? "smooth" : "auto",
             top: offsetTop,
@@ -50,70 +61,109 @@ export default function Lyric() {
       }
     }
     mountRef.current = true;
-  }, [currentLrc?.currentLrc]);
+  }, [currentLrc]);
+
+  const optionsComponent = (
+    <div className="lyric-options-container">
+      <div
+        className="lyric-option-item"
+        role="button"
+        title={t("music_detail.translation")}
+        data-active={
+          !!showTranslation && (lyricParser?.hasTranslation ?? false)
+        }
+        data-disabled={!lyricParser?.hasTranslation}
+        onClick={() => {
+          setShowTranslation(!showTranslation);
+        }}
+      >
+        <SvgAsset iconName="language"></SvgAsset>
+      </div>
+    </div>
+  );
 
   return (
-    <div
-      className="lyric-container"
-      data-loading={currentLrc === null}
-      onContextMenu={(e) => {
-        showCustomContextMenu({
-          x: e.clientX,
-          y: e.clientY,
-          width: 200,
-          height: 146,
-          component: (
-            <LyricContextMenu
-              setLyricFontSize={setFontSize}
-              lyricParser={currentLrc?.parser}
-            ></LyricContextMenu>
-          ),
-        });
-      }}
-      style={
-        fontSize
-          ? {
-              fontSize: `${fontSize}px`,
-            }
-          : null
-      }
-      ref={containerRef}
-    >
-      {
-        <Condition condition={currentLrc !== null} falsy={<Loading></Loading>}>
+    <div className="lyric-container-outer">
+      <div
+        className="lyric-container"
+        data-loading={lyricContext === null}
+        onContextMenu={(e) => {
+          showCustomContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            width: 200,
+            height: 146,
+            component: (
+              <LyricContextMenu
+                setLyricFontSize={setFontSize}
+                lyricParser={lyricParser}
+              ></LyricContextMenu>
+            ),
+          });
+        }}
+        style={
+          fontSize
+            ? {
+                fontSize: `${fontSize}px`,
+              }
+            : null
+        }
+        ref={containerRef}
+      >
+        {
           <Condition
-            condition={currentLrc?.parser}
-            falsy={
-              <>
-                <div className="lyric-item">{t("music_detail.no_lyric")}</div>
-                <div
-                  className="lyric-item search-lyric"
-                  role="button"
-                  onClick={() => {
-                    showModal("SearchLyric", {
-                      defaultTitle: getCurrentMusic()?.title,
-                      musicItem: getCurrentMusic(),
-                    });
-                  }}
-                >
-                  {t("music_detail.search_lyric")}
-                </div>
-              </>
-            }
+            condition={lyricContext !== null}
+            falsy={<Loading></Loading>}
           >
-            {currentLrc?.parser?.getLyric?.()?.map((lrc, index) => (
-              <div
-                key={index}
-                className="lyric-item"
-                id={`lyric-item-id-${index}`}
-                data-highlight={currentLrc?.currentLrc?.index === index}
-              >
-                {lrc.lrc}
-              </div>
-            ))}
+            <Condition
+              condition={lyricParser}
+              falsy={
+                <>
+                  <div className="lyric-item">{t("music_detail.no_lyric")}</div>
+                  <div
+                    className="lyric-item search-lyric"
+                    role="button"
+                    onClick={() => {
+                      showModal("SearchLyric", {
+                        defaultTitle: getCurrentMusic()?.title,
+                        musicItem: getCurrentMusic(),
+                      });
+                    }}
+                  >
+                    {t("music_detail.search_lyric")}
+                  </div>
+                </>
+              }
+            >
+              {lyricParser?.getLyricItems?.()?.map((lyricItem, index) => (
+                <>
+                  <div
+                    key={index}
+                    className="lyric-item"
+                    id={`lyric-item-id-${index}`}
+                    data-highlight={currentLrc?.index === index}
+                  >
+                    {lyricItem.lrc}
+                  </div>
+                  <IfTruthy
+                    condition={lyricParser?.hasTranslation && showTranslation}
+                  >
+                    <div
+                      key={"tr" + index}
+                      className="lyric-item lyric-item-translation"
+                      id={`tr-lyric-item-id-${index}`}
+                      data-highlight={currentLrc?.index === index}
+                    >
+                      {lyricItem.translation}
+                    </div>
+                  </IfTruthy>
+                </>
+              ))}
+            </Condition>
           </Condition>
-        </Condition>
-      }
+        }
+      </div>
+      {optionsComponent}
     </div>
   );
 }
@@ -127,17 +177,16 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
   const { setLyricFontSize, lyricParser } = props;
 
   const [fontSize, setFontSize] = useState<string | null>(
-    getUserPerference("inlineLyricFontSize") ?? "13"
+    getUserPreference("inlineLyricFontSize") ?? "13"
   );
 
   const [linkedLyricInfo, setLinkedLyricInfo] = useState<IMedia.IUnique>(null);
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const currentMusicRef = useRef<IMusic.IMusicItem>(
     getCurrentMusic() ?? ({} as any)
   );
-
 
   useEffect(() => {
     getLinkedLyric(currentMusicRef.current).then((linked) => {
@@ -151,7 +200,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
     if (val) {
       const nVal = +val;
       if (8 <= nVal && nVal <= 32) {
-        setUserPerference("inlineLyricFontSize", `${val}`);
+        setUserPreference("inlineLyricFontSize", `${val}`);
         setLyricFontSize(`${val}`);
       }
     }
@@ -160,9 +209,11 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
   async function downloadLyric(fileType: "lrc" | "txt") {
     let rawLrc = "";
     if (fileType === "lrc") {
-      rawLrc = lyricParser.getRawLyricStr(true);
+      rawLrc = lyricParser.toString({
+        withTimestamp: true,
+      });
     } else {
-      rawLrc = lyricParser.getRawLyricStr();
+      rawLrc = lyricParser.toString();
     }
 
     try {
@@ -191,7 +242,9 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
 
   return (
     <>
-      <div className="lyric-ctx-menu--set-font-title">{t("music_detail.lyric_ctx_set_font_size")}</div>
+      <div className="lyric-ctx-menu--set-font-title">
+        {t("music_detail.lyric_ctx_set_font_size")}
+      </div>
       <div
         className="lyric-ctx-menu--font-container"
         onClick={(e) => e.stopPropagation()}
@@ -258,7 +311,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           downloadLyric("lrc");
         }}
       >
-        { t("music_detail.lyric_ctx_download_lyric_lrc")}
+        {t("music_detail.lyric_ctx_download_lyric_lrc")}
       </div>
       <div
         className="lyric-ctx-menu--row-container"
@@ -268,7 +321,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           downloadLyric("txt");
         }}
       >
-        { t("music_detail.lyric_ctx_download_lyric_txt")}
+        {t("music_detail.lyric_ctx_download_lyric_txt")}
       </div>
       <div className="divider"></div>
       <div
@@ -283,8 +336,10 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
       >
         <span>
           {linkedLyricInfo
-            ? `${t("music_detail.media_lyric_linked")} ${getMediaPrimaryKey(linkedLyricInfo)}`
-            :  t("music_detail.search_lyric")}
+            ? `${t("music_detail.media_lyric_linked")} ${getMediaPrimaryKey(
+                linkedLyricInfo
+              )}`
+            : t("music_detail.search_lyric")}
         </span>
       </div>
       <div

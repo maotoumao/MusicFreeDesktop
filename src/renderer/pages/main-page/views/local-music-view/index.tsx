@@ -6,7 +6,7 @@ import "./index.scss";
 import MusicList from "@/renderer/components/MusicList";
 import { showModal } from "@/renderer/components/Modal";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { useUserPerference } from "@/renderer/utils/user-perference";
+import { useUserPreference } from "@/renderer/utils/user-perference";
 import { useEffect, useState, useTransition } from "react";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import ListView from "./views/list";

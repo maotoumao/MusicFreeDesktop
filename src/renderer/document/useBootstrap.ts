@@ -2,7 +2,7 @@ import { ipcRendererInvoke, ipcRendererOn } from "@/shared/ipc/renderer";
 import { useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Evt from "../core/events";
-import { getUserPerference } from "../utils/user-perference";
+import { getUserPreference } from "../utils/user-perference";
 import { compare } from "compare-versions";
 import { showModal } from "../components/Modal";
 import checkUpdate from "../utils/check-update";

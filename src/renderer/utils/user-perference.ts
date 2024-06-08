@@ -1,32 +1,43 @@
 import Dexie, { Table } from "dexie";
+import EventEmitter from "eventemitter3";
 import { useEffect, useState } from "react";
 
 const basicType = ["number", "string", "boolean", "null", "undefined"];
 
-export function setUserPerference<K extends keyof IUserPerference.IType>(
+const ee = new EventEmitter();
+
+enum EvtNames {
+  USER_PREFERENCE_UPDATE = "USER_PREFERENCE_UPDATE",
+}
+
+export function setUserPreference<K extends keyof IUserPreference.IType>(
   key: K,
-  value: IUserPerference.IType[K]
+  value: IUserPreference.IType[K]
 ) {
   try {
+    let newValue;
     if (typeof value in basicType) {
-      localStorage.setItem(key, value as any);
+      newValue = value as any;
     } else {
-      localStorage.setItem(key, JSON.stringify(value));
+      newValue = JSON.stringify(value);
     }
+    localStorage.setItem(key, newValue as any);
+    ee.emit(EvtNames.USER_PREFERENCE_UPDATE, key, value);
   } catch {
     // 设置失败
   }
 }
 
-export function removeUserPerference(key: keyof IUserPerference.IType) {
+export function removeUserPreference(key: keyof IUserPreference.IType) {
   try {
     localStorage.removeItem(key);
+    ee.emit(EvtNames.USER_PREFERENCE_UPDATE, key, null);
   } catch {}
 }
 
-export function getUserPerference<K extends keyof IUserPerference.IType>(
+export function getUserPreference<K extends keyof IUserPreference.IType>(
   key: K
-): IUserPerference.IType[K] | null {
+): IUserPreference.IType[K] | null {
   let rawData = null;
   try {
     rawData = localStorage.getItem(key);
@@ -39,22 +50,34 @@ export function getUserPerference<K extends keyof IUserPerference.IType>(
   }
 }
 
-export function useUserPerference<K extends keyof IUserPerference.IType>(
+export function useUserPreference<K extends keyof IUserPreference.IType>(
   key: K
 ) {
-  const [state, _setState] = useState(getUserPerference(key));
+  const [state, _setState] = useState(getUserPreference(key));
 
-  function setState(newState: IUserPerference.IType[K] | null) {
-    _setState(newState);
-    setUserPerference(key, newState);
+  function setState(newState: IUserPreference.IType[K] | null) {
+    setUserPreference(key, newState);
   }
+
+  useEffect(() => {
+    const updateFn = (updateKey: K, value: IUserPreference.IType[K] | null) => {
+      if (key === updateKey) {
+        _setState(value);
+      }
+    };
+    ee.on(EvtNames.USER_PREFERENCE_UPDATE, updateFn);
+
+    return () => {
+      ee.off(EvtNames.USER_PREFERENCE_UPDATE, updateFn);
+    };
+  }, []);
 
   return [state, setState] as const;
 }
 
 /** 比较大的数据 */
 
-class UserPerferenceDB extends Dexie {
+class UserPreferenceDB extends Dexie {
   // 歌单信息，其中musiclist只存有platform和id
   perference: Table<Record<string, any>>;
 
@@ -66,16 +89,16 @@ class UserPerferenceDB extends Dexie {
   }
 }
 
-const upDB = new UserPerferenceDB();
+const upDB = new UserPreferenceDB();
 
 const dbKeyUpdateCbs = new Map<
-  keyof IUserPerference.IDBType,
+  keyof IUserPreference.IDBType,
   Set<(...args: any) => void>
 >();
 
-export async function setUserPerferenceIDB<
-  K extends keyof IUserPerference.IDBType
->(key: K, value: IUserPerference.IDBType[K]) {
+export async function setUserPreferenceIDB<
+  K extends keyof IUserPreference.IDBType
+>(key: K, value: IUserPreference.IDBType[K]) {
   try {
     await upDB.transaction("readwrite", upDB.perference, async () => {
       await upDB.perference.put({
@@ -91,9 +114,9 @@ export async function setUserPerferenceIDB<
   }
 }
 
-export async function getUserPerferenceIDB<
-  K extends keyof IUserPerference.IDBType
->(key: K): Promise<IUserPerference.IDBType[K] | null> {
+export async function getUserPreferenceIDB<
+  K extends keyof IUserPreference.IDBType
+>(key: K): Promise<IUserPreference.IDBType[K] | null> {
   try {
     return (
       (
@@ -107,15 +130,15 @@ export async function getUserPerferenceIDB<
   }
 }
 
-export function useUserPerferenceIDBValue<K extends keyof IUserPerference.IDBType>(
-  key: K
-) {
-  const [state, setState] = useState<IUserPerference.IDBType[K] | null>(null);
+export function useUserPreferenceIDBValue<
+  K extends keyof IUserPreference.IDBType
+>(key: K) {
+  const [state, setState] = useState<IUserPreference.IDBType[K] | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const result = await getUserPerferenceIDB(key);
+        const result = await getUserPreferenceIDB(key);
         setState(result);
       } catch {
       } finally {

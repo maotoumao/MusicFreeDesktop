@@ -1,6 +1,6 @@
 import {
-  getUserPerference,
-  setUserPerference,
+  getUserPreference,
+  setUserPreference,
 } from "@/renderer/utils/user-perference";
 import { hideModal, showModal } from "../..";
 import Base from "../Base";

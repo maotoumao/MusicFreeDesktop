@@ -1,7 +1,7 @@
 import { hideModal, showModal } from "@/renderer/components/Modal";
 import PluginTable from "./components/plugin-table";
 import "./index.scss";
-import { getUserPerference } from "@/renderer/utils/user-perference";
+import { getUserPreference } from "@/renderer/utils/user-perference";
 import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import A from "@/renderer/components/A";
@@ -153,7 +153,7 @@ export default function PluginManagerView() {
             role="button"
             data-type="normalButton"
             onClick={async () => {
-              const subscription = getUserPerference("subscription");
+              const subscription = getUserPreference("subscription");
 
               if (subscription?.length) {
                 for (let i = 0; i < subscription.length; ++i) {

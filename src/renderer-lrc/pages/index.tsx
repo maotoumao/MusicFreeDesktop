@@ -161,8 +161,8 @@ function LyricContent() {
   const lyricAppConfig = useAppConfig()?.lyric;
 
   const textWidth = useMemo(() => {
-    if (currentLyric?.lrc?.lrc) {
-      return getTextWidth(currentLyric?.lrc?.lrc, {
+    if (currentLyric?.lrc) {
+      return getTextWidth(currentLyric?.lrc, {
         fontSize: lyricAppConfig?.fontSize ?? 48,
         fontFamily: lyricAppConfig?.fontData?.family || undefined,
       });
@@ -206,7 +206,7 @@ function LyricContent() {
         left: textWidth > window.innerWidth ? 0 : undefined,
       }}
     >
-      {currentLyric?.lrc?.lrc ??
+      {currentLyric?.lrc ??
         (currentMusic
           ? `${currentMusic.title} - ${currentMusic.artist}`
           : "暂无歌词")}

@@ -53,7 +53,7 @@ function getCurrentPlayerData() {
           artwork: currentMusic.artwork,
         }
       : null,
-    lyric: currentLyric?.parser?.getLyric() ?? null,
+    lyric: currentLyric?.parser?.getLyricItems() ?? null,
     currentLyric: currentLyric?.currentLrc,
     playerState: currentPlayerState,
     progress,
@@ -68,7 +68,7 @@ export function setupPlayerSyncHandler() {
     data: currentState,
   });
   ipcRendererSend("sync-current-music", currentState.music);
-  ipcRendererSend("sync-current-lyric", currentState.currentLyric?.lrc?.lrc);
+  ipcRendererSend("sync-current-lyric", currentState.currentLyric?.lrc);
   ipcRendererSend("sync-current-repeat-mode", currentState.repeatMode);
   ipcRendererSend("sync-current-playing-state", currentState.playerState);
 
@@ -121,7 +121,7 @@ export function setupPlayerSyncHandler() {
   trackPlayer.on(TrackPlayerEvent.LyricChanged, (lyric) => {
     broadcast({
       type: TrackPlayerSyncType.LyricChanged,
-      data: lyric?.getLyric(),
+      data: lyric?.getLyricItems(),
     });
   });
 
@@ -130,14 +130,14 @@ export function setupPlayerSyncHandler() {
 
     broadcast({
       type: TrackPlayerSyncType.CurrentLyricChanged,
-      data: lyric ?? "",
+      data: lyric ?? null,
     });
 
     if (
       platform === "darwin" &&
       getAppConfigPath("lyric.enableStatusBarLyric")
     ) {
-      ipcRendererSend("sync-current-lyric", lyric?.lrc?.lrc);
+      ipcRendererSend("sync-current-lyric", lyric?.lrc);
     }
   });
 
