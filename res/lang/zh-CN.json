@@ -198,7 +198,9 @@
     "media_lyric_linked": "已关联歌词: ",
     "unlink_media_lyric": "取消关联歌词",
     "toast_media_lyric_unlinked": "已取消关联歌词",
-    "translation": "翻译"
+    "translation": "翻译",
+    "show_translation": "显示翻译",
+    "hide_translation": "隐藏翻译"
   },
   "bottom_loading_state": {
     "reached_end": "~~~ 到底啦 ~~~",

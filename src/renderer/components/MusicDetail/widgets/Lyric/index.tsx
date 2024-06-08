@@ -179,6 +179,8 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
   const [fontSize, setFontSize] = useState<string | null>(
     getUserPreference("inlineLyricFontSize") ?? "13"
   );
+  const [showTranslation, setShowTranslation] =
+    useUserPreference("showTranslation");
 
   const [linkedLyricInfo, setLinkedLyricInfo] = useState<IMedia.IUnique>(null);
 
@@ -302,7 +304,18 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
         </div>
       </div>
       <div className="divider"></div>
-
+      <div
+        className="lyric-ctx-menu--row-container"
+        role="button"
+        data-disabled={!lyricParser?.hasTranslation}
+        onClick={() => {
+          setShowTranslation(!showTranslation);
+        }}
+      >
+        {showTranslation
+          ? t("music_detail.hide_translation")
+          : t("music_detail.show_translation")}
+      </div>
       <div
         className="lyric-ctx-menu--row-container"
         role="button"
