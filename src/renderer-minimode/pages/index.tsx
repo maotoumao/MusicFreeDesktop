@@ -97,8 +97,17 @@ export default function MinimodePage() {
           }}
         ></div>
         <img
+          title={
+            (currentMusicItem?.title || t("media.unknown_title")) +
+            " - " +
+            (currentMusicItem?.artist || t("media.unknown_artist"))
+          }
+          draggable="false"
           className="album-container"
           src={currentMusicItem?.artwork || albumImg}
+          onDoubleClick={() => {
+            ipcRendererSend("show-mainwindow");
+          }}
         ></img>
         <div className="body-container">{hover ? options : textContent}</div>
       </div>
