@@ -1,3 +1,4 @@
+import { safeParse } from "@/common/safe-serialization";
 import Dexie, { Table } from "dexie";
 import EventEmitter from "eventemitter3";
 import { useEffect, useState } from "react";
@@ -65,10 +66,23 @@ export function useUserPreference<K extends keyof IUserPreference.IType>(
         _setState(value);
       }
     };
+
+    const updateFnStorage = (e: StorageEvent) => {
+      if (e.key === key) {
+        try {
+          _setState(JSON.parse(e.newValue));
+        } catch {
+          _setState(e.newValue as any);
+        }
+      }
+    };
+
     ee.on(EvtNames.USER_PREFERENCE_UPDATE, updateFn);
+    window.addEventListener("storage", updateFnStorage);
 
     return () => {
       ee.off(EvtNames.USER_PREFERENCE_UPDATE, updateFn);
+      window.removeEventListener("storage", updateFnStorage);
     };
   }, []);
 

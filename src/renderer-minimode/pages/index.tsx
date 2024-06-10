@@ -10,6 +10,7 @@ import {
 } from "@/shared/player-command-sync/renderer";
 import { useTranslation } from "react-i18next";
 import { ipcRendererSend } from "@/shared/ipc/renderer";
+import { useUserPreference } from "@/renderer/utils/user-perference";
 
 const { currentMusicItemStore, playerStateStore, currentLyricStore } =
   PlayerSyncStore;
@@ -18,13 +19,17 @@ export default function MinimodePage() {
   const [hover, setHover] = useState(false);
   const currentMusicItem = currentMusicItemStore.useValue();
   const playerState = playerStateStore.useValue();
-  const currentLyric = currentLyricStore.useValue();
+  const lyricItem = currentLyricStore.useValue();
 
   const { t } = useTranslation();
+  const [showTranslation] = useUserPreference("showTranslation");
 
   const textContent = (
     <div className="text-container">
-      {currentLyric?.lrc || currentMusicItem?.title || t("media.unknown_title")}
+      <span>
+        {lyricItem?.lrc || currentMusicItem?.title || t("media.unknown_title")}
+      </span>
+      {showTranslation ? <span>{lyricItem?.translation}</span> : null}
     </div>
   );
 

@@ -59,8 +59,8 @@ export const createMiniModeWindow = (): BrowserWindow => {
 
   if (process.platform === "win32") {
     makeWindowFullyDraggable(miniWindow, {
-      width: 340,
-      height: 72,
+      width,
+      height,
       onMouseUp(position) {
         if (position) {
           setAppConfigPath("private.minimodeWindowPosition", {
