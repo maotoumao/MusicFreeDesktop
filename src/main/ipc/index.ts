@@ -28,6 +28,7 @@ import {
   getMinimodeWindow,
   showMinimodeWindow,
 } from "../window/minimode-window";
+import { appUpdateSources } from "@/common/constant";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -142,18 +143,14 @@ export default function setupIpcMain() {
   });
 
   /** APP更新 */
-  const updateSources = [
-    "https://gitee.com/maotoumao/MusicFreeDesktop/raw/master/release/version.json",
-    "https://raw.githubusercontent.com/maotoumao/MusicFreeDesktop/master/release/version.json",
-  ];
   ipcMainHandle("check-update", async () => {
     const currentVersion = app.getVersion();
     const updateInfo: ICommon.IUpdateInfo = {
       version: currentVersion,
     };
-    for (let i = 0; i < updateSources.length; ++i) {
+    for (let i = 0; i < appUpdateSources.length; ++i) {
       try {
-        const rawInfo = (await axios.get(updateSources[i])).data;
+        const rawInfo = (await axios.get(appUpdateSources[i])).data;
         if (compare(rawInfo.version, currentVersion, ">")) {
           updateInfo.update = rawInfo;
           return updateInfo;

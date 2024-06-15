@@ -279,7 +279,7 @@ async function installThemePack(themePackPath: string) {
 }
 
 async function uninstallThemePack(themePack: ICommon.IThemePack) {
-  await rimraf(themePack.path);
+  return await rimraf(themePack.path);
 }
 
 export const mod = {

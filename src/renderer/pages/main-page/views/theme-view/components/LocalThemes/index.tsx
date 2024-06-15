@@ -69,6 +69,7 @@ export default function LocalThemes() {
         {localThemePacks.map((it) => (
           <ThemeItem
             config={it}
+            hash={it.hash}
             key={it.path}
             type="local"
             selected={it.hash === currentThemePack?.hash}

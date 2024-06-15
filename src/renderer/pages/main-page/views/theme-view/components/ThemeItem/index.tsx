@@ -8,12 +8,17 @@ import Loading from "@/renderer/components/Loading";
 
 interface IProps {
   config: ICommon.IThemePack;
+  hash?: string;
   type: "remote" | "local";
   selected?: boolean;
+  /**[Remote Only] 主题的最新版是否已经在本地安装 */
+  latestInstalled?: boolean;
+  /**[Remote Only] 主题是否已经在本地安装 */
+  installed?: boolean;
 }
 
 export default function ThemeItem(props: IProps) {
-  const { config, type, selected } = props;
+  const { config, type, selected, latestInstalled, installed, hash } = props;
 
   const [isHover, setIsHover] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,9 +30,16 @@ export default function ThemeItem(props: IProps) {
       if (type === "local") {
         await Themepack.selectTheme(config);
       } else {
-        setIsLoading(true);
-        const cfg = await Themepack.installRemoteThemePack(config.srcUrl);
-        await Themepack.selectTheme(cfg);
+        if (latestInstalled) {
+          await Themepack.selectThemeByHash(hash);
+        } else {
+          setIsLoading(true);
+          const themePack = await Themepack.installRemoteThemePack(
+            config.srcUrl,
+            config.id
+          );
+          await Themepack.selectTheme(themePack);
+        }
       }
     } catch (e) {
       toast.error(
@@ -76,7 +88,11 @@ export default function ThemeItem(props: IProps) {
                   role="button"
                   onClick={selectTheme}
                 >
-                  {t("theme.download_and_use")}
+                  {latestInstalled
+                    ? t("theme.use_theme")
+                    : installed
+                    ? t("theme.update_theme")
+                    : t("theme.download_and_use")}
                 </div>
               </If.Truthy>
               <If.Falsy>
@@ -87,7 +103,7 @@ export default function ThemeItem(props: IProps) {
                 >
                   {t("theme.use_theme")}
                 </div>
-                {config?.hash && (
+                {hash && (
                   <div
                     className="theme-option-button"
                     role="button"

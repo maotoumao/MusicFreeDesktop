@@ -11,6 +11,7 @@ import A from "@/renderer/components/A";
 export default function RemoteThemes() {
   const [themes, loadingState] = useRemoteThemes();
   const currentTheme = ThemePack.useCurrentThemePack();
+  const localThemes = ThemePack.useLocalThemePacks();
   const { t } = useTranslation();
 
   return (
@@ -34,9 +35,18 @@ export default function RemoteThemes() {
             {themes.map((it) => (
               <ThemeItem
                 config={it.config}
+                hash={it.hash}
                 key={it.publishName}
                 type="remote"
                 selected={it.hash && it.hash === currentTheme?.hash}
+                latestInstalled={
+                  it.hash &&
+                  localThemes.some((localTheme) => it.hash === localTheme.hash)
+                }
+                installed={
+                  it.id &&
+                  localThemes.some((localTheme) => it.id === localTheme.id)
+                }
               ></ThemeItem>
             ))}
           </div>

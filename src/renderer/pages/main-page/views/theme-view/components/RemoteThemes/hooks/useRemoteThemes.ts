@@ -11,6 +11,7 @@ interface IThemeStoreItem {
   hash: string;
   packageName: string;
   config: ICommon.IThemePack;
+  id?: string;
 }
 
 function raceWithData<T>(promises: Array<Promise<T>>): Promise<T> {

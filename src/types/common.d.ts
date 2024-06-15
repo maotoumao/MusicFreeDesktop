@@ -23,6 +23,7 @@ declare namespace ICommon {
   }
 
   interface IThemePack {
+    id?: string;
     /** 主题 */
     name: string;
     /** 加载之后的路径，内部属性 */

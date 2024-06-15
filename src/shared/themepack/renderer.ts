@@ -18,6 +18,17 @@ async function selectTheme(themePack: ICommon.IThemePack | null) {
   currentThemePackStore.setValue(themePack);
 }
 
+async function selectThemeByHash(hash: string) {
+  const targetTheme = localThemePacksStore
+    .getValue()
+    .find((it) => it.hash === hash);
+
+  if (targetTheme) {
+    await mod.selectTheme(targetTheme);
+    currentThemePackStore.setValue(targetTheme);
+  }
+}
+
 let themePacksLoaded = false;
 async function setupThemePacks() {
   try {
@@ -48,10 +59,30 @@ async function installThemePack(themePackPath: string) {
   return themePackConfig;
 }
 
-async function installRemoteThemePack(remoteUrl: string) {
+/**
+ *
+ * @param remoteUrl 主题包地址
+ * @param id 可选，如果有主题id的话会替换掉本地的资源
+ * @returns
+ */
+async function installRemoteThemePack(remoteUrl: string, id?: string) {
   const themePackConfig = await mod.installRemoteThemePack(remoteUrl);
+
+  let oldThemeConfig: ICommon.IThemePack | null = null;
+  if (id) {
+    oldThemeConfig = localThemePacksStore.getValue().find((it) => it.id === id);
+    if (oldThemeConfig) {
+      mod.uninstallThemePack(oldThemeConfig);
+    }
+  }
   if (themePackConfig) {
-    localThemePacksStore.setValue((prev) => [...prev, themePackConfig]);
+    localThemePacksStore.setValue((prev) =>
+      [themePackConfig].concat(
+        oldThemeConfig
+          ? prev.filter((it) => it.hash !== oldThemeConfig.hash)
+          : prev
+      )
+    );
   }
   return themePackConfig;
 }
@@ -84,6 +115,7 @@ function useLocalThemePacks() {
 
 const ThemePack = {
   selectTheme,
+  selectThemeByHash,
   setupThemePacks,
   loadThemePacks,
   installThemePack,

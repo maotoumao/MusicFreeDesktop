@@ -113,11 +113,17 @@ export enum DownloadState {
   DONE = "DONE",
 }
 
-// 主题包链接
+// 主题更新链接
 export const themePackStoreBaseUrl = [
   "https://raw.githubusercontent.com/maotoumao/MusicFreeThemePacks/master/", //github
   "https://cdn.jsdelivr.net/gh/maotoumao/MusicFreeThemePacks@master/",
   "https://gitee.com/maotoumao/MusicFreeThemePacks/raw/master/", // gitee
+];
+
+export const appUpdateSources = [
+  "https://gitee.com/maotoumao/MusicFreeDesktop/raw/master/release/version.json",
+  "https://raw.githubusercontent.com/maotoumao/MusicFreeDesktop/master/release/version.json",
+  "https://cdn.jsdelivr.net/gh/maotoumao/MusicFreeDesktop@master/release/version.json",
 ];
 
 export enum TrackPlayerSyncType {
