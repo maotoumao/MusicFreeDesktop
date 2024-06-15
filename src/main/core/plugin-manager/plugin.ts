@@ -91,11 +91,17 @@ export class Plugin {
           },
           os: process.platform,
           appVersion: app.getVersion(),
+          lang: getAppConfigPathSync("normal.language"),
+        };
+        const _process = {
+          platform: process.platform,
+          version: app.getVersion(),
+          env,
         };
         // eslint-disable-next-line no-new-func
         _instance = Function(`
                     'use strict';
-                    return function(require, __musicfree_require, module, exports, console, env) {
+                    return function(require, __musicfree_require, module, exports, console, env, process) {
                         ${funcCode}
                     }
                 `)()(
@@ -104,7 +110,8 @@ export class Plugin {
           _module,
           _module.exports,
           console,
-          env
+          env,
+          _process
         );
         if (_module.exports.default) {
           _instance = _module.exports.default as IPlugin.IPluginInstance;
