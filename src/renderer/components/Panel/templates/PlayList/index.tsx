@@ -2,7 +2,7 @@ import Evt from "@renderer/core/events";
 import "./index.scss";
 import { CSSProperties, memo, useEffect, useRef, useState } from "react";
 import trackPlayer from "@/renderer/core/track-player";
-import Condition from "@/renderer/components/Condition";
+import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
@@ -17,8 +17,10 @@ import useStateRef from "@/renderer/hooks/useStateRef";
 import { isBetween } from "@/common/normalize-util";
 import hotkeys from "hotkeys-js";
 import { Trans, useTranslation } from "react-i18next";
+import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 
 const estimizeItemHeight = 2.6 * rem;
+const DRAG_TAG = "Playlist";
 
 export default function PlayList() {
   const musicQueue = trackPlayer.useMusicQueue();
@@ -58,6 +60,22 @@ export default function PlayList() {
       hotkeys.unbind("Ctrl+A", ctrlAHandler);
     };
   }, []);
+
+  const onDrop = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) {
+      // 没有移动
+      return;
+    }
+    const newData = musicQueue
+      .slice(0, fromIndex)
+      .concat(musicQueue.slice(fromIndex + 1));
+    newData.splice(
+      fromIndex > toIndex ? toIndex : toIndex - 1,
+      0,
+      musicQueue[fromIndex]
+    );
+    trackPlayer.setMusicQueue(newData);
+  };
 
   useEffect(() => {
     setActiveItems([]);
@@ -101,6 +119,7 @@ export default function PlayList() {
           >
             {virtualController.virtualItems.map((virtualItem) => {
               const musicItem = virtualItem.dataItem;
+              const rowIndex = virtualItem.rowIndex;
               return (
                 <div
                   key={virtualItem.rowIndex}
@@ -108,6 +127,10 @@ export default function PlayList() {
                     position: "absolute",
                     left: 0,
                     top: virtualItem.top,
+                  }}
+                  draggable
+                  onDragStart={(e) => {
+                    startDrag(e, rowIndex, DRAG_TAG);
                   }}
                   onDoubleClick={() => {
                     trackPlayer.playMusic(musicItem);
@@ -169,6 +192,22 @@ export default function PlayList() {
                     }
                     musicItem={musicItem}
                   ></PlayListMusicItem>
+
+                  <IfTruthy condition={rowIndex === 0}>
+                    <DragReceiver
+                      position="top"
+                      rowIndex={0}
+                      tag={DRAG_TAG}
+                      insideTable
+                      onDrop={onDrop}
+                    ></DragReceiver>
+                  </IfTruthy>
+                  <DragReceiver
+                    position="bottom"
+                    rowIndex={rowIndex + 1}
+                    tag={DRAG_TAG}
+                    onDrop={onDrop}
+                  ></DragReceiver>
                 </div>
               );
             })}

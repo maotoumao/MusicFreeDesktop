@@ -57,6 +57,8 @@ export default function Slider() {
               ? seekPercent * 100
               : duration === 0
               ? 0
+              : !isFinite(duration) || isNaN(duration)
+              ? 0
               : (currentTime / duration) * 100
           }%)`,
         }}

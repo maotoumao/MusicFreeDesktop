@@ -3,10 +3,7 @@ import "./index.scss";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import { useEffect, useRef, useState } from "react";
-import {
-  showContextMenu,
-  showCustomContextMenu,
-} from "@/renderer/components/ContextMenu";
+import { showCustomContextMenu } from "@/renderer/components/ContextMenu";
 import {
   getUserPreference,
   setUserPreference,
@@ -191,11 +188,13 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
   );
 
   useEffect(() => {
-    getLinkedLyric(currentMusicRef.current).then((linked) => {
-      if (linked) {
-        setLinkedLyricInfo(linked);
-      }
-    });
+    if (currentMusicRef.current?.platform) {
+      getLinkedLyric(currentMusicRef.current).then((linked) => {
+        if (linked) {
+          setLinkedLyricInfo(linked);
+        }
+      });
+    }
   }, []);
 
   function handleFontSize(val: string | number) {

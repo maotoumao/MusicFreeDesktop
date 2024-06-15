@@ -8,7 +8,6 @@ import Tag from "../Tag";
 import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import Lyric from "./widgets/Lyric";
 import SvgAsset from "../SvgAsset";
-import { OptionItem } from "./widgets/OptionItem";
 import Condition from "../Condition";
 import { useTranslation } from "react-i18next";
 
@@ -54,7 +53,7 @@ export default function () {
         <SvgAsset iconName="chevron-down"></SvgAsset>
       </div>
       <div className="music-title" title={musicItem?.title}>
-        {musicItem?.title}
+        {musicItem?.title || t("media.unknown_title")}
       </div>
       <div className="music-info">
         <span>
@@ -66,7 +65,7 @@ export default function () {
             - {musicItem?.album}
           </Condition>
         </span>
-        <Tag fill>{musicItem?.platform}</Tag>
+        {musicItem?.platform ? <Tag fill>{musicItem.platform}</Tag> : null}
       </div>
       <div className="music-body">
         <div className="music-album-options">

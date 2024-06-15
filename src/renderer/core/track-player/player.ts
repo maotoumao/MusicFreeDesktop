@@ -30,11 +30,15 @@ import { ipcRendererOn, ipcRendererSend } from "@/shared/ipc/renderer";
 import Evt from "../events";
 import { getLinkedLyric } from "../link-lyric";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
+import { createUniqueMap } from "@/common/unique-map";
+import { createIndexMap } from "@/common/index-map";
 
 const initProgress = {
   currentTime: 0,
   duration: Infinity,
 };
+
+const indexMap = createIndexMap();
 
 /** 音乐队列 */
 const musicQueueStore = new Store<IMusic.IMusicItem[]>([]);
@@ -77,6 +81,7 @@ export async function setupPlayer() {
   ];
   const playList = (await getUserPreferenceIDB("playList")) ?? [];
   musicQueueStore.setValue(playList);
+  indexMap.update(playList);
 
   if (_repeatMode) {
     setRepeatMode(_repeatMode as RepeatMode);
@@ -279,9 +284,11 @@ function setupEvents() {
   });
 }
 
-function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
+export function setMusicQueue(musicQueue: IMusic.IMusicItem[]) {
   musicQueueStore.setValue(musicQueue);
   setUserPreferenceIDB("playList", musicQueue);
+  indexMap.update(musicQueue);
+  currentIndex = findMusicIndex(currentMusicStore.getValue());
 }
 
 /** 设置当前播放的音乐 */
@@ -375,7 +382,6 @@ export function setRepeatMode(repeatMode: RepeatMode) {
   }
   repeatModeStore.setValue(repeatMode);
   setUserPreference("repeatMode", repeatMode);
-  currentIndex = findMusicIndex(currentMusicStore.getValue());
   trackPlayerEventsEmitter.emit(TrackPlayerEvent.RepeatModeChanged, repeatMode);
 }
 
@@ -383,8 +389,8 @@ function findMusicIndex(musicItem?: IMusic.IMusicItem) {
   if (!musicItem) {
     return -1;
   }
-  const musicQueue = musicQueueStore.getValue();
-  return musicQueue.findIndex((item) => isSameMedia(musicItem, item));
+
+  return indexMap.indexOf(musicItem);
 }
 
 /**
@@ -444,7 +450,6 @@ export function addNext(musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) {
 
     const newQueue = [...prevQueue, ..._musicItems, ...tailQueue];
     setMusicQueue(newQueue);
-    currentIndex = findMusicIndex(currentMusic);
   }
 }
 
@@ -650,6 +655,10 @@ interface ISetTrackOptions {
   seekTo?: number;
 }
 
+function resetProgress() {
+  progressStore.setValue(initProgress);
+}
+
 /** 内部播放 */
 function setTrackAndPlay(
   mediaSource: IPlugin.IMediaSourceResult,
@@ -684,20 +693,19 @@ export function removeFromQueue(
   musicItem: IMusic.IMusicItem | number | IMusic.IMusicItem[]
 ) {
   if (Array.isArray(musicItem)) {
-    const mapObj: Record<string, Record<string, true>> = {};
-    for (const mi of musicItem) {
-      mapObj[mi.platform] = { ...mapObj[mi.platform], [mi.id]: true };
-    }
+    const unqMap = createUniqueMap(musicItem);
+
     const musicQueue = musicQueueStore.getValue();
     const result: IMusic.IMusicItem[] = [];
     for (let i = 0; i < musicQueue.length; ++i) {
       const loopMusicItem = musicQueue[i];
       // 命中即将删除的逻辑
-      if (mapObj?.[loopMusicItem.platform]?.[loopMusicItem.id]) {
+      if (unqMap.has(loopMusicItem)) {
         if (currentIndex === i) {
           trackPlayer.clear();
           currentIndex = -1;
           setCurrentMusic(null);
+          resetProgress();
         }
       } else {
         result.push(loopMusicItem);
@@ -728,7 +736,6 @@ export function removeFromQueue(
     newQueue.splice(musicIndex, 1);
 
     setMusicQueue(newQueue);
-    currentIndex = findMusicIndex(currentMusicStore.getValue());
   }
 }
 
