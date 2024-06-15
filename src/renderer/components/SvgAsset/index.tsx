@@ -69,6 +69,7 @@ interface IProps {
   iconName: SvgAssetIconNames;
   size?: number;
   title?: string;
+  color?: string;
 }
 /**
  *
@@ -84,6 +85,7 @@ function SvgAsset(props: IProps) {
       style={{
         width: props.size,
         height: props.size,
+        color: props.color,
       }}
     ></Svg.default>
   );

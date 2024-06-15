@@ -47,6 +47,7 @@ import musicSheetDB from "@/renderer/core/db/music-sheet-db";
 import DragReceiver, { startDrag } from "../DragReceiver";
 import { i18n } from "@/shared/i18n/renderer";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
+import isLocalMusic from "@/renderer/utils/is-local-music";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -227,11 +228,9 @@ export function showMusicContextMenu(
       icon: "array-download-tray",
       show: isArray
         ? !musicItems.every(
-            (item) =>
-              item.platform === localPluginName || Downloader.isDownloaded(item)
+            (item) => isLocalMusic(item) || Downloader.isDownloaded(item)
           )
-        : musicItems.platform !== localPluginName &&
-          !Downloader.isDownloaded(musicItems),
+        : !isLocalMusic(musicItems) && !Downloader.isDownloaded(musicItems),
       onClick() {
         Downloader.startDownload(musicItems);
       },

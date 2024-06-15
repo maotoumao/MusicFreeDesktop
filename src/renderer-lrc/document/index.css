@@ -5,7 +5,6 @@ body,
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-
 }
 
 ::-webkit-scrollbar {
@@ -53,7 +52,7 @@ input {
   border-radius: 2px;
   border: 1px solid var(--dividerColor);
   box-sizing: border-box;
-  
+
   &::placeholder {
     opacity: 0.6;
   }
@@ -76,6 +75,7 @@ div[role="button"] {
     border-radius: 1.6em;
     color: white;
     width: fit-content;
+    line-height: 1em;
   }
   &[data-type="normalButton"] {
     font-size: 1em;
@@ -84,6 +84,7 @@ div[role="button"] {
     color: var(--textColor);
     border: 1px solid currentColor;
     width: fit-content;
+    line-height: 1em;
   }
 
   &[data-type="dangerButton"] {
@@ -93,6 +94,7 @@ div[role="button"] {
     color: #fc5f5f;
     border: 1px solid currentColor;
     width: fit-content;
+    line-height: 1em;
 
     &[data-fill="true"] {
       color: white;

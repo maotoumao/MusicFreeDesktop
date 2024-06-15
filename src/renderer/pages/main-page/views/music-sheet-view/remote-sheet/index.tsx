@@ -5,6 +5,8 @@ import MusicSheetlikeView from "@/renderer/components/MusicSheetlikeView";
 import { isSameMedia } from "@/common/media-util";
 
 import MusicSheet from "@/renderer/core/music-sheet";
+import { useTranslation } from "react-i18next";
+import SvgAsset from "@/renderer/components/SvgAsset";
 
 export default function RemoteSheet() {
   const { platform, id } = useParams() ?? {};
@@ -33,6 +35,7 @@ interface IProps {
 function RemoteSheetOptions(props: IProps) {
   const { sheetItem } = props;
   const starredMusicSheets = MusicSheet.frontend.useAllStarredSheets();
+  const { t } = useTranslation();
 
   const isStarred = starredMusicSheets.find((item) =>
     isSameMedia(sheetItem, item)
@@ -42,6 +45,7 @@ function RemoteSheetOptions(props: IProps) {
     <>
       <div
         role="button"
+        className="option-button"
         data-type="normalButton"
         onClick={() => {
           isStarred
@@ -49,7 +53,11 @@ function RemoteSheetOptions(props: IProps) {
             : MusicSheet.frontend.starMusicSheet(sheetItem);
         }}
       >
-        {isStarred ? "取消收藏" : "收藏歌单"}
+        <SvgAsset
+          iconName={isStarred ? "heart" : "heart-outline"}
+          color={isStarred ? "red" : undefined}
+        ></SvgAsset>
+        <span>{t("music_sheet_like_view.star")}</span>
       </div>
     </>
   );

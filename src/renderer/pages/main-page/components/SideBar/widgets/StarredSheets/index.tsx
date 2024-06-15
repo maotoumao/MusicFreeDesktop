@@ -16,7 +16,7 @@ export default function StarredSheets() {
   const starredSheets = MusicSheet.frontend.useAllStarredSheets();
 
   const navigate = useNavigate();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className="side-bar-container--starred-sheets">
@@ -50,7 +50,7 @@ export default function StarredSheets() {
                   y: e.clientY,
                   menuItems: [
                     {
-                      title: "取消收藏",
+                      title: t("side_bar.unstar_sheet"),
                       icon: "trash",
                       onClick() {
                         MusicSheet.frontend.unstarMusicSheet(item).then(() => {

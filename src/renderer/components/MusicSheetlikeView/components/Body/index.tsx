@@ -71,6 +71,7 @@ export default function Body(props: IProps) {
         <div className="buttons">
           <div
             role="button"
+            className="option-button"
             data-disabled={!musicList?.length}
             data-type="primaryButton"
             title={t("music_sheet_like_view.play_all")}
@@ -80,13 +81,14 @@ export default function Body(props: IProps) {
               }
             }}
           >
-            {t("music_sheet_like_view.play_all")}
+            <SvgAsset iconName="play"></SvgAsset>
+            <span>{t("music_sheet_like_view.play_all")}</span>
           </div>
           <div
             role="button"
             data-type="normalButton"
             data-disabled={!musicList?.length}
-            className="add-to-sheet"
+            className="add-to-sheet option-button"
             title={t("music_sheet_like_view.add_to_sheet")}
             onClick={() => {
               showModal("AddMusicToSheet", {
@@ -94,7 +96,8 @@ export default function Body(props: IProps) {
               });
             }}
           >
-            {t("music_sheet_like_view.add_to_sheet")}
+            <SvgAsset iconName="plus"></SvgAsset>
+            <span>{t("music_sheet_like_view.add_to_sheet")}</span>
           </div>
           {options}
         </div>

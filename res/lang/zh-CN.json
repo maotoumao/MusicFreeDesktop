@@ -158,7 +158,8 @@
     "starred_sheets": "我的收藏",
 
     "delete_sheet": "删除歌单",
-    "rename_sheet": "重命名歌单"
+    "rename_sheet": "重命名歌单",
+    "unstar_sheet": "取消收藏"
   },
   "app_header": {
     "nav_back": "后退",
@@ -238,8 +239,9 @@
     "user_variable_setting_success": "设置成功~"
   },
   "music_sheet_like_view": {
-    "play_all": "播放全部",
-    "add_to_sheet": "添加到歌单"
+    "play_all": "播放",
+    "add_to_sheet": "添加",
+    "star": "收藏"
   },
   "settings": {
     "choose_path": "选择路径",
