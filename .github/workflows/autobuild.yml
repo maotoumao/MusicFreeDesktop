@@ -77,7 +77,7 @@ jobs:
                 node-version: 18
             - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
             - run: npm install
-            - run: npm run make
+            - run: npm run make -- --arch="x64"
             - run: ls ./out/make
             - name: Upload Setup
               uses: actions/upload-artifact@v4
