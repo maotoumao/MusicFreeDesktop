@@ -40,7 +40,7 @@ export default function NoPlugin(props: INoPluginProps) {
         <Trans
           i18nKey={"plugin.info_hint_install_plugin_before_use"}
           components={{
-            a: <Link to="main/plugin-manager-view"></Link>,
+            a: <Link to="/main/plugin-manager-view"></Link>,
           }}
         ></Trans>
       </span>
