@@ -11,10 +11,13 @@ import { secondsToDuration } from "@/common/time-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
 import { musicDetailShownStore } from "@/renderer/components/MusicDetail";
 import albumImg from "@/assets/imgs/album-cover.jpg";
+import { useTranslation } from "react-i18next";
 
 export default function MusicInfo() {
   const musicItem = useCurrentMusic();
   const musicDetailShown = musicDetailShownStore.useValue();
+
+  const {t} = useTranslation();
 
   function toggleMusicDetail() {
     if (musicDetailShown) {
@@ -39,7 +42,7 @@ export default function MusicInfo() {
           <div
             className="open-detail"
             role="button"
-            title={musicDetailShown ? "关闭歌曲详情页" : "打开歌曲详情页"}
+            title={musicDetailShown ? t("music_bar.close_music_detail_page") : t("music_bar.open_music_detail_page")}
             onClick={toggleMusicDetail}
           >
             <SvgAsset

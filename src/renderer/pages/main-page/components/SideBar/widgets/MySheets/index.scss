@@ -8,7 +8,6 @@
   & .title {
     height: 3rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding-left: 1rem;
     padding-right: 0.5rem;
@@ -19,6 +18,8 @@
     & .my-sheets {
       display: flex;
       align-items: center;
+      flex: 1;
+
       &::after {
         content: "";
         width: 0;
@@ -39,10 +40,11 @@
       }
     }
 
-    & .add-new-sheet {
-      $size: 20px;
+    & .option-btn {
+      $size: 18px;
       width: $size;
       height: $size;
+      margin-left: 6px;
 
       & svg {
         width: $size;

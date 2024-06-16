@@ -1,4 +1,4 @@
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
 import SvgAsset from "../SvgAsset";
 import "./index.scss";
 import { showModal } from "../Modal";
@@ -6,17 +6,22 @@ import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import HeaderNavigator from "./widgets/Navigator";
 import Evt from "@/renderer/core/events";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { musicDetailShownStore } from "../MusicDetail";
 import Condition from "../Condition";
 import SearchHistory from "./widgets/SearchHistory";
 import { addSearchHistory } from "@/renderer/utils/search-history";
+import { useTranslation } from "react-i18next";
+import { getAppConfigPath, useAppConfig } from "@/shared/app-config/renderer";
 
 export default function AppHeader() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>();
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const isHistoryFocusRef = useRef(false);
+
+  const isMiniMode = useAppConfig()?.private?.minimode;
+
+  const { t } = useTranslation();
 
   if (!showSearchHistory) {
     isHistoryFocusRef.current = false;
@@ -46,7 +51,7 @@ export default function AppHeader() {
           <input
             ref={inputRef}
             className="header-search-input"
-            placeholder="在这里输入搜索内容"
+            placeholder={t("app_header.search_placeholder")}
             maxLength={50}
             onClick={() => {
               setShowSearchHistory(true);
@@ -98,11 +103,21 @@ export default function AppHeader() {
         >
           <SvgAsset iconName="sparkles"></SvgAsset>
         </div>
-        <div className="header-divider"></div>
         <div
           role="button"
           className="header-button"
-          title="设置"
+          title={t("app_header.theme")}
+          onClick={() => {
+            navigate("/main/theme");
+            Evt.emit("HIDE_MUSIC_DETAIL");
+          }}
+        >
+          <SvgAsset iconName="t-shirt-line"></SvgAsset>
+        </div>
+        <div
+          role="button"
+          className="header-button"
+          title={t("app_header.settings")}
           onClick={() => {
             navigate("/main/setting");
             Evt.emit("HIDE_MUSIC_DETAIL");
@@ -110,9 +125,23 @@ export default function AppHeader() {
         >
           <SvgAsset iconName="cog-8-tooth"></SvgAsset>
         </div>
+        <div className="header-divider"></div>
         <div
           role="button"
-          title="最小化"
+          title={t("app_header.minimode")}
+          className="header-button"
+          onClick={() => {
+            ipcRendererSend("set-minimode", !isMiniMode);
+            if (!isMiniMode) {
+              ipcRendererSend("min-window", { skipTaskBar: true });
+            }
+          }}
+        >
+          <SvgAsset iconName="picture-in-picture-line"></SvgAsset>
+        </div>
+        <div
+          role="button"
+          title={t("app_header.minimize")}
           className="header-button"
           onClick={() => {
             ipcRendererSend("min-window", {});
@@ -122,12 +151,10 @@ export default function AppHeader() {
         </div>
         <div
           role="button"
-          title="退出"
+          title={t("app_header.exit")}
           className="header-button"
           onClick={() => {
-            const exitBehavior = rendererAppConfig.getAppConfigPath(
-              "normal.closeBehavior"
-            );
+            const exitBehavior = getAppConfigPath("normal.closeBehavior");
             if (exitBehavior === "minimize") {
               ipcRendererSend("min-window", {
                 skipTaskBar: true,

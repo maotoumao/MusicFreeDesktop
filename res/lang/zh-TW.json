@@ -1,0 +1,395 @@
+{
+  "common": {
+    "cancel": "取消",
+    "confirm": "確認",
+    "download": "下載",
+    "downloading": "下載中",
+    "downloaded": "已下載",
+    "remove": "移除",
+    "delete": "刪除",
+    "default": "預設",
+    "version_code": "版本號",
+    "operation": "操作",
+    "update": "更新",
+    "uninstall": "卸載",
+    "install": "安裝",
+    "about": "關於",
+    "exit": "退出",
+    "edit": "編輯",
+    "undo": "撤銷",
+    "redo": "重做",
+    "cut": "剪下",
+    "copy": "複製",
+    "paste": "貼上",
+    "select_all": "全選",
+    "loading": "加載中",
+    "create": "創建",
+    "add": "新增",
+    "save": "保存",
+    "clear": "清除",
+    "open": "打開",
+    "status": "狀態"
+  },
+
+  "media": {
+    "unknown_title": "無標題",
+    "unknown_artist": "未知藝術家",
+    "unknown_album": "未知專輯",
+
+    "default_favorite_sheet_name": "喜愛",
+
+    "playlist": "播放清單",
+
+    "media_type_music": "音樂",
+    "media_type_album": "專輯",
+    "media_type_artist": "藝術家",
+    "media_type_sheet": "歌單",
+    "media_type_lyric": "歌詞",
+
+    "media_title": "標題",
+    "media_platform": "來源",
+    "media_duration": "時長",
+    "media_create_at": "創建時間",
+    "media_play_count": "播放次數",
+    "media_music_count": "歌曲數量",
+    "media_description": "描述",
+
+    "music_state_pause": "暫停",
+    "music_state_play": "播放",
+    "music_state_play_or_pause": "播放/暫停",
+    "music_quality_low": "低音質",
+    "music_quality_standard": "標準音質",
+    "music_quality_high": "高音質",
+    "music_quality_super": "超高音質",
+
+    "music_repeat_mode": "重複模式",
+    "music_repeat_mode_loop": "單曲重複",
+    "music_repeat_mode_queue": "列表重複",
+    "music_repeat_mode_shuffle": "隨機播放"
+  },
+
+  "plugin": {
+    "prop_user_variable": "用戶變量",
+    "method_search": "搜尋",
+    "method_import_music_item": "導入歌曲",
+    "method_import_music_sheet": "導入歌單",
+    "method_get_top_lists": "排行榜",
+
+    "info_hint_you_have_no_plugin": "你尚未安裝任何插件",
+    "info_hint_you_have_no_plugin_with_supported_method": "你尚未安裝支持 <highlight>{{supportMethod}}</highlight> 的插件",
+    "info_hint_install_plugin_before_use": "請先前往 <a>插件管理</a> 安裝插件~"
+  },
+
+  "download_page": {
+    "waiting": "等待中...",
+    "failed": "下載失敗"
+  },
+  "plugin_management_page": {
+    "plugin_management": "插件管理",
+    "choose_plugin": "選擇插件",
+    "install": "安裝",
+    "musicfree_plugin": "MusicFree 插件",
+    "install_successfully": "插件安裝成功",
+    "install_failed": "安裝失敗",
+    "invalid_plugin": "無效的插件",
+    "install_from_local_file": "從本地文件安裝",
+    "install_from_network": "從網絡安裝",
+    "install_plugin_from_network": "從網絡安裝插件",
+    "installing": "安裝中",
+    "info_hint_install_placeholder": "輸入插件來源 URL（以 json 或 js 結尾）",
+    "error_hint_plugin_should_end_with_js_or_json": "插件 URL 應以 json 或 js 結尾",
+    "info_hint_install_plugin": "插件需符合 MusicFree 特定協議，詳情請參考 <a>官方頁面</a>",
+    "subscription_setting": "訂閱設定",
+    "update_subscription": "更新訂閱",
+    "update_successfully": "更新成功",
+    "no_subscription": "當前沒有訂閱",
+
+    "uninstall": "卸載",
+    "uninstall_plugin": "卸載插件",
+    "confirm_text_uninstall_plugin": "確認卸載插件 {{plugin}}？",
+    "uninstall_successfully": "插件 {{plugin}} 已卸載",
+    "uninstall_failed": "卸載失敗",
+
+    "toast_plugin_is_latest": "插件 {{plugin}} 已是最新版本",
+    "update_failed": "更新失敗",
+
+    "update": "更新",
+
+    "importing_media": "導入中",
+    "placeholder_import_music_item": "輸入 {{plugin}} 歌曲 URL",
+    "import_failed": "導入失敗",
+    "placeholder_import_music_sheet": "輸入 {{plugin}} 歌單 URL"
+  },
+  "local_music_page": {
+    "local_music": "本地音樂",
+    "auto_scan": "自動掃描",
+    "search_local_music": "搜尋本地音樂",
+    "list_view": "列表視圖",
+    "artist_view": "藝術家視圖",
+    "album_view": "專輯視圖",
+    "folder_view": "文件夾視圖",
+    "total_music_num": "共 {{number}} 首歌曲"
+  },
+
+  "music_list_context_menu": {
+    "next_play": "下一首播放",
+    "add_to_my_sheets": "添加到我的歌單",
+    "remove_from_sheet": "從歌單移除",
+    "delete_local_download": "刪除本地下載",
+    "reveal_local_music_in_file_explorer": "打開歌曲文件夾",
+    "reveal_local_music_in_file_explorer_fail": "打開失敗：",
+
+    "delete_local_downloaded_songs_success": "已刪除 {{musicNums}} 首本地歌曲",
+    "delete_local_downloaded_song_success": "已刪除本地歌曲 [{{songName}}]"
+  },
+
+  "search_result_page": {
+    "search_result_title": "搜尋結果"
+  },
+  "side_bar": {
+    "toplist": "排行榜",
+    "recommend_sheets": "推薦歌單",
+    "download_management": "下載管理",
+    "local_music": "本地音樂",
+    "plugin_management": "插件管理",
+
+    "my_sheets": "我的歌單",
+    "create_local_sheet": "創建歌單",
+    "starred_sheets": "我的收藏",
+
+    "delete_sheet": "刪除歌單",
+    "rename_sheet": "重歌單",
+    "unstar_sheet": "取消收藏",
+    "recently_play": "最近播放"
+  },
+  "app_header": {
+    "nav_back": "返回",
+    "nav_forward": "前進",
+    "search_placeholder": "在這裡輸入搜尋",
+    "search_history": "搜尋歷史",
+    "settings": "設置",
+    "minimize": "最小化",
+    "minimode": "迷你模式",
+    "exit": "退出",
+    "theme": "主題"
+  },
+  "music_bar": {
+    "open_music_detail_page": "打開歌曲詳情",
+    "close_music_detail_page": "關閉歌曲詳情",
+    "previous_music": "上一首",
+    "next_music": "下一首",
+    "mute": "靜音",
+    "unmute": "取消靜音",
+    "playback_speed": "播放速度",
+    "choose_music_quality": "選擇音樂音質",
+    "only_set_for_current_music": "僅針對當前歌曲",
+    "desktop_lyric": "桌面歌詞"
+  },
+  "music_detail": {
+    "search_lyric": "搜尋歌詞",
+    "no_lyric": "暫無歌詞",
+
+    "lyric_ctx_download_lyric": "下載歌詞",
+    "lyric_ctx_download_lyric_lrc": "下載歌詞 (.lrc)",
+    "lyric_ctx_download_lyric_txt": "下載歌詞 (.txt)",
+    "lyric_ctx_download_success": "下載成功",
+    "lyric_ctx_download_fail": "下載失敗",
+    "lyric_ctx_set_font_size": "設置字體大小",
+
+    "link_media_lyric": "鏈接歌詞",
+    "media_lyric_linked": "已鏈接歌詞：",
+    "unlink_media_lyric": "取消鏈接歌詞",
+    "toast_media_lyric_unlinked": "已取消鏈接歌詞",
+    "translation": "翻譯",
+    "show_translation": "顯示翻譯",
+    "hide_translation": "隱藏翻譯"
+  },
+  "bottom_loading_state": {
+    "reached_end": "~~~ 沒有更多了 ~~~",
+    "loading": "加載中...",
+    "load_more": "加載更多"
+  },
+  "empty": {
+    "hint_empty": "這裡什麼都沒有~~~"
+  },
+  "modal": {
+    "add_to_my_sheets": "添加到我的歌單",
+    "total_music_num": "共 {{number}} 首歌曲",
+    "create_local_sheet": "創建歌單",
+    "create_local_sheet_placeholder": "請輸入新的歌單名稱",
+    "exit_confirm": "確認退出？",
+    "plugin_subscription": "插件訂閱",
+    "subscription_remarks": "備註：",
+    "subscription_links": "鏈接：",
+    "subscription_save_success": "訂閱地址已保存",
+    "search_lyric": "搜尋歌詞",
+    "search_lyric_result_empty": "未找到相關結果",
+    "media_lyric_linked": "歌詞已鏈接~",
+    "media_lyric_link_failed": "鏈接歌詞失敗：",
+    "new_version_found": "發現新版本",
+    "latest_version": "最新版本：",
+    "current_version": "當前版本：",
+    "skip_this_version": "跳過此版本",
+    "scan_local_music": "掃描本地音樂",
+    "scan_local_music_hint": "將自動掃描選擇的文件夾（實時同步）",
+    "add_folder": "添加文件夾"
+  },
+  "panel": {
+    "play_list_song_num": "播放清單（{{number}} 首歌曲）",
+    "user_variable": "用戶變量",
+    "user_variable_setting_success": "設置成功~"
+  },
+  "music_sheet_like_view": {
+    "play_all": "播放全部",
+    "add_to_sheet": "添加到歌單",
+    "star": "收藏"
+  },
+  "settings": {
+    "choose_path": "選擇路徑",
+    "change_path": "更改路徑",
+    "folder_not_exist": "文件夾不存在",
+    "open_folder": "打開文件夾",
+
+    "section_name": {
+      "normal": "一般",
+      "play_music": "播放",
+      "download": "下載",
+      "lyric": "歌詞",
+      "plugin": "插件",
+      "theme": "主題",
+      "short_cut": "快捷鍵",
+      "network": "網絡",
+      "backup": "備份與恢復",
+      "about": "關於 MusicFree"
+    },
+    "normal": {
+      "check_update": "啟動應用時檢查更新",
+      "close_behavior": "點擊退出按鈕時",
+      "exit_app": "退出應用",
+      "minimize": "最小化到系統托盤",
+      "taskbar_thumb": "任務欄縮略圖樣式（重啟應用後生效）",
+      "current_artwork": "當前歌曲封面",
+      "main_window": "主窗口界面",
+      "max_history_length": "搜尋歷史記錄最大數量",
+      "music_list_hide_columns": "歌曲列表隱藏列",
+      "languages": "語言",
+      "toast_switch_language_fail": "切換語言失敗"
+    },
+    "play_music": {
+      "case_sensitive_in_search": "搜尋歌單時區分大小寫",
+      "default_play_quality": "預設播放音質",
+      "when_quality_missing": "當播放音質缺失時",
+      "play_lower_quality_version": "播放低音質版本",
+      "play_higher_quality_version": "播放高音質版本",
+      "when_play_error": "播放錯誤時",
+      "pause": "暫停",
+      "skip_to_next": "跳至下一首",
+      "double_click_music_list": "雙擊歌曲列表時",
+      "add_music_to_playlist": "添加歌曲到播放清單",
+      "replace_playlist_with_musiclist": "用當前歌單替換播放清單",
+      "audio_output_device": "音頻輸出設備",
+      "when_device_removed": "當音頻裝置被移除時",
+      "continue_playing": "繼續播放"
+    },
+    "download": {
+      "download_folder": "下載文件夾",
+      "max_concurrency": "最大同時下載數量",
+      "default_download_quality": "預設下載音質",
+      "when_quality_missing": "當下載音質缺失時",
+      "download_lower_quality_version": "下載低音質版本",
+      "download_higher_quality_version": "下載高音質版本"
+    },
+    "lyric": {
+      "enable_status_bar_lyric": "啟用狀態欄歌詞",
+      "enable_desktop_lyric": "啟用桌面歌詞",
+      "lock_desktop_lyric": "鎖定桌面歌詞",
+      "font": "字體",
+      "font_size": "字體大小",
+      "font_color": "字體顏色",
+      "stroke_color": "描邊顏色"
+    },
+    "plugin": {
+      "auto_update_plugin": "啟動應用時自動更新插件",
+      "not_check_plugin_version": "安裝插件時不檢查版本"
+    },
+    "short_cut": {
+      "enable_local": "啟用應用內快捷鍵",
+      "enable_global": "啟用全局快捷鍵",
+      "ability": "功能",
+      "local_short_cut": "應用內快捷鍵",
+      "global_short_cut": "全局快捷鍵",
+      "play/pause": "播放/暫停",
+      "skip-next": "下一首",
+      "skip-previous": "上一首",
+      "volume-up": "音量增加",
+      "volume-down": "音量減少",
+      "toggle-desktop-lyric": "開啟/關閉桌面歌詞",
+      "like/dislike": "喜歡/不喜歡當前歌曲",
+      "no_short_cut": "無"
+    },
+    "network": {
+      "host": "主機",
+      "port": "端口",
+      "username": "用戶名",
+      "password": "密碼",
+      "local_cache": "本地緩存：{{cacheSize}}",
+      "clear_cache": "清除緩存",
+      "enable_network_proxy": "啟用網絡代理"
+    },
+    "backup": {
+      "resume_mode_append": "附加到現有清單後",
+      "resume_mode_overwrite": "覆蓋現有清單",
+      "backup_by_file": "通過文件備份",
+      "musicfree_backup_file": "MusicFree 備份文件",
+      "backup_to": "備份到...",
+      "backup_by_webdav": "WebDAV 備份",
+      "backup_success": "備份成功~",
+      "backup_fail": "備份失敗：{{reason}}",
+      "resume_success": "恢復成功~",
+      "resume_fail": "恢復失敗：{{reason}}",
+      "backup_music_sheet": "備份歌單",
+      "resume_music_sheet": "恢復歌單",
+      "webdav_server_url": "URL",
+      "username": "用戶名",
+      "password": "密碼",
+      "webdav_data_not_complete": "URL、用戶名和密碼不能為空",
+      "webdav_backup_file_not_exist": "備份文件不存在"
+    },
+    "about": {
+      "current_version": "當前版本：{{version}}",
+      "already_latest": "已是最新版本！",
+      "check_update": "檢查更新",
+      "software_author": "軟件作者：",
+      "open_source_declaration": "源碼：軟件是基於 GPL3.0 授權的開源軟件。<Github>Github 地址</Github> <Gitee>Gitee 地址</Gitee>",
+      "official_site": "官方網站",
+      "mobile_version": "移動版"
+    }
+  },
+  "main": {
+    "previous_music": "上一首歌曲",
+    "next_music": "下一首歌曲",
+    "close_desktop_lyric": "關閉桌面歌詞",
+    "open_desktop_lyric": "開啟桌面歌詞",
+    "unlock_desktop_lyric": "解鎖桌面歌詞",
+    "lock_desktop_lyric": "鎖定桌面歌詞",
+    "no_playing_music": "目前無正在播放的音樂"
+  },
+  "theme": {
+    "tab_local": "本地主題",
+    "tab_remote": "主題市場",
+    "download_and_use": "下載並使用",
+    "use_theme": "使用主題",
+    "install_theme": "安裝主題",
+    "update_theme": "更新主題",
+    "uninstall_theme": "卸載主題",
+    "musicfree_theme": "MusicFree 主題",
+    "all_files": "全部檔案",
+    "install_theme_success": "安裝主題{{name}}成功~",
+    "install_theme_fail": "安裝主題失敗: {{reason}}",
+    "uninstall_theme_success": "卸載主題{{name}}成功~",
+    "uninstall_theme_fail": "卸載主題失敗: {{reason}}",
+    "how_to_submit_new_theme": "💡如何提交新主題: 主題市場中的主題與 <Github>MusicFreeThemePacks</Github> 倉庫同步，如果需要提交新主題請直接提PR。",
+    "load_remote_theme_error": "出錯啦...",
+    "invalid_theme": "主題無效: {{reason}}"
+  }
+}

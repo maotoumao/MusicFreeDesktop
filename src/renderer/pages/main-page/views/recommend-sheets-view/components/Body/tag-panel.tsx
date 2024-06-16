@@ -1,5 +1,5 @@
 import Condition from "@/renderer/components/Condition";
-import { defaultTag } from ".";
+import { getDefaultTag } from ".";
 import "./tag-panel.scss";
 
 interface ITagPanelProps {
@@ -10,6 +10,7 @@ interface ITagPanelProps {
 
 export default function TagPanel(props: ITagPanelProps) {
   const { show, onTagClick, tagsGroups } = props;
+  const defaultTag = getDefaultTag();
 
   return (
     <div className="tag-panel--container shadow backdrop-color" data-show={show}>

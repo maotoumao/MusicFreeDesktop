@@ -1,8 +1,14 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
-import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import MultiRadioGroupSettingItem from "../../components/MultiRadioGroupSettingItem";
+import ListBoxSettingItem from "../../components/ListBoxSettingItem";
+
+import "./index.scss";
+import { changeLang, getLangList } from "@/shared/i18n/renderer";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 interface IProps {
   data: IAppConfig["normal"];
@@ -11,47 +17,51 @@ interface IProps {
 export default function Normal(props: IProps) {
   const { data = {} as IAppConfig["normal"] } = props;
 
+  const { t } = useTranslation();
+
+  const allLangs = getLangList();
+
   return (
     <div className="setting-view--normal-container">
       <CheckBoxSettingItem
-        label="应用启动时检测软件版本更新"
+        label={t("settings.normal.check_update")}
         checked={data.checkUpdate}
         keyPath="normal.checkUpdate"
       ></CheckBoxSettingItem>
       <RadioGroupSettingItem
-        label="单击退出按钮时"
+        label={t("settings.normal.close_behavior")}
         keyPath="normal.closeBehavior"
         value={data.closeBehavior}
         options={[
           {
             value: "exit",
-            title: "退出应用",
+            title: t("settings.normal.exit_app"),
           },
           {
             value: "minimize",
-            title: "最小化到托盘",
+            title: t("settings.normal.minimize"),
           },
         ]}
       ></RadioGroupSettingItem>
-      {window.globalData.platform === "win32" ? (
+      {getGlobalContext().platform === "win32" ? (
         <RadioGroupSettingItem
-          label="任务栏缩略图样式 (重启应用后生效)"
+          label={t("settings.normal.taskbar_thumb")}
           keyPath="normal.taskbarThumb"
           value={data.taskbarThumb}
           options={[
             {
               value: "artwork",
-              title: "当前播放歌曲的封面",
+              title: t("settings.normal.current_artwork"),
             },
             {
               value: "window",
-              title: "主窗口界面",
+              title: t("settings.normal.main_window"),
             },
           ]}
         ></RadioGroupSettingItem>
       ) : null}
       <RadioGroupSettingItem
-        label="搜索历史记录最多保存条数"
+        label={t("settings.normal.max_history_length")}
         keyPath="normal.maxHistoryLength"
         value={data.maxHistoryLength}
         options={[
@@ -73,20 +83,33 @@ export default function Normal(props: IProps) {
         ]}
       ></RadioGroupSettingItem>
       <MultiRadioGroupSettingItem
-        label="歌曲列表隐藏列"
+        label={t("settings.normal.music_list_hide_columns")}
         keyPath="normal.musicListColumnsShown"
         value={data.musicListColumnsShown}
         options={[
           {
-            title: "时长",
+            title: t("media.media_duration"),
             value: "duration",
           },
           {
-            title: "来源",
+            title: t("media.media_platform"),
             value: "platform",
           },
         ]}
       ></MultiRadioGroupSettingItem>
+      <ListBoxSettingItem
+        label={t("settings.normal.languages")}
+        keyPath="normal.language"
+        value={data.language}
+        width={"240px"}
+        onChange={async (lang) => {
+          const success = await changeLang(lang);
+          if (!success) {
+            toast.warning(t("settings.normal.toast_switch_language_fail"));
+          }
+        }}
+        options={allLangs}
+      ></ListBoxSettingItem>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { memo } from "react";
 export type SvgAssetIconNames =
   | "album"
   | "array-download-tray"
+  | "arrow-left-end-on-rectangle"
   | "cd"
   | "check"
   | "check-circle"
@@ -11,6 +12,7 @@ export type SvgAssetIconNames =
   | "chevron-down"
   | "chevron-left"
   | "chevron-right"
+  | "clock"
   | "code-bracket-square"
   | "cog-8-tooth"
   | "dashboard-speed"
@@ -23,20 +25,25 @@ export type SvgAssetIconNames =
   | "heart-outline"
   | "heart"
   | "identification"
+  | "language"
   | "list-bullet"
   | "lock-closed"
   | "lock-open"
   | "logo"
   | "lyric"
+  | "lyric-en"
   | "magnifying-glass"
   | "minus"
   | "motion-play"
   | "musical-note"
   | "pause"
+  | "pencil-square"
+  | "picture-in-picture-line"
   | "play"
   | "playlist"
   | "plus"
   | "plus-circle"
+  | "question-mark-circle"
   | "repeat-song-1"
   | "repeat-song"
   | "rolling-1s"
@@ -51,6 +58,7 @@ export type SvgAssetIconNames =
   | "speaker-x-mark"
   | "trash"
   | "trophy"
+  | "t-shirt-line"
   | "user"
   | "lq"
   | "sd"
@@ -62,6 +70,7 @@ interface IProps {
   iconName: SvgAssetIconNames;
   size?: number;
   title?: string;
+  color?: string;
 }
 /**
  *
@@ -77,6 +86,7 @@ function SvgAsset(props: IProps) {
       style={{
         width: props.size,
         height: props.size,
+        color: props.color,
       }}
     ></Svg.default>
   );

@@ -1,5 +1,6 @@
 import { CSSProperties } from "react";
 import "./index.scss";
+import { useTranslation } from "react-i18next";
 
 interface IEmptyProps {
   style?: CSSProperties;
@@ -7,10 +8,11 @@ interface IEmptyProps {
 
 export default function Empty(props: IEmptyProps) {
   const { style } = props;
+  const {t} = useTranslation();
 
   return (
     <div className="components--empty-container" style={style}>
-      什么都没有呀~~~
+      {t("empty.hint_empty")}
     </div>
   );
 }

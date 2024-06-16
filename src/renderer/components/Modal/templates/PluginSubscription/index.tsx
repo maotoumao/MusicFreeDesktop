@@ -1,6 +1,6 @@
 import {
-  getUserPerference,
-  setUserPerference,
+  getUserPreference,
+  setUserPreference,
 } from "@/renderer/utils/user-perference";
 import { hideModal } from "../..";
 import Base from "../Base";
@@ -9,24 +9,25 @@ import { ReactNode, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
-interface IReconfirmProps {}
-
-export default function PluginSubscription(props: IReconfirmProps) {
+export default function PluginSubscription() {
   const [subscription, setSubscription] = useState(
-    getUserPerference("subscription") ?? []
+    getUserPreference("subscription") ?? []
   );
+
+  const { t } = useTranslation();
 
   return (
     <Base withBlur={false}>
       <div className="modal--plugin-subscription shadow backdrop-color">
-        <Base.Header>插件订阅</Base.Header>
+        <Base.Header>{t("modal.plugin_subscription")}</Base.Header>
         <div className="content-container">
           <Condition condition={subscription.length} falsy={<Empty></Empty>}>
             {subscription.map((item, index) => (
               <div className="content-item" key={index}>
                 <div className="content-item-row">
-                  <span>备注: </span>
+                  <span>{t("modal.subscription_remarks")}</span>
                   <input
                     defaultValue={item.title ?? ""}
                     onChange={(e) => {
@@ -39,7 +40,7 @@ export default function PluginSubscription(props: IReconfirmProps) {
                   ></input>
                 </div>
                 <div className="content-item-row">
-                  <span>链接: </span>
+                  <span>{t("modal.subscription_links")}</span>
                   <input
                     defaultValue={item.srcUrl ?? ""}
                     onChange={(e) => {
@@ -69,24 +70,24 @@ export default function PluginSubscription(props: IReconfirmProps) {
               ]);
             }}
           >
-            添加
+            {t("common.add")}
           </div>
           <div
             role="button"
             data-type="dangerButton"
             data-fill={true}
             onClick={() => {
-              setUserPerference(
+              setUserPreference(
                 "subscription",
                 subscription.filter((item) =>
                   item.srcUrl.match(/https?:\/\/.+\.js(on)?/)
                 )
               );
-              toast.success('已保存订阅地址')
+              toast.success(t("modal.subscription_save_success"));
               hideModal();
             }}
           >
-            保存
+            {t("common.save")}
           </div>
         </div>
       </div>

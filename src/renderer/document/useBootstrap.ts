@@ -1,23 +1,22 @@
-import { ipcRendererInvoke, ipcRendererOn } from "@/common/ipc-util/renderer";
-import { useEffect } from "react";
+import { ipcRendererInvoke, ipcRendererOn } from "@/shared/ipc/renderer";
+import { useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Evt from "../core/events";
-import { getUserPerference } from "../utils/user-perference";
+import { getUserPreference } from "../utils/user-perference";
 import { compare } from "compare-versions";
 import { showModal } from "../components/Modal";
-import rendererAppConfig from "@/common/app-config/renderer";
 import checkUpdate from "../utils/check-update";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
+import Themepack from "@/shared/themepack/renderer";
 
 export default function useBootstrap() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (window.themepack.currentThemePackStore.getValue()) {
-      window.themepack.selectTheme(
-        window.themepack.currentThemePackStore.getValue()
-      );
-    }
+  useLayoutEffect(() => {
+    Themepack.setupThemePacks();
+  }, []);
 
+  useEffect(() => {
     const navigateCallback = (url: string, payload?: any) => {
       /**
        * evt:// 协议 触发任意事件
@@ -42,7 +41,7 @@ export default function useBootstrap() {
       }
     });
 
-    if (rendererAppConfig.getAppConfigPath("normal.checkUpdate")) {
+    if (getAppConfigPath("normal.checkUpdate")) {
       checkUpdate();
     }
   }, []);

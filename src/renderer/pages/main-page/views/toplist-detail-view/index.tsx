@@ -10,11 +10,13 @@ export default function TopListDetailView() {
   );
 
   return (
-    <MusicSheetlikeView
-      musicSheet={topListDetail}
-      musicList={topListDetail?.musicList ?? []}
-      state={state}
-      onLoadMore={loadMore}
-    />
+    <div id="page-container" className="page-container">
+      <MusicSheetlikeView
+        musicSheet={topListDetail}
+        musicList={topListDetail?.musicList ?? []}
+        state={state}
+        onLoadMore={loadMore}
+      />
+    </div>
   );
 }

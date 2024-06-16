@@ -3,6 +3,7 @@ import albumImg from "@/assets/imgs/album-cover.jpg";
 import Tag from "@/renderer/components/Tag";
 import Condition from "@/renderer/components/Condition";
 import "./index.scss";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   artistItem: IArtist.IArtistItem;
@@ -10,6 +11,7 @@ interface IProps {
 
 export default function Header(props: IProps) {
   const { artistItem } = props;
+  const { t } = useTranslation();
 
   return (
     <div className="artist-view--header-container">
@@ -21,7 +23,9 @@ export default function Header(props: IProps) {
       <div className="artist-info">
         <div className="title-container">
           <Tag>{artistItem?.platform}</Tag>
-          <div className="title">{artistItem?.name ?? "佚名"}</div>
+          <div className="title">
+            {artistItem?.name ?? t("media.unknown_artist")}
+          </div>
         </div>
 
         <Condition condition={artistItem?.description}>
@@ -33,7 +37,7 @@ export default function Header(props: IProps) {
               dataset.fold = dataset.fold === "true" ? "false" : "true";
             }}
           >
-            简介：{artistItem?.description}
+            {artistItem?.description}
           </div>
         </Condition>
       </div>

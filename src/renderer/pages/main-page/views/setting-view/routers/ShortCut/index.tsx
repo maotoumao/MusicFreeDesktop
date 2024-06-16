@@ -1,12 +1,13 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import hotkeys from "hotkeys-js";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { bindShortCut } from "@/renderer/core/shortcut";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   data: IAppConfig["shortCut"];
@@ -15,12 +16,14 @@ interface IProps {
 export default function ShortCut(props: IProps) {
   const { data = {} as IAppConfig["shortCut"] } = props;
 
+  const { t } = useTranslation();
+
   return (
     <div className="setting-view--short-cut-container">
       <CheckBoxSettingItem
         keyPath="shortCut.enableLocal"
         checked={data.enableLocal}
-        label="启用软件内快捷键"
+        label={t("settings.short_cut.enable_local")}
       ></CheckBoxSettingItem>
       <CheckBoxSettingItem
         keyPath="shortCut.enableGlobal"
@@ -28,7 +31,7 @@ export default function ShortCut(props: IProps) {
         onCheckChanged={(val) => {
           ipcRendererSend("enable-global-short-cut", val);
         }}
-        label="启用全局快捷键"
+        label={t("settings.short_cut.enable_global")}
       ></CheckBoxSettingItem>
       <ShortCutTable
         shortCuts={data.shortcuts ?? {}}
@@ -40,17 +43,16 @@ export default function ShortCut(props: IProps) {
 }
 
 type IShortCutKeys = keyof IAppConfig["shortCut"]["shortcuts"];
-const translations: Record<IShortCutKeys, string> = {
-  "play/pause": "播放/暂停",
-  "skip-next": "播放下一首",
-  "skip-previous": "播放上一首",
-  "volume-up": "增加音量",
-  "volume-down": "减少音量",
-  "toggle-desktop-lyric": "打开/关闭桌面歌词",
-  "like/dislike": "喜欢/不喜欢当前歌曲",
-};
 
-const shortCutKeys = Object.keys(translations) as IShortCutKeys[];
+const shortCutKeys: IShortCutKeys[] = [
+  "play/pause",
+  "skip-next",
+  "skip-previous",
+  "volume-up",
+  "volume-down",
+  "toggle-desktop-lyric",
+  "like/dislike",
+];
 
 interface IShortCutTableProps {
   shortCuts: Partial<IAppConfig["shortCut"]["shortcuts"]>;
@@ -59,29 +61,29 @@ interface IShortCutTableProps {
 }
 function ShortCutTable(props: IShortCutTableProps) {
   const { shortCuts, enableGlobal, enableLocal } = props;
+  const { t } = useTranslation();
 
   return (
     <div className="setting-view--short-cut-table-container">
       <div className="setting-view--short-cut-table-row">
-        <div className="short-cut-cell">功能</div>
-        <div className="short-cut-cell">软件快捷键</div>
-        <div className="short-cut-cell">全局快捷键</div>
+        <div className="short-cut-cell">{t("settings.short_cut.ability")}</div>
+        <div className="short-cut-cell">
+          {t("settings.short_cut.enable_local")}
+        </div>
+        <div className="short-cut-cell">
+          {t("settings.short_cut.enable_global")}
+        </div>
       </div>
       {shortCutKeys.map((it) => (
         <div className="setting-view--short-cut-table-row" key={it}>
-          <div className="short-cut-cell">
-            {translations[it as IShortCutKeys]}
-          </div>
+          <div className="short-cut-cell">{t(`settings.short_cut.${it}`)}</div>
           <div className="short-cut-cell">
             <ShortCutItem
               enabled={enableLocal}
               value={shortCuts[it]?.local}
               onChange={(val) => {
                 bindShortCut(it as IShortCutKeys, val);
-                rendererAppConfig.setAppConfigPath(
-                  `shortCut.shortcuts.${it}.local`,
-                  val
-                );
+                setAppConfigPath(`shortCut.shortcuts.${it}.local`, val);
               }}
             ></ShortCutItem>
           </div>
@@ -133,6 +135,7 @@ function ShortCutItem(props: IShortCutItemProps) {
   const isRecordingRef = useRef(false);
   const scopeRef = useRef(Math.random().toString().slice(2));
   const recordedKeysRef = useRef(new Set<string>());
+  const { t } = useTranslation();
 
   useEffect(() => {
     hotkeys(
@@ -235,7 +238,7 @@ function ShortCutItem(props: IShortCutItemProps) {
       readOnly
       aria-live="off"
       className="short-cut-item--container"
-      value={realValue || "空"}
+      value={realValue || t("settings.short_cut.no_short_cut")}
       onKeyDown={(e) => {
         e.preventDefault();
       }}

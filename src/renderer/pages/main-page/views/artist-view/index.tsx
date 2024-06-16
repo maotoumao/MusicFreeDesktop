@@ -22,12 +22,12 @@ export default function ArtistView() {
     return () => {
       queryResultStore.setValue(initQueryResult);
     };
-  })
+  });
 
   return (
-    <div className="artist-view--container">
+    <div id="page-container" className="page-container artist-view--container">
       <Header artistItem={artistItem}></Header>
-      <Body artistItem = {artistItem}></Body>
+      <Body artistItem={artistItem}></Body>
     </div>
   );
 }

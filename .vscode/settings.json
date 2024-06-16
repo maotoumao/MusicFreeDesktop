@@ -1,0 +1,7 @@
+{
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.html": "html",
+    "map": "cpp"
+  }
+}

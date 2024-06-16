@@ -1,15 +1,16 @@
-.music-downloaded {
+.music-download-base {
   display: flex;
-  justify-content: center;
   align-items: center;
-  color: var(--infoColor, #0A95C8);
+  justify-content: center;
+}
+
+.music-downloaded {
+  color: var(--infoColor, #0a95c8);
 }
 
 .music-can-download {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   opacity: 0.6;
+
   cursor: pointer;
   &:hover {
     opacity: 1;

@@ -31,24 +31,23 @@ import {
   memo,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/renderer/hooks/useVirtualList";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { isBetween } from "@/common/normalize-util";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
 import { toast } from "react-toastify";
-import classNames from "@/renderer/utils/classnames";
 import SwitchCase from "../SwitchCase";
 import SvgAsset from "../SvgAsset";
-import { getAppConfigPath } from "@/common/app-config/main";
 import musicSheetDB from "@/renderer/core/db/music-sheet-db";
 import DragReceiver, { startDrag } from "../DragReceiver";
+import { i18n } from "@/shared/i18n/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
+import isLocalMusic from "@/renderer/utils/is-local-music";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -75,6 +74,8 @@ interface IMusicListProps {
   enableDrag?: boolean;
   /** 拖拽结束 */
   onDragEnd?: (newMusicList: IMusic.IMusicItem[]) => void;
+  /** context */
+  contextMenu?: IContextMenuItem[];
 }
 
 const columnHelper = createColumnHelper<IMusic.IMusicItem>();
@@ -95,7 +96,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
   }),
   columnHelper.accessor((_, index) => index + 1, {
     cell: (info) => info.getValue(),
-    header: () => "#",
+    header: "#",
     id: "index",
     minSize: 40,
     maxSize: 40,
@@ -103,7 +104,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     enableResizing: false,
   }),
   columnHelper.accessor("title", {
-    header: "标题",
+    header: () => i18n.t("media.media_title"),
     size: 250,
     maxSize: 300,
     minSize: 100,
@@ -116,7 +117,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
   }),
 
   columnHelper.accessor("artist", {
-    header: "作者",
+    header: () => i18n.t("media.media_type_artist"),
     size: 130,
     maxSize: 200,
     minSize: 60,
@@ -125,7 +126,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 2,
   }),
   columnHelper.accessor("album", {
-    header: "专辑",
+    header: () => i18n.t("media.media_type_album"),
     size: 120,
     maxSize: 200,
     minSize: 60,
@@ -134,7 +135,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 2,
   }),
   columnHelper.accessor("duration", {
-    header: "时长",
+    header: () => i18n.t("media.media_duration"),
     size: 64,
     maxSize: 150,
     minSize: 48,
@@ -144,7 +145,7 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
     fr: 1,
   }),
   columnHelper.accessor("platform", {
-    header: "来源",
+    header: () => i18n.t("media.media_platform"),
     size: 100,
     minSize: 80,
     maxSize: 300,
@@ -160,7 +161,7 @@ export function showMusicContextMenu(
   musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
   x: number,
   y: number,
-  localMusicSheetId?: string
+  sheetType?: string
 ) {
   const menuItems: IContextMenuItem[] = [];
   const isArray = Array.isArray(musicItems);
@@ -171,11 +172,15 @@ export function showMusicContextMenu(
         icon: "identification",
       },
       {
-        title: `作者: ${musicItems.artist ?? '未知作者'}`,
+        title: `${i18n.t("media.media_type_artist")}: ${
+          musicItems.artist ?? i18n.t("media.unknown_artist")
+        }`,
         icon: "user",
       },
       {
-        title: `专辑: ${musicItems.album ?? '未知专辑'}`,
+        title: `${i18n.t("media.media_type_album")}: ${
+          musicItems.album ?? i18n.t("media.unknown_album")
+        }`,
         icon: "album",
         show: !!musicItems.album,
       },
@@ -186,14 +191,14 @@ export function showMusicContextMenu(
   }
   menuItems.push(
     {
-      title: "下一首播放",
+      title: i18n.t("music_list_context_menu.next_play"),
       icon: "motion-play",
       onClick() {
         trackPlayer.addNext(musicItems);
       },
     },
     {
-      title: "添加到歌单",
+      title: i18n.t("music_list_context_menu.add_to_my_sheets"),
       icon: "document-plus",
       onClick() {
         showModal("AddMusicToSheet", {
@@ -202,17 +207,17 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: "从歌单内删除",
+      title: i18n.t("music_list_context_menu.remove_from_sheet"),
       icon: "trash",
-      show: !!localMusicSheetId && localMusicSheetId !== "play-list",
+      show: !!sheetType && sheetType !== "play-list",
       onClick() {
-        MusicSheet.frontend.removeMusicFromSheet(musicItems, localMusicSheetId);
+        MusicSheet.frontend.removeMusicFromSheet(musicItems, sheetType);
       },
     },
     {
-      title: "删除",
+      title: i18n.t("common.remove"),
       icon: "trash",
-      show: localMusicSheetId === "play-list",
+      show: sheetType === "play-list",
       onClick() {
         trackPlayer.removeFromQueue(musicItems);
       },
@@ -221,21 +226,19 @@ export function showMusicContextMenu(
 
   menuItems.push(
     {
-      title: "下载",
+      title: i18n.t("common.download"),
       icon: "array-download-tray",
       show: isArray
         ? !musicItems.every(
-            (item) =>
-              item.platform === localPluginName || Downloader.isDownloaded(item)
+            (item) => isLocalMusic(item) || Downloader.isDownloaded(item)
           )
-        : musicItems.platform !== localPluginName &&
-          !Downloader.isDownloaded(musicItems),
+        : !isLocalMusic(musicItems) && !Downloader.isDownloaded(musicItems),
       onClick() {
-        Downloader.generateDownloadMusicTask(musicItems);
+        Downloader.startDownload(musicItems);
       },
     },
     {
-      title: "删除本地下载",
+      title: i18n.t("music_list_context_menu.delete_local_download"),
       icon: "trash",
       show:
         (isArray && musicItems.every((it) => Downloader.isDownloaded(it))) ||
@@ -247,10 +250,22 @@ export function showMusicContextMenu(
         );
         if (isSuccess) {
           if (isArray) {
-            toast.success(`已删除 ${musicItems.length} 首本地歌曲`);
+            toast.success(
+              i18n.t(
+                "music_list_context_menu.delete_local_downloaded_songs_success",
+                {
+                  musicNums: musicItems.length,
+                }
+              )
+            );
           } else {
             toast.success(
-              `已删除本地歌曲 [${(musicItems as IMusic.IMusicItem).title}]`
+              i18n.t(
+                "music_list_context_menu.delete_local_downloaded_song_success",
+                {
+                  songName: (musicItems as IMusic.IMusicItem).title,
+                }
+              )
             );
           }
         } else if (info?.msg) {
@@ -259,7 +274,9 @@ export function showMusicContextMenu(
       },
     },
     {
-      title: "打开歌曲所在文件夹",
+      title: i18n.t(
+        "music_list_context_menu.reveal_local_music_in_file_explorer"
+      ),
       icon: "folder-open",
       show:
         !isArray &&
@@ -275,18 +292,23 @@ export function showMusicContextMenu(
                 musicItems.id,
               ]);
             }
-            ipcRendererSend(
-              "open-path",
-              window.path.dirname(
-                getInternalData<IMusic.IMusicItemInternalData>(
-                  realTimeMusicItem,
-                  "downloadData"
-                )?.path
-              )
+            const result = await ipcRendererInvoke(
+              "show-item-in-folder",
+              getInternalData<IMusic.IMusicItemInternalData>(
+                realTimeMusicItem,
+                "downloadData"
+              )?.path
             );
+            if (!result) {
+              throw new Error();
+            }
           }
         } catch (e) {
-          toast.error(`打开失败: ${e?.message ?? ""}`);
+          toast.error(
+            `${i18n.t(
+              "music_list_context_menu.reveal_local_music_in_file_explorer_fail"
+            )} ${e?.message ?? ""}`
+          );
         }
       },
     }
@@ -318,7 +340,7 @@ function _MusicList(props: IMusicListProps) {
 
   const musicListRef = useRef(musicList);
   const columnShownRef = useRef(
-    rendererAppConfig.getAppConfigPath("normal.musicListColumnsShown").reduce(
+    getAppConfigPath("normal.musicListColumnsShown").reduce(
       (prev, curr) => ({
         ...prev,
         [curr]: false,
@@ -354,7 +376,7 @@ function _MusicList(props: IMusicListProps) {
       virtualProps?.getScrollElement || virtualProps?.offsetHeight
     )
       ? -1
-      : virtualProps?.fallbackRenderCount ?? 100,
+      : virtualProps?.fallbackRenderCount ?? 50,
   });
 
   const [activeItems, setActiveItems] = useState<number[]>([]);
@@ -536,9 +558,7 @@ function _MusicList(props: IMusicListProps) {
                 onDoubleClick={() => {
                   const config =
                     doubleClickBehavior ??
-                    rendererAppConfig.getAppConfigPath(
-                      "playMusic.clickMusicList"
-                    );
+                    getAppConfigPath("playMusic.clickMusicList");
                   if (config === "replace") {
                     trackPlayer.playMusicWithReplaceQueue(
                       table.getRowModel().rows.map((it) => it.original),

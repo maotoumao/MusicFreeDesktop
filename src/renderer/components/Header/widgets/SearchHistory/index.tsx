@@ -12,6 +12,7 @@ import {
 } from "@/renderer/utils/search-history";
 import Condition from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
+import { useTranslation } from "react-i18next";
 
 interface ISearchHistoryProps {
   onHistoryClick: (item: string) => void;
@@ -22,6 +23,8 @@ interface ISearchHistoryProps {
 export default function SearchHistory(props: ISearchHistoryProps) {
   const { onHistoryClick, onHistoryPanelBlur, onHistoryPanelFocus } = props;
   const [historyList, removeHistory] = useSearchHistory();
+  const {t} = useTranslation();
+
 
   return (
     <div
@@ -31,7 +34,7 @@ export default function SearchHistory(props: ISearchHistoryProps) {
       onBlur={onHistoryPanelBlur}
     >
       <div className="search-history--header">
-        搜索历史
+        {t("app_header.search_history")}
         <div
           className="search-history--header-clear"
           role="button"

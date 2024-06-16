@@ -22,6 +22,7 @@
     "@typescript-eslint/no-empty-function": "warn",
     "no-empty": "warn",
     "no-useless-catch": "warn",
-    "prefer-const": "warn"
+    "prefer-const": "warn",
+    "quotes": [1, "double"]
   }
 }

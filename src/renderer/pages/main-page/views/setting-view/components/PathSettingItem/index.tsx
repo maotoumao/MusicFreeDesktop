@@ -1,19 +1,12 @@
-import rendererAppConfig from "@/common/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
-} from "@/common/app-config/type";
-import { Listbox } from "@headlessui/react";
+} from "@/shared/app-config/type";
 import "./index.scss";
-import defaultAppConfig from "@/common/app-config/default-app-config";
-import Condition from "@/renderer/components/Condition";
-import Loading from "@/renderer/components/Loading";
-import { isBasicType } from "@/common/normalize-util";
-import useVirtualList from "@/renderer/hooks/useVirtualList";
-import { rem } from "@/common/constant";
-import { Fragment, useEffect, useRef } from "react";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
+import { useTranslation } from "react-i18next";
 
 interface PathSettingItemProps<T extends IAppConfigKeyPath> {
   keyPath: T;
@@ -25,6 +18,8 @@ export default function PathSettingItem<T extends IAppConfigKeyPath>(
   props: PathSettingItemProps<T>
 ) {
   const { keyPath, label, value } = props;
+
+  const { t } = useTranslation();
 
   return (
     <div className="setting-view--path-setting-item-container setting-row">
@@ -38,20 +33,17 @@ export default function PathSettingItem<T extends IAppConfigKeyPath>(
           data-type="primaryButton"
           onClick={async () => {
             const result = await ipcRendererInvoke("show-open-dialog", {
-              title: "选择路径",
+              title: t("settings.choose_path"),
               defaultPath: value as string,
               properties: ["openDirectory"],
-              buttonLabel: "确认",
+              buttonLabel: t("common.confirm"),
             });
             if (!result.canceled) {
-              rendererAppConfig.setAppConfigPath(
-                keyPath,
-                result.filePaths[0]! as any
-              );
+              setAppConfigPath(keyPath, result.filePaths[0]! as any);
             }
           }}
         >
-          更改路径
+          {t("settings.change_path")}
         </div>
         <div
           role="button"
@@ -60,11 +52,11 @@ export default function PathSettingItem<T extends IAppConfigKeyPath>(
             if (await window.fs.isFolder(value as string)) {
               ipcRendererSend("open-path", value as string);
             } else {
-              toast.error("文件夹不存在");
+              toast.error(t("settings.folder_not_exist"));
             }
           }}
         >
-          打开文件夹
+          {t("settings.open_folder")}
         </div>
       </div>
       {/* </Listbox> */}

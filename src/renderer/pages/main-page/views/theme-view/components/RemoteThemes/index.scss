@@ -1,0 +1,22 @@
+.remote-themes-container {
+  width: 100%;
+  margin-top: 14px;
+
+  & .remote-themes-inner-container {
+    display: grid;
+    gap: 24px 36px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  & .remote-themes-description {
+    margin: 1em 0;
+  }
+
+  & .remote-themes-load-error {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

@@ -4,9 +4,11 @@ import { useMatch, useNavigate } from "react-router-dom";
 import { Disclosure } from "@headlessui/react";
 import MusicSheet, { defaultSheet } from "@/renderer/core/music-sheet";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { showModal } from "@/renderer/components/Modal";
+import { hideModal, showModal } from "@/renderer/components/Modal";
 import { localPluginName } from "@/common/constant";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
+import { useTranslation } from "react-i18next";
+import { useSupportedPlugin } from "@/renderer/core/plugin-delegate";
 
 export default function MySheets() {
   const sheetIdMatch = useMatch(
@@ -15,23 +17,39 @@ export default function MySheets() {
   const currentSheetId = sheetIdMatch?.params?.sheetId;
   const musicSheets = MusicSheet.frontend.useAllSheets();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const importablePlugins = useSupportedPlugin("importMusicSheet");
 
   return (
     <div className="side-bar-container--my-sheets">
       <div className="divider"></div>
       <Disclosure defaultOpen>
         <Disclosure.Button className="title" as="div" role="button">
-          <div className="my-sheets ">我的歌单</div>
+          <div className="my-sheets">{t("side_bar.my_sheets")}</div>
           <div
             role="button"
-            className="add-new-sheet"
-            title="新建歌单"
+            className="option-btn"
+            title={t("plugin.method_import_music_sheet")}
+            onClick={(e) => {
+              e.stopPropagation();
+              showModal("ImportMusicSheet", {
+                plugins: importablePlugins,
+              });
+            }}
+          >
+            <SvgAsset iconName="arrow-left-end-on-rectangle"></SvgAsset>
+          </div>
+          <div
+            role="button"
+            className="option-btn"
+            title={t("side_bar.create_local_sheet")}
             onClick={(e) => {
               e.stopPropagation();
               showModal("AddNewSheet");
             }}
           >
-            <SvgAsset iconName="plus-circle"></SvgAsset>
+            <SvgAsset iconName="plus"></SvgAsset>
           </div>
         </Disclosure.Button>
         <Disclosure.Panel>
@@ -54,7 +72,28 @@ export default function MySheets() {
                   y: e.clientY,
                   menuItems: [
                     {
-                      title: "删除歌单",
+                      title: t("side_bar.rename_sheet"),
+                      icon: "pencil-square",
+                      show: item.id !== defaultSheet.id,
+                      onClick() {
+                        showModal("SimpleInputWithState", {
+                          placeholder: t(
+                            "modal.create_local_sheet_placeholder"
+                          ),
+                          maxLength: 30,
+                          title: t("side_bar.rename_sheet"),
+                          defaultValue: item.title,
+                          async onOk(text) {
+                            await MusicSheet.frontend.updateSheet(item.id, {
+                              title: text,
+                            });
+                            hideModal();
+                          },
+                        });
+                      },
+                    },
+                    {
+                      title: t("side_bar.delete_sheet"),
                       icon: "trash",
                       show: item.id !== defaultSheet.id,
                       onClick() {
@@ -74,7 +113,11 @@ export default function MySheets() {
                 });
               }}
               selected={currentSheetId === item.id}
-              title={item.title}
+              title={
+                item.id === defaultSheet.id
+                  ? t("media.default_favorite_sheet_name")
+                  : item.title
+              }
             ></ListItem>
           ))}
         </Disclosure.Panel>

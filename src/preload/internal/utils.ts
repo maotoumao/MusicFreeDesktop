@@ -1,4 +1,4 @@
-import url from 'url';
+import url from "url";
 
 function addFileScheme(filePath: string) {
   return filePath.startsWith("file:")

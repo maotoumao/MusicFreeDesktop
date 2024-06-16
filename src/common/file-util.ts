@@ -4,6 +4,7 @@ import { localPluginName, supportLocalMediaType } from "./constant";
 import CryptoJS from "crypto-js";
 import fs from "fs/promises";
 import url from "url";
+import type { BigIntStats, PathLike, StatOptions, Stats } from "original-fs";
 
 function getB64Picture(picture: IPicture) {
   return `data:${picture.format};base64,${picture.data.toString("base64")}`;
@@ -91,7 +92,7 @@ export async function parseLocalMusicItem(
       localPath: filePath,
       url: addFileScheme(filePath),
       artist: "未知作者",
-      album: '未知专辑'
+      album: "未知专辑",
     };
   }
 }
@@ -133,4 +134,15 @@ export function addTailSlash(filePath: string) {
   return filePath.endsWith("/") || filePath.endsWith("\\")
     ? filePath
     : filePath + "/";
+}
+
+export async function safeStat(
+  path: PathLike,
+  opts?: StatOptions
+): Promise<Stats | BigIntStats | null> {
+  try {
+    return await fs.stat(path, opts);
+  } catch {
+    return null;
+  }
 }

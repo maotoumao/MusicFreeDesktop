@@ -1,19 +1,49 @@
-import { Link } from 'react-router-dom';
-import './index.scss';
-
+import { Link } from "react-router-dom";
+import "./index.scss";
+import { Trans, useTranslation } from "react-i18next";
 
 interface INoPluginProps {
-    supportMethod?: string;
-    height?: number | string;
+  supportMethod?: string;
+  height?: number | string;
 }
 
 export default function NoPlugin(props: INoPluginProps) {
+  const { supportMethod, height } = props ?? {};
+
+  const { t } = useTranslation();
+
   return (
-    <div className='no-plugin-container' style={{
-      height: props.height
-    }}>
-        <span>你还没有安装{props?.supportMethod ? <>支持 <span className='highlight'>{props.supportMethod}</span> 功能的</> : ''}插件~</span>
-        <span>先去<Link to={'/main/plugin-manager-view'}>插件管理</Link> 安装插件吧~</span>
+    <div
+      className="no-plugin-container"
+      style={{
+        height: height,
+      }}
+    >
+      <span>
+        {supportMethod ? (
+          <Trans
+            i18nKey={
+              "plugin.info_hint_you_have_no_plugin_with_supported_method"
+            }
+            components={{
+              highlight: <span className="highlight"></span>,
+            }}
+            values={{
+              supportMethod,
+            }}
+          ></Trans>
+        ) : (
+          t("plugin.info_hint_you_have_no_plugin")
+        )}
+      </span>
+      <span>
+        <Trans
+          i18nKey={"plugin.info_hint_install_plugin_before_use"}
+          components={{
+            a: <Link to="/main/plugin-manager-view"></Link>,
+          }}
+        ></Trans>
+      </span>
     </div>
-  )
+  );
 }

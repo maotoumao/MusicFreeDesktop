@@ -9,11 +9,14 @@ import Condition from "@/renderer/components/Condition";
 import { RequestStateCode } from "@/common/constant";
 import Loading from "@/renderer/components/Loading";
 import { useNavigate } from "react-router-dom";
+import { i18n } from "@/shared/i18n/renderer";
 
-export const defaultTag: IMedia.IUnique = {
-  title: "默认",
-  id: "",
-};
+export function getDefaultTag(): IMedia.IUnique {
+  return {
+    title: i18n.t("common.default"),
+    id: "",
+  };
+}
 
 interface IBodyProps {
   plugin: IPlugin.IPluginDelegate;
@@ -25,7 +28,7 @@ export default function Body(props: IBodyProps) {
   const [selectedTag, setSelectedTag] = useState<IMedia.IUnique | null>(null);
 
   // 第一个tag
-  const [firstTag, setFirstTag] = useState<IMedia.IUnique>(defaultTag);
+  const [firstTag, setFirstTag] = useState<IMedia.IUnique>(getDefaultTag);
 
   const tags = useRecommendListTags(plugin);
   //   const tags: any[] = [];
@@ -45,7 +48,7 @@ export default function Body(props: IBodyProps) {
         }
         setSelectedTag(cachedTag);
       } else {
-        setSelectedTag(defaultTag);
+        setSelectedTag(getDefaultTag);
       }
     }
   }, [tags]);

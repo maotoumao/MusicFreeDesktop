@@ -4,9 +4,11 @@ import Base from "../Base";
 import useMounted from "@/renderer/hooks/useMounted";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
+import { useTranslation } from "react-i18next";
 
 interface ISimpleInputWithStateProps<PromiseItem> {
   title: string;
+  defaultValue?: string;
   placeholder?: string;
   hints?: ReactNode[];
   maxLength?: number;
@@ -23,6 +25,7 @@ export default function SimpleInputWithState<PromiseItem>(
 ) {
   const {
     title,
+    defaultValue,
     placeholder,
     hints,
     maxLength,
@@ -34,8 +37,9 @@ export default function SimpleInputWithState<PromiseItem>(
     onPromiseResolved,
   } = props;
   const [loading, setLoading] = useState(false);
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText] = useState(defaultValue ?? "");
   const isMounted = useMounted();
+  const { t } = useTranslation();
 
   return (
     <Base withBlur={false}>
@@ -47,6 +51,7 @@ export default function SimpleInputWithState<PromiseItem>(
         >
           <div className="input-area">
             <input
+              autoFocus
               placeholder={placeholder}
               onChange={(e) => {
                 setInputText(e.target.value.slice(0, maxLength));
@@ -79,7 +84,7 @@ export default function SimpleInputWithState<PromiseItem>(
                   });
               }}
             >
-              {okText ?? "确认"}
+              {okText ?? t("common.confirm")}
             </div>
           </div>
           <Condition condition={hints}>

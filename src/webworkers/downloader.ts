@@ -1,9 +1,22 @@
 import * as Comlink from "comlink";
 import fs from "fs";
+import fsPromises from "fs/promises";
 import { Readable } from "stream";
 import { encodeUrlHeaders } from "@/common/normalize-util";
 import throttle from "lodash.throttle";
 import { DownloadState as DownloadState } from "@/common/constant";
+import { rimraf } from "rimraf";
+
+async function cleanFile(filePath: string) {
+  try {
+    if ((await fsPromises.stat(filePath)).isFile()) {
+      await rimraf(filePath);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const responseToReadable = (
   response: Response,
@@ -51,7 +64,7 @@ async function downloadFile(
   // onDone?: () => void,
   // onError?: (reason: Error) => Promise<void>
 ) {
-  let state = DownloadState.PENDING;
+  let state = DownloadState.DOWNLOADING;
   try {
     const stat = fs.statSync(filePath);
     // if (stat.isFile()) {
@@ -102,10 +115,10 @@ async function downloadFile(
     });
     const stm = responseToReadable(res, {
       onRead(size) {
-        if (state !== DownloadState.PENDING) {
+        if (state !== DownloadState.DOWNLOADING) {
           return;
         }
-        state = DownloadState.PENDING;
+        state = DownloadState.DOWNLOADING;
         console.log(state, size, totalSize);
         onStateChange({
           state,
@@ -128,12 +141,18 @@ async function downloadFile(
         state,
       });
     });
+
+    stm.on("error", () => {
+      // 清理文件
+      cleanFile(filePath);
+    });
   } catch (e) {
     state = DownloadState.ERROR;
     onStateChange({
       state,
       msg: e?.message,
     });
+    cleanFile(filePath);
   }
 }
 

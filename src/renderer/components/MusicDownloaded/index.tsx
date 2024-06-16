@@ -1,10 +1,11 @@
 import { isSameMedia } from "@/common/media-util";
-import SvgAsset from "@/renderer/components/SvgAsset";
+import SvgAsset, { SvgAssetIconNames } from "@/renderer/components/SvgAsset";
 import { useDownloaded } from "@/renderer/core/downloader/downloaded-sheet";
 import { memo, useEffect, useState } from "react";
 import "./index.scss";
-import { localPluginName } from "@/common/constant";
+import { DownloadState, localPluginName } from "@/common/constant";
 import Downloader from "@/renderer/core/downloader";
+import { useTranslation } from "react-i18next";
 
 interface IMusicDownloadedProps {
   musicItem: IMusic.IMusicItem;
@@ -15,31 +16,42 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
   const { musicItem, size = 18 } = props;
   // const [loading, setLoading] = useState(false);
 
-  const isDownloaded = useDownloaded(musicItem);
-  const isDownloadedOrLocal =
-    isDownloaded || musicItem?.platform === localPluginName;
+  const downloadState = Downloader.useDownloadState(musicItem);
 
-  // useEffect(() => {
-  //   setLoading(false);
-  // }, [isDownloaded]);
+  const { t } = useTranslation();
+  const isDownloadedOrLocal =
+    downloadState === DownloadState.DONE ||
+    musicItem?.platform === localPluginName;
+
+  let iconName: SvgAssetIconNames = "array-download-tray";
+
+  if (isDownloadedOrLocal) {
+    iconName = "check-circle";
+  } else if (
+    downloadState !== DownloadState.NONE &&
+    downloadState !== DownloadState.ERROR
+  ) {
+    iconName = "rolling-1s";
+  }
 
   return (
     <div
-      className={
+      className={`music-download-base ${
         isDownloadedOrLocal ? "music-downloaded" : "music-can-download"
+      }`}
+      title={
+        isDownloadedOrLocal ? t("common.downloaded") : t("common.download")
       }
-      title={isDownloadedOrLocal ? "已下载" : "下载"}
       onClick={() => {
-        if (!isDownloadedOrLocal) {
-          // TODO 点击的时候切换loading状态
-          Downloader.generateDownloadMusicTask(musicItem);
+        if (
+          downloadState === DownloadState.NONE ||
+          downloadState === DownloadState.ERROR
+        ) {
+          Downloader.startDownload(musicItem);
         }
       }}
     >
-      <SvgAsset
-        iconName={isDownloadedOrLocal ? "check-circle" : "array-download-tray"}
-        size={size}
-      ></SvgAsset>
+      <SvgAsset iconName={iconName} size={size}></SvgAsset>
     </div>
   );
 }

@@ -1,0 +1,97 @@
+.minimode-page-container {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  user-select: none;
+
+  & .minimode-header-container {
+    width: 100%;
+    height: 72px;
+    box-sizing: border-box;
+    padding: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border-radius: 6px;
+
+    & .mini-mode-header-background-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -2;
+      background-color: #333333;
+    }
+
+    & .mini-mode-header-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-size: cover;
+      background-position: center;
+      z-index: -1;
+      opacity: 0.6;
+      transition: all 300ms ease-in-out;
+      filter: blur(15px);
+    }
+
+    & .album-container {
+      width: 56px;
+      height: 56px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    & .body-container {
+      flex: 1;
+      height: 100%;
+      font-size: 13px;
+
+      & .text-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: white;
+      }
+
+      & .options-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        height: 100%;
+        padding-right: 48px;
+        position: relative;
+
+        & .close-button {
+          position: absolute;
+          right: 0;
+          top: 0;
+          color: white;
+
+          & svg {
+            width: 16px;
+            height: 16px;
+          }
+        }
+
+        & .option-item {
+          color: white;
+
+          & svg {
+            width: 28px;
+            height: 28px;
+          }
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+}

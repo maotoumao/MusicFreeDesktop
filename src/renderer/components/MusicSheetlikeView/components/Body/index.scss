@@ -9,8 +9,21 @@
     & .buttons {
       display: flex;
       font-size: 1.05rem;
-
       column-gap: 1rem;
+
+      & .option-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-left: 0.8em;
+        padding-right: 0.8em;
+
+        & svg {
+          width: 1.3em;
+          height: 1.3em;
+          margin-right: 2px;
+        }
+      }
     }
 
     & .search-in-music-list-container {

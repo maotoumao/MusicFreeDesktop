@@ -3,37 +3,43 @@ import "./index.scss";
 import MySheets from "./widgets/MySheets";
 import { useMatch, useNavigate } from "react-router";
 import StarredSheets from "./widgets/StarredSheets";
+import { useTranslation } from "react-i18next";
 
 export default function () {
   const navigate = useNavigate();
   const routePathMatch = useMatch("/main/:routePath");
-
+  const { t } = useTranslation();
 
   const options = [
     {
       iconName: "trophy",
-      title: "排行榜",
+      title: t("side_bar.toplist"),
       route: "toplist",
     },
     {
       iconName: "fire",
-      title: "热门歌单",
+      title: t("side_bar.recommend_sheets"),
       route: "recommend-sheets",
     },
     {
       iconName: "array-download-tray",
-      title: "下载管理",
+      title: t("side_bar.download_management"),
       route: "download",
     },
     {
       iconName: "folder-open",
-      title: "本地音乐",
+      title: t("side_bar.local_music"),
       route: "local-music",
     },
     {
       iconName: "code-bracket-square",
-      title: "插件管理",
+      title: t("side_bar.plugin_management"),
       route: "plugin-manager-view",
+    },
+    {
+      iconName: "clock",
+      title: t("side_bar.recently_play"),
+      route: "recently_play",
     },
   ] as const;
 

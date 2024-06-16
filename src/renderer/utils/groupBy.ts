@@ -9,7 +9,7 @@ export default function groupBy<T extends Record<IndexableType, any>, K extends 
       // depending upon the type of keyFinder
       // if it is function, pass the value to it
       // if it is a property, access the property
-      const key: K = typeof keyFinder === 'function' ? keyFinder(b) : b[keyFinder];
+      const key: K = typeof keyFinder === "function" ? keyFinder(b) : b[keyFinder];
       
       // aggregate values based on the keys
       if(!a[key]){

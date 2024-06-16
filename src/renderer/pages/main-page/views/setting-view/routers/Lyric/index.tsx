@@ -1,11 +1,13 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import "./index.scss";
 import ColorPickerSettingItem from "../../components/ColorPickerSettingItem";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import FontPickerSettingItem from "../../components/FontPickerSettingItem";
 import { IfTruthy } from "@/renderer/components/Condition";
+import { useTranslation } from "react-i18next";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 interface IProps {
   data: IAppConfig["lyric"];
@@ -18,17 +20,19 @@ const numberArray = Array(65)
 export default function Lyric(props: IProps) {
   const { data = {} as IAppConfig["lyric"] } = props;
 
+  const { t } = useTranslation();
+
   return (
     <div className="setting-view--lyric-container">
-      <IfTruthy condition={window.globalData.platform === "darwin"}>
+      <IfTruthy condition={getGlobalContext().platform === "darwin"}>
         <CheckBoxSettingItem
-          label="启用状态栏歌词"
+          label={t("settings.lyric.enable_status_bar_lyric")}
           checked={data.enableStatusBarLyric}
           keyPath="lyric.enableStatusBarLyric"
         ></CheckBoxSettingItem>
       </IfTruthy>
       <CheckBoxSettingItem
-        label="启用桌面歌词"
+        label={t("settings.lyric.enable_desktop_lyric")}
         checked={data.enableDesktopLyric}
         keyPath="lyric.enableDesktopLyric"
         onCheckChanged={(checked) => {
@@ -41,7 +45,7 @@ export default function Lyric(props: IProps) {
         keyPath="lyric.alwaysOnTop"
       ></CheckBoxSettingItem> */}
       <CheckBoxSettingItem
-        label="锁定桌面歌词"
+        label={t("settings.lyric.lock_desktop_lyric")}
         checked={data.lockLyric}
         keyPath="lyric.lockLyric"
         onCheckChanged={(checked) => {
@@ -49,7 +53,7 @@ export default function Lyric(props: IProps) {
         }}
       ></CheckBoxSettingItem>
       <FontPickerSettingItem
-        label="字体"
+        label={t("settings.lyric.font")}
         keyPath="lyric.fontData"
         value={data.fontData}
       ></FontPickerSettingItem>
@@ -57,15 +61,15 @@ export default function Lyric(props: IProps) {
         keyPath="lyric.fontSize"
         value={data.fontSize}
         options={numberArray}
-        label="字体大小"
+        label={t("settings.lyric.font_size")}
       ></ListBoxSettingItem>
       <ColorPickerSettingItem
-        label="字体颜色"
+        label={t("settings.lyric.font_color")}
         value={data.fontColor}
         keyPath="lyric.fontColor"
       ></ColorPickerSettingItem>
       <ColorPickerSettingItem
-        label="描边颜色"
+        label={t("settings.lyric.stroke_color")}
         value={data.strokeColor}
         keyPath="lyric.strokeColor"
       ></ColorPickerSettingItem>

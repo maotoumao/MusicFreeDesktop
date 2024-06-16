@@ -1,11 +1,13 @@
-import { ipcMainHandle, ipcMainOn } from "@/common/ipc-util/main";
+import { ipcMainHandle, ipcMainOn } from "@/shared/ipc/main";
 import {
   closeLyricWindow,
   createLyricWindow,
   getLyricWindow,
   getMainWindow,
+  showMainWindow,
 } from "../window";
 import { app, dialog, shell } from "electron";
+import fs from "fs/promises";
 import { currentMusicInfoStore } from "../store/current-music";
 import { PlayerState } from "@/renderer/core/track-player/enum";
 import { setTrayTitle, setupTrayMenu } from "../tray";
@@ -14,12 +16,19 @@ import { compare } from "compare-versions";
 import {
   getAppConfigPathSync,
   setAppConfigPath,
-} from "@/common/app-config/main";
+} from "@/shared/app-config/main";
 // import { getExtensionWindow, syncExtensionData } from "../core/extensions";
 import setThumbImg from "../utils/set-thumb-img";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
 import { HttpsProxyAgent } from "https-proxy-agent";
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
+import {
+  closeMinimodeWindow,
+  createMiniModeWindow,
+  getMinimodeWindow,
+  showMinimodeWindow,
+} from "../window/minimode-window";
+import { appUpdateSources } from "@/common/constant";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -40,6 +49,16 @@ export default function setupIpcMain() {
 
   ipcMainOn("open-path", (path) => {
     shell.openPath(path);
+  });
+
+  ipcMainHandle("show-item-in-folder", async (fullPath: string) => {
+    try {
+      await fs.stat(fullPath);
+      shell.showItemInFolder(fullPath);
+      return true;
+    } catch {
+      return false;
+    }
   });
 
   ipcMainHandle("show-open-dialog", (options) => {
@@ -124,18 +143,14 @@ export default function setupIpcMain() {
   });
 
   /** APP更新 */
-  const updateSources = [
-    "https://gitee.com/maotoumao/MusicFreeDesktop/raw/master/release/version.json",
-    "https://raw.githubusercontent.com/maotoumao/MusicFreeDesktop/master/release/version.json",
-  ];
   ipcMainHandle("check-update", async () => {
     const currentVersion = app.getVersion();
     const updateInfo: ICommon.IUpdateInfo = {
       version: currentVersion,
     };
-    for (let i = 0; i < updateSources.length; ++i) {
+    for (let i = 0; i < appUpdateSources.length; ++i) {
       try {
-        const rawInfo = (await axios.get(updateSources[i])).data;
+        const rawInfo = (await axios.get(appUpdateSources[i])).data;
         if (compare(rawInfo.version, currentVersion, ">")) {
           updateInfo.update = rawInfo;
           return updateInfo;
@@ -167,6 +182,19 @@ export default function setupIpcMain() {
     return NaN;
   });
 
+  ipcMainOn("set-minimode", (enabled) => {
+    if (enabled && !getMinimodeWindow()) {
+      showMinimodeWindow();
+      setAppConfigPath("private.minimode", true);
+    } else if (!enabled) {
+      closeMinimodeWindow();
+      setAppConfigPath("private.minimode", false);
+    }
+  });
+
+  ipcMainOn("show-mainwindow", () => {
+    showMainWindow();
+  });
   // ipcMainOn("send-to-lyric-window", (data) => {
   //   const lyricWindow = getLyricWindow();
   //   if (!lyricWindow) {

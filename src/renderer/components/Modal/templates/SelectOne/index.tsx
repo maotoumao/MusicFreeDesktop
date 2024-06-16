@@ -5,6 +5,7 @@ import "./index.scss";
 import Condition from "@/renderer/components/Condition";
 import classNames from "@/renderer/utils/classnames";
 import SvgAsset from "@/renderer/components/SvgAsset";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   title: string;
@@ -26,6 +27,7 @@ export default function SelectOne(props: IProps) {
       : -1
   );
   const [extraChecked, setExtraChecked] = useState(defaultExtra ?? false);
+  const { t } = useTranslation();
 
   return (
     <Base defaultClose withBlur={false}>
@@ -73,7 +75,7 @@ export default function SelectOne(props: IProps) {
               hideModal();
             }}
           >
-            取消
+            {t("common.cancel")}
           </div>
           <div
             role="button"
@@ -84,7 +86,7 @@ export default function SelectOne(props: IProps) {
               hideModal();
             }}
           >
-            确认
+            {t("common.confirm")}
           </div>
         </div>
       </div>

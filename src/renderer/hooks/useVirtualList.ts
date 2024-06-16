@@ -10,6 +10,8 @@ import throttle from "lodash.throttle";
 interface IVirtualListProps<T> {
   /** 滚动的容器 */
   getScrollElement?: () => HTMLElement;
+  /** 滚动容器的query */
+  scrollElementQuery?: string;
   /** 元素高度和列表高度 */
   estimizeItemHeight: number;
 
@@ -39,6 +41,7 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
     renderCount = 40,
     fallbackRenderCount = -1,
     getScrollElement,
+    scrollElementQuery,
     offsetHeight = 0,
   } = props;
   const dataRef = useRef(data);
@@ -98,7 +101,9 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
 
   useEffect(() => {
     if (!scrollElementRef.current) {
-      scrollElementRef.current = getScrollElement?.();
+      scrollElementRef.current = getScrollElement
+        ? getScrollElement()
+        : document.querySelector(scrollElementQuery);
     }
     if (scrollElementRef.current) {
       scrollElementRef.current.addEventListener("scroll", scrollHandler);

@@ -32,7 +32,10 @@
 
     & .header-search {
       -webkit-app-region: none;
-      background-color: var(--headerPlaceholderColor, rgba($color: #000, $alpha: 0.14));
+      background-color: var(
+        --headerPlaceholderColor,
+        rgba($color: #000, $alpha: 0.14)
+      );
       position: relative;
       height: 28px;
       width: 220px;
@@ -83,7 +86,6 @@
   }
 
   & .right-part {
-    width: 120px;
     height: 100%;
     color: var(--headerTextColor);
     display: flex;
@@ -91,10 +93,9 @@
     align-items: center;
     -webkit-app-region: none;
     padding-right: 16px;
+    gap: 4px;
 
     & .header-divider {
-      margin-left: 6px;
-      margin-right: 6px;
       height: 16px;
       width: 1px;
       opacity: 0.2;

@@ -4,7 +4,8 @@ import { localFilePathSymbol } from "@/common/constant";
 import fs from "fs/promises";
 import { delay } from "@/common/time-util";
 import axios from "axios";
-import { addFileScheme } from "@/common/file-util";
+import { addFileScheme, safeStat } from "@/common/file-util";
+import path from "path";
 
 export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
   private plugin;
@@ -117,12 +118,48 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
   ): Promise<ILyric.ILyricSource | null> {
     let rawLrc = musicItem.rawLrc;
     let lrcUrl = musicItem.lrc;
+    let translation: string;
     // 如果存在文本
     if (rawLrc) {
       return {
         rawLrc,
         lrc: lrcUrl,
       };
+    }
+    // 2. 读取路径下的同名lrc文件
+    const localPath =
+      getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData")
+        ?.path || musicItem.$$localPath;
+    if (localPath) {
+      const fileName = path.parse(localPath).name;
+      const lrcPathWithoutExt = path.resolve(localPath, `../${fileName}`);
+      const lrcTranslationPathWithoutExt = path.resolve(
+        localPath,
+        `../${fileName}-tr`
+      );
+      const exts = [".lrc", ".LRC", ".txt"];
+
+      for (const ext of exts) {
+        const lrcFilePath = lrcPathWithoutExt + ext;
+        if ((await safeStat(lrcFilePath))?.isFile()) {
+          rawLrc = await fs.readFile(lrcFilePath, "utf8");
+
+          if ((await safeStat(lrcTranslationPathWithoutExt + ext))?.isFile()) {
+            translation = await fs.readFile(
+              lrcTranslationPathWithoutExt + ext,
+              "utf8"
+            );
+          }
+
+          if (rawLrc) {
+            return {
+              rawLrc,
+              translation,
+              lrc: lrcUrl,
+            };
+          }
+        }
+      }
     }
     // // 2.本地缓存
     // const localLrc =
@@ -136,54 +173,42 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     //     };
     // }
     // 3.优先使用url
+
+    try {
+      const lrcSource = await this.plugin.instance?.getLyric?.(
+        resetMediaItem(musicItem, undefined, true)
+      );
+
+      rawLrc = lrcSource?.rawLrc;
+      lrcUrl = lrcSource?.lrc || lrcUrl;
+      translation = lrcSource?.translation;
+
+      if (rawLrc || translation) {
+        if (!rawLrc) {
+          rawLrc = translation;
+          translation = undefined;
+        }
+
+        return {
+          rawLrc,
+          translation,
+        };
+      }
+    } catch (e: any) {
+      // trace('插件获取歌词失败', e?.message, 'error');
+      // devLog('error', '插件获取歌词失败', e, e?.message);
+    }
+
     if (lrcUrl) {
       try {
         rawLrc = (await axios.get(lrcUrl, { timeout: 5000 })).data;
         return {
           rawLrc,
           lrc: lrcUrl,
+          translation,
         };
       } catch {
         lrcUrl = undefined;
-      }
-    }
-    // 4. 如果地址失效
-    if (!lrcUrl) {
-      // 插件获得url
-      try {
-        // if (from) {
-        //   lrcSource = await PluginManager.getByMedia(
-        //     musicItem
-        //   )?.instance?.getLyric?.(resetMediaItem(musicItem, undefined, true));
-        // } else {
-        const lrcSource = await this.plugin.instance?.getLyric?.(
-          resetMediaItem(musicItem, undefined, true)
-        );
-        // }
-
-        rawLrc = lrcSource?.rawLrc;
-        lrcUrl = lrcSource?.lrc;
-      } catch (e: any) {
-        // trace('插件获取歌词失败', e?.message, 'error');
-        // devLog('error', '插件获取歌词失败', e, e?.message);
-      }
-    }
-    // 5. 最后一次请求
-    if (rawLrc || lrcUrl) {
-      // const filename = `${pathConst.lrcCachePath}${nanoid()}.lrc`;
-      if (lrcUrl) {
-        try {
-          rawLrc = (await axios.get(lrcUrl, { timeout: 5000 })).data;
-        } catch {
-          console.log("first");
-        }
-      }
-      if (rawLrc) {
-        // await writeFile(filename, rawLrc, 'utf8');
-        return {
-          rawLrc,
-          lrc: lrcUrl,
-        };
       }
     }
     // // 6. 如果是本地文件
@@ -199,13 +224,6 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     return null;
   }
 
-  /** 获取歌词文本 */
-  async getLyricText(
-    musicItem: IMusic.IMusicItem
-  ): Promise<string | undefined> {
-    return (await this.getLyric(musicItem))?.rawLrc;
-  }
-
   /** 获取专辑信息 */
   async getAlbumInfo(
     albumItem: IAlbum.IAlbumItem,
@@ -214,7 +232,9 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
     if (!this.plugin.instance.getAlbumInfo) {
       return {
         albumItem,
-        musicList: (albumItem?.musicList ?? []).map(it => resetMediaItem(it, this.plugin.name)),
+        musicList: (albumItem?.musicList ?? []).map((it) =>
+          resetMediaItem(it, this.plugin.name)
+        ),
         isEnd: true,
       };
     }

@@ -6,14 +6,14 @@ import "./index.scss";
 import MusicList from "@/renderer/components/MusicList";
 import { showModal } from "@/renderer/components/Modal";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { useUserPerference } from "@/renderer/utils/user-perference";
+import { useUserPreference } from "@/renderer/utils/user-perference";
 import { useEffect, useState, useTransition } from "react";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import ListView from "./views/list";
 import ArtistView from "./views/artist";
 import AlbumView from "./views/album";
 import FolderView from "./views/folder";
-import rendererAppConfig from "@/common/app-config/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
 
 enum DisplayView {
   LIST,
@@ -39,7 +39,7 @@ export default function LocalMusicView() {
       setFilterMusicList(null);
     } else {
       startTransition(() => {
-        const caseSensitive = rendererAppConfig.getAppConfigPath(
+        const caseSensitive = getAppConfigPath(
           "playMusic.caseSensitiveInSearch"
         );
         if (caseSensitive) {
@@ -74,10 +74,11 @@ export default function LocalMusicView() {
 
   return (
     <div
-      className="local-music-view--container"
+      id="page-container"
+      className="page-container local-music-view--container"
       data-full-page={displayView !== DisplayView.LIST}
     >
-      <div className="header">本地音乐</div>
+      <div className="header">{t("local_music_page.local_music")}</div>
       <div className="operations">
         <div
           data-type="normalButton"
@@ -86,7 +87,7 @@ export default function LocalMusicView() {
             showModal("WatchLocalDir");
           }}
         >
-          自动扫描
+          {t("local_music_page.auto_scan")}
         </div>
         <div className="operations-layout">
           <input
@@ -95,12 +96,12 @@ export default function LocalMusicView() {
             onChange={(evt) => {
               setInputSearch(evt.target.value);
             }}
-            placeholder="搜索本地音乐"
+            placeholder={t("local_music_page.search_local_music")}
           ></input>
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.LIST}
-            title="列表视图"
+            title={t("local_music_page.list_view")}
             onClick={() => {
               setDisplayView(DisplayView.LIST);
             }}
@@ -110,7 +111,7 @@ export default function LocalMusicView() {
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.ARTIST}
-            title="作者视图"
+            title={t("local_music_page.artist_view")}
             onClick={() => {
               setDisplayView(DisplayView.ARTIST);
             }}
@@ -120,7 +121,7 @@ export default function LocalMusicView() {
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.ALBUM}
-            title="专辑视图"
+            title={t("local_music_page.album_view")}
             onClick={() => {
               setDisplayView(DisplayView.ALBUM);
             }}
@@ -130,7 +131,7 @@ export default function LocalMusicView() {
           <div
             className="list-view-action"
             data-selected={displayView === DisplayView.FOLDER}
-            title="文件夹视图"
+            title={t("local_music_page.folder_view")}
             onClick={() => {
               setDisplayView(DisplayView.FOLDER);
             }}

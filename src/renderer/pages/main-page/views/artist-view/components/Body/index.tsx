@@ -12,11 +12,9 @@ interface IBodyProps {
 
 const supportedMediaType = ["music", "album"];
 export default function Body(props: IBodyProps) {
-    const {artistItem} = props;
+  const { artistItem } = props;
   const [currentMediaType, setCurrentMediaType] = useState("music");
   const { t } = useTranslation();
-  
-
 
   return (
     <div className="artist-view--body-container">
@@ -28,21 +26,21 @@ export default function Body(props: IBodyProps) {
         <Tab.List className="tab-list-container">
           {supportedMediaType.map((type) => (
             <Tab key={type} as="div" className="tab-list-item">
-              {t(type)}
+              {t(`media.media_type_${type}`)}
             </Tab>
           ))}
         </Tab.List>
         <Tab.Panels className={"tab-panels-container"}>
           {supportedMediaType.map((type) => (
             <Tab.Panel className="tab-panel-container" key={type}>
-                <SwitchCase.Switch switch={type}>
-                    <SwitchCase.Case case={'music'}>
-                        <MusicResult artistItem={artistItem}></MusicResult>
-                    </SwitchCase.Case>
-                    <SwitchCase.Case case={'album'}>
-                        <AlbumResult artistItem={artistItem}></AlbumResult>
-                    </SwitchCase.Case>
-                </SwitchCase.Switch>
+              <SwitchCase.Switch switch={type}>
+                <SwitchCase.Case case={"music"}>
+                  <MusicResult artistItem={artistItem}></MusicResult>
+                </SwitchCase.Case>
+                <SwitchCase.Case case={"album"}>
+                  <AlbumResult artistItem={artistItem}></AlbumResult>
+                </SwitchCase.Case>
+              </SwitchCase.Switch>
             </Tab.Panel>
           ))}
         </Tab.Panels>

@@ -16,6 +16,7 @@
       "*": ["node_modules/*"],
       "@/*": ["src/*"],
       "@main/*": ["src/main/*"],
+      "@shared/*": ["src/shared/*"],
       "@native/*": ["src/main/native_modules/*"],
       "@renderer/*": ["src/renderer/*"],
       "@renderer-lrc/*": ["src/renderer-lrc/*"]

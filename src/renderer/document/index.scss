@@ -48,7 +48,6 @@ table {
   top: calc(54px + 1rem);
 }
 
-
 .opacity-button {
   opacity: 0.6;
 
@@ -88,6 +87,7 @@ input {
   }
 }
 
+// 按钮样式
 div[role="button"] {
   cursor: pointer;
   user-select: none;
@@ -101,27 +101,31 @@ div[role="button"] {
   &[data-type="primaryButton"] {
     background-color: var(--primaryColor);
     font-size: 1em;
-    padding: 0.4em 1em;
+    padding: 0.5em 0.8em;
     border-radius: 1.6em;
     color: white;
     width: fit-content;
+    line-height: 1em;
   }
   &[data-type="normalButton"] {
     font-size: 1em;
-    padding: 0.4em 1em;
+    padding: 0.5em 0.8em;
     border-radius: 1.6em;
     color: var(--textColor);
     border: 1px solid currentColor;
     width: fit-content;
+    line-height: 1em;
+    background-color: color-mix(in srgb, currentColor 15%, transparent);
   }
 
   &[data-type="dangerButton"] {
     font-size: 1em;
-    padding: 0.4em 1em;
+    padding: 0.5em 0.8em;
     border-radius: 1.6em;
     color: var(--dangerColor);
     border: 1px solid currentColor;
     width: fit-content;
+    line-height: 1em;
 
     &[data-fill="true"] {
       color: white;

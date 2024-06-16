@@ -1,4 +1,4 @@
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
 
 export default function A(
   props: React.DetailedHTMLProps<

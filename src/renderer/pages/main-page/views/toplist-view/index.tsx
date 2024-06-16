@@ -1,5 +1,4 @@
 import Condition from "@/renderer/components/Condition";
-import "./index.scss";
 import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
 import { Tab } from "@headlessui/react";
 import { getSortedSupportedPlugin } from "@/renderer/core/plugin-delegate";
@@ -11,16 +10,25 @@ import { useEffect } from "react";
 import useGetTopList from "./hooks/useGetTopList";
 import NoPlugin from "@/renderer/components/NoPlugin";
 import Empty from "@/renderer/components/Empty";
+import { useTranslation } from "react-i18next";
+
+import "./index.scss";
 
 export default function ToplistView() {
   const availablePlugins = getSortedSupportedPlugin("getTopLists");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
-    <div className="toplist-view--container">
+    <div id="page-container" className="page-container toplist-view--container">
       <Condition
         condition={availablePlugins.length}
-        falsy={<NoPlugin supportMethod="排行榜" height={"100%"}></NoPlugin>}
+        falsy={
+          <NoPlugin
+            supportMethod={t("plugin.method_get_top_lists")}
+            height={"100%"}
+          ></NoPlugin>
+        }
       >
         <Tab.Group
           defaultIndex={history.state?.usr?.pluginIndex}

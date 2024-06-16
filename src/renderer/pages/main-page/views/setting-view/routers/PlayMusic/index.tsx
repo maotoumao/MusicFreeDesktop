@@ -1,11 +1,12 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import "./index.scss";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import { useOutputAudioDevices } from "@/renderer/hooks/useMediaDevices";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
-import rendererAppConfig from "@/common/app-config/renderer";
 import trackPlayer from "@/renderer/core/track-player";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   data: IAppConfig["playMusic"];
@@ -15,101 +16,114 @@ export default function PlayMusic(props: IProps) {
   const { data = {} as IAppConfig["playMusic"] } = props;
 
   const audioDevices = useOutputAudioDevices();
+  const { t } = useTranslation();
 
   return (
     <div className="setting-view--play-music-container">
       <CheckBoxSettingItem
         keyPath="playMusic.caseSensitiveInSearch"
         checked={data.caseSensitiveInSearch}
-        label="歌单内搜索时区分大小写"
+        label={t("settings.play_music.case_sensitive_in_search")}
       ></CheckBoxSettingItem>
       <RadioGroupSettingItem
-        label="默认播放音质"
+        label={t("settings.play_music.default_play_quality")}
         keyPath="playMusic.defaultQuality"
         value={data?.defaultQuality}
         options={[
           {
             value: "low",
-            title: "低音质",
+            title: t("media.music_quality_low"),
           },
           {
             value: "standard",
-            title: "标准音质",
+            title: t("media.music_quality_standard"),
           },
           {
             value: "high",
-            title: "高音质",
+            title: t("media.music_quality_high"),
           },
           {
             value: "super",
-            title: "超高音质",
+            title: t("media.music_quality_super"),
           },
         ]}
       ></RadioGroupSettingItem>
       <RadioGroupSettingItem
-        label="播放音质缺失时"
+        label={t("settings.play_music.when_quality_missing")}
         keyPath="playMusic.whenQualityMissing"
         value={data.whenQualityMissing}
         options={[
           {
             value: "lower",
-            title: "播放更低音质",
+            title: t("settings.play_music.play_lower_quality_version"),
           },
           {
             value: "higher",
-            title: "播放更高音质",
+            title: t("settings.play_music.play_higher_quality_version"),
           },
         ]}
       ></RadioGroupSettingItem>
       <RadioGroupSettingItem
-        label="播放失败时"
+        label={t("settings.play_music.when_play_error")}
         keyPath="playMusic.playError"
         value={data.playError}
         options={[
           {
             value: "pause",
-            title: "暂停",
+            title: t("settings.play_music.pause"),
           },
           {
             value: "skip",
-            title: "自动播放下一首",
+            title: t("settings.play_music.skip_to_next"),
           },
         ]}
       ></RadioGroupSettingItem>
       <RadioGroupSettingItem
-        label="双击音乐列表时"
+        label={t("settings.play_music.double_click_music_list")}
         keyPath="playMusic.clickMusicList"
         value={data.clickMusicList}
         options={[
           {
             value: "normal",
-            title: "将目标单曲添加到播放队列",
+            title: t("settings.play_music.add_music_to_playlist"),
           },
           {
             value: "replace",
-            title: "使用当前音乐列表替换播放队列",
+            title: t("settings.play_music.replace_playlist_with_musiclist"),
           },
         ]}
       ></RadioGroupSettingItem>
       <ListBoxSettingItem
-        label="音频输出设备"
+        label={t("settings.play_music.audio_output_device")}
         keyPath="playMusic.audioOutputDevice"
         value={data.audioOutputDevice}
         renderItem={(item) => {
-          return item ? item.label : "默认";
+          return item ? item.label : t("common.default");
         }}
-        width={'320px'}
+        width={"320px"}
         onChange={async (item) => {
           const result = await trackPlayer.setAudioOutputDevice(item.deviceId);
           if (result) {
-            rendererAppConfig.setAppConfigPath(
-              "playMusic.audioOutputDevice",
-              item.toJSON()
-            );
+            setAppConfigPath("playMusic.audioOutputDevice", item.toJSON());
           }
         }}
         options={audioDevices}
       ></ListBoxSettingItem>
+      <RadioGroupSettingItem
+        label={t("settings.play_music.when_device_removed")}
+        keyPath="playMusic.whenDeviceRemoved"
+        value={data.whenDeviceRemoved}
+        options={[
+          {
+            value: "pause",
+            title: t("settings.play_music.pause"),
+          },
+          {
+            value: "play",
+            title: t("settings.play_music.continue_playing"),
+          },
+        ]}
+      ></RadioGroupSettingItem>
     </div>
   );
 }

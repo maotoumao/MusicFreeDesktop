@@ -2,17 +2,23 @@ import { Tab } from "@headlessui/react";
 import "./index.scss";
 import Downloaded from "./components/Downloaded";
 import Downloading from "./components/Downloading";
+import { useTranslation } from "react-i18next";
 
 export default function DownloadView() {
+  const { t } = useTranslation();
+
   return (
-    <div className="download-view--container">
+    <div
+      id="page-container"
+      className="page-container download-view--container"
+    >
       <Tab.Group>
         <Tab.List className="tab-list-container">
           <Tab as="div" className="tab-list-item">
-            已下载
+            {t("common.downloaded")}
           </Tab>
           <Tab as="div" className="tab-list-item">
-            下载中
+            {t("common.downloading")}
           </Tab>
         </Tab.List>
         <Tab.Panels className={"tab-panels-container"}>

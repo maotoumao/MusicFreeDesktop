@@ -3,12 +3,15 @@ import MusicSheet from "@/renderer/core/music-sheet";
 import debounce from "@/common/debounce";
 import { hideModal } from "../..";
 import SimpleInputWithState from "../SimpleInputWithState";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   initMusicItems: IMusic.IMusicItem | IMusic.IMusicItem[];
 }
 
 export default function AddNewSheet(props: IProps) {
+  const {t} = useTranslation();
+
   const onCreateNewSheetClick = useCallback(
     debounce(async (newSheetName) => {
       try {
@@ -26,11 +29,11 @@ export default function AddNewSheet(props: IProps) {
 
   return (
     <SimpleInputWithState
-      title="新建歌单"
+      title={t("modal.create_local_sheet")}
       onOk={onCreateNewSheetClick}
-      placeholder="请输入新建歌单名称"
+      placeholder={t("modal.create_local_sheet_placeholder")}
       maxLength={30}
-      okText="创建"
+      okText={t("common.create")}
     ></SimpleInputWithState>
   );
 }

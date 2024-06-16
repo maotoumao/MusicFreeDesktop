@@ -2,11 +2,11 @@ import hotkeys from "hotkeys-js";
 
 import trackPlayer from "../track-player";
 import { PlayerState, TrackPlayerEvent } from "../track-player/enum";
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import Evt from "../events";
 import { shortCutKeys, shortCutKeysEvts } from "@/common/constant";
-import rendererAppConfig from "@/common/app-config/renderer";
-import { ipcRendererSend } from "@/common/ipc-util/renderer";
+import { getAppConfigPath } from "@/shared/app-config/renderer";
+import { ipcRendererSend } from "@/shared/ipc/renderer";
 
 const originalHotkeysFilter = hotkeys.filter;
 
@@ -26,8 +26,8 @@ const baseShortCutFunction = (
   originalEvt: KeyboardEvent
 ) => {
   originalEvt.preventDefault();
-  if (global && rendererAppConfig.getAppConfigPath("shortCut.enableGlobal")) {
-  } else if (rendererAppConfig.getAppConfigPath("shortCut.enableLocal")) {
+  if (global && getAppConfigPath("shortCut.enableGlobal")) {
+  } else if (getAppConfigPath("shortCut.enableLocal")) {
     Evt.emit(evt);
   }
 };
@@ -97,7 +97,7 @@ export function unbindShortCut(eventType: IShortCutKeys, global = false) {
 export function setupLocalShortCut() {
   // 固定的快捷键
   shortCutKeys.forEach((it) => {
-    const val = rendererAppConfig.getAppConfigPath(`shortCut.shortcuts.${it}`);
+    const val = getAppConfigPath(`shortCut.shortcuts.${it}`);
     if (val && val.local && val.local.length) {
       bindShortCut(it, val.local);
     }

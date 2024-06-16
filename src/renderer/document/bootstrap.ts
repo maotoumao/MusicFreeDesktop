@@ -5,36 +5,53 @@ import {
   registerPluginEvents,
 } from "../core/plugin-delegate";
 import trackPlayer from "../core/track-player";
-import rendererAppConfig from "@/common/app-config/renderer";
 import localMusic from "../core/local-music";
 import { setupLocalShortCut } from "../core/shortcut";
 import { setAutoFreeze } from "immer";
 import Evt from "../core/events";
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 
 import Downloader from "../core/downloader";
-import MessageManager from "../core/message-manager";
+import {
+  getAppConfigPath,
+  setAppConfigPath,
+  setupRendererAppConfig,
+} from "@/shared/app-config/renderer";
+import { setupI18n } from "@/shared/i18n/renderer";
+import {
+  setupCommandHandler,
+  setupPlayerSyncHandler,
+} from "../core/command-handler";
+import ThemePack from "@/shared/themepack/renderer";
+import {
+  addToRecentlyPlaylist,
+  setupRecentlyPlaylist,
+} from "../core/recently-playlist";
+import { TrackPlayerEvent } from "../core/track-player/enum";
 
 setAutoFreeze(false);
 
 export default async function () {
   await Promise.all([
-    rendererAppConfig.setupRendererAppConfig(),
+    setupRendererAppConfig(),
     registerPluginEvents(),
     MusicSheet.frontend.setupMusicSheets(),
     trackPlayer.setupPlayer(),
-    localMusic.setupLocalMusic(),
   ]);
-  await MessageManager.setupMessageManager();
-  await window.themepack.setupThemePacks();
+  setupCommandHandler();
+  setupPlayerSyncHandler();
+  await setupI18n();
   setupLocalShortCut();
   dropHandler();
   clearDefaultBehavior();
   setupEvents();
+  setupDeviceChange();
+  localMusic.setupLocalMusic();
   await Downloader.setupDownloader();
+  setupRecentlyPlaylist();
 
   // 自动更新插件
-  if (rendererAppConfig.getAppConfigPath("plugin.autoUpdatePlugin")) {
+  if (getAppConfigPath("plugin.autoUpdatePlugin")) {
     const lastUpdated = +(localStorage.getItem("pluginLastupdatedTime") || 0);
     const now = Date.now();
     if (Math.abs(now - lastUpdated) > 86400000) {
@@ -48,6 +65,7 @@ function dropHandler() {
   document.addEventListener("drop", async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    console.log(event);
 
     const validMusicList: IMusic.IMusicItem[] = [];
     for (const f of event.dataTransfer.files) {
@@ -73,6 +91,12 @@ function dropHandler() {
             f.path
           )
         );
+      } else if (f.path.endsWith(".mftheme")) {
+        // 主题包
+        const themeConfig = await ThemePack.installThemePack(f.path);
+        if (themeConfig) {
+          await ThemePack.selectTheme(themeConfig);
+        }
       }
     }
     if (validMusicList.length) {
@@ -119,15 +143,10 @@ function clearDefaultBehavior() {
 /** 设置事件 */
 function setupEvents() {
   Evt.on("TOGGLE_DESKTOP_LYRIC", () => {
-    const enableDesktopLyric = rendererAppConfig.getAppConfigPath(
-      "lyric.enableDesktopLyric"
-    );
+    const enableDesktopLyric = getAppConfigPath("lyric.enableDesktopLyric");
 
     ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
-    rendererAppConfig.setAppConfigPath(
-      "lyric.enableDesktopLyric",
-      !enableDesktopLyric
-    );
+    setAppConfigPath("lyric.enableDesktopLyric", !enableDesktopLyric);
   });
 
   Evt.on("TOGGLE_LIKE", async (item) => {
@@ -139,4 +158,26 @@ function setupEvents() {
       MusicSheet.frontend.addMusicToFavorite(realItem);
     }
   });
+
+  // 最近播放
+  trackPlayer.on(TrackPlayerEvent.MusicChanged, (musicItem) => {
+    addToRecentlyPlaylist(musicItem);
+  });
+}
+
+async function setupDeviceChange() {
+  const getAudioDevices = async () =>
+    await navigator.mediaDevices.enumerateDevices().catch(() => []);
+  let devices = (await getAudioDevices()) || [];
+
+  navigator.mediaDevices.ondevicechange = async (evt) => {
+    const newDevices = await getAudioDevices();
+    if (
+      newDevices.length < devices.length &&
+      getAppConfigPath("playMusic.whenDeviceRemoved") === "pause"
+    ) {
+      trackPlayer.pause();
+    }
+    devices = newDevices;
+  };
 }

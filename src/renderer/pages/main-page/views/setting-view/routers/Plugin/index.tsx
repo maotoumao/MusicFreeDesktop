@@ -1,6 +1,7 @@
-import { IAppConfig } from "@/common/app-config/type";
+import { IAppConfig } from "@/shared/app-config/type";
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   data: IAppConfig["plugin"];
@@ -9,15 +10,17 @@ interface IProps {
 export default function Plugin(props: IProps) {
   const { data = {} as IAppConfig["plugin"] } = props;
 
+  const { t } = useTranslation();
+
   return (
     <div className="setting-view--plugin-container">
       <CheckBoxSettingItem
         keyPath="plugin.autoUpdatePlugin"
         checked={data?.autoUpdatePlugin}
-        label="打开软件时自动更新插件"
+        label={t("settings.plugin.auto_update_plugin")}
       ></CheckBoxSettingItem>
       <CheckBoxSettingItem
-        label="安装插件时不校验版本"
+        label={t("settings.plugin.not_check_plugin_version")}
         keyPath="plugin.notCheckPluginVersion"
         checked={data?.notCheckPluginVersion}
       ></CheckBoxSettingItem>

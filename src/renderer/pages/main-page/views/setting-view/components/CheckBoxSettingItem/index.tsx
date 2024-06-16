@@ -1,9 +1,9 @@
-import defaultAppConfig from "@/common/app-config/default-app-config";
-import rendererAppConfig from "@/common/app-config/renderer";
+import defaultAppConfig from "@/shared/app-config/internal/default-app-config";
+import { setAppConfigPath } from "@/shared/app-config/renderer";
 import {
   IAppConfigKeyPath,
   IAppConfigKeyPathValue,
-} from "@/common/app-config/type";
+} from "@/shared/app-config/type";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
 
@@ -37,7 +37,7 @@ export default function CheckBoxSettingItem<T extends IAppConfigKeyPath>(
           if (onCheckChanged) {
             onCheckChanged(!checked);
           } else {
-            rendererAppConfig.setAppConfigPath(keyPath, !checked as any);
+            setAppConfigPath(keyPath, !checked as any);
           }
         }}
       >

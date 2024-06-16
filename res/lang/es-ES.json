@@ -1,0 +1,395 @@
+{
+  "common": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "download": "Descargar",
+    "downloading": "Descargando",
+    "downloaded": "Descargado",
+    "remove": "Eliminar",
+    "delete": "Eliminar",
+    "default": "Predeterminado",
+    "version_code": "Código de versión",
+    "operation": "Operación",
+    "update": "Actualizar",
+    "uninstall": "Desinstalar",
+    "install": "Instalar",
+    "about": "Acerca de",
+    "exit": "Salir",
+    "edit": "Editar",
+    "undo": "Deshacer",
+    "redo": "Rehacer",
+    "cut": "Cortar",
+    "copy": "Copiar",
+    "paste": "Pegar",
+    "select_all": "Seleccionar todo",
+    "loading": "Cargando",
+    "create": "Crear",
+    "add": "Añadir",
+    "save": "Guardar",
+    "clear": "Limpiar",
+    "open": "Abrir",
+    "status": "Estado"
+  },
+
+  "media": {
+    "unknown_title": "Sin título",
+    "unknown_artist": "Artista desconocido",
+    "unknown_album": "Álbum desconocido",
+
+    "default_favorite_sheet_name": "Me gusta",
+
+    "playlist": "Lista de reproducción",
+
+    "media_type_music": "Música",
+    "media_type_album": "Álbum",
+    "media_type_artist": "Artista",
+    "media_type_sheet": "Lista de canciones",
+    "media_type_lyric": "Letra",
+
+    "media_title": "Título",
+    "media_platform": "Fuente",
+    "media_duration": "Duración",
+    "media_create_at": "Fecha de creación",
+    "media_play_count": "Reproducciones",
+    "media_music_count": "Número de canciones",
+    "media_description": "Descripción",
+
+    "music_state_pause": "Pausa",
+    "music_state_play": "Reproducir",
+    "music_state_play_or_pause": "Reproducir/Pausar",
+    "music_quality_low": "Baja calidad",
+    "music_quality_standard": "Calidad estándar",
+    "music_quality_high": "Alta calidad",
+    "music_quality_super": "Calidad super alta",
+
+    "music_repeat_mode": "Modo de repetición",
+    "music_repeat_mode_loop": "Repetir una canción",
+    "music_repeat_mode_queue": "Repetir lista",
+    "music_repeat_mode_shuffle": "Reproducción aleatoria"
+  },
+
+  "plugin": {
+    "prop_user_variable": "Variable de usuario",
+    "method_search": "Buscar",
+    "method_import_music_item": "Importar canción",
+    "method_import_music_sheet": "Importar lista de canciones",
+    "method_get_top_lists": "Lista de éxitos",
+
+    "info_hint_you_have_no_plugin": "No has instalado ningún complemento",
+    "info_hint_you_have_no_plugin_with_supported_method": "No has instalado un complemento que soporte <highlight>{{supportMethod}}</highlight>",
+    "info_hint_install_plugin_before_use": "Ve a <a>gestión de complementos</a> para instalar un complemento primero~"
+  },
+
+  "download_page": {
+    "waiting": "Esperando...",
+    "failed": "Descarga fallida"
+  },
+  "plugin_management_page": {
+    "plugin_management": "Gestión de complementos",
+    "choose_plugin": "Elegir complemento",
+    "install": "Instalar",
+    "musicfree_plugin": "Complemento MusicFree",
+    "install_successfully": "Complemento instalado con éxito",
+    "install_failed": "Instalación fallida",
+    "invalid_plugin": "Complemento inválido",
+    "install_from_local_file": "Instalar desde archivo local",
+    "install_from_network": "Instalar desde la red",
+    "install_plugin_from_network": "Instalar complemento desde la red",
+    "installing": "Instalando",
+    "info_hint_install_placeholder": "Introduce la URL de la fuente del complemento (termina en json o js)",
+    "error_hint_plugin_should_end_with_js_or_json": "La URL del complemento debe terminar en json o js",
+    "info_hint_install_plugin": "El complemento debe cumplir con el protocolo específico de MusicFree, consulta la <a>página oficial</a> para más detalles",
+    "subscription_setting": "Configuración de suscripción",
+    "update_subscription": "Actualizar suscripción",
+    "update_successfully": "Actualización exitosa",
+    "no_subscription": "No hay suscripciones actualmente",
+
+    "uninstall": "Desinstalar",
+    "uninstall_plugin": "Desinstalar complemento",
+    "confirm_text_uninstall_plugin": "¿Confirmar desinstalación del complemento {{plugin}}?",
+    "uninstall_successfully": "Complemento {{plugin}} desinstalado",
+    "uninstall_failed": "Desinstalación fallida",
+
+    "toast_plugin_is_latest": "El complemento {{plugin}} ya está actualizado a la última versión",
+    "update_failed": "Actualización fallida",
+
+    "update": "Actualizar",
+
+    "importing_media": "Importando",
+    "placeholder_import_music_item": "Introduce la URL de la canción {{plugin}}",
+    "import_failed": "Importación fallida",
+    "placeholder_import_music_sheet": "Introduce la URL de la lista de canciones {{plugin}}"
+  },
+  "local_music_page": {
+    "local_music": "Música local",
+    "auto_scan": "Escaneo automático",
+    "search_local_music": "Buscar música local",
+    "list_view": "Vista de lista",
+    "artist_view": "Vista de artistas",
+    "album_view": "Vista de álbumes",
+    "folder_view": "Vista de carpetas",
+    "total_music_num": "Total de {{number}} canciones"
+  },
+
+  "music_list_context_menu": {
+    "next_play": "Reproducir a continuación",
+    "add_to_my_sheets": "Añadir a mi lista de canciones",
+    "remove_from_sheet": "Eliminar de la lista de canciones",
+    "delete_local_download": "Eliminar descarga local",
+    "reveal_local_music_in_file_explorer": "Abrir carpeta de la canción",
+    "reveal_local_music_in_file_explorer_fail": "Error al abrir: ",
+
+    "delete_local_downloaded_songs_success": "Eliminadas {{musicNums}} canciones locales",
+    "delete_local_downloaded_song_success": "Eliminada la canción local [{{songName}}]"
+  },
+
+  "search_result_page": {
+    "search_result_title": "Resultados de búsqueda para"
+  },
+  "side_bar": {
+    "toplist": "Lista de éxitos",
+    "recommend_sheets": "Listas recomendadas",
+    "download_management": "Gestión de descargas",
+    "local_music": "Música local",
+    "plugin_management": "Gestión de complementos",
+
+    "my_sheets": "Mis listas de canciones",
+    "create_local_sheet": "Crear lista de canciones",
+    "starred_sheets": "Mis favoritos",
+
+    "delete_sheet": "Eliminar lista de canciones",
+    "rename_sheet": "Cambiar nombre",
+    "unstar_sheet": "Desmarcar",
+    "recently_play": "Reproducido recientemente"
+  },
+  "app_header": {
+    "nav_back": "Atrás",
+    "nav_forward": "Adelante",
+    "search_placeholder": "Introduce aquí para buscar",
+    "search_history": "Historial de búsqueda",
+    "settings": "Configuración",
+    "minimize": "Minimizar",
+    "minimode": "Modo minimalista",
+    "exit": "Salir",
+    "theme": "tema"
+  },
+  "music_bar": {
+    "open_music_detail_page": "Abrir detalles de la canción",
+    "close_music_detail_page": "Cerrar detalles de la canción",
+    "previous_music": "Canción anterior",
+    "next_music": "Siguiente canción",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido",
+    "playback_speed": "Velocidad de reproducción",
+    "choose_music_quality": "Elegir calidad de música",
+    "only_set_for_current_music": "Solo para la canción actual",
+    "desktop_lyric": "Letra en el escritorio"
+  },
+  "music_detail": {
+    "search_lyric": "Buscar letra",
+    "no_lyric": "No hay letra disponible",
+
+    "lyric_ctx_download_lyric": "Descargar letra",
+    "lyric_ctx_download_lyric_lrc": "Descargar letra (.lrc)",
+    "lyric_ctx_download_lyric_txt": "Descargar letra (.txt)",
+    "lyric_ctx_download_success": "Descarga exitosa",
+    "lyric_ctx_download_fail": "Descarga fallida",
+    "lyric_ctx_set_font_size": "Ajustar tamaño de fuente",
+
+    "link_media_lyric": "Vincular letra",
+    "media_lyric_linked": "Letra vinculada: ",
+    "unlink_media_lyric": "Desvincular letra",
+    "toast_media_lyric_unlinked": "Letra desvinculada",
+    "translation": "Traducción",
+    "show_translation": "Mostrar traducción",
+    "hide_translation": "Ocultar traducción"
+  },
+  "bottom_loading_state": {
+    "reached_end": "~~~ Fin ~~~",
+    "loading": "Cargando...",
+    "load_more": "Cargar más"
+  },
+  "empty": {
+    "hint_empty": "No hay nada aquí~~~"
+  },
+  "modal": {
+    "add_to_my_sheets": "Añadir a mi lista de canciones",
+    "total_music_num": "Total de {{number}} canciones",
+    "create_local_sheet": "Crear lista de canciones",
+    "create_local_sheet_placeholder": "Introduce el nombre de la nueva lista de canciones",
+    "exit_confirm": "¿Confirmar salida?",
+    "plugin_subscription": "Suscripción de complemento",
+    "subscription_remarks": "Observaciones: ",
+    "subscription_links": "Enlaces: ",
+    "subscription_save_success": "Dirección de suscripción guardada",
+    "search_lyric": "Buscar letra",
+    "search_lyric_result_empty": "No se encontraron resultados",
+    "media_lyric_linked": "Letra vinculada~",
+    "media_lyric_link_failed": "Error al vincular la letra:",
+    "new_version_found": "Nueva versión encontrada",
+    "latest_version": "Última versión: ",
+    "current_version": "Versión actual: ",
+    "skip_this_version": "Saltar esta versión",
+    "scan_local_music": "Escanear música local",
+    "scan_local_music_hint": "Se escanearán automáticamente las carpetas seleccionadas (sincronización en tiempo real)",
+    "add_folder": "Añadir carpeta"
+  },
+  "panel": {
+    "play_list_song_num": "Lista de reproducción ({{number}} canciones)",
+    "user_variable": "Variable de usuario",
+    "user_variable_setting_success": "Configuración exitosa~"
+  },
+  "music_sheet_like_view": {
+    "play_all": "Reproducir todo",
+    "add_to_sheet": "Añadir a la lista de canciones",
+    "star": "favorito"
+  },
+  "settings": {
+    "choose_path": "Elegir ruta",
+    "change_path": "Cambiar ruta",
+    "folder_not_exist": "La carpeta no existe",
+    "open_folder": "Abrir carpeta",
+
+    "section_name": {
+      "normal": "General",
+      "play_music": "Reproducir",
+      "download": "Descargar",
+      "lyric": "Letra",
+      "plugin": "Complemento",
+      "theme": "Tema",
+      "short_cut": "Atajos",
+      "network": "Red",
+      "backup": "Respaldo y restauración",
+      "about": "Acerca de MusicFree"
+    },
+    "normal": {
+      "check_update": "Comprobar actualizaciones al iniciar la aplicación",
+      "close_behavior": "Al hacer clic en el botón de salida",
+      "exit_app": "Salir de la aplicación",
+      "minimize": "Minimizar a la bandeja",
+      "taskbar_thumb": "Estilo de miniatura en la barra de tareas (efectivo tras reiniciar la aplicación)",
+      "current_artwork": "Portada de la canción actual",
+      "main_window": "Interfaz de la ventana principal",
+      "max_history_length": "Número máximo de registros en el historial de búsqueda",
+      "music_list_hide_columns": "Columnas ocultas en la lista de canciones",
+      "languages": "Idioma",
+      "toast_switch_language_fail": "Error al cambiar el idioma"
+    },
+    "play_music": {
+      "case_sensitive_in_search": "Distinguir mayúsculas y minúsculas en la búsqueda de listas de canciones",
+      "default_play_quality": "Calidad de reproducción predeterminada",
+      "when_quality_missing": "Cuando falta la calidad de reproducción",
+      "play_lower_quality_version": "Reproducir versión de menor calidad",
+      "play_higher_quality_version": "Reproducir versión de mayor calidad",
+      "when_play_error": "En caso de error al reproducir",
+      "pause": "Pausar",
+      "skip_to_next": "Saltar a la siguiente",
+      "double_click_music_list": "Al hacer doble clic en la lista de canciones",
+      "add_music_to_playlist": "Añadir canción a la lista de reproducción",
+      "replace_playlist_with_musiclist": "Reemplazar la lista de reproducción con la lista de canciones actual",
+      "audio_output_device": "Dispositivo de salida de audio",
+      "when_device_removed": "Cuando se elimina el dispositivo de audio",
+      "continue_playing": "Continuar reproduciendo"
+    },
+    "download": {
+      "download_folder": "Carpeta de descargas",
+      "max_concurrency": "Máximo número de descargas simultáneas",
+      "default_download_quality": "Calidad de descarga predeterminada",
+      "when_quality_missing": "Cuando falta la calidad de descarga",
+      "download_lower_quality_version": "Descargar versión de menor calidad",
+      "download_higher_quality_version": "Descargar versión de mayor calidad"
+    },
+    "lyric": {
+      "enable_status_bar_lyric": "Habilitar letra en la barra de estado",
+      "enable_desktop_lyric": "Habilitar letra en el escritorio",
+      "lock_desktop_lyric": "Bloquear letra en el escritorio",
+      "font": "Fuente",
+      "font_size": "Tamaño de fuente",
+      "font_color": "Color de fuente",
+      "stroke_color": "Color del contorno"
+    },
+    "plugin": {
+      "auto_update_plugin": "Actualizar complementos automáticamente al iniciar la aplicación",
+      "not_check_plugin_version": "No verificar la versión al instalar complementos"
+    },
+    "short_cut": {
+      "enable_local": "Habilitar atajos en la aplicación",
+      "enable_global": "Habilitar atajos globales",
+      "ability": "Funcionalidad",
+      "local_short_cut": "Atajos en la aplicación",
+      "global_short_cut": "Atajos globales",
+      "play/pause": "Reproducir/Pausar",
+      "skip-next": "Siguiente canción",
+      "skip-previous": "Canción anterior",
+      "volume-up": "Subir volumen",
+      "volume-down": "Bajar volumen",
+      "toggle-desktop-lyric": "Activar/Desactivar letra en el escritorio",
+      "like/dislike": "Me gusta/No me gusta la canción actual",
+      "no_short_cut": "Vacío"
+    },
+    "network": {
+      "host": "Host",
+      "port": "Puerto",
+      "username": "Usuario",
+      "password": "Contraseña",
+      "local_cache": "Caché local: {{cacheSize}}",
+      "clear_cache": "Limpiar caché",
+      "enable_network_proxy": "Habilitar proxy de red"
+    },
+    "backup": {
+      "resume_mode_append": "Añadir al final de la lista existente",
+      "resume_mode_overwrite": "Sobrescribir la lista existente",
+      "backup_by_file": "Respaldo por archivo",
+      "musicfree_backup_file": "Archivo de respaldo MusicFree",
+      "backup_to": "Respaldar en...",
+      "backup_by_webdav": "Respaldo WebDAV",
+      "backup_success": "Respaldo exitoso~",
+      "backup_fail": "Error al respaldar: {{reason}}",
+      "resume_success": "Restauración exitosa~",
+      "resume_fail": "Error al restaurar: {{reason}}",
+      "backup_music_sheet": "Respaldo de listas de canciones",
+      "resume_music_sheet": "Restaurar listas de canciones",
+      "webdav_server_url": "URL",
+      "username": "Usuario",
+      "password": "Contraseña",
+      "webdav_data_not_complete": "La URL, usuario y contraseña no pueden estar vacíos",
+      "webdav_backup_file_not_exist": "El archivo de respaldo no existe"
+    },
+    "about": {
+      "current_version": "Versión actual: {{version}}",
+      "already_latest": "¡Ya tienes la última versión!",
+      "check_update": "Buscar actualizaciones",
+      "software_author": "Autor del software: ",
+      "open_source_declaration": "Código fuente: El software es de código abierto bajo la licencia GPL3.0. <Github>Dirección de Github</Github> <Gitee>Dirección de Gitee</Gitee>",
+      "official_site": "Sitio oficial",
+      "mobile_version": "Versión móvil"
+    }
+  },
+  "main": {
+    "previous_music": "Canción anterior",
+    "next_music": "Siguiente canción",
+    "close_desktop_lyric": "Cerrar letra en pantalla",
+    "open_desktop_lyric": "Abrir letra en pantalla",
+    "unlock_desktop_lyric": "Desbloquear letra en pantalla",
+    "lock_desktop_lyric": "Bloquear letra en pantalla",
+    "no_playing_music": "No hay música reproduciéndose actualmente"
+  },
+  "theme": {
+    "tab_local": "Tema local",
+    "tab_remote": "Mercado de temas",
+    "download_and_use": "Descargar y usar",
+    "use_theme": "Usar tema",
+    "install_theme": "Instalar tema",
+    "update_theme": "Actualizar tema",
+    "uninstall_theme": "Desinstalar tema",
+    "musicfree_theme": "Tema de MusicFree",
+    "all_files": "Todos los archivos",
+    "install_theme_success": "Tema {{name}} instalado con éxito~",
+    "install_theme_fail": "Error al instalar el tema: {{reason}}",
+    "uninstall_theme_success": "Tema {{name}} desinstalado con éxito~",
+    "uninstall_theme_fail": "Error al desinstalar el tema: {{reason}}",
+    "how_to_submit_new_theme": "💡Cómo enviar un nuevo tema: Los temas en el mercado de temas están sincronizados con el repositorio <Github>MusicFreeThemePacks</Github>. Si necesita enviar un nuevo tema, envíe una solicitud de extracción directamente.",
+    "load_remote_theme_error": "Ha ocurrido un error...",
+    "invalid_theme": "Tema inválido: {{reason}}"
+  }
+}

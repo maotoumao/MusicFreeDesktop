@@ -1,7 +1,7 @@
-import { ipcRendererInvoke, ipcRendererSend } from "@/common/ipc-util/renderer";
+import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
 import delegatePluginsStore from "./store";
-import rendererAppConfig from "@/common/app-config/renderer";
 import { useMemo } from "react";
+import { getAppConfigPath, useAppConfig } from "@/shared/app-config/renderer";
 
 /** 刷新插件 */
 export function refreshPlugins() {
@@ -19,7 +19,7 @@ export function getSupportedPlugin(
 export function getSortedSupportedPlugin(
   featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
-  const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta") ?? {};
+  const meta = getAppConfigPath("private.pluginMeta") ?? {};
   return delegatePluginsStore
     .getValue()
     .filter((_) => _.supportedMethod.includes(featureMethod))
@@ -43,7 +43,7 @@ export function useSupportedPlugin(
 export function useSortedSupportedPlugin(
   featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
-  const meta = rendererAppConfig.getAppConfigPath("private.pluginMeta") ?? {};
+  const meta = getAppConfigPath("private.pluginMeta") ?? {};
   return delegatePluginsStore
     .useValue()
     .filter((_) => _.supportedMethod.includes(featureMethod))
@@ -110,7 +110,7 @@ export function getPluginPrimaryKey(pluginItem: IPluginDelegateLike) {
 
 export function useSortedPlugins() {
   const plugins = delegatePluginsStore.useValue();
-  const configs = rendererAppConfig.useAppConfig();
+  const configs = useAppConfig();
 
   const meta = useMemo(() => {
     return configs?.private?.pluginMeta ?? {};

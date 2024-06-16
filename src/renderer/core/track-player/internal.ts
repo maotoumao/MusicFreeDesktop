@@ -24,7 +24,6 @@ class TrackPlayerInternal {
     this.hls.attachMedia(this.audio);
     // @ts-ignore
     this.hls.on("hlsError", () => {
-      console.log("???");
       this.throwError(ErrorReason.EmptyResource);
     });
 
@@ -145,7 +144,7 @@ class TrackPlayerInternal {
           })
             .then((res) => res.arrayBuffer())
             .then((buf) => {
-              sourceBuffer.addEventListener('updateend', () => {
+              sourceBuffer.addEventListener("updateend", () => {
                 mediaSource.endOfStream();
               })
               sourceBuffer.appendBuffer(buf);

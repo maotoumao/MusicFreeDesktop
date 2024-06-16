@@ -1,4 +1,4 @@
-import LyricParser from "@/renderer/utils/lyric-parser";
+import LyricParser, { IParsedLrcItem } from "@/renderer/utils/lyric-parser";
 
 /** 播放器状态 */
 export enum PlayerState {
@@ -30,10 +30,7 @@ export enum ErrorReason {
 
 export interface ICurrentLyric {
   parser?: LyricParser;
-  currentLrc?: {
-    lrc?: ILyric.IParsedLrcItem; // 当前时刻的歌词
-    index?: number; // 下标
-  };
+  currentLrc?: IParsedLrcItem;
 }
 
 /** 播放器事件 */
@@ -73,7 +70,7 @@ export interface TrackPlayerEventParams {
   [TrackPlayerEvent.VolumeChanged]: number;
   [TrackPlayerEvent.MusicChanged]: IMusic.IMusicItem | null;
   [TrackPlayerEvent.RepeatModeChanged]: RepeatMode;
-  [TrackPlayerEvent.CurrentLyricChanged]: ICurrentLyric['currentLrc'];
+  [TrackPlayerEvent.CurrentLyricChanged]: ICurrentLyric["currentLrc"];
   [TrackPlayerEvent.LyricChanged]: LyricParser;
 }
 

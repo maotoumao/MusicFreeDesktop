@@ -20,11 +20,13 @@ export default function AlbumView() {
     useAlbumDetail(originalAlbumItem);
 
   return (
-    <MusicSheetlikeView
-      musicSheet={albumItem}
-      musicList={musicList}
-      onLoadMore={getAlbumDetail}
-      state={requestState}
-    ></MusicSheetlikeView>
+    <div id="page-container" className="page-container">
+      <MusicSheetlikeView
+        musicSheet={albumItem}
+        musicList={musicList}
+        onLoadMore={getAlbumDetail}
+        state={requestState}
+      ></MusicSheetlikeView>
+    </div>
   );
 }

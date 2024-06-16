@@ -1,12 +1,17 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
 import trackPlayer from "@/renderer/core/track-player";
+import { useTranslation } from "react-i18next";
 
 export default function Controller() {
   const playerState = trackPlayer.usePlayerState();
+
+  const {t} = useTranslation();
+
+
   return (
     <div className="music-controller">
-      <div className="skip controller-btn" title="上一首" onClick={() => {
+      <div className="skip controller-btn" title={t("music_bar.previous_music")} onClick={() => {
           trackPlayer.skipToPrev();
 
       }}>
@@ -30,7 +35,7 @@ export default function Controller() {
       </div>
       <div
         className="skip controller-btn"
-        title="下一首"
+        title={t("music_bar.next_music")}
         onClick={() => {
       
           trackPlayer.skipToNext();

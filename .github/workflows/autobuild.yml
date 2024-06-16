@@ -5,11 +5,11 @@ jobs:
     build-windows: 
         runs-on: windows-latest
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
-                node-version: 16
-            - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $Env:GITHUB_ENV
+                node-version: 18
+            - run: echo (node -p -e '`VERSION=${require("./package.json").version}`') >> $Env:GITHUB_ENV
             - run: npm install
             - run: npm run package
             - uses: maotoumao/inno-setup-action-cli@main
@@ -17,7 +17,7 @@ jobs:
                   filepath: ./release/build-windows.iss
                   variables: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=${{ secrets.MYAPPID }}
             - name: Upload Setup
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: windows-release
                   path: ./out/MusicFreeSetup.exe
@@ -28,7 +28,7 @@ jobs:
                 files: ./out/MusicFree-win32-x64
                 dest: MusicFree-win32-x64-portable.zip
             - name: Upload Portable
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: windows-portable-release
                   path: ${{ github.workspace }}/MusicFree-win32-x64-portable.zip
@@ -36,11 +36,11 @@ jobs:
     build-windows-legacy: 
         runs-on: windows-latest
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
-                node-version: 16
-            - run: echo (node -p -e '`VERSION=${require(\"./package.json\").version}`') >> $Env:GITHUB_ENV
+                node-version: 18
+            - run: echo (node -p -e '`VERSION=${require("./package.json").version}`') >> $Env:GITHUB_ENV
             - run: npm install
             - run: npm install electron@22
             - run: npm run package
@@ -49,7 +49,7 @@ jobs:
                   filepath: ./release/build-windows.iss
                   variables: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=${{ secrets.MYAPPID }}
             - name: Upload Setup
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: windows-legacy-release
                   path: ./out/MusicFreeSetup.exe
@@ -60,7 +60,7 @@ jobs:
                 files: ./out/MusicFree-win32-x64
                 dest: MusicFree-win32-x64-legacy-portable.zip
             - name: Upload Portable
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: windows-legacy-portable-release
                   path: ${{ github.workspace }}/MusicFree-win32-x64-legacy-portable.zip
@@ -68,18 +68,19 @@ jobs:
     build-macos-x64: 
         runs-on: macos-latest
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - uses: actions/setup-python@v4
               with:
                 python-version: '3.10'
-            - uses: actions/setup-node@v3
+            - uses: actions/setup-node@v4
               with:
-                node-version: 16
+                node-version: 18
             - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
             - run: npm install
-            - run: npm run make
+            - run: npm run make -- --arch="x64"
+            - run: ls ./out/make
             - name: Upload Setup
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: macos-x64-dmg-release
                   path: ./out/make/MusicFree-${{ env.VERSION }}-x64.dmg
@@ -87,18 +88,18 @@ jobs:
     build-macos-arm64: 
         runs-on: macos-latest
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - uses: actions/setup-python@v4
               with:
                 python-version: '3.10'
-            - uses: actions/setup-node@v3
+            - uses: actions/setup-node@v4
               with:
-                node-version: 16
+                node-version: 18
             - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
             - run: npm install
             - run: npm run make -- --arch="arm64"
             - name: Upload Setup
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: macos-arm64-dmg-release
                   path: ./out/make/MusicFree-${{ env.VERSION }}-arm64.dmg
@@ -106,15 +107,15 @@ jobs:
     build-ubuntu: 
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
-                node-version: 16
+                node-version: 18
             - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
             - run: npm install
             - run: npm run make
             - name: Upload Setup
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: ubuntu-release
                   path: ./out/make/deb/x64/

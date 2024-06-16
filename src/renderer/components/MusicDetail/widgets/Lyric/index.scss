@@ -1,8 +1,39 @@
+$width: 360px;
+$height: 420px;
+.lyric-container-outer {
+  position: relative;
+  width: $width;
+  height: $height;
+
+  & .lyric-options-container {
+    position: absolute;
+    right: -14px;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transform: translateX(100%);
+
+    & .lyric-option-item {
+      &[data-active="true"] {
+        color: var(--primaryColor);
+      }
+
+      width: 18px;
+      height: 18px;
+
+      & svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+}
+
 .lyric-container {
-  width: 360px;
-  height: 420px;
+  width: $width;
+  height: $height;
   overflow-y: auto;
-  scrollbar-gutter: stable both-edges;
   font-size: 1rem;
   cursor: default;
   position: relative;
@@ -47,6 +78,10 @@
       font-weight: 600;
       opacity: 1;
     }
+  }
+
+  & .lyric-item-translation {
+    margin-top: -0.6em;
   }
 
   & .search-lyric {
