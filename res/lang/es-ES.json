@@ -27,7 +27,8 @@
     "add": "Añadir",
     "save": "Guardar",
     "clear": "Limpiar",
-    "open": "Abrir"
+    "open": "Abrir",
+    "status": "Estado"
   },
 
   "media": {
@@ -156,7 +157,10 @@
     "create_local_sheet": "Crear lista de canciones",
     "starred_sheets": "Mis favoritos",
 
-    "delete_sheet": "Eliminar lista de canciones"
+    "delete_sheet": "Eliminar lista de canciones",
+    "rename_sheet": "Cambiar nombre",
+    "unstar_sheet": "Desmarcar",
+    "recently_play": "Reproducido recientemente"
   },
   "app_header": {
     "nav_back": "Atrás",
@@ -165,7 +169,9 @@
     "search_history": "Historial de búsqueda",
     "settings": "Configuración",
     "minimize": "Minimizar",
-    "exit": "Salir"
+    "minimode": "Modo minimalista",
+    "exit": "Salir",
+    "theme": "tema"
   },
   "music_bar": {
     "open_music_detail_page": "Abrir detalles de la canción",
@@ -193,7 +199,10 @@
     "link_media_lyric": "Vincular letra",
     "media_lyric_linked": "Letra vinculada: ",
     "unlink_media_lyric": "Desvincular letra",
-    "toast_media_lyric_unlinked": "Letra desvinculada"
+    "toast_media_lyric_unlinked": "Letra desvinculada",
+    "translation": "Traducción",
+    "show_translation": "Mostrar traducción",
+    "hide_translation": "Ocultar traducción"
   },
   "bottom_loading_state": {
     "reached_end": "~~~ Fin ~~~",
@@ -232,7 +241,8 @@
   },
   "music_sheet_like_view": {
     "play_all": "Reproducir todo",
-    "add_to_sheet": "Añadir a la lista de canciones"
+    "add_to_sheet": "Añadir a la lista de canciones",
+    "star": "favorito"
   },
   "settings": {
     "choose_path": "Elegir ruta",
@@ -277,7 +287,9 @@
       "double_click_music_list": "Al hacer doble clic en la lista de canciones",
       "add_music_to_playlist": "Añadir canción a la lista de reproducción",
       "replace_playlist_with_musiclist": "Reemplazar la lista de reproducción con la lista de canciones actual",
-      "audio_output_device": "Dispositivo de salida de audio"
+      "audio_output_device": "Dispositivo de salida de audio",
+      "when_device_removed": "Cuando se elimina el dispositivo de audio",
+      "continue_playing": "Continuar reproduciendo"
     },
     "download": {
       "download_folder": "Carpeta de descargas",
@@ -299,18 +311,6 @@
     "plugin": {
       "auto_update_plugin": "Actualizar complementos automáticamente al iniciar la aplicación",
       "not_check_plugin_version": "No verificar la versión al instalar complementos"
-    },
-    "theme": {
-      "example_theme_hint": "Aquí hay algunos temas de ejemplo:",
-      "example_theme_subscription_hint": "También puedes seguir nuestro WeChat: <highlight>Una GatoGato</highlight>, responde con <highlight>Paquete de temas MusicFree</highlight> para obtener el enlace de descarga (actualizado periódicamente)",
-      "install_theme": "Instalar paquete de temas",
-      "uninstall_theme": "Desinstalar paquete de temas",
-      "musicfree_theme": "Tema MusicFree",
-      "all_files": "Todos los archivos",
-      "install_theme_success": "Tema {{name}} instalado con éxito~",
-      "install_theme_fail": "Error al instalar el tema: {{reason}}",
-      "uninstall_theme_success": "Tema {{name}} desinstalado con éxito~",
-      "uninstall_theme_fail": "Error al desinstalar el tema: {{reason}}"
     },
     "short_cut": {
       "enable_local": "Habilitar atajos en la aplicación",
@@ -373,5 +373,23 @@
     "unlock_desktop_lyric": "Desbloquear letra en pantalla",
     "lock_desktop_lyric": "Bloquear letra en pantalla",
     "no_playing_music": "No hay música reproduciéndose actualmente"
+  },
+  "theme": {
+    "tab_local": "Tema local",
+    "tab_remote": "Mercado de temas",
+    "download_and_use": "Descargar y usar",
+    "use_theme": "Usar tema",
+    "install_theme": "Instalar tema",
+    "update_theme": "Actualizar tema",
+    "uninstall_theme": "Desinstalar tema",
+    "musicfree_theme": "Tema de MusicFree",
+    "all_files": "Todos los archivos",
+    "install_theme_success": "Tema {{name}} instalado con éxito~",
+    "install_theme_fail": "Error al instalar el tema: {{reason}}",
+    "uninstall_theme_success": "Tema {{name}} desinstalado con éxito~",
+    "uninstall_theme_fail": "Error al desinstalar el tema: {{reason}}",
+    "how_to_submit_new_theme": "💡Cómo enviar un nuevo tema: Los temas en el mercado de temas están sincronizados con el repositorio <Github>MusicFreeThemePacks</Github>. Si necesita enviar un nuevo tema, envíe una solicitud de extracción directamente.",
+    "load_remote_theme_error": "Ha ocurrido un error...",
+    "invalid_theme": "Tema inválido: {{reason}}"
   }
 }

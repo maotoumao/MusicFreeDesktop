@@ -24,6 +24,8 @@ declare namespace IUserPreference {
   interface IDBType {
     /** 当前播放队列 */
     playList: IMusic.IMusicItem[];
+    /** 最近播放队列 */
+    recentlyPlayList: IMusic.IMusicItem[];
     /** 已下载列表 */
     downloadedList: IMedia.IMediaBase[];
     /** 本地音乐监听列表 */

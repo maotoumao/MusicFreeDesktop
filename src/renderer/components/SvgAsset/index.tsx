@@ -12,6 +12,7 @@ export type SvgAssetIconNames =
   | "chevron-down"
   | "chevron-left"
   | "chevron-right"
+  | "clock"
   | "code-bracket-square"
   | "cog-8-tooth"
   | "dashboard-speed"

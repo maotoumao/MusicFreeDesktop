@@ -8,7 +8,10 @@ export default function DownloadView() {
   const { t } = useTranslation();
 
   return (
-    <div className="download-view--container">
+    <div
+      id="page-container"
+      className="page-container download-view--container"
+    >
       <Tab.Group>
         <Tab.List className="tab-list-container">
           <Tab as="div" className="tab-list-item">

@@ -11,7 +11,7 @@ interface IProps {
 
 export default function Header(props: IProps) {
   const { artistItem } = props;
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className="artist-view--header-container">
@@ -23,7 +23,9 @@ export default function Header(props: IProps) {
       <div className="artist-info">
         <div className="title-container">
           <Tag>{artistItem?.platform}</Tag>
-          <div className="title">{artistItem?.name ?? t("media.unknown_artist")}</div>
+          <div className="title">
+            {artistItem?.name ?? t("media.unknown_artist")}
+          </div>
         </div>
 
         <Condition condition={artistItem?.description}>
@@ -35,7 +37,7 @@ export default function Header(props: IProps) {
               dataset.fold = dataset.fold === "true" ? "false" : "true";
             }}
           >
-            简介：{artistItem?.description}
+            {artistItem?.description}
           </div>
         </Condition>
       </div>

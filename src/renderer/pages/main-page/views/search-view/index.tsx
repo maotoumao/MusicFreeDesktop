@@ -39,7 +39,7 @@ export default function SearchView() {
   }, []);
 
   return (
-    <div className="search-view-container">
+    <div id="page-container" className="page-container search-view-container">
       <div className="search-header">
         <span className="highlight">「{decodeURIComponent(query)}」</span>
         {t("search_result_page.search_result_title")}

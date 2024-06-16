@@ -26,11 +26,14 @@
         flex: 1;
         font-size: 1.4rem;
         font-weight: 600;
-        margin-left: 8px;
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
+
+        &:not(:first-child) {
+          margin-left: 8px;
+        }
       }
     }
 

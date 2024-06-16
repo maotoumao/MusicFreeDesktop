@@ -27,7 +27,8 @@
     "add": "新增",
     "save": "保存",
     "clear": "清除",
-    "open": "打開"
+    "open": "打開",
+    "status": "狀態"
   },
 
   "media": {
@@ -156,7 +157,10 @@
     "create_local_sheet": "創建歌單",
     "starred_sheets": "我的收藏",
 
-    "delete_sheet": "刪除歌單"
+    "delete_sheet": "刪除歌單",
+    "rename_sheet": "重歌單",
+    "unstar_sheet": "取消收藏",
+    "recently_play": "最近播放"
   },
   "app_header": {
     "nav_back": "返回",
@@ -165,7 +169,9 @@
     "search_history": "搜尋歷史",
     "settings": "設置",
     "minimize": "最小化",
-    "exit": "退出"
+    "minimode": "迷你模式",
+    "exit": "退出",
+    "theme": "主題"
   },
   "music_bar": {
     "open_music_detail_page": "打開歌曲詳情",
@@ -193,7 +199,10 @@
     "link_media_lyric": "鏈接歌詞",
     "media_lyric_linked": "已鏈接歌詞：",
     "unlink_media_lyric": "取消鏈接歌詞",
-    "toast_media_lyric_unlinked": "已取消鏈接歌詞"
+    "toast_media_lyric_unlinked": "已取消鏈接歌詞",
+    "translation": "翻譯",
+    "show_translation": "顯示翻譯",
+    "hide_translation": "隱藏翻譯"
   },
   "bottom_loading_state": {
     "reached_end": "~~~ 沒有更多了 ~~~",
@@ -232,7 +241,8 @@
   },
   "music_sheet_like_view": {
     "play_all": "播放全部",
-    "add_to_sheet": "添加到歌單"
+    "add_to_sheet": "添加到歌單",
+    "star": "收藏"
   },
   "settings": {
     "choose_path": "選擇路徑",
@@ -277,7 +287,9 @@
       "double_click_music_list": "雙擊歌曲列表時",
       "add_music_to_playlist": "添加歌曲到播放清單",
       "replace_playlist_with_musiclist": "用當前歌單替換播放清單",
-      "audio_output_device": "音頻輸出設備"
+      "audio_output_device": "音頻輸出設備",
+      "when_device_removed": "當音頻裝置被移除時",
+      "continue_playing": "繼續播放"
     },
     "download": {
       "download_folder": "下載文件夾",
@@ -299,18 +311,6 @@
     "plugin": {
       "auto_update_plugin": "啟動應用時自動更新插件",
       "not_check_plugin_version": "安裝插件時不檢查版本"
-    },
-    "theme": {
-      "example_theme_hint": "這裡有一些示例主題：",
-      "example_theme_subscription_hint": "你也可以關注我們的微信：<highlight>一隻貓貓</highlight>，回復 <highlight>MusicFree 主題包</highlight> 獲取下載連結（定期更新）",
-      "install_theme": "安裝主題包",
-      "uninstall_theme": "卸載主題包",
-      "musicfree_theme": "MusicFree 主題",
-      "all_files": "所有文件",
-      "install_theme_success": "主題 {{name}} 安裝成功~",
-      "install_theme_fail": "安裝主題失敗：{{reason}}",
-      "uninstall_theme_success": "主題 {{name}} 卸載成功~",
-      "uninstall_theme_fail": "卸載主題失敗：{{reason}}"
     },
     "short_cut": {
       "enable_local": "啟用應用內快捷鍵",
@@ -373,5 +373,23 @@
     "unlock_desktop_lyric": "解鎖桌面歌詞",
     "lock_desktop_lyric": "鎖定桌面歌詞",
     "no_playing_music": "目前無正在播放的音樂"
+  },
+  "theme": {
+    "tab_local": "本地主題",
+    "tab_remote": "主題市場",
+    "download_and_use": "下載並使用",
+    "use_theme": "使用主題",
+    "install_theme": "安裝主題",
+    "update_theme": "更新主題",
+    "uninstall_theme": "卸載主題",
+    "musicfree_theme": "MusicFree 主題",
+    "all_files": "全部檔案",
+    "install_theme_success": "安裝主題{{name}}成功~",
+    "install_theme_fail": "安裝主題失敗: {{reason}}",
+    "uninstall_theme_success": "卸載主題{{name}}成功~",
+    "uninstall_theme_fail": "卸載主題失敗: {{reason}}",
+    "how_to_submit_new_theme": "💡如何提交新主題: 主題市場中的主題與 <Github>MusicFreeThemePacks</Github> 倉庫同步，如果需要提交新主題請直接提PR。",
+    "load_remote_theme_error": "出錯啦...",
+    "invalid_theme": "主題無效: {{reason}}"
   }
 }

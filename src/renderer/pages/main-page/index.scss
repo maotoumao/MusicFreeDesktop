@@ -1,14 +1,20 @@
 .page-container {
-    flex: auto;
-    overflow-y: auto;
-    overflow-x: hidden;
-    width: 100%;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    position: relative;
+  flex: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  position: relative;
 }
 
 .page-container-full-width {
-    padding-left: 0;
-    padding-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.page-container-fw {
+  @extend .page-container;
+  padding-left: 0;
+  padding-right: 0;
 }

@@ -23,6 +23,11 @@ import {
   setupPlayerSyncHandler,
 } from "../core/command-handler";
 import ThemePack from "@/shared/themepack/renderer";
+import {
+  addToRecentlyPlaylist,
+  setupRecentlyPlaylist,
+} from "../core/recently-playlist";
+import { TrackPlayerEvent } from "../core/track-player/enum";
 
 setAutoFreeze(false);
 
@@ -43,6 +48,7 @@ export default async function () {
   setupDeviceChange();
   localMusic.setupLocalMusic();
   await Downloader.setupDownloader();
+  setupRecentlyPlaylist();
 
   // 自动更新插件
   if (getAppConfigPath("plugin.autoUpdatePlugin")) {
@@ -151,6 +157,11 @@ function setupEvents() {
     } else {
       MusicSheet.frontend.addMusicToFavorite(realItem);
     }
+  });
+
+  // 最近播放
+  trackPlayer.on(TrackPlayerEvent.MusicChanged, (musicItem) => {
+    addToRecentlyPlaylist(musicItem);
   });
 }
 

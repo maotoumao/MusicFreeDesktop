@@ -11,7 +11,10 @@ export default function PluginManagerView() {
   const { t } = useTranslation();
 
   return (
-    <div className="plugin-manager-view-container">
+    <div
+      id="page-container"
+      className="page-container plugin-manager-view-container"
+    >
       <div className="header">
         {t("plugin_management_page.plugin_management")}
       </div>

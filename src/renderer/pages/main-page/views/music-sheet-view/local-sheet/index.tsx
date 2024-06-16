@@ -19,6 +19,7 @@ export default function LocalSheet() {
 
   return (
     <MusicSheetlikeView
+      hidePlatform
       musicSheet={_musicSheet}
       state={loading}
       musicList={musicSheet?.musicList ?? []}

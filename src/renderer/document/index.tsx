@@ -8,7 +8,6 @@ import MainPage from "../pages/main-page";
 import { ContextMenuComponent } from "../components/ContextMenu";
 import { ToastContainer } from "react-toastify";
 
-
 import "rc-slider/assets/index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css"; // 全局样式
@@ -48,7 +47,6 @@ function Root() {
 }
 
 function BootstrapComponent(): null {
-
   useBootstrap();
 
   return null;

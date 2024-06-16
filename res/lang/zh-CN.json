@@ -159,7 +159,8 @@
 
     "delete_sheet": "删除歌单",
     "rename_sheet": "重命名歌单",
-    "unstar_sheet": "取消收藏"
+    "unstar_sheet": "取消收藏",
+    "recently_play": "最近播放"
   },
   "app_header": {
     "nav_back": "后退",
@@ -311,7 +312,6 @@
       "auto_update_plugin": "打开软件时自动更新插件",
       "not_check_plugin_version": "安装插件时不校验版本"
     },
-
     "short_cut": {
       "enable_local": "启用软件内快捷键",
       "enable_global": "启用全局快捷键",

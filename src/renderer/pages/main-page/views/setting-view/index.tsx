@@ -18,9 +18,6 @@ export default function SettingView() {
   const intersectionRatioRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
-    document
-      .getElementById("page-container")
-      ?.classList?.add("page-container-full-width");
     intersectionObserverRef.current = new IntersectionObserver(
       (targets) => {
         const ratio = intersectionRatioRef.current;
@@ -62,7 +59,10 @@ export default function SettingView() {
   }, []);
 
   return (
-    <div className="setting-view--container">
+    <div
+      id="page-container"
+      className="page-container-fw setting-view--container"
+    >
       <div className="setting-view--header">
         <div className="tab-list-container">
           {routers.map((setting) => (

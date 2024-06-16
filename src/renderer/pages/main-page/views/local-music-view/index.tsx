@@ -74,7 +74,8 @@ export default function LocalMusicView() {
 
   return (
     <div
-      className="local-music-view--container"
+      id="page-container"
+      className="page-container local-music-view--container"
       data-full-page={displayView !== DisplayView.LIST}
     >
       <div className="header">{t("local_music_page.local_music")}</div>

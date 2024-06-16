@@ -74,6 +74,8 @@ interface IMusicListProps {
   enableDrag?: boolean;
   /** 拖拽结束 */
   onDragEnd?: (newMusicList: IMusic.IMusicItem[]) => void;
+  /** context */
+  contextMenu?: IContextMenuItem[];
 }
 
 const columnHelper = createColumnHelper<IMusic.IMusicItem>();

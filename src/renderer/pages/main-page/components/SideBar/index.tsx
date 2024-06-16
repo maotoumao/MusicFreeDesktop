@@ -36,6 +36,11 @@ export default function () {
       title: t("side_bar.plugin_management"),
       route: "plugin-manager-view",
     },
+    {
+      iconName: "clock",
+      title: t("side_bar.recently_play"),
+      route: "recently_play",
+    },
   ] as const;
 
   return (

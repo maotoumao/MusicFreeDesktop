@@ -27,7 +27,8 @@
     "add": "Add",
     "save": "Save",
     "clear": "Clear",
-    "open": "Open"
+    "open": "Open",
+    "status": "Status"
   },
 
   "media": {
@@ -156,7 +157,10 @@
     "create_local_sheet": "Create Playlist",
     "starred_sheets": "Favorites",
 
-    "delete_sheet": "Delete Playlist"
+    "delete_sheet": "Delete",
+    "rename_sheet": "Rename",
+    "unstar_sheet": "Unstar",
+    "recently_play": "Recently Play"
   },
   "app_header": {
     "nav_back": "Back",
@@ -165,7 +169,9 @@
     "search_history": "Search History",
     "settings": "Settings",
     "minimize": "Minimize",
-    "exit": "Exit"
+    "minimode": "Minimode",
+    "exit": "Exit",
+    "theme": "Theme"
   },
   "music_bar": {
     "open_music_detail_page": "Open Song Details",
@@ -193,7 +199,10 @@
     "link_media_lyric": "Link Lyric",
     "media_lyric_linked": "Lyric Linked: ",
     "unlink_media_lyric": "Unlink Lyric",
-    "toast_media_lyric_unlinked": "Lyric Unlinked"
+    "toast_media_lyric_unlinked": "Lyric Unlinked",
+    "translation": "Translation",
+    "show_translation": "Show Translation",
+    "hide_translation": "Hide Translation"
   },
   "bottom_loading_state": {
     "reached_end": "~~~ End ~~~",
@@ -232,7 +241,8 @@
   },
   "music_sheet_like_view": {
     "play_all": "Play All",
-    "add_to_sheet": "Add to Playlist"
+    "add_to_sheet": "Add to Playlist",
+    "star": "Star"
   },
   "settings": {
     "choose_path": "Choose Path",
@@ -277,7 +287,9 @@
       "double_click_music_list": "When double-clicking the music list",
       "add_music_to_playlist": "Add the selected song to the playback queue",
       "replace_playlist_with_musiclist": "Replace playback queue with current music list",
-      "audio_output_device": "Audio output device"
+      "audio_output_device": "Audio output device",
+      "when_device_removed": "When device is removed",
+      "continue_playing": "Continue playing"
     },
     "download": {
       "download_folder": "Download Directory",
@@ -299,18 +311,6 @@
     "plugin": {
       "auto_update_plugin": "Automatically update plugins on startup",
       "not_check_plugin_version": "Do not check plugin version when installing"
-    },
-    "theme": {
-      "example_theme_hint": "Here are some example themes:",
-      "example_theme_subscription_hint": "You can also follow the WeChat public account: <highlight>A Cat-headed Cat</highlight>, and reply with <highlight>MusicFree Theme Pack</highlight> to get the download link (updated periodically)",
-      "install_theme": "Install Theme Pack",
-      "uninstall_theme": "Uninstall Theme Pack",
-      "musicfree_theme": "MusicFree Theme",
-      "all_files": "All Files",
-      "install_theme_success": "Installed theme {{name}} successfully~",
-      "install_theme_fail": "Failed to install theme: {{reason}}",
-      "uninstall_theme_success": "Uninstalled theme {{name}} successfully~",
-      "uninstall_theme_fail": "Failed to uninstall theme: {{reason}}"
     },
     "short_cut": {
       "enable_local": "Enable in-app shortcuts",
@@ -373,5 +373,23 @@
     "unlock_desktop_lyric": "Unlock Desktop Lyrics",
     "lock_desktop_lyric": "Lock Desktop Lyrics",
     "no_playing_music": "No Music Playing"
+  },
+  "theme": {
+    "tab_local": "Local Theme",
+    "tab_remote": "Theme Marketplace",
+    "download_and_use": "Download and Use",
+    "use_theme": "Use Theme",
+    "install_theme": "Install Theme",
+    "update_theme": "Update Theme",
+    "uninstall_theme": "Uninstall Theme",
+    "musicfree_theme": "MusicFree Theme",
+    "all_files": "All Files",
+    "install_theme_success": "Successfully installed theme {{name}}~",
+    "install_theme_fail": "Failed to install theme: {{reason}}",
+    "uninstall_theme_success": "Successfully uninstalled theme {{name}}~",
+    "uninstall_theme_fail": "Failed to uninstall theme: {{reason}}",
+    "how_to_submit_new_theme": "💡How to submit a new theme: The themes in the theme marketplace are synchronized with the <Github>MusicFreeThemePacks</Github> repository. If you need to submit a new theme, please make a pull request directly.",
+    "load_remote_theme_error": "An error occurred...",
+    "invalid_theme": "Invalid theme: {{reason}}"
   }
 }

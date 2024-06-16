@@ -87,6 +87,7 @@ input {
   }
 }
 
+// 按钮样式
 div[role="button"] {
   cursor: pointer;
   user-select: none;
@@ -114,6 +115,7 @@ div[role="button"] {
     border: 1px solid currentColor;
     width: fit-content;
     line-height: 1em;
+    background-color: color-mix(in srgb, currentColor 15%, transparent);
   }
 
   &[data-type="dangerButton"] {

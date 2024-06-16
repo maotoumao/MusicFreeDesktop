@@ -14,17 +14,21 @@ import { useTranslation } from "react-i18next";
 
 import "./index.scss";
 
-
 export default function ToplistView() {
   const availablePlugins = getSortedSupportedPlugin("getTopLists");
   const navigate = useNavigate();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
-    <div className="toplist-view--container">
+    <div id="page-container" className="page-container toplist-view--container">
       <Condition
         condition={availablePlugins.length}
-        falsy={<NoPlugin supportMethod={t("plugin.method_get_top_lists")} height={"100%"}></NoPlugin>}
+        falsy={
+          <NoPlugin
+            supportMethod={t("plugin.method_get_top_lists")}
+            height={"100%"}
+          ></NoPlugin>
+        }
       >
         <Tab.Group
           defaultIndex={history.state?.usr?.pluginIndex}
