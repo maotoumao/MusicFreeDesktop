@@ -130,6 +130,7 @@ export const createLyricWindow = (): BrowserWindow => {
   });
 
   if (process.platform === "darwin") {
+    // @ts-ignore ignore error in windows legacy
     lyricWindow.invalidateShadow();
   }
 
