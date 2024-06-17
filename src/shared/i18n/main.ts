@@ -58,9 +58,18 @@ export async function setupI18n(options?: ISetupI18nOptions) {
     if (defaultLang && !allLangs.includes(defaultLang)) {
       defaultLang = undefined;
     }
+
     if (!defaultLang) {
-      defaultLang =
-        app.getLocale() || allLangs.includes("en-US") ? "en-US" : allLangs[0];
+      const appLocale = app.getLocale();
+      if (allLangs.includes(appLocale)) {
+        defaultLang = appLocale;
+      } else if (appLocale.includes("zh") && allLangs.includes("zh-CN")) {
+        defaultLang = "zh-CN";
+      } else if (allLangs.includes("en-US")) {
+        defaultLang = "en-US";
+      } else {
+        defaultLang = allLangs[0];
+      }
     }
 
     const langContent = await readLangContent(defaultLang);
