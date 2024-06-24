@@ -1,7 +1,7 @@
 {
   "name": "musicfree-desktop",
   "productName": "MusicFree",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "一个插件化的音乐播放器",
   "main": ".webpack/main",
   "scripts": {
