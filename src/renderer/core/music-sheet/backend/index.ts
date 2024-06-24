@@ -51,9 +51,7 @@ export function getAllStarredSheets() {
 export async function queryAllSheets() {
   try {
     // 读取全部歌单
-    const allSheets = await musicSheetDB.sheets
-      .orderBy("$$sortIndex")
-      .toArray();
+    const allSheets = await musicSheetDB.sheets.toArray();
     const dbDefaultSheet = allSheets.find(
       (item) => item.id === defaultSheet.id
     );
