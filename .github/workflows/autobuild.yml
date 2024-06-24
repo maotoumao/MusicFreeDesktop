@@ -66,7 +66,7 @@ jobs:
                   path: ${{ github.workspace }}/MusicFree-win32-x64-legacy-portable.zip
 
     build-macos-x64: 
-        runs-on: macos-latest
+        runs-on: macos-13
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-python@v4
@@ -77,7 +77,7 @@ jobs:
                 node-version: 18
             - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
             - run: npm install
-            - run: npm run make -- --arch="x64"
+            - run: npm run make
             - run: ls ./out/make
             - name: Upload Setup
               uses: actions/upload-artifact@v4
