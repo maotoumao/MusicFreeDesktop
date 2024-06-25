@@ -13,6 +13,7 @@ export interface IGlobalContext {
     userData: string;
     temp: string;
     downloads: string;
+    res: string;
   };
   platform: NodeJS.Platform;
 }

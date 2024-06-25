@@ -1,4 +1,4 @@
-import MusicSheet from "@/renderer/core/music-sheet";
+import MusicSheet, { defaultSheet } from "@/renderer/core/music-sheet";
 import Base from "../Base";
 import "./index.scss";
 import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
@@ -61,7 +61,11 @@ export default function AddMusicToSheet(props: IAddMusicToSheetProps) {
                 src={sheet.artwork ?? albumImg}
                 onError={setFallbackAlbum}
               ></img>
-              <span>{sheet.title}</span>
+              <span>
+                {sheet.id === defaultSheet.id
+                  ? t("media.default_favorite_sheet_name")
+                  : sheet.title}
+              </span>
             </div>
           ))}
         </div>
