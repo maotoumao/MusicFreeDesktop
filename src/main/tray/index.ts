@@ -266,6 +266,7 @@ export async function setupTrayMenu() {
 export function setTrayTitle(str: string) {
   if (!str || !str.length) {
     tray.setTitle("");
+    return;
   }
   if (str.length > 7) {
     tray?.setTitle(" " + str.slice(0) + "...");
