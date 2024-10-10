@@ -1,12 +1,6 @@
 import log from "electron-log/main"
 import {safeStringify} from "@/common/safe-serialization";
 
-export function setupLogger() {
-    log.initialize();
-    // Set max size of log file to 2MB
-    log.transports.file.maxSize = 2 * 1024 * 1024;
-}
-
 
 function logError(msg: string, error: Error, extra?: any) {
     log.error(msg, error?.name, error?.message, error?.stack, safeStringify(extra));

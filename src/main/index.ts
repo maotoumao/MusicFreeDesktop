@@ -5,6 +5,8 @@ import {
     getLyricWindow,
     getMainWindow,
     showMainWindow,
+    getMinimodeWindow,
+    showMinimodeWindow,
 } from "./window";
 import setupIpcMain, {handleProxy} from "./ipc";
 import {setupPluginManager} from "./core/plugin-manager";
@@ -24,13 +26,8 @@ import {
 } from "@/shared/app-config/main";
 import {setupGlobalContext} from "@/shared/global-context/main";
 import {setupI18n} from "@/shared/i18n/main";
-import {
-    createMiniModeWindow,
-    getMinimodeWindow,
-    showMinimodeWindow,
-} from "./window/minimode-window";
 import {handleDeepLink} from "./utils/deep-link";
-import logger, {setupLogger} from "@shared/logger/main";
+import logger from "@shared/logger/main";
 import {PlayerState} from "@/common/constant";
 
 
@@ -52,7 +49,6 @@ if (process.platform === "win32") {
 }
 
 setAutoFreeze(false);
-setupLogger();
 
 
 if (process.defaultApp) {

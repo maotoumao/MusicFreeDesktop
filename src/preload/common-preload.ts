@@ -5,6 +5,7 @@ import fsDelegate from "./internal/fs-delegate";
 import path from "path";
 import { rimraf } from "rimraf";
 import utils from "./internal/utils";
+import "electron-log/preload";
 import "@shared/i18n/preload";
 import "@shared/global-context/preload";
 import "@shared/app-db/preload";

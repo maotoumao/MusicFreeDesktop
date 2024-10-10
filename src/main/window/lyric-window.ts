@@ -1,8 +1,8 @@
-import { BrowserWindow, app, screen, nativeImage } from "electron";
-import { getAppConfigPath, setAppConfigPath } from "@/shared/app-config/main";
-import { ipcMainOn } from "@/shared/ipc/main";
+import {app, BrowserWindow, nativeImage, screen} from "electron";
+import {getAppConfigPath, setAppConfigPath} from "@/shared/app-config/main";
+import {ipcMainOn} from "@/shared/ipc/main";
 import debounce from "lodash.debounce";
-import { registerExtensionWindow } from "@/shared/message-hub/main";
+import {registerExtensionWindow} from "@/shared/message-hub/main";
 import getResourcePath from "@/utils/main/get-resource-path";
 import makeWindowFullyDraggable from "@/utils/main/make-window-fully-draggable";
 
@@ -27,7 +27,7 @@ const dSetLyricWindowConfig = debounce(
   }
 );
 
-export const createLyricWindow = (): BrowserWindow => {
+export const _createWindow = (): BrowserWindow => {
   // Create the browser window.
   const width = 920;
   const height = 160;
@@ -142,9 +142,9 @@ export const createLyricWindow = (): BrowserWindow => {
   return lyricWindow;
 };
 
-export const closeLyricWindow = () => {
+export const _closeWindow = () => {
   lyricWindow?.close();
   lyricWindow = null;
 };
 
-export const getLyricWindow = () => lyricWindow;
+export const _getWindow = () => lyricWindow;

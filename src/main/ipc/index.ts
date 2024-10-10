@@ -5,6 +5,9 @@ import {
   getLyricWindow,
   getMainWindow,
   showMainWindow,
+  closeMinimodeWindow,
+  getMinimodeWindow,
+  showMinimodeWindow,
 } from "../window";
 import { app, dialog, shell } from "electron";
 import fs from "fs/promises";
@@ -21,12 +24,6 @@ import setThumbImg from "../utils/set-thumb-img";
 import setThumbbarBtns from "../utils/set-thumbbar-btns";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { IAppConfig } from "@/shared/app-config/type";
-import {
-  closeMinimodeWindow,
-  createMiniModeWindow,
-  getMinimodeWindow,
-  showMinimodeWindow,
-} from "../window/minimode-window";
 import {appUpdateSources, PlayerState} from "@/common/constant";
 
 export default function setupIpcMain() {
