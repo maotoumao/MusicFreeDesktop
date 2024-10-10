@@ -8,6 +8,7 @@ import { showModal } from "../components/Modal";
 import checkUpdate from "../utils/check-update";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
 import Themepack from "@/shared/themepack/renderer";
+import logger from "@shared/logger/renderer";
 
 export default function useBootstrap() {
   const navigate = useNavigate();
@@ -44,5 +45,6 @@ export default function useBootstrap() {
     if (getAppConfigPath("normal.checkUpdate")) {
       checkUpdate();
     }
+    logger.logPerf("Bundle First Screen");
   }, []);
 }

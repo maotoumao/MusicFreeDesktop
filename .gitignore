@@ -96,3 +96,5 @@ tmp
 plugins
 
 .VSCodeCounter
+
+.idea/

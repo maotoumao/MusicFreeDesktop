@@ -14,9 +14,12 @@ import "./index.css"; // 全局样式
 import "./index.scss";
 import { toastDuration } from "@/common/constant";
 import useBootstrap from "./useBootstrap";
+import logger from "@shared/logger/renderer";
 
+logger.logPerf("Create Bundle");
 bootstrap().then(() => {
-  ReactDOM.createRoot(document.getElementById("root")).render(<Root></Root>);
+    logger.logPerf("Bundle Bootstrap Ready");
+    ReactDOM.createRoot(document.getElementById("root")).render(<Root></Root>);
 });
 
 function Root() {

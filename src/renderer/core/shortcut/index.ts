@@ -1,7 +1,5 @@
 import hotkeys from "hotkeys-js";
 
-import trackPlayer from "../track-player";
-import { PlayerState, TrackPlayerEvent } from "../track-player/enum";
 import { IAppConfig } from "@/shared/app-config/type";
 import Evt from "../events";
 import { shortCutKeys, shortCutKeysEvts } from "@/common/constant";
@@ -50,7 +48,7 @@ export function bindShortCut(
   // 原有的快捷键
   const mapKey = `${key}${global ? "-g" : ""}`;
   // const originalHotKey = boundKeyMap.get(mapKey);
-  // console.log(originalHotKey, shortCut);
+  // console.logger(originalHotKey, shortCut);
   // if (originalHotKey?.join?.("+") === shortCut?.join?.("+")) {
   //   // 没改
   //   return;

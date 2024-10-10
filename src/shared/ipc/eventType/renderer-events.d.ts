@@ -24,8 +24,8 @@ declare namespace IpcEvents {
     "set-minimode": boolean;
 
     "sync-current-music": IMusic.IMusicItem;
-    "sync-current-playing-state": import("@/renderer/core/track-player/enum").PlayerState;
-    "sync-current-repeat-mode": import("@/renderer/core/track-player/enum").RepeatMode;
+    "sync-current-playing-state": import("@/common/constant").PlayerState;
+    "sync-current-repeat-mode": import("@/common/constant").RepeatMode;
     "sync-current-lyric": string;
 
     // "send-to-lyric-window": {

@@ -2,10 +2,10 @@ import { asyncCacheFn } from "@/common/cache-fn";
 import axios from "axios";
 import fs from "fs/promises";
 import sharp from "sharp";
-import { getResPath } from "./get-res-path";
+import getResourcePath from "@/utils/main/get-resource-path";
 
 const getDefaultAlbumBuffer = asyncCacheFn(async () => {
-  return await fs.readFile(getResPath("album-cover.jpeg"));
+  return await fs.readFile(getResourcePath("album-cover.jpeg"));
 });
 
 let hasHooked = false;

@@ -1,6 +1,6 @@
-import { TrackPlayerSyncType } from "@/common/constant";
+import { TrackPlayerSyncType, PlayerState } from "@/common/constant";
 import trackPlayer from "../track-player";
-import { PlayerState, TrackPlayerEvent } from "../track-player/enum";
+import { TrackPlayerEvent } from "../track-player/enum";
 import { getAppConfigPath } from "@/shared/app-config/renderer";
 import { getGlobalContext } from "@/shared/global-context/renderer";
 import MessageHub from "@/shared/message-hub/renderer";

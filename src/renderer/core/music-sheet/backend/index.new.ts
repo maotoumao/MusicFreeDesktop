@@ -95,7 +95,7 @@ export async function updateSheet(
   //   });
   // } catch (e) {
   //   // 更新歌单信息失败
-  //   console.log(e);
+  //   console.logger(e);
   // }
 }
 

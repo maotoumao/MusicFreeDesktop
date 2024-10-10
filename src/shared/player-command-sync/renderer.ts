@@ -1,8 +1,7 @@
 // 给扩展窗口用的
 import Store from "@/common/store";
 import MessageHub from "../message-hub/renderer";
-import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
-import { TrackPlayerSyncType } from "@/common/constant";
+import { TrackPlayerSyncType, PlayerState, RepeatMode } from "@/common/constant";
 import { IParsedLrcItem } from "@/renderer/utils/lyric-parser";
 
 export function sendCommand<T extends keyof ICommon.ICommand>(

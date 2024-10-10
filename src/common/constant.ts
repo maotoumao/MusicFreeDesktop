@@ -135,3 +135,25 @@ export enum TrackPlayerSyncType {
   CurrentLyricChanged = "CurrentLyricChanged",
   ProgressChanged = "ProgressChanged",
 }
+
+/** 播放器状态 */
+export enum PlayerState {
+  /** 无音频 */
+  None,
+  /** 播放中 */
+  Playing,
+  /** 暂停 */
+  Paused,
+  /** 缓冲中 */
+  Buffering,
+}
+
+/** 播放模式 */
+export enum RepeatMode {
+  /** 随机 */
+  Shuffle = "shuffle",
+  /** 播放队列 */
+  Queue = "queue-repeat",
+  /** 单曲循环 */
+  Loop = "loop",
+}

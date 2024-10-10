@@ -9,7 +9,6 @@ import {
 import { app, dialog, shell } from "electron";
 import fs from "fs/promises";
 import { currentMusicInfoStore } from "../store/current-music";
-import { PlayerState } from "@/renderer/core/track-player/enum";
 import { setTrayTitle, setupTrayMenu } from "../tray";
 import axios from "axios";
 import { compare } from "compare-versions";
@@ -28,7 +27,7 @@ import {
   getMinimodeWindow,
   showMinimodeWindow,
 } from "../window/minimode-window";
-import { appUpdateSources } from "@/common/constant";
+import {appUpdateSources, PlayerState} from "@/common/constant";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {

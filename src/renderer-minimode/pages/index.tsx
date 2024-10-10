@@ -1,6 +1,6 @@
 import { useState } from "react";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { PlayerState } from "@/renderer/core/track-player/enum";
+import { PlayerState } from "@/common/constant";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 
 import "./index.scss";

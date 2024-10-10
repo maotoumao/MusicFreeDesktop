@@ -14,7 +14,7 @@ declare namespace IpcEvents {
       // 同步歌词
       lrc: import("@/renderer/utils/lyric-parser").IParsedLrcItem[];
       // 播放状态
-      playerState: import("@/renderer/core/track-player/enum").PlayerState;
+      playerState: import("@/common/constant").PlayerState;
       // 当前音乐
       currentMusic: IMusic.IMusicItem;
     }>;

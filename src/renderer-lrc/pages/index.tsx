@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
-import { PlayerState } from "@/renderer/core/track-player/enum";
+import { PlayerState } from "@/common/constant";
 import getTextWidth from "@/renderer/utils/get-text-width";
 import { useAppConfig } from "@/shared/app-config/renderer";
 import {

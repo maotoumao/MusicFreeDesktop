@@ -41,7 +41,7 @@ const _require = (packageName: string) => {
 };
 
 // const _consoleBind = function (
-//     method: 'log' | 'error' | 'info' | 'warn',
+//     method: 'logger' | 'error' | 'info' | 'warn',
 //     ...args: any
 // ) {
 //     const fn = console[method];
@@ -52,7 +52,7 @@ const _require = (packageName: string) => {
 // };
 
 // const _console = {
-//     log: _consoleBind.bind(null, 'log'),
+//     logger: _consoleBind.bind(null, 'logger'),
 //     warn: _consoleBind.bind(null, 'warn'),
 //     info: _consoleBind.bind(null, 'info'),
 //     error: _consoleBind.bind(null, 'error'),

@@ -83,6 +83,7 @@
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.11",
     "dexie": "^3.2.4",
+    "electron-log": "^5.2.0",
     "eventemitter3": "^5.0.1",
     "he": "^1.2.0",
     "hls.js": "^1.5.8",

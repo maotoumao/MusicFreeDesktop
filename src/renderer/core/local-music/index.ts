@@ -42,7 +42,7 @@ async function setupLocalMusic() {
 
     // ipcRendererSend("add-watch-dir", localWatchDir);
     // ipcRendererOn("sync-local-music", (items) => {
-    //   console.log("set!!", items);
+    //   console.logger("set!!", items);
     //   localMusicListStore.setValue(items);
     // });
 

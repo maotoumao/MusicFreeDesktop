@@ -1,5 +1,5 @@
 import Store from "@/common/store";
-import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
+import {PlayerState, RepeatMode} from "@/common/constant";
 
 export const currentMusicInfoStore = new Store<{
   currentMusic: IMusic.IMusicItem | null;

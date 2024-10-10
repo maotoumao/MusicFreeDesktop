@@ -27,7 +27,7 @@ async function checkPath() {
     const res = await fs.stat(configDirPath);
     if (!res.isDirectory()) {
       await rimraf(configDirPath);
-      throw new Error();
+      throw new Error("Not a valid path");
     }
   } catch {
     fs.mkdir(configDirPath, {

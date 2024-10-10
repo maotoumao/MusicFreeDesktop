@@ -30,7 +30,7 @@ async function setupWatcher(initPaths?: string[]) {
       musicItem.$$localPath = fp;
       setInternalData<IMusic.IMusicItemInternalData>(
         musicItem,
-        "downloadData", 
+        "downloadData",
         {
             path: fp,
             quality: "standard"
@@ -101,7 +101,7 @@ async function changeWatchPath(addPaths?: string[], rmPaths?: string[]) {
         // watcher._watched.delete(it);
       });
     }
-    // console.log("WATCH PATH CHANGED", addPaths, rmPaths, watcher);
+    // console.logger("WATCH PATH CHANGED", addPaths, rmPaths, watcher);
   } catch (e) {
     console.log(e);
   }

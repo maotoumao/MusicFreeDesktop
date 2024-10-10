@@ -8,13 +8,13 @@ import {
 } from "electron";
 import { showMainWindow } from "../window";
 import { currentMusicInfoStore } from "../store/current-music";
-import { PlayerState, RepeatMode } from "@/renderer/core/track-player/enum";
+import { PlayerState, RepeatMode } from "@/common/constant";
 import { ipcMainSendMainWindow } from "@/shared/ipc/main";
-import { getResPath } from "../utils/get-res-path";
 import { getAppConfigPath } from "@/shared/app-config/main";
 import { setDesktopLyricLock, setLyricWindow } from "../ipc";
 import { t } from "@/shared/i18n/main";
 import { sendCommand } from "@/shared/player-command-sync/main";
+import getResourcePath from "@/utils/main/get-resource-path";
 
 let tray: Tray | null = null;
 
@@ -69,7 +69,7 @@ if (process.platform === "darwin") {
 
 export function setupTray() {
   tray = new Tray(
-    nativeImage.createFromPath(getResPath("logo.png")).resize({
+    nativeImage.createFromPath(getResourcePath("logo.png")).resize({
       width: 32,
       height: 32,
     })
