@@ -1,7 +1,6 @@
 import { asyncCacheFn } from "@/common/cache-fn";
 import axios from "axios";
 import fs from "fs/promises";
-import sharp from "sharp";
 import getResourcePath from "@/utils/main/get-resource-path";
 
 const getDefaultAlbumBuffer = asyncCacheFn(async () => {
@@ -42,6 +41,7 @@ export default async function (src: string, hwnd: bigint) {
 
     const size = 106;
 
+    const sharp = (await import("sharp")).default;
     const result = await sharp(buffer)
       .resize(size, size, {
         fit: "cover",

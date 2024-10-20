@@ -1,5 +1,5 @@
 import { BrowserWindow, app, ipcMain } from "electron";
-import { IpcRendererEvt } from "./internal/common";
+import { _IpcRendererEvt } from "./internal/common";
 import path from "path";
 
 declare const WORKER_DOWNLOADER_WEBPACK_ENTRY: string;
@@ -7,7 +7,7 @@ declare const LOCAL_FILE_WATCHER_WEBPACK_ENTRY: string;
 declare const DB_WEBPACK_ENTRY: string;
 
 export function setupGlobalContext() {
-  ipcMain.on(IpcRendererEvt.GET_GLOBAL_DATA, (evt) => {
+  ipcMain.on(_IpcRendererEvt.GET_GLOBAL_DATA, (evt) => {
     evt.returnValue = {
       appVersion: app.getVersion(),
       workersPath: {

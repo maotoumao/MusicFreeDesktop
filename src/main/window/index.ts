@@ -15,3 +15,4 @@ export {
     _getWindow as getMinimodeWindow,
     _showWindow as showMinimodeWindow,
 } from "./minimode-window";
+
