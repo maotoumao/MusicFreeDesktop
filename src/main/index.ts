@@ -15,7 +15,6 @@ import {setupGlobalShortCut} from "./core/global-short-cut";
 import fs from "fs";
 import path from "path";
 import {setAutoFreeze} from "immer";
-import setThumbbarBtns from "./utils/set-thumbbar-btns";
 import {currentMusicInfoStore} from "./store/current-music";
 
 import {
@@ -29,6 +28,7 @@ import {setupI18n} from "@/shared/i18n/main";
 import {handleDeepLink} from "./utils/deep-link";
 import logger from "@shared/logger/main";
 import {PlayerState} from "@/common/constant";
+import ThumbBarManager from "@main/thumb-bar-manager";
 
 
 // portable
@@ -114,8 +114,7 @@ app.whenReady().then(async () => {
             setAppConfigPath("normal.language", lang);
             setupTrayMenu();
             if (process.platform === "win32") {
-                setThumbbarBtns(currentMusicInfoStore.getValue().currentPlayerState === PlayerState.Playing
-                );
+                ThumbBarManager.setThumbBarButtons(getMainWindow(), currentMusicInfoStore.getValue().currentPlayerState === PlayerState.Playing)
             }
         },
     });

@@ -30,7 +30,7 @@ async function checkPath() {
             throw new Error("Not a valid path");
         }
     } catch {
-        fs.mkdir(configDirPath, {
+        await fs.mkdir(configDirPath, {
             recursive: true,
         });
     }

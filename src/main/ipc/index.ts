@@ -20,11 +20,10 @@ import {
   setAppConfigPath,
 } from "@/shared/app-config/main";
 // import { getExtensionWindow, syncExtensionData } from "../core/extensions";
-import setThumbImg from "../utils/set-thumb-img";
-import setThumbbarBtns from "../utils/set-thumbbar-btns";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { IAppConfig } from "@/shared/app-config/type";
 import {appUpdateSources, PlayerState} from "@/common/constant";
+import ThumbBarManager from "@main/thumb-bar-manager";
 
 export default function setupIpcMain() {
   ipcMainOn("min-window", ({ skipTaskBar }) => {
@@ -91,8 +90,7 @@ export default function setupIpcMain() {
     const mainWindow = getMainWindow();
     if (mainWindow) {
       if (process.platform === "win32" && thumbStyle === "artwork") {
-        const hwnd = mainWindow.getNativeWindowHandle().readBigUInt64LE(0);
-        setThumbImg(musicItem?.artwork, hwnd);
+        ThumbBarManager.setThumbImage(mainWindow, musicItem?.artwork);
       }
       if (musicItem) {
         mainWindow.setTitle(
@@ -114,7 +112,8 @@ export default function setupIpcMain() {
     // });
     setupTrayMenu();
     if (process.platform === "win32") {
-      setThumbbarBtns(playerState === PlayerState.Playing);
+      const mainWindow = getMainWindow();
+      ThumbBarManager.setThumbBarButtons(mainWindow, playerState === PlayerState.Playing);
     }
   });
 
