@@ -57,7 +57,7 @@ const config: ForgeConfig = {
             js: "./src/renderer/document/index.tsx",
             name: "main_window",
             preload: {
-              js: "./src/preload/thumb-bar-util.ts",
+              js: "./src/preload/index.ts",
             },
           },
           {

@@ -59,20 +59,16 @@ class AppConfig {
         await this.loadConfig();
 
         // Bind events
-        windowManager.on("WindowCreated", ({windowName}) => {
-            if (windowName === "main") {
-                // sync config
-                ipcMain.handle("sync-app-config", () => {
-                    return this.config;
-                });
+        // sync config
+        ipcMain.handle("@shared/app-config/sync-app-config", () => {
+            return this.config;
+        });
 
-                ipcMain.on("set-app-config", (_rawEvt, data: IAppConfig) => {
-                    /**
-                     * data: {key: value}
-                     */
-                    this.setConfig(data);
-                })
-            }
+        ipcMain.on("@shared/app-config/set-app-config", (_rawEvt, data: IAppConfig) => {
+            /**
+             * data: {key: value}
+             */
+            this.setConfig(data);
         })
     }
 
@@ -119,7 +115,7 @@ class AppConfig {
             originalFs.writeFileSync(this.configPath, rawConfig, "utf-8");
             // 3. Notify to all windows
             this.windowManager.getAllWindows().forEach((window) => {
-                window.webContents.send("set-app-config", data);
+                window.webContents.send("@shared/app-config/update-app-config", data);
             })
 
             this.onAppConfigUpdatedCallbacks.forEach((callback) => {

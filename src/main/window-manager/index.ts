@@ -189,9 +189,12 @@ class WindowManager implements IWindowManager {
     private createLyricWindow() {
         const width = 920;
         const height = 160;
+        const initPosition = AppConfig.getConfig("private.lyricWindowPosition");
         const lyricWindow = new BrowserWindow({
             height,
             width,
+            x: initPosition?.x,
+            y: initPosition?.y,
             transparent: true,
             webPreferences: {
                 preload: LRC_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -260,7 +263,7 @@ class WindowManager implements IWindowManager {
 
     public showLyricWindow() {
         if (!WindowManager.lrcWindow) {
-            this.createMainWindow();
+            this.createLyricWindow();
         }
 
         const lrcWindow = WindowManager.lrcWindow;
@@ -285,9 +288,13 @@ class WindowManager implements IWindowManager {
         // Create the browser window.
         const width = 340;
         const height = 72;
+        const initPosition = AppConfig.getConfig("private.minimodeWindowPosition");
+
         const miniWindow = new BrowserWindow({
             height,
             width,
+            x: initPosition?.x,
+            y: initPosition?.y,
             webPreferences: {
                 preload: MINIMODE_WINDOW_PRELOAD_WEBPACK_ENTRY,
                 nodeIntegration: true,
@@ -322,7 +329,7 @@ class WindowManager implements IWindowManager {
             }
         });
 
-        miniWindow.once("ready-to-show", async () => {
+        miniWindow.once("ready-to-show", () => {
             const position = AppConfig.getConfig("private.minimodeWindowPosition");
             if (position) {
                 this.normalizeWindowPosition(miniWindow, position, async (position) => {

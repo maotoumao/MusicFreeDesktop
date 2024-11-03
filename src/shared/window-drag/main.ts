@@ -36,7 +36,9 @@ const makeWin32WindowFullyDraggable = (
 
     browserWindow.hookWindowMessage(WM_LBUTTONUP, () => {
         dragging = false;
-        onDragEnd(cachePosition);
+        if (cachePosition !== null) {
+            onDragEnd(cachePosition);
+        }
         cachePosition = null;
     });
     browserWindow.hookWindowMessage(

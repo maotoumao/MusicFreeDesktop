@@ -70,7 +70,7 @@ function ShortCutTable() {
                     <div className="short-cut-cell">
                         <ShortCutItem
                             enabled={enableLocalShortCut}
-                            value={shortCuts[it]?.local}
+                            value={shortCuts?.[it]?.local}
                             onChange={(val) => {
                                 bindShortCut(it as IShortCutKeys, val);
                                 const prevShortCuts: any = AppConfig.getConfig("shortCut.shortcuts") || {};

@@ -2,15 +2,15 @@ import { contextBridge, ipcRenderer } from "electron";
 
 
 async function syncConfig() {
-    return await ipcRenderer.invoke("sync-app-config");
+    return await ipcRenderer.invoke("@shared/app-config/sync-app-config");
 }
 
 function setConfig(config: any) {
-    return ipcRenderer.send("set-app-config", config);
+    return ipcRenderer.send("@shared/app-config/set-app-config", config);
 }
 
 function onConfigUpdate(callback: (patch: any) => void) {
-    ipcRenderer.on("sync-app-config", (_event, patch) => {
+    ipcRenderer.on("@shared/app-config/update-app-config", (_event, patch) => {
         callback(patch);
     });
 }

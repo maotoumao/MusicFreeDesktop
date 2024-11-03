@@ -97,7 +97,7 @@ export function setupLocalShortCut() {
   // 固定的快捷键
   shortCutKeys.forEach((key) => {
     const shortCuts = AppConfig.getConfig("shortCut.shortcuts");
-    const shortCut = shortCuts[key];
+    const shortCut = shortCuts?.[key];
     if (shortCut && shortCut.local && shortCut.local.length) {
       bindShortCut(key, shortCut.local);
     }
