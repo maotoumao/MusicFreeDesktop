@@ -128,7 +128,7 @@ export enum DownloadState {
 export const themePackStoreBaseUrl = [
     "https://raw.githubusercontent.com/maotoumao/MusicFreeThemePacks/master/", //github
     "https://cdn.jsdelivr.net/gh/maotoumao/MusicFreeThemePacks@master/",
-    "https://gitee.com/maotoumao/MusicFreeThemePacks/raw/master/", // gitee
+    "https://dev.azure.com/maotoumao/MusicFree/_apis/git/repositories/MusicFreeThemePacks/items?scopePath=/.publish/publish.json&api-version=6.0", // azure
 ];
 
 export const appUpdateSources = [
