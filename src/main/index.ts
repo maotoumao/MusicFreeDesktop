@@ -12,7 +12,7 @@ import logger from "@shared/logger/main";
 import {PlayerState} from "@/common/constant";
 import ThumbBarUtil from "@/utils/main/thumb-bar-util";
 import windowManager from "@main/window-manager";
-import AppConfig from "@shared/app-config.new/main";
+import AppConfig from "@shared/app-config/main";
 import AppState from "@shared/app-state/main";
 import TrayManager from "@main/tray-manager";
 import WindowDrag from "@shared/window-drag/main";

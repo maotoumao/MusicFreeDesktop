@@ -6,7 +6,7 @@ import hotkeys from "hotkeys-js";
 import {bindShortCut} from "@/renderer/core/shortcut";
 import {ipcRendererSend} from "@/shared/ipc/renderer";
 import {useTranslation} from "react-i18next";
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 import {IAppConfig} from "@/types/app-config";
 

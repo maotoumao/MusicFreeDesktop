@@ -46,7 +46,7 @@ import musicSheetDB from "@/renderer/core/db/music-sheet-db";
 import DragReceiver, { startDrag } from "../DragReceiver";
 import { i18n } from "@/shared/i18n/renderer";
 import isLocalMusic from "@/renderer/utils/is-local-music";
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 interface IMusicListProps {
   /** 展示的播放列表 */

@@ -1,4 +1,3 @@
-import {IAppConfig} from "@/shared/app-config/type";
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import InputSettingItem from "../../components/InputSettingItem";
@@ -6,15 +5,11 @@ import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
 import {useEffect, useState} from "react";
 import {normalizeFileSize} from "@/common/normalize-util";
 import {Trans, useTranslation} from "react-i18next";
+import useAppConfig from "@/hooks/useAppConfig";
 
-interface IProps {
-    data: IAppConfig["network"];
-}
 
-export default function Network(props: IProps) {
-    const {data = {} as IAppConfig["network"]} = props;
-
-    const proxyEnabled = !!data.proxy?.enabled;
+export default function Network() {
+    const proxyEnabled = !!useAppConfig("network.proxy.enabled");
 
     const [cacheSize, setCacheSize] = useState(NaN);
 

@@ -15,7 +15,7 @@ import { compare } from "compare-versions";
 import { nanoid } from "nanoid";
 import { addRandomHash } from "@/common/normalize-util";
 import https from "https";
-import AppConfig from "@shared/app-config.new/main";
+import AppConfig from "@shared/app-config/main";
 
 const axios = _axios.create({
   httpsAgent: new https.Agent({

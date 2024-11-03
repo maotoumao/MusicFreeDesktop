@@ -1,4 +1,4 @@
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import "./index.scss";
 import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
 import {toast} from "react-toastify";

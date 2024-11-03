@@ -41,11 +41,11 @@ declare namespace IpcEvents {
     /** 快捷键 */
     "enable-global-short-cut": boolean;
     "bind-global-short-cut": {
-      key: keyof import("../../app-config/type").IAppConfig["shortCut"]["shortcuts"];
+      key: keyof import("@/types/app-config").IAppConfig["shortCut.shortcuts"];
       shortCut: string[];
     };
     "unbind-global-short-cut": {
-      key: keyof import("../../app-config/type").IAppConfig["shortCut"]["shortcuts"];
+      key: keyof import("@/types/app-config").IAppConfig["shortCut.shortcuts"];
       shortCut: string[];
     };
     /** 设置代理 */

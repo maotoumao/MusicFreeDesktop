@@ -5,7 +5,7 @@ import Evt from "../core/events";
 import checkUpdate from "../utils/check-update";
 import Themepack from "@/shared/themepack/renderer";
 import logger from "@shared/logger/renderer";
-import AppConfig from "@/shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 export default function useBootstrap() {
   const navigate = useNavigate();

@@ -1,10 +1,10 @@
 import hotkeys from "hotkeys-js";
 
-import { IAppConfig } from "@/shared/app-config/type";
 import Evt from "../events";
 import { shortCutKeys, shortCutKeysEvts } from "@/common/constant";
 import { ipcRendererSend } from "@/shared/ipc/renderer";
-import AppConfig from "@/shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
+import {IAppConfig} from "@/types/app-config";
 
 
 const originalHotkeysFilter = hotkeys.filter;
@@ -17,7 +17,7 @@ hotkeys.filter = (event) => {
   return originalHotkeysFilter(event);
 };
 
-type IShortCutKeys = keyof IAppConfig["shortCut"]["shortcuts"];
+type IShortCutKeys = keyof IAppConfig["shortCut.shortcuts"];
 
 const baseShortCutFunction = (
   evt: keyof IEventType.IEvents,
@@ -95,10 +95,11 @@ export function unbindShortCut(eventType: IShortCutKeys, global = false) {
 
 export function setupLocalShortCut() {
   // 固定的快捷键
-  shortCutKeys.forEach((it) => {
-    const val = AppConfig.getConfig(`shortCut.shortcuts.${it}`);
-    if (val && val.local && val.local.length) {
-      bindShortCut(it, val.local);
+  shortCutKeys.forEach((key) => {
+    const shortCuts = AppConfig.getConfig("shortCut.shortcuts");
+    const shortCut = shortCuts[key];
+    if (shortCut && shortCut.local && shortCut.local.length) {
+      bindShortCut(key, shortCut.local);
     }
   });
 }

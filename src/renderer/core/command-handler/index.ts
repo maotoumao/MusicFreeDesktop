@@ -4,7 +4,7 @@ import {TrackPlayerEvent} from "../track-player/enum";
 import {getGlobalContext} from "@/shared/global-context/renderer";
 import MessageHub from "@/shared/message-hub/renderer";
 import throttle from "lodash.throttle";
-import AppConfig from "@/shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import appState from "@shared/app-state/renderer";
 
 const broadcast = MessageHub.broadcast;

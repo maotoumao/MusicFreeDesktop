@@ -1,4 +1,4 @@
-import {IAppConfig} from "../shared/app-config/type";
+import {IAppConfig} from "@/types/app-config";
 
 export const internalDataKey = "$";
 export const internalDataSymbol = Symbol.for("internal");
@@ -76,7 +76,7 @@ export const defaultFont = {
     style: "",
 };
 
-type IShortCutKeys = keyof IAppConfig["shortCut"]["shortcuts"];
+type IShortCutKeys = keyof IAppConfig["shortCut.shortcuts"];
 export const shortCutKeys: IShortCutKeys[] = [
     "play/pause",
     "skip-next",

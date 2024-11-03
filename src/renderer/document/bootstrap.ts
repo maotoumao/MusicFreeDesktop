@@ -12,7 +12,7 @@ import Evt from "../core/events";
 import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
 
 import Downloader from "../core/downloader";
-import AppConfig from "@/shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import {setupI18n} from "@/shared/i18n/renderer";
 import {
     setupCommandHandler,

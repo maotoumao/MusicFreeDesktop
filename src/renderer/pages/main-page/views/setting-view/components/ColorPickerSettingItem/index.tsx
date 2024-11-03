@@ -4,7 +4,7 @@ import {useState} from "react";
 import {HexAlphaColorPicker, HexColorInput} from "react-colorful";
 import useAppConfig from "@/hooks/useAppConfig";
 import {IAppConfig} from "@/types/app-config";
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 interface IColorPickerSettingItemProps<T extends keyof IAppConfig> {
     keyPath: T;

@@ -4,7 +4,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
 import {IAppConfig} from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 
 interface IRadioGroupSettingItemProps<T extends keyof IAppConfig> {

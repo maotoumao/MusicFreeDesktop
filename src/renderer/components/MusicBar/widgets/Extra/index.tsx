@@ -11,7 +11,7 @@ import {ipcRendererInvoke} from "@/shared/ipc/renderer";
 import classNames from "@/renderer/utils/classnames";
 import {getCurrentPanel, hidePanel, showPanel,} from "@/renderer/components/Panel";
 import {useTranslation} from "react-i18next";
-import AppConfig from "@shared/app-config.new/main";
+import AppConfig from "@shared/app-config/main";
 import {isCN} from "@/shared/i18n/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 

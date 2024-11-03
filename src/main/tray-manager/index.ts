@@ -4,7 +4,7 @@ import {IWindowManager} from "@/types/main/window-manager";
 import getResourcePath from "@/utils/main/get-resource-path";
 import {PlayerState, RepeatMode, ResourceName} from "@/common/constant";
 import AppState from "@shared/app-state/main";
-import AppConfig from "@shared/app-config.new/main";
+import AppConfig from "@shared/app-config/main";
 import {sendCommand} from "@shared/player-command-sync/main";
 import windowManager from "@main/window-manager";
 import {IAppConfig} from "@/types/app-config";

@@ -2,7 +2,7 @@ import {
   callPluginDelegateMethod,
   useSortedPlugins,
 } from "@/renderer/core/plugin-delegate";
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 import {
   useReactTable,

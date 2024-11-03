@@ -3,7 +3,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
 import {IAppConfig} from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 type ExtractArrayItem<T> = T extends Array<infer R> ? R : never;
 

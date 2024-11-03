@@ -12,7 +12,7 @@ import SearchHistory from "./widgets/SearchHistory";
 import {addSearchHistory} from "@/renderer/utils/search-history";
 import {useTranslation} from "react-i18next";
 import useAppConfig from "@/hooks/useAppConfig";
-import AppConfig from "@shared/app-config.new/main";
+import AppConfig from "@shared/app-config/main";
 
 export default function AppHeader() {
     const navigate = useNavigate();

@@ -20,7 +20,7 @@ import { getGlobalContext } from "@/shared/global-context/renderer";
 import Store from "@/common/store";
 import { useEffect, useState } from "react";
 import { DownloadEvts, ee } from "./ee";
-import AppConfig from "@/shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 
 export interface IDownloadStatus {

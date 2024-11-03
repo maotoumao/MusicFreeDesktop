@@ -7,7 +7,7 @@ import InputSettingItem from "../../components/InputSettingItem";
 import {AuthType, createClient} from "webdav";
 import BackupResume from "@/renderer/core/backup-resume";
 import {useTranslation} from "react-i18next";
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 
 

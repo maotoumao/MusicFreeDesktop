@@ -3,9 +3,7 @@ import {app, dialog, shell} from "electron";
 import fs from "fs/promises";
 import axios from "axios";
 import {compare} from "compare-versions";
-import AppConfig from "@/shared/app-config.new/main";
-import {HttpsProxyAgent} from "https-proxy-agent";
-import {IAppConfig} from "@/shared/app-config/type";
+import AppConfig from "@shared/app-config/main";
 import {appUpdateSources} from "@/common/constant";
 import windowManager from "@main/window-manager";
 

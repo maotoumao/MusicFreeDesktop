@@ -2,7 +2,7 @@ import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
 import delegatePluginsStore from "./store";
 import {useMemo} from "react";
 import useAppConfig from "@/hooks/useAppConfig";
-import AppConfig from "@shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 /** 刷新插件 */
 export function refreshPlugins() {

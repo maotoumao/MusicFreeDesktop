@@ -1,5 +1,5 @@
 import {IAppConfig} from "@/types/app-config";
-import _defaultAppConfig from "@shared/app-config.new/default-app-config";
+import _defaultAppConfig from "@shared/app-config/default-app-config";
 
 
 interface IMod {

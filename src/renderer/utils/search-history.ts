@@ -1,5 +1,5 @@
 import {getUserPreferenceIDB, setUserPreferenceIDB} from "./user-perference";
-import AppConfig from "@/shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 export async function getSearchHistory() {
     return (await getUserPreferenceIDB("searchHistory")) ?? [];

@@ -1,7 +1,7 @@
 import {shortCutKeys, shortCutKeysEvts} from "@/common/constant";
 import {ipcMainOn, ipcMainSendMainWindow} from "@/shared/ipc/main";
 import {globalShortcut} from "electron";
-import AppConfig from "@shared/app-config.new/main";
+import AppConfig from "@shared/app-config/main";
 import {IAppConfig} from "@/types/app-config";
 
 type IShortCutKeys = keyof IAppConfig["shortCut.shortcuts"];

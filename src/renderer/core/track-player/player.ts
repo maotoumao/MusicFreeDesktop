@@ -26,7 +26,7 @@ import {
   setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
 import { delay } from "@/common/time-util";
-import AppConfig from "@/shared/app-config.new/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import Evt from "../events";
 import { getLinkedLyric } from "../link-lyric";
 import { createUniqueMap } from "@/common/unique-map";
@@ -88,7 +88,7 @@ export async function setupPlayer() {
 
   setCurrentMusic(currentMusic);
   setAudioOutputDevice(
-    AppConfig.getConfig("playMusic.audioOutputDevice.deviceId")
+    AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId
   );
 
   const [volume, speed] = [
