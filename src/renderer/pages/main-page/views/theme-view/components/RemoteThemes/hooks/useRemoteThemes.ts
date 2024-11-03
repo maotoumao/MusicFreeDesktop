@@ -52,7 +52,12 @@ export default function () {
       raceWithData(
         themePackStoreBaseUrl.map(
           async (it, index) =>
-            [await axios.get(it + ".publish/publish.json"), index] as const
+            [await axios.get(it + ".publish/publish.json").then(res => {
+              if (typeof res.data !== "object") {
+                throw new Error("Invalid data");
+              }
+              return res;
+            }), index] as const
         )
       )
         .then(([res, index]) => {
