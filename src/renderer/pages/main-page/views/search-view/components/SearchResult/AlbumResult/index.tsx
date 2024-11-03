@@ -1,9 +1,7 @@
 import { RequestStateCode } from "@/common/constant";
 import React, { memo } from "react";
 import "./index.scss";
-import BottomLoadingState from "@/renderer/components/BottomLoadingState";
 import useSearch from "../../../hooks/useSearch";
-import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
 import { useNavigate } from "react-router-dom";
 import MusicSheetlikeList from "@/renderer/components/MusicSheetlikeList";
 
@@ -27,7 +25,7 @@ function AlbumResult(props: IMediaResultProps) {
         search(undefined, undefined, "album", pluginHash);
       }}
       onClick={(albumItem) => {
-        navigate(`/main/album/${albumItem.platform}/${albumItem.id}`, {
+        navigate(`/main/album/${encodeURIComponent(albumItem.platform)}/${encodeURIComponent(albumItem.id)}`, {
           state: {
             albumItem,
           },

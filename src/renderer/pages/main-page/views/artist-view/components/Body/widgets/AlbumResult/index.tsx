@@ -36,7 +36,7 @@ export default function AlbumResult(props: IBodyProps) {
           data={queryResult.data ?? []}
           state={queryResult.state}
           onClick={(mediaItem) => {
-            navigate(`/main/album/${mediaItem.platform}/${mediaItem.id}`, {
+            navigate(`/main/album/${encodeURIComponent(mediaItem.platform)}/${encodeURIComponent(mediaItem.id)}`, {
                 state: {
                     albumItem: mediaItem
                 }
