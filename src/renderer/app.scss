@@ -20,6 +20,19 @@
   margin-top: 1.2rem;
   flex-shrink: 0;
   column-gap: 2.5rem;
+  overflow-x: auto;
+  padding-bottom: 6px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 当鼠标悬浮时显示滚动条 */
+  &:hover {
+    &::-webkit-scrollbar {
+      display: block;
+    }
+  }
 
   & .tab-list-item {
     display: flex;
@@ -32,6 +45,7 @@
     cursor: pointer;
     opacity: 0.7;
     white-space: nowrap;
+    user-select: none;
 
     &:hover {
       opacity: 0.9;
