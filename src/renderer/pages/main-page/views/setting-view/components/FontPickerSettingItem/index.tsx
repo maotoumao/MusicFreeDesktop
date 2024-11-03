@@ -1,60 +1,57 @@
-import {
-  IAppConfigKeyPath,
-  IAppConfigKeyPathValue,
-} from "@/shared/app-config/type";
-import defaultAppConfig from "@/shared/app-config/internal/default-app-config";
-import { useEffect, useMemo, useState } from "react";
+import {useMemo} from "react";
 import ListBoxSettingItem from "../ListBoxSettingItem";
-import { defaultFont as _defaultFont } from "@/common/constant";
-import useLocalFonts from "@/renderer/hooks/useLocalFonts";
-import { setAppConfigPath } from "@/shared/app-config/renderer";
-import { useTranslation } from "react-i18next";
+import {defaultFont as _defaultFont} from "@/common/constant";
+import useLocalFonts from "@/hooks/useLocalFonts";
+import {useTranslation} from "react-i18next";
+import {IAppConfig} from "@/types/app-config";
+import AppConfig from "@shared/app-config.new/renderer";
 
-interface FontPickerSettingItemProps<T extends IAppConfigKeyPath> {
-  keyPath: T;
-  label?: string;
-  value?: IAppConfigKeyPathValue<T>;
+interface FontPickerSettingItemProps<T extends keyof IAppConfig> {
+    keyPath: T;
+    label?: string;
 }
 
 function useFonts() {
-  const allLocalFonts = useLocalFonts();
-  const { t } = useTranslation();
+    const allLocalFonts = useLocalFonts();
+    const {t} = useTranslation();
 
-  const defaultFont = {
-    ..._defaultFont,
-    fullName: t("common.default"),
-  };
+    const defaultFont = {
+        ..._defaultFont,
+        fullName: t("common.default"),
+    };
 
-  const fonts = useMemo(
-    () => (allLocalFonts ? [defaultFont, ...allLocalFonts] : null),
-    [allLocalFonts]
-  );
+    const fonts = useMemo(
+        () => (allLocalFonts ? [defaultFont, ...allLocalFonts] : null),
+        [allLocalFonts]
+    );
 
-  return fonts;
+    return fonts;
 }
 
-export default function FontPickerSettingItem<T extends IAppConfigKeyPath>(
-  props: FontPickerSettingItemProps<T>
+export default function FontPickerSettingItem<T extends keyof IAppConfig>(
+    props: FontPickerSettingItemProps<T>
 ) {
-  const { keyPath, label, value = defaultAppConfig[keyPath] } = props;
+    const {keyPath, label} = props;
 
-  const fonts = useFonts();
-  return (
-    <ListBoxSettingItem
-      label={label}
-      keyPath={keyPath}
-      value={value}
-      renderItem={(item) => (item as FontData).fullName}
-      options={fonts ?? (null as any)}
-      onChange={(val) => {
-        // 字体不可序列化 不知道为啥 json.stringify是空对象
-        setAppConfigPath(keyPath, {
-          family: (val as FontData).family,
-          fullName: (val as FontData).fullName,
-          postscriptName: (val as FontData).postscriptName,
-          style: (val as FontData).style,
-        } as any);
-      }}
-    ></ListBoxSettingItem>
-  );
+    const fonts = useFonts();
+    return (
+        <ListBoxSettingItem
+            label={label}
+            keyPath={keyPath}
+            renderItem={(item) => (item as FontData).fullName}
+            options={fonts ?? (null as any)}
+            onChange={(event, newValue) => {
+                // 字体不可序列化 不知道为啥 json.stringify是空对象
+                event.preventDefault();
+                AppConfig.setConfig({
+                    [keyPath]: {
+                        family: (newValue as FontData).family,
+                        fullName: (newValue as FontData).fullName,
+                        postscriptName: (newValue as FontData).postscriptName,
+                        style: (newValue as FontData).style,
+                    }
+                });
+            }}
+        ></ListBoxSettingItem>
+    );
 }

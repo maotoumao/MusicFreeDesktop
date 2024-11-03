@@ -1,14 +1,11 @@
-import { ipcRendererInvoke, ipcRendererOn } from "@/shared/ipc/renderer";
+import { ipcRendererOn } from "@/shared/ipc/renderer";
 import { useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Evt from "../core/events";
-import { getUserPreference } from "../utils/user-perference";
-import { compare } from "compare-versions";
-import { showModal } from "../components/Modal";
 import checkUpdate from "../utils/check-update";
-import { getAppConfigPath } from "@/shared/app-config/renderer";
 import Themepack from "@/shared/themepack/renderer";
 import logger from "@shared/logger/renderer";
+import AppConfig from "@/shared/app-config.new/renderer";
 
 export default function useBootstrap() {
   const navigate = useNavigate();
@@ -42,7 +39,7 @@ export default function useBootstrap() {
       }
     });
 
-    if (getAppConfigPath("normal.checkUpdate")) {
+    if (AppConfig.getConfig("normal.checkUpdate")) {
       checkUpdate();
     }
     logger.logPerf("Bundle First Screen");

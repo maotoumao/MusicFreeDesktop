@@ -14,8 +14,8 @@ import _axios from "axios";
 import { compare } from "compare-versions";
 import { nanoid } from "nanoid";
 import { addRandomHash } from "@/common/normalize-util";
-import { getAppConfigPathSync } from "@/shared/app-config/main";
 import https from "https";
+import AppConfig from "@shared/app-config.new/main";
 
 const axios = _axios.create({
   httpsAgent: new https.Agent({
@@ -229,7 +229,7 @@ async function installPluginFromRawCode(funcCode: string) {
   const oldVersionPlugin = plugins.find((p) => p.name === plugin.name);
   if (
     oldVersionPlugin &&
-    !getAppConfigPathSync("plugin.notCheckPluginVersion")
+    !AppConfig.getConfig("plugin.notCheckPluginVersion")
   ) {
     if (
       compare(

@@ -2,21 +2,18 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import trackPlayer from "@/renderer/core/track-player";
-import { RepeatMode } from "@/renderer/core/track-player/enum";
-import { useRef, useState } from "react";
+import {RepeatMode} from "@/renderer/core/track-player/enum";
+import {useRef, useState} from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
-import { showModal } from "@/renderer/components/Modal";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
+import {showModal} from "@/renderer/components/Modal";
+import {ipcRendererInvoke} from "@/shared/ipc/renderer";
 import classNames from "@/renderer/utils/classnames";
-import {
-  getCurrentPanel,
-  hidePanel,
-  showPanel,
-} from "@/renderer/components/Panel";
-import { useTranslation } from "react-i18next";
-import { setAppConfigPath, useAppConfig } from "@/shared/app-config/renderer";
-import { isCN } from "@/shared/i18n/renderer";
+import {getCurrentPanel, hidePanel, showPanel,} from "@/renderer/components/Panel";
+import {useTranslation} from "react-i18next";
+import AppConfig from "@shared/app-config.new/main";
+import {isCN} from "@/shared/i18n/renderer";
+import useAppConfig from "@/hooks/useAppConfig";
 
 export default function Extra() {
   const repeatMode = trackPlayer.useRepeatMode();
@@ -88,7 +85,7 @@ function VolumeBtn() {
         setShowVolumeBubble(false);
       }}
       onClick={() => {
-        if (tmpVolumeRef === null) {
+        if (tmpVolumeRef.current === null) {
           tmpVolumeRef.current = 0;
         }
         tmpVolumeRef.current =
@@ -245,7 +242,9 @@ function QualityBtn() {
           onOk(value, extra) {
             trackPlayer.setQuality(value as IMusic.IQualityKey);
             if (!extra) {
-              setAppConfigPath("playMusic.defaultQuality", value);
+              AppConfig.setConfig({
+                "playMusic.defaultQuality": value
+              });
             }
           },
         });
@@ -279,8 +278,7 @@ function QualityBtn() {
 }
 
 function LyricBtn() {
-  const rendererConfig = useAppConfig();
-  const enableDesktopLyric = rendererConfig?.lyric?.enableDesktopLyric ?? false;
+  const enableDesktopLyric = useAppConfig("lyric.enableDesktopLyric");
   const { t } = useTranslation();
 
   // const lyric = useLyric();

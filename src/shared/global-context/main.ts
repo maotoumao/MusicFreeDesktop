@@ -1,4 +1,4 @@
-import { BrowserWindow, app, ipcMain } from "electron";
+import { app, ipcMain } from "electron";
 import { _IpcRendererEvt } from "./internal/common";
 import path from "path";
 

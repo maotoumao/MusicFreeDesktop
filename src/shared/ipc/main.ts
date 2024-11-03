@@ -1,11 +1,11 @@
 /** 主进程ipc封装 */
-import { getMainWindow } from "@/main/window";
 import {
   BrowserWindow,
   IpcMainEvent,
   IpcMainInvokeEvent,
   ipcMain,
 } from "electron";
+import WindowManager from "@main/window-manager";
 
 /** 主进程监听 */
 export function ipcMainOn<T extends keyof IpcEvents.Renderer>(
@@ -58,7 +58,7 @@ export function ipcMainSendMainWindow<T extends keyof IpcEvents.Main>(
   channel: T,
   args?: IpcEvents.Main[T]
 ) {
-  const mainWindow = getMainWindow();
+  const mainWindow = WindowManager.mainWindow;
   if (mainWindow) {
     mainWindow.webContents.send(channel, args);
   }

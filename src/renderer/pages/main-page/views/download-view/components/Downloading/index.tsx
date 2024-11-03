@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import "./index.scss";
 import { i18n } from "@/shared/i18n/renderer";
-import useVirtualList from "@/renderer/hooks/useVirtualList";
+import useVirtualList from "@/hooks/useVirtualList";
 import DownloadStatus from "./DownloadStatus";
 
 const columnHelper = createColumnHelper<IMusic.IMusicItem>();
@@ -69,7 +69,7 @@ export default function Downloading() {
   const virtualController = useVirtualList({
     data: table.getRowModel().rows,
     scrollElementQuery: "#page-container",
-    estimizeItemHeight,
+    estimateItemHeight: estimizeItemHeight,
   });
 
   return (

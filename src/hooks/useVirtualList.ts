@@ -13,7 +13,7 @@ interface IVirtualListProps<T> {
   /** 滚动容器的query */
   scrollElementQuery?: string;
   /** 元素高度和列表高度 */
-  estimizeItemHeight: number;
+  estimateItemHeight: number;
 
   /** 数据 */
   data: T[];
@@ -36,7 +36,7 @@ interface IVirtualItem<T> {
 
 export default function useVirtualList<T>(props: IVirtualListProps<T>) {
   const {
-    estimizeItemHeight,
+    estimateItemHeight,
     data,
     renderCount = 40,
     fallbackRenderCount = -1,
@@ -49,7 +49,7 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
 
   const [virtualItems, setVirtualItems] = useState<IVirtualItem<T>[]>([]);
   const [totalHeight, setTotalHeight] = useState<number>(
-    data.length * estimizeItemHeight
+    data.length * estimateItemHeight
   );
 
   const scrollElementRef = useRef<HTMLElement>();
@@ -61,7 +61,7 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
           (scrollElementRef.current?.scrollTop ?? 0) -
           (typeof offsetHeight === "number" ? offsetHeight : offsetHeight());
         const realData = dataRef.current;
-        const estimizeStartIndex = Math.floor(scrollTop / estimizeItemHeight);
+        const estimizeStartIndex = Math.floor(scrollTop / estimateItemHeight);
         const startIndex = Math.max(
           estimizeStartIndex - (estimizeStartIndex % 2 === 1 ? 3 : 2),
           0
@@ -81,7 +81,7 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
             .map((item, index) => ({
               rowIndex: startIndex + index,
               dataItem: item,
-              top: (startIndex + index) * estimizeItemHeight,
+              top: (startIndex + index) * estimateItemHeight,
             }))
         );
       },
@@ -95,7 +95,7 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
   );
 
   useEffect(() => {
-    setTotalHeight(data.length * estimizeItemHeight);
+    setTotalHeight(data.length * estimateItemHeight);
     scrollHandler();
   }, [data]);
 
@@ -128,7 +128,7 @@ export default function useVirtualList<T>(props: IVirtualListProps<T>) {
     scrollElementRef.current.scrollTo({
       top:
         (typeof offsetHeight === "number" ? offsetHeight : offsetHeight()) +
-        estimizeItemHeight * index,
+        estimateItemHeight * index,
       behavior,
     });
   }

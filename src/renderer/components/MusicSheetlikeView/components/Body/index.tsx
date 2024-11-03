@@ -9,7 +9,7 @@ import { showModal } from "@/renderer/components/Modal";
 import { RequestStateCode, localPluginName } from "@/common/constant";
 import { offsetHeightStore } from "../../store";
 import MusicSheet from "@/renderer/core/music-sheet";
-import { getAppConfigPath } from "@/shared/app-config/renderer";
+import AppConfig from "@/shared/app-config.new/renderer";
 import { useTranslation } from "react-i18next";
 
 interface IProps {
@@ -34,7 +34,7 @@ export default function Body(props: IProps) {
       setFilterMusicList(null);
     } else {
       startTransition(() => {
-        const caseSensitive = getAppConfigPath(
+        const caseSensitive = AppConfig.getConfig(
           "playMusic.caseSensitiveInSearch"
         );
         if (caseSensitive) {

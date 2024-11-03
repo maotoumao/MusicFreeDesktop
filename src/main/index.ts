@@ -1,34 +1,24 @@
 import {app, BrowserWindow, globalShortcut} from "electron";
-import {
-    createLyricWindow,
-    createMainWindow,
-    getLyricWindow,
-    getMainWindow,
-    showMainWindow,
-    getMinimodeWindow,
-    showMinimodeWindow,
-} from "./window";
-import setupIpcMain, {handleProxy} from "./ipc";
+import setupIpcMain from "./ipc";
 import {setupPluginManager} from "./core/plugin-manager";
-import {setupTray, setupTrayMenu} from "./tray";
 import {setupGlobalShortCut} from "./core/global-short-cut";
 import fs from "fs";
 import path from "path";
 import {setAutoFreeze} from "immer";
-import {currentMusicInfoStore} from "./store/current-music";
-
-import {
-    getAppConfigPath,
-    getAppConfigPathSync,
-    setAppConfigPath,
-    setupMainAppConfig,
-} from "@/shared/app-config/main";
 import {setupGlobalContext} from "@/shared/global-context/main";
 import {setupI18n} from "@/shared/i18n/main";
 import {handleDeepLink} from "./utils/deep-link";
 import logger from "@shared/logger/main";
 import {PlayerState} from "@/common/constant";
-import ThumbBarManager from "@main/thumb-bar-manager";
+import ThumbBarUtil from "@/utils/main/thumb-bar-util";
+import windowManager from "@main/window-manager";
+import AppConfig from "@shared/app-config.new/main";
+import AppState from "@shared/app-state/main";
+import TrayManager from "@main/tray-manager";
+import WindowDrag from "@shared/window-drag/main";
+import {IAppConfig} from "@/types/app-config";
+import axios from "axios";
+import {HttpsProxyAgent} from "https-proxy-agent";
 
 
 // portable
@@ -74,7 +64,7 @@ app.on("activate", () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-        createMainWindow();
+        windowManager.showMainWindow();
     }
 });
 
@@ -83,8 +73,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 app.on("second-instance", (_evt, commandLine) => {
-    if (getMainWindow()) {
-        showMainWindow();
+    if (windowManager.mainWindow) {
+        windowManager.showMainWindow();
     }
 
     if (process.platform !== "darwin") {
@@ -105,55 +95,152 @@ app.on("will-quit", () => {
 app.whenReady().then(async () => {
     logger.logPerf("App Ready");
     setupGlobalContext();
-    await Promise.allSettled([setupMainAppConfig()]);
+    AppState.setup(windowManager);
     setupI18n({
         getDefaultLang() {
-            return getAppConfigPathSync("normal.language");
+            return AppConfig.getConfig("normal.language");
         },
         onLanguageChanged(lang) {
-            setAppConfigPath("normal.language", lang);
-            setupTrayMenu();
+            AppConfig.setConfig({
+                "normal.language": lang
+            });
             if (process.platform === "win32") {
-                ThumbBarManager.setThumbBarButtons(getMainWindow(), currentMusicInfoStore.getValue().currentPlayerState === PlayerState.Playing)
+                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, AppState.isPlaying())
             }
         },
     });
     setupIpcMain();
     setupPluginManager();
-    setupTray();
-    bootstrap();
+    TrayManager.setup(windowManager);
+    WindowDrag.setup();
     setupGlobalShortCut();
     logger.logPerf("Create Main Window");
-    createMainWindow();
+    // Bind App State events
+    AppState.on("MusicChanged", (musicItem) => {
+        TrayManager.buildTrayMenu();
+        const mainWindow = windowManager.mainWindow;
+
+        if (mainWindow) {
+            const thumbStyle = AppConfig.getConfig("normal.taskbarThumb");
+            if (process.platform === "win32" && thumbStyle === "artwork") {
+                ThumbBarUtil.setThumbImage(mainWindow, musicItem?.artwork);
+            }
+            if (musicItem) {
+                mainWindow.setTitle(
+                    musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : "")
+                );
+            } else {
+                mainWindow.setTitle(app.name);
+            }
+        }
+    })
+
+    AppState.on("PlayerStateChanged", (playerState) => {
+        TrayManager.buildTrayMenu();
+        if (process.platform === "win32") {
+            ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, playerState === PlayerState.Playing)
+        }
+    })
+
+    AppState.on("RepeatModeChanged", () => {
+        TrayManager.buildTrayMenu();
+    })
+
+    AppState.on("LyricChanged", (lyric) => {
+        if (AppConfig.getConfig("lyric.enableStatusBarLyric")) {
+            TrayManager.setTitle(lyric);
+        } else {
+            TrayManager.setTitle("");
+        }
+    })
+
+    await AppConfig.setup(windowManager);
+    windowManager.showMainWindow();
+
+    bootstrap();
+
 });
 
 async function bootstrap() {
-    const downloadPath = await getAppConfigPath("download.path");
+    const downloadPath = AppConfig.getConfig("download.path");
     if (!downloadPath) {
-        setAppConfigPath("download.path", app.getPath("downloads"));
+        AppConfig.setConfig({
+            "download.path": app.getPath("downloads")
+        });
     }
 
     /** 一些初始化设置 */
-    // 初始化桌面歌词
-    getAppConfigPath("lyric.enableDesktopLyric").then((result) => {
-        if (result) {
-            if (!getLyricWindow()) {
-                createLyricWindow();
+        // 初始化桌面歌词
+    const desktopLyricEnabled = AppConfig.getConfig("lyric.enableDesktopLyric");
+
+    if (desktopLyricEnabled) {
+        windowManager.showLyricWindow();
+    }
+
+
+    const minimodeEnabled = AppConfig.getConfig("private.minimode");
+
+    if (minimodeEnabled) {
+        windowManager.showMiniModeWindow();
+    }
+
+    // 初始化代理
+    const proxyConfigKeys: Array<keyof IAppConfig> = [
+        "network.proxy.enabled",
+        "network.proxy.host",
+        "network.proxy.port",
+        "network.proxy.username",
+        "network.proxy.password"
+    ];
+
+    AppConfig.onConfigUpdated((patch, config) => {
+        let proxyUpdated = false;
+        for (const proxyConfigKey of proxyConfigKeys) {
+            if (proxyConfigKey in patch) {
+                proxyUpdated = true;
+                break;
+            }
+        }
+
+        if (proxyUpdated) {
+            if (config["network.proxy.enabled"]) {
+                handleProxy(true, config["network.proxy.host"], config["network.proxy.port"], config["network.proxy.username"], config["network.proxy.password"]);
+            } else {
+                handleProxy(false);
             }
         }
     });
 
-    getAppConfigPath("private.minimode").then((enabled) => {
-        if (enabled) {
-            if (!getMinimodeWindow()) {
-                showMinimodeWindow();
-            }
-        }
-    });
+    handleProxy(
+        AppConfig.getConfig("network.proxy.enabled"),
+        AppConfig.getConfig("network.proxy.host"),
+        AppConfig.getConfig("network.proxy.port"),
+        AppConfig.getConfig("network.proxy.username"),
+        AppConfig.getConfig("network.proxy.password")
+    );
 
-    getAppConfigPath("network.proxy").then((result) => {
-        if (result) {
-            handleProxy(result);
+}
+
+
+function handleProxy(enabled: boolean, host?: string | null, port?: string | null, username?: string | null, password?: string | null) {
+    try {
+        if (!enabled) {
+            axios.defaults.httpAgent = undefined;
+            axios.defaults.httpsAgent = undefined;
+        } else if (host) {
+            const proxyUrl = new URL(host);
+            proxyUrl.port = port;
+            proxyUrl.username = username;
+            proxyUrl.password = password;
+            const agent = new HttpsProxyAgent(proxyUrl);
+
+            axios.defaults.httpAgent = agent;
+            axios.defaults.httpsAgent = agent;
+        } else {
+            throw new Error("Unknown Host");
         }
-    });
+    } catch (e) {
+        axios.defaults.httpAgent = undefined;
+        axios.defaults.httpsAgent = undefined;
+    }
 }

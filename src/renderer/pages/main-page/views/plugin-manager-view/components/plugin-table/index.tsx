@@ -2,6 +2,7 @@ import {
   callPluginDelegateMethod,
   useSortedPlugins,
 } from "@/renderer/core/plugin-delegate";
+import AppConfig from "@shared/app-config.new/renderer";
 
 import {
   useReactTable,
@@ -20,10 +21,6 @@ import { showPanel } from "@/renderer/components/Panel";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 import { produce } from "immer";
 import { i18n } from "@/shared/i18n/renderer";
-import {
-  getAppConfigPath,
-  setAppConfigPath,
-} from "@/shared/app-config/renderer";
 
 const t = i18n.t;
 
@@ -174,7 +171,7 @@ function renderOptions(info: any) {
               variables: row.userVariables,
               plugin: row,
               initValues:
-                getAppConfigPath("private.pluginMeta")?.[row.platform]
+                AppConfig.getConfig("private.pluginMeta")?.[row.platform]
                   ?.userVariables,
             });
           }}
@@ -234,7 +231,7 @@ export default function PluginTable() {
   });
 
   function onDrop(fromIndex: number, toIndex: number) {
-    const meta = getAppConfigPath("private.pluginMeta") ?? {};
+    const meta = AppConfig.getConfig("private.pluginMeta") ?? {};
 
     const newPlugins = plugins
       .slice(0, fromIndex)
@@ -254,7 +251,9 @@ export default function PluginTable() {
       });
     });
 
-    setAppConfigPath("private.pluginMeta", newMeta);
+    AppConfig.setConfig({
+      "private.pluginMeta": newMeta
+    });
   }
 
   return (

@@ -1,5 +1,5 @@
 import { RequestStateCode, themePackStoreBaseUrl } from "@/common/constant";
-import useMounted from "@/renderer/hooks/useMounted";
+import useMounted from "@/hooks/useMounted";
 import Themepack from "@/shared/themepack/renderer";
 import axios from "axios";
 import { useEffect, useState } from "react";

@@ -8,12 +8,12 @@ import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
 import Tag from "@/renderer/components/Tag";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import useVirtualList from "@/renderer/hooks/useVirtualList";
+import useVirtualList from "@/hooks/useVirtualList";
 import { rem } from "@/common/constant";
 import { showMusicContextMenu } from "@/renderer/components/MusicList";
 import MusicDownloaded from "@/renderer/components/MusicDownloaded";
 import Base from "../Base";
-import useStateRef from "@/renderer/hooks/useStateRef";
+import useStateRef from "@/hooks/useStateRef";
 import { isBetween } from "@/common/normalize-util";
 import hotkeys from "hotkeys-js";
 import { Trans, useTranslation } from "react-i18next";
@@ -30,7 +30,7 @@ export default function PlayList() {
   const { t } = useTranslation();
 
   const virtualController = useVirtualList({
-    estimizeItemHeight,
+    estimateItemHeight: estimizeItemHeight,
     data: musicQueue,
     getScrollElement() {
       return scrollElementRef.current;

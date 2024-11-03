@@ -1,130 +1,125 @@
-import { ipcRendererInvoke, ipcRendererSend } from "@/shared/ipc/renderer";
+import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
 import delegatePluginsStore from "./store";
-import { useMemo } from "react";
-import { getAppConfigPath, useAppConfig } from "@/shared/app-config/renderer";
+import {useMemo} from "react";
+import useAppConfig from "@/hooks/useAppConfig";
+import AppConfig from "@shared/app-config.new/renderer";
 
 /** 刷新插件 */
 export function refreshPlugins() {
-  ipcRendererSend("refresh-plugins");
+    ipcRendererSend("refresh-plugins");
 }
 
 export function getSupportedPlugin(
-  featureMethod: keyof IPlugin.IPluginInstanceMethods
+    featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
-  return delegatePluginsStore
-    .getValue()
-    .filter((_) => _.supportedMethod.includes(featureMethod));
+    return delegatePluginsStore
+        .getValue()
+        .filter((_) => _.supportedMethod.includes(featureMethod));
 }
 
 export function getSortedSupportedPlugin(
-  featureMethod: keyof IPlugin.IPluginInstanceMethods
+    featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
-  const meta = getAppConfigPath("private.pluginMeta") ?? {};
-  return delegatePluginsStore
-    .getValue()
-    .filter((_) => _.supportedMethod.includes(featureMethod))
-    .sort((a, b) => {
-      return (meta[a.platform]?.order ?? Infinity) -
-        (meta[b?.platform]?.order ?? Infinity) <
-        0
-        ? -1
-        : 1;
-    });
+    const meta = AppConfig.getConfig("private.pluginMeta") ?? {};
+    return delegatePluginsStore
+        .getValue()
+        .filter((_) => _.supportedMethod.includes(featureMethod))
+        .sort((a, b) => {
+            return (meta[a.platform]?.order ?? Infinity) -
+            (meta[b?.platform]?.order ?? Infinity) <
+            0
+                ? -1
+                : 1;
+        });
 }
 
 export function useSupportedPlugin(
-  featureMethod: keyof IPlugin.IPluginInstanceMethods
+    featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
-  return delegatePluginsStore
-    .useValue()
-    .filter((_) => _.supportedMethod.includes(featureMethod));
+    return delegatePluginsStore
+        .useValue()
+        .filter((_) => _.supportedMethod.includes(featureMethod));
 }
 
 export function useSortedSupportedPlugin(
-  featureMethod: keyof IPlugin.IPluginInstanceMethods
+    featureMethod: keyof IPlugin.IPluginInstanceMethods
 ) {
-  const meta = getAppConfigPath("private.pluginMeta") ?? {};
-  return delegatePluginsStore
-    .useValue()
-    .filter((_) => _.supportedMethod.includes(featureMethod))
-    .sort((a, b) => {
-      return (meta[a.platform]?.order ?? Infinity) -
-        (meta[b?.platform]?.order ?? Infinity) <
-        0
-        ? -1
-        : 1;
-    });
+    const meta = AppConfig.getConfig("private.pluginMeta") ?? {};
+    return delegatePluginsStore
+        .useValue()
+        .filter((_) => _.supportedMethod.includes(featureMethod))
+        .sort((a, b) => {
+            return (meta[a.platform]?.order ?? Infinity) -
+            (meta[b?.platform]?.order ?? Infinity) <
+            0
+                ? -1
+                : 1;
+        });
 }
 
 export function getSearchablePlugins(
-  supportedSearchType?: IMedia.SupportMediaType
+    supportedSearchType?: IMedia.SupportMediaType
 ) {
-  return getSupportedPlugin("search").filter((_) =>
-    supportedSearchType && _.supportedSearchType
-      ? _.supportedSearchType.includes(supportedSearchType)
-      : true
-  );
+    return getSupportedPlugin("search").filter((_) =>
+        supportedSearchType && _.supportedSearchType
+            ? _.supportedSearchType.includes(supportedSearchType)
+            : true
+    );
 }
 
 export function getSortedSearchablePlugins(
-  supportedSearchType?: IMedia.SupportMediaType
+    supportedSearchType?: IMedia.SupportMediaType
 ) {
-  return getSortedSupportedPlugin("search").filter((_) =>
-    supportedSearchType && _.supportedSearchType
-      ? _.supportedSearchType.includes(supportedSearchType)
-      : true
-  );
+    return getSortedSupportedPlugin("search").filter((_) =>
+        supportedSearchType && _.supportedSearchType
+            ? _.supportedSearchType.includes(supportedSearchType)
+            : true
+    );
 }
 
 export function getPluginByHash(hash: string) {
-  return delegatePluginsStore.getValue().find((item) => item.hash === hash);
+    return delegatePluginsStore.getValue().find((item) => item.hash === hash);
 }
 
 interface IPluginDelegateLike {
-  platform?: string;
-  hash?: string;
+    platform?: string;
+    hash?: string;
 }
 
 export async function callPluginDelegateMethod<
-  T extends keyof IPlugin.IPluginInstanceMethods
+    T extends keyof IPlugin.IPluginInstanceMethods
 >(
-  pluginDelegate: IPluginDelegateLike,
-  method: T,
-  ...args: Parameters<IPlugin.IPluginInstanceMethods[T]>
+    pluginDelegate: IPluginDelegateLike,
+    method: T,
+    ...args: Parameters<IPlugin.IPluginInstanceMethods[T]>
 ) {
-  return (await ipcRendererInvoke("call-plugin-method", {
-    hash: pluginDelegate.hash,
-    platform: pluginDelegate.platform,
-    method,
-    args,
-  })) as ReturnType<IPlugin.IPluginInstanceMethods[T]>;
+    return (await ipcRendererInvoke("call-plugin-method", {
+        hash: pluginDelegate.hash,
+        platform: pluginDelegate.platform,
+        method,
+        args,
+    })) as ReturnType<IPlugin.IPluginInstanceMethods[T]>;
 }
 
 export function getPluginPrimaryKey(pluginItem: IPluginDelegateLike) {
-  return (
-    delegatePluginsStore
-      .getValue()
-      .find((it) => it.platform === pluginItem.platform)?.primaryKey ?? []
-  );
+    return (
+        delegatePluginsStore
+            .getValue()
+            .find((it) => it.platform === pluginItem.platform)?.primaryKey ?? []
+    );
 }
 
 export function useSortedPlugins() {
-  const plugins = delegatePluginsStore.useValue();
-  const configs = useAppConfig();
+    const plugins = delegatePluginsStore.useValue();
+    const meta = useAppConfig("private.pluginMeta") ?? {};
 
-  const meta = useMemo(() => {
-    return configs?.private?.pluginMeta ?? {};
-  }, [configs]);
-
-  const sortedPlugins = useMemo(() => {
-    return [...plugins].sort((a, b) => {
-      return (meta[a.platform]?.order ?? Infinity) -
-        (meta[b?.platform]?.order ?? Infinity) <
-        0
-        ? -1
-        : 1;
-    });
-  }, [plugins, meta]);
-
-  return sortedPlugins;
+    return useMemo(() => {
+        return [...plugins].sort((a, b) => {
+            return (meta[a.platform]?.order ?? Infinity) -
+            (meta[b?.platform]?.order ?? Infinity) <
+            0
+                ? -1
+                : 1;
+        });
+    }, [plugins, meta]);
 }

@@ -9,7 +9,7 @@ export const mainConfig: Configuration = {
    * that runs in the main process.
    */
   entry: {
-    index: "./src/main/index.ts",
+    index: "./src/main/thumb-bar-util.ts",
   },
   // Put your normal webpack config below here
   module: {

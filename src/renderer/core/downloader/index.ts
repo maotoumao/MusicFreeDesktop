@@ -1,4 +1,3 @@
-// todo: need refactor
 import {
   getMediaPrimaryKey,
   getQualityOrder,
@@ -17,11 +16,12 @@ import {
   useDownloaded,
   useDownloadedMusicList,
 } from "./downloaded-sheet";
-import { getAppConfigPath } from "@/shared/app-config/renderer";
 import { getGlobalContext } from "@/shared/global-context/renderer";
 import Store from "@/common/store";
 import { useEffect, useState } from "react";
 import { DownloadEvts, ee } from "./ee";
+import AppConfig from "@/shared/app-config.new/renderer";
+
 
 export interface IDownloadStatus {
   state: DownloadState;
@@ -60,7 +60,7 @@ function setupDownloaderWorker() {
     const worker = new Worker(downloaderWorkerPath);
     downloaderWorker = Comlink.wrap(worker);
   }
-  setDownloadingConcurrency(getAppConfigPath("download.concurrency"));
+  setDownloadingConcurrency(AppConfig.getConfig("download.concurrency"));
 }
 
 const concurrencyLimit = 20;
@@ -130,8 +130,8 @@ async function downloadMusicImpl(
   onStateChange: IOnStateChangeFunc
 ) {
   const [defaultQuality, whenQualityMissing] = [
-    getAppConfigPath("download.defaultQuality"),
-    getAppConfigPath("download.whenQualityMissing"),
+    AppConfig.getConfig("download.defaultQuality"),
+    AppConfig.getConfig("download.whenQualityMissing"),
   ];
   const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
   let mediaSource: IPlugin.IMediaSourceResult | null = null;
@@ -156,7 +156,7 @@ async function downloadMusicImpl(
     if (mediaSource?.url) {
       const ext = mediaSource.url.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
       const downloadBasePath =
-        getAppConfigPath("download.path") ??
+        AppConfig.getConfig("download.path") ??
         getGlobalContext().appPath.downloads;
       const downloadPath = window.path.resolve(
         downloadBasePath,

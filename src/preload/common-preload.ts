@@ -10,6 +10,8 @@ import "@shared/i18n/preload";
 import "@shared/global-context/preload";
 import "@shared/app-db/preload";
 import "@shared/themepack/preload";
+import "@shared/app-state/preload";
+
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 contextBridge.exposeInMainWorld("ipcRenderer", ipcRendererDelegate);
