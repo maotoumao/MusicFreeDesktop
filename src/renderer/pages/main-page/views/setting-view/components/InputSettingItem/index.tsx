@@ -28,8 +28,8 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
         trim
     } = props;
 
-    const [tmpValue, setTmpValue] = useState<string | null>(null);
     const value = useAppConfig(keyPath);
+    const [tmpValue, setTmpValue] = useState<string | null>(value as string || "");
 
     return (
         <div
@@ -57,13 +57,14 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
                     }
 
                     if (!event.defaultPrevented) {
+                        console.log(tmpValue);
                         AppConfig.setConfig({
                             [keyPath]: trim ? tmpValue.trim() as any : tmpValue as any
                         });
                     }
-                    setTmpValue(null);
                 }}
-                value={(tmpValue || value || "") as string}
+                defaultValue={value as string}
+                value={(tmpValue || "") as string}
             ></input>
         </div>
     );
