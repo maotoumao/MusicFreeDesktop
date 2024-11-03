@@ -50,7 +50,9 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
                     if (tmpValue === null) {
                         return;
                     }
-                    const event = new Event("ConfigChanged");
+                    const event = new Event("ConfigChanged", {
+                        cancelable: true
+                    });
 
                     if (onChange) {
                         onChange(event, tmpValue as any);

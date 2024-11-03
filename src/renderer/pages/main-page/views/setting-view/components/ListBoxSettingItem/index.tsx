@@ -47,7 +47,9 @@ export default function ListBoxSettingItem<T extends keyof IAppConfig>(
         value={value}
         onChange={
           (newVal) => {
-            const event = new Event("ConfigChanged", {});
+            const event = new Event("ConfigChanged", {
+              cancelable: true
+            });
             if (onChange) {
               onChange(event, newVal);
             }

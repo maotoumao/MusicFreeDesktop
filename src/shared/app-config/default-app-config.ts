@@ -2,6 +2,7 @@ import {defaultFont} from "@/common/constant";
 import {IAppConfig} from "@/types/app-config";
 
 const _defaultAppConfig: IAppConfig =  {
+    "$schema-version": 1,
     "playMusic.whenQualityMissing": "lower",
     "playMusic.defaultQuality": "standard",
     "playMusic.clickMusicList": "replace",

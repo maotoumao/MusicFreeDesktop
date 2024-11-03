@@ -43,6 +43,7 @@ export default function FontPickerSettingItem<T extends keyof IAppConfig>(
             onChange={(event, newValue) => {
                 // 字体不可序列化 不知道为啥 json.stringify是空对象
                 event.preventDefault();
+                console.log(event.defaultPrevented, "Prev");
                 AppConfig.setConfig({
                     [keyPath]: {
                         family: (newValue as FontData).family,

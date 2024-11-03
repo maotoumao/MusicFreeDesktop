@@ -31,7 +31,9 @@ export default function CheckBoxSettingItem<T extends keyof IAppConfig>(
                 title={label}
                 role="button"
                 onClick={() => {
-                    const event = new Event("ConfigChanged", {});
+                    const event = new Event("ConfigChanged", {
+                        cancelable: true
+                    });
                     if (onChange) {
                         onChange(event, !checked);
                     }

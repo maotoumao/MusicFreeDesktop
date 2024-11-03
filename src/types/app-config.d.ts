@@ -1,4 +1,5 @@
 interface _IAppConfig {
+    "$schema-version": number;
     "normal.closeBehavior": "exit_app" | "minimize";
     "normal.maxHistoryLength": number;
     "normal.checkUpdate": boolean;
