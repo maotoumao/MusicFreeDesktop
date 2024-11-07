@@ -2,8 +2,6 @@ import Store from "@/common/store";
 import trackPlayer from "./internal";
 import {
   ICurrentLyric,
-  PlayerState,
-  RepeatMode,
   TrackPlayerEvent,
 } from "./enum";
 import trackPlayerEventsEmitter from "./event";
@@ -15,7 +13,7 @@ import {
   isSameMedia,
   sortByTimestampAndIndex,
 } from "@/common/media-util";
-import { timeStampSymbol, sortIndexSymbol } from "@/common/constant";
+import {timeStampSymbol, sortIndexSymbol, PlayerState, RepeatMode} from "@/common/constant";
 import { callPluginDelegateMethod } from "../plugin-delegate";
 import LyricParser from "@/renderer/utils/lyric-parser";
 import {
@@ -571,7 +569,7 @@ async function playIndex(nextIndex: number, options: IPlayOptions = {}) {
       if (!mediaSource?.url) {
         throw new Error("Empty Source");
       }
-      console.log("MEDIA SOURCE", mediaSource, musicItem);
+      console.log("MEDIA SOURCE", JSON.stringify(mediaSource), musicItem);
       if (isSameMedia(musicItem, musicQueueStore.getValue()[currentIndex])) {
         setCurrentQuality(quality);
         setCurrentMusic(musicItem);

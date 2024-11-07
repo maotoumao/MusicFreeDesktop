@@ -19,7 +19,7 @@ import WindowDrag from "@shared/window-drag/main";
 import {IAppConfig} from "@/types/app-config";
 import axios from "axios";
 import {HttpsProxyAgent} from "https-proxy-agent";
-
+import ServiceManager from "@shared/service-manager/main";
 
 // portable
 if (process.platform === "win32") {
@@ -162,6 +162,8 @@ app.whenReady().then(async () => {
 });
 
 async function bootstrap() {
+    ServiceManager.setup(windowManager);
+
     const downloadPath = AppConfig.getConfig("download.path");
     if (!downloadPath) {
         AppConfig.setConfig({

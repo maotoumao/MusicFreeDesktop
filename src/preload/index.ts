@@ -2,4 +2,5 @@
 import "./common-preload";
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
-import "@/shared/message-hub/preload/main";
+import "@shared/message-hub/preload/main";
+import "@shared/service-manager/preload";

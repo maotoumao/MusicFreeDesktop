@@ -2,12 +2,14 @@
  * 播放音乐
  */
 import {encodeUrlHeaders} from "@/common/normalize-util";
-import {ErrorReason, PlayerState, TrackPlayerEvent} from "./enum";
+import {ErrorReason, TrackPlayerEvent} from "./enum";
 import trackPlayerEventsEmitter from "./event";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import getUrlExt from "@/renderer/utils/get-url-ext";
 import Hls from "hls.js";
 import {isSameMedia} from "@/common/media-util";
+import {PlayerState} from "@/common/constant";
+import ServiceManager from "@shared/service-manager/renderer";
 
 class TrackPlayerInternal {
     private audioContext: AudioContext;
@@ -29,6 +31,8 @@ class TrackPlayerInternal {
         });
 
         this.registerEvents();
+        // @ts-ignore
+        window.ad = this.audio;
     }
 
     private throwError(reason: ErrorReason) {
@@ -92,15 +96,46 @@ class TrackPlayerInternal {
         trackSource: IMusic.IMusicSource,
         musicItem: IMusic.IMusicItem
     ) {
+        // 1. original url
         let url = trackSource.url;
-        if (trackSource.headers || trackSource.userAgent) {
-            const trackSourceHeaders = trackSource.headers ?? {};
-            if (trackSource.userAgent) {
-                trackSourceHeaders["user-agent"] = trackSource.userAgent;
-            }
+        const urlObj = new URL(trackSource.url);
+        let headers: Record<string, any> | null = null;
 
-            url = encodeUrlHeaders(url, trackSourceHeaders);
+        if (trackSource.headers || trackSource.userAgent) {
+            headers = {...(trackSource.headers ?? {})};
+            if (trackSource.userAgent) {
+                headers["user-agent"] = trackSource.userAgent;
+            }
         }
+
+        if (urlObj.username && urlObj.password) {
+            const authHeader = `Basic ${btoa(
+                `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
+                    urlObj.password
+                )}`
+            )}`;
+            urlObj.username = "";
+            urlObj.password = "";
+            headers = {
+                ...(headers || {}),
+                Authorization: authHeader,
+            }
+            url = urlObj.toString();
+        }
+
+        // hack URL
+        if (headers) {
+            const forwardedUrl = ServiceManager.RequestForwarderService.forwardRequest(url, "GET", headers);
+            if (forwardedUrl) {
+                url = forwardedUrl;
+                headers = null;
+            } else if (!headers["Authorization"]) {
+                url = encodeUrlHeaders(url, headers);
+                headers = null;
+            }
+        }
+
+
         if (!url) {
             this.throwError(ErrorReason.EmptyResource);
             return;
@@ -118,36 +153,25 @@ class TrackPlayerInternal {
             ],
         });
         // 拓展播放功能
-        if (getUrlExt(url) === ".m3u8" && Hls.isSupported()) {
+        if (getUrlExt(trackSource.url) === ".m3u8" && Hls.isSupported()) {
+            // Todo: headers
             this.hls.loadSource(url);
+        } else if (headers) {
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    ...trackSource.headers,
+                },
+            })
+                .then(async (res) => {
+                    console.log("response", res.headers.get("content-type"));
+                    const blob = await res.blob();
+                    if (isSameMedia(this.currentMusic, musicItem)) {
+                        this.audio.src = URL.createObjectURL(blob);
+                    }
+                });
         } else {
-            const urlObj = new URL(trackSource.url);
-            if (urlObj.username && urlObj.password) {
-                // TODO: 这部分逻辑需要抽离出来 特殊逻辑
-                const authHeader = `Basic ${btoa(
-                    `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
-                        urlObj.password
-                    )}`
-                )}`;
-                urlObj.username = "";
-                urlObj.password = "";
-                fetch(urlObj.toString(), {
-                    method: "GET",
-                    headers: {
-                        ...trackSource.headers,
-                        Authorization: authHeader,
-                    },
-                })
-                    .then(async (res) => {
-                        const blob = await res.blob();
-                        if (isSameMedia(this.currentMusic, musicItem)) {
-                            this.audio.src = URL.createObjectURL(blob);
-                        }
-                    });
-
-            } else {
-                this.audio.src = url;
-            }
+            this.audio.src = url;
         }
     }
 
@@ -177,6 +201,7 @@ class TrackPlayerInternal {
     seekTo(seconds: number) {
         if (this.hasSource() && isFinite(seconds)) {
             const duration = this.audio.duration;
+            console.log(duration);
             this.audio.currentTime = Math.min(
                 seconds,
                 isNaN(duration) ? Infinity : duration

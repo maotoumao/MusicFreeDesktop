@@ -91,7 +91,7 @@ const config: ForgeConfig = {
             js: "./src/webworkers/db-worker.ts",
             name: "db",
             nodeIntegration: true,
-          },
+          }
         ],
       },
     }),

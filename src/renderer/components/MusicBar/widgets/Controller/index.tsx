@@ -2,6 +2,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
 import trackPlayer from "@/renderer/core/track-player";
 import { useTranslation } from "react-i18next";
+import { PlayerState } from "@/common/constant";
 
 export default function Controller() {
   const playerState = trackPlayer.usePlayerState();
@@ -20,7 +21,7 @@ export default function Controller() {
       <div
         className="play-or-pause controller-btn primary-btn"
         onClick={() => {
-          if(playerState === trackPlayer.PlayerState.Playing) {
+          if(playerState === PlayerState.Playing) {
             trackPlayer.pause();
           } else {
             trackPlayer.resumePlay();
@@ -29,7 +30,7 @@ export default function Controller() {
       >
         <SvgAsset
           iconName={
-            playerState !== trackPlayer.PlayerState.Playing ? "play" : "pause"
+            playerState !== PlayerState.Playing ? "play" : "pause"
           }
         ></SvgAsset>
       </div>
@@ -37,7 +38,7 @@ export default function Controller() {
         className="skip controller-btn"
         title={t("music_bar.next_music")}
         onClick={() => {
-      
+
           trackPlayer.skipToNext();
         }}
       >

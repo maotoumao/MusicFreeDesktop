@@ -33,7 +33,7 @@ async function registerGlobalShortCut() {
     const globalShortCuts = AppConfig.getConfig("shortCut.shortcuts");
     for (const shortCutKey of shortCutKeys) {
 
-        const globalShortCutConfig = globalShortCuts[shortCutKey]?.global;
+        const globalShortCutConfig = globalShortCuts?.[shortCutKey]?.global;
 
         if (globalShortCutConfig?.length) {
             await registerSingleShortCut(shortCutKey, globalShortCutConfig);
@@ -46,7 +46,7 @@ async function registerSingleShortCut(key: IShortCutKeys, shortCut: string[]) {
         if (shortCut.length) {
             const prevConfig = AppConfig.getConfig("shortCut.shortcuts");
 
-            if (prevConfig[key].global?.length) {
+            if (prevConfig[key]?.global?.length) {
                 globalShortcut.unregister(prevConfig[key].global.join("+"));
             }
 

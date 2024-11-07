@@ -24,6 +24,7 @@ import {
     setupRecentlyPlaylist,
 } from "../core/recently-playlist";
 import {TrackPlayerEvent} from "../core/track-player/enum";
+import ServiceManager from "@shared/service-manager/renderer";
 
 
 setAutoFreeze(false);
@@ -46,6 +47,7 @@ export default async function () {
     localMusic.setupLocalMusic();
     await Downloader.setupDownloader();
     setupRecentlyPlaylist();
+    ServiceManager.setup();
 
     // 自动更新插件
     if (AppConfig.getConfig("plugin.autoUpdatePlugin")) {
