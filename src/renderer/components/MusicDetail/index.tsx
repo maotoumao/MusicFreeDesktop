@@ -9,7 +9,7 @@ import Lyric from "./widgets/Lyric";
 import SvgAsset from "../SvgAsset";
 import Condition from "../Condition";
 import { useTranslation } from "react-i18next";
-import {useCurrentMusic} from "@renderer/core/track-player.new/hooks";
+import {useCurrentMusic} from "@renderer/core/track-player/hooks";
 
 export const musicDetailShownStore = new Store(false);
 

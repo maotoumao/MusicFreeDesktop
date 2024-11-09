@@ -1,4 +1,4 @@
-import _trackPlayerStore from "@renderer/core/track-player.new/store";
+import _trackPlayerStore from "@renderer/core/track-player/store";
 
 const {
     musicQueueStore,

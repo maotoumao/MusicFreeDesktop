@@ -21,7 +21,7 @@ import {createIndexMap, IIndexMap} from "@/common/index-map";
 import _trackPlayerStore from "./store";
 import EventEmitter from "eventemitter3";
 import {IAudioController} from "@/types/audio-controller";
-import AudioController from "@renderer/core/track-player.new/controller/audio-controller";
+import AudioController from "@renderer/core/track-player/controller/audio-controller";
 import logger from "@shared/logger/renderer";
 import {callPluginDelegateMethod} from "@renderer/core/plugin-delegate";
 import voidCallback from "@/utils/common/void-callback";

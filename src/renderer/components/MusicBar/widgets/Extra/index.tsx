@@ -1,7 +1,7 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
 import SwitchCase from "@/renderer/components/SwitchCase";
-import trackPlayer from "@/renderer/core/track-player.new";
+import trackPlayer from "src/renderer/core/track-player";
 import {useRef, useState} from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
@@ -14,7 +14,7 @@ import AppConfig from "@shared/app-config/renderer";
 import {isCN} from "@/shared/i18n/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 import {RepeatMode} from "@/common/constant";
-import {useQuality, useRepeatMode, useSpeed, useVolume} from "@renderer/core/track-player.new/hooks";
+import {useQuality, useRepeatMode, useSpeed, useVolume} from "@renderer/core/track-player/hooks";
 
 export default function Extra() {
   const repeatMode = useRepeatMode();

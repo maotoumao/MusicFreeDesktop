@@ -1,7 +1,7 @@
 import {localPluginHash, PlayerState, supportLocalMediaType} from "@/common/constant";
 import MusicSheet from "../core/music-sheet";
 import {callPluginDelegateMethod, registerPluginEvents,} from "../core/plugin-delegate";
-import trackPlayer from "../core/track-player.new";
+import trackPlayer from "../core/track-player";
 import localMusic from "../core/local-music";
 import {setupLocalShortCut} from "../core/shortcut";
 import {setAutoFreeze} from "immer";
@@ -14,7 +14,7 @@ import {setupCommandHandler, setupPlayerSyncHandler,} from "../core/command-hand
 import ThemePack from "@/shared/themepack/renderer";
 import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-playlist";
 import ServiceManager from "@shared/service-manager/renderer";
-import {PlayerEvents} from "@renderer/core/track-player.new/enum";
+import {PlayerEvents} from "@renderer/core/track-player/enum";
 
 
 setAutoFreeze(false);

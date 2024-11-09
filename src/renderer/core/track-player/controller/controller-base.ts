@@ -1,4 +1,4 @@
-import {CurrentTime, ErrorReason} from "@renderer/core/track-player.new/enum";
+import {CurrentTime, ErrorReason} from "@renderer/core/track-player/enum";
 import {PlayerState} from "@/common/constant";
 
 export default class ControllerBase {

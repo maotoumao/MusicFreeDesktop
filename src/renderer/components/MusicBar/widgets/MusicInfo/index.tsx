@@ -9,7 +9,7 @@ import MusicFavorite from "@/renderer/components/MusicFavorite";
 import {musicDetailShownStore} from "@/renderer/components/MusicDetail";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import {useTranslation} from "react-i18next";
-import {useCurrentMusic, useProgress} from "@renderer/core/track-player.new/hooks";
+import {useCurrentMusic, useProgress} from "@renderer/core/track-player/hooks";
 
 export default function MusicInfo() {
   const musicItem = useCurrentMusic();

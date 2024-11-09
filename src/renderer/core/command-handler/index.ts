@@ -1,11 +1,11 @@
 import {TrackPlayerSyncType, PlayerState} from "@/common/constant";
-import trackPlayer from "../track-player.new";
+import trackPlayer from "../track-player";
 import {getGlobalContext} from "@/shared/global-context/renderer";
 import MessageHub from "@/shared/message-hub/renderer";
 import throttle from "lodash.throttle";
 import AppConfig from "@shared/app-config/renderer";
 import appState from "@shared/app-state/renderer";
-import {PlayerEvents} from "@renderer/core/track-player.new/enum";
+import {PlayerEvents} from "@renderer/core/track-player/enum";
 
 const broadcast = MessageHub.broadcast;
 

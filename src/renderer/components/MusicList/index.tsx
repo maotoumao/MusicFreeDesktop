@@ -12,7 +12,7 @@ import "./index.scss";
 import Tag from "../Tag";
 import { secondsToDuration } from "@/common/time-util";
 import MusicSheet from "@/renderer/core/music-sheet";
-import trackPlayer from "@/renderer/core/track-player.new";
+import trackPlayer from "src/renderer/core/track-player";
 import Condition, { IfTruthy } from "../Condition";
 import Empty from "../Empty";
 import MusicFavorite from "../MusicFavorite";

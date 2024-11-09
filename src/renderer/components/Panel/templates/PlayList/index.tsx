@@ -1,7 +1,7 @@
 import Evt from "@renderer/core/events";
 import "./index.scss";
 import { CSSProperties, memo, useEffect, useRef, useState } from "react";
-import trackPlayer from "@/renderer/core/track-player.new";
+import trackPlayer from "src/renderer/core/track-player";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
@@ -17,7 +17,7 @@ import { isBetween } from "@/common/normalize-util";
 import hotkeys from "hotkeys-js";
 import { Trans, useTranslation } from "react-i18next";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
-import {useCurrentMusic, useMusicQueue} from "@renderer/core/track-player.new/hooks";
+import {useCurrentMusic, useMusicQueue} from "@renderer/core/track-player/hooks";
 
 const estimizeItemHeight = 2.6 * rem;
 const DRAG_TAG = "Playlist";

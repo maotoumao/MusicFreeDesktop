@@ -16,8 +16,8 @@ import LyricParser from "@/renderer/utils/lyric-parser";
 import { getLinkedLyric, unlinkLyric } from "@/renderer/core/link-lyric";
 import { getMediaPrimaryKey } from "@/common/media-util";
 import { useTranslation } from "react-i18next";
-import {useLyric} from "@renderer/core/track-player.new/hooks";
-import trackPlayer from "@/renderer/core/track-player.new";
+import {useLyric} from "@renderer/core/track-player/hooks";
+import trackPlayer from "src/renderer/core/track-player";
 
 export default function Lyric() {
   const lyricContext = useLyric();

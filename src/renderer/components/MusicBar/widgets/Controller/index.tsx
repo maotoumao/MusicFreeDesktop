@@ -1,9 +1,9 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
-import trackPlayer from "@/renderer/core/track-player.new";
+import trackPlayer from "src/renderer/core/track-player";
 import { useTranslation } from "react-i18next";
 import { PlayerState } from "@/common/constant";
-import {usePlayerState} from "@renderer/core/track-player.new/hooks";
+import {usePlayerState} from "@renderer/core/track-player/hooks";
 
 export default function Controller() {
   const playerState = usePlayerState();
