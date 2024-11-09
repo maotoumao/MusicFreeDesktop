@@ -215,6 +215,7 @@ class TrackPlayer {
             getUserPreference("currentQuality") || AppConfig.getConfig("playMusic.defaultQuality")
         ];
         const playList = (await getUserPreferenceIDB("playList")) ?? [];
+        addSortProperty(playList);
         const deviceId = AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId;
 
         // 2. init audio controller
@@ -241,7 +242,7 @@ class TrackPlayer {
         }
 
         if (speed) {
-            this.setVolume(volume)
+            this.setSpeed(speed)
         }
 
         // 4. reload lyric
@@ -563,7 +564,7 @@ class TrackPlayer {
     public setRepeatMode(repeatMode: RepeatMode) {
         if (repeatMode === RepeatMode.Shuffle) {
             this.setMusicQueue(shuffle(this.musicQueue));
-        } else if (repeatModeStore.getValue() === RepeatMode.Shuffle) {
+        } else if (this.repeatMode === RepeatMode.Shuffle) {
             this.setMusicQueue(sortByTimestampAndIndex(this.musicQueue, true));
         }
         repeatModeStore.setValue(repeatMode);

@@ -85,7 +85,7 @@ function VolumeBtn() {
       onMouseOut={() => {
         setShowVolumeBubble(false);
       }}
-      onClick={() => {
+      onClick={(e) => {
         if (tmpVolumeRef.current === null) {
           tmpVolumeRef.current = 0;
         }
