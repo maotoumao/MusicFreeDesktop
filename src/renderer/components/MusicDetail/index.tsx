@@ -2,7 +2,6 @@ import Evt from "@renderer/core/events";
 import AnimatedDiv from "../AnimatedDiv";
 import "./index.scss";
 import albumImg from "@/assets/imgs/album-cover.jpg";
-import { useCurrentMusic } from "@/renderer/core/track-player/player";
 import Store from "@/common/store";
 import Tag from "../Tag";
 import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
@@ -10,6 +9,7 @@ import Lyric from "./widgets/Lyric";
 import SvgAsset from "../SvgAsset";
 import Condition from "../Condition";
 import { useTranslation } from "react-i18next";
+import {useCurrentMusic} from "@renderer/core/track-player.new/hooks";
 
 export const musicDetailShownStore = new Store(false);
 

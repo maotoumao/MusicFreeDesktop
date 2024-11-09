@@ -1,7 +1,7 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
 import SwitchCase from "@/renderer/components/SwitchCase";
-import trackPlayer from "@/renderer/core/track-player";
+import trackPlayer from "@/renderer/core/track-player.new";
 import {useRef, useState} from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
@@ -14,9 +14,10 @@ import AppConfig from "@shared/app-config/renderer";
 import {isCN} from "@/shared/i18n/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 import {RepeatMode} from "@/common/constant";
+import {useQuality, useRepeatMode, useSpeed, useVolume} from "@renderer/core/track-player.new/hooks";
 
 export default function Extra() {
-  const repeatMode = trackPlayer.useRepeatMode();
+  const repeatMode = useRepeatMode();
   const { t } = useTranslation();
 
   return (
@@ -69,7 +70,7 @@ export default function Extra() {
 }
 
 function VolumeBtn() {
-  const volume = trackPlayer.useVolume();
+  const volume = useVolume();
   const tmpVolumeRef = useRef<number | null>(null);
   const [showVolumeBubble, setShowVolumeBubble] = useState(false);
   const { t } = useTranslation();
@@ -141,7 +142,7 @@ function VolumeBtn() {
 }
 
 function SpeedBtn() {
-  const speed = trackPlayer.useSpeed();
+  const speed = useSpeed();
   const [showSpeedBubble, setShowSpeedBubble] = useState(false);
   const tmpSpeedRef = useRef<number | null>(null);
   const { t } = useTranslation();
@@ -208,7 +209,7 @@ function SpeedBtn() {
 }
 
 function QualityBtn() {
-  const quality = trackPlayer.useQuality();
+  const quality = useQuality();
   const { t } = useTranslation();
 
   return (

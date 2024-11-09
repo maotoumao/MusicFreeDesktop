@@ -1,11 +1,12 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
-import trackPlayer from "@/renderer/core/track-player";
+import trackPlayer from "@/renderer/core/track-player.new";
 import { useTranslation } from "react-i18next";
 import { PlayerState } from "@/common/constant";
+import {usePlayerState} from "@renderer/core/track-player.new/hooks";
 
 export default function Controller() {
-  const playerState = trackPlayer.usePlayerState();
+  const playerState = usePlayerState();
 
   const {t} = useTranslation();
 
@@ -24,7 +25,7 @@ export default function Controller() {
           if(playerState === PlayerState.Playing) {
             trackPlayer.pause();
           } else {
-            trackPlayer.resumePlay();
+            trackPlayer.resume();
           }
         }}
       >

@@ -1,17 +1,15 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import Evt from "@/renderer/core/events";
-import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
+import {setFallbackAlbum} from "@/renderer/utils/img-on-error";
 import "./index.scss";
-import {
-  useCurrentMusic,
-  useProgress,
-} from "@/renderer/core/track-player/player";
+
 import Tag from "@/renderer/components/Tag";
-import { secondsToDuration } from "@/common/time-util";
+import {secondsToDuration} from "@/common/time-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
-import { musicDetailShownStore } from "@/renderer/components/MusicDetail";
+import {musicDetailShownStore} from "@/renderer/components/MusicDetail";
 import albumImg from "@/assets/imgs/album-cover.jpg";
-import { useTranslation } from "react-i18next";
+import {useTranslation} from "react-i18next";
+import {useCurrentMusic, useProgress} from "@renderer/core/track-player.new/hooks";
 
 export default function MusicInfo() {
   const musicItem = useCurrentMusic();

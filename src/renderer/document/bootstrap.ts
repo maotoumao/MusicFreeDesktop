@@ -1,30 +1,20 @@
-import {localPluginHash, supportLocalMediaType} from "@/common/constant";
+import {localPluginHash, PlayerState, supportLocalMediaType} from "@/common/constant";
 import MusicSheet from "../core/music-sheet";
-import {
-    callPluginDelegateMethod,
-    registerPluginEvents,
-} from "../core/plugin-delegate";
-import trackPlayer from "../core/track-player";
+import {callPluginDelegateMethod, registerPluginEvents,} from "../core/plugin-delegate";
+import trackPlayer from "../core/track-player.new";
 import localMusic from "../core/local-music";
 import {setupLocalShortCut} from "../core/shortcut";
 import {setAutoFreeze} from "immer";
 import Evt from "../core/events";
 import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
-
 import Downloader from "../core/downloader";
 import AppConfig from "@shared/app-config/renderer";
 import {setupI18n} from "@/shared/i18n/renderer";
-import {
-    setupCommandHandler,
-    setupPlayerSyncHandler,
-} from "../core/command-handler";
+import {setupCommandHandler, setupPlayerSyncHandler,} from "../core/command-handler";
 import ThemePack from "@/shared/themepack/renderer";
-import {
-    addToRecentlyPlaylist,
-    setupRecentlyPlaylist,
-} from "../core/recently-playlist";
-import {TrackPlayerEvent} from "../core/track-player/enum";
+import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-playlist";
 import ServiceManager from "@shared/service-manager/renderer";
+import {PlayerEvents} from "@renderer/core/track-player.new/enum";
 
 
 setAutoFreeze(false);
@@ -34,7 +24,7 @@ export default async function () {
         AppConfig.setup(),
         registerPluginEvents(),
         MusicSheet.frontend.setupMusicSheets(),
-        trackPlayer.setupPlayer(),
+        trackPlayer.setup(),
     ]);
     setupCommandHandler();
     setupPlayerSyncHandler();
@@ -141,9 +131,32 @@ function clearDefaultBehavior() {
 
 /** 设置事件 */
 function setupEvents() {
+    Evt.on("SKIP_NEXT", () => {
+        trackPlayer.skipToNext();
+    })
+
+    Evt.on("SKIP_PREVIOUS", () => {
+        trackPlayer.skipToPrev();
+    })
+
+    Evt.on("TOGGLE_PLAYER_STATE", () => {
+        if (trackPlayer.playerState === PlayerState.Playing) {
+            trackPlayer.pause();
+        } else {
+            trackPlayer.resume();
+        }
+    })
+
+    Evt.on("VOLUME_UP", (val = 0.04) => {
+        trackPlayer.setVolume(Math.min(1, trackPlayer.volume + val))
+    })
+
+    Evt.on("VOLUME_DOWN", (val = 0.04) => {
+        trackPlayer.setVolume(Math.max(0, trackPlayer.volume - val));
+    });
+
     Evt.on("TOGGLE_DESKTOP_LYRIC", () => {
         const enableDesktopLyric = AppConfig.getConfig("lyric.enableDesktopLyric");
-
         ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
         AppConfig.setConfig({
             "lyric.enableDesktopLyric": !enableDesktopLyric
@@ -152,7 +165,7 @@ function setupEvents() {
 
     Evt.on("TOGGLE_LIKE", async (item) => {
         // 如果没有传入，就是当前播放的歌曲
-        const realItem = item || trackPlayer.getCurrentMusic();
+        const realItem = item || trackPlayer.currentMusic;
         if (MusicSheet.frontend.isFavoriteMusic(realItem)) {
             MusicSheet.frontend.removeMusicFromFavorite(realItem);
         } else {
@@ -161,7 +174,7 @@ function setupEvents() {
     });
 
     // 最近播放
-    trackPlayer.on(TrackPlayerEvent.MusicChanged, (musicItem) => {
+    trackPlayer.on(PlayerEvents.MusicChanged, (musicItem) => {
         addToRecentlyPlaylist(musicItem);
     });
 }

@@ -1,5 +1,6 @@
 export interface IIndexMap {
   indexOf: (mediaItem?: IMedia.IMediaBase | null) => number;
+  has: (mediaItem?: IMedia.IMediaBase | null) => boolean;
   update: (mediaItems?: IMedia.IMediaBase[]) => void;
 }
 
@@ -31,8 +32,16 @@ export function createIndexMap(mediaItems?: IMedia.IMediaBase[]): IIndexMap {
     return indexMap.get(mediaItem?.platform)?.get(mediaItem?.id) ?? -1;
   }
 
+  function has(mediaItem?: IMedia.IMediaBase | null) {
+    if (!mediaItem) {
+      return false;
+    }
+    return indexMap.get(mediaItem?.platform)?.has(mediaItem?.id)?? false;
+  }
+
   return {
     update,
     indexOf,
+    has
   };
 }

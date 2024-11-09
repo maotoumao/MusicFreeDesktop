@@ -3,7 +3,7 @@ import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import {useOutputAudioDevices} from "@/hooks/useMediaDevices";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
-import trackPlayer from "@/renderer/core/track-player";
+import trackPlayer from "@/renderer/core/track-player.new";
 import {useTranslation} from "react-i18next";
 import AppConfig from "@shared/app-config/renderer";
 
@@ -70,12 +70,10 @@ export default function PlayMusic() {
                 width={"320px"}
                 onChange={async (evt, item) => {
                     evt.preventDefault();
-                    const result = await trackPlayer.setAudioOutputDevice(item.deviceId);
-                    if (result) {
-                        AppConfig.setConfig({
-                            "playMusic.audioOutputDevice": item.toJSON()
-                        });
-                    }
+                    await trackPlayer.setAudioOutputDevice(item.deviceId);
+                    AppConfig.setConfig({
+                        "playMusic.audioOutputDevice": item.toJSON()
+                    });
                 }}
                 options={audioDevices}
             ></ListBoxSettingItem>

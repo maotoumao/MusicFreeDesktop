@@ -1,7 +1,7 @@
 import Evt from "@renderer/core/events";
 import "./index.scss";
 import { CSSProperties, memo, useEffect, useRef, useState } from "react";
-import trackPlayer from "@/renderer/core/track-player";
+import trackPlayer from "@/renderer/core/track-player.new";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
@@ -13,18 +13,18 @@ import { rem } from "@/common/constant";
 import { showMusicContextMenu } from "@/renderer/components/MusicList";
 import MusicDownloaded from "@/renderer/components/MusicDownloaded";
 import Base from "../Base";
-import useStateRef from "@/hooks/useStateRef";
 import { isBetween } from "@/common/normalize-util";
 import hotkeys from "hotkeys-js";
 import { Trans, useTranslation } from "react-i18next";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
+import {useCurrentMusic, useMusicQueue} from "@renderer/core/track-player.new/hooks";
 
 const estimizeItemHeight = 2.6 * rem;
 const DRAG_TAG = "Playlist";
 
 export default function PlayList() {
-  const musicQueue = trackPlayer.useMusicQueue();
-  const currentMusic = trackPlayer.useCurrentMusic();
+  const musicQueue = useMusicQueue();
+  const currentMusic = useCurrentMusic();
   const scrollElementRef = useRef<HTMLDivElement>();
   const [activeItems, setActiveItems] = useState<number[]>([]);
   const { t } = useTranslation();
@@ -40,9 +40,9 @@ export default function PlayList() {
 
   useEffect(() => {
     virtualController.setScrollElement(scrollElementRef.current);
-    const currentMusic = trackPlayer.getCurrentMusic();
+    const currentMusic = trackPlayer.currentMusic;
     if (currentMusic) {
-      const queue = trackPlayer.getMusicQueue();
+      const queue = trackPlayer.musicQueue;
       const index = queue.findIndex((it) => isSameMedia(it, currentMusic));
       if (index > 4) {
         virtualController.scrollToIndex(index - 4);
@@ -51,7 +51,7 @@ export default function PlayList() {
 
     const ctrlAHandler = (evt: Event) => {
       evt.preventDefault();
-      const queue = trackPlayer.getMusicQueue();
+      const queue = trackPlayer.musicQueue;
       setActiveItems([0, queue.length - 1]);
     };
     hotkeys("Ctrl+A", "play-list", ctrlAHandler);
@@ -95,7 +95,7 @@ export default function PlayList() {
         <div
           role="button"
           onClick={() => {
-            trackPlayer.clearQueue();
+            trackPlayer.reset();
           }}
         >
           {t("common.clear")}
@@ -257,7 +257,7 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
         className="playlist--remove"
         role="button"
         onClick={() => {
-          trackPlayer.removeFromQueue(musicItem);
+          trackPlayer.removeMusic(musicItem);
         }}
       >
         <SvgAsset iconName="x-mark" size={16}></SvgAsset>

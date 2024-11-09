@@ -1,11 +1,11 @@
 import {TrackPlayerSyncType, PlayerState} from "@/common/constant";
-import trackPlayer from "../track-player";
-import {TrackPlayerEvent} from "../track-player/enum";
+import trackPlayer from "../track-player.new";
 import {getGlobalContext} from "@/shared/global-context/renderer";
 import MessageHub from "@/shared/message-hub/renderer";
 import throttle from "lodash.throttle";
 import AppConfig from "@shared/app-config/renderer";
 import appState from "@shared/app-state/renderer";
+import {PlayerEvents} from "@renderer/core/track-player.new/enum";
 
 const broadcast = MessageHub.broadcast;
 
@@ -26,7 +26,7 @@ export function setupCommandHandler<T extends keyof ICommon.ICommand>() {
                 break;
             case "SetPlayerState":
                 data === PlayerState.Playing
-                    ? trackPlayer.resumePlay()
+                    ? trackPlayer.resume()
                     : trackPlayer.pause();
                 break;
             case "PlayMusic": {
@@ -37,11 +37,11 @@ export function setupCommandHandler<T extends keyof ICommon.ICommand>() {
 }
 
 function getCurrentPlayerData() {
-    const currentMusic = trackPlayer.getCurrentMusic();
-    const currentLyric = trackPlayer.getLyric();
-    const currentPlayerState = trackPlayer.getPlayerState();
-    const progress = trackPlayer.getProgress();
-    const repeatMode = trackPlayer.getRepeatMode();
+    const currentMusic = trackPlayer.currentMusic;
+    const currentLyric = trackPlayer.lyric;
+    const currentPlayerState = trackPlayer.playerState;
+    const progress = trackPlayer.progress;
+    const repeatMode = trackPlayer.repeatMode;
     return {
         music: currentMusic
             ? {
@@ -83,7 +83,7 @@ export function setupPlayerSyncHandler() {
         });
     });
 
-    trackPlayer.on(TrackPlayerEvent.MusicChanged, (currentMusic) => {
+    trackPlayer.on(PlayerEvents.MusicChanged, (currentMusic) => {
         // 同步主进程
         const simplifiedMusicItem = currentMusic
             ? {
@@ -104,7 +104,7 @@ export function setupPlayerSyncHandler() {
         appState.syncCurrentMusic(simplifiedMusicItem);
     });
 
-    trackPlayer.on(TrackPlayerEvent.StateChanged, (state) => {
+    trackPlayer.on(PlayerEvents.StateChanged, (state) => {
         broadcast({
             type: TrackPlayerSyncType.PlayerStateChanged,
             data: state,
@@ -112,7 +112,7 @@ export function setupPlayerSyncHandler() {
         appState.syncCurrentPlayerState(state);
     });
 
-    trackPlayer.on(TrackPlayerEvent.RepeatModeChanged, (mode) => {
+    trackPlayer.on(PlayerEvents.RepeatModeChanged, (mode) => {
         broadcast({
             type: TrackPlayerSyncType.RepeatModeChanged,
             data: mode,
@@ -121,14 +121,14 @@ export function setupPlayerSyncHandler() {
         appState.syncCurrentRepeatMode(mode);
     });
 
-    trackPlayer.on(TrackPlayerEvent.LyricChanged, (lyric) => {
+    trackPlayer.on(PlayerEvents.LyricChanged, (lyric) => {
         broadcast({
             type: TrackPlayerSyncType.LyricChanged,
             data: lyric?.getLyricItems(),
         });
     });
 
-    trackPlayer.on(TrackPlayerEvent.CurrentLyricChanged, (lyric) => {
+    trackPlayer.on(PlayerEvents.CurrentLyricChanged, (lyric) => {
         const {platform} = getGlobalContext();
 
         broadcast({
@@ -151,5 +151,5 @@ export function setupPlayerSyncHandler() {
         });
     }, 1000);
 
-    trackPlayer.on(TrackPlayerEvent.ProgressChanged, progressChangedHandler);
+    trackPlayer.on(PlayerEvents.ProgressChanged, progressChangedHandler);
 }
