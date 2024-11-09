@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./index.scss";
-import trackPlayer from "src/renderer/core/track-player";
+import trackPlayer from "@renderer/core/track-player";
 import {useProgress} from "@renderer/core/track-player/hooks";
 
 export default function Slider() {

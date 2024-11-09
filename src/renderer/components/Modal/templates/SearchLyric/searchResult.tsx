@@ -12,7 +12,7 @@ import { getMediaPrimaryKey } from "@/common/media-util";
 import { toast } from "react-toastify";
 import { hideModal } from "../..";
 import { useTranslation } from "react-i18next";
-import trackPlayer from "src/renderer/core/track-player";
+import trackPlayer from "@renderer/core/track-player";
 
 interface ISearchResultProps {
   data: ISearchLyricResult;

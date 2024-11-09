@@ -1,7 +1,6 @@
-import Evt from "@renderer/core/events";
 import "./index.scss";
-import { CSSProperties, memo, useEffect, useRef, useState } from "react";
-import trackPlayer from "src/renderer/core/track-player";
+import { memo, useEffect, useRef, useState } from "react";
+import trackPlayer from "@renderer/core/track-player";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";

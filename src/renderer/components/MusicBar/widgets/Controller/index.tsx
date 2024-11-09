@@ -1,6 +1,6 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
-import trackPlayer from "src/renderer/core/track-player";
+import trackPlayer from "@renderer/core/track-player";
 import { useTranslation } from "react-i18next";
 import { PlayerState } from "@/common/constant";
 import {usePlayerState} from "@renderer/core/track-player/hooks";

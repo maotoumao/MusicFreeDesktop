@@ -4,7 +4,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import { ReactNode, useEffect, useState, useTransition } from "react";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
-import trackPlayer from "src/renderer/core/track-player";
+import trackPlayer from "@renderer/core/track-player";
 import { showModal } from "@/renderer/components/Modal";
 import { RequestStateCode, localPluginName } from "@/common/constant";
 import { offsetHeightStore } from "../../store";

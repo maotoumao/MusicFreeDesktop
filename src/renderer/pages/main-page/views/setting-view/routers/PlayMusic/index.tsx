@@ -3,7 +3,7 @@ import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import {useOutputAudioDevices} from "@/hooks/useMediaDevices";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
-import trackPlayer from "src/renderer/core/track-player";
+import trackPlayer from "@renderer/core/track-player";
 import {useTranslation} from "react-i18next";
 import AppConfig from "@shared/app-config/renderer";
 

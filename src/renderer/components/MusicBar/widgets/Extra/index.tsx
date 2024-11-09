@@ -1,7 +1,7 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
 import SwitchCase from "@/renderer/components/SwitchCase";
-import trackPlayer from "src/renderer/core/track-player";
+import trackPlayer from "@renderer/core/track-player";
 import {useRef, useState} from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
