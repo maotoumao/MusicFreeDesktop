@@ -78,7 +78,7 @@
     "cheerio": "^1.0.0-rc.12",
     "chokidar": "^3.6.0",
     "color": "^4.2.3",
-    "comlink": "^4.4.1",
+    "comlink": "^4.4.2",
     "compare-versions": "^6.1.0",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.11",

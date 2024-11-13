@@ -129,6 +129,7 @@ function clearDefaultBehavior() {
     document.addEventListener("keydown", killSpaceBar, false);
 }
 
+
 /** 设置事件 */
 function setupEvents() {
     Evt.on("SKIP_NEXT", () => {

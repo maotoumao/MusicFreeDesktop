@@ -59,10 +59,7 @@ type IOnStateChangeFunc = (data: {
 async function downloadFile(
   mediaSource: IMusic.IMusicSource,
   filePath: string,
-  onStateChange: IOnStateChangeFunc
-  // onProgress?: (progress: ICommon.IDownloadFileSize) => Promise<void>,
-  // onDone?: () => void,
-  // onError?: (reason: Error) => Promise<void>
+  onStateChange: IOnStateChangeFunc,
 ) {
   let state = DownloadState.DOWNLOADING;
   try {
@@ -156,6 +153,104 @@ async function downloadFile(
   }
 }
 
+
+interface IOptions {
+  onProgress?: (progress: ICommon.IDownloadFileSize) => Promise<void>;
+  onEnded?: () => Promise<void>;
+  onError?: (reason: Error) => Promise<void>;
+}
+async function downloadFileNew(
+    mediaSource: IMusic.IMusicSource,
+    filePath: string,
+    options?: IOptions
+) {
+  let hasError = false;
+  const {onProgress: onProgressCallback, onEnded: onEndedCallback, onError: onErrorCallback} = options ?? {};
+  try {
+    const stat = fs.statSync(filePath);
+
+    if (stat.isDirectory()) {
+      hasError = true;
+      onErrorCallback?.(new Error("Filepath is a directory"));
+      return;
+    }
+  } catch (e) {
+    // pass
+  }
+
+  const headers: Record<string, string> = {
+    ...(mediaSource.headers ?? {}),
+    "user-agent": mediaSource.userAgent,
+  };
+
+  try {
+    const urlObj = new URL(mediaSource.url);
+    let res: Response;
+    if (urlObj.username && urlObj.password) {
+      headers["Authorization"] = `Basic ${btoa(
+          `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
+              urlObj.password
+          )}`
+      )}`;
+      urlObj.username = "";
+      urlObj.password = "";
+      res = await fetch(urlObj.toString(), {
+        headers: headers,
+      });
+    } else {
+      res = await fetch(encodeUrlHeaders(mediaSource.url, headers));
+    }
+
+    const totalSize = +res.headers.get("content-length");
+    onProgressCallback?.({
+      currentSize: 0,
+      totalSize: totalSize
+    })
+
+
+    const stm = responseToReadable(res, {
+      onRead(size) {
+        if (hasError) {
+          // todo abort
+          return;
+        }
+        onProgressCallback?.({
+          currentSize: size,
+          totalSize: totalSize
+        })
+      },
+      onError: (e) => {
+        if (!hasError) {
+          hasError = true;
+          onErrorCallback?.(e);
+        }
+      },
+    }).pipe(fs.createWriteStream(filePath));
+
+    stm.on("close", () => {
+      onEndedCallback?.();
+    });
+
+    stm.on("error", (e) => {
+      if (!hasError) {
+        hasError = true;
+        onErrorCallback?.(e);
+      }
+      // 清理文件
+      cleanFile(filePath);
+    });
+  } catch (e) {
+    if (!hasError) {
+      hasError = true;
+      onErrorCallback?.(e);
+    }
+    cleanFile(filePath);
+  }
+}
+
+
+
 Comlink.expose({
   downloadFile,
+  downloadFileNew
 });

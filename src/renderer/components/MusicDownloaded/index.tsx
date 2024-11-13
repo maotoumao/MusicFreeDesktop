@@ -1,6 +1,5 @@
 import { isSameMedia } from "@/common/media-util";
 import SvgAsset, { SvgAssetIconNames } from "@/renderer/components/SvgAsset";
-import { useDownloaded } from "@/renderer/core/downloader/downloaded-sheet";
 import { memo, useEffect, useState } from "react";
 import "./index.scss";
 import { DownloadState, localPluginName } from "@/common/constant";
