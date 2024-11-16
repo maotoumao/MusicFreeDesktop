@@ -1,9 +1,9 @@
 import {app, BrowserWindow, nativeImage, screen} from "electron";
-import getResourcePath from "@/utils/main/get-resource-path";
+import getResourcePath from "@/common/main/get-resource-path";
 import {IWindowEvents, IWindowManager} from "@/types/main/window-manager";
 import {localPluginName, ResourceName} from "@/common/constant";
-import voidCallback from "@/utils/common/void-callback";
-import ThumbBarUtil from "@/utils/main/thumb-bar-util";
+import voidCallback from "@/common/void-callback";
+import ThumbBarUtil from "@/common/main/thumb-bar-util";
 import EventEmitter from "eventemitter3";
 import appState from "@shared/app-state/main";
 import {registerExtensionWindow, registerMainWindow} from "@shared/message-hub/main";

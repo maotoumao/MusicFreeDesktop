@@ -7,6 +7,8 @@ import FontPickerSettingItem from "../../components/FontPickerSettingItem";
 import {IfTruthy} from "@/renderer/components/Condition";
 import {useTranslation} from "react-i18next";
 import {getGlobalContext} from "@/shared/global-context/renderer";
+import {appWindowUtil} from "@shared/utils/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 const numberArray = Array(65)
     .fill(0)
@@ -27,7 +29,7 @@ export default function Lyric() {
                 label={t("settings.lyric.enable_desktop_lyric")}
                 keyPath="lyric.enableDesktopLyric"
                 onChange={(_evt, checked) => {
-                    ipcRendererInvoke("set-lyric-window", checked);
+                    appWindowUtil.setLyricWindow(checked);
                 }}
             ></CheckBoxSettingItem>
             {/* <CheckBoxSettingItem
@@ -38,9 +40,6 @@ export default function Lyric() {
             <CheckBoxSettingItem
                 label={t("settings.lyric.lock_desktop_lyric")}
                 keyPath="lyric.lockLyric"
-                onChange={(_evt, checked) => {
-                    ipcRendererSend("set-desktop-lyric-lock", checked);
-                }}
             ></CheckBoxSettingItem>
             <FontPickerSettingItem
                 label={t("settings.lyric.font")}

@@ -8,6 +8,7 @@ import {AuthType, createClient} from "webdav";
 import BackupResume from "@/renderer/core/backup-resume";
 import {useTranslation} from "react-i18next";
 import AppConfig from "@shared/app-config/renderer";
+import {dialogUtil} from "@shared/utils/renderer";
 
 
 
@@ -125,7 +126,7 @@ export default function Backup() {
                     role="button"
                     data-type="normalButton"
                     onClick={async () => {
-                        const result = await ipcRendererInvoke("show-save-dialog", {
+                        const result = await dialogUtil.showSaveDialog({
                             properties: ["showOverwriteConfirmation", "createDirectory"],
                             filters: [
                                 {
@@ -152,7 +153,7 @@ export default function Backup() {
                     role="button"
                     data-type="normalButton"
                     onClick={async () => {
-                        const result = await ipcRendererInvoke("show-open-dialog", {
+                        const result = await dialogUtil.showOpenDialog({
                             properties: ["openFile"],
                             filters: [
                                 {

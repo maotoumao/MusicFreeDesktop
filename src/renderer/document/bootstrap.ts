@@ -15,6 +15,7 @@ import ThemePack from "@/shared/themepack/renderer";
 import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-playlist";
 import ServiceManager from "@shared/service-manager/renderer";
 import {PlayerEvents} from "@renderer/core/track-player/enum";
+import {appWindowUtil} from "@shared/utils/renderer";
 
 
 setAutoFreeze(false);
@@ -37,6 +38,7 @@ export default async function () {
     localMusic.setupLocalMusic();
     await Downloader.setupDownloader();
     setupRecentlyPlaylist();
+    // 本地服务
     ServiceManager.setup();
 
     // 自动更新插件
@@ -158,7 +160,7 @@ function setupEvents() {
 
     Evt.on("TOGGLE_DESKTOP_LYRIC", () => {
         const enableDesktopLyric = AppConfig.getConfig("lyric.enableDesktopLyric");
-        ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
+        appWindowUtil.setLyricWindow(!enableDesktopLyric);
         AppConfig.setConfig({
             "lyric.enableDesktopLyric": !enableDesktopLyric
         })

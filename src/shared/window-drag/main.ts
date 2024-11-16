@@ -5,7 +5,7 @@
 import {BrowserWindow, ipcMain, ipcRenderer} from "electron";
 import {IWindowManager} from "@/types/main/window-manager";
 import * as process from "node:process";
-import debounce from "@/utils/common/debounce";
+import debounce from "@/common/debounce";
 import {ICommon} from "music-metadata/lib/aiff/AiffToken";
 
 const WM_MOUSEMOVE = 0x0200; // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove

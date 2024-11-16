@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {normalizeFileSize} from "@/common/normalize-util";
 import {Trans, useTranslation} from "react-i18next";
 import useAppConfig from "@/hooks/useAppConfig";
+import {appUtil} from "@shared/utils/renderer";
 
 
 export default function Network() {
@@ -16,7 +17,7 @@ export default function Network() {
     const {t} = useTranslation();
 
     useEffect(() => {
-        ipcRendererInvoke("get-cache-size").then((res) => {
+        appUtil.getCacheSize().then((res) => {
             setCacheSize(res);
         });
     }, []);
@@ -72,7 +73,7 @@ export default function Network() {
                     data-type="normalButton"
                     onClick={() => {
                         setCacheSize(0);
-                        ipcRendererSend("clear-cache");
+                        appUtil.clearCache();
                     }}
                 >
                     {t("settings.network.clear_cache")}

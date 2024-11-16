@@ -1,9 +1,9 @@
 import {BrowserWindow, nativeImage} from "electron";
-import getResourcePath from "@/utils/main/get-resource-path";
+import getResourcePath from "@/common/main/get-resource-path";
 import {t} from "@shared/i18n/main";
 import {sendCommand} from "@shared/player-command-sync/main";
 import {PlayerState, ResourceName} from "@/common/constant";
-import asyncMemoize from "@/utils/common/async-memoize";
+import asyncMemoize from "@/common/async-memoize";
 import fs from "fs/promises";
 import logger from "@shared/logger/main";
 import axios from "axios";

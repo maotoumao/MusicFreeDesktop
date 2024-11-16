@@ -1,5 +1,4 @@
 import {app, BrowserWindow, globalShortcut} from "electron";
-import setupIpcMain from "./ipc";
 import {setupPluginManager} from "./core/plugin-manager";
 import {setupGlobalShortCut} from "./core/global-short-cut";
 import fs from "fs";
@@ -7,10 +6,10 @@ import path from "path";
 import {setAutoFreeze} from "immer";
 import {setupGlobalContext} from "@/shared/global-context/main";
 import {setupI18n} from "@/shared/i18n/main";
-import {handleDeepLink} from "./utils/deep-link";
+import {handleDeepLink} from "./deep-link";
 import logger from "@shared/logger/main";
 import {PlayerState} from "@/common/constant";
-import ThumbBarUtil from "@/utils/main/thumb-bar-util";
+import ThumbBarUtil from "@/common/main/thumb-bar-util";
 import windowManager from "@main/window-manager";
 import AppConfig from "@shared/app-config/main";
 import AppState from "@shared/app-state/main";
@@ -20,6 +19,7 @@ import {IAppConfig} from "@/types/app-config";
 import axios from "axios";
 import {HttpsProxyAgent} from "https-proxy-agent";
 import ServiceManager from "@shared/service-manager/main";
+import utils from "@shared/utils/main";
 
 // portable
 if (process.platform === "win32") {
@@ -109,7 +109,7 @@ app.whenReady().then(async () => {
             }
         },
     });
-    setupIpcMain();
+    utils.setup(windowManager);
     setupPluginManager();
     TrayManager.setup(windowManager);
     WindowDrag.setup();
@@ -154,6 +154,7 @@ app.whenReady().then(async () => {
         }
     })
 
+
     await AppConfig.setup(windowManager);
     windowManager.showMainWindow();
 
@@ -178,6 +179,25 @@ async function bootstrap() {
     if (desktopLyricEnabled) {
         windowManager.showLyricWindow();
     }
+
+    // 桌面歌词锁定状态
+    AppConfig.onConfigUpdated((patch) => {
+        if ("lyric.lockLyric" in patch) {
+            const lyricWindow = windowManager.lyricWindow;
+            const lockState = patch["lyric.lockLyric"];
+
+            if (!lyricWindow) {
+                return;
+            }
+            if (lockState) {
+                lyricWindow.setIgnoreMouseEvents(true, {
+                    forward: true,
+                });
+            } else {
+                lyricWindow.setIgnoreMouseEvents(false);
+            }
+        }
+    })
 
 
     const minimodeEnabled = AppConfig.getConfig("private.minimode");
@@ -220,6 +240,8 @@ async function bootstrap() {
         AppConfig.getConfig("network.proxy.username"),
         AppConfig.getConfig("network.proxy.password")
     );
+
+
 
 }
 

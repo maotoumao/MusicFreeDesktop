@@ -2,7 +2,7 @@ import {ChildProcess, fork} from "child_process";
 import {ipcMain} from "electron";
 import {IWindowManager} from "@/types/main/window-manager";
 import {ServiceName} from "@shared/service-manager/common";
-import getResourcePath from "@/utils/main/get-resource-path";
+import getResourcePath from "@/common/main/get-resource-path";
 
 
 class ServiceInstance {

@@ -11,7 +11,8 @@ import "@shared/global-context/preload";
 import "@shared/app-db/preload";
 import "@shared/themepack/preload";
 import "@shared/app-state/preload";
-import "@shared/app-config/preload"
+import "@shared/app-config/preload";
+import "@shared/utils/preload";
 
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 

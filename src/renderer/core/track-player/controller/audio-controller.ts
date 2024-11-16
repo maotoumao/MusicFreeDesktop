@@ -11,7 +11,7 @@ import ServiceManager from "@shared/service-manager/renderer";
 import ControllerBase from "@renderer/core/track-player/controller/controller-base";
 import {ErrorReason} from "@renderer/core/track-player/enum";
 import Dexie from "dexie";
-import voidCallback from "@/utils/common/void-callback";
+import voidCallback from "@/common/void-callback";
 import {IAudioController} from "@/types/audio-controller";
 import Promise = Dexie.Promise;
 

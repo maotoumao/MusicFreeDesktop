@@ -5,6 +5,7 @@ import {toast} from "react-toastify";
 import {useTranslation} from "react-i18next";
 import {IAppConfig} from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
+import {dialogUtil, shellUtil} from "@shared/utils/renderer";
 
 interface PathSettingItemProps<T extends keyof IAppConfig> {
     keyPath: T;
@@ -29,7 +30,7 @@ export default function PathSettingItem<T extends keyof IAppConfig>(
                     role="button"
                     data-type="primaryButton"
                     onClick={async () => {
-                        const result = await ipcRendererInvoke("show-open-dialog", {
+                        const result = await dialogUtil.showOpenDialog({
                             title: t("settings.choose_path"),
                             defaultPath: value as string,
                             properties: ["openDirectory"],
@@ -49,7 +50,7 @@ export default function PathSettingItem<T extends keyof IAppConfig>(
                     data-type="normalButton"
                     onClick={async () => {
                         if (await window.fs.isFolder(value as string)) {
-                            ipcRendererSend("open-path", value as string);
+                            shellUtil.openPath(value as string);
                         } else {
                             toast.error(t("settings.folder_not_exist"));
                         }

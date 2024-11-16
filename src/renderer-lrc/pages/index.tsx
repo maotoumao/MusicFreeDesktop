@@ -3,11 +3,12 @@ import classNames from "@/renderer/utils/classnames";
 import {useEffect, useMemo, useRef, useState} from "react";
 import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
 import {PlayerState} from "@/common/constant";
 import getTextWidth from "@/renderer/utils/get-text-width";
 import {PlayerSyncStore, sendCommand,} from "@/shared/player-command-sync/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
+import {appWindowUtil} from "@shared/utils/renderer";
+import AppConfig from "@/shared/app-config/renderer";
 
 const {
     currentLyricStore,
@@ -65,19 +66,15 @@ export default function LyricWindowPage() {
                             <div
                                 className="operation-button"
                                 onClick={() => {
-                                    ipcRendererSend("set-desktop-lyric-lock", false);
+                                    AppConfig.setConfig({
+                                        "lyric.lockLyric": false
+                                    })
                                 }}
                                 onMouseOver={() => {
-                                    ipcRendererSend("ignore-mouse-event", {
-                                        ignore: false,
-                                        window: "lyric",
-                                    });
+                                    appWindowUtil.ignoreMouseEvent(false);
                                 }}
                                 onMouseLeave={() => {
-                                    ipcRendererSend("ignore-mouse-event", {
-                                        ignore: true,
-                                        window: "lyric",
-                                    });
+                                    appWindowUtil.ignoreMouseEvent(true);
                                 }}
                             >
                                 <SvgAsset iconName="lock-open"></SvgAsset>
@@ -122,7 +119,9 @@ export default function LyricWindowPage() {
                         <div
                             className="operation-button"
                             onClick={() => {
-                                ipcRendererSend("set-desktop-lyric-lock", true);
+                                AppConfig.setConfig({
+                                    "lyric.lockLyric": true
+                                });
                             }}
                         >
                             <SvgAsset iconName="lock-closed"></SvgAsset>
@@ -130,7 +129,7 @@ export default function LyricWindowPage() {
                         <div
                             className="operation-button"
                             onClick={() => {
-                                ipcRendererInvoke("set-lyric-window", false);
+                                appWindowUtil.setLyricWindow(false);
                             }}
                         >
                             <SvgAsset iconName="x-mark"></SvgAsset>

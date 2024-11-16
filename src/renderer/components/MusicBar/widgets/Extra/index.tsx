@@ -15,6 +15,7 @@ import {isCN} from "@/shared/i18n/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 import {RepeatMode} from "@/common/constant";
 import {useQuality, useRepeatMode, useSpeed, useVolume} from "@renderer/core/track-player/hooks";
+import {appWindowUtil} from "@shared/utils/renderer";
 
 export default function Extra() {
   const repeatMode = useRepeatMode();
@@ -315,7 +316,7 @@ function LyricBtn() {
       })}
       role="button"
       onClick={async () => {
-        ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
+        appWindowUtil.setLyricWindow(!enableDesktopLyric);
       }}
     >
       <SvgAsset

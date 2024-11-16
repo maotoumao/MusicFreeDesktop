@@ -13,6 +13,7 @@ import {addSearchHistory} from "@/renderer/utils/search-history";
 import {useTranslation} from "react-i18next";
 import useAppConfig from "@/hooks/useAppConfig";
 import AppConfig from "@shared/app-config/renderer";
+import {appUtil, appWindowUtil} from "@shared/utils/renderer";
 
 export default function AppHeader() {
     const navigate = useNavigate();
@@ -132,9 +133,9 @@ export default function AppHeader() {
                     title={t("app_header.minimode")}
                     className="header-button"
                     onClick={() => {
-                        ipcRendererSend("set-minimode", !isMiniMode);
+                        appWindowUtil.setMinimodeWindow(!isMiniMode);
                         if (!isMiniMode) {
-                            ipcRendererSend("min-window", {skipTaskBar: true});
+                            appWindowUtil.minMainWindow(true);
                         }
                     }}
                 >
@@ -145,7 +146,7 @@ export default function AppHeader() {
                     title={t("app_header.minimize")}
                     className="header-button"
                     onClick={() => {
-                        ipcRendererSend("min-window", {});
+                        appWindowUtil.minMainWindow();
                     }}
                 >
                     <SvgAsset iconName="minus"></SvgAsset>
@@ -157,11 +158,9 @@ export default function AppHeader() {
                     onClick={() => {
                         const exitBehavior = AppConfig.getConfig("normal.closeBehavior");
                         if (exitBehavior === "minimize") {
-                            ipcRendererSend("min-window", {
-                                skipTaskBar: true,
-                            });
+                            appWindowUtil.minMainWindow(true);
                         } else {
-                            ipcRendererSend("exit-app");
+                            appUtil.exitApp();
                         }
                     }}
                 >

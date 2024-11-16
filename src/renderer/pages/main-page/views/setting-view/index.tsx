@@ -3,7 +3,7 @@ import routers from "./routers";
 import {useEffect, useRef, useState} from "react";
 import Condition from "@/renderer/components/Condition";
 import {useTranslation} from "react-i18next";
-import camelToSnake from "@/utils/common/camel-to-snake";
+import camelToSnake from "@/common/camel-to-snake";
 
 export default function SettingView() {
     const [selected, setSelected] = useState(routers[0].id);

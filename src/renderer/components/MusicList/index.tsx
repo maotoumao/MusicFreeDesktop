@@ -47,6 +47,7 @@ import DragReceiver, { startDrag } from "../DragReceiver";
 import { i18n } from "@/shared/i18n/renderer";
 import isLocalMusic from "@/renderer/utils/is-local-music";
 import AppConfig from "@shared/app-config/renderer";
+import {shellUtil} from "@shared/utils/renderer";
 
 interface IMusicListProps {
   /** 展示的播放列表 */
@@ -291,13 +292,13 @@ export function showMusicContextMenu(
                 musicItems.id,
               ]);
             }
-            const result = await ipcRendererInvoke(
-              "show-item-in-folder",
-              getInternalData<IMusic.IMusicItemInternalData>(
+
+            const downloadPath = getInternalData<IMusic.IMusicItemInternalData>(
                 realTimeMusicItem,
                 "downloadData"
-              )?.path
-            );
+            )?.path;
+
+            const result = await shellUtil.showItemInFolder(downloadPath);
             if (!result) {
               throw new Error();
             }

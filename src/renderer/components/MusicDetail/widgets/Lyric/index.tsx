@@ -18,6 +18,7 @@ import { getMediaPrimaryKey } from "@/common/media-util";
 import { useTranslation } from "react-i18next";
 import {useLyric} from "@renderer/core/track-player/hooks";
 import trackPlayer from "@renderer/core/track-player";
+import {dialogUtil} from "@shared/utils/renderer";
 
 export default function Lyric() {
   const lyricContext = useLyric();
@@ -217,7 +218,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
     }
 
     try {
-      const result = await ipcRendererInvoke("show-save-dialog", {
+      const result = await dialogUtil.showSaveDialog({
         title: t("music_detail.lyric_ctx_download_lyric"),
         defaultPath:
           currentMusicRef.current.title +

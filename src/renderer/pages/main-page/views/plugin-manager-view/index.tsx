@@ -6,6 +6,7 @@ import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import A from "@/renderer/components/A";
 import { Trans, useTranslation } from "react-i18next";
+import {dialogUtil} from "@shared/utils/renderer";
 
 export default function PluginManagerView() {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export default function PluginManagerView() {
             data-type="normalButton"
             onClick={async () => {
               try {
-                const result = await ipcRendererInvoke("show-open-dialog", {
+                const result = await dialogUtil.showOpenDialog({
                   title: t("plugin_management_page.choose_plugin"),
                   buttonLabel: t("plugin_management_page.install"),
                   filters: [

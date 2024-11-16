@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { ipcRendererSend } from "@/shared/ipc/renderer";
 import { useUserPreference } from "@/renderer/utils/user-perference";
+import {appWindowUtil} from "@shared/utils/renderer";
 
 const { currentMusicItemStore, playerStateStore, currentLyricStore } =
   PlayerSyncStore;
@@ -39,8 +40,8 @@ export default function MinimodePage() {
         role="button"
         className="close-button"
         onClick={() => {
-          ipcRendererSend("set-minimode", false);
-          ipcRendererSend("show-mainwindow");
+            appWindowUtil.setMinimodeWindow(false);
+            appWindowUtil.showMainWindow();
         }}
       >
         <SvgAsset iconName="x-mark"></SvgAsset>
@@ -111,7 +112,7 @@ export default function MinimodePage() {
           className="album-container"
           src={currentMusicItem?.artwork || albumImg}
           onDoubleClick={() => {
-            ipcRendererSend("show-mainwindow");
+              appWindowUtil.showMainWindow();
           }}
         ></img>
         <div className="body-container">{hover ? options : textContent}</div>

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import MusicSheet from "@/renderer/core/music-sheet";
-import debounce from "@/utils/common/debounce";
+import debounce from "@/common/debounce";
 import { hideModal } from "../..";
 import SimpleInputWithState from "../SimpleInputWithState";
 import { useTranslation } from "react-i18next";

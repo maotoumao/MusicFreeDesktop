@@ -5,6 +5,7 @@ import wcChannelImg from "@/assets/imgs/wechat_channel.jpg";
 import { hideModal } from "../..";
 import { ipcRendererSend } from "@/shared/ipc/renderer";
 import { useTranslation } from "react-i18next";
+import {shellUtil} from "@shared/utils/renderer";
 
 interface IUpdateProps {
   currentVersion: string;
@@ -50,7 +51,7 @@ export default function Update(props: IUpdateProps) {
             role="button"
             data-type="primaryButton"
             onClick={() => {
-              ipcRendererSend("open-url", update.download[0]);
+              shellUtil.openExternal(update.download[0]);
             }}
           >
             {t("common.update")}

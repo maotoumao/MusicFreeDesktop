@@ -1,7 +1,7 @@
 import {app, Menu, MenuItem, MenuItemConstructorOptions, nativeImage, Tray} from "electron";
 import {t} from "@shared/i18n/main";
 import {IWindowManager} from "@/types/main/window-manager";
-import getResourcePath from "@/utils/main/get-resource-path";
+import getResourcePath from "@/common/main/get-resource-path";
 import {PlayerState, RepeatMode, ResourceName} from "@/common/constant";
 import AppState from "@shared/app-state/main";
 import AppConfig from "@shared/app-config/main";

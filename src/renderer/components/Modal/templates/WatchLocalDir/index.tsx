@@ -14,6 +14,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import Checkbox from "@/renderer/components/Checkbox";
 import localMusic from "@/renderer/core/local-music";
 import { useTranslation } from "react-i18next";
+import {dialogUtil} from "@shared/utils/renderer";
 
 interface IWatchDirProps {}
 export default function WatchLocalDir(props: IWatchDirProps) {
@@ -47,7 +48,7 @@ export default function WatchLocalDir(props: IWatchDirProps) {
               role="button"
               data-type="normalButton"
               onClick={async () => {
-                const result = await ipcRendererInvoke("show-open-dialog", {
+                const result = await dialogUtil.showOpenDialog({
                   title: t("modal.scan_local_music"),
                   properties: ["openDirectory", "createDirectory"],
                 });

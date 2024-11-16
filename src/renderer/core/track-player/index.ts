@@ -24,7 +24,7 @@ import {IAudioController} from "@/types/audio-controller";
 import AudioController from "@renderer/core/track-player/controller/audio-controller";
 import logger from "@shared/logger/renderer";
 import {callPluginDelegateMethod} from "@renderer/core/plugin-delegate";
-import voidCallback from "@/utils/common/void-callback";
+import voidCallback from "@/common/void-callback";
 import {delay} from "@/common/time-util";
 import {createUniqueMap} from "@/common/unique-map";
 import {getLinkedLyric} from "@renderer/core/link-lyric";
