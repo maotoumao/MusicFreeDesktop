@@ -154,7 +154,8 @@ class WindowManager implements IWindowManager {
 
         // 6. 发出信号
         this.emit("WindowCreated", {
-            windowName: "main"
+            windowName: "main",
+            browserWindow: mainWindow
         });
     }
 
@@ -254,10 +255,12 @@ class WindowManager implements IWindowManager {
         }
 
         registerExtensionWindow(lyricWindow);
-        this.emit("WindowCreated", {
-            windowName: "lyric"
-        });
+
         WindowManager.lrcWindow = lyricWindow;
+        this.emit("WindowCreated", {
+            windowName: "lyric",
+            browserWindow: lyricWindow
+        });
     }
 
 
@@ -342,10 +345,11 @@ class WindowManager implements IWindowManager {
         })
         // Todo: 记得删掉
         registerExtensionWindow(miniWindow);
-        this.emit("WindowCreated", {
-            windowName: "minimode"
-        })
         WindowManager.miniModeWindow = miniWindow;
+        this.emit("WindowCreated", {
+            windowName: "minimode",
+            browserWindow: miniWindow
+        })
     }
 
     public showMiniModeWindow() {

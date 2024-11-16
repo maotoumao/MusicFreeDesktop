@@ -15,7 +15,7 @@ function syncCurrentRepeatMode(state: RepeatMode) {
 }
 
 function syncCurrentLyric(lyric: string) {
-    ipcRenderer.send("sync-current-repeat-mode", lyric);
+    ipcRenderer.send("sync-current-lyric", lyric);
 }
 
 

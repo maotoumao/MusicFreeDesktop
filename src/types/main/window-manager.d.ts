@@ -5,6 +5,7 @@ export type IWindowNames = "main" | "lyric" | "minimode";
 export interface IWindowEvents {
     "WindowCreated": {
         windowName: IWindowNames;
+        browserWindow: BrowserWindow;
     }
 }
 

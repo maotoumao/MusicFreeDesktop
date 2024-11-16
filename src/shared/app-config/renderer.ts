@@ -53,7 +53,6 @@ class AppConfig {
     }
 
     public setConfig(data: IAppConfig) {
-        console.log("set!", data);
         mod.setConfig(data);
     }
 

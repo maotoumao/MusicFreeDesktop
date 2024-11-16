@@ -5,6 +5,7 @@ import {
   MessagePortMain,
   ipcMain,
 } from "electron";
+import {IWindowManager} from "@/types/main/window-manager";
 
 const extensionIds = new Set<number>();
 
@@ -77,3 +78,41 @@ export function onMessage(cb: (data: any) => void) {
 export function offMessage(cb: (data: any) => void) {
   callbacks.delete(cb);
 }
+
+
+//
+// class MessageHub {
+//   private extensionIds = new Set<number>();
+//   private windowManager: IWindowManager;
+//
+//   setup(windowManager: IWindowManager) {
+//     this.windowManager = windowManager;
+//     this.windowManager.on("WindowCreated", ({windowName, browserWindow}) => {
+//       if (windowName === "main") {
+//         return;
+//       }
+//
+//       const {port1, port2} = new MessageChannelMain();
+//       const extWindowId = browserWindow.id;
+//       this.extensionIds.add(extWindowId);
+//
+//       // 通知主窗口更新
+//       this.windowManager.mainWindow.webContents.postMessage("port", {
+//         id: extWindowId,
+//         type: "mount",
+//       }, [port1]);
+//
+//       browserWindow.webContents.postMessage("port", null, [port2]);
+//       browserWindow.on("close", () => {
+//         this.windowManager.mainWindow.webContents.postMessage("port", {
+//           id: extWindowId,
+//           type: "unmount",
+//         });
+//         this.extensionIds.delete(extWindowId);
+//       })
+//
+//     })
+//   }
+//
+// }
+//
