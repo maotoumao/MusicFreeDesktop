@@ -552,8 +552,8 @@ function _MusicList(props: IMusicListProps) {
                                     setActiveItems(newSet);
                                 } else {
                                     setActiveItems(new Set([virtualItem.rowIndex]));
+                                    lastActiveIndexRef.current = virtualItem.rowIndex;
                                 }
-                                lastActiveIndexRef.current = virtualItem.rowIndex;
                             }}
                             onDoubleClick={() => {
                                 const config =
