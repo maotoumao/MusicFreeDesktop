@@ -8,7 +8,7 @@ import {AuthType, createClient} from "webdav";
 import BackupResume from "@/renderer/core/backup-resume";
 import {useTranslation} from "react-i18next";
 import AppConfig from "@shared/app-config/renderer";
-import {dialogUtil} from "@shared/utils/renderer";
+import {dialogUtil, fsUtil} from "@shared/utils/renderer";
 
 
 
@@ -142,7 +142,7 @@ export default function Backup() {
                             const backUp = JSON.stringify({
                                 musicSheets: sheetDetails,
                             });
-                            await window.fs.writeFile(result.filePath, backUp, "utf-8");
+                            await fsUtil.writeFile(result.filePath, backUp, "utf-8");
                             toast.success(t("settings.backup.backup_success"));
                         }
                     }}
@@ -165,7 +165,7 @@ export default function Backup() {
                         });
                         if (!result.canceled && result.filePaths) {
                             try {
-                                const rawSheets = (await window.fs.readFile(
+                                const rawSheets = (await fsUtil.readFile(
                                     result.filePaths[0],
                                     "utf-8"
                                 )) as string;

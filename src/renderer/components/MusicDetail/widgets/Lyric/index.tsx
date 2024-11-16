@@ -18,7 +18,7 @@ import { getMediaPrimaryKey } from "@/common/media-util";
 import { useTranslation } from "react-i18next";
 import {useLyric} from "@renderer/core/track-player/hooks";
 import trackPlayer from "@renderer/core/track-player";
-import {dialogUtil} from "@shared/utils/renderer";
+import {dialogUtil, fsUtil} from "@shared/utils/renderer";
 
 export default function Lyric() {
   const lyricContext = useLyric();
@@ -231,7 +231,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
         ],
       });
       if (!result.canceled && result.filePath) {
-        await window.fs.writeFile(result.filePath, rawLrc, "utf-8");
+        await fsUtil.writeFile(result.filePath, rawLrc, "utf-8");
         toast.success(t("music_detail.lyric_ctx_download_success"));
       } else {
         throw new Error();

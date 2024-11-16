@@ -62,7 +62,6 @@ class Utils {
         })
     }
 
-
     private setupWindowUtil() {
         ipcMain.on("@shared/utils/min-main-window", (_, {skipTaskBar}) => {
             const mainWindow = this.windowManager.mainWindow;
@@ -129,7 +128,6 @@ class Utils {
         })
     }
 
-
     private setupDialogUtil() {
         ipcMain.handle("@shared/utils/show-open-dialog", async (_, options) => {
             const mainWindow = this.windowManager.mainWindow;
@@ -147,6 +145,7 @@ class Utils {
             return dialog.showSaveDialog(options);
         });
     }
+
 }
 
 

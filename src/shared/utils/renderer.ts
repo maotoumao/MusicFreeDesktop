@@ -1,5 +1,15 @@
+import type fs from "fs/promises";
+import type rimraf from "rimraf";
 
 interface IMod {
+    fs: {
+        writeFile(...args: Parameters<typeof fs.writeFile>): ReturnType<typeof fs.writeFile>;
+        readFile(...args: Parameters<typeof fs.readFile>): ReturnType<typeof fs.readFile>;
+        isFile: (path: string) => Promise<boolean>;
+        isFolder: (path: string) => Promise<boolean>;
+        rimraf: typeof rimraf.rimraf;
+        addFileScheme: (filePath: string) => string;
+    },
     app: {
         exitApp: () => void;
         getPath: (pathName: "home" | "appData" | "userData" | "sessionData" | "temp" | "exe" | "module" | "desktop" | "documents" | "downloads" | "music" | "pictures" | "videos" | "recent" | "logs" | "crashDumps") => Promise<string>;
@@ -31,4 +41,4 @@ const utils = window["@shared/utils" as any] as unknown as IMod;
 
 
 export default utils;
-export const {app: appUtil, appWindow: appWindowUtil, shell: shellUtil, dialog: dialogUtil} = utils;
+export const {fs: fsUtil, app: appUtil, appWindow: appWindowUtil, shell: shellUtil, dialog: dialogUtil} = utils;

@@ -28,6 +28,7 @@ import voidCallback from "@/common/void-callback";
 import {delay} from "@/common/time-util";
 import {createUniqueMap} from "@/common/unique-map";
 import {getLinkedLyric} from "@renderer/core/link-lyric";
+import {fsUtil} from "@shared/utils/renderer";
 
 const {
     musicQueueStore,
@@ -661,11 +662,11 @@ class TrackPlayer {
         );
         if (downloadedData) {
             const {quality, path: _path} = downloadedData;
-            if (await window.fs.isFile(_path)) {
+            if (await fsUtil.isFile(_path)) {
                 return {
                     quality,
                     mediaSource: {
-                        url: window.utils.addFileScheme(_path),
+                        url: fsUtil.addFileScheme(_path),
                     },
                 };
             } else {

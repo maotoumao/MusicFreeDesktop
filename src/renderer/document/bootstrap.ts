@@ -15,7 +15,7 @@ import ThemePack from "@/shared/themepack/renderer";
 import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-playlist";
 import ServiceManager from "@shared/service-manager/renderer";
 import {PlayerEvents} from "@renderer/core/track-player/enum";
-import {appWindowUtil} from "@shared/utils/renderer";
+import {appWindowUtil, fsUtil} from "@shared/utils/renderer";
 
 
 setAutoFreeze(false);
@@ -60,7 +60,7 @@ function dropHandler() {
 
         const validMusicList: IMusic.IMusicItem[] = [];
         for (const f of event.dataTransfer.files) {
-            if (f.type === "" && (await window.fs.isFolder(f.path))) {
+            if (f.type === "" && (await fsUtil.isFolder(f.path))) {
                 validMusicList.push(
                     ...(await callPluginDelegateMethod(
                         {

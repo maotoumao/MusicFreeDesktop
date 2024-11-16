@@ -1,4 +1,53 @@
 import {contextBridge, ipcRenderer} from "electron";
+import fs from "fs/promises";
+import {rimraf} from "rimraf";
+import url from "url";
+
+
+/****** fs utils ******/
+const originalFsWriteFile = fs.writeFile;
+const originalFsReadFile = fs.readFile;
+
+function writeFile(...args: Parameters<typeof originalFsWriteFile>): ReturnType<typeof originalFsWriteFile> {
+    return originalFsWriteFile(...args);
+}
+
+function readFile(...args: Parameters<typeof originalFsReadFile>): ReturnType<typeof originalFsReadFile> {
+    return originalFsReadFile(...args);
+}
+
+async function isFile(path: string) {
+    try {
+        const stat = await fs.stat(path);
+        return stat.isFile();
+    } catch {
+        return false;
+    }
+}
+
+async function isFolder(path: string) {
+    try {
+        const stat = await fs.stat(path);
+        return stat.isDirectory();
+    } catch {
+        return false;
+    }
+}
+
+function addFileScheme(filePath: string) {
+    return filePath.startsWith("file:")
+        ? filePath
+        : url.pathToFileURL(filePath).toString();
+}
+
+const fsUtil = {
+    writeFile,
+    readFile,
+    isFile,
+    isFolder,
+    rimraf,
+    addFileScheme
+}
 
 /****** app utils *****/
 function exitApp() {
@@ -94,6 +143,7 @@ const dialog = {
 
 
 const mod = {
+    fs: fsUtil,
     app,
     appWindow,
     shell,

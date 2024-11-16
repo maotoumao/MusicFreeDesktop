@@ -13,6 +13,7 @@ import musicSheetDB from "../db/music-sheet-db";
 import { internalDataKey, musicRefSymbol } from "@/common/constant";
 import { useEffect, useState } from "react";
 import { DownloadEvts, ee } from "./ee";
+import {fsUtil} from "@shared/utils/renderer";
 
 const downloadedMusicListStore = new Store<IMusic.IMusicItem[]>([]);
 const downloadedSet = new Set<string>();
@@ -121,7 +122,7 @@ export async function removeDownloadedMusic(
       removeResults = await Promise.all(
         toBeRemovedMusicDetail.map((it) => {
           try {
-            return window.rimraf(
+            return fsUtil.rimraf(
               getInternalData<IMusic.IMusicItemInternalData>(it, "downloadData")
                 ?.path
             );

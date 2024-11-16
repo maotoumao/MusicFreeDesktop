@@ -5,7 +5,7 @@ import {toast} from "react-toastify";
 import {useTranslation} from "react-i18next";
 import {IAppConfig} from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
-import {dialogUtil, shellUtil} from "@shared/utils/renderer";
+import {dialogUtil, fsUtil, shellUtil} from "@shared/utils/renderer";
 
 interface PathSettingItemProps<T extends keyof IAppConfig> {
     keyPath: T;
@@ -49,7 +49,7 @@ export default function PathSettingItem<T extends keyof IAppConfig>(
                     role="button"
                     data-type="normalButton"
                     onClick={async () => {
-                        if (await window.fs.isFolder(value as string)) {
+                        if (await fsUtil.isFolder(value as string)) {
                             shellUtil.openPath(value as string);
                         } else {
                             toast.error(t("settings.folder_not_exist"));

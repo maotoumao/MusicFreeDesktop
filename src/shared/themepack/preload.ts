@@ -3,7 +3,6 @@ import path from "path";
 import fs from "fs/promises";
 import { Readable } from "stream";
 import { rimraf } from "rimraf";
-import Store from "@/common/store";
 import { nanoid } from "nanoid";
 import { createReadStream, createWriteStream } from "original-fs";
 import unzipper from "unzipper";
