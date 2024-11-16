@@ -33,7 +33,7 @@ export default function PlayMusic() {
             <RadioGroupSettingItem
                 label={t("settings.play_music.when_quality_missing")}
                 keyPath="playMusic.whenQualityMissing"
-                options={["lower", "higher"]}
+                options={["lower", "higher", "skip"]}
                 renderItem={it => t("settings.play_music.play_" + it + "_quality_version")}
             ></RadioGroupSettingItem>
             <RadioGroupSettingItem

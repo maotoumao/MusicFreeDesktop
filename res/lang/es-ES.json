@@ -281,6 +281,7 @@
       "when_quality_missing": "Cuando falta la calidad de reproducción",
       "play_lower_quality_version": "Reproducir versión de menor calidad",
       "play_higher_quality_version": "Reproducir versión de mayor calidad",
+      "play_skip_quality_version": "no buscar otras versiones de calidad de sonido",
       "when_play_error": "En caso de error al reproducir",
       "pause": "Pausar",
       "skip_to_next": "Saltar a la siguiente",

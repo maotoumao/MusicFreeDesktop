@@ -49,7 +49,7 @@ interface InternalPlayerEvents {
     [PlayerEvents.MusicChanged]: (musicItem: IMusic.IMusicItem | null) => void;
     [PlayerEvents.LyricChanged]: (parser: LyricParser | null) => void;
     [PlayerEvents.CurrentLyricChanged]: (lyric: IParsedLrcItem | null) => void;
-    [PlayerEvents.Error]: (reason: any) => void;
+    [PlayerEvents.Error]: (errorMusicItem: IMusic.IMusicItem | null, reason: any) => void;
     [PlayerEvents.ProgressChanged]: (progress: CurrentTime) => void;
     [PlayerEvents.StateChanged]: (state: PlayerState) => void;
 }
@@ -127,15 +127,14 @@ class TrackPlayer {
     }
 
     private setupEvents() {
-        this.ee.on(PlayerEvents.Error, async (reason) => {
+        this.ee.on(PlayerEvents.Error, async (errorMusicItem) => {
             // config
             const needSkip = AppConfig.getConfig("playMusic.playError") === "skip";
 
             this.resetProgress();
             if (this.musicQueue.length > 1 && needSkip) {
-                const errorMusic = this.currentMusic;
                 await delay(500);
-                if (this.isCurrentMusic(errorMusic)) {
+                if (this.isCurrentMusic(errorMusicItem)) {
                     this.skipToNext();
                 }
             }
@@ -198,7 +197,7 @@ class TrackPlayer {
         }
 
         audioController.onError = async (type, reason) => {
-            this.ee.emit(PlayerEvents.Error, reason);
+            this.ee.emit(PlayerEvents.Error, audioController.musicItem, reason);
         }
 
 
@@ -350,7 +349,7 @@ class TrackPlayer {
             // 播放失败
             this.setCurrentQuality(AppConfig.getConfig("playMusic.defaultQuality"));
             this.audioController.reset();
-            this.ee.emit(PlayerEvents.Error, e)
+            this.ee.emit(PlayerEvents.Error, nextMusicItem, e)
         }
 
 

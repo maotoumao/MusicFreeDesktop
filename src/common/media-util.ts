@@ -111,8 +111,12 @@ export function removeInternalProperties<T extends IMedia.IMediaBase>(
  */
 export function getQualityOrder(
   qualityKey: IMusic.IQualityKey,
-  sort: "higher" | "lower"
+  sort: "higher" | "lower" | "skip"
 ) {
+  if (sort === "skip") {
+    return [qualityKey];
+  }
+
   const idx = qualityKeys.indexOf(qualityKey);
   const left = qualityKeys.slice(0, idx);
   const right = qualityKeys.slice(idx + 1);

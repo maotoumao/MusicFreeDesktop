@@ -281,6 +281,7 @@
       "when_quality_missing": "當播放音質缺失時",
       "play_lower_quality_version": "播放低音質版本",
       "play_higher_quality_version": "播放高音質版本",
+      "play_skip_quality_version": "不尋找其他音質版本",
       "when_play_error": "播放錯誤時",
       "pause": "暫停",
       "skip_to_next": "跳至下一首",

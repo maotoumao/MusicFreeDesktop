@@ -12,7 +12,7 @@ interface _IAppConfig {
     /** 默认播放音质 */
     "playMusic.defaultQuality": IMusic.IQualityKey;
     /** 默认播放音质缺失时 */
-    "playMusic.whenQualityMissing": "higher" | "lower";
+    "playMusic.whenQualityMissing": "higher" | "lower" | "skip";
     /** 双击音乐列表时 */
     "playMusic.clickMusicList": "normal" | "replace";
     /** 播放失败时 */

@@ -281,6 +281,7 @@
       "when_quality_missing": "When playback quality is missing",
       "play_lower_quality_version": "Play lower quality version",
       "play_higher_quality_version": "Play higher quality version",
+      "play_skip_quality_version": "Do not look for other quality versions",
       "when_play_error": "When playback error occurs",
       "pause": "Pause",
       "skip_to_next": "Automatically play next song",
