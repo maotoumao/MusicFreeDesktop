@@ -163,7 +163,9 @@ class TrackPlayer {
                     break;
                 }
                 case RepeatMode.Loop: {
-                    this.playIndex(this.currentIndex);
+                    this.playIndex(this.currentIndex, {
+                        restartOnSameMedia: true
+                    });
                 }
             }
         }
@@ -292,9 +294,8 @@ class TrackPlayer {
         if (this.currentIndex === index && this.isCurrentMusic(this.musicQueue[index]) && !refreshSource) {
             if (restartOnSameMedia) {
                 this.seekTo(0);
-            } else {
-                this.audioController.play();
             }
+            this.audioController.play();
 
             return;
         }
