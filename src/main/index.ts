@@ -95,8 +95,10 @@ app.on("will-quit", () => {
 app.whenReady().then(async () => {
     logger.logPerf("App Ready");
     setupGlobalContext();
+    await AppConfig.setup(windowManager);
+
     AppState.setup(windowManager);
-    setupI18n({
+    await setupI18n({
         getDefaultLang() {
             return AppConfig.getConfig("normal.language");
         },
@@ -155,7 +157,6 @@ app.whenReady().then(async () => {
     })
 
 
-    await AppConfig.setup(windowManager);
     windowManager.showMainWindow();
 
     bootstrap();

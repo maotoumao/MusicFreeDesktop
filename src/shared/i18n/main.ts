@@ -2,6 +2,7 @@ import { app, ipcMain } from "electron";
 import path from "path";
 import fs from "fs/promises";
 import i18n from "i18next";
+import logger from "@shared/logger/main";
 
 const ns = "translation";
 
@@ -114,7 +115,9 @@ export async function setupI18n(options?: ISetupI18nOptions) {
 
       return null;
     });
-  } catch {}
+  } catch (e){
+    logger.logError("I18N Setup Error", e as Error)
+  }
 }
 
 export const t = i18n.t.bind(i18n);

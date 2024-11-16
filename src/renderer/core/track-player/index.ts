@@ -283,7 +283,7 @@ class TrackPlayer {
 
     public async playIndex(index: number, options: IPlayOptions = {}) {
         const {refreshSource, restartOnSameMedia = true, seekTo, quality: intendedQuality} = options;
-        if (index === -1) {
+        if (index === -1 && this.musicQueue.length === 0) {
             // 播放列表为空
             return;
         }

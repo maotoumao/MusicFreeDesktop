@@ -12,7 +12,7 @@ import _defaultAppConfig from "@shared/app-config/default-app-config";
 class AppConfig {
     private _configPath: string;
     private windowManager: IWindowManager;
-    private config: IAppConfig = {};
+    private config: IAppConfig;
 
     private onAppConfigUpdatedCallbacks = new Set<(patch: IAppConfig, config: IAppConfig) => void>();
 
@@ -85,6 +85,7 @@ class AppConfig {
                 this.config = JSON.parse(rawConfig);
             }
         } catch (e) {
+
             if (e.message === "Unexpected end of JSON input" || e.code === "EISDIR") {
                 // JSON 解析异常 / 非文件
                 await rimraf(this.configPath);
