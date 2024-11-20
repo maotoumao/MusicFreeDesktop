@@ -175,7 +175,7 @@ class TrackPlayer {
             // 检查歌词
             if (this.lyric?.parser) {
                 const lyricItem = this.lyric.parser.getPosition(progress.currentTime);
-                if (this.lyric.currentLrc?.lrc !== lyricItem.lrc) {
+                if (this.lyric.currentLrc?.lrc !== lyricItem?.lrc) {
                     this.setCurrentLyric({
                         parser: this.lyric.parser,
                         currentLrc: lyricItem
