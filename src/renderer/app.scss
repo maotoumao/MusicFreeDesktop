@@ -8,8 +8,8 @@
 
   & .body-container {
     width: 100%;
-    height: calc(100vh - 54px - 64px);
-    flex: auto;
+    height: 0;
+    flex: 1;
     display: flex;
     position: relative;
   }

@@ -1,4 +1,3 @@
-import {ipcRendererSend} from "@/shared/ipc/renderer";
 import SvgAsset from "../SvgAsset";
 import "./index.scss";
 import {showModal} from "../Modal";
@@ -36,7 +35,7 @@ export default function AppHeader() {
     }
 
     function search(keyword: string) {
-        navigate(`/main/search/${keyword}`);
+        navigate(`/main/search/${encodeURIComponent(keyword)}`);
         musicDetailShownStore.setValue(false);
         addSearchHistory(keyword);
         setShowSearchHistory(false);

@@ -357,7 +357,7 @@ function _MusicList(props: IMusicListProps) {
     const virtualController = useVirtualList({
         data: table.getRowModel().rows,
         getScrollElement: virtualProps?.getScrollElement,
-        offsetHeight: () => tableContainerRef.current.offsetTop ?? 0,
+        offsetHeight: () => tableContainerRef.current?.offsetTop ?? 0,
         estimateItemHeight: estimizeItemHeight,
         fallbackRenderCount: !(
             virtualProps?.getScrollElement
