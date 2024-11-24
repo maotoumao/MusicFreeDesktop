@@ -101,31 +101,40 @@ div[role="button"] {
   &[data-type="primaryButton"] {
     background-color: var(--primaryColor);
     font-size: 1em;
-    padding: 0.5em 0.8em;
-    border-radius: 1.6em;
+    padding: 0.6em 1em;
+    border-radius: 6px;
     color: white;
     width: fit-content;
     line-height: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   &[data-type="normalButton"] {
     font-size: 1em;
-    padding: 0.5em 0.8em;
-    border-radius: 1.6em;
+    padding: 0.6em 1em;
+    border-radius: 6px;
     color: var(--textColor);
     border: 1px solid currentColor;
     width: fit-content;
     line-height: 1em;
     background-color: color-mix(in srgb, currentColor 15%, transparent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   &[data-type="dangerButton"] {
     font-size: 1em;
-    padding: 0.5em 0.8em;
-    border-radius: 1.6em;
+    padding: 0.6em 1em;
+    border-radius: 6px;
     color: var(--dangerColor);
     border: 1px solid currentColor;
     width: fit-content;
     line-height: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     &[data-fill="true"] {
       color: white;

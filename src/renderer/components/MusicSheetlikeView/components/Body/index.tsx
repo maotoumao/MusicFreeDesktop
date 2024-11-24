@@ -110,7 +110,7 @@ export default function Body(props: IProps) {
             value={inputSearch}
             className="search-in-music-list"
           ></input>
-          <SvgAsset iconName="magnifying-glass" size={16}></SvgAsset>
+          <SvgAsset iconName="magnifying-glass"></SvgAsset>
         </div>
       </div>
       <Condition

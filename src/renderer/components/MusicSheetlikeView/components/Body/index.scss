@@ -1,45 +1,42 @@
 .music-sheetlike-view--body-container {
   & .operations {
-    height: 4rem;
-
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
 
     & .buttons {
       display: flex;
-      font-size: 1.05rem;
       column-gap: 1rem;
 
       & .option-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding-left: 0.8em;
-        padding-right: 0.8em;
+        gap: 4px;
 
         & svg {
-          width: 1.3em;
-          height: 1.3em;
-          margin-right: 2px;
+          width: 1.5em;
+          height: 1.5em;
         }
       }
     }
 
     & .search-in-music-list-container {
-      width: 220px;
+      width: 280px;
       position: relative;
       display: flex;
       align-items: center;
       & .search-in-music-list {
-        width: 220px;
-        padding-right: 22px;
+        width: 100%;
+        padding: 0.6rem calc(1.4rem + 12px) 0.6rem 0.8rem;
+        border-radius: 4px;
       }
 
       & svg {
         opacity: 0.6;
         position: absolute;
-        right: 4px;
+        right: 6px;
+        width: 1.4rem;
+        height: 1.4rem;
       }
     }
   }
