@@ -101,7 +101,7 @@ async function changeWatchPath(addPaths?: string[], rmPaths?: string[]) {
         // watcher._watched.delete(it);
       });
     }
-    // console.logger("WATCH PATH CHANGED", addPaths, rmPaths, watcher);
+    // console.log("WATCH PATH CHANGED", addPaths, rmPaths, watcher);
   } catch (e) {
     console.log(e);
   }

@@ -325,9 +325,9 @@ export function useMusicSheet(sheetId: string) {
 //     const updateSheet = async () => {
 //       const start = Date.now();
 //       const sheetDetail = await backend.getSheetItemDetail(sheetId);
-//       console.logger("歌单详情", Date.now() - start, "ms");
+//       console.log("歌单详情", Date.now() - start, "ms");
 //       if (realTimeSheetIdRef.current === sheetId) {
-//         console.logger("歌单详情", sheetId);
+//         console.log("歌单详情", sheetId);
 //         setSheetItem(sheetDetail);
 //         setPendingState(RequestStateCode.FINISHED);
 //       }

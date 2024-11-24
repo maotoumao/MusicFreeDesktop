@@ -61,7 +61,7 @@ export default function MySheets() {
               }
               onClick={() => {
                 currentSheetId !== item.id &&
-                  navigate(`/main/musicsheet/${localPluginName}/${item.id}`);
+                  navigate(`/main/musicsheet/${encodeURIComponent(localPluginName)}/${encodeURIComponent(item.id)}`);
               }}
               onContextMenu={(e) => {
                 if (item.id === defaultSheet.id) {
@@ -100,7 +100,7 @@ export default function MySheets() {
                         MusicSheet.frontend.removeSheet(item.id).then(() => {
                           if (currentSheetId === item.id) {
                             navigate(
-                              `/main/musicsheet/${localPluginName}/${defaultSheet.id}`,
+                              `/main/musicsheet/${encodeURIComponent(localPluginName)}/${defaultSheet.id}`,
                               {
                                 replace: true,
                               }

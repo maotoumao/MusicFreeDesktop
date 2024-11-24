@@ -34,7 +34,7 @@ if (process.platform === "win32") {
             });
         }
     } catch (e) {
-        // console.logger(e)
+        // pass
     }
 }
 

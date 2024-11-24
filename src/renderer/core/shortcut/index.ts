@@ -49,7 +49,7 @@ export function bindShortCut(
   // 原有的快捷键
   const mapKey = `${key}${global ? "-g" : ""}`;
   // const originalHotKey = boundKeyMap.get(mapKey);
-  // console.logger(originalHotKey, shortCut);
+  // console.log(originalHotKey, shortCut);
   // if (originalHotKey?.join?.("+") === shortCut?.join?.("+")) {
   //   // 没改
   //   return;
