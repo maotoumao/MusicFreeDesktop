@@ -94,6 +94,7 @@ export default function PlayList() {
                 </div>
                 <div
                     role="button"
+                    data-type='normalButton'
                     onClick={() => {
                         trackPlayer.reset();
                     }}
