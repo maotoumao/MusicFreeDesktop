@@ -181,3 +181,8 @@ export enum WindowRole {
     MAIN = "MAIN",
     SLAVE = "SLAVE",
 }
+
+export const CommonConst = {
+    /** 新建歌单名称长度限制 */
+    NEW_SHEET_NAME_LENGTH_LIMIT: 120,
+}

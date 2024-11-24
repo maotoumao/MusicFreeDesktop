@@ -4,6 +4,7 @@ import debounce from "@/common/debounce";
 import { hideModal } from "../..";
 import SimpleInputWithState from "../SimpleInputWithState";
 import { useTranslation } from "react-i18next";
+import {CommonConst} from "@/common/constant";
 
 interface IProps {
   initMusicItems: IMusic.IMusicItem | IMusic.IMusicItem[];
@@ -32,7 +33,7 @@ export default function AddNewSheet(props: IProps) {
       title={t("modal.create_local_sheet")}
       onOk={onCreateNewSheetClick}
       placeholder={t("modal.create_local_sheet_placeholder")}
-      maxLength={30}
+      maxLength={CommonConst.NEW_SHEET_NAME_LENGTH_LIMIT}
       okText={t("common.create")}
     ></SimpleInputWithState>
   );

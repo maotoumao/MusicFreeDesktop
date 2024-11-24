@@ -37,10 +37,9 @@
         rgba($color: #000, $alpha: 0.14)
       );
       position: relative;
-      height: 28px;
-      width: 220px;
-      border-radius: 14px;
-      padding: 0 8px;
+      min-width: 220px;
+      border-radius: 8px;
+      padding: 0.5rem 8px;
       display: flex;
       align-items: center;
       margin-left: 14px;
@@ -53,6 +52,7 @@
         border: none;
         background-color: transparent !important;
         color: var(--headerTextColor);
+        padding: 0;
 
         &::placeholder {
           opacity: 0.7;
