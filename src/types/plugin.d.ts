@@ -61,6 +61,11 @@ declare namespace IPlugin {
     data?: IMusic.IMusicSheetGroupItem[];
   }
 
+  interface IGetCommentResult {
+    isEnd?: boolean;
+    data?: IComment.IComment[];
+  }
+
   interface IPluginDefine {
     /** 来源名 */
     platform: string;
@@ -130,6 +135,8 @@ declare namespace IPlugin {
       tag: ICommon.IUnique,
       page?: number
     ) => Promise<ICommon.PaginationResponse<IMusic.IMusicSheetItem>>;
+    /** 歌曲评论 */
+    getMusicComments?: (musicItem: IMusic.IMusicItem) => Promise<IGetCommentResult>
   }
 
   export interface IPluginInstance extends IPluginDefine {
