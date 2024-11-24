@@ -1,6 +1,6 @@
 import { RequestStateCode } from "@/common/constant";
-import { callPluginDelegateMethod } from "@/renderer/core/plugin-delegate";
 import { useCallback, useEffect, useRef, useState } from "react";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 const idleCode = [
   RequestStateCode.IDLE,
@@ -34,7 +34,7 @@ export default function useAlbumDetail(
             ? RequestStateCode.PENDING_FIRST_PAGE
             : RequestStateCode.PENDING_REST_PAGE
         );
-        const result = await callPluginDelegateMethod(
+        const result = await PluginManager.callPluginDelegateMethod(
           originalAlbumItem,
           "getAlbumInfo",
           originalAlbumItem,

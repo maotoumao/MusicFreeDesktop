@@ -1,7 +1,8 @@
 import { supportLocalMediaType } from "@/common/constant";
 import { parseLocalMusicItem, safeStat } from "@/common/file-util";
 import { sendToMainWindow } from "@/shared/message-hub/main";
-import { installPluginFromUrl, sendPlugins } from "../core/plugin-manager";
+import PluginManager from "@shared/plugin-manager/main";
+import voidCallback from "@/common/void-callback";
 
 export function handleDeepLink(url: string) {
     if (!url) {
@@ -13,7 +14,9 @@ export function handleDeepLink(url: string) {
         if (urlObj.protocol === "musicfree:") {
             handleMusicFreeScheme(urlObj);
         }
-    } catch {}
+    } catch {
+        // pass
+    }
 }
 
 async function handleMusicFreeScheme(url: URL) {
@@ -24,11 +27,11 @@ async function handleMusicFreeScheme(url: URL) {
                 url.pathname.slice(1) || url.searchParams.get("plugin");
             const pluginUrls = pluginUrlStr.split(",").map(decodeURIComponent);
             await Promise.all(
-                pluginUrls.map((it) => installPluginFromUrl(it).catch(() => {}))
+                pluginUrls.map((it) => PluginManager.installPluginFromRemoteUrl(it).catch(voidCallback))
             );
-
-            sendPlugins();
-        } catch {}
+        } catch {
+            // pass
+        }
     }
 }
 

@@ -129,7 +129,6 @@ export class Plugin {
             }
             this.checkValid(_instance);
         } catch (e: any) {
-            console.log(e);
             this.stateCode = PluginStateCode.CannotParse;
             if (e?.stateCode) {
                 this.stateCode = e.stateCode;

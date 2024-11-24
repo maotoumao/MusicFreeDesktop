@@ -1,7 +1,3 @@
-import {
-  callPluginDelegateMethod,
-  useSortedPlugins,
-} from "@/renderer/core/plugin-delegate";
 import AppConfig from "@shared/app-config/renderer";
 
 import {
@@ -21,6 +17,7 @@ import { showPanel } from "@/renderer/components/Panel";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 import { produce } from "immer";
 import { i18n } from "@/shared/i18n/renderer";
+import PluginManager, {useSortedPlugins} from "@shared/plugin-manager/renderer";
 
 const t = i18n.t;
 
@@ -42,7 +39,7 @@ function renderOptions(info: any) {
             async onConfirm() {
               hideModal();
               try {
-                await ipcRendererInvoke("uninstall-plugin", row.hash);
+                await PluginManager.uninstallPlugin(row.hash);
                 toast.success(
                   t("plugin_management_page.uninstall_successfully", {
                     plugin: row.platform,
@@ -64,7 +61,7 @@ function renderOptions(info: any) {
           }}
           onClick={async () => {
             try {
-              await ipcRendererInvoke("install-plugin-remote", row.srcUrl);
+              await PluginManager.installPluginFromRemote(row.srcUrl);
               toast.success(
                 t("plugin_management_page.toast_plugin_is_latest", {
                   plugin: row.platform,
@@ -99,7 +96,7 @@ function renderOptions(info: any) {
               ),
               maxLength: 1000,
               onOk(text) {
-                return callPluginDelegateMethod(
+                return PluginManager.callPluginDelegateMethod(
                   row,
                   "importMusicItem",
                   text.trim()
@@ -139,7 +136,7 @@ function renderOptions(info: any) {
               ),
               maxLength: 1000,
               onOk(text) {
-                return callPluginDelegateMethod(
+                return PluginManager.callPluginDelegateMethod(
                   row,
                   "importMusicSheet",
                   text.trim()

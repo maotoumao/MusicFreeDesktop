@@ -471,4 +471,22 @@ export default class PluginMethods implements IPlugin.IPluginInstanceMethods {
       };
     }
   }
+
+  async getMusicComments(musicItem: IMusic.IMusicItem): Promise<IPlugin.IGetCommentResult> {
+    try {
+      const result = await this.plugin.instance?.getMusicComments?.(
+          musicItem,
+      );
+      if (!result) {
+        throw new Error();
+      }
+      return result;
+    } catch (e: any) {
+      // devLog('error', '获取推荐歌单详情失败', e, e?.message);
+      return {
+        isEnd: true,
+        data: [],
+      };
+    }
+  }
 }

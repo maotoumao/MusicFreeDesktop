@@ -1,5 +1,4 @@
 import {app, BrowserWindow, globalShortcut} from "electron";
-import {setupPluginManager} from "./core/plugin-manager";
 import {setupGlobalShortCut} from "./core/global-short-cut";
 import fs from "fs";
 import path from "path";
@@ -18,6 +17,7 @@ import WindowDrag from "@shared/window-drag/main";
 import {IAppConfig} from "@/types/app-config";
 import axios from "axios";
 import {HttpsProxyAgent} from "https-proxy-agent";
+import PluginManager from "@shared/plugin-manager/main";
 import ServiceManager from "@shared/service-manager/main";
 import utils from "@shared/utils/main";
 
@@ -112,7 +112,7 @@ app.whenReady().then(async () => {
         },
     });
     utils.setup(windowManager);
-    setupPluginManager();
+    PluginManager.setup(windowManager);
     TrayManager.setup(windowManager);
     WindowDrag.setup();
     setupGlobalShortCut();

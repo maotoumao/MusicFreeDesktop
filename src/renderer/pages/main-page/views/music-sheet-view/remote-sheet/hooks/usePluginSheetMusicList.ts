@@ -1,7 +1,7 @@
 import { RequestStateCode } from "@/common/constant";
 import { isSameMedia } from "@/common/media-util";
-import { callPluginDelegateMethod } from "@/renderer/core/plugin-delegate";
 import { useEffect, useRef, useState } from "react";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function usePluginSheetMusicList(
   platform: string,
@@ -51,7 +51,7 @@ export default function usePluginSheetMusicList(
       );
       // 3. 调用获取音乐详情接口
       const sheetItem = currentSheetItemRef.current;
-      const result = await callPluginDelegateMethod(
+      const result = await PluginManager.callPluginDelegateMethod(
         sheetItem,
         "getMusicSheetInfo",
         sheetItem,

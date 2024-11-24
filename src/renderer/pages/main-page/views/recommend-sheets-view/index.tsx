@@ -1,12 +1,12 @@
 import Condition from "@/renderer/components/Condition";
 import NoPlugin from "@/renderer/components/NoPlugin";
 import { Tab } from "@headlessui/react";
-import { getSortedSupportedPlugin } from "@/renderer/core/plugin-delegate";
 import { useNavigate } from "react-router-dom";
 import Body from "./components/Body";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function RecommendSheetsView() {
-  const availablePlugins = getSortedSupportedPlugin("getRecommendSheetsByTag");
+  const availablePlugins = PluginManager.getSortedSupportedPlugin("getRecommendSheetsByTag");
   const navigate = useNavigate();
 
   return (

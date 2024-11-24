@@ -5,7 +5,6 @@ import {
   setInternalData,
 } from "@/common/media-util";
 import * as Comlink from "comlink";
-import { callPluginDelegateMethod } from "../plugin-delegate";
 import { DownloadState, localPluginName } from "@/common/constant";
 import PQueue from "p-queue";
 import {
@@ -21,6 +20,7 @@ import Store from "@/common/store";
 import { useEffect, useState } from "react";
 import { DownloadEvts, ee } from "./ee";
 import AppConfig from "@shared/app-config/renderer";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 
 export interface IDownloadStatus {
@@ -138,7 +138,7 @@ async function downloadMusicImpl(
   let realQuality: IMusic.IQualityKey = qualityOrder[0];
   for (const quality of qualityOrder) {
     try {
-      mediaSource = await callPluginDelegateMethod(
+      mediaSource = await PluginManager.callPluginDelegateMethod(
         musicItem,
         "getMediaSource",
         musicItem,

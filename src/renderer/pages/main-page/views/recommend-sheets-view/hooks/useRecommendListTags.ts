@@ -1,5 +1,5 @@
-import { callPluginDelegateMethod } from "@/renderer/core/plugin-delegate";
 import { useCallback, useEffect, useState } from "react";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function (plugin: IPlugin.IPluginDelegate) {
   const [tags, setTags] = useState<IPlugin.IGetRecommendSheetTagsResult | null>(
@@ -8,7 +8,7 @@ export default function (plugin: IPlugin.IPluginDelegate) {
 
   const query = useCallback(async () => {
     try {
-      const result = await callPluginDelegateMethod(
+      const result = await PluginManager.callPluginDelegateMethod(
         plugin,
         "getRecommendSheetTags"
       );

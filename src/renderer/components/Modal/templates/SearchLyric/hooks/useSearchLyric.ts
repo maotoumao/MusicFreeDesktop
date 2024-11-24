@@ -1,10 +1,9 @@
 import { RequestStateCode } from "@/common/constant";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import searchResultStore from "./searchResultStore";
 import { produce } from "immer";
-import delegatePluginsStore from "@/renderer/core/plugin-delegate/internal/store";
-import { callPluginDelegateMethod, getPluginByHash, getSearchablePlugins } from "@/renderer/core/plugin-delegate";
 import { useTranslation } from "react-i18next";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 
 export default function (){
@@ -26,13 +25,13 @@ export default function (){
         console.log("SEARCH LRC", query, queryPage);
         let plugins: IPlugin.IPluginDelegate[] = [];
         if (pluginHash) {
-           callPluginDelegateMethod
-            const tgtPlugin = getPluginByHash(pluginHash);
+           PluginManager.callPluginDelegateMethod
+            const tgtPlugin = PluginManager.getPluginByHash(pluginHash);
             if(tgtPlugin) {
                 plugins = [tgtPlugin];
             }
         } else {
-            plugins = getSearchablePlugins("lyric");
+            plugins = PluginManager.getSearchablePlugins("lyric");
         }
         if (plugins.length === 0) {
             searchResultStore.setValue(
@@ -98,7 +97,7 @@ export default function (){
                         };
                     }),
                 );
-                const result = await callPluginDelegateMethod(plugin, "search", query, page, "lyric");
+                const result = await PluginManager.callPluginDelegateMethod(plugin, "search", query, page, "lyric");
                 console.log(result);
                 /** 如果搜索结果不是本次结果 */
                 if (currentQueryRef.current !== query) {

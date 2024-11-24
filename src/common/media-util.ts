@@ -65,10 +65,16 @@ export function addSortProperty(
   const now = Date.now();
   if (Array.isArray(mediaItems)) {
     mediaItems.forEach((item, index) => {
+      if (!item) {
+        return;
+      }
       item[timeStampSymbol] = now;
       item[sortIndexSymbol] = index;
     });
   } else {
+    if (!mediaItems) {
+      return;
+    }
     mediaItems[timeStampSymbol] = now;
     mediaItems[sortIndexSymbol] = 0;
   }

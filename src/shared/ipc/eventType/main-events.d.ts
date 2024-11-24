@@ -20,9 +20,6 @@ declare namespace IpcEvents {
     }>;
   };
   interface Main {
-    /** 插件 */
-    "plugin-loaded": IPlugin.IPluginDelegate[];
-    "sync-app-config": AppConfig;
     /** 切换播放状态 */
     "player-cmd": {
       cmd: IPlayerCmd;

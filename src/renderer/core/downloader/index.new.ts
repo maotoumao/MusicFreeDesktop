@@ -11,8 +11,8 @@ import PQueue from "p-queue";
 import EventEmitter from "eventemitter3";
 import {DownloadState, localPluginName} from "@/common/constant";
 import {getQualityOrder, isSameMedia, setInternalData} from "@/common/media-util";
-import {callPluginDelegateMethod} from "@renderer/core/plugin-delegate";
 import {downloadingMusicStore} from "@renderer/core/downloader/store";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 type ProxyMarkedFunction<T> = T &
     Comlink.ProxyMarked;
@@ -183,7 +183,7 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
 
         for (const quality of qualityOrder) {
             try {
-                mediaSource = await callPluginDelegateMethod(
+                mediaSource = await PluginManager.callPluginDelegateMethod(
                     musicItem,
                     "getMediaSource",
                     musicItem,
@@ -240,7 +240,7 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
 
     public setConcurrency(concurrency: number) {
         if (this.downloadTaskQueue) {
-            this, this.downloadTaskQueue.concurrency = Math.min(
+            this.downloadTaskQueue.concurrency = Math.min(
                 concurrency < 1 ? 1 : concurrency,
                 Downloader.ConcurrencyLimit
             )

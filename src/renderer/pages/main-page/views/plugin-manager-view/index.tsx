@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import A from "@/renderer/components/A";
 import { Trans, useTranslation } from "react-i18next";
 import {dialogUtil} from "@shared/utils/renderer";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function PluginManagerView() {
   const { t } = useTranslation();
@@ -39,10 +40,7 @@ export default function PluginManagerView() {
                 if (result.canceled) {
                   return;
                 }
-                await ipcRendererInvoke(
-                  "install-plugin-local",
-                  result.filePaths[0]
-                );
+                await PluginManager.installPluginFromLocal(result.filePaths[0]);
                 toast.success(t("plugin_management_page.install_successfully"));
               } catch (e) {
                 toast.warn(
@@ -72,7 +70,7 @@ export default function PluginManagerView() {
                     text.trim().endsWith(".json") ||
                     text.trim().endsWith(".js")
                   ) {
-                    return ipcRendererInvoke("install-plugin-remote", text);
+                    return PluginManager.installPluginFromRemote(text);
                   } else {
                     throw new Error(
                       t(
@@ -161,10 +159,7 @@ export default function PluginManagerView() {
 
               if (subscription?.length) {
                 for (let i = 0; i < subscription.length; ++i) {
-                  await ipcRendererInvoke(
-                    "install-plugin-remote",
-                    subscription[i].srcUrl
-                  );
+                  await PluginManager.installPluginFromRemote(subscription[i].srcUrl)
                 }
                 toast.success(t("plugin_management_page.update_successfully"));
               } else {

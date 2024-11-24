@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { pluginsTopListStore } from "../store";
 import { RequestStateCode } from "@/common/constant";
 import { useStore } from "@/common/store";
-import { callPluginDelegateMethod } from "@/renderer/core/plugin-delegate";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function useGetTopList() {
   const [pluginsTopList, setPluginsTopList] = useStore(pluginsTopListStore);
@@ -28,7 +28,7 @@ export default function useGetTopList() {
             };
           })
         );
-        const result = await callPluginDelegateMethod(
+        const result = await PluginManager.callPluginDelegateMethod(
           { hash: pluginHash },
           "getTopLists"
         );

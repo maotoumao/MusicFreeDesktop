@@ -1,12 +1,10 @@
 import {localPluginHash, PlayerState, supportLocalMediaType} from "@/common/constant";
 import MusicSheet from "../core/music-sheet";
-import {callPluginDelegateMethod, registerPluginEvents,} from "../core/plugin-delegate";
 import trackPlayer from "../core/track-player";
 import localMusic from "../core/local-music";
 import {setupLocalShortCut} from "../core/shortcut";
 import {setAutoFreeze} from "immer";
 import Evt from "../core/events";
-import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
 import Downloader from "../core/downloader";
 import AppConfig from "@shared/app-config/renderer";
 import {setupI18n} from "@/shared/i18n/renderer";
@@ -16,6 +14,7 @@ import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-pl
 import ServiceManager from "@shared/service-manager/renderer";
 import {PlayerEvents} from "@renderer/core/track-player/enum";
 import {appWindowUtil, fsUtil} from "@shared/utils/renderer";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 
 setAutoFreeze(false);
@@ -23,7 +22,9 @@ setAutoFreeze(false);
 export default async function () {
     await Promise.all([
         AppConfig.setup(),
-        registerPluginEvents(),
+        PluginManager.setup(),
+    ]);
+    await Promise.all([
         MusicSheet.frontend.setupMusicSheets(),
         trackPlayer.setup(),
     ]);
@@ -47,7 +48,7 @@ export default async function () {
         const now = Date.now();
         if (Math.abs(now - lastUpdated) > 86400000) {
             localStorage.setItem("pluginLastupdatedTime", `${now}`);
-            ipcRendererSend("update-all-plugins");
+            PluginManager.updateAllPlugins();
         }
     }
 }
@@ -62,7 +63,7 @@ function dropHandler() {
         for (const f of event.dataTransfer.files) {
             if (f.type === "" && (await fsUtil.isFolder(f.path))) {
                 validMusicList.push(
-                    ...(await callPluginDelegateMethod(
+                    ...(await PluginManager.callPluginDelegateMethod(
                         {
                             hash: localPluginHash,
                         },
@@ -74,7 +75,7 @@ function dropHandler() {
                 supportLocalMediaType.some((postfix) => f.path.endsWith(postfix))
             ) {
                 validMusicList.push(
-                    await callPluginDelegateMethod(
+                    await PluginManager.callPluginDelegateMethod(
                         {
                             hash: localPluginHash,
                         },

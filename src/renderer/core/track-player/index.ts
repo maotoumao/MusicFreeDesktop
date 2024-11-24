@@ -23,12 +23,12 @@ import EventEmitter from "eventemitter3";
 import {IAudioController} from "@/types/audio-controller";
 import AudioController from "@renderer/core/track-player/controller/audio-controller";
 import logger from "@shared/logger/renderer";
-import {callPluginDelegateMethod} from "@renderer/core/plugin-delegate";
 import voidCallback from "@/common/void-callback";
 import {delay} from "@/common/time-util";
 import {createUniqueMap} from "@/common/unique-map";
 import {getLinkedLyric} from "@renderer/core/link-lyric";
 import {fsUtil} from "@shared/utils/renderer";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 const {
     musicQueueStore,
@@ -327,7 +327,7 @@ class TrackPlayer {
             });
 
             // extra information
-            const musicInfo = await callPluginDelegateMethod(
+            const musicInfo = await PluginManager.callPluginDelegateMethod(
                 {
                     platform: nextMusicItem.platform,
                 },
@@ -607,14 +607,14 @@ class TrackPlayer {
             let lyricSource: ILyric.ILyricSource;
 
             if (linkedLyricItem) {
-                lyricSource = await callPluginDelegateMethod(
+                lyricSource = await PluginManager.callPluginDelegateMethod(
                     linkedLyricItem,
                     "getLyric",
                     linkedLyricItem
                 )
             }
             if (!lyricSource && this.isCurrentMusic(currentMusic)) {
-                lyricSource = await callPluginDelegateMethod(
+                lyricSource = await PluginManager.callPluginDelegateMethod(
                     currentMusic,
                     "getLyric",
                     currentMusic
@@ -677,7 +677,7 @@ class TrackPlayer {
         // 2. 如果没有下载
         for (const quality of qualityOrder) {
             try {
-                mediaSource = await callPluginDelegateMethod(
+                mediaSource = await PluginManager.callPluginDelegateMethod(
                     {
                         platform: musicItem.platform,
                     },

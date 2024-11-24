@@ -4,11 +4,8 @@ import {
   setInternalData,
 } from "@/common/media-util";
 import { LRUCache } from "lru-cache";
-import {
-  callPluginDelegateMethod,
-  getPluginPrimaryKey,
-} from "../plugin-delegate";
 import musicSheetDB from "../db/music-sheet-db";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 const linkLyricCache = new LRUCache({
   max: 500,
@@ -26,7 +23,7 @@ export async function linkLyric(
     platform: to.platform,
     id: to.id,
   };
-  for (const toPk of getPluginPrimaryKey(to)) {
+  for (const toPk of PluginManager.getPluginPrimaryKey(to)) {
     filteredMusicItem[toPk] = to[toPk];
   }
   const fromPk = getMediaPrimaryKey(from);

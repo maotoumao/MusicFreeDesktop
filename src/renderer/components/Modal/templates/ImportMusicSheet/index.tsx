@@ -3,8 +3,8 @@ import Base from "../Base";
 import {toast} from "react-toastify";
 import {useTranslation} from "react-i18next";
 import "./index.scss";
-import {callPluginDelegateMethod} from "@/renderer/core/plugin-delegate";
 import NoPlugin from "@renderer/components/NoPlugin";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 interface IProps {
     plugins: IPlugin.IPluginDelegate[];
@@ -40,7 +40,7 @@ export default function ImportMusicSheet(props: IProps) {
                                         ),
                                         maxLength: 1000,
                                         onOk(text) {
-                                            return callPluginDelegateMethod(
+                                            return PluginManager.callPluginDelegateMethod(
                                                 it,
                                                 "importMusicSheet",
                                                 text.trim()

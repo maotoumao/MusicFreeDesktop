@@ -4,3 +4,4 @@ import "./common-preload";
 
 import "@shared/message-hub/preload/main";
 import "@shared/service-manager/preload";
+import "@shared/plugin-manager/preload";
