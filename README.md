@@ -88,7 +88,7 @@ config.json 是一个配置文件。
     "preview": "#000000", // 预览图，支持颜色或图片；
     "description": "描述文本",
     "iframes": {
-        "app": "http://musicfree.upup.fun", // 整个软件的背景
+        "app": "http://musicfree.catcat.work", // 整个软件的背景
         "header": "", // 头部区域的背景
         "body": "", // 侧边栏+主页面区域的背景
         "side-bar": "", // 侧边栏区域的背景

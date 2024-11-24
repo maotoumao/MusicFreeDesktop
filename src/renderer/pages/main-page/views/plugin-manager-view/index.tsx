@@ -98,7 +98,7 @@ export default function PluginManagerView() {
                   <Trans
                     i18nKey={"plugin_management_page.info_hint_install_plugin"}
                     components={{
-                      a: <A href="https://musicfree.upup.fun"></A>,
+                      a: <A href="https://musicfree.catcat.work"></A>,
                     }}
                   ></Trans>,
                 ],

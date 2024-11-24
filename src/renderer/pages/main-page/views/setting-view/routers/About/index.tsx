@@ -52,7 +52,7 @@ export default function About() {
         ></Trans>
       </div>
       <div className="setting-row about-version">
-        <A href="http://musicfree.upup.fun/">
+        <A href="http://musicfree.catcat.work/">
           {t("settings.about.official_site")}
         </A>
         <A href="https://github.com/maotoumao/MusicFree">
