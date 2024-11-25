@@ -33,7 +33,7 @@ export default function useTopListDetail(
       }))
 
       if (!result.isEnd) {
-        setRequestState(RequestStateCode.IDLE);
+        setRequestState(RequestStateCode.PARTLY_DONE);
       } else {
         setRequestState(RequestStateCode.FINISHED);
       }
