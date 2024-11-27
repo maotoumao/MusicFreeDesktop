@@ -8,7 +8,6 @@ import {
   setUserPreference,
   useUserPreference,
 } from "@/renderer/utils/user-perference";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import { showModal } from "@/renderer/components/Modal";
 import SvgAsset from "@/renderer/components/SvgAsset";

@@ -2,10 +2,9 @@ import {localPluginHash, PlayerState, RepeatMode, supportLocalMediaType} from "@
 import MusicSheet from "../core/music-sheet";
 import trackPlayer from "../core/track-player";
 import localMusic from "../core/local-music";
-import {setupLocalShortCut} from "../core/shortcut";
 import {setAutoFreeze} from "immer";
 import Downloader from "../core/downloader";
-import AppConfig from "@shared/app-config/renderer";
+import AppConfig from "@/providers/app-config/renderer";
 import {setupI18n} from "@/shared/i18n/renderer";
 import ThemePack from "@/shared/themepack/renderer";
 import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-playlist";
@@ -16,6 +15,8 @@ import PluginManager from "@shared/plugin-manager/renderer";
 import messageBus from "@shared/message-bus/renderer/main";
 import throttle from "lodash.throttle";
 import {IAppState} from "@shared/message-bus/type";
+import MusicDetail from "@renderer/components/MusicDetail";
+import shortCut from "@shared/short-cut/renderer";
 
 
 setAutoFreeze(false);
@@ -30,7 +31,7 @@ export default async function () {
         trackPlayer.setup(),
     ]);
     await setupI18n();
-    setupLocalShortCut();
+    shortCut.setup();
     dropHandler();
     clearDefaultBehavior();
     setupCommandAndEvents();
@@ -175,6 +176,11 @@ function setupCommandAndEvents() {
             "lyric.enableDesktopLyric": !enableDesktopLyric
         })
     });
+
+    messageBus.onCommand("OpenMusicDetailPage", () => {
+        MusicDetail.show();
+    })
+
 
     const sendAppStateTo = (from: "main" | number) => {
         const appState: IAppState = {

@@ -3,7 +3,7 @@ import {t} from "@shared/i18n/main";
 import {IWindowManager} from "@/types/main/window-manager";
 import getResourcePath from "@/common/main/get-resource-path";
 import {PlayerState, RepeatMode, ResourceName} from "@/common/constant";
-import AppConfig from "@shared/app-config/main";
+import AppConfig from "@/providers/app-config/main";
 import windowManager from "@main/window-manager";
 import {IAppConfig} from "@/types/app-config";
 import messageBus from "@shared/message-bus/main";
@@ -102,8 +102,7 @@ class TrayManager {
 
     private openMusicDetail() {
         this.windowManager.showMainWindow();
-        // todo: normalize
-        this.windowManager.mainWindow.webContents.send("navigate", "evt://SHOW_MUSIC_DETAIL");
+        messageBus.sendCommand("OpenMusicDetailPage");
     }
 
     public async buildTrayMenu() {
@@ -258,7 +257,7 @@ class TrayManager {
             label: t("app_header.settings"),
             click() {
                 windowManager.showMainWindow();
-                windowManager.mainWindow.webContents.send("navigate", "/main/setting");
+                messageBus.sendCommand("Navigate", "/main/setting");
             },
         });
         ctxMenu.push({

@@ -14,7 +14,7 @@ import "./index.css"; // 全局样式
 import "./index.scss";
 import {toastDuration} from "@/common/constant";
 import useBootstrap from "./useBootstrap";
-import logger from "@shared/logger/renderer";
+import logger from "@/providers/logger/renderer";
 
 logger.logPerf("Create Bundle");
 bootstrap().then(() => {

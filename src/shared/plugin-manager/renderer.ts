@@ -1,5 +1,5 @@
 import Store from "@/common/store";
-import AppConfig from "@shared/app-config/renderer";
+import AppConfig from "@/providers/app-config/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 import {useMemo} from "react";
 

@@ -15,7 +15,7 @@ export const musicDetailShownStore = new Store(false);
 
 export const isMusicDetailShown = musicDetailShownStore.getValue;
 
-export default function () {
+function MusicDetail() {
   const musicItem = useCurrentMusic();
   const musicDetailShown = musicDetailShownStore.useValue();
 
@@ -84,3 +84,13 @@ export default function () {
     </AnimatedDiv>
   );
 }
+
+MusicDetail.show = () => {
+  musicDetailShownStore.setValue(true);
+}
+
+MusicDetail.hide = () => {
+  musicDetailShownStore.setValue(false);
+}
+
+export default MusicDetail;

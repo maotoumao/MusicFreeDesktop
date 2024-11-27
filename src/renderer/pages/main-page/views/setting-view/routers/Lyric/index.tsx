@@ -1,14 +1,12 @@
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import "./index.scss";
 import ColorPickerSettingItem from "../../components/ColorPickerSettingItem";
-import {ipcRendererInvoke, ipcRendererSend} from "@/shared/ipc/renderer";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import FontPickerSettingItem from "../../components/FontPickerSettingItem";
 import {IfTruthy} from "@/renderer/components/Condition";
 import {useTranslation} from "react-i18next";
 import {getGlobalContext} from "@/shared/global-context/renderer";
 import {appWindowUtil} from "@shared/utils/renderer";
-import AppConfig from "@shared/app-config/renderer";
 
 const numberArray = Array(65)
     .fill(0)

@@ -70,6 +70,14 @@ function onCommand<K extends keyof ICommand>(command: K, cb: (data: ICommand[K],
     });
 }
 
+function sendCommand<K extends keyof ICommand>(command: K, data: ICommand[K]) {
+    ee.emit("command", {
+        command: command,
+        data: data,
+        timestamp: Date.now()
+    }, -1);
+}
+
 function syncAppState(appState: IAppState, to?: "main" | number) {
     if (to !== undefined) {
         syncAppStateTo(appState, to);
@@ -127,6 +135,7 @@ function syncAppStateTo(appState: IAppState, processId: "main" | number) {
 const mod = {
     syncAppState,
     onCommand,
+    sendCommand
 };
 
 contextBridge.exposeInMainWorld("@shared/message-bus/main", mod);

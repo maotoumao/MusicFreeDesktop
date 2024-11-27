@@ -5,7 +5,7 @@ import {useOutputAudioDevices} from "@/hooks/useMediaDevices";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import trackPlayer from "@renderer/core/track-player";
 import {useTranslation} from "react-i18next";
-import AppConfig from "@shared/app-config/renderer";
+import AppConfig from "@/providers/app-config/renderer";
 
 
 export default function PlayMusic() {

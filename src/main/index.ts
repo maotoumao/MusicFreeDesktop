@@ -1,16 +1,15 @@
 import {app, BrowserWindow, globalShortcut} from "electron";
-import {setupGlobalShortCut} from "./core/global-short-cut";
 import fs from "fs";
 import path from "path";
 import {setAutoFreeze} from "immer";
 import {setupGlobalContext} from "@/shared/global-context/main";
 import {setupI18n} from "@/shared/i18n/main";
 import {handleDeepLink} from "./deep-link";
-import logger from "@shared/logger/main";
+import logger from "@/providers/logger/main";
 import {PlayerState} from "@/common/constant";
 import ThumbBarUtil from "@/common/main/thumb-bar-util";
 import windowManager from "@main/window-manager";
-import AppConfig from "@shared/app-config/main";
+import AppConfig from "@/providers/app-config/main";
 import TrayManager from "@main/tray-manager";
 import WindowDrag from "@shared/window-drag/main";
 import {IAppConfig} from "@/types/app-config";
@@ -20,6 +19,8 @@ import PluginManager from "@shared/plugin-manager/main";
 import ServiceManager from "@shared/service-manager/main";
 import utils from "@shared/utils/main";
 import messageBus from "@shared/message-bus/main";
+import shortCut from "@shared/short-cut/main";
+import voidCallback from "@/common/void-callback";
 
 // portable
 if (process.platform === "win32") {
@@ -115,7 +116,7 @@ app.whenReady().then(async () => {
     PluginManager.setup(windowManager);
     TrayManager.setup(windowManager);
     WindowDrag.setup();
-    setupGlobalShortCut();
+    shortCut.setup().then(voidCallback);
     logger.logPerf("Create Main Window");
     // Setup message bus & app state
     messageBus.onAppStateChange((_, patch) => {
@@ -157,7 +158,6 @@ app.whenReady().then(async () => {
 
     messageBus.setup(windowManager);
 
-
     windowManager.showMainWindow();
 
     bootstrap();
@@ -182,8 +182,8 @@ async function bootstrap() {
         windowManager.showLyricWindow();
     }
 
-    // 桌面歌词锁定状态
     AppConfig.onConfigUpdated((patch) => {
+        // 桌面歌词锁定状态
         if ("lyric.lockLyric" in patch) {
             const lyricWindow = windowManager.lyricWindow;
             const lockState = patch["lyric.lockLyric"];
@@ -197,6 +197,14 @@ async function bootstrap() {
                 });
             } else {
                 lyricWindow.setIgnoreMouseEvents(false);
+            }
+        }
+        if ("shortCut.enableGlobal" in patch) {
+            const enableGlobal = patch["shortCut.enableGlobal"];
+            if (enableGlobal) {
+                shortCut.registerAllGlobalShortCuts();
+            } else {
+                shortCut.unregisterAllGlobalShortCuts();
             }
         }
     })

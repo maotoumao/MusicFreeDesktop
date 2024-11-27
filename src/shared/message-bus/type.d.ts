@@ -34,6 +34,8 @@ export interface ICommand {
     ToggleDesktopLyric: void;
     /** 同步音乐状态 */
     SyncAppState: void;
+    /** 打开音乐详情页面 */
+    OpenMusicDetailPage: void;
 }
 
 // 其他窗口向主窗口发送的消息

@@ -1,6 +1,5 @@
 import { toast } from "react-toastify";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { useTranslation } from "react-i18next";
 import ThemePack from "@/shared/themepack/renderer";
 import ThemeItem from "../ThemeItem";

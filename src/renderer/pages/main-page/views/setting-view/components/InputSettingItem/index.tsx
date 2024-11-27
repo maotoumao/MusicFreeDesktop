@@ -1,4 +1,4 @@
-import AppConfig from "@shared/app-config/renderer";
+import AppConfig from "@/providers/app-config/renderer";
 import "./index.scss";
 import {HTMLInputTypeAttribute, useState} from "react";
 import {IAppConfig} from "@/types/app-config";

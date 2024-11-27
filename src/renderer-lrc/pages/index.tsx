@@ -7,7 +7,7 @@ import {PlayerState} from "@/common/constant";
 import getTextWidth from "@/renderer/utils/get-text-width";
 import useAppConfig from "@/hooks/useAppConfig";
 import {appWindowUtil} from "@shared/utils/renderer";
-import AppConfig from "@/shared/app-config/renderer";
+import AppConfig from "@/providers/app-config/renderer";
 import messageBus, {useAppStatePartial} from "@shared/message-bus/renderer/extension";
 
 export default function LyricWindowPage() {

@@ -33,7 +33,7 @@ import musicSheetDB from "@/renderer/core/db/music-sheet-db";
 import DragReceiver, {startDrag} from "../DragReceiver";
 import {i18n} from "@/shared/i18n/renderer";
 import isLocalMusic from "@/renderer/utils/is-local-music";
-import AppConfig from "@shared/app-config/renderer";
+import AppConfig from "@/providers/app-config/renderer";
 import {shellUtil} from "@shared/utils/renderer";
 
 interface IMusicListProps {

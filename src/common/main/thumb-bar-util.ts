@@ -4,7 +4,7 @@ import {t} from "@shared/i18n/main";
 import {ResourceName} from "@/common/constant";
 import asyncMemoize from "@/common/async-memoize";
 import fs from "fs/promises";
-import logger from "@shared/logger/main";
+import logger from "@/providers/logger/main";
 import axios from "axios";
 import messageBus from "@shared/message-bus/main";
 

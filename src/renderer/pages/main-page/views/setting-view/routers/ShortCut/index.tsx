@@ -3,12 +3,11 @@ import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import {useEffect, useRef, useState} from "react";
 
 import hotkeys from "hotkeys-js";
-import {bindShortCut} from "@/renderer/core/shortcut";
-import {ipcRendererSend} from "@/shared/ipc/renderer";
 import {useTranslation} from "react-i18next";
-import AppConfig from "@shared/app-config/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 import {IAppConfig} from "@/types/app-config";
+import shortCut from "@shared/short-cut/renderer";
+import {shortCutKeys} from "@/common/constant";
 
 
 export default function ShortCut() {
@@ -22,9 +21,6 @@ export default function ShortCut() {
             ></CheckBoxSettingItem>
             <CheckBoxSettingItem
                 keyPath="shortCut.enableGlobal"
-                onChange={(_evt, val) => {
-                    ipcRendererSend("enable-global-short-cut", val);
-                }}
                 label={t("settings.short_cut.enable_global")}
             ></CheckBoxSettingItem>
             <ShortCutTable></ShortCutTable>
@@ -33,16 +29,6 @@ export default function ShortCut() {
 }
 
 type IShortCutKeys = keyof IAppConfig["shortCut.shortcuts"];
-
-const shortCutKeys: IShortCutKeys[] = [
-    "play/pause",
-    "skip-next",
-    "skip-previous",
-    "volume-up",
-    "volume-down",
-    "toggle-desktop-lyric",
-    "like/dislike",
-];
 
 
 function ShortCutTable() {
@@ -72,15 +58,7 @@ function ShortCutTable() {
                             enabled={enableLocalShortCut}
                             value={shortCuts?.[it]?.local}
                             onChange={(val) => {
-                                bindShortCut(it as IShortCutKeys, val);
-                                const prevShortCuts: any = AppConfig.getConfig("shortCut.shortcuts") || {};
-                                prevShortCuts[it] = {
-                                    ...(prevShortCuts[it] ?? {}),
-                                    local: val
-                                };
-                                AppConfig.setConfig({
-                                    "shortCut.shortcuts": prevShortCuts
-                                })
+                                shortCut.registerLocalShortCut(it as IShortCutKeys, val);
                             }}
                         ></ShortCutItem>
                     </div>
@@ -89,7 +67,7 @@ function ShortCutTable() {
                             enabled={enableGlobalShortCut}
                             value={shortCuts?.[it]?.global}
                             onChange={(val) => {
-                                bindShortCut(it as IShortCutKeys, val, true);
+                                shortCut.registerGlobalShortCut(it as IShortCutKeys, val);
                             }}
                         ></ShortCutItem>
                     </div>

@@ -1,4 +1,4 @@
-import AppConfig from "@shared/app-config/renderer";
+import AppConfig from "@/providers/app-config/renderer";
 
 import {
   useReactTable,
@@ -11,7 +11,6 @@ import { CSSProperties, ReactNode } from "react";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import { hideModal, showModal } from "@/renderer/components/Modal";
 import Empty from "@/renderer/components/Empty";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import { showPanel } from "@/renderer/components/Panel";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";

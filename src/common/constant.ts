@@ -1,4 +1,5 @@
 import {IAppConfig} from "@/types/app-config";
+import {ICommand} from "@shared/message-bus/type";
 
 export const internalDataKey = "$";
 export const internalDataSymbol = Symbol.for("internal");
@@ -97,6 +98,18 @@ export const shortCutKeysEvts: Record<IShortCutKeys, keyof IEventType.IEvents> =
         "volume-up": "VOLUME_UP",
         "toggle-desktop-lyric": "TOGGLE_DESKTOP_LYRIC",
         "like/dislike": "TOGGLE_LIKE",
+    };
+
+// 快捷键列表对应的指令
+export const shortCutKeysCommands: Record<IShortCutKeys, keyof ICommand> =
+    {
+        "play/pause": "TogglePlayerState",
+        "skip-next": "SkipToNext",
+        "skip-previous": "SkipToPrevious",
+        "volume-down": "VolumeDown",
+        "volume-up": "VolumeUp",
+        "toggle-desktop-lyric": "ToggleDesktopLyric",
+        "like/dislike": "ToggleFavorite",
     };
 
 // 主进程的Resource
