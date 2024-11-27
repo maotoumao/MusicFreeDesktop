@@ -1,8 +1,7 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
-import { useLocation, useNavigate } from "react-router-dom";
-import Evt from "@/renderer/core/events";
-import { isMusicDetailShown } from "@/renderer/components/MusicDetail";
+import { useNavigate } from "react-router-dom";
+import MusicDetail, { isMusicDetailShown } from "@/renderer/components/MusicDetail";
 import { useTranslation } from "react-i18next";
 
 export default function HeaderNavigator() {
@@ -11,7 +10,7 @@ export default function HeaderNavigator() {
   const canGo = history.state.idx < history.length - 1;
 
   const {t} = useTranslation();
- 
+
 
   return (
     <div className="header-navigator">
@@ -22,7 +21,7 @@ export default function HeaderNavigator() {
         role="button"
         onClick={() => {
           if (isMusicDetailShown()) {
-            Evt.emit("HIDE_MUSIC_DETAIL");
+              MusicDetail.hide();
           } else {
             navigate(-1);
           }
@@ -36,7 +35,7 @@ export default function HeaderNavigator() {
         title={canGo ? t("app_header.nav_forward") : undefined}
         onClick={() => {
           if (isMusicDetailShown()) {
-            Evt.emit("HIDE_MUSIC_DETAIL");
+              MusicDetail.hide();
           } else {
             navigate(1);
           }

@@ -4,8 +4,7 @@ import {showModal} from "../Modal";
 import {useNavigate} from "react-router-dom";
 import {useRef, useState} from "react";
 import HeaderNavigator from "./widgets/Navigator";
-import Evt from "@/renderer/core/events";
-import {musicDetailShownStore} from "../MusicDetail";
+import MusicDetail, {musicDetailShownStore} from "../MusicDetail";
 import Condition from "../Condition";
 import SearchHistory from "./widgets/SearchHistory";
 import {addSearchHistory} from "@/renderer/utils/search-history";
@@ -110,7 +109,7 @@ export default function AppHeader() {
                     title={t("app_header.theme")}
                     onClick={() => {
                         navigate("/main/theme");
-                        Evt.emit("HIDE_MUSIC_DETAIL");
+                        MusicDetail.hide();
                     }}
                 >
                     <SvgAsset iconName="t-shirt-line"></SvgAsset>
@@ -121,7 +120,7 @@ export default function AppHeader() {
                     title={t("app_header.settings")}
                     onClick={() => {
                         navigate("/main/setting");
-                        Evt.emit("HIDE_MUSIC_DETAIL");
+                        MusicDetail.hide();
                     }}
                 >
                     <SvgAsset iconName="cog-8-tooth"></SvgAsset>

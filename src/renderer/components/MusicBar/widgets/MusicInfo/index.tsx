@@ -1,5 +1,4 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
-import Evt from "@/renderer/core/events";
 import {setFallbackAlbum} from "@/renderer/utils/img-on-error";
 import "./index.scss";
 
