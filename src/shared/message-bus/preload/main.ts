@@ -46,7 +46,6 @@ ipcRenderer.on("@shared/message-bus/message", (_evt, message) => {
 })
 
 function handleMessage(data: IPortMessage, from: number | null) {
-    console.log("MESSAGE:", data, from);
     const {type, payload, timestamp} = data;
     if (type === "mount" || type === "unmount") {
         // those are not real message
@@ -64,7 +63,6 @@ function handleMessage(data: IPortMessage, from: number | null) {
 function onCommand<K extends keyof ICommand>(command: K, cb: (data: ICommand[K], from: "main" | number) => void) {
     ee.on("command", (payload, from) => {
         if (payload.command === command) {
-            console.log("command received!", payload);
             cb?.(payload.data, from);
         }
     });

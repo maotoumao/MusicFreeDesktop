@@ -18,7 +18,6 @@ ipcRenderer.on("port", (e) => {
                 ...appState,
                 ...(data.payload || {}),
             }
-            console.log("AppStateChanged", appState);
             ee.emit("stateChanged", appState, data.payload || {});
         }
 
