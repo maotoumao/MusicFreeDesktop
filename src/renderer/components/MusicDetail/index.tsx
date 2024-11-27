@@ -1,4 +1,3 @@
-import Evt from "@renderer/core/events";
 import AnimatedDiv from "../AnimatedDiv";
 import "./index.scss";
 import albumImg from "@/assets/imgs/album-cover.jpg";
@@ -21,13 +20,6 @@ function MusicDetail() {
 
   const { t } = useTranslation();
 
-  Evt.use("SHOW_MUSIC_DETAIL", () => {
-    musicDetailShownStore.setValue(true);
-  });
-
-  Evt.use("HIDE_MUSIC_DETAIL", () => {
-    musicDetailShownStore.setValue(false);
-  });
 
   return (
     <AnimatedDiv

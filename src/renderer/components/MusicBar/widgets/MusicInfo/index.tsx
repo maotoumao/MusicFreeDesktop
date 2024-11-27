@@ -6,7 +6,7 @@ import "./index.scss";
 import Tag from "@/renderer/components/Tag";
 import {secondsToDuration} from "@/common/time-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
-import {musicDetailShownStore} from "@/renderer/components/MusicDetail";
+import MusicDetail, {musicDetailShownStore} from "@/renderer/components/MusicDetail";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import {useTranslation} from "react-i18next";
 import {useCurrentMusic, useProgress} from "@renderer/core/track-player/hooks";
@@ -19,9 +19,9 @@ export default function MusicInfo() {
 
   function toggleMusicDetail() {
     if (musicDetailShown) {
-      Evt.emit("HIDE_MUSIC_DETAIL");
+      MusicDetail.hide();
     } else {
-      Evt.emit("SHOW_MUSIC_DETAIL");
+      MusicDetail.show();
     }
   }
 
