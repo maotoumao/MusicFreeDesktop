@@ -11,7 +11,6 @@ import {PlayerState} from "@/common/constant";
 import ThumbBarUtil from "@/common/main/thumb-bar-util";
 import windowManager from "@main/window-manager";
 import AppConfig from "@shared/app-config/main";
-import AppState from "@shared/app-state/main";
 import TrayManager from "@main/tray-manager";
 import WindowDrag from "@shared/window-drag/main";
 import {IAppConfig} from "@/types/app-config";
@@ -20,6 +19,7 @@ import {HttpsProxyAgent} from "https-proxy-agent";
 import PluginManager from "@shared/plugin-manager/main";
 import ServiceManager from "@shared/service-manager/main";
 import utils from "@shared/utils/main";
+import messageBus from "@shared/message-bus/main";
 
 // portable
 if (process.platform === "win32") {
@@ -97,7 +97,6 @@ app.whenReady().then(async () => {
     setupGlobalContext();
     await AppConfig.setup(windowManager);
 
-    AppState.setup(windowManager);
     await setupI18n({
         getDefaultLang() {
             return AppConfig.getConfig("normal.language");
@@ -107,7 +106,8 @@ app.whenReady().then(async () => {
                 "normal.language": lang
             });
             if (process.platform === "win32") {
-                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, AppState.isPlaying())
+
+                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, messageBus.getAppState().playerState === PlayerState.Playing)
             }
         },
     });
@@ -117,44 +117,45 @@ app.whenReady().then(async () => {
     WindowDrag.setup();
     setupGlobalShortCut();
     logger.logPerf("Create Main Window");
-    // Bind App State events
-    AppState.on("MusicChanged", (musicItem) => {
-        TrayManager.buildTrayMenu();
-        const mainWindow = windowManager.mainWindow;
+    // Setup message bus & app state
+    messageBus.onAppStateChange((_, patch) => {
+        if ("musicItem" in patch) {
+            TrayManager.buildTrayMenu();
+            const musicItem = patch.musicItem;
+            const mainWindow = windowManager.mainWindow;
 
-        if (mainWindow) {
-            const thumbStyle = AppConfig.getConfig("normal.taskbarThumb");
-            if (process.platform === "win32" && thumbStyle === "artwork") {
-                ThumbBarUtil.setThumbImage(mainWindow, musicItem?.artwork);
+            if (mainWindow) {
+                const thumbStyle = AppConfig.getConfig("normal.taskbarThumb");
+                if (process.platform === "win32" && thumbStyle === "artwork") {
+                    ThumbBarUtil.setThumbImage(mainWindow, musicItem?.artwork);
+                }
+                if (musicItem) {
+                    mainWindow.setTitle(
+                        musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : "")
+                    );
+                } else {
+                    mainWindow.setTitle(app.name);
+                }
             }
-            if (musicItem) {
-                mainWindow.setTitle(
-                    musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : "")
-                );
+        } else if ("playerState" in patch) {
+            TrayManager.buildTrayMenu();
+            const playerState = patch.playerState;
+
+            if (process.platform === "win32") {
+                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, playerState === PlayerState.Playing)
+            }
+        } else if ("repeatMode" in patch) {
+            TrayManager.buildTrayMenu();
+        } else if ("lyricText" in patch && process.platform === "darwin") {
+            if (AppConfig.getConfig("lyric.enableStatusBarLyric")) {
+                TrayManager.setTitle(patch.lyricText);
             } else {
-                mainWindow.setTitle(app.name);
+                TrayManager.setTitle("");
             }
         }
     })
 
-    AppState.on("PlayerStateChanged", (playerState) => {
-        TrayManager.buildTrayMenu();
-        if (process.platform === "win32") {
-            ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, playerState === PlayerState.Playing)
-        }
-    })
-
-    AppState.on("RepeatModeChanged", () => {
-        TrayManager.buildTrayMenu();
-    })
-
-    AppState.on("LyricChanged", (lyric) => {
-        if (AppConfig.getConfig("lyric.enableStatusBarLyric")) {
-            TrayManager.setTitle(lyric);
-        } else {
-            TrayManager.setTitle("");
-        }
-    })
+    messageBus.setup(windowManager);
 
 
     windowManager.showMainWindow();
@@ -241,7 +242,6 @@ async function bootstrap() {
         AppConfig.getConfig("network.proxy.username"),
         AppConfig.getConfig("network.proxy.password")
     );
-
 
 
 }

@@ -3,11 +3,10 @@ import {t} from "@shared/i18n/main";
 import {IWindowManager} from "@/types/main/window-manager";
 import getResourcePath from "@/common/main/get-resource-path";
 import {PlayerState, RepeatMode, ResourceName} from "@/common/constant";
-import AppState from "@shared/app-state/main";
 import AppConfig from "@shared/app-config/main";
-import {sendCommand} from "@shared/player-command-sync/main";
 import windowManager from "@main/window-manager";
 import {IAppConfig} from "@/types/app-config";
+import messageBus from "@shared/message-bus/main";
 
 if (process.platform === "darwin") {
     Menu.setApplicationMenu(
@@ -116,21 +115,21 @@ class TrayManager {
         const tray = TrayManager.trayInstance;
 
         /********* 音乐信息 **********/
-        const {music, playerState, repeatMode} =
-            AppState;
+        const {musicItem, playerState, repeatMode} =
+            messageBus.getAppState();
         // 更新一下tooltip
-        if (music) {
+        if (musicItem) {
             tray.setToolTip(
-                `${music.title ?? t("media.unknown_title")}${
-                    music.artist ? ` - ${music.artist}` : ""
+                `${musicItem.title ?? t("media.unknown_title")}${
+                    musicItem.artist ? ` - ${musicItem.artist}` : ""
                 }`
             );
         } else {
             tray.setToolTip("MusicFree");
         }
-        if (music) {
-            const fullName = `${music.title ?? t("media.unknown_title")}${
-                music.artist ? ` - ${music.artist}` : ""
+        if (musicItem) {
+            const fullName = `${musicItem.title ?? t("media.unknown_title")}${
+                musicItem.artist ? ` - ${musicItem.artist}` : ""
             }`;
             ctxMenu.push(
                 {
@@ -138,7 +137,7 @@ class TrayManager {
                     click: this.openMusicDetail.bind(this),
                 },
                 {
-                    label: `${t("media.media_platform")}: ${music.platform}`,
+                    label: `${t("media.media_platform")}: ${musicItem.platform}`,
                     click: this.openMusicDetail.bind(this),
                 }
             );
@@ -151,36 +150,31 @@ class TrayManager {
 
         ctxMenu.push(
             {
-                label: music
+                label: musicItem
                     ? playerState === PlayerState.Playing
                         ? t("media.music_state_pause")
                         : t("media.music_state_play")
                     : t("media.music_state_play_or_pause"),
-                enabled: !!music,
+                enabled: !!musicItem,
                 click() {
-                    if (!music) {
+                    if (!musicItem) {
                         return;
                     }
-                    sendCommand(
-                        "SetPlayerState",
-                        playerState === PlayerState.Playing
-                            ? PlayerState.Paused
-                            : PlayerState.Playing
-                    );
+                    messageBus.sendCommand("TogglePlayerState");
                 },
             },
             {
                 label: t("main.previous_music"),
-                enabled: !!music,
+                enabled: !!musicItem,
                 click() {
-                    sendCommand("SkipToPrevious");
+                    messageBus.sendCommand("SkipToPrevious");
                 },
             },
             {
                 label: t("main.next_music"),
-                enabled: !!music,
+                enabled: !!musicItem,
                 click() {
-                    sendCommand("SkipToNext");
+                    messageBus.sendCommand("SkipToNext");
                 },
             }
         );
@@ -195,7 +189,7 @@ class TrayManager {
                     type: "radio",
                     checked: repeatMode === RepeatMode.Loop,
                     click() {
-                        sendCommand("SetRepeatMode", RepeatMode.Loop);
+                        messageBus.sendCommand("SetRepeatMode", RepeatMode.Loop);
                     },
                 },
                 {
@@ -204,7 +198,7 @@ class TrayManager {
                     type: "radio",
                     checked: repeatMode === RepeatMode.Queue,
                     click() {
-                        sendCommand("SetRepeatMode", RepeatMode.Queue);
+                        messageBus.sendCommand("SetRepeatMode", RepeatMode.Queue);
                     },
                 },
                 {
@@ -213,7 +207,7 @@ class TrayManager {
                     type: "radio",
                     checked: repeatMode === RepeatMode.Shuffle,
                     click() {
-                        sendCommand("SetRepeatMode", RepeatMode.Shuffle);
+                        messageBus.sendCommand("SetRepeatMode", RepeatMode.Shuffle);
                     },
                 },
             ]),

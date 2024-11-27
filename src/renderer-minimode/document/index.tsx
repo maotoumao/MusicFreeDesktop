@@ -24,9 +24,3 @@ function Root() {
 
   return <MinimodePage></MinimodePage>;
 }
-
-// function BootstrapComponent(): null {
-//   useBootstrap();
-
-//   return null;
-// }

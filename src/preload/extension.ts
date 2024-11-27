@@ -1,3 +1,3 @@
 import "./common-preload";
 
-import "@/shared/message-hub/preload/extension";
+import "@/shared/message-bus/preload/extension";

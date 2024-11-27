@@ -1,7 +1,5 @@
 import ReactDOM from "react-dom/client";
-
 import bootstrap from "./bootstrap";
-
 import LyricWindowPage from "../pages";
 import { useEffect } from "react";
 

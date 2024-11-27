@@ -72,6 +72,23 @@ class TrackPlayer {
         return currentMusicStore.getValue();
     }
 
+    // 只有基础信息
+    get currentMusicBasicInfo() {
+        const currentMusic = this.currentMusic;
+        if (!currentMusic) {
+            return null;
+        }
+
+        return {
+            platform: currentMusic.platform,
+            title: currentMusic.title,
+            artist: currentMusic.artist,
+            id: currentMusic.id,
+            album: currentMusic.album,
+            artwork: currentMusic.artwork,
+        } as IMusic.IMusicItem
+    }
+
     get progress() {
         return progressStore.getValue();
     }

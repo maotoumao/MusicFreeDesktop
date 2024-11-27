@@ -1,12 +1,12 @@
 import {BrowserWindow, nativeImage} from "electron";
 import getResourcePath from "@/common/main/get-resource-path";
 import {t} from "@shared/i18n/main";
-import {sendCommand} from "@shared/player-command-sync/main";
-import {PlayerState, ResourceName} from "@/common/constant";
+import {ResourceName} from "@/common/constant";
 import asyncMemoize from "@/common/async-memoize";
 import fs from "fs/promises";
 import logger from "@shared/logger/main";
 import axios from "axios";
+import messageBus from "@shared/message-bus/main";
 
 /**
  * 设置缩略图按钮
@@ -23,7 +23,7 @@ function setThumbBarButtons(window: BrowserWindow, isPlaying?: boolean) {
             icon: nativeImage.createFromPath(getResourcePath(ResourceName.SKIP_LEFT_ICON)),
             tooltip: t("main.previous_music"),
             click() {
-                sendCommand("SkipToPrevious");
+                messageBus.sendCommand("SkipToPrevious");
             },
         },
         {
@@ -34,9 +34,8 @@ function setThumbBarButtons(window: BrowserWindow, isPlaying?: boolean) {
                 ? t("media.music_state_pause")
                 : t("media.music_state_play"),
             click() {
-                sendCommand(
-                    "SetPlayerState",
-                    isPlaying ? PlayerState.Paused : PlayerState.Playing
+                messageBus.sendCommand(
+                    "TogglePlayerState"
                 );
             },
         },
@@ -44,7 +43,7 @@ function setThumbBarButtons(window: BrowserWindow, isPlaying?: boolean) {
             icon: nativeImage.createFromPath(getResourcePath(ResourceName.SKIP_RIGHT_ICON)),
             tooltip: t("main.next_music"),
             click() {
-                sendCommand("SkipToNext");
+                messageBus.sendCommand("SkipToNext");
             },
         },
     ]);

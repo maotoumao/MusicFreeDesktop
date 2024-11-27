@@ -5,21 +5,14 @@ import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import {PlayerState} from "@/common/constant";
 import getTextWidth from "@/renderer/utils/get-text-width";
-import {PlayerSyncStore, sendCommand,} from "@/shared/player-command-sync/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 import {appWindowUtil} from "@shared/utils/renderer";
 import AppConfig from "@/shared/app-config/renderer";
-
-const {
-    currentLyricStore,
-    currentMusicItemStore,
-    playerStateStore,
-} = PlayerSyncStore;
+import messageBus, {useAppStatePartial} from "@shared/message-bus/renderer/extension";
 
 export default function LyricWindowPage() {
-    const currentMusic = currentMusicItemStore.useValue();
-    const playerState = playerStateStore.useValue();
-
+    const currentMusic = useAppStatePartial("musicItem");
+    const playerState = useAppStatePartial("playerState");
     const lockLyric = useAppConfig("lyric.lockLyric");
     const [showOperations, setShowOperations] = useState(false);
 
@@ -84,7 +77,7 @@ export default function LyricWindowPage() {
                         <div
                             className="operation-button"
                             onClick={() => {
-                                sendCommand("SkipToPrevious");
+                                messageBus.sendCommand("SkipToPrevious");
                             }}
                         >
                             <SvgAsset iconName="skip-left"></SvgAsset>
@@ -93,12 +86,7 @@ export default function LyricWindowPage() {
                             className="operation-button"
                             onClick={() => {
                                 if (currentMusic) {
-                                    sendCommand(
-                                        "SetPlayerState",
-                                        playerState === PlayerState.Playing
-                                            ? PlayerState.Paused
-                                            : PlayerState.Playing
-                                    );
+                                    messageBus.sendCommand("TogglePlayerState");
                                 }
                             }}
                         >
@@ -111,7 +99,7 @@ export default function LyricWindowPage() {
                         <div
                             className="operation-button"
                             onClick={() => {
-                                sendCommand("SkipToNext");
+                                messageBus.sendCommand("SkipToNext");
                             }}
                         >
                             <SvgAsset iconName="skip-right"></SvgAsset>
@@ -145,11 +133,8 @@ export default function LyricWindowPage() {
 }
 
 function LyricContent() {
-    // const progress = currentProgressStore.useValue();
-    const currentLyric = currentLyricStore.useValue();
-
-    const currentMusic = currentMusicItemStore.useValue();
-    // const lyric = lyricStore.useValue();
+    const currentMusic = useAppStatePartial("musicItem");
+    const currentLyric = useAppStatePartial("parsedLrc");
 
     const fontDataConfig = useAppConfig("lyric.fontData");
     const fontSizeConfig = useAppConfig("lyric.fontSize");

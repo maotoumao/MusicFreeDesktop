@@ -1,8 +1,8 @@
-import { supportLocalMediaType } from "@/common/constant";
-import { parseLocalMusicItem, safeStat } from "@/common/file-util";
-import { sendToMainWindow } from "@/shared/message-hub/main";
+import {supportLocalMediaType} from "@/common/constant";
+import {parseLocalMusicItem, safeStat} from "@/common/file-util";
 import PluginManager from "@shared/plugin-manager/main";
 import voidCallback from "@/common/void-callback";
+import messageBus from "@shared/message-bus/main";
 
 export function handleDeepLink(url: string) {
     if (!url) {
@@ -42,10 +42,8 @@ async function handleBareUrl(url: string) {
             supportLocalMediaType.some((postfix) => url.endsWith(postfix))
         ) {
             const musicItem = await parseLocalMusicItem(url);
-            sendToMainWindow({
-                cmd: "PlayMusic",
-                data: musicItem,
-            });
+            messageBus.sendCommand("PlayMusic", musicItem);
         }
-    } catch {}
+    } catch {
+    }
 }

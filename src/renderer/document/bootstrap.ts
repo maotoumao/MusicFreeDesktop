@@ -1,20 +1,21 @@
-import {localPluginHash, PlayerState, supportLocalMediaType} from "@/common/constant";
+import {localPluginHash, PlayerState, RepeatMode, supportLocalMediaType} from "@/common/constant";
 import MusicSheet from "../core/music-sheet";
 import trackPlayer from "../core/track-player";
 import localMusic from "../core/local-music";
 import {setupLocalShortCut} from "../core/shortcut";
 import {setAutoFreeze} from "immer";
-import Evt from "../core/events";
 import Downloader from "../core/downloader";
 import AppConfig from "@shared/app-config/renderer";
 import {setupI18n} from "@/shared/i18n/renderer";
-import {setupCommandHandler, setupPlayerSyncHandler,} from "../core/command-handler";
 import ThemePack from "@/shared/themepack/renderer";
 import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-playlist";
 import ServiceManager from "@shared/service-manager/renderer";
-import {PlayerEvents} from "@renderer/core/track-player/enum";
+import {CurrentTime, PlayerEvents} from "@renderer/core/track-player/enum";
 import {appWindowUtil, fsUtil} from "@shared/utils/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
+import messageBus from "@shared/message-bus/renderer/main";
+import throttle from "lodash.throttle";
+import {IAppState} from "@shared/message-bus/type";
 
 
 setAutoFreeze(false);
@@ -28,13 +29,11 @@ export default async function () {
         MusicSheet.frontend.setupMusicSheets(),
         trackPlayer.setup(),
     ]);
-    setupCommandHandler();
-    setupPlayerSyncHandler();
     await setupI18n();
     setupLocalShortCut();
     dropHandler();
     clearDefaultBehavior();
-    setupEvents();
+    setupCommandAndEvents();
     setupDeviceChange();
     localMusic.setupLocalMusic();
     await Downloader.setupDownloader();
@@ -51,6 +50,7 @@ export default async function () {
             PluginManager.updateAllPlugins();
         }
     }
+
 }
 
 function dropHandler() {
@@ -134,41 +134,32 @@ function clearDefaultBehavior() {
 
 
 /** 设置事件 */
-function setupEvents() {
-    Evt.on("SKIP_NEXT", () => {
+function setupCommandAndEvents() {
+    messageBus.onCommand("SkipToNext", () => {
         trackPlayer.skipToNext();
-    })
-
-    Evt.on("SKIP_PREVIOUS", () => {
+    });
+    messageBus.onCommand("SkipToPrevious", () => {
         trackPlayer.skipToPrev();
-    })
-
-    Evt.on("TOGGLE_PLAYER_STATE", () => {
+    });
+    messageBus.onCommand("TogglePlayerState", () => {
         if (trackPlayer.playerState === PlayerState.Playing) {
             trackPlayer.pause();
         } else {
             trackPlayer.resume();
         }
+    });
+    messageBus.onCommand("SetRepeatMode", (mode) => {
+        trackPlayer.setRepeatMode(mode);
     })
-
-    Evt.on("VOLUME_UP", (val = 0.04) => {
+    messageBus.onCommand("VolumeUp", (val = 0.04) => {
         trackPlayer.setVolume(Math.min(1, trackPlayer.volume + val))
-    })
+    });
 
-    Evt.on("VOLUME_DOWN", (val = 0.04) => {
+    messageBus.onCommand("VolumeDown", (val = 0.04) => {
         trackPlayer.setVolume(Math.max(0, trackPlayer.volume - val));
     });
 
-    Evt.on("TOGGLE_DESKTOP_LYRIC", () => {
-        const enableDesktopLyric = AppConfig.getConfig("lyric.enableDesktopLyric");
-        appWindowUtil.setLyricWindow(!enableDesktopLyric);
-        AppConfig.setConfig({
-            "lyric.enableDesktopLyric": !enableDesktopLyric
-        })
-    });
-
-    Evt.on("TOGGLE_LIKE", async (item) => {
-        // 如果没有传入，就是当前播放的歌曲
+    messageBus.onCommand("ToggleFavorite", async (item) => {
         const realItem = item || trackPlayer.currentMusic;
         if (MusicSheet.frontend.isFavoriteMusic(realItem)) {
             MusicSheet.frontend.removeMusicFromFavorite(realItem);
@@ -177,8 +168,71 @@ function setupEvents() {
         }
     });
 
+    messageBus.onCommand("ToggleDesktopLyric", () => {
+        const enableDesktopLyric = AppConfig.getConfig("lyric.enableDesktopLyric");
+        appWindowUtil.setLyricWindow(!enableDesktopLyric);
+        AppConfig.setConfig({
+            "lyric.enableDesktopLyric": !enableDesktopLyric
+        })
+    });
+
+    const sendAppStateTo = (from: "main" | number) => {
+        const appState: IAppState = {
+            repeatMode: trackPlayer.repeatMode || RepeatMode.Queue,
+            playerState: trackPlayer.playerState || PlayerState.None,
+            musicItem: trackPlayer.currentMusicBasicInfo || null,
+            lyricText: trackPlayer.lyric?.currentLrc?.lrc || null,
+            parsedLrc: trackPlayer.lyric?.currentLrc || null,
+            progress: trackPlayer.progress?.currentTime || 0,
+            duration: trackPlayer.progress?.duration || 0
+        }
+
+        messageBus.syncAppState(appState, from);
+    }
+
+    messageBus.onCommand("SyncAppState", (_, from) => {
+        sendAppStateTo(from);
+    });
+    sendAppStateTo("main");
+
+    // 状态同步
+    trackPlayer.on(PlayerEvents.StateChanged, state => {
+        messageBus.syncAppState({
+            playerState: state
+        });
+    });
+
+    trackPlayer.on(PlayerEvents.RepeatModeChanged, mode => {
+        messageBus.syncAppState({
+            repeatMode: mode
+        })
+    });
+
+    trackPlayer.on(PlayerEvents.CurrentLyricChanged, lyric => {
+        messageBus.syncAppState({
+            lyricText: lyric.lrc,
+            parsedLrc: lyric
+        });
+    })
+
+    const progressChangedHandler = throttle((currentTime: CurrentTime) => {
+        messageBus.syncAppState({
+            progress: currentTime?.currentTime || 0,
+            duration: currentTime.duration || 0,
+        });
+    }, 800);
+
+    trackPlayer.on(PlayerEvents.ProgressChanged, progressChangedHandler);
+
     // 最近播放
     trackPlayer.on(PlayerEvents.MusicChanged, (musicItem) => {
+        messageBus.syncAppState({
+            musicItem,
+            lyricText: null,
+            parsedLrc: null,
+            progress: 0,
+            duration: 0,
+        });
         addToRecentlyPlaylist(musicItem);
     });
 }
