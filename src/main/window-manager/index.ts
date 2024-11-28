@@ -6,7 +6,7 @@ import voidCallback from "@/common/void-callback";
 import ThumbBarUtil from "@/common/main/thumb-bar-util";
 import EventEmitter from "eventemitter3";
 import WindowDrag from "@shared/window-drag/main";
-import AppConfig from "@/providers/app-config/main";
+import AppConfig from "@shared/app-config/main";
 import messageBus from "@shared/message-bus/main";
 
 

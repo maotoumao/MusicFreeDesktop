@@ -100,12 +100,17 @@ function ignoreMouseEvent(ignore: boolean) {
     ipcRenderer.send("@shared/utils/ignore-mouse-event", ignore);
 }
 
+function toggleMainWindowVisible() {
+    ipcRenderer.send("@shared/utils/toggle-main-window-visible");
+}
+
 const appWindow = {
     minMainWindow,
     showMainWindow,
     setLyricWindow,
     setMinimodeWindow,
-    ignoreMouseEvent
+    ignoreMouseEvent,
+    toggleMainWindowVisible
 }
 
 /****** shell utils *****/

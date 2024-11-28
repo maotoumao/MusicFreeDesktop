@@ -326,7 +326,8 @@
       "volume-down": "Bajar volumen",
       "toggle-desktop-lyric": "Activar/Desactivar letra en el escritorio",
       "like/dislike": "Me gusta/No me gusta la canción actual",
-      "no_short_cut": "Vacío"
+      "no_short_cut": "Vacío",
+      "toggle-main-window-visible": "Mostrar/Ocultar ventana principal"
     },
     "network": {
       "host": "Host",

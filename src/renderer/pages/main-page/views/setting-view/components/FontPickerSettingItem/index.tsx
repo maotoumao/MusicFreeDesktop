@@ -4,7 +4,7 @@ import {defaultFont as _defaultFont} from "@/common/constant";
 import useLocalFonts from "@/hooks/useLocalFonts";
 import {useTranslation} from "react-i18next";
 import {IAppConfig} from "@/types/app-config";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 interface FontPickerSettingItemProps<T extends keyof IAppConfig> {
     keyPath: T;

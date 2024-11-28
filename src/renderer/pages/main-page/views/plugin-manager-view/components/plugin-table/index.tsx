@@ -1,4 +1,4 @@
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 import {
   useReactTable,

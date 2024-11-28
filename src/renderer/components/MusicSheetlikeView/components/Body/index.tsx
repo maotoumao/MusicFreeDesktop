@@ -9,7 +9,7 @@ import { showModal } from "@/renderer/components/Modal";
 import { RequestStateCode, localPluginName } from "@/common/constant";
 import { offsetHeightStore } from "../../store";
 import MusicSheet from "@/renderer/core/music-sheet";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import { useTranslation } from "react-i18next";
 
 interface IProps {

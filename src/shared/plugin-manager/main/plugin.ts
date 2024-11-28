@@ -9,7 +9,7 @@ import PluginMethods from "./plugin-methods";
 import reactNativeCookies from "./polyfill/react-native-cookies";
 import {app} from "electron";
 import * as webdav from "webdav";
-import AppConfig from "@/providers/app-config/main";
+import AppConfig from "@shared/app-config/main";
 
 axios.defaults.timeout = 15000;
 

@@ -10,7 +10,7 @@ import ListView from "./views/list";
 import ArtistView from "./views/artist";
 import AlbumView from "./views/album";
 import FolderView from "./views/folder";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 enum DisplayView {
   LIST,

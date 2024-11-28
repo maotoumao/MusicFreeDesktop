@@ -3,7 +3,7 @@
 }
 
 .setting-view--short-cut-table-row {
-  width: 42rem;
+  width: 45rem;
   display: flex;
   align-items: center;
   height: 3rem;
@@ -22,9 +22,37 @@
       width: 9rem;
     }
 
-    & .short-cut-item--container[data-disabled=true] {
-      opacity: 0.6;
-      pointer-events: none;
+    & .short-cut-item--container {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      & [data-disabled=true] {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      &:hover {
+        & .short-cut-item--clear-button {
+          opacity: 1;
+        }
+      }
+
+      & .short-cut-item--clear-button {
+        position: absolute;
+        right: 4px;
+        width: 1.2rem;
+        height: 1.2rem;
+        line-height: 0;
+        transition: opacity ease-in-out 0.2s;
+        opacity: 0;
+
+        & svg {
+          height: 1.2rem;
+          width: 1.2rem;
+        }
+      }
+
     }
   }
 }

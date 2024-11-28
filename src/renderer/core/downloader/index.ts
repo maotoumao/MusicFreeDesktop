@@ -19,7 +19,7 @@ import { getGlobalContext } from "@/shared/global-context/renderer";
 import Store from "@/common/store";
 import { useEffect, useState } from "react";
 import { DownloadEvts, ee } from "./ee";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
 
 

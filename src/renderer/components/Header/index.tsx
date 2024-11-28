@@ -10,7 +10,7 @@ import SearchHistory from "./widgets/SearchHistory";
 import {addSearchHistory} from "@/renderer/utils/search-history";
 import {useTranslation} from "react-i18next";
 import useAppConfig from "@/hooks/useAppConfig";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import {appUtil, appWindowUtil} from "@shared/utils/renderer";
 
 export default function AppHeader() {

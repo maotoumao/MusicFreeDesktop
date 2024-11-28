@@ -326,7 +326,8 @@
       "volume-down": "降低音量",
       "toggle-desktop-lyric": "打开/关闭桌面歌词",
       "like/dislike": "喜欢/不喜欢当前歌曲",
-      "no_short_cut": "空"
+      "no_short_cut": "空",
+      "toggle-main-window-visible": "显示/隐藏主窗口"
     },
     "network": {
       "host": "主机",

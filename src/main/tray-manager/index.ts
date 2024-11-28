@@ -3,7 +3,7 @@ import {t} from "@shared/i18n/main";
 import {IWindowManager} from "@/types/main/window-manager";
 import getResourcePath from "@/common/main/get-resource-path";
 import {PlayerState, RepeatMode, ResourceName} from "@/common/constant";
-import AppConfig from "@/providers/app-config/main";
+import AppConfig from "@shared/app-config/main";
 import windowManager from "@main/window-manager";
 import {IAppConfig} from "@/types/app-config";
 import messageBus from "@shared/message-bus/main";

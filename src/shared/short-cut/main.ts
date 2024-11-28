@@ -1,5 +1,5 @@
 import {globalShortcut, ipcMain} from "electron";
-import AppConfig from "@/providers/app-config/main";
+import AppConfig from "@shared/app-config/main";
 import {IAppConfig} from "@/types/app-config";
 import {shortCutKeys, shortCutKeysCommands} from "@/common/constant";
 import messageBus from "@shared/message-bus/main";

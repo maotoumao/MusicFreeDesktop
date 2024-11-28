@@ -326,7 +326,8 @@
       "volume-down": "音量減少",
       "toggle-desktop-lyric": "開啟/關閉桌面歌詞",
       "like/dislike": "喜歡/不喜歡當前歌曲",
-      "no_short_cut": "無"
+      "no_short_cut": "無",
+      "toggle-main-window-visible": "顯示/隱藏主窗口"
     },
     "network": {
       "host": "主機",

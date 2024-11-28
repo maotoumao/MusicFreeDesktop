@@ -5,8 +5,8 @@ import fs from "fs/promises";
 import {rimraf} from "rimraf";
 import {IAppConfig} from "@/types/app-config";
 import {IWindowManager} from "@/types/main/window-manager";
-import logger from "@/providers/logger/main";
-import _defaultAppConfig from "@/providers/app-config/default-app-config";
+import logger from "@shared/logger/main";
+import _defaultAppConfig from "@shared/app-config/default-app-config";
 
 
 class AppConfig {

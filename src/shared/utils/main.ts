@@ -104,6 +104,17 @@ class Utils {
             targetWindow.setIgnoreMouseEvents(ignore, {
                 forward: true,
             });
+        });
+
+        ipcMain.on("@shared/utils/toggle-main-window-visible", () => {
+            const mainWindow = this.windowManager.mainWindow;
+
+            if (mainWindow.isMinimized() || !mainWindow.isVisible()) {
+                mainWindow.show();
+            } else {
+                mainWindow.hide();
+                mainWindow.setSkipTaskbar(true);
+            }
         })
 
     }

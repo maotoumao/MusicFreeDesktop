@@ -1,12 +1,12 @@
 import * as Comlink from "comlink";
 import {getGlobalContext} from "@shared/global-context/renderer";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import {
     addDownloadedMusicToList,
     isDownloaded,
     setupDownloadedMusicList
 } from "@renderer/core/downloader/downloaded-sheet";
-import logger from "@/providers/logger/renderer";
+import logger from "@shared/logger/renderer";
 import PQueue from "p-queue";
 import EventEmitter from "eventemitter3";
 import {DownloadState, localPluginName} from "@/common/constant";

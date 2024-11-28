@@ -9,7 +9,7 @@ import {showModal} from "@/renderer/components/Modal";
 import classNames from "@/renderer/utils/classnames";
 import {getCurrentPanel, hidePanel, showPanel,} from "@/renderer/components/Panel";
 import {useTranslation} from "react-i18next";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import {isCN} from "@/shared/i18n/renderer";
 import useAppConfig from "@/hooks/useAppConfig";
 import {RepeatMode} from "@/common/constant";

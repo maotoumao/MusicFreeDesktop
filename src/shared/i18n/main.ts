@@ -2,7 +2,7 @@ import { app, ipcMain } from "electron";
 import path from "path";
 import fs from "fs/promises";
 import i18n from "i18next";
-import logger from "@/providers/logger/main";
+import logger from "@shared/logger/main";
 
 const ns = "translation";
 

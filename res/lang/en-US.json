@@ -326,7 +326,8 @@
       "volume-down": "Volume Down",
       "toggle-desktop-lyric": "Toggle Desktop Lyric",
       "like/dislike": "Like/Dislike Current Song",
-      "no_short_cut": "None"
+      "no_short_cut": "None",
+      "toggle-main-window-visible": "Show/Hide Main Window"
     },
     "network": {
       "host": "Host",

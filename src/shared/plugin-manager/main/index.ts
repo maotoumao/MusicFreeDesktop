@@ -10,10 +10,10 @@ import {localPluginHash, localPluginName} from "@/common/constant";
 import localPlugin from "./internal-plugins/local-plugin";
 import {addRandomHash} from "@/common/normalize-util";
 import {IWindowManager} from "@/types/main/window-manager";
-import AppConfig from "@/providers/app-config/main";
+import AppConfig from "@shared/app-config/main";
 import {compare} from "compare-versions";
 import {nanoid} from "nanoid";
-import logger from "@/providers/logger/main";
+import logger from "@shared/logger/main";
 
 const axios = _axios.create({
     httpsAgent: new https.Agent({

@@ -1,4 +1,4 @@
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import messageBus from "@shared/message-bus/renderer/extension";
 
 export default async function () {

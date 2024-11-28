@@ -86,6 +86,7 @@ export const shortCutKeys: IShortCutKeys[] = [
     "volume-down",
     "toggle-desktop-lyric",
     "like/dislike",
+    "toggle-main-window-visible"
 ];
 
 // 快捷键列表对应的指令
@@ -98,6 +99,7 @@ export const shortCutKeysCommands: Record<IShortCutKeys, keyof ICommand> =
         "volume-up": "VolumeUp",
         "toggle-desktop-lyric": "ToggleDesktopLyric",
         "like/dislike": "ToggleFavorite",
+        "toggle-main-window-visible": "ToggleMainWindowVisible"
     };
 
 // 主进程的Resource

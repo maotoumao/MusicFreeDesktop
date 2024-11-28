@@ -8,6 +8,7 @@ import useAppConfig from "@/hooks/useAppConfig";
 import {IAppConfig} from "@/types/app-config";
 import shortCut from "@shared/short-cut/renderer";
 import {shortCutKeys} from "@/common/constant";
+import SvgAsset from "@renderer/components/SvgAsset";
 
 
 export default function ShortCut() {
@@ -50,7 +51,7 @@ function ShortCutTable() {
                     {t("settings.short_cut.enable_global")}
                 </div>
             </div>
-            {shortCutKeys.map((it) => (
+            {shortCutKeys.map((it: string) => (
                 <div className="setting-view--short-cut-table-row" key={it}>
                     <div className="short-cut-cell">{t(`settings.short_cut.${it}`)}</div>
                     <div className="short-cut-cell">
@@ -60,6 +61,10 @@ function ShortCutTable() {
                             onChange={(val) => {
                                 shortCut.registerLocalShortCut(it as IShortCutKeys, val);
                             }}
+                            showClearButton
+                            onClear={() => {
+                                shortCut.unregisterLocalShortCut(it as IShortCutKeys);
+                            }}
                         ></ShortCutItem>
                     </div>
                     <div className="short-cut-cell">
@@ -68,6 +73,10 @@ function ShortCutTable() {
                             value={shortCuts?.[it]?.global}
                             onChange={(val) => {
                                 shortCut.registerGlobalShortCut(it as IShortCutKeys, val);
+                            }}
+                            showClearButton
+                            onClear={() => {
+                                shortCut.unregisterGlobalShortCut(it as IShortCutKeys);
                             }}
                         ></ShortCutItem>
                     </div>
@@ -82,6 +91,8 @@ interface IShortCutItemProps {
     isGlobal?: boolean;
     value?: string[];
     onChange?: (sc?: string[]) => void;
+    showClearButton?: boolean;
+    onClear?: () => void;
 }
 
 function formatValue(val: string[]) {
@@ -104,7 +115,7 @@ function keyCodeMap(code: string) {
 }
 
 function ShortCutItem(props: IShortCutItemProps) {
-    const {value, onChange, enabled, isGlobal} = props;
+    const {value, onChange, enabled, isGlobal, showClearButton, onClear} = props;
     const [tmpValue, setTmpValue] = useState<string[] | null>();
     const realValue = formatValue(tmpValue ?? value ?? []);
     const isRecordingRef = useRef(false);
@@ -120,7 +131,6 @@ function ShortCutItem(props: IShortCutItemProps) {
                 keyup: true,
             },
             (evt) => {
-                console.log(evt);
                 const type = evt.type;
                 let key = evt.key.toLowerCase();
                 if (evt.code === "Space") {
@@ -128,14 +138,7 @@ function ShortCutItem(props: IShortCutItemProps) {
                 }
                 if (type === "keydown") {
                     isRecordingRef.current = true;
-                    if (key === "backspace") {
-                        // 删除
-                        setTmpValue(null);
-                        isRecordingRef.current = false;
-                        recordedKeysRef.current.clear();
-                        // 新的快捷键为空
-                        onChange?.([]);
-                    } else if (key === "meta") {
+                    if (key === "meta") {
                         setTmpValue(null);
                         isRecordingRef.current = false;
                         recordedKeysRef.current.clear();
@@ -204,27 +207,36 @@ function ShortCutItem(props: IShortCutItemProps) {
     }, []);
 
     return (
-        <input
-            data-capture="true"
-            data-disabled={!enabled}
-            autoCorrect="off"
-            autoCapitalize="off"
-            type="text"
-            readOnly
-            aria-live="off"
-            className="short-cut-item--container"
-            value={realValue || t("settings.short_cut.no_short_cut")}
-            onKeyDown={(e) => {
-                e.preventDefault();
-            }}
-            onFocus={() => {
-                hotkeys.setScope(scopeRef.current);
-            }}
-            onBlur={() => {
-                hotkeys.setScope("all");
-                setTmpValue(null);
-                recordedKeysRef.current.clear();
-            }}
-        ></input>
+        <div className="short-cut-item--container">
+            <input
+                data-capture="true"
+                data-disabled={!enabled}
+                data-show-clear-button={showClearButton}
+                autoCorrect="off"
+                autoCapitalize="off"
+                type="text"
+                readOnly
+                aria-live="off"
+                className="short-cut-item--input"
+                value={realValue || t("settings.short_cut.no_short_cut")}
+                onKeyDown={(e) => {
+                    e.preventDefault();
+                }}
+                onFocus={() => {
+                    hotkeys.setScope(scopeRef.current);
+                }}
+                onBlur={() => {
+                    hotkeys.setScope("all");
+                    setTmpValue(null);
+                    recordedKeysRef.current.clear();
+                }}
+            >
+            </input>
+            {
+                (enabled && showClearButton) ? <div className='short-cut-item--clear-button' role="button" onClick={onClear}>
+                    <SvgAsset iconName='x-mark'></SvgAsset>
+                </div> : null
+            }
+        </div>
     );
 }

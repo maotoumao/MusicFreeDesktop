@@ -1,4 +1,4 @@
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import {IAppConfig} from "@/types/app-config";
 import {shortCutKeys, shortCutKeysCommands} from "@/common/constant";
 import hotkeys from "hotkeys-js";
@@ -52,7 +52,7 @@ class ShortCut {
                 messageBus.sendCommand(shortCutKeysCommands[key]);
             }
         }
-        this.localShortCutCallbackMap.set(key, callback);
+        this.localShortCutCallbackMap.set(key as string, callback);
         hotkeys(shortCut.join("+"), "all", callback);
 
         const shortCuts = AppConfig.getConfig("shortCut.shortcuts");
@@ -71,8 +71,8 @@ class ShortCut {
         const shortCuts = AppConfig.getConfig("shortCut.shortcuts");
         const prevShortCut = shortCuts?.[key]?.local;
         if (prevShortCut?.length) {
-            hotkeys.unbind(prevShortCut.join("+"), "all", this.localShortCutCallbackMap.get(key));
-            this.localShortCutCallbackMap.delete(key);
+            hotkeys.unbind(prevShortCut.join("+"), "all", this.localShortCutCallbackMap.get(key as string));
+            this.localShortCutCallbackMap.delete(key as string);
 
             AppConfig.setConfig({
                 "shortCut.shortcuts": {

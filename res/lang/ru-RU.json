@@ -326,7 +326,8 @@
       "volume-down": "Уменьшить громкость",
       "toggle-desktop-lyric": "Включить/Выключить текст песни на рабочем столе",
       "like/dislike": "Нравится/Не нравится текущая песня",
-      "no_short_cut": "Пусто"
+      "no_short_cut": "Пусто",
+      "toggle-main-window-visible": "Показать/Скрыть главное окно"
     },
     "network": {
       "host": "Хост",

@@ -4,7 +4,7 @@ import trackPlayer from "../core/track-player";
 import localMusic from "../core/local-music";
 import {setAutoFreeze} from "immer";
 import Downloader from "../core/downloader";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import {setupI18n} from "@/shared/i18n/renderer";
 import ThemePack from "@/shared/themepack/renderer";
 import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-playlist";
@@ -179,6 +179,10 @@ function setupCommandAndEvents() {
 
     messageBus.onCommand("OpenMusicDetailPage", () => {
         MusicDetail.show();
+    });
+
+    messageBus.onCommand("ToggleMainWindowVisible", () => {
+        appWindowUtil.toggleMainWindowVisible();
     })
 
 

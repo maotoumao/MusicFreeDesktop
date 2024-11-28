@@ -10,7 +10,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import { Tooltip } from "react-tooltip";
 import {IAppConfig} from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 interface ListBoxSettingItemProps<T extends keyof IAppConfig> {
   keyPath: T;

@@ -36,8 +36,12 @@ export interface ICommand {
     SyncAppState: void;
     /** 打开音乐详情页面 */
     OpenMusicDetailPage: void;
+    /** 切换主窗口显示 */
+    ToggleMainWindowVisible: void;
 }
 
+
+// 内部使用的消息
 // 其他窗口向主窗口发送的消息
 export interface IPortMessagePayload<CommandKey extends keyof ICommand = keyof ICommand, StateKey extends keyof IAppState = keyof IAppState> {
     mount: number;

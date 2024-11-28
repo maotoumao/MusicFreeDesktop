@@ -1,4 +1,4 @@
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import "./index.scss";
 import {toast} from "react-toastify";
 import {useTranslation} from "react-i18next";

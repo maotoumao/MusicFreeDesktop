@@ -24,6 +24,7 @@ interface IMod {
         setMinimodeWindow: (enabled: boolean) => void;
         setLyricWindowLock: (lockState: boolean) => void;
         ignoreMouseEvent: (ignore: boolean) => void;
+        toggleMainWindowVisible: () => void;
     },
     shell: {
         openExternal: (url: string) => void;

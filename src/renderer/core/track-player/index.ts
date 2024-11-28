@@ -16,13 +16,13 @@ import {
     setUserPreference,
     setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
-import AppConfig from "@/providers/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import {createIndexMap, IIndexMap} from "@/common/index-map";
 import _trackPlayerStore from "./store";
 import EventEmitter from "eventemitter3";
 import {IAudioController} from "@/types/audio-controller";
 import AudioController from "@renderer/core/track-player/controller/audio-controller";
-import logger from "@/providers/logger/renderer";
+import logger from "@shared/logger/renderer";
 import voidCallback from "@/common/void-callback";
 import {delay} from "@/common/time-util";
 import {createUniqueMap} from "@/common/unique-map";

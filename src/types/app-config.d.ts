@@ -52,6 +52,7 @@ interface _IAppConfig {
         | "volume-up"
         | "volume-down"
         | "like/dislike",
+        | "toggle-main-window-visible",
         {
             local?: string[] | null;
             global?: string[] | null;
