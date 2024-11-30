@@ -10,7 +10,7 @@ import reactNativeCookies from "./polyfill/react-native-cookies";
 import {app} from "electron";
 import * as webdav from "webdav";
 import AppConfig from "@shared/app-config/main";
-import createPluginStorage from "@shared/plugin-manager/main/polyfill/storage";
+import pluginStorage from "@shared/plugin-manager/main/polyfill/storage";
 
 axios.defaults.timeout = 15000;
 
@@ -33,6 +33,16 @@ const packages: Record<string, any> = {
     he,
     "@react-native-cookies/cookies": reactNativeCookies,
     webdav,
+    "musicfree/storage": pluginStorage
+};
+
+const _require = (packageName: string) => {
+    const pkg = packages[packageName];
+    if (pkg) {
+        pkg.default = pkg;
+        return pkg;
+    }
+    return null;
 };
 
 // const _consoleBind = function (
@@ -73,7 +83,11 @@ export class Plugin {
         pluginPath: string
     ) {
         let _instance: IPlugin.IPluginInstance;
-        const _module: any = {exports: {}};
+        const _module: any = {exports: {}, loaded: false};
+        let loadResolveCallback: () => void = null;
+        const ensurePluginInitialized = new Promise<void>((resolve) => {
+            loadResolveCallback = resolve;
+        });
         try {
             if (typeof funcCode === "string") {
                 // 插件的环境变量
@@ -92,24 +106,7 @@ export class Plugin {
                     platform: process.platform,
                     version: app.getVersion(),
                     env,
-                };
-
-                const dynamicPackage: Record<string, any> = {
-                    "@musicfree/storage": null
-                };
-
-                const _require = (packageName: string) => {
-                    const pkg = packages[packageName];
-                    if (pkg) {
-                        pkg.default = pkg;
-                        return pkg;
-                    }
-                    const dPkg = dynamicPackage[packageName];
-                    if (dPkg) {
-                        pkg.default = pkg;
-                        return dPkg;
-                    }
-                    return null;
+                    ensurePluginInitialized
                 };
 
                 // eslint-disable-next-line no-new-func
@@ -132,9 +129,8 @@ export class Plugin {
                 } else {
                     _instance = _module.exports as IPlugin.IPluginInstance;
                 }
+                loadResolveCallback?.();
 
-                // 初始化package
-                dynamicPackage["@musicfree/storage"] = createPluginStorage(_instance.platform);
 
             } else {
                 _instance = funcCode();
@@ -179,6 +175,7 @@ export class Plugin {
                 this.hash = sha256(funcCode.toString()).toString();
             }
         }
+        _module.loaded = true;
 
         // 放在最后
         this.methods = new PluginMethods(this);
