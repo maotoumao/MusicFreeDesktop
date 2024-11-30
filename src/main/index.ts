@@ -174,6 +174,12 @@ async function bootstrap() {
         });
     }
 
+    const minimodeEnabled = AppConfig.getConfig("private.minimode");
+
+    if (minimodeEnabled) {
+        windowManager.showMiniModeWindow();
+    }
+
     /** 一些初始化设置 */
         // 初始化桌面歌词
     const desktopLyricEnabled = AppConfig.getConfig("lyric.enableDesktopLyric");
@@ -209,12 +215,6 @@ async function bootstrap() {
         }
     })
 
-
-    const minimodeEnabled = AppConfig.getConfig("private.minimode");
-
-    if (minimodeEnabled) {
-        windowManager.showMiniModeWindow();
-    }
 
     // 初始化代理
     const proxyConfigKeys: Array<keyof IAppConfig> = [

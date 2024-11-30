@@ -10,6 +10,7 @@ import reactNativeCookies from "./polyfill/react-native-cookies";
 import {app} from "electron";
 import * as webdav from "webdav";
 import AppConfig from "@shared/app-config/main";
+import createPluginStorage from "@shared/plugin-manager/main/polyfill/storage";
 
 axios.defaults.timeout = 15000;
 
@@ -32,12 +33,6 @@ const packages: Record<string, any> = {
     he,
     "@react-native-cookies/cookies": reactNativeCookies,
     webdav,
-};
-
-const _require = (packageName: string) => {
-    const pkg = packages[packageName];
-    pkg.default = pkg;
-    return pkg;
 };
 
 // const _consoleBind = function (
@@ -98,6 +93,25 @@ export class Plugin {
                     version: app.getVersion(),
                     env,
                 };
+
+                const dynamicPackage: Record<string, any> = {
+                    "@musicfree/storage": null
+                };
+
+                const _require = (packageName: string) => {
+                    const pkg = packages[packageName];
+                    if (pkg) {
+                        pkg.default = pkg;
+                        return pkg;
+                    }
+                    const dPkg = dynamicPackage[packageName];
+                    if (dPkg) {
+                        pkg.default = pkg;
+                        return dPkg;
+                    }
+                    return null;
+                };
+
                 // eslint-disable-next-line no-new-func
                 _instance = Function(`
                     'use strict';
@@ -118,6 +132,10 @@ export class Plugin {
                 } else {
                     _instance = _module.exports as IPlugin.IPluginInstance;
                 }
+
+                // 初始化package
+                dynamicPackage["@musicfree/storage"] = createPluginStorage(_instance.platform);
+
             } else {
                 _instance = funcCode();
             }
