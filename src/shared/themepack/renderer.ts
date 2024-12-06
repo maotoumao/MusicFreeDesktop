@@ -1,7 +1,8 @@
 import Store from "@/common/store";
-import type { IMod } from "./type";
-import { toast } from "react-toastify";
-import { useEffect } from "react";
+import type {IMod} from "./type";
+import {toast} from "react-toastify";
+import {useEffect} from "react";
+import debounce from "@/common/debounce";
 
 const mod = window["@shared/themepack" as any] as unknown as IMod;
 
@@ -41,7 +42,17 @@ async function setupThemePacks() {
         mod.loadThemePacks();
       }
     });
-  } catch {}
+
+    window.onresize = debounce(() => {
+      mod.selectTheme(currentThemePackStore.getValue());
+    }, 150, {
+      leading: false,
+      trailing: true
+    });
+
+  } catch {
+    // pass
+  }
 }
 
 async function loadThemePacks() {

@@ -84,6 +84,8 @@ class WindowManager implements IWindowManager {
         const mainWindow = new BrowserWindow({
             height: 700,
             width: 1050,
+            minHeight: 700,
+            minWidth: 1050,
             webPreferences: {
                 preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
                 nodeIntegration: true,
@@ -92,7 +94,6 @@ class WindowManager implements IWindowManager {
                 sandbox: false,
                 webviewTag: true,
             },
-            resizable: false,
             frame: false,
             icon: nativeImage.createFromPath(getResourcePath(ResourceName.LOGO_IMAGE)),
         });
