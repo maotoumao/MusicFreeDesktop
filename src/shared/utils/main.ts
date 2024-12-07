@@ -106,6 +106,18 @@ class Utils {
             });
         });
 
+        ipcMain.on("@shared/utils/toggle-maximize-main-window", () => {
+            const mainWindow = this.windowManager.mainWindow;
+
+            if (mainWindow) {
+                if (mainWindow.isMaximized()) {
+                    mainWindow.unmaximize();
+                } else {
+                    mainWindow.maximize();
+                }
+            }
+        })
+
         ipcMain.on("@shared/utils/toggle-main-window-visible", () => {
             const mainWindow = this.windowManager.mainWindow;
 

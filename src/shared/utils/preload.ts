@@ -104,13 +104,18 @@ function toggleMainWindowVisible() {
     ipcRenderer.send("@shared/utils/toggle-main-window-visible");
 }
 
+function toggleMainWindowMaximize() {
+    ipcRenderer.send("@shared/utils/toggle-maximize-main-window");
+}
+
 const appWindow = {
     minMainWindow,
     showMainWindow,
     setLyricWindow,
     setMinimodeWindow,
     ignoreMouseEvent,
-    toggleMainWindowVisible
+    toggleMainWindowVisible,
+    toggleMainWindowMaximize
 }
 
 /****** shell utils *****/

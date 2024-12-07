@@ -25,6 +25,7 @@ interface IMod {
         setLyricWindowLock: (lockState: boolean) => void;
         ignoreMouseEvent: (ignore: boolean) => void;
         toggleMainWindowVisible: () => void;
+        toggleMainWindowMaximize: () => void;
     },
     shell: {
         openExternal: (url: string) => void;

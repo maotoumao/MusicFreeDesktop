@@ -149,6 +149,11 @@ export default function AppHeader() {
                 >
                     <SvgAsset iconName="minus"></SvgAsset>
                 </div>
+                <div role="button" className="header-button" onClick={() => {
+                    appWindowUtil.toggleMainWindowMaximize();
+                }}>
+                    <SvgAsset iconName="square"></SvgAsset>
+                </div>
                 <div
                     role="button"
                     title={t("app_header.exit")}
