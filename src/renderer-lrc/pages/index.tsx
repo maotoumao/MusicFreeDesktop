@@ -156,25 +156,6 @@ function LyricContent() {
         return 0;
     }, [currentLyric, fontDataConfig, fontSizeConfig, currentMusic]);
 
-    // const lastIndexRef = useRef(0);
-
-    // const currentIndex = useMemo(() => {
-    //   if (!lyric?.length) {
-    //     return -1;
-    //   }
-    //   for (
-    //     let i = lastIndexRef.current % lyric.length;
-    //     i !== (lastIndexRef.current + lyric.length - 1) % lyric.length;
-    //     i = (i + 1) % lyric.length
-    //   ) {
-    //     if (lyric[i].time >= progress.currentTime) {
-    //       lastIndexRef.current = i - 1;
-    //       return i - 1;
-    //     }
-    //   }
-    //   lastIndexRef.current = lyric.length - 1;
-    //   return lyric.length - 1;
-    // }, [lyric, progress]);
 
     return (
         <div
