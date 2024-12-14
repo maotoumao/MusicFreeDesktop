@@ -4,6 +4,7 @@ import "./app.scss";
 import MusicBar from "./components/MusicBar";
 import {Outlet} from "react-router";
 import PanelComponent from "./components/Panel";
+import MusicDetail from "@renderer/components/MusicDetail";
 
 export default function App() {
     return (
@@ -13,6 +14,7 @@ export default function App() {
                 <Outlet></Outlet>
                 <PanelComponent></PanelComponent>
             </div>
+            <MusicDetail></MusicDetail>
             <MusicBar></MusicBar>
         </div>
     );

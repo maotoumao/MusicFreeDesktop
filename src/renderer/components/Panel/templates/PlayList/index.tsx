@@ -17,10 +17,15 @@ import {Trans, useTranslation} from "react-i18next";
 import DragReceiver, {startDrag} from "@/renderer/components/DragReceiver";
 import {useCurrentMusic, useMusicQueue} from "@renderer/core/track-player/hooks";
 
-const estimizeItemHeight = 2.6 * rem;
+const estimateItemHeight = 2.6 * rem;
 const DRAG_TAG = "Playlist";
 
-export default function PlayList() {
+interface IProps {
+    coverHeader?: boolean;
+}
+
+export default function PlayList(props: IProps) {
+    const {coverHeader} = props;
     const musicQueue = useMusicQueue();
     const currentMusic = useCurrentMusic();
     const scrollElementRef = useRef<HTMLDivElement>();
@@ -30,7 +35,7 @@ export default function PlayList() {
     const {t} = useTranslation();
 
     const virtualController = useVirtualList({
-        estimateItemHeight: estimizeItemHeight,
+        estimateItemHeight: estimateItemHeight,
         data: musicQueue,
         getScrollElement() {
             return scrollElementRef.current;
@@ -82,7 +87,7 @@ export default function PlayList() {
     }, [musicQueue]);
 
     return (
-        <Base width={"460px"} scrollable={false}>
+        <Base width={"460px"} scrollable={false} coverHeader={coverHeader}>
             <div className="playlist--header">
                 <div className="playlist--title">
                     <Trans

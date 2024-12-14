@@ -15,6 +15,7 @@ import useAppConfig from "@/hooks/useAppConfig";
 import {RepeatMode} from "@/common/constant";
 import {useQuality, useRepeatMode, useSpeed, useVolume} from "@renderer/core/track-player/hooks";
 import {appWindowUtil} from "@shared/utils/renderer";
+import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
 
 export default function Extra() {
   const repeatMode = useRepeatMode();
@@ -59,7 +60,9 @@ export default function Extra() {
           if (getCurrentPanel()?.type === "PlayList") {
             hidePanel();
           } else {
-            showPanel("PlayList");
+            showPanel("PlayList", {
+              coverHeader: musicDetailShownStore.getValue()
+            });
           }
         }}
       >
@@ -116,17 +119,19 @@ function VolumeBtn() {
                 trackPlayer.setVolume(val as number);
               }}
               value={volume}
-              trackStyle={{
-                background: "var(--primaryColor)",
-              }}
-              handleStyle={{
-                height: 12,
-                width: 12,
-                marginLeft: -4,
-                borderColor: "var(--primaryColor)",
-              }}
-              railStyle={{
-                background: "#d8d8d8",
+              styles={{
+                track: {
+                  background: "var(--primaryColor)",
+                },
+                handle: {
+                  height: 12,
+                  width: 12,
+                  marginLeft: -4,
+                  borderColor: "var(--primaryColor)",
+                },
+                rail: {
+                  background: "#d8d8d8",
+                },
               }}
             ></Slider>
           </div>

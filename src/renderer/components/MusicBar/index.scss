@@ -1,13 +1,11 @@
 .music-bar-container {
   width: 100vw;
-  height: 64px;
+  height: var(--appMusicBarHeight, 64px);
   border-top: 1px solid var(--dividerColor);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   user-select: none;
   position: relative;
-  z-index: 1000;
-
-  
+  z-index: 4000;
 }

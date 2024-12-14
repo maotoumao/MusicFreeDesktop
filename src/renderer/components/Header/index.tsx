@@ -4,7 +4,7 @@ import {showModal} from "../Modal";
 import {useNavigate} from "react-router-dom";
 import {useRef, useState} from "react";
 import HeaderNavigator from "./widgets/Navigator";
-import MusicDetail, {musicDetailShownStore} from "../MusicDetail";
+import MusicDetail from "../MusicDetail";
 import Condition from "../Condition";
 import SearchHistory from "./widgets/SearchHistory";
 import {addSearchHistory} from "@/renderer/utils/search-history";
@@ -12,6 +12,7 @@ import {useTranslation} from "react-i18next";
 import useAppConfig from "@/hooks/useAppConfig";
 import AppConfig from "@shared/app-config/renderer";
 import {appUtil, appWindowUtil} from "@shared/utils/renderer";
+import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
 
 export default function AppHeader() {
     const navigate = useNavigate();

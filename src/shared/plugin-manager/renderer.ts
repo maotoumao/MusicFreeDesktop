@@ -84,6 +84,14 @@ function getPluginByHash(hash: string) {
     return delegatePluginsStore.getValue().find((item) => item.hash === hash);
 }
 
+function getPluginByPlatform(platform: string) {
+    return delegatePluginsStore.getValue().find((item) => item.platform === platform);
+}
+
+function isSupportFeatureMethod(platform: string, featureMethod: keyof IPlugin.IPluginInstanceMethods) {
+    return delegatePluginsStore.getValue().find((item) => item.platform === platform)?.supportedMethod?.includes?.(featureMethod) ?? false;
+}
+
 
 function getPluginPrimaryKey(pluginItem: IPluginDelegateLike) {
     return (
@@ -105,6 +113,8 @@ const PluginManager = {
     getSearchablePlugins,
     getSortedSearchablePlugins,
     getPluginByHash,
+    getPluginByPlatform,
+    isSupportFeatureMethod,
     getPluginPrimaryKey,
     callPluginDelegateMethod: mod.callPluginMethod,
     updateAllPlugins: mod.updateAllPlugins,

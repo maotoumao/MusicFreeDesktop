@@ -1,10 +1,15 @@
-.music-detail-container {
+.music-detail--container {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 100;
+  z-index: 3000;
+  box-sizing: border-box;
+  padding-bottom: var(--appMusicBarHeight);
+  display: flex;
+  flex-direction: column;
+  -webkit-app-region: no-drag;
 
   & .music-detail-background {
     top: 0;
@@ -68,22 +73,25 @@
 
   & .music-body {
     width: 100%;
-    margin-top: 2rem;
-    height: 440px;
+    box-sizing: border-box;
+    padding: 4rem 0;
+    height: 0;
+    flex: 1;
     display: flex;
     justify-content: center;
+    align-items: center;
+    column-gap: 54px;
 
     & .music-album-options {
-      width: 260px;
-      height: 260px;
-      margin-top: 40px;
-      margin-right: 96px;
+      $size: 35vmin;
+      width: $size;
+      height: $size;
       object-fit: cover;
       -webkit-user-drag: none;
       & .music-album {
-        width: 260px;
-        height: 260px;
-        border-radius: 16px;
+        width: $size;
+        height: $size;
+        border-radius: 8px;
         object-fit: cover;
       }
 

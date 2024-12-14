@@ -1,0 +1,51 @@
+.music-detail--header-container {
+  width: 100%;
+  height: var(--appHeaderHeight);
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+
+  & .hide-music-detail {
+    left: 24px;
+    $size: 32px;
+    top: 16px;
+    width: $size;
+    height: $size;
+    -webkit-app-region: no-drag;
+    cursor: pointer;
+    & svg {
+      width: $size;
+      height: $size;
+    }
+  }
+
+  & .music-detail--header-right {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 16px;
+    gap: 4px;
+
+    & .header-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 20px;
+      opacity: 0.6;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      & svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}

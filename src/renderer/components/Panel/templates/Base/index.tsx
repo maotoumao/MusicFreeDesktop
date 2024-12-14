@@ -17,6 +17,7 @@ interface IBaseModalProps {
   width?: string | number;
   scrollable?: boolean;
   children: ReactNode;
+  coverHeader?: boolean;
 }
 
 const baseId = "components--panel-base-container";
@@ -30,6 +31,7 @@ function Base(props: IBaseModalProps) {
     withBlur = false,
     width,
     scrollable = true,
+    coverHeader = false
   } = props;
 
   const trapCloseRef = useRef(false);
@@ -40,6 +42,7 @@ function Base(props: IBaseModalProps) {
       className={`components--panel-base animate__animated animate__fadeIn ${
         withBlur ? "blur10" : ""
       }`}
+      data-cover-header={coverHeader}
       style={{
         backgroundColor: maskColor,
       }}

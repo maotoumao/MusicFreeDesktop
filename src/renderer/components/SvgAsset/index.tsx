@@ -5,6 +5,7 @@ export type SvgAssetIconNames =
   | "array-download-tray"
   | "arrow-left-end-on-rectangle"
   | "cd"
+  | "chat-bubble-left-ellipsis"
   | "check"
   | "check-circle"
   | "chevron-double-down"

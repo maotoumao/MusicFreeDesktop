@@ -606,7 +606,7 @@ class TrackPlayer {
     }
 
 
-    public async fetchCurrentLyric(refetch = false) {
+    public async fetchCurrentLyric(forceLoad = false) {
         const currentMusic = this.currentMusic;
 
         if (!currentMusic) {
@@ -615,7 +615,7 @@ class TrackPlayer {
         }
 
         const currentLyric = this.lyric;
-        if (!refetch && currentLyric && this.isCurrentMusic(currentLyric?.parser?.musicItem)) {
+        if (!forceLoad && currentLyric && this.isCurrentMusic(currentLyric?.parser?.musicItem)) {
             return;
         }
         try {

@@ -1,5 +1,5 @@
-$width: 360px;
-$height: 420px;
+$width: 40vw;
+$height: 100%;
 .lyric-container-outer {
   position: relative;
   width: $width;
@@ -59,7 +59,7 @@ $height: 420px;
     &::before,
     &::after {
       content: "";
-      height: calc(180px - 0.5rem);
+      height: calc(50% - 0.5rem);
       display: block;
     }
   }
