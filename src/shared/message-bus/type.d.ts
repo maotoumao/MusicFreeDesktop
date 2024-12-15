@@ -7,6 +7,7 @@ export interface IAppState {
     repeatMode?: RepeatMode;
     lyricText?: string | null;
     parsedLrc?: IParsedLrcItem | null;
+    fullLyric?: IParsedLrcItem[] | null;
     progress?: number;
     duration?: number;
 }

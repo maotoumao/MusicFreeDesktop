@@ -193,6 +193,7 @@ function setupCommandAndEvents() {
             musicItem: trackPlayer.currentMusicBasicInfo || null,
             lyricText: trackPlayer.lyric?.currentLrc?.lrc || null,
             parsedLrc: trackPlayer.lyric?.currentLrc || null,
+            fullLyric: trackPlayer.lyric?.parser?.getLyricItems() || [],
             progress: trackPlayer.progress?.currentTime || 0,
             duration: trackPlayer.progress?.duration || 0
         }
@@ -225,6 +226,12 @@ function setupCommandAndEvents() {
         });
     })
 
+    trackPlayer.on(PlayerEvents.LyricChanged, lyric => {
+        messageBus.syncAppState({
+            fullLyric: lyric?.getLyricItems?.() || []
+        })
+    })
+
     const progressChangedHandler = throttle((currentTime: CurrentTime) => {
         messageBus.syncAppState({
             progress: currentTime?.currentTime || 0,
@@ -239,6 +246,7 @@ function setupCommandAndEvents() {
         messageBus.syncAppState({
             musicItem,
             lyricText: null,
+            fullLyric: [],
             parsedLrc: null,
             progress: 0,
             duration: 0,
