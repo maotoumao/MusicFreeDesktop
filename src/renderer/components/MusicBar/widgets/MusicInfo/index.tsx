@@ -9,7 +9,7 @@ import MusicDetail, {useMusicDetailShown} from "@/renderer/components/MusicDetai
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import {useTranslation} from "react-i18next";
 import {useCurrentMusic, useProgress} from "@renderer/core/track-player/hooks";
-import {hidePanel} from "@renderer/components/Panel";
+import {hidePanel, showPanel} from "@renderer/components/Panel";
 import MusicDownloaded from "@renderer/components/MusicDownloaded";
 import PluginManager from "@shared/plugin-manager/renderer";
 
@@ -77,13 +77,21 @@ export default function MusicInfo() {
                     )}
                 </div>
             </div>
-            <div data-detail-shown={musicDetailShown} className="music-info-content-container music-info-operations-container">
+            <div data-detail-shown={musicDetailShown}
+                 className="music-info-content-container music-info-operations-container">
                 <MusicFavorite musicItem={musicItem} size={22}></MusicFavorite>
                 <MusicDownloaded musicItem={musicItem} size={22}></MusicDownloaded>
-                <div role='button' data-disabled={!PluginManager.isSupportFeatureMethod(musicItem.platform, "getMusicComments")}>
-                    <SvgAsset iconName='chat-bubble-left-ellipsis' size={22}></SvgAsset>
+                <div role="button"
+                     data-disabled={!PluginManager.isSupportFeatureMethod(musicItem.platform, "getMusicComments")}
+                     onClick={() => {
+                         showPanel("MusicComment", {
+                             musicItem: musicItem,
+                             coverHeader: true
+                         })
+                     }}>
+                    <SvgAsset iconName="chat-bubble-left-ellipsis" size={22}></SvgAsset>
                 </div>
-                <div className='music-info-operation-divider'></div>
+                <div className="music-info-operation-divider"></div>
                 <Progress></Progress>
             </div>
         </div>

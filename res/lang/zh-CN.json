@@ -45,6 +45,7 @@
     "media_type_artist": "作者",
     "media_type_sheet": "歌单",
     "media_type_lyric": "歌词",
+    "media_type_comment": "评论",
 
     "media_title": "标题",
     "media_platform": "来源",

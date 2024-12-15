@@ -22,6 +22,7 @@ export type SvgAssetIconNames =
   | "folder-open"
   | "font-size-larger"
   | "font-size-smaller"
+  | "hand-thumb-up"
   | "headphone"
   | "heart-outline"
   | "heart"

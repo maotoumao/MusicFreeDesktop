@@ -45,6 +45,7 @@
     "media_type_artist": "藝術家",
     "media_type_sheet": "歌單",
     "media_type_lyric": "歌詞",
+    "media_type_comment": "評論",
 
     "media_title": "標題",
     "media_platform": "來源",

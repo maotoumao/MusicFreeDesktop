@@ -45,6 +45,7 @@
     "media_type_artist": "Artist",
     "media_type_sheet": "Playlist",
     "media_type_lyric": "Lyric",
+    "media_type_comment": "Comment",
 
     "media_title": "Title",
     "media_platform": "Source",

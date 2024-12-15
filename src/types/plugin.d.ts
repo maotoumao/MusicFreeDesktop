@@ -136,7 +136,7 @@ declare namespace IPlugin {
       page?: number
     ) => Promise<ICommon.PaginationResponse<IMusic.IMusicSheetItem>>;
     /** 歌曲评论 */
-    getMusicComments?: (musicItem: IMusic.IMusicItem) => Promise<IGetCommentResult>
+    getMusicComments?: (musicItem: IMusic.IMusicItem, page?: number) => Promise<IGetCommentResult>
   }
 
   export interface IPluginInstance extends IPluginDefine {

@@ -1,0 +1,64 @@
+.music-comment-panel--title-container {
+  margin: 24px 16px 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.music-comment-panel--body-container {
+  margin-bottom: 16px;
+}
+
+.music-comment-panel--comment-item-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  & .comment-title-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1em;
+
+    & .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+
+    & span {
+      user-select: auto;
+    }
+  }
+
+
+  & .comment-body-container {
+    padding-left: 40px;
+    user-select: text;
+    cursor: text;
+    line-height: 1.5em;
+
+  }
+
+  & .comment-operations-container{
+    display: flex;
+    justify-content: space-between;
+    padding-left: 40px;
+    opacity: 0.7;
+
+    & .thumb-up {
+      display: flex;
+      align-items: center;
+
+      & svg {
+        width: 1.1em;
+        height: 1.1em;
+      }
+      & span {
+        margin-left: 4px;
+      }
+    }
+  }
+
+
+}
