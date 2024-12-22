@@ -287,6 +287,10 @@ class WindowManager implements IWindowManager {
             const fontSize = Math.max(Math.min(Math.floor((height - 60) / 2), 80), 16);
             AppConfig.setConfig({
                 "lyric.fontSize": fontSize,
+                "private.lyricWindowSize": {
+                    width,
+                    height
+                },
             });
             width = wWidth;
             height = wHeight;

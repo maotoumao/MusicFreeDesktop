@@ -287,31 +287,6 @@ function LyricBtn() {
   const enableDesktopLyric = useAppConfig("lyric.enableDesktopLyric");
   const { t } = useTranslation();
 
-  // const lyric = useLyric();
-
-  // useEffect(() => {
-  //   // 同步歌词 这样写貌似不好 应该用回调
-  //   // TODO: 挪到bootstrap中
-  //   if (enableDesktopLyric) {
-  //     // 同步歌词
-  //     if (lyric?.currentLrc) {
-  //       const currentLrc = lyric?.currentLrc;
-  //       // 同步两句歌词
-  //       ipcRendererSend("send-to-lyric-window", {
-  //         timeStamp: Date.now(),
-  //         lrc: currentLrc
-  //           ? [currentLrc.lrc, lyric.parser.getLyric()[currentLrc.index + 1]]
-  //           : [],
-  //       });
-  //     } else {
-  //       ipcRendererSend("send-to-lyric-window", {
-  //         timeStamp: Date.now(),
-  //         lrc: [],
-  //       });
-  //     }
-  //   }
-  // }, [lyric, enableDesktopLyric]);
-
   return (
     <div
       className={classNames({
