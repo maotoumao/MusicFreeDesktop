@@ -94,6 +94,7 @@ interface _IAppConfig {
 
     /** 不需要用户配置的数据 */
     "private.lyricWindowPosition": ICommon.IPoint;
+    "private.lyricWindowSize": ICommon.ISize;
 
     "private.minimodeWindowPosition": ICommon.IPoint;
 

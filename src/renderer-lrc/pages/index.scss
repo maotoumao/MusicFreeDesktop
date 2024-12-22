@@ -1,4 +1,4 @@
-.lyric-window-container {
+.container {
   position: relative;
   width: 100%;
   height: 100%;
@@ -9,11 +9,24 @@
     background-color: rgba($color: #000000, $alpha: 0.2);
   }
 
+  &::after {
+    display: block;
+    content: '';
+    height: 14px;
+  }
 
-  & .lyric-window-content-container {
+  & .operation-outer-container {
     width: 100%;
-    height: 100%;
-    margin-top: 24px;
+    height: 46px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+
+  & .content-container {
+    width: 100%;
+    height: calc(100% - 60px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -28,11 +41,7 @@
   }
 
 
-  & .lyric-window-operation-container {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
+  & .operation-container {
     height: 28px;
     display: flex;
     align-items: center;

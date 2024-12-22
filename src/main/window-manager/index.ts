@@ -186,10 +186,36 @@ class WindowManager implements IWindowManager {
     }
 
     /**************************** Lyric Window ***************************/
+    private static lyricWindowMinSize: ICommon.ISize = {
+        width: 920,
+        height: 92, // 60 + 16 * 2
+    }
+    private static lyricWindowMaxSize: ICommon.ISize = {
+        width: Infinity,
+        height: 240, // 60 + 80 * 2
+    }
+
+    private formatLyricWindowSize(width?: number, height?: number): ICommon.ISize {
+        return {
+            width: Math.min(Math.max(width ?? Infinity, WindowManager.lyricWindowMinSize.width), WindowManager.lyricWindowMaxSize.width),
+            height: Math.min(Math.max(height ?? Infinity, WindowManager.lyricWindowMinSize.height), WindowManager.lyricWindowMaxSize.height),
+        }
+    }
+
+    private evaluateWindowHeight() {
+        const fontSize = AppConfig.getConfig("lyric.fontSize") || 54;
+        return 60 + fontSize * 2;
+    }
+
     private createLyricWindow() {
-        const width = 920;
-        const height = 160;
         const initPosition = AppConfig.getConfig("private.lyricWindowPosition");
+        const initSize = AppConfig.getConfig("private.lyricWindowSize");
+
+        let {
+            width,
+            height
+        } = this.formatLyricWindowSize(initSize?.width ?? WindowManager.lyricWindowMinSize.width, this.evaluateWindowHeight())
+
         const lyricWindow = new BrowserWindow({
             height,
             width,
@@ -202,12 +228,19 @@ class WindowManager implements IWindowManager {
                 webSecurity: false,
                 sandbox: false,
             },
-            resizable: false,
+            minWidth: WindowManager.lyricWindowMinSize.width,
+            minHeight: WindowManager.lyricWindowMinSize.height,
+            maxHeight: WindowManager.lyricWindowMaxSize.height,
+            resizable: true,
             frame: false,
             skipTaskbar: true,
             alwaysOnTop: true,
             icon: nativeImage.createFromPath(getResourcePath(ResourceName.LOGO_IMAGE)),
         });
+
+        const display = screen.getDisplayNearestPoint(lyricWindow.getBounds());
+        WindowManager.lyricWindowMaxSize.width = display.bounds.width;
+        lyricWindow.setMaximumSize(WindowManager.lyricWindowMaxSize.width, WindowManager.lyricWindowMaxSize.height);
 
         // and load the index.html of the app.
         lyricWindow.loadURL(LRC_WINDOW_WEBPACK_ENTRY);
@@ -219,14 +252,46 @@ class WindowManager implements IWindowManager {
 
         // 设置窗口可拖拽
         WindowDrag.setWindowDraggable(lyricWindow, {
-            width,
-            height,
+            width, // 实际不生效
+            height, // 实际不生效
+            getWindowSize() {
+                return {
+                    width,
+                    height
+                }
+            },
             onDragEnd(point) {
                 AppConfig.setConfig({
                     "private.lyricWindowPosition": point
                 });
+                const currentDisplayBounds =
+                    screen.getDisplayNearestPoint(point).bounds;
+                if (currentDisplayBounds.width !== WindowManager.lyricWindowMaxSize.width) {
+                    WindowManager.lyricWindowMaxSize.width = currentDisplayBounds.width;
+                    lyricWindow.setMaximumSize(WindowManager.lyricWindowMaxSize.width, WindowManager.lyricWindowMaxSize.height);
+                }
             }
         });
+
+        AppConfig.onConfigUpdated((patch, _, from) => {
+            if (from === "renderer") {
+                if (patch["lyric.fontSize"]) {
+                    height = this.evaluateWindowHeight();
+                    lyricWindow.setSize(width, height);
+                }
+            }
+        });
+
+        lyricWindow.on("resize", () => {
+            const [wWidth, wHeight] = lyricWindow.getSize();
+            const fontSize = Math.max(Math.min(Math.floor((height - 60) / 2), 80), 16);
+            AppConfig.setConfig({
+                "lyric.fontSize": fontSize,
+            });
+            width = wWidth;
+            height = wHeight;
+
+        })
 
         // 初始化设置
         lyricWindow.once("ready-to-show", async () => {

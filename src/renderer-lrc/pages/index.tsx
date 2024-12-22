@@ -27,7 +27,7 @@ export default function LyricWindowPage() {
     return (
         <div
             className={classNames({
-                "lyric-window-container": true,
+                "container": true,
                 "lock-lyric": lockLyric,
             })}
             onMouseOver={() => {
@@ -51,81 +51,83 @@ export default function LyricWindowPage() {
                 }
             }}
         >
-            <Condition condition={showOperations}>
-                <div className="lyric-window-operation-container">
-                    <Condition
-                        condition={!lockLyric}
-                        falsy={
+            <div className='operation-outer-container'>
+                <Condition condition={true || showOperations}>
+                    <div className="operation-container">
+                        <Condition
+                            condition={!lockLyric}
+                            falsy={
+                                <div
+                                    className="operation-button"
+                                    onClick={() => {
+                                        AppConfig.setConfig({
+                                            "lyric.lockLyric": false
+                                        })
+                                    }}
+                                    onMouseOver={() => {
+                                        appWindowUtil.ignoreMouseEvent(false);
+                                    }}
+                                    onMouseLeave={() => {
+                                        appWindowUtil.ignoreMouseEvent(true);
+                                    }}
+                                >
+                                    <SvgAsset iconName="lock-open"></SvgAsset>
+                                </div>
+                            }
+                        >
+                            <div
+                                className="operation-button"
+                                onClick={() => {
+                                    messageBus.sendCommand("SkipToPrevious");
+                                }}
+                            >
+                                <SvgAsset iconName="skip-left"></SvgAsset>
+                            </div>
+                            <div
+                                className="operation-button"
+                                onClick={() => {
+                                    if (currentMusic) {
+                                        messageBus.sendCommand("TogglePlayerState");
+                                    }
+                                }}
+                            >
+                                <SvgAsset
+                                    iconName={
+                                        playerState === PlayerState.Playing ? "pause" : "play"
+                                    }
+                                ></SvgAsset>
+                            </div>
+                            <div
+                                className="operation-button"
+                                onClick={() => {
+                                    messageBus.sendCommand("SkipToNext");
+                                }}
+                            >
+                                <SvgAsset iconName="skip-right"></SvgAsset>
+                            </div>
                             <div
                                 className="operation-button"
                                 onClick={() => {
                                     AppConfig.setConfig({
-                                        "lyric.lockLyric": false
-                                    })
-                                }}
-                                onMouseOver={() => {
-                                    appWindowUtil.ignoreMouseEvent(false);
-                                }}
-                                onMouseLeave={() => {
-                                    appWindowUtil.ignoreMouseEvent(true);
+                                        "lyric.lockLyric": true
+                                    });
                                 }}
                             >
-                                <SvgAsset iconName="lock-open"></SvgAsset>
+                                <SvgAsset iconName="lock-closed"></SvgAsset>
                             </div>
-                        }
-                    >
-                        <div
-                            className="operation-button"
-                            onClick={() => {
-                                messageBus.sendCommand("SkipToPrevious");
-                            }}
-                        >
-                            <SvgAsset iconName="skip-left"></SvgAsset>
-                        </div>
-                        <div
-                            className="operation-button"
-                            onClick={() => {
-                                if (currentMusic) {
-                                    messageBus.sendCommand("TogglePlayerState");
-                                }
-                            }}
-                        >
-                            <SvgAsset
-                                iconName={
-                                    playerState === PlayerState.Playing ? "pause" : "play"
-                                }
-                            ></SvgAsset>
-                        </div>
-                        <div
-                            className="operation-button"
-                            onClick={() => {
-                                messageBus.sendCommand("SkipToNext");
-                            }}
-                        >
-                            <SvgAsset iconName="skip-right"></SvgAsset>
-                        </div>
-                        <div
-                            className="operation-button"
-                            onClick={() => {
-                                AppConfig.setConfig({
-                                    "lyric.lockLyric": true
-                                });
-                            }}
-                        >
-                            <SvgAsset iconName="lock-closed"></SvgAsset>
-                        </div>
-                        <div
-                            className="operation-button"
-                            onClick={() => {
-                                appWindowUtil.setLyricWindow(false);
-                            }}
-                        >
-                            <SvgAsset iconName="x-mark"></SvgAsset>
-                        </div>
-                    </Condition>
-                </div>
-            </Condition>
-            <div className="lyric-window-content-container">
+                            <div
+                                className="operation-button"
+                                onClick={() => {
+                                    appWindowUtil.setLyricWindow(false);
+                                }}
+                            >
+                                <SvgAsset iconName="x-mark"></SvgAsset>
+                            </div>
+                        </Condition>
+                    </div>
+                </Condition>
+            </div>
+            <div className="content-container">
                 <LyricContent></LyricContent>
             </div>
         </div>

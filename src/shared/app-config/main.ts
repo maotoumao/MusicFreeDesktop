@@ -14,7 +14,7 @@ class AppConfig {
     private windowManager: IWindowManager;
     private config: IAppConfig;
 
-    private onAppConfigUpdatedCallbacks = new Set<(patch: IAppConfig, config: IAppConfig) => void>();
+    private onAppConfigUpdatedCallbacks = new Set<(patch: IAppConfig, config: IAppConfig, from: "main" | "renderer") => void>();
 
     get configPath() {
         if (!this._configPath) {
@@ -68,11 +68,11 @@ class AppConfig {
             /**
              * data: {key: value}
              */
-            this.setConfig(data);
+            this._setConfig(data, "renderer");
         })
     }
 
-    public onConfigUpdated(callback: (patch: IAppConfig, config: IAppConfig) => void) {
+    public onConfigUpdated(callback: (patch: IAppConfig, config: IAppConfig, from: "main" | "renderer") => void) {
         this.onAppConfigUpdatedCallbacks.add(callback);
     }
 
@@ -183,6 +183,10 @@ class AppConfig {
     }
 
     public setConfig(data: IAppConfig) {
+        this._setConfig(data, "main");
+    }
+
+    private _setConfig(data: IAppConfig, from: "main" | "renderer") {
         try {
             // 1. Merge old one
             this.config = {..._defaultAppConfig, ...this.config, ...data};
@@ -195,7 +199,7 @@ class AppConfig {
             })
 
             this.onAppConfigUpdatedCallbacks.forEach((callback) => {
-                callback(data, this.config);
+                callback(data, this.config, from);
             })
 
         } catch (e) {

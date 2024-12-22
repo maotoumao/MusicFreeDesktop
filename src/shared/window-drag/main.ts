@@ -2,11 +2,9 @@
  * https://github.com/electron/electron/issues/1354#issuecomment-1356330873
  */
 
-import {BrowserWindow, ipcMain, ipcRenderer} from "electron";
-import {IWindowManager} from "@/types/main/window-manager";
+import {BrowserWindow, ipcMain } from "electron";
 import * as process from "node:process";
 import debounce from "@/common/debounce";
-import {ICommon} from "music-metadata/lib/aiff/AiffToken";
 
 const WM_MOUSEMOVE = 0x0200; // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove
 const WM_LBUTTONUP = 0x0202; // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup
@@ -16,6 +14,7 @@ const MK_LBUTTON = 0x0001;
 interface IDragOptions {
     width: number;
     height: number;
+    getWindowSize?: () => ICommon.ISize;
     onDragEnd: (position: ICommon.IPoint | null) => void;
 }
 
@@ -23,7 +22,7 @@ const makeWin32WindowFullyDraggable = (
     browserWindow: BrowserWindow,
     options: IDragOptions
 ): void => {
-    const {height, width, onDragEnd} = options;
+    const {height, width, getWindowSize, onDragEnd} = options;
     const initialPos = {
         x: 0,
         y: 0,
@@ -59,10 +58,19 @@ const makeWin32WindowFullyDraggable = (
             const y = lParam.readInt16LE(2);
             if (!dragging) {
                 dragging = true;
+
+                let initWidth = width;
+                let initHeight = height;
+                if (getWindowSize) {
+                    const size = getWindowSize();
+                    initWidth = size.width;
+                    initHeight = size.height;
+                }
+
                 initialPos.x = x;
                 initialPos.y = y;
-                initialPos.height = height;
-                initialPos.width = width;
+                initialPos.height = initHeight;
+                initialPos.width = initWidth;
                 return;
             }
 
@@ -89,11 +97,18 @@ class WindowDrag {
             const window = BrowserWindow.fromWebContents(_evt.sender)
             if (this.registeredWindows.has(window)) {
                 const metadata = this.registeredWindows.get(window);
+                let width = metadata.width;
+                let height = metadata.height;
+                if (metadata.getWindowSize) {
+                    const size = metadata.getWindowSize();
+                    width = size.width;
+                    height = size.height;
+                }
                 window.setBounds({
                     x: position.x,
                     y: position.y,
-                    height: metadata.height,
-                    width: metadata.width
+                    height: height,
+                    width: width
                 });
                 metadata.onDragEnd?.(position);
             }
