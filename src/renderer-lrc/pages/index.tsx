@@ -137,6 +137,8 @@ export default function LyricWindowPage() {
 function LyricContent() {
     const currentMusic = useAppStatePartial("musicItem");
     const currentLyric = useAppStatePartial("parsedLrc");
+    const currentFullLyric = useAppStatePartial("fullLyric");
+    const currentProgress = useAppStatePartial("progress");
 
     const fontDataConfig = useAppConfig("lyric.fontData");
     const fontSizeConfig = useAppConfig("lyric.fontSize");

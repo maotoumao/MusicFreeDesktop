@@ -76,6 +76,10 @@ class AppConfig {
         this.onAppConfigUpdatedCallbacks.add(callback);
     }
 
+    public offConfigUpdated(callback: (patch: IAppConfig, config: IAppConfig, from: "main" | "renderer") => void) {
+        this.onAppConfigUpdatedCallbacks.delete(callback);
+    }
+
     async migrateOldVersionConfig() {
         if (this.config["$schema-version"] >= 0) {
             return;
