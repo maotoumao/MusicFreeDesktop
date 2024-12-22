@@ -52,7 +52,7 @@ export default function LyricWindowPage() {
             }}
         >
             <div className='operation-outer-container'>
-                <Condition condition={true || showOperations}>
+                <Condition condition={showOperations}>
                     <div className="operation-container">
                         <Condition
                             condition={!lockLyric}
