@@ -93,6 +93,7 @@ interface _IAppConfig {
     "localMusic.watchDir": string[];
 
     /** 不需要用户配置的数据 */
+    "private.mainWindowSize": ICommon.ISize;
     "private.lyricWindowPosition": ICommon.IPoint;
     "private.lyricWindowSize": ICommon.ISize;
 
