@@ -5,7 +5,6 @@ import path from "path";
 import "electron-log/preload";
 import "@shared/i18n/preload";
 import "@shared/global-context/preload";
-import "@shared/app-db/preload";
 import "@shared/themepack/preload";
 import "@shared/app-config/preload";
 import "@shared/utils/preload";
