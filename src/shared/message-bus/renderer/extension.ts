@@ -45,7 +45,9 @@ export function useAppStatePartial<K extends keyof IAppState>(key: K) {
 
 const messageBus = {
     sendCommand: mod.sendCommand,
-    subscribeAppState: mod.subscribeAppState
+    subscribeAppState: mod.subscribeAppState,
+    onStateChange: mod.onStateChange,
+    offStateChange: mod.offStateChange,
 }
 
 export default messageBus;

@@ -1,6 +1,6 @@
 import "./index.scss";
 import classNames from "@/renderer/utils/classnames";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import {PlayerState} from "@/common/constant";
@@ -9,6 +9,7 @@ import useAppConfig from "@/hooks/useAppConfig";
 import {appWindowUtil} from "@shared/utils/renderer";
 import AppConfig from "@shared/app-config/renderer";
 import messageBus, {useAppStatePartial} from "@shared/message-bus/renderer/extension";
+import {IAppState} from "@shared/message-bus/type";
 
 export default function LyricWindowPage() {
     const currentMusic = useAppStatePartial("musicItem");
@@ -138,12 +139,13 @@ function LyricContent() {
     const currentMusic = useAppStatePartial("musicItem");
     const currentLyric = useAppStatePartial("parsedLrc");
     const currentFullLyric = useAppStatePartial("fullLyric");
-    const currentProgress = useAppStatePartial("progress");
 
     const fontDataConfig = useAppConfig("lyric.fontData");
     const fontSizeConfig = useAppConfig("lyric.fontSize");
     const fontColorConfig = useAppConfig("lyric.fontColor");
     const fontStrokeConfig = useAppConfig("lyric.strokeColor");
+
+    const [enableTransition, setEnableTransition] = useState(false);
 
     const textWidth = useMemo(() => {
         if (currentLyric?.lrc) {
@@ -160,6 +162,50 @@ function LyricContent() {
         return 0;
     }, [currentLyric, fontDataConfig, fontSizeConfig, currentMusic]);
 
+    const [left, setLeft] = useState(null);
+
+    useLayoutEffect(() => {
+        if (textWidth > window.innerWidth) {
+            setEnableTransition(false);
+            setLeft(0);
+        } else {
+            setLeft(null);
+        }
+    }, [textWidth]);
+
+    useLayoutEffect(() => {
+        const callback = (_: any, patch: IAppState) => {
+            if (!patch.progress) {
+                return;
+            }
+            if (textWidth > window.innerWidth) {
+                if (currentLyric && currentLyric.index > -1 && currentFullLyric) {
+                    const nextLyric = currentFullLyric[currentLyric.index + 1];
+                    if (nextLyric && (nextLyric.time > currentLyric.time)) {
+                        const diff = nextLyric.time - currentLyric.time;
+                        const virtualPointer = (patch.progress - currentLyric.time) / diff * textWidth;
+                        if (virtualPointer > window.innerWidth * 0.5) {
+                            setEnableTransition(true);
+                            setLeft(-Math.min((virtualPointer - window.innerWidth * 0.5) * 1.1, textWidth - window.innerWidth));
+                            return;
+                        }
+                    }
+                }
+                setEnableTransition(false);
+                setLeft(0);
+            } else {
+                setEnableTransition(false);
+                setLeft(null);
+            }
+        };
+        messageBus.onStateChange(callback);
+
+        return () => {
+            messageBus.offStateChange(callback);
+        }
+
+    }, [textWidth, currentFullLyric, currentLyric]);
+
 
     return (
         <div
@@ -169,7 +215,8 @@ function LyricContent() {
                 WebkitTextStrokeColor: fontStrokeConfig,
                 fontSize: fontSizeConfig,
                 fontFamily: fontDataConfig?.family || undefined,
-                left: textWidth > window.innerWidth ? 0 : undefined,
+                left: left,
+                transition: enableTransition ? "left 900ms linear" : "none",
             }}
         >
             {currentLyric?.lrc ??
