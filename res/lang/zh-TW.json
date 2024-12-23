@@ -363,7 +363,7 @@
       "already_latest": "已是最新版本！",
       "check_update": "檢查更新",
       "software_author": "軟件作者：",
-      "open_source_declaration": "源碼：軟件是基於 GPL3.0 授權的開源軟件。<Github>Github 地址</Github> <Gitee>Gitee 地址</Gitee>",
+      "open_source_declaration": "源碼：軟件是基於 AGPL3.0 授權的開源軟件。<Github>Github 地址</Github> <Gitee>Gitee 地址</Gitee>",
       "official_site": "官方網站",
       "mobile_version": "移動版"
     }

@@ -363,7 +363,7 @@
       "already_latest": "Already up to date!",
       "check_update": "Check for Update",
       "software_author": "Software Author: ",
-      "open_source_declaration": "Source Code: Software is open-source under GPL3.0 license. <Github>Github Link</Github> <Gitee>Gitee Link</Gitee>",
+      "open_source_declaration": "Source Code: Software is open-source under AGPL3.0 license. <Github>Github Link</Github> <Gitee>Gitee Link</Gitee>",
       "official_site": "Official Website",
       "mobile_version": "Mobile Version"
     }

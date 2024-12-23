@@ -363,7 +363,7 @@
       "already_latest": "当前已是最新版本!",
       "check_update": "检查更新",
       "software_author": "软件作者: ",
-      "open_source_declaration": "源代码: 软件基于 GPL3.0 协议开源.  <Github>Github地址</Github>  <Gitee>Gitee地址</Gitee>",
+      "open_source_declaration": "源代码: 软件基于 AGPL3.0 协议开源.  <Github>Github地址</Github>  <Gitee>Gitee地址</Gitee>",
       "official_site": "软件官网",
       "mobile_version": "移动版"
     }
