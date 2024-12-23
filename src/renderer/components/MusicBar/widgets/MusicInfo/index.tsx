@@ -79,6 +79,18 @@ export default function MusicInfo() {
             </div>
             <div data-detail-shown={musicDetailShown}
                  className="music-info-content-container music-info-operations-container">
+                <div
+                    className="open-detail"
+                    role="button"
+                    title={musicDetailShown ? t("music_bar.close_music_detail_page") : t("music_bar.open_music_detail_page")}
+                    onClick={toggleMusicDetail}
+                >
+                    <SvgAsset
+                        iconName={
+                            musicDetailShown ? "chevron-double-down" : "chevron-double-up"
+                        }
+                    ></SvgAsset>
+                </div>
                 <MusicFavorite musicItem={musicItem} size={22}></MusicFavorite>
                 <MusicDownloaded musicItem={musicItem} size={22}></MusicDownloaded>
                 <div role="button"
