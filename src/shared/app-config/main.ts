@@ -48,7 +48,7 @@ class AppConfig {
                 throw new Error("Not a valid path");
             }
         } catch {
-            await fs.writeFile(this.configPath, "{}", "utf-8");
+            await fs.writeFile(this.configPath, JSON.stringify(_defaultAppConfig, undefined, 4), "utf-8");
         }
     }
 
@@ -88,7 +88,6 @@ class AppConfig {
         try {
             const oldConfig = this.config as any;
             const newConfig = {
-                ..._defaultAppConfig,
                 "normal.closeBehavior": oldConfig.normal?.closeBehavior === "exit" ? "exit_app" : oldConfig.normal?.closeBehavior,
                 "normal.maxHistoryLength": oldConfig.normal?.maxHistoryLength,
                 "normal.checkUpdate": oldConfig.normal?.checkUpdate,
@@ -157,12 +156,16 @@ class AppConfig {
     async loadConfig() {
         try {
             if (this.config) {
-                return this.config;
+                return {..._defaultAppConfig, ...this.config};
             } else {
                 const rawConfig = await fs.readFile(this.configPath, "utf8");
                 this.config = JSON.parse(rawConfig);
                 // 升级旧版设置
                 await this.migrateOldVersionConfig();
+                this.config = {
+                    ..._defaultAppConfig,
+                    ...this.config,
+                }
             }
         } catch (e) {
             if (e.message === "Unexpected end of JSON input" || e.code === "EISDIR") {
