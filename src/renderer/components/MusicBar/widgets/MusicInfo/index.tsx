@@ -94,7 +94,7 @@ export default function MusicInfo() {
                 <MusicFavorite musicItem={musicItem} size={22}></MusicFavorite>
                 <MusicDownloaded musicItem={musicItem} size={22}></MusicDownloaded>
                 <div role="button"
-                     data-disabled={!PluginManager.isSupportFeatureMethod(musicItem.platform, "getMusicComments")}
+                     data-disabled={!PluginManager.isSupportFeatureMethod(musicItem?.platform, "getMusicComments")}
                      onClick={() => {
                          showPanel("MusicComment", {
                              musicItem: musicItem,

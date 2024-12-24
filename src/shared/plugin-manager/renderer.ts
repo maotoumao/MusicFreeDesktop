@@ -89,6 +89,9 @@ function getPluginByPlatform(platform: string) {
 }
 
 function isSupportFeatureMethod(platform: string, featureMethod: keyof IPlugin.IPluginInstanceMethods) {
+    if (!platform) {
+        return false;
+    }
     return delegatePluginsStore.getValue().find((item) => item.platform === platform)?.supportedMethod?.includes?.(featureMethod) ?? false;
 }
 

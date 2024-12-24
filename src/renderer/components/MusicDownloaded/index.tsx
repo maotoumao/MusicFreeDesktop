@@ -43,8 +43,8 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
       }
       onClick={() => {
         if (
-          downloadState === DownloadState.NONE ||
-          downloadState === DownloadState.ERROR
+          musicItem && (downloadState === DownloadState.NONE ||
+                downloadState === DownloadState.ERROR)
         ) {
           Downloader.startDownload(musicItem);
         }
