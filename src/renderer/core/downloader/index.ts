@@ -69,6 +69,9 @@ const downloadingQueue = new PQueue({
 });
 
 function setDownloadingConcurrency(concurrency: number) {
+  if (isNaN(concurrency)) {
+    return;
+  }
   downloadingQueue.concurrency = Math.min(
     concurrency < 1 ? 1 : concurrency,
     concurrencyLimit

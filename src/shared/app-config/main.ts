@@ -87,7 +87,7 @@ class AppConfig {
         // 1. 升级到v1
         try {
             const oldConfig = this.config as any;
-            const newConfig = {
+            const newConfig: any = {
                 "normal.closeBehavior": oldConfig.normal?.closeBehavior === "exit" ? "exit_app" : oldConfig.normal?.closeBehavior,
                 "normal.maxHistoryLength": oldConfig.normal?.maxHistoryLength,
                 "normal.checkUpdate": oldConfig.normal?.checkUpdate,
@@ -146,6 +146,12 @@ class AppConfig {
                 "private.minimode": oldConfig.private?.minimode,
             }
             this.config = newConfig;
+            for (const k in _defaultAppConfig) {
+                if (newConfig[k] === null || newConfig[k] === undefined) {
+                    // @ts-ignore
+                    newConfig[k] = _defaultAppConfig[k];
+                }
+            }
             const rawConfig = JSON.stringify(newConfig, undefined, 4);
             originalFs.writeFileSync(this.configPath, rawConfig, "utf-8");
         } catch (e) {
