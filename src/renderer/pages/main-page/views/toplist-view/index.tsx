@@ -1,7 +1,6 @@
 import Condition from "@/renderer/components/Condition";
 import MusicSheetlikeItem from "@/renderer/components/MusicSheetlikeItem";
 import { Tab } from "@headlessui/react";
-import { getSortedSupportedPlugin } from "@/renderer/core/plugin-delegate";
 import { pluginsTopListStore } from "./store";
 import { RequestStateCode } from "@/common/constant";
 import Loading from "@/renderer/components/Loading";
@@ -13,9 +12,10 @@ import Empty from "@/renderer/components/Empty";
 import { useTranslation } from "react-i18next";
 
 import "./index.scss";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function ToplistView() {
-  const availablePlugins = getSortedSupportedPlugin("getTopLists");
+  const availablePlugins = PluginManager.getSortedSupportedPlugin("getTopLists");
   const navigate = useNavigate();
   const { t } = useTranslation();
 

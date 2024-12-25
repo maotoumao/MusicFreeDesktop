@@ -1,6 +1,6 @@
 .components--panel-base {
   position: absolute;
-  z-index: 999;
+  z-index: 10000;
   top: 0;
   left: 0;
   right: 0;
@@ -10,6 +10,10 @@
   justify-content: flex-end;
   background-color: var(--maskColor);
   cursor: default !important;
+
+  &[data-cover-header=true] {
+    top: calc(-1 * var(--appHeaderHeight));
+  }
 
   & .components--panel-base-content {
     border-top-left-radius: 8px;

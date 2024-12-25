@@ -1,40 +1,61 @@
-import objectPath from "object-path";
-import { ipcRendererInvoke, ipcRendererOn } from "@/shared/ipc/renderer";
-import Store from "../../common/store";
-import { IAppConfig, IAppConfigKeyPath, IAppConfigKeyPathValue } from "./type";
-import defaultAppConfig from "./internal/default-app-config";
+import {IAppConfig} from "@/types/app-config";
+import _defaultAppConfig from "@shared/app-config/default-app-config";
 
-const appConfigStore = new Store<IAppConfig>({});
 
-export async function setupRendererAppConfig() {
-  ipcRendererOn("sync-app-config", (config) => {
-    appConfigStore.setValue(config);
-  });
+interface IMod {
+    syncConfig(): Promise<IAppConfig>;
 
-  const appConfig = await ipcRendererInvoke("sync-app-config", undefined);
-  appConfigStore.setValue(appConfig);
+    setConfig(config: IAppConfig): void;
+
+    onConfigUpdate(callback: (config: IAppConfig) => void): void;
 }
 
-export function getAppConfigPath<K extends IAppConfigKeyPath>(
-  keyPath: K
-): IAppConfigKeyPathValue<K> {
-  const value = appConfigStore.getValue();
-  return objectPath.get(value, keyPath) ?? defaultAppConfig[keyPath];
+const mod = window["@shared/app-config" as any] as unknown as IMod
+
+class AppConfig {
+    private config: IAppConfig = {};
+
+    public initialized = false;
+
+    private updateCallbacks: Set<(patch: IAppConfig, config: IAppConfig) => void> = new Set();
+
+    private notifyCallbacks(patch: IAppConfig) {
+        for (const callback of this.updateCallbacks) {
+            callback(patch, this.config);
+        }
+    }
+
+    async setup() {
+        this.initialized = true;
+        this.config = await mod.syncConfig();
+        this.notifyCallbacks(this.config);
+
+        mod.onConfigUpdate((patch) => {
+            this.config = {..._defaultAppConfig, ...this.config, ...patch};
+            this.notifyCallbacks(patch);
+        })
+    }
+
+    public onConfigUpdate(callback: (patch: IAppConfig, config: IAppConfig) => void) {
+        this.updateCallbacks.add(callback);
+    }
+
+    public offConfigUpdate(callback: (patch: IAppConfig, config: IAppConfig) => void) {
+        this.updateCallbacks.delete(callback);
+    }
+
+    public getAllConfig() {
+        return this.config;
+    }
+
+    public getConfig<T extends keyof IAppConfig>(key: T): IAppConfig[T] {
+        return this.config[key];
+    }
+
+    public setConfig(data: IAppConfig) {
+        mod.setConfig(data);
+    }
+
 }
 
-export async function setAppConfigPath<K extends IAppConfigKeyPath>(
-  keyPath: K,
-  value: IAppConfigKeyPathValue<K>
-): Promise<boolean> {
-  return ipcRendererInvoke("set-app-config-path", {
-    keyPath,
-    value,
-  });
-}
-
-export async function setAppConfig(appConfig: IAppConfig) {
-  return ipcRendererInvoke("set-app-config", appConfig);
-}
-
-export const getAppConfig = appConfigStore.getValue;
-export const useAppConfig = appConfigStore.useValue;
+export default new AppConfig();

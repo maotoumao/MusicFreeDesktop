@@ -1,6 +1,6 @@
 import Store from "@/common/store";
 import templates from "./templates";
-import { useMemo } from "react";
+import {useMemo} from "react";
 
 type ITemplate = typeof templates;
 type IPanelType = keyof ITemplate;
@@ -18,15 +18,13 @@ const panelStore = new Store<IPanelInfo>({
 export default function PanelComponent() {
   const modalState = panelStore.useValue();
 
-  const component = useMemo(() => {
+  return useMemo(() => {
     if (modalState.type) {
       const Component = templates[modalState.type];
       return <Component {...(modalState.payload ?? {})}></Component>;
     }
     return null;
   }, [modalState]);
-
-  return component;
 }
 
 export function showPanel<T extends keyof ITemplate>(

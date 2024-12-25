@@ -1,6 +1,6 @@
 import { RequestStateCode } from "@/common/constant";
-import { callPluginDelegateMethod } from "@/renderer/core/plugin-delegate";
 import { useEffect, useRef, useState } from "react";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function useTopListDetail(
   topListItem: IMusic.IMusicSheetItem | null,
@@ -21,7 +21,7 @@ export default function useTopListDetail(
       } else {
         setRequestState(RequestStateCode.PENDING_REST_PAGE);
       }
-      const result = await callPluginDelegateMethod({platform}, "getTopListDetail", topListItem, pageRef.current);
+      const result = await PluginManager.callPluginDelegateMethod({platform}, "getTopListDetail", topListItem, pageRef.current);
       if (!result) {
         throw new Error();
       }
@@ -33,7 +33,7 @@ export default function useTopListDetail(
       }))
 
       if (!result.isEnd) {
-        setRequestState(RequestStateCode.IDLE);
+        setRequestState(RequestStateCode.PARTLY_DONE);
       } else {
         setRequestState(RequestStateCode.FINISHED);
       }

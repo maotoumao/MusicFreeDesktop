@@ -8,7 +8,8 @@ import { hideModal, showModal } from "@/renderer/components/Modal";
 import { localPluginName } from "@/common/constant";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
 import { useTranslation } from "react-i18next";
-import { useSupportedPlugin } from "@/renderer/core/plugin-delegate";
+import {useSupportedPlugin} from "@shared/plugin-manager/renderer";
+
 
 export default function MySheets() {
   const sheetIdMatch = useMatch(
@@ -61,7 +62,7 @@ export default function MySheets() {
               }
               onClick={() => {
                 currentSheetId !== item.id &&
-                  navigate(`/main/musicsheet/${localPluginName}/${item.id}`);
+                  navigate(`/main/musicsheet/${encodeURIComponent(localPluginName)}/${encodeURIComponent(item.id)}`);
               }}
               onContextMenu={(e) => {
                 if (item.id === defaultSheet.id) {
@@ -100,7 +101,7 @@ export default function MySheets() {
                         MusicSheet.frontend.removeSheet(item.id).then(() => {
                           if (currentSheetId === item.id) {
                             navigate(
-                              `/main/musicsheet/${localPluginName}/${defaultSheet.id}`,
+                              `/main/musicsheet/${encodeURIComponent(localPluginName)}/${defaultSheet.id}`,
                               {
                                 replace: true,
                               }

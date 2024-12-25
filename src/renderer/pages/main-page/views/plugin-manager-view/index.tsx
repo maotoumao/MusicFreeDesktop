@@ -2,10 +2,11 @@ import { hideModal, showModal } from "@/renderer/components/Modal";
 import PluginTable from "./components/plugin-table";
 import "./index.scss";
 import { getUserPreference } from "@/renderer/utils/user-perference";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import A from "@/renderer/components/A";
 import { Trans, useTranslation } from "react-i18next";
+import {dialogUtil} from "@shared/utils/renderer";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function PluginManagerView() {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export default function PluginManagerView() {
             data-type="normalButton"
             onClick={async () => {
               try {
-                const result = await ipcRendererInvoke("show-open-dialog", {
+                const result = await dialogUtil.showOpenDialog({
                   title: t("plugin_management_page.choose_plugin"),
                   buttonLabel: t("plugin_management_page.install"),
                   filters: [
@@ -38,10 +39,7 @@ export default function PluginManagerView() {
                 if (result.canceled) {
                   return;
                 }
-                await ipcRendererInvoke(
-                  "install-plugin-local",
-                  result.filePaths[0]
-                );
+                await PluginManager.installPluginFromLocal(result.filePaths[0]);
                 toast.success(t("plugin_management_page.install_successfully"));
               } catch (e) {
                 toast.warn(
@@ -71,7 +69,7 @@ export default function PluginManagerView() {
                     text.trim().endsWith(".json") ||
                     text.trim().endsWith(".js")
                   ) {
-                    return ipcRendererInvoke("install-plugin-remote", text);
+                    return PluginManager.installPluginFromRemote(text);
                   } else {
                     throw new Error(
                       t(
@@ -97,7 +95,7 @@ export default function PluginManagerView() {
                   <Trans
                     i18nKey={"plugin_management_page.info_hint_install_plugin"}
                     components={{
-                      a: <A href="https://musicfree.upup.fun"></A>,
+                      a: <A href="https://musicfree.catcat.work"></A>,
                     }}
                   ></Trans>,
                 ],
@@ -160,10 +158,7 @@ export default function PluginManagerView() {
 
               if (subscription?.length) {
                 for (let i = 0; i < subscription.length; ++i) {
-                  await ipcRendererInvoke(
-                    "install-plugin-remote",
-                    subscription[i].srcUrl
-                  );
+                  await PluginManager.installPluginFromRemote(subscription[i].srcUrl)
                 }
                 toast.success(t("plugin_management_page.update_successfully"));
               } else {

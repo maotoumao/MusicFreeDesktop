@@ -4,10 +4,10 @@ import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import useSearchLyric from "./hooks/useSearchLyric";
 import searchResultStore from "./hooks/searchResultStore";
-import { getSearchablePlugins } from "@/renderer/core/plugin-delegate";
 import { Tab } from "@headlessui/react";
 import SearchResult from "./searchResult";
 import { useTranslation } from "react-i18next";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 interface IProps {
   defaultTitle?: string;
@@ -24,7 +24,7 @@ export default function SearchLyric(props: IProps) {
   const searchResults = searchResultStore.useValue();
   const { t } = useTranslation();
 
-  const availablePlugins = getSearchablePlugins("lyric");
+  const availablePlugins = PluginManager.getSearchablePlugins("lyric");
 
   useEffect(() => {
     if (inputSearch) {

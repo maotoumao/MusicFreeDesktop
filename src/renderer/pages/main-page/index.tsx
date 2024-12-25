@@ -3,7 +3,6 @@ import SideBar from "./components/SideBar";
 import PluginManagerView from "./views/plugin-manager-view";
 import MusicSheetView from "./views/music-sheet-view";
 import SearchView from "./views/search-view";
-import MusicDetail from "@/renderer/components/MusicDetail";
 import AlbumView from "./views/album-view";
 import ArtistView from "./views/artist-view";
 import ToplistView from "./views/toplist-view";
@@ -62,7 +61,6 @@ export default function MainPage() {
         ></Route>
         <Route path="*" element={<Empty></Empty>}></Route>
       </Routes>
-      <MusicDetail></MusicDetail>
     </>
   );
 }

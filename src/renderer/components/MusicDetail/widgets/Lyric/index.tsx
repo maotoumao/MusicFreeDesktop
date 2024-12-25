@@ -1,4 +1,3 @@
-import trackPlayer from "@/renderer/core/track-player";
 import "./index.scss";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
@@ -9,20 +8,19 @@ import {
   setUserPreference,
   useUserPreference,
 } from "@/renderer/utils/user-perference";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import { showModal } from "@/renderer/components/Modal";
-import { getCurrentMusic } from "@/renderer/core/track-player/player";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import LyricParser from "@/renderer/utils/lyric-parser";
 import { getLinkedLyric, unlinkLyric } from "@/renderer/core/link-lyric";
-import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
-import trackPlayerEventsEmitter from "@/renderer/core/track-player/event";
-import { TrackPlayerEvent } from "@/renderer/core/track-player/enum";
+import { getMediaPrimaryKey } from "@/common/media-util";
 import { useTranslation } from "react-i18next";
+import {useLyric} from "@renderer/core/track-player/hooks";
+import trackPlayer from "@renderer/core/track-player";
+import {dialogUtil, fsUtil} from "@shared/utils/renderer";
 
 export default function Lyric() {
-  const lyricContext = trackPlayer.useLyric();
+  const lyricContext = useLyric();
   const lyricParser = lyricContext?.parser;
   const currentLrc = lyricContext?.currentLrc;
 
@@ -121,9 +119,10 @@ export default function Lyric() {
                     className="lyric-item search-lyric"
                     role="button"
                     onClick={() => {
+                        const currentMusic = trackPlayer.currentMusic;
                       showModal("SearchLyric", {
-                        defaultTitle: getCurrentMusic()?.title,
-                        musicItem: getCurrentMusic(),
+                        defaultTitle: currentMusic?.title,
+                        musicItem: currentMusic,
                       });
                     }}
                   >
@@ -184,7 +183,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
   const { t } = useTranslation();
 
   const currentMusicRef = useRef<IMusic.IMusicItem>(
-    getCurrentMusic() ?? ({} as any)
+    trackPlayer.currentMusic ?? ({} as any)
   );
 
   useEffect(() => {
@@ -218,7 +217,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
     }
 
     try {
-      const result = await ipcRendererInvoke("show-save-dialog", {
+      const result = await dialogUtil.showSaveDialog({
         title: t("music_detail.lyric_ctx_download_lyric"),
         defaultPath:
           currentMusicRef.current.title +
@@ -231,7 +230,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
         ],
       });
       if (!result.canceled && result.filePath) {
-        await window.fs.writeFile(result.filePath, rawLrc, "utf-8");
+        await fsUtil.writeFile(result.filePath, rawLrc, "utf-8");
         toast.success(t("music_detail.lyric_ctx_download_success"));
       } else {
         throw new Error();
@@ -361,14 +360,13 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
         onClick={async () => {
           try {
             await unlinkLyric(currentMusicRef.current);
-            if (isSameMedia(currentMusicRef.current, getCurrentMusic())) {
-              trackPlayerEventsEmitter.emit(
-                TrackPlayerEvent.NeedRefreshLyric,
-                true
-              );
+            if (trackPlayer.isCurrentMusic(currentMusicRef.current)) {
+                trackPlayer.fetchCurrentLyric(true);
             }
             toast.success(t("music_detail.toast_media_lyric_unlinked"));
-          } catch {}
+          } catch {
+              // pass
+          }
         }}
       >
         {t("music_detail.unlink_media_lyric")}

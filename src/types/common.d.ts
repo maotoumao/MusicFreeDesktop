@@ -22,6 +22,11 @@ declare namespace ICommon {
     y: number;
   }
 
+  interface ISize {
+    width: number;
+    height: number;
+  }
+
   interface IThemePack {
     id?: string;
     /** 主题 */

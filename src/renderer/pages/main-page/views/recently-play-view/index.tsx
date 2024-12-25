@@ -27,6 +27,8 @@ export default function RecentlyPlayView() {
     </>
   );
 
+  console.log(recentlyPlaylistSheet);
+
   return (
     <div id="page-container" className="page-container">
       <MusicSheetlikeView

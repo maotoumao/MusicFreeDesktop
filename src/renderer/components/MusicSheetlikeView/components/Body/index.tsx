@@ -4,12 +4,12 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import { ReactNode, useEffect, useState, useTransition } from "react";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
-import trackPlayer from "@/renderer/core/track-player";
+import trackPlayer from "@renderer/core/track-player";
 import { showModal } from "@/renderer/components/Modal";
 import { RequestStateCode, localPluginName } from "@/common/constant";
 import { offsetHeightStore } from "../../store";
 import MusicSheet from "@/renderer/core/music-sheet";
-import { getAppConfigPath } from "@/shared/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import { useTranslation } from "react-i18next";
 
 interface IProps {
@@ -34,7 +34,7 @@ export default function Body(props: IProps) {
       setFilterMusicList(null);
     } else {
       startTransition(() => {
-        const caseSensitive = getAppConfigPath(
+        const caseSensitive = AppConfig.getConfig(
           "playMusic.caseSensitiveInSearch"
         );
         if (caseSensitive) {
@@ -110,7 +110,7 @@ export default function Body(props: IProps) {
             value={inputSearch}
             className="search-in-music-list"
           ></input>
-          <SvgAsset iconName="magnifying-glass" size={16}></SvgAsset>
+          <SvgAsset iconName="magnifying-glass"></SvgAsset>
         </div>
       </div>
       <Condition

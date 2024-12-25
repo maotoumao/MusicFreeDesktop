@@ -2,7 +2,7 @@ import { produce } from "immer";
 import { useCallback } from "react";
 import { RequestStateCode } from "@/common/constant";
 import { queryResultStore } from "../store";
-import { callPluginDelegateMethod } from "@/renderer/core/plugin-delegate";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 const setQueryResults = queryResultStore.setValue;
 
@@ -33,7 +33,7 @@ export default function useQueryArtist() {
                 : RequestStateCode.PENDING_REST_PAGE;
           })
         );
-        const result = await callPluginDelegateMethod(
+        const result = await PluginManager.callPluginDelegateMethod(
           artist,
           "getArtistWorks",
           artist,

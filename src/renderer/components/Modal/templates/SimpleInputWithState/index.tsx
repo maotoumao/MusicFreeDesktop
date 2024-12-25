@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import "./index.scss";
 import Base from "../Base";
-import useMounted from "@/renderer/hooks/useMounted";
+import useMounted from "@/hooks/useMounted";
 import Condition from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
 import { useTranslation } from "react-i18next";

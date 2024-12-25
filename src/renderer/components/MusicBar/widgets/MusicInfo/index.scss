@@ -1,10 +1,52 @@
+$width: 290px;
+
+.music-info-outer-container {
+  width: $width;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.music-info-content-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+
+  &[data-detail-shown="true"] {
+    transform: translateY(-100%);
+  }
+}
+
+.music-info-operations-container {
+  box-sizing: border-box;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+
+  & div[role='button'] {
+    width: 22px;
+    height: 22px;
+  }
+
+  & .music-info-operation-divider {
+    height: 40%;
+    width: 1px;
+    background: var(--dividerColor);
+  }
+}
+
 // 左边的信息区域
 .music-info-container {
   box-sizing: border-box;
   position: relative;
   display: flex;
   align-items: center;
-  width: 290px;
+  width: $width;
   height: 48px;
   /* border-right: 1px solid var(--dividerColor); */
   padding-left: 10px;
@@ -49,9 +91,8 @@
     justify-content: space-around;
     margin-left: 10px;
     width: 226px;
-    padding: 8px 0;
     height: 48px;
-    padding-right: 8px;
+    padding: 8px 8px 8px 0;
     font-size: 1rem;
 
     & .music-title {

@@ -59,6 +59,15 @@
         justify-content: center;
         overflow: hidden;
         color: white;
+
+        & span {
+          // 最多两行
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
 
       & .options-container {

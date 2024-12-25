@@ -1,40 +1,55 @@
-import Evt from "@renderer/core/events";
 import AnimatedDiv from "../AnimatedDiv";
 import "./index.scss";
 import albumImg from "@/assets/imgs/album-cover.jpg";
-import { useCurrentMusic } from "@/renderer/core/track-player/player";
-import Store from "@/common/store";
 import Tag from "../Tag";
-import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
+import {setFallbackAlbum} from "@/renderer/utils/img-on-error";
+import Header from "./widgets/Header";
 import Lyric from "./widgets/Lyric";
-import SvgAsset from "../SvgAsset";
 import Condition from "../Condition";
-import { useTranslation } from "react-i18next";
-
-export const musicDetailShownStore = new Store(false);
+import {useTranslation} from "react-i18next";
+import {useCurrentMusic} from "@renderer/core/track-player/hooks";
+import {useEffect} from "react";
+import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
 
 export const isMusicDetailShown = musicDetailShownStore.getValue;
+export const useMusicDetailShown = musicDetailShownStore.useValue;
 
-export default function () {
+function MusicDetail() {
   const musicItem = useCurrentMusic();
   const musicDetailShown = musicDetailShownStore.useValue();
 
   const { t } = useTranslation();
 
-  Evt.use("SHOW_MUSIC_DETAIL", () => {
-    musicDetailShownStore.setValue(true);
-  });
+  useEffect(() => {
+    const escHandler = (evt: KeyboardEvent) => {
+      if (evt.code === "Escape") {
+        evt.preventDefault();
+        musicDetailShownStore.setValue(false);
+      }
+    };
+    window.addEventListener("keydown", escHandler);
 
-  Evt.use("HIDE_MUSIC_DETAIL", () => {
-    musicDetailShownStore.setValue(false);
-  });
+    return () => {
+      window.removeEventListener("keydown", escHandler);
+    }
+  }, []);
+
 
   return (
     <AnimatedDiv
       showIf={musicDetailShown}
-      className="music-detail-container animate__animated background-color"
+      className="music-detail--container animate__animated background-color"
       mountClassName="animate__slideInUp"
       unmountClassName="animate__slideOutDown"
+      onAnimationEnd={() => {
+        // hack logic: https://github.com/electron/electron/issues/32341
+        // force reflow to refresh drag region
+        setTimeout(() => {
+          document.body.style.width = "0";
+          document.body.getBoundingClientRect();
+          document.body.style.width = "";
+        }, 200);
+      }}
     >
       <div
         className="music-detail-background"
@@ -42,16 +57,7 @@ export default function () {
           backgroundImage: `url(${musicItem?.artwork ?? albumImg})`,
         }}
       ></div>
-      <div
-        className="hide-music-detail"
-        role="button"
-        title={t("music_bar.close_music_detail_page")}
-        onClick={() => {
-          musicDetailShownStore.setValue(false);
-        }}
-      >
-        <SvgAsset iconName="chevron-down"></SvgAsset>
-      </div>
+      <Header></Header>
       <div className="music-title" title={musicItem?.title}>
         {musicItem?.title || t("media.unknown_title")}
       </div>
@@ -74,9 +80,6 @@ export default function () {
             onError={setFallbackAlbum}
             src={musicItem?.artwork ?? albumImg}
           ></img>
-          {/* <div className="music-options">
-            <OptionItem iconName='document-plus'></OptionItem>
-          </div> */}
         </div>
 
         <Lyric></Lyric>
@@ -84,3 +87,13 @@ export default function () {
     </AnimatedDiv>
   );
 }
+
+MusicDetail.show = () => {
+  musicDetailShownStore.setValue(true);
+}
+
+MusicDetail.hide = () => {
+  musicDetailShownStore.setValue(false);
+}
+
+export default MusicDetail;

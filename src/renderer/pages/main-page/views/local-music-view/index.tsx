@@ -1,19 +1,16 @@
 import localMusicListStore from "@/renderer/core/local-music/store";
-import { Tab } from "@headlessui/react";
 import { useTranslation } from "react-i18next";
 
 import "./index.scss";
-import MusicList from "@/renderer/components/MusicList";
 import { showModal } from "@/renderer/components/Modal";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { useUserPreference } from "@/renderer/utils/user-perference";
 import { useEffect, useState, useTransition } from "react";
 import SwitchCase from "@/renderer/components/SwitchCase";
 import ListView from "./views/list";
 import ArtistView from "./views/artist";
 import AlbumView from "./views/album";
 import FolderView from "./views/folder";
-import { getAppConfigPath } from "@/shared/app-config/renderer";
+import AppConfig from "@shared/app-config/renderer";
 
 enum DisplayView {
   LIST,
@@ -39,7 +36,7 @@ export default function LocalMusicView() {
       setFilterMusicList(null);
     } else {
       startTransition(() => {
-        const caseSensitive = getAppConfigPath(
+        const caseSensitive = AppConfig.getConfig(
           "playMusic.caseSensitiveInSearch"
         );
         if (caseSensitive) {

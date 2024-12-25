@@ -3,9 +3,11 @@
 
   & .content-container {
     max-height: 540px;
+    min-height: 100px;
   }
 
   & .plugin-item {
+    box-sizing: border-box;
     width: 100%;
     height: 3rem;
     line-height: 3rem;

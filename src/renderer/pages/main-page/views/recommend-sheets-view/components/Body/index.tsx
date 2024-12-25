@@ -129,7 +129,7 @@ export default function Body(props: IBodyProps) {
             }}
             onClick={(sheetItem) => {
               navigate(
-                `/main/musicsheet/${sheetItem.platform}/${sheetItem.id}`,
+                `/main/musicsheet/${encodeURIComponent(sheetItem.platform)}/${encodeURIComponent(sheetItem.id)}`,
                 {
                   state: {
                     sheetItem: sheetItem,

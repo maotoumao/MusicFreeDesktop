@@ -1,12 +1,8 @@
 import { produce } from "immer";
 import { useCallback, useRef } from "react";
 import { searchResultsStore } from "../store/search-result";
-import {
-  callPluginDelegateMethod,
-  getPluginByHash,
-  getSupportedPlugin,
-} from "@/renderer/core/plugin-delegate";
 import { RequestStateCode } from "@/common/constant";
+import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function useSearch() {
   const searchResults = searchResultsStore.getValue();
@@ -33,10 +29,10 @@ export default function useSearch() {
       let pluginDelegates: IPlugin.IPluginDelegate[] = [];
 
       if (pluginHash) {
-        const tgtPlugin = getPluginByHash(pluginHash);
+        const tgtPlugin = PluginManager.getPluginByHash(pluginHash);
         tgtPlugin && (pluginDelegates = [tgtPlugin]);
       } else {
-        pluginDelegates = getSupportedPlugin("search");
+        pluginDelegates = PluginManager.getSupportedPlugin("search");
       }
 
       // 使用选中插件搜素
@@ -99,7 +95,7 @@ export default function useSearch() {
               };
             })
           );
-          const result = await callPluginDelegateMethod(
+          const result = await PluginManager.callPluginDelegateMethod(
             pluginDelegate,
             "search",
             query,

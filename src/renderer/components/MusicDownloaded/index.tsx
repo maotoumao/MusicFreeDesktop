@@ -1,6 +1,5 @@
 import { isSameMedia } from "@/common/media-util";
 import SvgAsset, { SvgAssetIconNames } from "@/renderer/components/SvgAsset";
-import { useDownloaded } from "@/renderer/core/downloader/downloaded-sheet";
 import { memo, useEffect, useState } from "react";
 import "./index.scss";
 import { DownloadState, localPluginName } from "@/common/constant";
@@ -44,8 +43,8 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
       }
       onClick={() => {
         if (
-          downloadState === DownloadState.NONE ||
-          downloadState === DownloadState.ERROR
+          musicItem && (downloadState === DownloadState.NONE ||
+                downloadState === DownloadState.ERROR)
         ) {
           Downloader.startDownload(musicItem);
         }

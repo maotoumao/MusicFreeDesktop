@@ -1,4 +1,3 @@
-// todo: need refactor
 import {
   getMediaPrimaryKey,
   getQualityOrder,
@@ -6,7 +5,6 @@ import {
   setInternalData,
 } from "@/common/media-util";
 import * as Comlink from "comlink";
-import { callPluginDelegateMethod } from "../plugin-delegate";
 import { DownloadState, localPluginName } from "@/common/constant";
 import PQueue from "p-queue";
 import {
@@ -17,11 +15,13 @@ import {
   useDownloaded,
   useDownloadedMusicList,
 } from "./downloaded-sheet";
-import { getAppConfigPath } from "@/shared/app-config/renderer";
 import { getGlobalContext } from "@/shared/global-context/renderer";
 import Store from "@/common/store";
 import { useEffect, useState } from "react";
 import { DownloadEvts, ee } from "./ee";
+import AppConfig from "@shared/app-config/renderer";
+import PluginManager from "@shared/plugin-manager/renderer";
+
 
 export interface IDownloadStatus {
   state: DownloadState;
@@ -60,7 +60,7 @@ function setupDownloaderWorker() {
     const worker = new Worker(downloaderWorkerPath);
     downloaderWorker = Comlink.wrap(worker);
   }
-  setDownloadingConcurrency(getAppConfigPath("download.concurrency"));
+  setDownloadingConcurrency(AppConfig.getConfig("download.concurrency"));
 }
 
 const concurrencyLimit = 20;
@@ -69,6 +69,9 @@ const downloadingQueue = new PQueue({
 });
 
 function setDownloadingConcurrency(concurrency: number) {
+  if (isNaN(concurrency)) {
+    return;
+  }
   downloadingQueue.concurrency = Math.min(
     concurrency < 1 ? 1 : concurrency,
     concurrencyLimit
@@ -130,15 +133,15 @@ async function downloadMusicImpl(
   onStateChange: IOnStateChangeFunc
 ) {
   const [defaultQuality, whenQualityMissing] = [
-    getAppConfigPath("download.defaultQuality"),
-    getAppConfigPath("download.whenQualityMissing"),
+    AppConfig.getConfig("download.defaultQuality"),
+    AppConfig.getConfig("download.whenQualityMissing"),
   ];
   const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
   let mediaSource: IPlugin.IMediaSourceResult | null = null;
   let realQuality: IMusic.IQualityKey = qualityOrder[0];
   for (const quality of qualityOrder) {
     try {
-      mediaSource = await callPluginDelegateMethod(
+      mediaSource = await PluginManager.callPluginDelegateMethod(
         musicItem,
         "getMediaSource",
         musicItem,
@@ -156,7 +159,7 @@ async function downloadMusicImpl(
     if (mediaSource?.url) {
       const ext = mediaSource.url.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
       const downloadBasePath =
-        getAppConfigPath("download.path") ??
+        AppConfig.getConfig("download.path") ??
         getGlobalContext().appPath.downloads;
       const downloadPath = window.path.resolve(
         downloadBasePath,

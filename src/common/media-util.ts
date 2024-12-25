@@ -65,10 +65,16 @@ export function addSortProperty(
   const now = Date.now();
   if (Array.isArray(mediaItems)) {
     mediaItems.forEach((item, index) => {
+      if (!item) {
+        return;
+      }
       item[timeStampSymbol] = now;
       item[sortIndexSymbol] = index;
     });
   } else {
+    if (!mediaItems) {
+      return;
+    }
     mediaItems[timeStampSymbol] = now;
     mediaItems[sortIndexSymbol] = 0;
   }
@@ -111,8 +117,12 @@ export function removeInternalProperties<T extends IMedia.IMediaBase>(
  */
 export function getQualityOrder(
   qualityKey: IMusic.IQualityKey,
-  sort: "higher" | "lower"
+  sort: "higher" | "lower" | "skip"
 ) {
+  if (sort === "skip") {
+    return [qualityKey];
+  }
+
   const idx = qualityKeys.indexOf(qualityKey);
   const left = qualityKeys.slice(0, idx);
   const right = qualityKeys.slice(idx + 1);

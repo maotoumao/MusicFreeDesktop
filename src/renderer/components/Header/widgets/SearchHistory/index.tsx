@@ -1,11 +1,7 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
-import { useLocation, useNavigate } from "react-router-dom";
-import Evt from "@/renderer/core/events";
-import { isMusicDetailShown } from "@/renderer/components/MusicDetail";
 import { useEffect, useState } from "react";
 import {
-  addSearchHistory,
   clearSearchHistory,
   getSearchHistory,
   removeSearchHistory,

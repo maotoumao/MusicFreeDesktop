@@ -1,48 +1,26 @@
-import { ipcRendererInvoke, ipcRendererOn } from "@/shared/ipc/renderer";
-import { useEffect, useLayoutEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Evt from "../core/events";
-import { getUserPreference } from "../utils/user-perference";
-import { compare } from "compare-versions";
-import { showModal } from "../components/Modal";
+import {useEffect, useLayoutEffect} from "react";
+import {useNavigate} from "react-router-dom";
 import checkUpdate from "../utils/check-update";
-import { getAppConfigPath } from "@/shared/app-config/renderer";
 import Themepack from "@/shared/themepack/renderer";
+import logger from "@shared/logger/renderer";
+import AppConfig from "@shared/app-config/renderer";
+import messageBus from "@shared/message-bus/renderer/main";
 
 export default function useBootstrap() {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  useLayoutEffect(() => {
-    Themepack.setupThemePacks();
-  }, []);
+    useLayoutEffect(() => {
+        Themepack.setupThemePacks();
+    }, []);
 
-  useEffect(() => {
-    const navigateCallback = (url: string, payload?: any) => {
-      /**
-       * evt:// 协议 触发任意事件
-       */
-      if (url.startsWith("evt://")) {
-        const evtName = url.slice(6);
-        if (evtName !== "NAVIGATE") {
-          Evt.emit(evtName as any, payload);
-        }
-      } else {
-        navigate(url, {
-          state: payload,
+    useEffect(() => {
+        messageBus.onCommand("Navigate", (route) => {
+            navigate(route);
         });
-      }
-    };
-    // Evt.on('NAVIGATE', navigateCallback);
-    ipcRendererOn("navigate", (args) => {
-      if (typeof args === "string") {
-        navigateCallback(args);
-      } else {
-        navigateCallback(args.url, args.payload);
-      }
-    });
 
-    if (getAppConfigPath("normal.checkUpdate")) {
-      checkUpdate();
-    }
-  }, []);
+        if (AppConfig.getConfig("normal.checkUpdate")) {
+            checkUpdate();
+        }
+        logger.logPerf("Bundle First Screen");
+    }, []);
 }

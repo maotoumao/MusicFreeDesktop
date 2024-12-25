@@ -1,11 +1,11 @@
 import { toast } from "react-toastify";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { useTranslation } from "react-i18next";
 import ThemePack from "@/shared/themepack/renderer";
 import ThemeItem from "../ThemeItem";
 
 import "./index.scss";
+import {dialogUtil} from "@shared/utils/renderer";
 
 export default function LocalThemes() {
   const currentThemePack = ThemePack.useCurrentThemePack();
@@ -22,7 +22,7 @@ export default function LocalThemes() {
             className="theme-thumb-container theme-install-local"
             onClick={async () => {
               try {
-                const result = await ipcRendererInvoke("show-open-dialog", {
+                const result = await dialogUtil.showOpenDialog({
                   title: t("theme.install_theme"),
                   buttonLabel: t("common.install"),
                   filters: [

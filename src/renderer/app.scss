@@ -8,8 +8,8 @@
 
   & .body-container {
     width: 100%;
-    height: calc(100vh - 54px - 64px);
-    flex: auto;
+    height: 0;
+    flex: 1;
     display: flex;
     position: relative;
   }
@@ -20,6 +20,19 @@
   margin-top: 1.2rem;
   flex-shrink: 0;
   column-gap: 2.5rem;
+  overflow-x: auto;
+  padding-bottom: 6px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 当鼠标悬浮时显示滚动条 */
+  &:hover {
+    &::-webkit-scrollbar {
+      display: block;
+    }
+  }
 
   & .tab-list-item {
     display: flex;
@@ -32,6 +45,7 @@
     cursor: pointer;
     opacity: 0.7;
     white-space: nowrap;
+    user-select: none;
 
     &:hover {
       opacity: 0.9;
@@ -92,8 +106,12 @@
   --animate-duration: 300ms !important;
   --scrollbar-width: 8px;
 
+  --appHeaderHeight: 54px;
+  --appMusicBarHeight: 64px;
+
   font-size: 13px;
   color: var(--textColor);
+
 }
 
 a {

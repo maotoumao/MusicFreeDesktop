@@ -1,7 +1,4 @@
-import {
-  callPluginDelegateMethod,
-  useSortedPlugins,
-} from "@/renderer/core/plugin-delegate";
+import AppConfig from "@shared/app-config/renderer";
 
 import {
   useReactTable,
@@ -14,16 +11,12 @@ import { CSSProperties, ReactNode } from "react";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import { hideModal, showModal } from "@/renderer/components/Modal";
 import Empty from "@/renderer/components/Empty";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
 import { toast } from "react-toastify";
 import { showPanel } from "@/renderer/components/Panel";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 import { produce } from "immer";
 import { i18n } from "@/shared/i18n/renderer";
-import {
-  getAppConfigPath,
-  setAppConfigPath,
-} from "@/shared/app-config/renderer";
+import PluginManager, {useSortedPlugins} from "@shared/plugin-manager/renderer";
 
 const t = i18n.t;
 
@@ -45,7 +38,7 @@ function renderOptions(info: any) {
             async onConfirm() {
               hideModal();
               try {
-                await ipcRendererInvoke("uninstall-plugin", row.hash);
+                await PluginManager.uninstallPlugin(row.hash);
                 toast.success(
                   t("plugin_management_page.uninstall_successfully", {
                     plugin: row.platform,
@@ -67,7 +60,7 @@ function renderOptions(info: any) {
           }}
           onClick={async () => {
             try {
-              await ipcRendererInvoke("install-plugin-remote", row.srcUrl);
+              await PluginManager.installPluginFromRemote(row.srcUrl);
               toast.success(
                 t("plugin_management_page.toast_plugin_is_latest", {
                   plugin: row.platform,
@@ -102,7 +95,7 @@ function renderOptions(info: any) {
               ),
               maxLength: 1000,
               onOk(text) {
-                return callPluginDelegateMethod(
+                return PluginManager.callPluginDelegateMethod(
                   row,
                   "importMusicItem",
                   text.trim()
@@ -142,7 +135,7 @@ function renderOptions(info: any) {
               ),
               maxLength: 1000,
               onOk(text) {
-                return callPluginDelegateMethod(
+                return PluginManager.callPluginDelegateMethod(
                   row,
                   "importMusicSheet",
                   text.trim()
@@ -174,7 +167,7 @@ function renderOptions(info: any) {
               variables: row.userVariables,
               plugin: row,
               initValues:
-                getAppConfigPath("private.pluginMeta")?.[row.platform]
+                AppConfig.getConfig("private.pluginMeta")?.[row.platform]
                   ?.userVariables,
             });
           }}
@@ -234,7 +227,7 @@ export default function PluginTable() {
   });
 
   function onDrop(fromIndex: number, toIndex: number) {
-    const meta = getAppConfigPath("private.pluginMeta") ?? {};
+    const meta = AppConfig.getConfig("private.pluginMeta") ?? {};
 
     const newPlugins = plugins
       .slice(0, fromIndex)
@@ -254,7 +247,9 @@ export default function PluginTable() {
       });
     });
 
-    setAppConfigPath("private.pluginMeta", newMeta);
+    AppConfig.setConfig({
+      "private.pluginMeta": newMeta
+    });
   }
 
   return (

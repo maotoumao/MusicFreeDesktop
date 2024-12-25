@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useState , useRef , useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
 
 
@@ -13,6 +13,8 @@ interface IProps
   mountClassName?: string;
   // 卸载动画
   unmountClassName?: string;
+  onMountAnimationEnd?: () => void;
+  onUnmountAnimationEnd?: () => void;
 }
 
 /**
@@ -24,11 +26,14 @@ export default function AnimatedDiv(props: IProps) {
     showIf = true,
     mountClassName,
     unmountClassName,
+      onMountAnimationEnd,
+      onUnmountAnimationEnd,
     className,
     onAnimationEnd,
   } = props ?? {};
 
   const [shouldMount, setShouldMount] = useState(false);
+  const [animationPlaying, setAnimationPlaying] = useState(false);
 
   const filteredProps: Record<string, any> = useMemo(() => {
     const res = {
@@ -59,9 +64,12 @@ export default function AnimatedDiv(props: IProps) {
         if (!showIf) {
           // 如果showIf是false，表示当前播放的是卸载状态的动画
           setShouldMount(false);
+          onUnmountAnimationEnd?.();
         } else {
           setShouldMount(true);
+          onMountAnimationEnd?.();
         }
+        setAnimationPlaying(prev => !prev);
       }}
     ></div>
   ) : null;

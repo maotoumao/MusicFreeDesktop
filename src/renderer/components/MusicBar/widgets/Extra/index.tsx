@@ -1,25 +1,24 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
 import "./index.scss";
 import SwitchCase from "@/renderer/components/SwitchCase";
-import trackPlayer from "@/renderer/core/track-player";
-import { RepeatMode } from "@/renderer/core/track-player/enum";
-import { useRef, useState } from "react";
+import trackPlayer from "@renderer/core/track-player";
+import {useRef, useState} from "react";
 import Condition from "@/renderer/components/Condition";
 import Slider from "rc-slider";
-import { showModal } from "@/renderer/components/Modal";
-import { ipcRendererInvoke } from "@/shared/ipc/renderer";
+import {showModal} from "@/renderer/components/Modal";
 import classNames from "@/renderer/utils/classnames";
-import {
-  getCurrentPanel,
-  hidePanel,
-  showPanel,
-} from "@/renderer/components/Panel";
-import { useTranslation } from "react-i18next";
-import { setAppConfigPath, useAppConfig } from "@/shared/app-config/renderer";
-import { isCN } from "@/shared/i18n/renderer";
+import {getCurrentPanel, hidePanel, showPanel,} from "@/renderer/components/Panel";
+import {useTranslation} from "react-i18next";
+import AppConfig from "@shared/app-config/renderer";
+import {isCN} from "@/shared/i18n/renderer";
+import useAppConfig from "@/hooks/useAppConfig";
+import {RepeatMode} from "@/common/constant";
+import {useQuality, useRepeatMode, useSpeed, useVolume} from "@renderer/core/track-player/hooks";
+import {appWindowUtil} from "@shared/utils/renderer";
+import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
 
 export default function Extra() {
-  const repeatMode = trackPlayer.useRepeatMode();
+  const repeatMode = useRepeatMode();
   const { t } = useTranslation();
 
   return (
@@ -61,7 +60,9 @@ export default function Extra() {
           if (getCurrentPanel()?.type === "PlayList") {
             hidePanel();
           } else {
-            showPanel("PlayList");
+            showPanel("PlayList", {
+              coverHeader: musicDetailShownStore.getValue()
+            });
           }
         }}
       >
@@ -72,7 +73,7 @@ export default function Extra() {
 }
 
 function VolumeBtn() {
-  const volume = trackPlayer.useVolume();
+  const volume = useVolume();
   const tmpVolumeRef = useRef<number | null>(null);
   const [showVolumeBubble, setShowVolumeBubble] = useState(false);
   const { t } = useTranslation();
@@ -87,8 +88,8 @@ function VolumeBtn() {
       onMouseOut={() => {
         setShowVolumeBubble(false);
       }}
-      onClick={() => {
-        if (tmpVolumeRef === null) {
+      onClick={(e) => {
+        if (tmpVolumeRef.current === null) {
           tmpVolumeRef.current = 0;
         }
         tmpVolumeRef.current =
@@ -118,17 +119,19 @@ function VolumeBtn() {
                 trackPlayer.setVolume(val as number);
               }}
               value={volume}
-              trackStyle={{
-                background: "var(--primaryColor)",
-              }}
-              handleStyle={{
-                height: 12,
-                width: 12,
-                marginLeft: -4,
-                borderColor: "var(--primaryColor)",
-              }}
-              railStyle={{
-                background: "#d8d8d8",
+              styles={{
+                track: {
+                  background: "var(--primaryColor)",
+                },
+                handle: {
+                  height: 12,
+                  width: 12,
+                  marginLeft: -4,
+                  borderColor: "var(--primaryColor)",
+                },
+                rail: {
+                  background: "#d8d8d8",
+                },
               }}
             ></Slider>
           </div>
@@ -144,7 +147,7 @@ function VolumeBtn() {
 }
 
 function SpeedBtn() {
-  const speed = trackPlayer.useSpeed();
+  const speed = useSpeed();
   const [showSpeedBubble, setShowSpeedBubble] = useState(false);
   const tmpSpeedRef = useRef<number | null>(null);
   const { t } = useTranslation();
@@ -211,7 +214,7 @@ function SpeedBtn() {
 }
 
 function QualityBtn() {
-  const quality = trackPlayer.useQuality();
+  const quality = useQuality();
   const { t } = useTranslation();
 
   return (
@@ -245,7 +248,9 @@ function QualityBtn() {
           onOk(value, extra) {
             trackPlayer.setQuality(value as IMusic.IQualityKey);
             if (!extra) {
-              setAppConfigPath("playMusic.defaultQuality", value);
+              AppConfig.setConfig({
+                "playMusic.defaultQuality": value
+              });
             }
           },
         });
@@ -279,34 +284,8 @@ function QualityBtn() {
 }
 
 function LyricBtn() {
-  const rendererConfig = useAppConfig();
-  const enableDesktopLyric = rendererConfig?.lyric?.enableDesktopLyric ?? false;
+  const enableDesktopLyric = useAppConfig("lyric.enableDesktopLyric");
   const { t } = useTranslation();
-
-  // const lyric = useLyric();
-
-  // useEffect(() => {
-  //   // 同步歌词 这样写貌似不好 应该用回调
-  //   // TODO: 挪到bootstrap中
-  //   if (enableDesktopLyric) {
-  //     // 同步歌词
-  //     if (lyric?.currentLrc) {
-  //       const currentLrc = lyric?.currentLrc;
-  //       // 同步两句歌词
-  //       ipcRendererSend("send-to-lyric-window", {
-  //         timeStamp: Date.now(),
-  //         lrc: currentLrc
-  //           ? [currentLrc.lrc, lyric.parser.getLyric()[currentLrc.index + 1]]
-  //           : [],
-  //       });
-  //     } else {
-  //       ipcRendererSend("send-to-lyric-window", {
-  //         timeStamp: Date.now(),
-  //         lrc: [],
-  //       });
-  //     }
-  //   }
-  // }, [lyric, enableDesktopLyric]);
 
   return (
     <div
@@ -316,7 +295,7 @@ function LyricBtn() {
       })}
       role="button"
       onClick={async () => {
-        ipcRendererInvoke("set-lyric-window", !enableDesktopLyric);
+        appWindowUtil.setLyricWindow(!enableDesktopLyric);
       }}
     >
       <SvgAsset

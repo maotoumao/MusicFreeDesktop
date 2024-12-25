@@ -45,6 +45,7 @@
     "media_type_artist": "藝術家",
     "media_type_sheet": "歌單",
     "media_type_lyric": "歌詞",
+    "media_type_comment": "評論",
 
     "media_title": "標題",
     "media_platform": "來源",
@@ -281,6 +282,7 @@
       "when_quality_missing": "當播放音質缺失時",
       "play_lower_quality_version": "播放低音質版本",
       "play_higher_quality_version": "播放高音質版本",
+      "play_skip_quality_version": "不尋找其他音質版本",
       "when_play_error": "播放錯誤時",
       "pause": "暫停",
       "skip_to_next": "跳至下一首",
@@ -325,7 +327,8 @@
       "volume-down": "音量減少",
       "toggle-desktop-lyric": "開啟/關閉桌面歌詞",
       "like/dislike": "喜歡/不喜歡當前歌曲",
-      "no_short_cut": "無"
+      "no_short_cut": "無",
+      "toggle-main-window-visible": "顯示/隱藏主窗口"
     },
     "network": {
       "host": "主機",
@@ -360,7 +363,7 @@
       "already_latest": "已是最新版本！",
       "check_update": "檢查更新",
       "software_author": "軟件作者：",
-      "open_source_declaration": "源碼：軟件是基於 GPL3.0 授權的開源軟件。<Github>Github 地址</Github> <Gitee>Gitee 地址</Gitee>",
+      "open_source_declaration": "源碼：軟件是基於 AGPL3.0 授權的開源軟件。<Github>Github 地址</Github> <Gitee>Gitee 地址</Gitee>",
       "official_site": "官方網站",
       "mobile_version": "移動版"
     }

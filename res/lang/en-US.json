@@ -45,6 +45,7 @@
     "media_type_artist": "Artist",
     "media_type_sheet": "Playlist",
     "media_type_lyric": "Lyric",
+    "media_type_comment": "Comment",
 
     "media_title": "Title",
     "media_platform": "Source",
@@ -281,6 +282,7 @@
       "when_quality_missing": "When playback quality is missing",
       "play_lower_quality_version": "Play lower quality version",
       "play_higher_quality_version": "Play higher quality version",
+      "play_skip_quality_version": "Do not look for other quality versions",
       "when_play_error": "When playback error occurs",
       "pause": "Pause",
       "skip_to_next": "Automatically play next song",
@@ -325,7 +327,8 @@
       "volume-down": "Volume Down",
       "toggle-desktop-lyric": "Toggle Desktop Lyric",
       "like/dislike": "Like/Dislike Current Song",
-      "no_short_cut": "None"
+      "no_short_cut": "None",
+      "toggle-main-window-visible": "Show/Hide Main Window"
     },
     "network": {
       "host": "Host",
@@ -360,7 +363,7 @@
       "already_latest": "Already up to date!",
       "check_update": "Check for Update",
       "software_author": "Software Author: ",
-      "open_source_declaration": "Source Code: Software is open-source under GPL3.0 license. <Github>Github Link</Github> <Gitee>Gitee Link</Gitee>",
+      "open_source_declaration": "Source Code: Software is open-source under AGPL3.0 license. <Github>Github Link</Github> <Gitee>Gitee Link</Gitee>",
       "official_site": "Official Website",
       "mobile_version": "Mobile Version"
     }

@@ -30,7 +30,7 @@ async function setupWatcher(initPaths?: string[]) {
       musicItem.$$localPath = fp;
       setInternalData<IMusic.IMusicItemInternalData>(
         musicItem,
-        "downloadData", 
+        "downloadData",
         {
             path: fp,
             quality: "standard"
