@@ -86,6 +86,27 @@ class TrayManager {
             });
         }
 
+        let debugClickCount = 0;
+        let debugClickTime = 0;
+
+        const debugModeHandler = () => {
+            const now = Date.now();
+            if (now - debugClickTime < 500) {
+                debugClickCount++;
+                debugClickTime = now;
+                if (debugClickCount === 5) {
+                    windowManager.mainWindow?.webContents?.openDevTools({
+                        mode: "undocked"
+                    })
+                }
+            } else {
+                debugClickCount = 1;
+                debugClickTime = Date.now();
+            }
+        }
+
+        tray.on("click", debugModeHandler);
+
         // 配置变化时更新菜单
         AppConfig.onConfigUpdated((changedConfig) => {
             for (const k of this.observedKey) {
