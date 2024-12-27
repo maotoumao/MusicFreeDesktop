@@ -1,5 +1,5 @@
 import {ChildProcess, fork} from "child_process";
-import {ipcMain} from "electron";
+import {app, ipcMain} from "electron";
 import {IWindowManager} from "@/types/main/window-manager";
 import {ServiceName} from "@shared/service-manager/common";
 import getResourcePath from "@/common/main/get-resource-path";
@@ -68,11 +68,13 @@ class ServiceInstance {
 
     stop() {
         this.started = false;
-        this.serviceProcess.removeAllListeners();
-        this.serviceProcess.kill();
-        this.serviceProcess = null;
-        this.retryTimeOut = 6000;
-        this.hostChangeCallback(null);
+        if (!this.serviceProcess.killed) {
+            this.serviceProcess.removeAllListeners();
+            this.serviceProcess.kill(0);
+            this.serviceProcess = null;
+            this.retryTimeOut = 6000;
+            this.hostChangeCallback(null);
+        }
     }
 }
 
@@ -110,6 +112,15 @@ class ServiceManager {
 
     setup(windowManager: IWindowManager) {
         this.windowManager = windowManager;
+
+        app.on("will-quit", () => {
+            if (!windowManager.mainWindow?.isDestroyed()) {
+                this.serviceMap.forEach((val) => {
+                    val.instance.stop();
+                })
+            }
+        })
+
         // put services here
         this.addService(ServiceName.RequestForwarder).start();
 
