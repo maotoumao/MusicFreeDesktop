@@ -1,9 +1,11 @@
+@use "sass:math";
+
 .music-bar--slider-container {
   position: absolute;
   width: 100%;
   left: 0;
   $height: 12px;
-  top: -($height / 2);
+  top: - math.div($height, 2);
   height: $height;
   display: flex;
   justify-content: center;
