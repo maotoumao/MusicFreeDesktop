@@ -70,7 +70,7 @@ class ServiceInstance {
         this.started = false;
         if (!this.serviceProcess.killed) {
             this.serviceProcess.removeAllListeners();
-            this.serviceProcess.kill(0);
+            this.serviceProcess.kill();
             this.serviceProcess = null;
             this.retryTimeOut = 6000;
             this.hostChangeCallback(null);
@@ -113,7 +113,7 @@ class ServiceManager {
     setup(windowManager: IWindowManager) {
         this.windowManager = windowManager;
 
-        app.on("will-quit", () => {
+        app.on("before-quit", () => {
             if (!windowManager.mainWindow?.isDestroyed()) {
                 this.serviceMap.forEach((val) => {
                     val.instance.stop();
