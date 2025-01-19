@@ -149,8 +149,6 @@ npm start
 
 <img src="./src/assets/imgs/wechat_channel.jpg" height="160px" title="微信公众号" style="display:inherit;"/>
 
-[<img src="https://api.gitsponsors.com/api/badge/img?id=646034058" height="20">](https://api.gitsponsors.com/api/badge/link?p=A4Rhx8CtdTgIjqp+RtOsoJ9o1dvOspLgy8Ty5Af0KFBt5GexnnY5BiHWawlkbqQ9Q9J2Ljb9Lese1zVhaN2HuKxOKu/feq7yIFL2lX7VS91VbWSIqnEPW4WcprXO/eaOgYO7ThALUcm9j0sqbqughA==)
-
 ## 截图
 
 ![screenshot](./.imgs/screenshot.png)
