@@ -70,6 +70,10 @@ class AppConfig {
              */
             this._setConfig(data, "renderer");
         })
+
+        ipcMain.on("@shared/app-config/reset", () => {
+            this.reset();
+        })
     }
 
     public onConfigUpdated(callback: (patch: IAppConfig, config: IAppConfig, from: "main" | "renderer") => void) {
@@ -189,6 +193,11 @@ class AppConfig {
 
     public getAllConfig() {
         return this.config;
+    }
+
+    public reset() {
+        this.config = {};
+        this.setConfig({});
     }
 
     public getConfig<T extends keyof IAppConfig>(key: T): IAppConfig[T] {

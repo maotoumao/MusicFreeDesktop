@@ -1,5 +1,6 @@
 import {IAppConfig} from "@/types/app-config";
 import _defaultAppConfig from "@shared/app-config/default-app-config";
+import defaultAppConfig from "@shared/app-config/default-app-config";
 
 
 interface IMod {
@@ -8,6 +9,8 @@ interface IMod {
     setConfig(config: IAppConfig): void;
 
     onConfigUpdate(callback: (config: IAppConfig) => void): void;
+
+    reset(): void;
 }
 
 const mod = window["@shared/app-config" as any] as unknown as IMod
@@ -54,6 +57,12 @@ class AppConfig {
 
     public setConfig(data: IAppConfig) {
         mod.setConfig(data);
+    }
+
+    public reset() {
+        mod.reset();
+        this.config = defaultAppConfig;
+        this.notifyCallbacks(this.config);
     }
 
 }
