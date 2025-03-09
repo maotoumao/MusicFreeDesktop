@@ -283,8 +283,9 @@ class TrayManager {
         });
         ctxMenu.push({
             label: t("common.exit"),
-            role: "quit",
+            role: process.platform === "win32" ? undefined : "quit",
             click() {
+                windowManager.mainWindow?.removeAllListeners?.();
                 app.exit(0);
             },
         });

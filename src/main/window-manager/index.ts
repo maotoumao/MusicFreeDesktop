@@ -1,14 +1,14 @@
-import { app, BrowserWindow, nativeImage, screen } from "electron";
+import {app, BrowserWindow, nativeImage, screen} from "electron";
 import getResourcePath from "@/common/main/get-resource-path";
-import { IWindowEvents, IWindowManager } from "@/types/main/window-manager";
-import { localPluginName, PlayerState, ResourceName } from "@/common/constant";
+import {IWindowEvents, IWindowManager} from "@/types/main/window-manager";
+import {localPluginName, PlayerState, ResourceName} from "@/common/constant";
 import voidCallback from "@/common/void-callback";
 import ThumbBarUtil from "@/common/main/thumb-bar-util";
 import EventEmitter from "eventemitter3";
 import WindowDrag from "@shared/window-drag/main";
 import AppConfig from "@shared/app-config/main";
 import messageBus from "@shared/message-bus/main";
-import { IAppConfig } from "@/types/app-config";
+import {IAppConfig} from "@/types/app-config";
 import debounce from "@/common/debounce";
 
 
@@ -171,6 +171,14 @@ class WindowManager implements IWindowManager {
                 }
             }
         );
+
+        mainWindow.on("close", (e) => {
+            if (process.platform === "win32" && AppConfig.getConfig("normal.closeBehavior") === "minimize") {
+                e.preventDefault();
+                mainWindow.hide();
+                mainWindow.setSkipTaskbar(true);
+            }
+        })
 
         // 5. 更新thumbbar
         ThumbBarUtil.setThumbBarButtons(mainWindow, false);
