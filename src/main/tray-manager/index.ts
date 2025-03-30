@@ -1,11 +1,11 @@
-import {app, Menu, MenuItem, MenuItemConstructorOptions, nativeImage, Tray} from "electron";
-import {t} from "@shared/i18n/main";
-import {IWindowManager} from "@/types/main/window-manager";
+import { app, Menu, MenuItem, MenuItemConstructorOptions, nativeImage, Tray } from "electron";
+import { t } from "@shared/i18n/main";
+import { IWindowManager } from "@/types/main/window-manager";
 import getResourcePath from "@/common/main/get-resource-path";
-import {PlayerState, RepeatMode, ResourceName} from "@/common/constant";
+import { PlayerState, RepeatMode, ResourceName } from "@/common/constant";
 import AppConfig from "@shared/app-config/main";
 import windowManager from "@main/window-manager";
-import {IAppConfig} from "@/types/app-config";
+import { IAppConfig } from "@/types/app-config";
 import messageBus from "@shared/message-bus/main";
 
 if (process.platform === "darwin") {
@@ -39,11 +39,11 @@ if (process.platform === "darwin") {
                         accelerator: "Shift+Command+Z",
                         role: "redo",
                     },
-                    {type: "separator"},
-                    {label: t("common.cut"), accelerator: "Command+X", role: "cut"},
-                    {label: t("common.copy"), accelerator: "Command+C", role: "copy"},
-                    {label: t("common.cut"), accelerator: "Command+V", role: "paste"},
-                    {type: "separator"},
+                    { type: "separator" },
+                    { label: t("common.cut"), accelerator: "Command+X", role: "cut" },
+                    { label: t("common.copy"), accelerator: "Command+C", role: "copy" },
+                    { label: t("common.cut"), accelerator: "Command+V", role: "paste" },
+                    { type: "separator" },
                     {
                         label: t("common.select_all"),
                         accelerator: "Command+A",
@@ -95,9 +95,11 @@ class TrayManager {
                 debugClickCount++;
                 debugClickTime = now;
                 if (debugClickCount === 5) {
-                    windowManager.mainWindow?.webContents?.openDevTools({
-                        mode: "undocked"
-                    })
+                    windowManager.getAllWindows().forEach(win => {
+                        win?.webContents?.openDevTools({
+                            mode: "undocked"
+                        })
+                    });
                 }
             } else {
                 debugClickCount = 1;
@@ -135,22 +137,20 @@ class TrayManager {
         const tray = TrayManager.trayInstance;
 
         /********* 音乐信息 **********/
-        const {musicItem, playerState, repeatMode} =
+        const { musicItem, playerState, repeatMode } =
             messageBus.getAppState();
         // 更新一下tooltip
         if (musicItem) {
             tray.setToolTip(
-                `${musicItem.title ?? t("media.unknown_title")}${
-                    musicItem.artist ? ` - ${musicItem.artist}` : ""
+                `${musicItem.title ?? t("media.unknown_title")}${musicItem.artist ? ` - ${musicItem.artist}` : ""
                 }`
             );
         } else {
             tray.setToolTip("MusicFree");
         }
         if (musicItem) {
-            const fullName = `${musicItem.title ?? t("media.unknown_title")}${
-                musicItem.artist ? ` - ${musicItem.artist}` : ""
-            }`;
+            const fullName = `${musicItem.title ?? t("media.unknown_title")}${musicItem.artist ? ` - ${musicItem.artist}` : ""
+                }`;
             ctxMenu.push(
                 {
                     label: fullName.length > 12 ? fullName.slice(0, 12) + "..." : fullName,
