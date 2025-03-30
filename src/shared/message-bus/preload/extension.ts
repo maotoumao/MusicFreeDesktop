@@ -48,9 +48,6 @@ ipcRenderer.on("port", (e) => {
 });
 
 function sendCommand<T extends keyof ICommand>(command: T, data?: ICommand[T]) {
-  if (!extPort) {
-    return;
-  }
   const message: IPortMessage = {
     type: "command",
     payload: {
@@ -60,7 +57,7 @@ function sendCommand<T extends keyof ICommand>(command: T, data?: ICommand[T]) {
     timestamp: Date.now(),
   };
 
-  if (!connected) {
+  if (!extPort || !connected) {
     cachedMessages.push(message);
     return;
   }
@@ -68,16 +65,13 @@ function sendCommand<T extends keyof ICommand>(command: T, data?: ICommand[T]) {
 }
 
 function subscribeAppState(keys: (keyof IAppState)[]) {
-  if (!extPort) {
-    return;
-  }
   const message: IPortMessage = {
     type: "subscribeAppState",
     payload: keys,
     timestamp: Date.now(),
   };
 
-  if (!connected) {
+  if (!extPort || !connected) {
     cachedMessages.push(message);
     return;
   }
