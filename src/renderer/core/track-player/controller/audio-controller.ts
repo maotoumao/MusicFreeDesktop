@@ -52,10 +52,12 @@ class AudioController extends ControllerBase implements IAudioController {
 
         this.audio.onpause = () => {
             this.playerState = PlayerState.Paused;
+            navigator.mediaSession.playbackState = "paused";
         }
 
         this.audio.onerror = (event) => {
             this.playerState = PlayerState.Paused;
+            navigator.mediaSession.playbackState = "paused";
             this.onError?.(ErrorReason.EmptyResource, event as any);
         }
 

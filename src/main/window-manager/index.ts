@@ -82,6 +82,15 @@ class WindowManager implements IWindowManager {
 
     /**************************** Main Window ***************************/
     private createMainWindow() {
+        // 清理旧窗口
+        if (WindowManager.mainWindow) {
+            WindowManager.mainWindow.removeAllListeners();
+            if (!WindowManager.mainWindow.isDestroyed()) {
+                WindowManager.mainWindow.close();
+                WindowManager.mainWindow.destroy();
+            }
+            WindowManager.mainWindow = null;
+        }
         // 1. 创建主窗口
         const initSize = AppConfig.getConfig("private.mainWindowSize");
         const mainWindow = new BrowserWindow({
@@ -163,6 +172,14 @@ class WindowManager implements IWindowManager {
             }
         );
 
+        mainWindow.on("close", (e) => {
+            if (process.platform === "win32" && AppConfig.getConfig("normal.closeBehavior") === "minimize") {
+                e.preventDefault();
+                mainWindow.hide();
+                mainWindow.setSkipTaskbar(true);
+            }
+        })
+
         // 5. 更新thumbbar
         ThumbBarUtil.setThumbBarButtons(mainWindow, false);
         WindowManager.mainWindow = mainWindow;
@@ -175,7 +192,7 @@ class WindowManager implements IWindowManager {
     }
 
     public showMainWindow() {
-        if (!WindowManager.mainWindow) {
+        if (!WindowManager.mainWindow || WindowManager.mainWindow.isDestroyed()) {
             this.createMainWindow();
         }
 
