@@ -3,21 +3,22 @@ import App from "../app";
 import "animate.css";
 import ModalComponent from "../components/Modal";
 import bootstrap from "./bootstrap";
-import {HashRouter, Route, Routes} from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 import MainPage from "../pages/main-page";
-import {ContextMenuComponent} from "../components/ContextMenu";
-import {ToastContainer} from "react-toastify";
+import { ContextMenuComponent } from "../components/ContextMenu";
+import { ToastContainer } from "react-toastify";
 
 import "rc-slider/assets/index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css"; // 全局样式
 import "./index.scss";
-import {toastDuration} from "@/common/constant";
+import { toastDuration } from "@/common/constant";
 import useBootstrap from "./useBootstrap";
 import logger from "@shared/logger/renderer";
-import {ErrorBoundary} from "react-error-boundary";
+import { ErrorBoundary } from "react-error-boundary";
 import Fallback from "@renderer/document/fallback";
 import AppConfig from "@shared/app-config/renderer";
+import trackPlayer from "../core/track-player";
 
 logger.logPerf("Create Bundle");
 bootstrap().then(() => {
@@ -26,7 +27,8 @@ bootstrap().then(() => {
         FallbackComponent={Fallback} onReset={() => {
             // 删除软件配置
             AppConfig.reset();
-    }}><Root></Root></ErrorBoundary>);
+            trackPlayer.reset();
+        }}><Root></Root></ErrorBoundary>);
 });
 
 function Root() {
