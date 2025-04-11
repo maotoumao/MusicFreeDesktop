@@ -114,7 +114,7 @@ function ToplistGroupItem(props: IToplistGroupItemProps) {
         <div className="header">{groupItem.title}</div>
       </Condition>
       <div className="body">
-        {groupItem.data.map((item) => (
+        {(groupItem.data ?? []).map((item) => (
           <MusicSheetlikeItem
             key={item.id}
             mediaItem={item}
