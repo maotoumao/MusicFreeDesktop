@@ -1,21 +1,21 @@
 import "./index.scss";
-import {memo, useEffect, useRef, useState} from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import trackPlayer from "@renderer/core/track-player";
-import Condition, {IfTruthy} from "@/renderer/components/Condition";
+import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Empty from "@/renderer/components/Empty";
-import {getMediaPrimaryKey, isSameMedia} from "@/common/media-util";
+import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
 import Tag from "@/renderer/components/Tag";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import useVirtualList from "@/hooks/useVirtualList";
-import {rem} from "@/common/constant";
-import {showMusicContextMenu} from "@/renderer/components/MusicList";
+import { rem } from "@/common/constant";
+import { showMusicContextMenu } from "@/renderer/components/MusicList";
 import MusicDownloaded from "@/renderer/components/MusicDownloaded";
 import Base from "../Base";
 import hotkeys from "hotkeys-js";
-import {Trans, useTranslation} from "react-i18next";
-import DragReceiver, {startDrag} from "@/renderer/components/DragReceiver";
-import {useCurrentMusic, useMusicQueue} from "@renderer/core/track-player/hooks";
+import { Trans, useTranslation } from "react-i18next";
+import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
+import { useCurrentMusic, useMusicQueue } from "@renderer/core/track-player/hooks";
 
 const estimateItemHeight = 2.6 * rem;
 const DRAG_TAG = "Playlist";
@@ -25,14 +25,14 @@ interface IProps {
 }
 
 export default function PlayList(props: IProps) {
-    const {coverHeader} = props;
+    const { coverHeader } = props;
     const musicQueue = useMusicQueue();
     const currentMusic = useCurrentMusic();
     const scrollElementRef = useRef<HTMLDivElement>();
     const [activeItems, setActiveItems] = useState<Set<number>>(new Set());
     const lastActiveIndexRef = useRef(0);
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const virtualController = useVirtualList({
         estimateItemHeight: estimateItemHeight,
@@ -57,7 +57,7 @@ export default function PlayList(props: IProps) {
         const ctrlAHandler = (evt: Event) => {
             evt.preventDefault();
             const queue = trackPlayer.musicQueue;
-            setActiveItems(new Set(Array.from({length: queue.length}, (_, i) => i)));
+            setActiveItems(new Set(Array.from({ length: queue.length }, (_, i) => i)));
         };
         hotkeys("Ctrl+A", "play-list", ctrlAHandler);
 
@@ -183,7 +183,7 @@ export default function PlayList(props: IProps) {
                                             }
                                             setActiveItems(
                                                 new Set(
-                                                    Array.from({length: end - start + 1}, (_, i) => start + i)
+                                                    Array.from({ length: end - start + 1 }, (_, i) => start + i)
                                                 )
                                             );
                                         } else if (hotkeys.ctrl) {
@@ -242,7 +242,7 @@ interface IPlayListMusicItemProps {
 }
 
 function _PlayListMusicItem(props: IPlayListMusicItemProps) {
-    const {isPlaying, musicItem, isActive} = props;
+    const { isPlaying, musicItem, isActive } = props;
 
     return (
         <div
@@ -256,11 +256,11 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
                 <MusicFavorite musicItem={musicItem} size={16}></MusicFavorite>
                 <MusicDownloaded musicItem={musicItem} size={16}></MusicDownloaded>
             </div>
-            <div className="playlist--title" title={musicItem.title}>
-                {musicItem.title}
+            <div className="playlist--title" title={musicItem?.title}>
+                {musicItem?.title ?? "-"}
             </div>
-            <div className="playlist--artist" title={musicItem.artist}>
-                {musicItem.artist ?? "-"}
+            <div className="playlist--artist" title={musicItem?.artist}>
+                {musicItem?.artist ?? "-"}
             </div>
             <div className="playlist--platform">
                 <Tag
@@ -268,7 +268,7 @@ function _PlayListMusicItem(props: IPlayListMusicItemProps) {
                         width: "initial",
                     }}
                 >
-                    {musicItem.platform}
+                    {musicItem?.platform}
                 </Tag>
             </div>
             <div
