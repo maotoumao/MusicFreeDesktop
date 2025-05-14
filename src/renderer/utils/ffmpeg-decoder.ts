@@ -1,9 +1,9 @@
-import { FFmpeg } from '@ffmpeg/ffmpeg'; // 修改为默认导入 FFmpeg 类
-import { fetchFile } from './fetch-file-helper'; // 假设你将 fetchFile 放到一个辅助文件中
+import { FFmpeg, FileData } from '@ffmpeg/ffmpeg'; // 导入 FFmpeg 类 和 FileData 类型
+import { fetchFile } from './fetch-file-helper';
 
-const ffmpeg = new FFmpeg(); // 使用 new FFmpeg() 创建实例
+const ffmpeg = new FFmpeg();
 
-ffmpeg.on('log', (e) => { // 移动日志监听器到实例创建后
+ffmpeg.on('log', (e) => {
   console.log(e.message);
 });
 
@@ -14,10 +14,11 @@ export async function decodeAudioWithFFmpeg(url: string): globalThis.Promise<str
   if (decodeCache.has(url)) return decodeCache.get(url)!;
 
   if (!isLoaded) {
-    messageText.value = '加载ffmpeg-core.js'; // 假设 messageText 在此上下文中不可用，可以考虑移除或用其他方式提示
-    await ffmpeg.load({ // load 方法现在是实例方法
-      coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js', // 与你的 audio-controller.ts 保持一致
-      // wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm' // 可选
+    // messageText.value = '加载ffmpeg-core.js'; // 移除或替换此行
+    console.log('加载ffmpeg-core.js'); // 使用 console.log 替代
+    await ffmpeg.load({
+      coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js',
+      // wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm'
     });
     isLoaded = true;
   }
@@ -25,11 +26,19 @@ export async function decodeAudioWithFFmpeg(url: string): globalThis.Promise<str
   try {
     const fileName = 'input' + (url.split('.').pop() || '.unknown');
 
-    await ffmpeg.writeFile(fileName, await fetchFile(url)); // 使用辅助函数 fetchFile
-    await ffmpeg.exec(['-i', fileName, '-f', 'wav', 'output.wav']); // exec 方法现在是实例方法
+    await ffmpeg.writeFile(fileName, await fetchFile(url));
+    await ffmpeg.exec(['-i', fileName, '-f', 'wav', 'output.wav']);
 
-    const data = await ffmpeg.readFile('output.wav'); // readFile 方法现在是实例方法
-    const pcmBlob = new Blob([data.buffer], { type: 'audio/wav' });
+    const data: FileData = await ffmpeg.readFile('output.wav');
+    let pcmBlob: Blob;
+    if (data instanceof Uint8Array) {
+      pcmBlob = new Blob([data.buffer], { type: 'audio/wav' });
+    } else {
+      // 如果 data 是 string，理论上不应该发生在这里，因为我们明确输出了 wav
+      // 但为了类型安全，可以做一个处理或抛出错误
+      console.error('FFmpeg readFile did not return Uint8Array for WAV output');
+      throw new Error('Unexpected data type from ffmpeg.readFile');
+    }
     const pcmUrl = URL.createObjectURL(pcmBlob);
 
     decodeCache.set(url, pcmUrl);
