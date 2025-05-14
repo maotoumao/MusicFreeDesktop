@@ -10,14 +10,20 @@ import { PlayerState } from "@/common/constant";
 import ServiceManager from "@shared/service-manager/renderer";
 import ControllerBase from "@renderer/core/track-player/controller/controller-base";
 import { ErrorReason } from "@renderer/core/track-player/enum";
-import Dexie from "dexie";
+// import Dexie from "dexie"; // 如果不需要 Dexie.Promise，可以注释掉
 import voidCallback from "@/common/void-callback";
 import { IAudioController } from "@/types/audio-controller";
-// import Promise = Dexie.Promise; // 保持注释或使用 globalThis.Promise
-import { FFmpeg } from '@ffmpeg/ffmpeg'; // 使用 { FFmpeg } 导入
+// import Promise = Dexie.Promise; // 暂时注释掉或在使用时避免混淆，或者使用 globalThis.Promise
+import { FFmpeg } from '@ffmpeg/ffmpeg'; // 修改为从 @ffmpeg/ffmpeg 导入 FFmpeg 类
+import { fetchFile } from '@/renderer/utils/fetch-file-helper'; // 从辅助文件导入 fetchFile
 
 // FFmpeg 解码相关属性
 const ffmpeg = new FFmpeg(); // 使用 new FFmpeg() 创建实例
+
+ffmpeg.on('log', (e) => { // 移动日志监听器到实例创建后
+  console.log(e.message);
+});
+
 let isFfmpegLoaded = false;
 const decodeCache = new Map<string, string>();
 
@@ -93,25 +99,20 @@ class AudioController extends ControllerBase implements IAudioController {
   private async decodeAudioWithFFmpeg(url: string): globalThis.Promise<string> {
     if (decodeCache.has(url)) return decodeCache.get(url)!;
 
-    // 按需加载 FFmpeg
     if (!isFfmpegLoaded) {
-      await ffmpeg.load({ // 配置在 load 方法中传入
+      await ffmpeg.load({
         coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js',
+        // wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm'
       });
       isFfmpegLoaded = true;
     }
 
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Network response was not ok');
-
-      const arrayBuffer = await response.arrayBuffer();
       const fileName = 'input' + (url.split('.').pop() || '.unknown');
+      await ffmpeg.writeFile(fileName, await fetchFile(url));
+      await ffmpeg.exec(['-i', fileName, '-f', 'wav', 'output.wav']);
 
-      ffmpeg.FS('writeFile', fileName, new Uint8Array(arrayBuffer));
-      await ffmpeg.run('-i', fileName, '-f', 'wav', 'output.wav');
-
-      const data = ffmpeg.FS('readFile', 'output.wav');
+      const data = await ffmpeg.readFile('output.wav');
       const pcmBlob = new Blob([data.buffer], { type: 'audio/wav' });
       const pcmUrl = URL.createObjectURL(pcmBlob);
 
