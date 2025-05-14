@@ -14,13 +14,13 @@ import { ErrorReason } from "@renderer/core/track-player/enum";
 import voidCallback from "@/common/void-callback";
 import { IAudioController } from "@/types/audio-controller";
 // import Promise = Dexie.Promise; // 暂时注释掉或在使用时避免混淆，或者使用 globalThis.Promise
-import { FFmpeg } from '@ffmpeg/ffmpeg'; // 修改为从 @ffmpeg/ffmpeg 导入 FFmpeg 类
-import { fetchFile } from '@/renderer/utils/fetch-file-helper'; // 从辅助文件导入 fetchFile
+import { FFmpeg, FileData } from '@ffmpeg/ffmpeg'; // 导入 FFmpeg 类 和 FileData 类型
+import { fetchFile } from '@/renderer/utils/fetch-file-helper';
 
 // FFmpeg 解码相关属性
-const ffmpeg = new FFmpeg(); // 使用 new FFmpeg() 创建实例
+const ffmpeg = new FFmpeg();
 
-ffmpeg.on('log', (e) => { // 移动日志监听器到实例创建后
+ffmpeg.on('log', (e) => {
   console.log(e.message);
 });
 
@@ -74,7 +74,7 @@ class AudioController extends ControllerBase implements IAudioController {
     this.audio.ontimeupdate = () => {
       this.onProgressUpdate?.({
         currentTime: this.audio.currentTime,
-        duration: this.audio.duration, // 缓冲中是Infinity
+        duration: this.audio.duration,
       });
     }
 
@@ -95,14 +95,12 @@ class AudioController extends ControllerBase implements IAudioController {
     window.ad = this.audio;
   }
 
-  // FFmpeg 解码方法
   private async decodeAudioWithFFmpeg(url: string): globalThis.Promise<string> {
     if (decodeCache.has(url)) return decodeCache.get(url)!;
 
     if (!isFfmpegLoaded) {
       await ffmpeg.load({
         coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js',
-        // wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm'
       });
       isFfmpegLoaded = true;
     }
@@ -112,8 +110,14 @@ class AudioController extends ControllerBase implements IAudioController {
       await ffmpeg.writeFile(fileName, await fetchFile(url));
       await ffmpeg.exec(['-i', fileName, '-f', 'wav', 'output.wav']);
 
-      const data = await ffmpeg.readFile('output.wav');
-      const pcmBlob = new Blob([data.buffer], { type: 'audio/wav' });
+      const data: FileData = await ffmpeg.readFile('output.wav');
+      let pcmBlob: Blob;
+      if (data instanceof Uint8Array) {
+        pcmBlob = new Blob([data.buffer], { type: 'audio/wav' });
+      } else {
+        console.error('FFmpeg readFile did not return Uint8Array for WAV output');
+        throw new Error('Unexpected data type from ffmpeg.readFile');
+      }
       const pcmUrl = URL.createObjectURL(pcmBlob);
 
       decodeCache.set(url, pcmUrl);
@@ -124,7 +128,6 @@ class AudioController extends ControllerBase implements IAudioController {
     }
   }
 
-  // 判断浏览器是否原生支持该格式
   private isNativeSupported(url: string): boolean {
     const audio = new Audio();
     const ext = url.split('.').pop()?.toLowerCase() || '';
