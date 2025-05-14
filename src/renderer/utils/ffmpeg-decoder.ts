@@ -1,10 +1,6 @@
-import { createFFmpeg } from '@ffmpeg/ffmpeg';
+import { FFmpeg } from '@ffmpeg/ffmpeg'; // 使用 { FFmpeg } 导入
 
-const ffmpeg = createFFmpeg({
-  log: false,
-  corePath: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js'
-});
-
+const ffmpeg = new FFmpeg(); // 使用 new FFmpeg() 创建实例
 let isLoaded = false;
 const decodeCache = new Map<string, string>();
 
@@ -12,7 +8,10 @@ export async function decodeAudioWithFFmpeg(url: string): Promise<string> {
   if (decodeCache.has(url)) return decodeCache.get(url)!;
 
   if (!isLoaded) {
-    await ffmpeg.load();
+    await ffmpeg.load({ // 配置在 load 方法中传入
+      coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js',
+      // log: false, // FFmpeg 实例的 log 属性似乎不是这样配置，通常在 load 或 run 时控制
+    });
     isLoaded = true;
   }
 
@@ -21,18 +20,15 @@ export async function decodeAudioWithFFmpeg(url: string): Promise<string> {
     if (!response.ok) throw new Error('Network response was not ok');
 
     const arrayBuffer = await response.arrayBuffer();
-    // const blob = new Blob([arrayBuffer], { // fetchFile 应该可以直接处理 ArrayBuffer
-    //   type: response.headers.get('content-type') || 'application/octet-stream'
-    // });
-    const fileName = 'input' + (url.split('.').pop() || '.unknown'); // 确保文件名有扩展名
+    const fileName = 'input' + (url.split('.').pop() || '.unknown');
 
     ffmpeg.FS('writeFile', fileName, new Uint8Array(arrayBuffer));
-    await ffmpeg.run('-i', fileName, '-f', 'wav', 'output.wav'); // -f wav 指定输出格式
+    await ffmpeg.run('-i', fileName, '-f', 'wav', 'output.wav');
 
     const data = ffmpeg.FS('readFile', 'output.wav');
     const pcmBlob = new Blob([data.buffer], { type: 'audio/wav' });
     const pcmUrl = URL.createObjectURL(pcmBlob);
-    
+
     decodeCache.set(url, pcmUrl);
     return pcmUrl;
   } catch (error) {
