@@ -311,7 +311,9 @@ class AudioController extends ControllerBase implements IAudioController {
             }
             console.log(`[AudioController] 本地文件存在，准备读取: ${filePath}`);
             const fileContentBuffer = await fsUtil.readFile(filePath, null);
-            if (!fileContentBuffer || fileContentBuffer.byteLength === 0) {
+            if (!fileContentBuffer || 
+                (typeof fileContentBuffer === 'string' && fileContentBuffer.length === 0) ||
+                (fileContentBuffer instanceof Buffer && fileContentBuffer.byteLength === 0)) {
                 console.error(`[AudioController] 本地文件读取失败或为空: ${filePath}`);
                 this.onError?.(ErrorReason.EmptyResource, new Error(`Failed to read local file or file is empty: ${filePath}`));
                 return;
