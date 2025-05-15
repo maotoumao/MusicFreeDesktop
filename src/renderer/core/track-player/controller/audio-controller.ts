@@ -1,3 +1,4 @@
+// src/renderer/core/track-player/controller/audio-controller.ts
 /**
  * 播放音乐
  */
@@ -10,23 +11,10 @@ import { PlayerState } from "@/common/constant";
 import ServiceManager from "@shared/service-manager/renderer";
 import ControllerBase from "@renderer/core/track-player/controller/controller-base";
 import { ErrorReason } from "@renderer/core/track-player/enum";
-// import Dexie from "dexie"; // 如果不需要 Dexie.Promise，可以注释掉
 import voidCallback from "@/common/void-callback";
 import { IAudioController } from "@/types/audio-controller";
-// import Promise = Dexie.Promise; // 暂时注释掉或在使用时避免混淆，或者使用 globalThis.Promise
-import { FFmpeg, FileData } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@/renderer/utils/fetch-file-helper';
-import { getGlobalContext } from "@shared/global-context/renderer"; // 新增导入
-
-// FFmpeg 解码相关属性
-const ffmpeg = new FFmpeg();
-
-ffmpeg.on('log', (e) => {
-  console.log(e.message);
-});
-
-let isFfmpegLoaded = false;
-const decodeCache = new Map<string, string>();
+import { decodeAudioWithFFmpeg } from '@/renderer/utils/ffmpeg-decoder'; // 确保导入
+import { fsUtil } from "@shared/utils/renderer"; // 确保导入
 
 class AudioController extends ControllerBase implements IAudioController {
   private audio: HTMLAudioElement;
@@ -55,7 +43,6 @@ class AudioController extends ControllerBase implements IAudioController {
     this.audio.preload = "auto";
     this.audio.controls = false;
 
-    ////// events
     this.audio.onplaying = () => {
       this.playerState = PlayerState.Playing;
       navigator.mediaSession.playbackState = "playing";
@@ -69,7 +56,10 @@ class AudioController extends ControllerBase implements IAudioController {
     this.audio.onerror = (event) => {
       this.playerState = PlayerState.Paused;
       navigator.mediaSession.playbackState = "paused";
-      this.onError?.(ErrorReason.EmptyResource, event as any);
+      // 避免在 FFmpeg 解码失败后，原生播放也失败时重复触发 onError
+      if (this.playerState !== PlayerState.None) { // 仅当之前不是 None 状态时（即已尝试播放）
+          this.onError?.(ErrorReason.EmptyResource, event as any);
+      }
     }
 
     this.audio.ontimeupdate = () => {
@@ -91,55 +81,24 @@ class AudioController extends ControllerBase implements IAudioController {
     this.audio.onratechange = () => {
       this.onSpeedChange?.(this.audio.playbackRate);
     }
-
     // @ts-ignore  isDev
     window.ad = this.audio;
   }
 
-  private async decodeAudioWithFFmpeg(url: string): globalThis.Promise<string> {
-    if (decodeCache.has(url)) return decodeCache.get(url)!;
-
-    if (!isFfmpegLoaded) {
-      console.log('加载ffmpeg-core.js (audio-controller)'); // 添加日志区分
-      const ffmpegAssetsPath = `file://${getGlobalContext().appPath.res}/.ffmpeg-assets`;
-      await ffmpeg.load({
-        coreURL: `${ffmpegAssetsPath}/ffmpeg-core.js`,
-        wasmURL: `${ffmpegAssetsPath}/ffmpeg-core.wasm`,
-        // workerURL: `${ffmpegAssetsPath}/ffmpeg-core-mt.worker.js`, // 如果使用多线程核心
-        classWorkerURL: `${ffmpegAssetsPath}/ffmpeg-main.worker.js`
-      });
-      isFfmpegLoaded = true;
-    }
-
-    try {
-      const fileName = 'input' + (url.split('.').pop() || '.unknown');
-      await ffmpeg.writeFile(fileName, await fetchFile(url));
-      await ffmpeg.exec(['-i', fileName, '-f', 'wav', 'output.wav']);
-
-      const data: FileData = await ffmpeg.readFile('output.wav');
-      let pcmBlob: Blob;
-      if (data instanceof Uint8Array) {
-        pcmBlob = new Blob([data.buffer], { type: 'audio/wav' });
-      } else {
-        console.error('FFmpeg readFile did not return Uint8Array for WAV output');
-        throw new Error('Unexpected data type from ffmpeg.readFile');
-      }
-      const pcmUrl = URL.createObjectURL(pcmBlob);
-
-      decodeCache.set(url, pcmUrl);
-      return pcmUrl;
-    } catch (error) {
-      console.error('FFmpeg 解码失败:', error);
-      throw error;
-    }
-  }
 
   private isNativeSupported(url: string): boolean {
-    const audio = new Audio();
-    const ext = url.split('.').pop()?.toLowerCase() || '';
-    return ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a'].includes(ext) ||
-           audio.canPlayType(`audio/${ext}`) !== '';
+    const audio = document.createElement('audio'); // 使用临时 audio 元素
+    const ext = (url.split('.').pop()?.toLowerCase() || '').split('?')[0]; // 移除查询参数
+    const mimeType = `audio/${ext}`;
+
+    // 常见格式的快速检查
+    if (['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus'].includes(ext)) {
+        if (audio.canPlayType(mimeType) !== '') return true;
+    }
+    // 对于更复杂的 URL 或不常见的扩展名，依赖 canPlayType
+    return audio.canPlayType(mimeType) !== '';
   }
+
 
   private initHls(config?: Partial<HlsConfig>) {
     if (!this.hls) {
@@ -173,7 +132,10 @@ class AudioController extends ControllerBase implements IAudioController {
 
   play(): void {
     if (this.hasSource) {
-      this.audio.play().catch(voidCallback);
+      this.audio.play().catch((e) => {
+        console.error("HTMLAudioElement play() failed:", e);
+        this.onError?.(ErrorReason.EmptyResource, e);
+      });
     }
   }
 
@@ -181,6 +143,11 @@ class AudioController extends ControllerBase implements IAudioController {
     this.playerState = PlayerState.None;
     this.audio.src = "";
     this.audio.removeAttribute("src");
+    if (this.musicItem && this.musicItem.id && decodeCache.has(this.musicItem.id)) { // 假设musicItem.id可以作为cache的key
+        URL.revokeObjectURL(decodeCache.get(this.musicItem.id));
+        decodeCache.delete(this.musicItem.id);
+    }
+    this.musicItem = null;
     navigator.mediaSession.metadata = null;
     navigator.mediaSession.playbackState = "none";
   }
@@ -222,8 +189,8 @@ class AudioController extends ControllerBase implements IAudioController {
       ],
     });
 
-    this.playerState = PlayerState.None;
-    this.audio.src = "";
+    this.playerState = PlayerState.None; // 重置状态
+    this.audio.src = ""; // 清空旧源
     this.audio.removeAttribute("src");
     navigator.mediaSession.playbackState = "none";
   }
@@ -273,7 +240,7 @@ class AudioController extends ControllerBase implements IAudioController {
       if (forwardedUrl) {
         url = forwardedUrl;
         headers = null;
-      } else if (!headers["Authorization"]) {
+      } else if (!headers["Authorization"]) { // 只对没有 Authorization 的进行 URL 编码，因为 Authorization 可能很长
         url = encodeUrlHeaders(url, headers);
         headers = null;
       }
@@ -284,44 +251,62 @@ class AudioController extends ControllerBase implements IAudioController {
       return;
     }
 
-    if (getUrlExt(trackSource.url) === ".m3u8") {
+    // 尝试原生播放
+    if (this.isNativeSupported(url)) {
+        console.log(`[AudioController] 原生支持格式，直接播放: ${url}`);
+        if (headers) { // 如果仍然有 headers (例如 Authorization)
+            fetch(url, { method: "GET", headers })
+                .then(async (res) => {
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    const blob = await res.blob();
+                    if (isSameMedia(this.musicItem, musicItem)) { // 检查是否还是当前歌曲
+                        this.audio.src = URL.createObjectURL(blob);
+                    } else {
+                        URL.revokeObjectURL(URL.createObjectURL(blob)); // 不是当前歌曲，释放资源
+                    }
+                }).catch(e => {
+                    console.error(`[AudioController] 带 Headers Fetch 失败 for ${url}:`, e);
+                    this.onError?.(ErrorReason.EmptyResource, e);
+                });
+        } else {
+            this.audio.src = url;
+        }
+    } else if (getUrlExt(trackSource.url) === ".m3u8") {
+      console.log(`[AudioController] M3U8 格式，使用 HLS.js 播放: ${url}`);
       if (Hls.isSupported()) {
         this.initHls();
         this.hls.loadSource(url);
       } else {
+        console.error('[AudioController] HLS.js 不被支持');
         this.onError(ErrorReason.UnsupportedResource);
         return;
       }
     } else {
+      // 非原生支持，尝试 FFmpeg 解码
+      console.log(`[AudioController] 非原生支持格式，尝试 FFmpeg 解码: ${url}`);
       try {
-        const pcmUrl = await this.decodeAudioWithFFmpeg(url);
-        this.audio.src = pcmUrl;
-      } catch (error) {
-        if (this.isNativeSupported(url)) {
-          if (headers) {
-            fetch(url, {
-                method: "GET",
-                headers: {
-                    ...headers,
-                },
-            })
-            .then(async (res) => {
-                const blob = await res.blob();
-                if (isSameMedia(this.musicItem, musicItem)) {
-                    this.audio.src = URL.createObjectURL(blob);
-                }
-            }).catch(e => {
-                console.error('Fetch with headers failed:', e);
-                this.onError?.(ErrorReason.EmptyResource, e);
-            });
-          } else {
-             this.audio.src = url;
-          }
-        } else {
-          console.error('无法播放该格式:', error);
-          this.onError?.(ErrorReason.EmptyResource, error);
-          return;
+        let inputData: string | Uint8Array = url;
+        // 对本地文件特殊处理
+        if (url.startsWith('file://')) {
+            const filePath = decodeURIComponent(url.replace(/^file:\/\//, ''));
+            console.log(`[AudioController] 本地文件路径: ${filePath}`);
+            // 注意：fsUtil.readFile 需要返回 Uint8Array 或 ArrayBuffer
+            const fileContentBuffer = await fsUtil.readFile(filePath, null); // 假设返回 ArrayBuffer
+            inputData = new Uint8Array(fileContentBuffer as ArrayBuffer);
+            console.log(`[AudioController] 本地文件读取成功，大小: ${inputData.byteLength}`);
         }
+        // 解码操作
+        const pcmUrl = await decodeAudioWithFFmpeg(inputData);
+        console.log(`[AudioController] FFmpeg 解码成功，PCM URL: ${pcmUrl}`);
+        if (isSameMedia(this.musicItem, musicItem)) { // 再次检查
+            this.audio.src = pcmUrl;
+        } else {
+            URL.revokeObjectURL(pcmUrl); // 不是当前歌曲，释放资源
+        }
+      } catch (error) {
+        console.error('[AudioController] FFmpeg 解码失败:', error);
+        this.onError?.(ErrorReason.UnsupportedResource, error);
+        return;
       }
     }
   }
