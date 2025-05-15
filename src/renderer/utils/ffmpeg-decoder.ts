@@ -2,6 +2,8 @@
 import { FFmpeg, FileData } from '@ffmpeg/ffmpeg';
 import { fetchFile } from './fetch-file-helper';
 import { getGlobalContext } from "@shared/global-context/renderer";
+import { fsUtil } from "@shared/utils/renderer";
+import { getMediaPrimaryKey } from '@/common/media-util'; // 确保导入，如果你要在外部使用
 
 const ffmpeg = new FFmpeg();
 
@@ -13,7 +15,24 @@ ffmpeg.on('progress', (p) => {
 });
 
 let isLoaded = false;
-const decodeCache = new Map<string, string>(); // 保持私有
+const decodeCache = new Map<string, string>();
+
+async function createBlobURLFromLocalFile(filePath: string, type: string): Promise<string> {
+  try {
+    console.log(`[FFmpeg Decoder] Reading local file for Blob URL: ${filePath}`);
+    const fileContent = await fsUtil.readFile(filePath, null); // 假设返回 ArrayBuffer
+    if (!fileContent || (fileContent as ArrayBuffer).byteLength === 0) {
+      throw new Error(`File content is empty or null for ${filePath}`);
+    }
+    const blob = new Blob([fileContent as ArrayBuffer], { type });
+    const blobUrl = URL.createObjectURL(blob);
+    console.log(`[FFmpeg Decoder] Created Blob URL for ${filePath}: ${blobUrl.substring(0, 100)}...`); // 只打印部分 URL
+    return blobUrl;
+  } catch (error) {
+    console.error(`[FFmpeg Decoder] Error creating Blob URL from ${filePath}:`, error);
+    throw error;
+  }
+}
 
 export function clearDecodeCacheKey(key: string) {
   const pcmUrl = decodeCache.get(key);
@@ -24,17 +43,10 @@ export function clearDecodeCacheKey(key: string) {
   }
 }
 
-export function clearAllDecodeCache() {
-  decodeCache.forEach((url) => URL.revokeObjectURL(url));
-  decodeCache.clear();
-  console.log('[FFmpeg Decoder] All decode cache cleared.');
-}
-
 export async function decodeAudioWithFFmpeg(
   urlOrData: string | Uint8Array,
-  stableCacheKey?: string // 接收一个可选的稳定缓存键
+  stableCacheKey?: string
 ): globalThis.Promise<string> {
-  // 如果没有提供 stableCacheKey，则根据输入类型简单生成一个
   const internalCacheKey = stableCacheKey || (typeof urlOrData === 'string' ? urlOrData : `data-${urlOrData.byteLength}`);
   console.log(`[decodeAudioWithFFmpeg] 请求解码, 缓存键: ${internalCacheKey}`);
 
@@ -45,30 +57,32 @@ export async function decodeAudioWithFFmpeg(
 
   if (!isLoaded) {
     console.log('[decodeAudioWithFFmpeg] FFmpeg 未加载，开始加载...');
-    const ffmpegAssetsPath = `file://${getGlobalContext().appPath.res}/.ffmpeg-assets`;
-    console.log(`[decodeAudioWithFFmpeg] FFmpeg assets 基础路径: ${ffmpegAssetsPath}`);
+    const ffmpegAssetsBasePath = `${getGlobalContext().appPath.res}/.ffmpeg-assets`;
+    console.log(`[decodeAudioWithFFmpeg] FFmpeg assets 本地文件基础路径: ${ffmpegAssetsBasePath}`);
 
-    const coreURL = `${ffmpegAssetsPath}/ffmpeg-core.js`;
-    const wasmURL = `${ffmpegAssetsPath}/ffmpeg-core.wasm`;
-    const classWorkerURL = `${ffmpegAssetsPath}/ffmpeg-main.worker.js`;
-
-    console.log(`[decodeAudioWithFFmpeg] coreURL: ${coreURL}`);
-    console.log(`[decodeAudioWithFFmpeg] wasmURL: ${wasmURL}`);
-    console.log(`[decodeAudioWithFFmpeg] classWorkerURL (for FFmpeg.exec): ${classWorkerURL}`);
+    const coreURLPath = window.path.join(ffmpegAssetsBasePath, 'ffmpeg-core.js');
+    const wasmURLPath = window.path.join(ffmpegAssetsBasePath, 'ffmpeg-core.wasm');
+    const classWorkerURLPath = window.path.join(ffmpegAssetsBasePath, 'ffmpeg-main.worker.js');
 
     try {
+      console.log(`[decodeAudioWithFFmpeg] 准备加载核心文件为 Blob URL...`);
+      const coreBlobURL = await createBlobURLFromLocalFile(coreURLPath, 'application/javascript');
+      const wasmBlobURL = await createBlobURLFromLocalFile(wasmURLPath, 'application/wasm');
+      const classWorkerBlobURL = await createBlobURLFromLocalFile(classWorkerURLPath, 'application/javascript');
+
+      console.log(`[decodeAudioWithFFmpeg] coreBlobURL (first 100 chars): ${coreBlobURL.substring(0,100)}...`);
+      console.log(`[decodeAudioWithFFmpeg] wasmBlobURL (first 100 chars): ${wasmBlobURL.substring(0,100)}...`);
+      console.log(`[decodeAudioWithFFmpeg] classWorkerBlobURL (first 100 chars): ${classWorkerBlobURL.substring(0,100)}...`);
+
       await ffmpeg.load({
-        coreURL: coreURL,
-        wasmURL: wasmURL,
-        classWorkerURL: classWorkerURL,
+        coreURL: coreBlobURL,
+        wasmURL: wasmBlobURL,
+        classWorkerURL: classWorkerBlobURL,
       });
       console.log('[decodeAudioWithFFmpeg] FFmpeg 加载成功!');
       isLoaded = true;
     } catch (error) {
       console.error('[decodeAudioWithFFmpeg] FFmpeg 加载失败:', error);
-      if (error.name === 'NetworkError' || error.message.includes('fetch')) {
-          console.error('[decodeAudioWithFFmpeg] FFmpeg 核心文件网络加载错误，请检查路径和CSP设置。');
-      }
       throw error;
     }
   } else {
@@ -81,21 +95,21 @@ export async function decodeAudioWithFFmpeg(
 
     let fileDataInstance: Uint8Array;
     if (typeof urlOrData === 'string') {
-        console.log(`[decodeAudioWithFFmpeg] FFmpeg: 准备通过 fetchFile 获取文件内容: ${urlOrData}`);
-        fileDataInstance = await fetchFile(urlOrData);
+        console.log(`[decodeAudioWithFFmpeg] FFmpeg: 准备通过 fetchFile 获取网络文件内容: ${urlOrData}`);
+        fileDataInstance = await fetchFile(urlOrData); // fetchFile 用于网络 URL
          if (!fileDataInstance || fileDataInstance.byteLength === 0) {
-            console.error(`[decodeAudioWithFFmpeg] fetchFile未能获取到有效数据 for URL: ${urlOrData}`);
+            console.error(`[decodeAudioWithFFmpeg] fetchFile 未能获取到有效数据 for URL: ${urlOrData}`);
             throw new Error(`fetchFile returned empty data for ${urlOrData}`);
         }
     } else {
-        fileDataInstance = urlOrData;
+        fileDataInstance = urlOrData; // 如果已经是 Uint8Array (例如本地文件读取后)
     }
     console.log(`[decodeAudioWithFFmpeg] 获取数据大小: ${fileDataInstance?.byteLength}`);
 
     console.log(`[decodeAudioWithFFmpeg] FFmpeg: 准备写入文件 ${inputFileName}`);
     await ffmpeg.writeFile(inputFileName, fileDataInstance);
     console.log(`[decodeAudioWithFFmpeg] FFmpeg: 文件写入完成 ${inputFileName}, 开始执行解码...`);
-    await ffmpeg.exec(['-i', inputFileName, '-c:a', 'pcm_s16le', '-f', 'wav', outputFileName]);
+    await ffmpeg.exec(['-i', inputFileName, '-c:a', 'pcm_s16le', '-ar', '44100', '-ac', '2', '-f', 'wav', outputFileName]);
     console.log('[decodeAudioWithFFmpeg] FFmpeg: 解码完成, 准备读取输出文件.');
 
     const dataOutput: FileData = await ffmpeg.readFile(outputFileName);
@@ -107,7 +121,7 @@ export async function decodeAudioWithFFmpeg(
       throw new Error('Unexpected data type from ffmpeg.readFile');
     }
     const pcmUrl = URL.createObjectURL(pcmBlob);
-    console.log(`[decodeAudioWithFFmpeg] 生成 PCM URL: ${pcmUrl}`);
+    console.log(`[decodeAudioWithFFmpeg] 生成 PCM URL: ${pcmUrl.substring(0,100)}...`);
 
     await ffmpeg.deleteFile(inputFileName);
     await ffmpeg.deleteFile(outputFileName);
