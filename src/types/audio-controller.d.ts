@@ -13,7 +13,7 @@ export interface IAudioController {
     prepareTrack?(musicItem: IMusic.IMusicItem): void;
 
     // 设置音源
-    setTrackSource(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem): void;
+    setTrackSource(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem): Promise<boolean>;
 
     // 暂停
     pause(): void;
