@@ -3,16 +3,11 @@ import { FFmpeg, FileData } from '@ffmpeg/ffmpeg';
 import { fetchFile } from './fetch-file-helper';
 import { getGlobalContext } from "@shared/global-context/renderer";
 import { fsUtil } from "@shared/utils/renderer"; // 确保 fsUtil 已正确暴露并可用
-import { getMediaPrimaryKey } from '@/common/media-util';
 
 const ffmpeg = new FFmpeg();
 
-ffmpeg.on('log', (e) => {
-  console.log(`[FFmpeg log]: ${e.type} - ${e.message.substring(0, 500)}`); // 截断过长的日志
-});
-ffmpeg.on('progress', (p) => {
-  console.log('[FFmpeg progress]:', p);
-});
+ffmpeg.on('log', ({ message }) => console.log('[FFmpeg log]:', message));
+ffmpeg.on('progress', (p) => console.log('[FFmpeg progress]:', p));
 
 let isLoaded = false;
 const decodeCache = new Map<string, string>();
@@ -118,7 +113,15 @@ export async function decodeAudioWithFFmpeg(
     await ffmpeg.writeFile(inputFileName, fileDataInstance);
     console.log(`[decodeAudioWithFFmpeg] FFmpeg: 文件写入完成 ${inputFileName}, 开始执行解码...`);
     // PCM s16le 是 WAV 文件中常见的未压缩音频格式
-    await ffmpeg.exec(['-i', inputFileName, '-c:a', 'pcm_s16le', '-ar', '44100', '-ac', '2', '-f', 'wav', outputFileName]);
+    await ffmpeg.exec([
+      '-i', inputFileName,
+      '-vn', '-sn', // 禁用视频和字幕
+      '-acodec', 'pcm_s16le', // 强制使用 PCM 16-bit
+      '-ar', '44100', // 采样率
+      '-ac', '2', // 声道数
+      '-f', 'wav',
+      outputFileName
+    ]);
     console.log('[decodeAudioWithFFmpeg] FFmpeg: 解码完成, 准备读取输出文件.');
 
     const dataOutput: FileData = await ffmpeg.readFile(outputFileName);
