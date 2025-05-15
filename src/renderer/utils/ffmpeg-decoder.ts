@@ -17,8 +17,8 @@ export async function decodeAudioWithFFmpeg(url: string): globalThis.Promise<str
     // messageText.value = '加载ffmpeg-core.js'; // 移除或替换此行
     console.log('加载ffmpeg-core.js'); // 使用 console.log 替代
     await ffmpeg.load({
-      coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js',
-      // wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm'
+      coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js',
+      wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm'
     });
     isLoaded = true;
   }
