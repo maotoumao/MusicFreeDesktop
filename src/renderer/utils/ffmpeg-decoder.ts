@@ -6,26 +6,42 @@ import { getGlobalContext } from "@shared/global-context/renderer";
 const ffmpeg = new FFmpeg();
 
 ffmpeg.on('log', (e) => {
-  // 你可以根据需要过滤日志，例如只显示错误或关键信息
-  // if (e.type === 'fferr' || e.message.includes('Input') || e.message.includes('Output')) {
   console.log(`[FFmpeg log]: ${e.type} - ${e.message}`);
-  // }
 });
 ffmpeg.on('progress', (p) => {
   console.log('[FFmpeg progress]:', p);
 });
 
-
 let isLoaded = false;
-const decodeCache = new Map<string, string>();
+// 导出 decodeCache
+export const decodeCache = new Map<string, string>();
 
-export async function decodeAudioWithFFmpeg(urlOrData: string | Uint8Array): globalThis.Promise<string> {
-  const cacheKey = typeof urlOrData === 'string' ? urlOrData : `data-${urlOrData.byteLength}`; // 简单生成缓存键
-  console.log(`[decodeAudioWithFFmpeg] 请求解码: ${typeof urlOrData === 'string' ? urlOrData : `Uint8Array (size: ${urlOrData.byteLength})`}`);
+export function clearDecodeCacheKey(key: string) {
+  const pcmUrl = decodeCache.get(key);
+  if (pcmUrl) {
+    URL.revokeObjectURL(pcmUrl);
+    decodeCache.delete(key);
+    console.log(`[FFmpeg Decoder] Cleared cache for key: ${key}`);
+  }
+}
 
-  if (decodeCache.has(cacheKey)) {
-    console.log(`[decodeAudioWithFFmpeg] 从缓存返回 PCM URL for: ${cacheKey}`);
-    return decodeCache.get(cacheKey)!;
+export function clearAllDecodeCache() {
+  decodeCache.forEach((url) => URL.revokeObjectURL(url));
+  decodeCache.clear();
+  console.log('[FFmpeg Decoder] All decode cache cleared.');
+}
+
+
+export async function decodeAudioWithFFmpeg(
+  urlOrData: string | Uint8Array,
+  stableCacheKey?: string // 接收一个稳定的缓存键
+): globalThis.Promise<string> {
+  const internalCacheKey = stableCacheKey || (typeof urlOrData === 'string' ? urlOrData : `data-${urlOrData.byteLength}`);
+  console.log(`[decodeAudioWithFFmpeg] 请求解码, 缓存键: ${internalCacheKey}`);
+
+  if (decodeCache.has(internalCacheKey)) {
+    console.log(`[decodeAudioWithFFmpeg] 从缓存返回 PCM URL for: ${internalCacheKey}`);
+    return decodeCache.get(internalCacheKey)!;
   }
 
   if (!isLoaded) {
@@ -46,10 +62,6 @@ export async function decodeAudioWithFFmpeg(urlOrData: string | Uint8Array): glo
         coreURL: coreURL,
         wasmURL: wasmURL,
         classWorkerURL: classWorkerURL,
-        // 如果使用的是单线程 @ffmpeg/core，则不需要 workerURL
-        // 如果使用的是多线程 @ffmpeg/core-mt，你需要确保相应的 worker 文件 (例如 ffmpeg-core-mt.worker.js)
-        // 存在于 ffmpegAssetsPath下，并取消注释下面这行：
-        // workerURL: `${ffmpegAssetsPath}/ffmpeg-core-mt.worker.js`,
       });
       console.log('[decodeAudioWithFFmpeg] FFmpeg 加载成功!');
       isLoaded = true;
@@ -98,12 +110,11 @@ export async function decodeAudioWithFFmpeg(urlOrData: string | Uint8Array): glo
     const pcmUrl = URL.createObjectURL(pcmBlob);
     console.log(`[decodeAudioWithFFmpeg] 生成 PCM URL: ${pcmUrl}`);
 
-    // 清理 FFmpeg 虚拟文件系统中的文件
     await ffmpeg.deleteFile(inputFileName);
     await ffmpeg.deleteFile(outputFileName);
     console.log('[decodeAudioWithFFmpeg] 清理虚拟文件系统中的临时文件');
 
-    decodeCache.set(cacheKey, pcmUrl);
+    decodeCache.set(internalCacheKey, pcmUrl);
     return pcmUrl;
   } catch (error) {
     console.error('[decodeAudioWithFFmpeg] FFmpeg 解码或文件操作失败:', error);

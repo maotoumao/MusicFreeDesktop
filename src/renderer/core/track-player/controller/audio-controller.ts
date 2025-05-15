@@ -6,14 +6,14 @@ import { encodeUrlHeaders } from "@/common/normalize-util";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import getUrlExt from "@/renderer/utils/get-url-ext";
 import Hls, { Events as HlsEvents, HlsConfig } from "hls.js";
-import { isSameMedia } from "@/common/media-util";
+import { isSameMedia, getMediaPrimaryKey } from "@/common/media-util"; // 确保导入 getMediaPrimaryKey
 import { PlayerState } from "@/common/constant";
 import ServiceManager from "@shared/service-manager/renderer";
 import ControllerBase from "@renderer/core/track-player/controller/controller-base";
 import { ErrorReason } from "@renderer/core/track-player/enum";
 import voidCallback from "@/common/void-callback";
 import { IAudioController } from "@/types/audio-controller";
-import { decodeAudioWithFFmpeg } from '@/renderer/utils/ffmpeg-decoder'; // 确保导入
+import { decodeAudioWithFFmpeg, clearDecodeCacheKey } from '@/renderer/utils/ffmpeg-decoder'; // 确保导入 decodeAudioWithFFmpeg 和 clearDecodeCacheKey
 import { fsUtil } from "@shared/utils/renderer"; // 确保导入
 
 class AudioController extends ControllerBase implements IAudioController {
@@ -54,12 +54,11 @@ class AudioController extends ControllerBase implements IAudioController {
     }
 
     this.audio.onerror = (event) => {
-      this.playerState = PlayerState.Paused;
+      const currentSrc = this.audio.currentSrc;
+      console.error(`[AudioController] HTMLAudioElement error for src: ${currentSrc}`, event);
+      this.playerState = PlayerState.Paused; // 确保先设置状态
       navigator.mediaSession.playbackState = "paused";
-      // 避免在 FFmpeg 解码失败后，原生播放也失败时重复触发 onError
-      if (this.playerState !== PlayerState.None) { // 仅当之前不是 None 状态时（即已尝试播放）
-          this.onError?.(ErrorReason.EmptyResource, event as any);
-      }
+      this.onError?.(ErrorReason.EmptyResource, event as any); // 直接调用 onError
     }
 
     this.audio.ontimeupdate = () => {
@@ -88,6 +87,7 @@ class AudioController extends ControllerBase implements IAudioController {
 
   private isNativeSupported(url: string): boolean {
     const audio = document.createElement('audio'); // 使用临时 audio 元素
+    if (!url) return false; // 增加 URL 有效性检查
     const ext = (url.split('.').pop()?.toLowerCase() || '').split('?')[0]; // 移除查询参数
     const mimeType = `audio/${ext}`;
 
@@ -143,10 +143,12 @@ class AudioController extends ControllerBase implements IAudioController {
     this.playerState = PlayerState.None;
     this.audio.src = "";
     this.audio.removeAttribute("src");
-    if (this.musicItem && this.musicItem.id && decodeCache.has(this.musicItem.id)) { // 假设musicItem.id可以作为cache的key
-        URL.revokeObjectURL(decodeCache.get(this.musicItem.id));
-        decodeCache.delete(this.musicItem.id);
+
+    if (this.musicItem) {
+      const cacheKeyToClear = getMediaPrimaryKey(this.musicItem);
+      clearDecodeCacheKey(cacheKeyToClear);
     }
+
     this.musicItem = null;
     navigator.mediaSession.metadata = null;
     navigator.mediaSession.playbackState = "none";
@@ -210,46 +212,51 @@ class AudioController extends ControllerBase implements IAudioController {
     });
 
     let url = trackSource.url;
-    const urlObj = new URL(trackSource.url);
     let headers: Record<string, any> | null = null;
 
-    if (trackSource.headers || trackSource.userAgent) {
-      headers = {...(trackSource.headers ?? {})};
-      if (trackSource.userAgent) {
-        headers["user-agent"] = trackSource.userAgent;
-      }
+    if (url) { // 确保url存在
+        const urlObj = new URL(trackSource.url); // 现在可以安全地创建
+        if (trackSource.headers || trackSource.userAgent) {
+            headers = {...(trackSource.headers ?? {})};
+            if (trackSource.userAgent) {
+                headers["user-agent"] = trackSource.userAgent;
+            }
+        }
+
+        if (urlObj.username && urlObj.password) {
+            const authHeader = `Basic ${btoa(
+                `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
+                urlObj.password
+                )}`
+            )}`;
+            urlObj.username = "";
+            urlObj.password = "";
+            headers = {
+                ...(headers || {}),
+                Authorization: authHeader,
+            }
+            url = urlObj.toString();
+        }
+
+        if (headers) {
+            const forwardedUrl = ServiceManager.RequestForwarderService.forwardRequest(url, "GET", headers);
+            if (forwardedUrl) {
+                url = forwardedUrl;
+                headers = null;
+            } else if (!headers["Authorization"]) {
+                url = encodeUrlHeaders(url, headers);
+                headers = null;
+            }
+        }
     }
 
-    if (urlObj.username && urlObj.password) {
-      const authHeader = `Basic ${btoa(
-        `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
-          urlObj.password
-        )}`
-      )}`;
-      urlObj.username = "";
-      urlObj.password = "";
-      headers = {
-        ...(headers || {}),
-        Authorization: authHeader,
-      }
-      url = urlObj.toString();
-    }
-
-    if (headers) {
-      const forwardedUrl = ServiceManager.RequestForwarderService.forwardRequest(url, "GET", headers);
-      if (forwardedUrl) {
-        url = forwardedUrl;
-        headers = null;
-      } else if (!headers["Authorization"]) { // 只对没有 Authorization 的进行 URL 编码，因为 Authorization 可能很长
-        url = encodeUrlHeaders(url, headers);
-        headers = null;
-      }
-    }
 
     if (!url) {
       this.onError(ErrorReason.EmptyResource, new Error("url is empty"));
       return;
     }
+
+    const stableCacheKey = getMediaPrimaryKey(musicItem); // 生成稳定的缓存键
 
     // 尝试原生播放
     if (this.isNativeSupported(url)) {
@@ -290,13 +297,17 @@ class AudioController extends ControllerBase implements IAudioController {
         if (url.startsWith('file://')) {
             const filePath = decodeURIComponent(url.replace(/^file:\/\//, ''));
             console.log(`[AudioController] 本地文件路径: ${filePath}`);
-            // 注意：fsUtil.readFile 需要返回 Uint8Array 或 ArrayBuffer
-            const fileContentBuffer = await fsUtil.readFile(filePath, null); // 假设返回 ArrayBuffer
+            const fileContentBuffer = await fsUtil.readFile(filePath, null);
+             if (!fileContentBuffer) {
+                console.error(`[AudioController] 本地文件读取失败: ${filePath}`);
+                this.onError?.(ErrorReason.EmptyResource, new Error(`Failed to read local file: ${filePath}`));
+                return;
+            }
             inputData = new Uint8Array(fileContentBuffer as ArrayBuffer);
             console.log(`[AudioController] 本地文件读取成功，大小: ${inputData.byteLength}`);
         }
         // 解码操作
-        const pcmUrl = await decodeAudioWithFFmpeg(inputData);
+        const pcmUrl = await decodeAudioWithFFmpeg(inputData, stableCacheKey);
         console.log(`[AudioController] FFmpeg 解码成功，PCM URL: ${pcmUrl}`);
         if (isSameMedia(this.musicItem, musicItem)) { // 再次检查
             this.audio.src = pcmUrl;
