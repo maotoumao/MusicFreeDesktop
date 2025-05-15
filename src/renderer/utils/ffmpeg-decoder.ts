@@ -13,8 +13,7 @@ ffmpeg.on('progress', (p) => {
 });
 
 let isLoaded = false;
-// 导出 decodeCache
-export const decodeCache = new Map<string, string>();
+const decodeCache = new Map<string, string>(); // 保持私有
 
 export function clearDecodeCacheKey(key: string) {
   const pcmUrl = decodeCache.get(key);
@@ -31,11 +30,11 @@ export function clearAllDecodeCache() {
   console.log('[FFmpeg Decoder] All decode cache cleared.');
 }
 
-
 export async function decodeAudioWithFFmpeg(
   urlOrData: string | Uint8Array,
-  stableCacheKey?: string // 接收一个稳定的缓存键
+  stableCacheKey?: string // 接收一个可选的稳定缓存键
 ): globalThis.Promise<string> {
+  // 如果没有提供 stableCacheKey，则根据输入类型简单生成一个
   const internalCacheKey = stableCacheKey || (typeof urlOrData === 'string' ? urlOrData : `data-${urlOrData.byteLength}`);
   console.log(`[decodeAudioWithFFmpeg] 请求解码, 缓存键: ${internalCacheKey}`);
 
