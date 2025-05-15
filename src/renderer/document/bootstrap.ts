@@ -17,6 +17,8 @@ import throttle from "lodash.throttle";
 import {IAppState} from "@shared/message-bus/type";
 import MusicDetail from "@renderer/components/MusicDetail";
 import shortCut from "@shared/short-cut/renderer";
+import ffmpegService from "@/renderer/core/ffmpeg"; // 引入 FFmpegService
+import logger from "@/shared/logger/renderer";
 
 
 setAutoFreeze(false);
@@ -51,6 +53,13 @@ export default async function () {
             PluginManager.updateAllPlugins();
         }
     }
+
+    logger.logInfo('[Bootstrap] Initializing FFmpeg service...');
+    ffmpegService.load().then(() => {
+        logger.logInfo('[Bootstrap] FFmpeg service initialized.');
+    }).catch(error => {
+        logger.logError('[Bootstrap] Failed to initialize FFmpeg service on startup.', error);
+    });
 
 }
 

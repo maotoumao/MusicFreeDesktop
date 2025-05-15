@@ -65,6 +65,17 @@ export const supportLocalMediaType = [
     ".opus",
 ];
 
+export const browserSupportedAudioExtensions = [
+    ".mp3",
+    ".wav",
+    ".ogg", // Ogg Vorbis
+    ".aac",
+    ".m4a", // 通常是 AAC in MP4 container
+    ".flac", // Firefox, Chrome >= 56, Edge >= 16
+    ".weba", // WebM audio (Opus or Vorbis)
+    ".opus" // Opus in Ogg container
+];
+
 export const toastDuration = {
     short: 1000,
     long: 2500,
