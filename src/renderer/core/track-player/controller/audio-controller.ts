@@ -14,8 +14,9 @@ import { ErrorReason } from "@renderer/core/track-player/enum";
 import voidCallback from "@/common/void-callback";
 import { IAudioController } from "@/types/audio-controller";
 // import Promise = Dexie.Promise; // 暂时注释掉或在使用时避免混淆，或者使用 globalThis.Promise
-import { FFmpeg, FileData } from '@ffmpeg/ffmpeg'; // 导入 FFmpeg 类 和 FileData 类型
+import { FFmpeg, FileData } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@/renderer/utils/fetch-file-helper';
+import { getGlobalContext } from "@shared/global-context/renderer"; // 新增导入
 
 // FFmpeg 解码相关属性
 const ffmpeg = new FFmpeg();
@@ -99,8 +100,13 @@ class AudioController extends ControllerBase implements IAudioController {
     if (decodeCache.has(url)) return decodeCache.get(url)!;
 
     if (!isFfmpegLoaded) {
+      console.log('加载ffmpeg-core.js (audio-controller)'); // 添加日志区分
+      const ffmpegAssetsPath = `file://${getGlobalContext().appPath.res}/.ffmpeg-assets`;
       await ffmpeg.load({
-        coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js',
+        coreURL: `${ffmpegAssetsPath}/ffmpeg-core.js`,
+        wasmURL: `${ffmpegAssetsPath}/ffmpeg-core.wasm`,
+        // workerURL: `${ffmpegAssetsPath}/ffmpeg-core-mt.worker.js`, // 如果使用多线程核心
+        classWorkerURL: `${ffmpegAssetsPath}/ffmpeg-main.worker.js`
       });
       isFfmpegLoaded = true;
     }
