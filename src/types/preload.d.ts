@@ -1,11 +1,10 @@
 // src/types/preload.d.ts
-import { PlayerState } from "@/common/constant";
-import type NodePath from "node:path"; // 导入 NodeJS path 模块的类型
+// import type NodePath from "node:path"; // 不再需要
 
 interface Window {
-  path: typeof NodePath; // 声明 window.path 的类型为 NodeJS path 模块的类型
+  // path: typeof NodePath; // <--- 移除这一行
   electron: {
-    // ... 其他已有的 electron API
+    // ... (保留其他 electron API 声明)
     mpvPlayer: {
       initialize: () => Promise<boolean>;
       load: (filePath: string, track: IMusic.IMusicItem) => Promise<void>;
@@ -33,6 +32,7 @@ interface Window {
       onInitSuccess: (callback: () => void) => Electron.IpcRenderer;
       removeAllMpvListeners: (channel?: string) => void;
     };
-    // 如果还有其他通过 contextBridge 暴露的 API，也在这里声明
   };
+  // 如果 @shared/utils 模块仍然通过 contextBridge 暴露，保留其类型声明
+  // 例如: ['@shared/utils']: typeof import('../shared/utils/preload').mod;
 }

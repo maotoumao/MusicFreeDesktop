@@ -1,3 +1,4 @@
+// forge.config.ts
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { MakerZIP } from "@electron-forge/maker-zip";
 import { MakerDeb } from "@electron-forge/maker-deb";
@@ -23,20 +24,13 @@ const config: ForgeConfig = {
   },
   rebuildConfig: {},
   makers: [
-    // new MakerSquirrel({
-    //   exe: "MusicFree",
-    //   setupIcon: path.resolve(__dirname, "resources/logo.ico"),
-    //   setupMsi: "MusicFreeInstaller",
-    // }),
     new MakerZIP({}, ["darwin"]),
     new MakerDMG(
       {
-        // background
         format: "ULFO",
       },
       ["darwin"]
     ),
-    // new MakerRpm({}),
     new MakerDeb({
       options: {
         name: "MusicFree",
@@ -67,6 +61,7 @@ const config: ForgeConfig = {
             preload: {
               js: "./src/preload/extension.ts",
             },
+            // webPreferences 应该在主进程的 BrowserWindow 创建时设置，而不是在这里
           },
           {
             html: "./src/renderer-minimode/document/index.html",
@@ -75,6 +70,7 @@ const config: ForgeConfig = {
             preload: {
               js: "./src/preload/extension.ts",
             },
+            // webPreferences 应该在主进程的 BrowserWindow 创建时设置，而不是在这里
           },
           /** webworkers */
           {

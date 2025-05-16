@@ -1,3 +1,4 @@
+// src/main/window-manager/index.ts
 import {app, BrowserWindow, nativeImage, screen} from "electron";
 import getResourcePath from "@/common/main/get-resource-path";
 import {IWindowEvents, IWindowManager} from "@/types/main/window-manager";
@@ -100,11 +101,12 @@ class WindowManager implements IWindowManager {
             minWidth: 1050,
             webPreferences: {
                 preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true,
+                nodeIntegration: true, // 确保主窗口也有Node集成
                 nodeIntegrationInWorker: true,
                 webSecurity: false,
-                sandbox: false,
+                sandbox: false, // 通常与 nodeIntegration: true 一起使用时需要设为 false
                 webviewTag: true,
+                // contextIsolation 默认为 true, 这对于使用 contextBridge 的 preload 脚本是推荐的
             },
             frame: false,
             icon: nativeImage.createFromPath(getResourcePath(ResourceName.LOGO_IMAGE)),
@@ -258,9 +260,10 @@ class WindowManager implements IWindowManager {
             transparent: true,
             webPreferences: {
                 preload: LRC_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true,
-                webSecurity: false,
-                sandbox: false,
+                nodeIntegration: true, // <--- 添加
+                sandbox: false,        // <--- 添加
+                // contextIsolation 保持默认 true，因为 preload/extension.ts 使用了 contextBridge
+                webSecurity: false, // 根据项目需求，如果需要加载本地资源或跨域请求，可能需要
             },
             minWidth: WindowManager.lyricWindowMinSize.width,
             minHeight: WindowManager.lyricWindowMinSize.height,
@@ -405,10 +408,11 @@ class WindowManager implements IWindowManager {
             y: initPosition?.y,
             webPreferences: {
                 preload: MINIMODE_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true,
-                nodeIntegrationInWorker: true,
+                nodeIntegration: true, // <--- 添加
+                sandbox: false,        // <--- 添加
+                // contextIsolation 保持默认 true
+                nodeIntegrationInWorker: true, // 如果 mini 窗口内也使用 worker 并需要 node
                 webSecurity: false,
-                sandbox: false,
             },
             resizable: false,
             frame: false,
