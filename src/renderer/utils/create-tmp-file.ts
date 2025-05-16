@@ -1,5 +1,6 @@
 import { getGlobalContext } from "@/shared/global-context/renderer";
 import { nanoid } from "nanoid";
+import path from 'path';
 import {fsUtil} from "@shared/utils/renderer";
 
 export async function createTmpFile(data: string) {
@@ -8,7 +9,7 @@ export async function createTmpFile(data: string) {
     throw new Error("TempFile Path NotFound");
   }
   const randomFileName = nanoid();
-  const filePath = window.path.resolve(appPath.temp, randomFileName);
+  const filePath = path.resolve(appPath.temp, randomFileName);
   await fsUtil.writeFile(filePath, data, "utf-8");
 
   return {

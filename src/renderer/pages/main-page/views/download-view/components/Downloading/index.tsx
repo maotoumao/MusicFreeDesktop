@@ -1,5 +1,5 @@
 import Tag from "@/renderer/components/Tag";
-import Downloader from "@/renderer/core/downloader";
+import { downloadingMusicStore } from "@/renderer/core/downloader/store";
 import {
   createColumnHelper,
   flexRender,
@@ -57,7 +57,7 @@ const columnDef = [
 ];
 
 export default function Downloading() {
-  const downloadingQueue = Downloader.useDownloadingMusicList();
+  const downloadingQueue = downloadingMusicStore.useValue();
 
   const table = useReactTable({
     debugAll: false,

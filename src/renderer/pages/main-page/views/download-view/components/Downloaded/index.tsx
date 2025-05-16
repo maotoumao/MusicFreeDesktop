@@ -1,9 +1,9 @@
 import MusicList from "@/renderer/components/MusicList";
-import Downloader from "@/renderer/core/downloader";
+import { useDownloadedMusicList } from "@/renderer/core/downloader/downloaded-sheet";
 import { useRef } from "react";
 
 export default function Downloaded() {
-  const downloadedList = Downloader.useDownloadedMusicList();
+  const downloadedList = useDownloadedMusicList();
   const musicListContainerRef = useRef<HTMLDivElement>();
 
   return (

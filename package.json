@@ -65,6 +65,7 @@
     "sass-loader": "^16.0.4",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.1",
+    "path-browserify": "^1.0.1",
     "ts-node": "^10.9.2",
     "typescript": "~5.0.4"
   },

@@ -92,7 +92,7 @@ app.on("open-url", (_evt, url) => {
 app.on("will-quit", async () => { // 修改为 async
     globalShortcut.unregisterAll();
     if (AppConfig.getConfig("playMusic.backend") === "mpv") { // 新增条件判断
-        await mpvManager.quitMpv().catch(voidCallback); // 修改
+        await mpvManager.quitMpv().catch(err => logger.logError("Error quitting MPV on app exit:", err));
     }
 });
 
@@ -168,7 +168,7 @@ app.whenReady().then(async () => {
         mpvManager.setMainWindow(windowManager.mainWindow); // 新增
         if (AppConfig.getConfig("playMusic.backend") === "mpv") {
             mpvManager.initializeMpv(true).catch(err => { // 修改
-              logger.logError("Initial MPV initialization failed on app ready:", err);
+                logger.logError("Initial MPV initialization failed on app ready:", err as Error);
             });
         }
     } else {
@@ -178,7 +178,7 @@ app.whenReady().then(async () => {
                 mpvManager.setMainWindow(data.browserWindow);
                 if (AppConfig.getConfig("playMusic.backend") === "mpv") {
                      mpvManager.initializeMpv(true).catch(err => { // 修改
-                        logger.logError("Initial MPV initialization failed (deferred):", err);
+                        logger.logError("Initial MPV initialization failed (deferred):", err as Error);
                     });
                 }
             }
@@ -240,12 +240,12 @@ async function bootstrap() {
             if (AppConfig.getConfig("playMusic.backend") === "mpv") {
                 if (windowManager.mainWindow) { // 确保 mainWindow 存在
                     mpvManager.setMainWindow(windowManager.mainWindow);
-                    await mpvManager.initializeMpv(true).catch(err => { // 修改
-                      logger.logError("MPV initialization failed on config change:", err);
+                    await mpvManager.initializeMpv(true).catch(err => {
+                        logger.logError("MPV initialization failed on config change:", err as Error);
                     });
                 }
             } else {
-                await mpvManager.quitMpv().catch(voidCallback); // 修改
+                await mpvManager.quitMpv().catch(err => logger.logError("Error quitting MPV on config change:", err as Error));
             }
         }
          // 新增：处理 MPV 路径或参数变化
@@ -254,8 +254,8 @@ async function bootstrap() {
                 logger.logInfo("MPV path or args changed, re-initializing MPV.");
                 if (windowManager.mainWindow) {
                      mpvManager.setMainWindow(windowManager.mainWindow);
-                     await mpvManager.initializeMpv(true).catch(err => { // 修改
-                        logger.logError("MPV re-initialization failed after path/args change:", err);
+                     await mpvManager.initializeMpv(true).catch(err => {
+                        logger.logError("MPV re-initialization failed after path/args change:", err as Error);
                     });
                 }
             }

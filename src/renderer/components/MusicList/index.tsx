@@ -34,6 +34,7 @@ import DragReceiver, {startDrag} from "../DragReceiver";
 import {i18n} from "@/shared/i18n/renderer";
 import isLocalMusic from "@/renderer/utils/is-local-music";
 import AppConfig from "@shared/app-config/renderer";
+import { isDownloaded, removeDownloadedMusic } from "@/renderer/core/downloader/downloaded-sheet";
 import {shellUtil} from "@shared/utils/renderer";
 
 interface IMusicListProps {
@@ -217,21 +218,21 @@ export function showMusicContextMenu(
             icon: "array-download-tray",
             show: isArray
                 ? !musicItems.every(
-                    (item) => isLocalMusic(item) || Downloader.isDownloaded(item)
+                    (item) => isLocalMusic(item) || isDownloaded(item)
                 )
-                : !isLocalMusic(musicItems) && !Downloader.isDownloaded(musicItems),
+                : !isLocalMusic(musicItems) && !isDownloaded(musicItems),
             onClick() {
-                Downloader.startDownload(musicItems);
+                Downloader.download(musicItems);
             },
         },
         {
             title: i18n.t("music_list_context_menu.delete_local_download"),
             icon: "trash",
             show:
-                (isArray && musicItems.every((it) => Downloader.isDownloaded(it))) ||
-                (!isArray && Downloader.isDownloaded(musicItems)),
+            (isArray && musicItems.every((it) => isDownloaded(it))) ||
+                (!isArray && isDownloaded(musicItems)),
             async onClick() {
-                const [isSuccess, info] = await Downloader.removeDownloadedMusic(
+                const [isSuccess, info] = await removeDownloadedMusic(
                     musicItems,
                     true
                 );
@@ -267,7 +268,7 @@ export function showMusicContextMenu(
             icon: "folder-open",
             show:
                 !isArray &&
-                (Downloader.isDownloaded(musicItems) ||
+                (isDownloaded(musicItems) ||
                     musicItems?.platform === localPluginName),
             async onClick() {
                 try {

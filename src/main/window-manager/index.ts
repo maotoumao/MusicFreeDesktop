@@ -101,10 +101,10 @@ class WindowManager implements IWindowManager {
             minWidth: 1050,
             webPreferences: {
                 preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true, // 确保主窗口也有Node集成
+                nodeIntegration: true,
                 nodeIntegrationInWorker: true,
                 webSecurity: false,
-                sandbox: false, // 通常与 nodeIntegration: true 一起使用时需要设为 false
+                sandbox: false,
                 webviewTag: true,
                 // contextIsolation 默认为 true, 这对于使用 contextBridge 的 preload 脚本是推荐的
             },
@@ -260,9 +260,9 @@ class WindowManager implements IWindowManager {
             transparent: true,
             webPreferences: {
                 preload: LRC_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true, // <--- 添加
-                sandbox: false,        // <--- 添加
-                // contextIsolation 保持默认 true，因为 preload/extension.ts 使用了 contextBridge
+                nodeIntegration: true,
+                sandbox: false,
+                contextIsolation: true, // 保持 true，因为 preload/extension.ts 使用了 contextBridge
                 webSecurity: false, // 根据项目需求，如果需要加载本地资源或跨域请求，可能需要
             },
             minWidth: WindowManager.lyricWindowMinSize.width,
@@ -408,9 +408,9 @@ class WindowManager implements IWindowManager {
             y: initPosition?.y,
             webPreferences: {
                 preload: MINIMODE_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true, // <--- 添加
-                sandbox: false,        // <--- 添加
-                // contextIsolation 保持默认 true
+                nodeIntegration: true,
+                sandbox: false,
+                contextIsolation: true, // 保持 true
                 nodeIntegrationInWorker: true, // 如果 mini 窗口内也使用 worker 并需要 node
                 webSecurity: false,
             },

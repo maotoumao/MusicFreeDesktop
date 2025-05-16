@@ -14,26 +14,26 @@ function DownloadStatus(props: IProps) {
 
   const { t } = useTranslation();
 
-  const downloadStatus = Downloader.useDownloadStatus(musicItem);
-  if (!downloadStatus) {
+  const taskStatus = Downloader.useDownloadTaskStatus(musicItem);
+  if (!taskStatus) {
     return <span>-</span>;
-  } else if (downloadStatus.state === DownloadState.WAITING) {
+  } else if (taskStatus.status === DownloadState.WAITING) {
     return <span>{t("download_page.waiting")}</span>;
-  } else if (downloadStatus.state === DownloadState.ERROR) {
+  } else if (taskStatus.status === DownloadState.ERROR) {
     return (
       <span style={{ color: "var(--dangerColor, #FC5F5F)" }}>
-        {t("download_page.failed")}: {downloadStatus.msg}
+        {t("download_page.failed")}: {taskStatus.error?.message}
       </span>
     );
-  } else if (downloadStatus.state === DownloadState.DOWNLOADING) {
+  } else if (taskStatus.status === DownloadState.DOWNLOADING) {
     return (
       <span
         style={{
           color: "var(--infoColor, #0A95C8)",
         }}
       >
-        {normalizeFileSize(downloadStatus.downloaded ?? 0)} /{" "}
-        {normalizeFileSize(downloadStatus.total ?? 0)}
+        {normalizeFileSize(taskStatus.progress?.currentSize ?? 0)} /{" "}
+        {normalizeFileSize(taskStatus.progress?.totalSize ?? 0)}
       </span>
     );
   }

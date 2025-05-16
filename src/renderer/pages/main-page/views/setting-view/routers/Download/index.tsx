@@ -24,7 +24,7 @@ export default function Download() {
                 keyPath="download.concurrency"
                 options={concurrencyList}
                 onChange={(_evt, newConfig) => {
-                    Downloader.setDownloadingConcurrency(newConfig);
+                    Downloader.setConcurrency(newConfig);
                 }}
                 label={t("settings.download.max_concurrency")}
             ></ListBoxSettingItem>

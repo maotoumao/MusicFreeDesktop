@@ -1,5 +1,5 @@
-import localMusicListStore from "@/renderer/core/local-music/store";
 import "./index.scss";
+import path from 'path';
 import { useMemo, useState } from "react";
 import groupBy from "@/renderer/utils/groupBy";
 import MusicList from "@/renderer/components/MusicList";
@@ -14,7 +14,7 @@ export default function FolderView(props: IProps) {
 
   const [keys, allMusic] = useMemo(() => {
     const grouped = groupBy(localMusicList ?? [], (it) =>
-      window.path.dirname(it.$$localPath)
+      path.dirname(it.$$localPath)
     );
     return [Object.keys(grouped).sort((a, b) => a.localeCompare(b)), grouped];
   }, [localMusicList]);

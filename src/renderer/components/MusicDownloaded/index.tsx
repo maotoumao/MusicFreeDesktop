@@ -15,7 +15,8 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
   const { musicItem, size = 18 } = props;
   // const [loading, setLoading] = useState(false);
 
-  const downloadState = Downloader.useDownloadState(musicItem);
+  const taskStatus = Downloader.useDownloadTaskStatus(musicItem);
+  const downloadState = taskStatus?.status;
 
   const { t } = useTranslation();
   const isDownloadedOrLocal =
@@ -27,8 +28,8 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
   if (isDownloadedOrLocal) {
     iconName = "check-circle";
   } else if (
-    downloadState !== DownloadState.NONE &&
-    downloadState !== DownloadState.ERROR
+    taskStatus?.status && taskStatus.status !== DownloadState.NONE &&
+    taskStatus.status !== DownloadState.ERROR
   ) {
     iconName = "rolling-1s";
   }
@@ -43,10 +44,10 @@ function MusicDownloaded(props: IMusicDownloadedProps) {
       }
       onClick={() => {
         if (
-          musicItem && (downloadState === DownloadState.NONE ||
-                downloadState === DownloadState.ERROR)
+          musicItem && (taskStatus?.status === DownloadState.NONE ||
+            taskStatus?.status === DownloadState.ERROR || !taskStatus)
         ) {
-          Downloader.startDownload(musicItem);
+          Downloader.download(musicItem);
         }
       }}
     >

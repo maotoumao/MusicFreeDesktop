@@ -1,5 +1,5 @@
 import localMusicListStore from "./store";
-import {getUserPreferenceIDB,} from "@/renderer/utils/user-perference";
+import {getUserPreferenceIDB} from "@/renderer/utils/user-perference";
 import * as Comlink from "comlink";
 import musicSheetDB from "../db/music-sheet-db";
 import {getGlobalContext} from "@/shared/global-context/renderer";
@@ -23,11 +23,12 @@ interface ILocalFileWatcherWorker {
 }
 
 let localFileWatcherWorker: ILocalFileWatcherWorker;
+import path from 'path';
 
 function isSubDir(parent: string, target: string) {
-    const relative = window.path.relative(parent, target);
+    const relative = path.relative(parent, target);
     return (
-        relative && !relative.startsWith("..") && !window.path.isAbsolute(relative)
+        relative && !relative.startsWith("..") && !path.isAbsolute(relative)
     );
 }
 

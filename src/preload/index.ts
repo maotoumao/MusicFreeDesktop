@@ -56,11 +56,6 @@ const mpvPlayerListener = {
     }
 };
 
-declare global {
-    interface Window {
-        electron?: any;
-    }
-}
 
 contextBridge.exposeInMainWorld("electron", {
     ...(window.electron || {}),

@@ -57,6 +57,9 @@ export const rendererConfig: Configuration = {
       "@renderer-lrc": path.join(__dirname, "../src/renderer-lrc"),
       "@shared": path.join(__dirname, "../src/shared")
     },
+    fallback: {
+      "path": require.resolve("path-browserify")
+    }
   },
   externals: process.platform !== "darwin" ? ["fsevents"] : undefined,
 };
