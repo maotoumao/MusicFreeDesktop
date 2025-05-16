@@ -5,11 +5,10 @@
   "description": "一个插件化的音乐播放器",
   "main": ".webpack/main",
   "scripts": {
-    "prepare:ffmpeg": "node scripts/download-ffmpeg-core.js",
-    "start": "npm run prepare:ffmpeg && electron-forge start",
-    "dev": "npm run prepare:ffmpeg && electron-forge start --inspect-electron",
-    "package": "npm run prepare:ffmpeg && electron-forge package",
-    "make": "npm run prepare:ffmpeg && electron-forge make",
+    "start": "electron-forge start",
+    "dev": "electron-forge start --inspect-electron",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx,.js ./src --fix",
     "lint-staged": "lint-staged",
@@ -70,9 +69,6 @@
     "typescript": "~5.0.4"
   },
   "dependencies": {
-    "@ffmpeg/core": "^0.12.6",
-    "@ffmpeg/ffmpeg": "^0.12.10",
-    "@ffmpeg/util": "^0.12.1",
     "@headlessui/react": "^1.7.15",
     "@tanstack/react-table": "^8.17.3",
     "animate.css": "^4.1.1",
@@ -102,6 +98,7 @@
     "lru-cache": "^10.2.2",
     "music-metadata": "^8.3.0",
     "nanoid": "^4.0.2",
+    "node-mpv": "^1.5.0",
     "object-path": "^0.11.8",
     "p-queue": "^7.4.1",
     "qs": "^6.12.1",

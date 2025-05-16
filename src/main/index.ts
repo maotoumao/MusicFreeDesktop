@@ -1,5 +1,6 @@
+// src/main/index.ts
 import {app, BrowserWindow, globalShortcut} from "electron";
-import fs from "fs";
+import fs from "fs"; // 修改：直接使用 fs/promises 导入的 fs
 import path from "path";
 import {setAutoFreeze} from "immer";
 import {setupGlobalContext} from "@/shared/global-context/main";
@@ -21,17 +22,18 @@ import utils from "@shared/utils/main";
 import messageBus from "@shared/message-bus/main";
 import shortCut from "@shared/short-cut/main";
 import voidCallback from "@/common/void-callback";
+import mpvManager from "./mpv-manager"; // 新增
 
 // portable
 if (process.platform === "win32") {
     try {
         const appPath = app.getPath("exe");
         const portablePath = path.resolve(appPath, "../portable");
-        const portableFolderStat = fs.statSync(portablePath);
+        const portableFolderStat = fs.statSync(portablePath); // 注意：fs.statSync 是同步的
         if (portableFolderStat.isDirectory()) {
             const appPathNames = ["appData", "userData"];
             appPathNames.forEach((it) => {
-                app.setPath(it, path.resolve(portablePath, it));
+                app.setPath(it as any, path.resolve(portablePath, it)); //  'it' implicitly has type 'any'
             });
         }
     } catch (e) {
@@ -87,8 +89,11 @@ app.on("open-url", (_evt, url) => {
     handleDeepLink(url);
 });
 
-app.on("will-quit", () => {
+app.on("will-quit", async () => { // 修改为 async
     globalShortcut.unregisterAll();
+    if (AppConfig.getConfig("playMusic.backend") === "mpv") { // 新增条件判断
+        await mpvManager.quitMpv().catch(voidCallback); // 修改
+    }
 });
 
 // In this file you can include the rest of your app's specific main process
@@ -107,7 +112,6 @@ app.whenReady().then(async () => {
                 "normal.language": lang
             });
             if (process.platform === "win32") {
-
                 ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, messageBus.getAppState().playerState === PlayerState.Playing)
             }
         },
@@ -118,7 +122,7 @@ app.whenReady().then(async () => {
     WindowDrag.setup();
     shortCut.setup().then(voidCallback);
     logger.logPerf("Create Main Window");
-    // Setup message bus & app state
+
     messageBus.onAppStateChange((_, patch) => {
         if ("musicItem" in patch) {
             TrayManager.buildTrayMenu();
@@ -157,11 +161,31 @@ app.whenReady().then(async () => {
     })
 
     messageBus.setup(windowManager);
+    windowManager.showMainWindow(); // 这会创建 mainWindow
 
-    windowManager.showMainWindow();
+    // 确保 mainWindow 创建后再设置给 mpvManager
+    if (windowManager.mainWindow) {
+        mpvManager.setMainWindow(windowManager.mainWindow); // 新增
+        if (AppConfig.getConfig("playMusic.backend") === "mpv") {
+            mpvManager.initializeMpv(true).catch(err => { // 修改
+              logger.logError("Initial MPV initialization failed on app ready:", err);
+            });
+        }
+    } else {
+        // 如果 mainWindow 由于某些原因未能立即创建，可以监听 windowManager 的事件
+        windowManager.on("WindowCreated", (data) => {
+            if (data.windowName === "main" && data.browserWindow) {
+                mpvManager.setMainWindow(data.browserWindow);
+                if (AppConfig.getConfig("playMusic.backend") === "mpv") {
+                     mpvManager.initializeMpv(true).catch(err => { // 修改
+                        logger.logError("Initial MPV initialization failed (deferred):", err);
+                    });
+                }
+            }
+        });
+    }
 
     bootstrap();
-
 });
 
 async function bootstrap() {
@@ -180,16 +204,13 @@ async function bootstrap() {
         windowManager.showMiniModeWindow();
     }
 
-    /** 一些初始化设置 */
-        // 初始化桌面歌词
     const desktopLyricEnabled = AppConfig.getConfig("lyric.enableDesktopLyric");
 
     if (desktopLyricEnabled) {
         windowManager.showLyricWindow();
     }
 
-    AppConfig.onConfigUpdated((patch) => {
-        // 桌面歌词锁定状态
+    AppConfig.onConfigUpdated(async (patch) => { // 修改为 async
         if ("lyric.lockLyric" in patch) {
             const lyricWindow = windowManager.lyricWindow;
             const lockState = patch["lyric.lockLyric"];
@@ -213,10 +234,34 @@ async function bootstrap() {
                 shortCut.unregisterAllGlobalShortCuts();
             }
         }
+
+        // 新增：处理播放后端切换
+        if (patch["playMusic.backend"] !== undefined) {
+            if (AppConfig.getConfig("playMusic.backend") === "mpv") {
+                if (windowManager.mainWindow) { // 确保 mainWindow 存在
+                    mpvManager.setMainWindow(windowManager.mainWindow);
+                    await mpvManager.initializeMpv(true).catch(err => { // 修改
+                      logger.logError("MPV initialization failed on config change:", err);
+                    });
+                }
+            } else {
+                await mpvManager.quitMpv().catch(voidCallback); // 修改
+            }
+        }
+         // 新增：处理 MPV 路径或参数变化
+        if (patch["playMusic.mpvPath"] !== undefined || patch["playMusic.mpvArgs"] !== undefined) {
+            if (AppConfig.getConfig("playMusic.backend") === "mpv") {
+                logger.logInfo("MPV path or args changed, re-initializing MPV.");
+                if (windowManager.mainWindow) {
+                     mpvManager.setMainWindow(windowManager.mainWindow);
+                     await mpvManager.initializeMpv(true).catch(err => { // 修改
+                        logger.logError("MPV re-initialization failed after path/args change:", err);
+                    });
+                }
+            }
+        }
     })
 
-
-    // 初始化代理
     const proxyConfigKeys: Array<keyof IAppConfig> = [
         "network.proxy.enabled",
         "network.proxy.host",
@@ -250,10 +295,7 @@ async function bootstrap() {
         AppConfig.getConfig("network.proxy.username"),
         AppConfig.getConfig("network.proxy.password")
     );
-
-
 }
-
 
 function handleProxy(enabled: boolean, host?: string | null, port?: string | null, username?: string | null, password?: string | null) {
     try {
@@ -261,18 +303,22 @@ function handleProxy(enabled: boolean, host?: string | null, port?: string | nul
             axios.defaults.httpAgent = undefined;
             axios.defaults.httpsAgent = undefined;
         } else if (host) {
-            const proxyUrl = new URL(host);
-            proxyUrl.port = port;
-            proxyUrl.username = username;
-            proxyUrl.password = password;
-            const agent = new HttpsProxyAgent(proxyUrl);
+            const proxyUrl = new URL(host.startsWith("http") ? host : `http://${host}`); // 确保有协议头
+            proxyUrl.port = port || proxyUrl.port; // 如果 port 为空，则使用 URL 中的 port
+            if (username) proxyUrl.username = username;
+            if (password) proxyUrl.password = password;
+
+            const agent = new HttpsProxyAgent(proxyUrl.toString()); // HttpsProxyAgent 接受字符串 URL
 
             axios.defaults.httpAgent = agent;
             axios.defaults.httpsAgent = agent;
         } else {
-            throw new Error("Unknown Host");
+            // 如果启用了代理但主机未设置，则清除代理设置
+            axios.defaults.httpAgent = undefined;
+            axios.defaults.httpsAgent = undefined;
         }
     } catch (e) {
+        logger.logError("Error setting up proxy:", e);
         axios.defaults.httpAgent = undefined;
         axios.defaults.httpsAgent = undefined;
     }

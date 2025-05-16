@@ -20,7 +20,8 @@
       "@native/*": ["src/main/native_modules/*"],
       "@renderer/*": ["src/renderer/*"],
       "@renderer-lrc/*": ["src/renderer-lrc/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "src/types/**/*.d.ts"]
 }

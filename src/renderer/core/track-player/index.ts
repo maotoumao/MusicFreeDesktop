@@ -1,4 +1,5 @@
-import {CurrentTime, ICurrentLyric, PlayerEvents,} from "./enum";
+// src/renderer/core/track-player/index.ts
+import {CurrentTime, ICurrentLyric, PlayerEvents} from "./enum";
 import shuffle from "lodash.shuffle";
 import {
     addSortProperty,
@@ -22,6 +23,7 @@ import _trackPlayerStore from "./store";
 import EventEmitter from "eventemitter3";
 import {IAudioController} from "@/types/audio-controller";
 import AudioController from "@renderer/core/track-player/controller/audio-controller";
+import MpvController from "@renderer/core/track-player/controller/mpv-controller";
 import logger from "@shared/logger/renderer";
 import voidCallback from "@/common/void-callback";
 import {delay} from "@/common/time-util";
@@ -63,7 +65,6 @@ interface IPlayOptions {
 
 interface ITrackOptions {
     seekTo?: number;
-    // 自动播放
     autoPlay?: boolean;
 }
 
@@ -72,13 +73,11 @@ class TrackPlayer {
         return currentMusicStore.getValue();
     }
 
-    // 只有基础信息
     get currentMusicBasicInfo() {
         const currentMusic = this.currentMusic;
         if (!currentMusic) {
             return null;
         }
-
         return {
             platform: currentMusic.platform,
             title: currentMusic.title,
@@ -126,53 +125,92 @@ class TrackPlayer {
     }
 
     private indexMap: IIndexMap;
-
     private currentIndex = -1;
-
-    private audioController: IAudioController;
-
+    private audioController: IAudioController | null = null;
     private ee: EventEmitter<InternalPlayerEvents>;
+    private isReady = false;
 
     constructor() {
         this.indexMap = createIndexMap();
         this.ee = new EventEmitter();
-        this.audioController = new AudioController();
     }
 
-    on<T extends keyof InternalPlayerEvents>(event: T, callback: InternalPlayerEvents[T]) {
-        this.ee.on(event, callback as any);
-    }
+    private async initializeAudioBackend(previousState?: { music: IMusic.IMusicItem | null, time: number, isPlaying: boolean }) {
+        const backendType = AppConfig.getConfig("playMusic.backend");
+        logger.logInfo(`TrackPlayer: Initializing audio backend - ${backendType}`);
 
-    private setupEvents() {
-        this.ee.on(PlayerEvents.Error, async (errorMusicItem) => {
-            // config
-            const needSkip = AppConfig.getConfig("playMusic.playError") === "skip";
+        if (this.audioController) {
+            this.audioController.destroy();
+            this.audioController = null;
+        }
 
-            this.resetProgress();
-            if (this.musicQueue.length > 1 && needSkip) {
-                await delay(500);
-                if (this.isCurrentMusic(errorMusicItem)) {
-                    this.skipToNext();
+        if (backendType === "mpv") {
+            this.audioController = new MpvController();
+        } else {
+            this.audioController = new AudioController();
+        }
+        this.setupAudioControllerEvents();
+
+        if (previousState && previousState.music && this.audioController) {
+            logger.logInfo("TrackPlayer: Restoring previous playback state after backend switch.", previousState);
+            this.setCurrentMusic(previousState.music);
+            this.currentIndex = this.findMusicIndex(previousState.music);
+
+            this.setPlayerState(PlayerState.Buffering);
+            this.audioController.prepareTrack?.(previousState.music);
+
+            try {
+                const qualityToUse = this.currentQuality || AppConfig.getConfig("playMusic.defaultQuality");
+                const {mediaSource, quality} = await this.fetchMediaSource(previousState.music, qualityToUse);
+
+                if (!mediaSource?.url) {
+                    throw new Error("mediaSource.url is empty after backend switch");
+                }
+
+                if (this.isCurrentMusic(previousState.music)) {
+                    this.setCurrentQuality(quality);
+                    this.setTrack(mediaSource, previousState.music, {
+                        seekTo: previousState.time,
+                        autoPlay: previousState.isPlaying
+                    });
+                }
+            } catch (e: any) {
+                logger.logError("Error restoring track after backend switch:", e);
+                this.ee.emit(PlayerEvents.Error, previousState.music, e);
+                this.setPlayerState(PlayerState.None);
+            }
+        } else if (this.audioController) {
+            const currentMusicToLoad = this.currentMusic;
+            const currentProgressToSeek = this.progress.currentTime;
+            const qualityToUse = this.currentQuality || AppConfig.getConfig("playMusic.defaultQuality");
+
+            if (currentMusicToLoad) {
+                logger.logInfo("TrackPlayer: Loading current track with new backend on initial setup or simple backend switch without active play.", currentMusicToLoad);
+                this.audioController.prepareTrack?.(currentMusicToLoad);
+                 try {
+                    const {mediaSource, quality} = await this.fetchMediaSource(currentMusicToLoad, qualityToUse);
+                     if (!mediaSource?.url) throw new Error("mediaSource.url is empty for initial load with new backend");
+
+                    if (this.isCurrentMusic(currentMusicToLoad)) {
+                        this.setCurrentQuality(quality);
+                        this.setTrack(mediaSource, currentMusicToLoad, {
+                            seekTo: currentProgressToSeek,
+                            autoPlay: false
+                        });
+                    }
+                } catch (e: any) {
+                    logger.logError("Error loading current track with new backend:", e);
+                    this.ee.emit(PlayerEvents.Error, currentMusicToLoad, e);
                 }
             }
-        });
-
-        navigator.mediaSession.setActionHandler("nexttrack", () => {
-            this.skipToNext();
-        })
-
-        navigator.mediaSession.setActionHandler("previoustrack", () => {
-            this.skipToPrev();
-        })
+        }
     }
 
+    private setupAudioControllerEvents() {
+        if (!this.audioController) return;
 
-    private createAudioController() {
-        const audioController = new AudioController();
-        // 播放结束
-        audioController.onEnded = () => {
+        this.audioController.onEnded = () => {
             this.resetProgress();
-
             switch (this.repeatMode) {
                 case RepeatMode.Queue:
                 case RepeatMode.Shuffle: {
@@ -186,10 +224,8 @@ class TrackPlayer {
                 }
             }
         }
-        // 进度更新
-        audioController.onProgressUpdate = ((progress) => {
+        this.audioController.onProgressUpdate = ((progress) => {
             this.setProgress(progress);
-            // 检查歌词
             if (this.lyric?.parser) {
                 const lyricItem = this.lyric.parser.getPosition(progress.currentTime);
                 if (this.lyric.currentLrc?.lrc !== lyricItem?.lrc) {
@@ -200,31 +236,48 @@ class TrackPlayer {
                 }
             }
         })
-
-        audioController.onVolumeChange = (volume) => {
+        this.audioController.onVolumeChange = (volume) => {
             currentVolumeStore.setValue(volume);
             setUserPreference("volume", volume);
         }
-
-        audioController.onSpeedChange = (speed) => {
+        this.audioController.onSpeedChange = (speed) => {
             currentSpeedStore.setValue(speed);
             setUserPreference("speed", speed);
         }
-
-        audioController.onPlayerStateChanged = (state) => {
+        this.audioController.onPlayerStateChanged = (state) => {
             this.setPlayerState(state);
         }
-
-        audioController.onError = async (type, reason) => {
-            this.ee.emit(PlayerEvents.Error, audioController.musicItem, reason);
+        this.audioController.onError = async (type, reason) => {
+            logger.logError("TrackPlayer: Playback error from controller", { type, reason, musicItem: this.audioController?.musicItem } as any);
+            this.ee.emit(PlayerEvents.Error, this.audioController?.musicItem, reason);
         }
-
-
-        this.audioController = audioController;
     }
 
     public async setup() {
-        // 1. Config
+        if (this.isReady) return;
+
+        await this.initializeAudioBackend();
+
+        AppConfig.onConfigUpdate(async (patch) => {
+            if (patch["playMusic.backend"] !== undefined) {
+                logger.logInfo("TrackPlayer: Audio backend configuration changed, re-initializing.");
+                const previousMusic = this.currentMusic;
+                const previousTime = this.progress.currentTime;
+                const wasPlaying = this.playerState === PlayerState.Playing;
+
+                if (this.audioController && wasPlaying) {
+                    this.audioController.pause();
+                }
+                this.setPlayerState(PlayerState.None);
+
+                await this.initializeAudioBackend({ music: previousMusic, time: previousTime, isPlaying: wasPlaying });
+            }
+            if (patch["playMusic.audioOutputDevice"] !== undefined && this.audioController) {
+                const deviceId = AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId;
+                await this.setAudioOutputDevice(deviceId); // Made await
+            }
+        });
+
         const [repeatMode, currentMusic, currentProgress, volume, speed, defaultQuality] = [
             getUserPreference("repeatMode"),
             getUserPreference("currentMusic"),
@@ -237,11 +290,8 @@ class TrackPlayer {
         addSortProperty(playList);
         const deviceId = AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId;
 
-        // 2. init audio controller
-        this.createAudioController();
         this.setupEvents();
 
-        // 3. resume state
         musicQueueStore.setValue(playList);
         this.indexMap.update(playList);
 
@@ -252,73 +302,97 @@ class TrackPlayer {
         this.setCurrentMusic(currentMusic);
         this.currentIndex = this.findMusicIndex(currentMusic);
 
-        if (deviceId) {
-            this.setAudioOutputDevice(deviceId);
+        if (deviceId && this.audioController) {
+            await this.setAudioOutputDevice(deviceId); // Made await
         }
 
-        if (volume !== null && volume !== undefined) {
+        if (volume !== null && volume !== undefined && this.audioController) {
             this.setVolume(volume);
         }
 
-        if (speed) {
+        if (speed && this.audioController) {
             this.setSpeed(speed)
         }
 
-        // 4. reload lyric
-        this.fetchCurrentLyric();
-
-        // 5. fetch music source
-        this.fetchMediaSource(currentMusic, defaultQuality).then(({mediaSource, quality}) => {
-            if (this.isCurrentMusic(currentMusic)) {
-                this.setTrack(mediaSource, currentMusic, {
-                    seekTo: currentProgress,
-                    autoPlay: false
-                });
-                this.setCurrentQuality(quality);
-            }
-        }).catch(voidCallback);
+        if (currentMusic && this.audioController) {
+            this.fetchMediaSource(currentMusic, defaultQuality).then(({mediaSource, quality}) => {
+                if (this.isCurrentMusic(currentMusic) && this.audioController) {
+                    this.setTrack(mediaSource, currentMusic, {
+                        seekTo: currentProgress,
+                        autoPlay: false
+                    });
+                    this.setCurrentQuality(quality);
+                }
+            }).catch(err => {
+                logger.logError("Error fetching media source on setup", err);
+                this.ee.emit(PlayerEvents.Error, currentMusic, err);
+            });
+        }
+        this.isReady = true;
     }
 
+    private setupEvents() {
+        this.ee.on(PlayerEvents.Error, async (errorMusicItem, reason) => {
+            logger.logError("TrackPlayer internal error event:", { musicTitle: errorMusicItem?.title, reason } as any);
+            this.resetProgress();
+            const needSkip = AppConfig.getConfig("playMusic.playError") === "skip";
+            if (this.musicQueue.length > 1 && needSkip && errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
+                await delay(500);
+                if (this.isCurrentMusic(errorMusicItem)) {
+                    this.skipToNext();
+                }
+            } else if (errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
+                this.pause();
+                 this.setPlayerState(PlayerState.None);
+            }
+        });
 
-    // 切换播放模式
-    public toggleRepeatMode() {
-        let nextRepeatMode = this.repeatMode;
-        switch (nextRepeatMode) {
-            case RepeatMode.Shuffle:
-                nextRepeatMode = RepeatMode.Loop;
-                break;
-            case RepeatMode.Loop:
-                nextRepeatMode = RepeatMode.Queue;
-                break;
-            case RepeatMode.Queue:
-                nextRepeatMode = RepeatMode.Shuffle;
-                break;
+        if (navigator.mediaSession) {
+            navigator.mediaSession.setActionHandler("nexttrack", () => {
+                this.skipToNext();
+            })
+            navigator.mediaSession.setActionHandler("previoustrack", () => {
+                this.skipToPrev();
+            })
         }
-
-        this.setRepeatMode(nextRepeatMode);
     }
 
     public async playIndex(index: number, options: IPlayOptions = {}) {
+        if (!this.isReady || !this.audioController) {
+            logger.logInfo("TrackPlayer not ready or audioController not initialized in playIndex. Attempting to setup.");
+            await this.setup();
+            if (!this.isReady || !this.audioController) {
+                 logger.logError("TrackPlayer setup failed in playIndex.", new Error("TrackPlayer setup failed in playIndex."));
+                 return;
+            }
+        }
+
         const {refreshSource, restartOnSameMedia = true, seekTo, quality: intendedQuality} = options;
+
         if (index === -1 && this.musicQueue.length === 0) {
-            // 播放列表为空
+            this.reset();
             return;
         }
-        // 1. normalize index
         index = (index + this.musicQueue.length) % this.musicQueue.length;
+        const nextMusicItem = this.musicQueue[index];
 
-        // 2. same media
-        if (this.currentIndex === index && this.isCurrentMusic(this.musicQueue[index]) && !refreshSource) {
+        if (!nextMusicItem) {
+            logger.logError(
+                `TrackPlayer: nextMusicItem is undefined in playIndex. index: ${index}, queueLength: ${this.musicQueue.length}`,
+                new Error("nextMusicItem is undefined")
+            );
+            this.reset();
+            return;
+        }
+
+        if (this.currentIndex === index && this.isCurrentMusic(nextMusicItem) && !refreshSource) {
             if (restartOnSameMedia) {
                 this.seekTo(0);
             }
             this.audioController.play();
-
             return;
         }
 
-        // update music
-        const nextMusicItem = this.musicQueue[index];
         this.setCurrentMusic(nextMusicItem);
         this.currentIndex = index;
 
@@ -327,15 +401,10 @@ class TrackPlayer {
 
         try {
             const {mediaSource, quality} = await this.fetchMediaSource(nextMusicItem, intendedQuality);
-
-            if (!mediaSource.url) {
+            if (!mediaSource?.url) {
                 throw new Error("mediaSource.url is empty");
             }
-
-            if (!this.isCurrentMusic(nextMusicItem)) {
-                // should be aborted
-                return;
-            }
+            if (!this.isCurrentMusic(nextMusicItem)) return;
 
             this.setCurrentQuality(quality);
             this.setTrack(mediaSource, nextMusicItem, {
@@ -343,46 +412,43 @@ class TrackPlayer {
                 autoPlay: true
             });
 
-            // extra information
             const musicInfo = await PluginManager.callPluginDelegateMethod(
-                {
-                    platform: nextMusicItem.platform,
-                },
-                "getMusicInfo",
-                nextMusicItem
+                { platform: nextMusicItem.platform }, "getMusicInfo", nextMusicItem
             ).catch(voidCallback);
 
-            if (!(musicInfo && this.isCurrentMusic(nextMusicItem) && typeof musicInfo === "object")) {
-                return;
+            if (musicInfo && this.isCurrentMusic(nextMusicItem) && typeof musicInfo === "object") {
+                this.setCurrentMusic({
+                    ...nextMusicItem,
+                    ...musicInfo,
+                    platform: nextMusicItem.platform,
+                    id: nextMusicItem.id,
+                });
             }
-
-            this.setCurrentMusic({
-                ...nextMusicItem,
-                ...musicInfo,
-                platform: nextMusicItem.platform,
-                id: nextMusicItem.id,
-            });
-
-        } catch (e) {
-            // 播放失败
+        } catch (e: any) {
+            logger.logError("Error in playIndex:", e, {musicItem: nextMusicItem?.title});
             this.setCurrentQuality(AppConfig.getConfig("playMusic.defaultQuality"));
-            this.audioController.reset();
-            this.ee.emit(PlayerEvents.Error, nextMusicItem, e)
+            if (this.audioController) this.audioController.reset();
+            this.ee.emit(PlayerEvents.Error, nextMusicItem, e);
         }
-
-
     }
 
     public async playMusic(musicItem: IMusic.IMusicItem, options: IPlayOptions = {}) {
+        if (!this.isReady || !this.audioController) {
+             logger.logInfo("TrackPlayer not ready or audioController not initialized in playMusic.");
+             await this.setup();
+             if (!this.isReady || !this.audioController) {
+                  logger.logError("TrackPlayer setup failed in playMusic.", new Error("TrackPlayer setup failed in playMusic."));
+                  return;
+             }
+        }
         const queueIndex = this.findMusicIndex(musicItem);
         if (queueIndex === -1) {
-            // TODO: 用add代替
             const newQueue = [
                 ...this.musicQueue,
                 {
                     ...musicItem,
                     [timeStampSymbol]: Date.now(),
-                    [sortIndexSymbol]: 0
+                    [sortIndexSymbol]: this.musicQueue.length // Correct sortIndex
                 }
             ]
             this.setMusicQueue(newQueue);
@@ -393,207 +459,241 @@ class TrackPlayer {
     }
 
     public async playMusicWithReplaceQueue(musicList: IMusic.IMusicItem[], musicItem?: IMusic.IMusicItem) {
+        if (!this.isReady || !this.audioController) {
+            logger.logInfo("TrackPlayer not ready or audioController not initialized in playMusicWithReplaceQueue.");
+            await this.setup();
+            if (!this.isReady || !this.audioController) {
+                 logger.logError("TrackPlayer setup failed in playMusicWithReplaceQueue.", new Error("TrackPlayer setup failed in playMusicWithReplaceQueue."));
+                 return;
+            }
+        }
         if (!musicList.length && !musicItem) {
+            this.reset();
             return;
         }
-        addSortProperty(musicList);
+        addSortProperty(musicList); // This will set timeStampSymbol and sortIndexSymbol for all items
         if (this.repeatMode === RepeatMode.Shuffle) {
             musicList = shuffle(musicList);
         }
         musicItem = musicItem ?? musicList[0];
         this.setMusicQueue(musicList);
-        await this.playMusic(musicItem);
+        await this.playMusic(musicItem); // playMusic will handle finding the index or adding if not found
     }
 
     public skipToPrev() {
+        if (!this.isReady || !this.audioController) return;
         if (this.isEmpty) {
-            this.setCurrentMusic(null);
-            this.currentIndex = -1;
+            this.reset();
             return;
         }
         this.playIndex(this.currentIndex - 1);
     }
 
     public skipToNext() {
+        if (!this.isReady || !this.audioController) return;
         if (this.isEmpty) {
-            this.setCurrentMusic(null);
-            this.currentIndex = -1;
+            this.reset();
             return;
         }
         this.playIndex(this.currentIndex + 1);
     }
 
-
-    // 重置播放状态
     public reset() {
-        this.audioController.reset();
+        if (this.audioController) this.audioController.reset();
         this.setMusicQueue([]);
         this.setCurrentMusic(null);
-        this.resetProgress();
         this.currentIndex = -1;
-
+        this.setPlayerState(PlayerState.None);
+        // resetProgress is called within setCurrentMusic if musicItem becomes null
     }
 
     public seekTo(seconds: number) {
+        if (!this.isReady || !this.audioController) return;
         this.audioController.seekTo(seconds);
     }
 
     public pause() {
+        if (!this.isReady || !this.audioController) return;
         this.audioController.pause();
-        if (this.playerState !== this.audioController.playerState) {
-            this.setPlayerState(this.audioController.playerState);
-        }
     }
 
     public resume() {
+        if (!this.isReady || !this.audioController) return;
         this.audioController.play();
-
-        if (this.playerState !== this.audioController.playerState) {
-            this.setPlayerState(this.audioController.playerState);
-        }
     }
 
     public setVolume(volume: number) {
+        if (!this.isReady || !this.audioController) {
+            currentVolumeStore.setValue(volume);
+            setUserPreference("volume", volume);
+            return;
+        }
         this.audioController.setVolume(volume);
     }
 
     public setSpeed(speed: number) {
+        if (!this.isReady || !this.audioController) {
+            currentSpeedStore.setValue(speed);
+            setUserPreference("speed", speed);
+            return;
+        }
         this.audioController.setSpeed(speed);
     }
 
     public addNext(musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) {
+        if (!this.isReady) return;
         let _musicItems: IMusic.IMusicItem[];
         if (Array.isArray(musicItems)) {
-            _musicItems = musicItems;
+            _musicItems = [...musicItems]; // Create a copy to avoid modifying the original array
         } else {
             _musicItems = [musicItems];
         }
 
         const now = Date.now();
-
-        let duplicateIndex = -1;
+        // Assign sort properties to new items
         _musicItems.forEach((item, index) => {
-            _musicItems[index] = {
-                ...item,
-                [timeStampSymbol]: now,
-                [sortIndexSymbol]: index,
-            };
-            if (duplicateIndex === -1 && this.isCurrentMusic(item)) {
-                duplicateIndex = index;
-            }
+            item[timeStampSymbol] = now;
+            item[sortIndexSymbol] = index; // Relative sort index for the batch being added
         });
 
-        if (duplicateIndex !== -1) {
-            _musicItems = [
-                _musicItems[duplicateIndex],
-                ..._musicItems.slice(0, duplicateIndex),
-                ..._musicItems.slice(duplicateIndex + 1),
-            ];
-        }
-
-
-        const startPart = [];
-        const tailPart = [];
-
         const oldQueue = this.musicQueue;
-        const uniqueMap = createUniqueMap(_musicItems);
+        const uniqueMapForNewItems = createUniqueMap(_musicItems);
+        const itemsToAdd: IMusic.IMusicItem[] = [];
 
-        for (let i = 0; i < oldQueue.length; ++i) {
-            if (i <= this.currentIndex) {
-                if (!uniqueMap.has(oldQueue[i])) {
-                    startPart.push(oldQueue[i]);
-                }
+        // Filter out items already in the queue from the new items batch
+        for (const newItem of _musicItems) {
+            if (this.findMusicIndex(newItem) === -1) { // Not in current queue
+                itemsToAdd.push(newItem);
             } else {
-                if (!uniqueMap.has(oldQueue[i])) {
-                    tailPart.push(oldQueue[i]);
-                }
+                // If it's already in the queue, we might want to remove the old one first
+                // For simplicity here, we'll just not add duplicates if they are already present
+                // A more complex logic might involve moving the existing item
             }
         }
 
+        if (itemsToAdd.length === 0) return; // Nothing new to add
+
+        let insertPosition = this.currentIndex + 1;
+        if (insertPosition > oldQueue.length) {
+            insertPosition = oldQueue.length;
+        }
 
         const newQueue = [
-            ...startPart,
-            ..._musicItems,
-            ...tailPart
+            ...oldQueue.slice(0, insertPosition),
+            ...itemsToAdd,
+            ...oldQueue.slice(insertPosition)
         ];
-
         this.setMusicQueue(newQueue);
     }
 
+    public removeMusic(musicItemsToRemove: IMusic.IMusicItem | IMusic.IMusicItem[] | number) {
+        if (!this.isReady) return;
 
-    public removeMusic(musicItems: IMusic.IMusicItem | IMusic.IMusicItem[] | number) {
-        if (Array.isArray(musicItems)) {
-            const uniqueMap = createUniqueMap(musicItems);
+        const currentQueue = this.musicQueue;
+        let indicesToRemove: number[] = [];
 
-            const newQueue = [];
-            const oldQueue = this.musicQueue;
+        if (typeof musicItemsToRemove === 'number') {
+            if (musicItemsToRemove >= 0 && musicItemsToRemove < currentQueue.length) {
+                indicesToRemove.push(musicItemsToRemove);
+            }
+        } else if (Array.isArray(musicItemsToRemove)) {
+            musicItemsToRemove.forEach(item => {
+                const idx = this.findMusicIndex(item);
+                if (idx !== -1) indicesToRemove.push(idx);
+            });
+            // Remove duplicates and sort in descending order for safe splicing
+            indicesToRemove = [...new Set(indicesToRemove)].sort((a, b) => b - a);
+        } else { // Single IMusic.IMusicItem
+            const idx = this.findMusicIndex(musicItemsToRemove);
+            if (idx !== -1) indicesToRemove.push(idx);
+        }
 
-            for (let i = 0; i < oldQueue.length; i++) {
-                const musicItem = oldQueue[i];
-                if (uniqueMap.has(musicItem)) {
-                    if (this.currentIndex === i) {
-                        this.audioController.reset();
-                        this.currentIndex = -1;
-                        resetProgress();
-                        this.setCurrentMusic(null);
-                    }
-                } else {
-                    newQueue.push(musicItem);
-                    if (this.currentIndex === i) {
-                        this.currentIndex = newQueue.length - 1;
-                    }
+        if (indicesToRemove.length === 0) return;
+
+        const newQueue = [...currentQueue];
+        let newCurrentIndex = this.currentIndex;
+        let currentMusicWasRemoved = false;
+
+        for (const index of indicesToRemove) {
+            if (index < newQueue.length) { // Ensure index is valid after previous splices
+                 newQueue.splice(index, 1);
+                if (index === newCurrentIndex) {
+                    currentMusicWasRemoved = true;
+                } else if (index < newCurrentIndex) {
+                    newCurrentIndex--;
                 }
             }
-            this.setMusicQueue(newQueue);
-        } else {
+        }
+        this.currentIndex = newCurrentIndex; // Update currentIndex first
 
-            const musicIndex = typeof musicItems === "number" ? musicItems : this.findMusicIndex(musicItems);
-            if (musicIndex === -1) {
-                return;
-            }
-            if (musicIndex === this.currentIndex) {
-                this.audioController.reset();
-                this.currentIndex = -1;
-                resetProgress();
-                this.setCurrentMusic(null);
-            }
+        if (currentMusicWasRemoved) {
+            if (this.audioController) this.audioController.reset();
+            this.resetProgress();
+            this.setCurrentMusic(null); // This will set currentIndex to -1 if currentMusic is null after setMusicQueue
+        }
 
-            const newQueue = [...this.musicQueue];
-            newQueue.splice(musicIndex, 1);
-            this.setMusicQueue(newQueue);
+        this.setMusicQueue(newQueue); // This will re-evaluate currentIndex if currentMusic is null
+
+        if (currentMusicWasRemoved && newQueue.length > 0) {
+            // If the current song was removed, play the song at the new currentIndex, or the first song
+            const playNextIdx = (this.currentIndex >= 0 && this.currentIndex < newQueue.length) ? this.currentIndex : 0;
+            this.playIndex(playNextIdx);
+        } else if (newQueue.length === 0) {
+            this.reset();
         }
     }
 
-
-    public async setQuality(quality: IMusic.IQualityKey) {
+    public async setQuality(qualityKey: IMusic.IQualityKey) {
+        if (!this.isReady || !this.audioController) return;
         const currentMusic = this.currentMusic;
-        if (currentMusic && quality !== this.currentQuality) {
-            const {mediaSource, quality: realQuality} = await this.fetchMediaSource(currentMusic, quality)
-            if (this.isCurrentMusic(currentMusic)) {
-                this.setTrack(mediaSource, currentMusic, {
-                    seekTo: this.progress.currentTime ?? 0,
-                    autoPlay: this.playerState === PlayerState.Playing
-                })
-                this.setCurrentQuality(realQuality);
+        if (currentMusic && qualityKey !== this.currentQuality) {
+            const currentTime = this.progress.currentTime;
+            const wasPlaying = this.playerState === PlayerState.Playing;
+            if (wasPlaying && this.audioController) this.audioController.pause();
+
+            this.setPlayerState(PlayerState.Buffering);
+            try {
+                const {mediaSource, quality: realQuality} = await this.fetchMediaSource(currentMusic, qualityKey)
+                if (this.isCurrentMusic(currentMusic) && this.audioController) {
+                    this.setTrack(mediaSource, currentMusic, {
+                        seekTo: currentTime,
+                        autoPlay: wasPlaying
+                    })
+                    this.setCurrentQuality(realQuality);
+                }
+            } catch (e: any) {
+                logger.logError("Error setting quality:", e, {music: currentMusic.title});
+                this.ee.emit(PlayerEvents.Error, currentMusic, e);
+                if (wasPlaying && this.audioController) this.audioController.play();
+                else this.setPlayerState(PlayerState.Paused);
             }
         }
     }
 
     public setRepeatMode(repeatMode: RepeatMode) {
-        if (repeatMode === RepeatMode.Shuffle) {
-            this.setMusicQueue(shuffle(this.musicQueue));
-        } else if (this.repeatMode === RepeatMode.Shuffle) {
-            this.setMusicQueue(sortByTimestampAndIndex(this.musicQueue, true));
+        if (!this.isReady) {
+            repeatModeStore.setValue(repeatMode);
+            setUserPreference("repeatMode", repeatMode);
+            this.ee.emit(PlayerEvents.RepeatModeChanged, repeatMode);
+            return;
         }
+        const oldRepeatMode = this.repeatMode;
         repeatModeStore.setValue(repeatMode);
         setUserPreference("repeatMode", repeatMode);
+
+        if (repeatMode === RepeatMode.Shuffle && oldRepeatMode !== RepeatMode.Shuffle) {
+            this.setMusicQueue(shuffle(this.musicQueue));
+        } else if (oldRepeatMode === RepeatMode.Shuffle && repeatMode !== RepeatMode.Shuffle) {
+            this.setMusicQueue(sortByTimestampAndIndex(this.musicQueue, true));
+        }
         this.ee.emit(PlayerEvents.RepeatModeChanged, repeatMode);
     }
 
     public async setAudioOutputDevice(deviceId?: string) {
+        if (!this.isReady || !this.audioController) return;
         try {
             await this.audioController.setSinkId(deviceId ?? "");
-        } catch (e) {
+        } catch (e: any) {
             logger.logError("设置音频输出设备失败", e);
         }
     }
@@ -605,10 +705,9 @@ class TrackPlayer {
         this.currentIndex = this.findMusicIndex(this.currentMusic);
     }
 
-
     public async fetchCurrentLyric(forceLoad = false) {
+        if (!this.isReady) return;
         const currentMusic = this.currentMusic;
-
         if (!currentMusic) {
             this.setCurrentLyric(null);
             return;
@@ -619,127 +718,105 @@ class TrackPlayer {
             return;
         }
         try {
-            // 获取被关联的歌词
             const linkedLyricItem = await getLinkedLyric(currentMusic);
-            let lyricSource: ILyric.ILyricSource;
+            let lyricSource: ILyric.ILyricSource | null = null;
 
             if (linkedLyricItem) {
-                lyricSource = await PluginManager.callPluginDelegateMethod(
-                    linkedLyricItem,
-                    "getLyric",
-                    linkedLyricItem
-                )
+                lyricSource = (await PluginManager.callPluginDelegateMethod(
+                    linkedLyricItem, "getLyric", linkedLyricItem
+                ).catch(voidCallback)) || null;
             }
-            if (!lyricSource && this.isCurrentMusic(currentMusic)) {
-                lyricSource = await PluginManager.callPluginDelegateMethod(
-                    currentMusic,
-                    "getLyric",
-                    currentMusic
-                );
+            if ((!lyricSource || (!lyricSource.rawLrc && !lyricSource.translation)) && this.isCurrentMusic(currentMusic)) {
+                lyricSource = (await PluginManager.callPluginDelegateMethod(
+                    currentMusic, "getLyric", currentMusic
+                ).catch(voidCallback)) || null;
             }
 
-            if (!this.isCurrentMusic(currentMusic)) {
-                return;
-            }
+            if (!this.isCurrentMusic(currentMusic)) return;
 
             if (!lyricSource?.rawLrc && !lyricSource?.translation) {
-                this.setCurrentLyric({});
+                this.setCurrentLyric({}); // Set to empty object if no lyric found
+                return;
             }
             const parser = new LyricParser(lyricSource.rawLrc, {
                 musicItem: currentMusic,
                 translation: lyricSource.translation
             });
-
             this.setCurrentLyric({
                 parser,
                 currentLrc: parser.getPosition(this.progress.currentTime || 0)
             });
-        } catch (e) {
+        } catch (e: any) {
             logger.logError("歌词解析失败", e);
-            this.setCurrentLyric({});
+            this.setCurrentLyric({}); // Set to empty object on error
         }
-
-
     }
 
-
-    private async fetchMediaSource(musicItem: IMusic.IMusicItem, quality?: IMusic.IQualityKey) {
+    private async fetchMediaSource(musicItem: IMusic.IMusicItem, quality?: IMusic.IQualityKey): Promise<{ quality: IMusic.IQualityKey; mediaSource: IPlugin.IMediaSourceResult | null; }> {
+        if (!this.isReady) {
+            throw new Error("TrackPlayer not ready to fetch media source.");
+        }
         const defaultQuality = AppConfig.getConfig("playMusic.defaultQuality");
         const whenQualityMissing = AppConfig.getConfig("playMusic.whenQualityMissing");
-
         const qualityOrder = getQualityOrder(quality ?? defaultQuality, whenQualityMissing);
-
         let mediaSource: IPlugin.IMediaSourceResult | null = null;
         let realQuality: IMusic.IQualityKey = qualityOrder[0];
 
-        // 1. 判断是否已下载
-        const downloadedData = getInternalData<IMusic.IMusicItemInternalData>(
-            musicItem,
-            "downloadData"
-        );
+        const downloadedData = getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData");
         if (downloadedData) {
-            const {quality, path: _path} = downloadedData;
+            const {quality: downloadedQuality, path: _path} = downloadedData;
             if (await fsUtil.isFile(_path)) {
                 return {
-                    quality,
-                    mediaSource: {
-                        url: fsUtil.addFileScheme(_path),
-                    },
+                    quality: downloadedQuality,
+                    mediaSource: { url: fsUtil.addFileScheme(_path) },
                 };
-            } else {
-                // TODO 删除
             }
         }
 
-        // 2. 如果没有下载
-        for (const quality of qualityOrder) {
+        for (const q of qualityOrder) {
             try {
                 mediaSource = await PluginManager.callPluginDelegateMethod(
-                    {
-                        platform: musicItem.platform,
-                    },
-                    "getMediaSource",
-                    musicItem,
-                    quality
+                    { platform: musicItem.platform }, "getMediaSource", musicItem, q
                 );
-                if (!mediaSource?.url) {
-                    continue;
-                }
-                realQuality = quality;
+                if (!mediaSource?.url) continue;
+                realQuality = q;
                 break;
-            } catch {
-                // pass
+            } catch (e: any) {
+                logger.logInfo(`Failed to get media source for quality ${q}`, e);
             }
         }
-        return {
-            quality: realQuality,
-            mediaSource: mediaSource
-        }
+        return { quality: realQuality, mediaSource };
     }
 
-
-    // 只读数据的设置
     private setCurrentMusic(musicItem: IMusic.IMusicItem | null) {
-        if (!this.isCurrentMusic(musicItem)) {
+        const isActuallyDifferent = !this.isCurrentMusic(musicItem) ||
+                                  (musicItem && this.currentMusic && JSON.stringify(musicItem) !== JSON.stringify(this.currentMusic));
+
+        if (isActuallyDifferent) {
             currentMusicStore.setValue(musicItem);
             this.ee.emit(PlayerEvents.MusicChanged, musicItem);
             this.fetchCurrentLyric();
-            this.setCurrentLyric(null);
+            this.resetProgress();
 
             if (musicItem) {
                 setUserPreference("currentMusic", musicItem);
             } else {
                 removeUserPreference("currentMusic");
             }
-        } else {
-            // 相同的歌曲，不需要额外触发事件
+        } else if (musicItem && !this.currentMusic) { // Case where currentMusic was null and new musicItem is set
             currentMusicStore.setValue(musicItem);
+            this.ee.emit(PlayerEvents.MusicChanged, musicItem);
+            this.fetchCurrentLyric();
+            this.resetProgress();
+            setUserPreference("currentMusic", musicItem);
         }
     }
 
     private setProgress(progress: CurrentTime) {
         progressStore.setValue(progress);
-        setUserPreference("currentProgress", progress.currentTime);
+        if (isFinite(progress.currentTime)) {
+            setUserPreference("currentProgress", progress.currentTime);
+        }
         this.ee.emit(PlayerEvents.ProgressChanged, progress);
     }
 
@@ -754,7 +831,8 @@ class TrackPlayer {
 
         if (lyric?.parser !== prev?.parser) {
             this.ee.emit(PlayerEvents.LyricChanged, lyric?.parser ?? null);
-        } else if (lyric?.currentLrc !== prev?.currentLrc) {
+        }
+        if (lyric?.currentLrc !== prev?.currentLrc) {
             this.ee.emit(PlayerEvents.CurrentLyricChanged, lyric?.currentLrc ?? null);
         }
     }
@@ -764,27 +842,37 @@ class TrackPlayer {
         this.ee.emit(PlayerEvents.StateChanged, playerState);
     }
 
-    // 获取音乐在播放列表中的下标
     private findMusicIndex(musicItem?: IMusic.IMusicItem | null) {
-        if (!musicItem) {
-            return -1;
-        }
+        if (!musicItem) return -1;
         return this.indexMap.indexOf(musicItem);
     }
-
 
     private resetProgress() {
         resetProgress();
         removeUserPreference("currentProgress");
     }
 
-    private setTrack(mediaSource: IPlugin.IMediaSourceResult, musicItem: IMusic.IMusicItem, options: ITrackOptions = {
-        autoPlay: true
-    }) {
+    private setTrack(mediaSource: IPlugin.IMediaSourceResult | null, musicItem: IMusic.IMusicItem, options: ITrackOptions = { autoPlay: true }) {
+        if (!this.audioController) {
+            logger.logError("setTrack called but audioController is null.", new Error("audioController is null"));
+            return;
+        }
+        this.audioController.reset();
         this.resetProgress();
+
+        if (!mediaSource || !mediaSource.url) {
+            logger.logError(
+                `setTrack called with invalid mediaSource. music: ${musicItem.title}`,
+                new Error(`Invalid mediaSource: ${JSON.stringify(mediaSource)}`)
+            );
+            this.ee.emit(PlayerEvents.Error, musicItem, new Error("无效的媒体源"));
+            this.setPlayerState(PlayerState.None);
+            return;
+        }
+
         this.audioController.setTrackSource(mediaSource, musicItem);
 
-        if (options.seekTo >= 0) {
+        if (options.seekTo !== undefined && isFinite(options.seekTo) && options.seekTo >= 0) {
             this.audioController.seekTo(options.seekTo);
         }
 
@@ -793,13 +881,9 @@ class TrackPlayer {
         }
     }
 
-
-    // 判断某首歌是否是当前播放的歌曲
-    public isCurrentMusic(musicItem: IMusic.IMusicItem) {
+    public isCurrentMusic(musicItem: IMusic.IMusicItem | null) {
         return isSameMedia(musicItem, this.currentMusic);
     }
-
 }
-
 
 export default new TrackPlayer();

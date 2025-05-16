@@ -1,3 +1,4 @@
+// src/types/app-config.d.ts
 interface _IAppConfig {
     "$schema-version": number;
     "normal.closeBehavior": "exit_app" | "minimize";
@@ -6,6 +7,13 @@ interface _IAppConfig {
     "normal.taskbarThumb": "window" | "artwork";
     "normal.musicListColumnsShown": Array<"duration" | "platform">;
     "normal.language": string;
+
+    /** 播放后端选择 */
+    "playMusic.backend": "web" | "mpv"; // 新增
+    /** MPV 可执行文件路径 */
+    "playMusic.mpvPath": string | null; // 新增
+    /** MPV 附加启动参数 */
+    "playMusic.mpvArgs": string; // 新增
 
     /** 歌单内搜索区分大小写 */
     "playMusic.caseSensitiveInSearch": boolean;
@@ -51,7 +59,7 @@ interface _IAppConfig {
         | "toggle-desktop-lyric"
         | "volume-up"
         | "volume-down"
-        | "like/dislike",
+        | "like/dislike"
         | "toggle-main-window-visible",
         {
             local?: string[] | null;
