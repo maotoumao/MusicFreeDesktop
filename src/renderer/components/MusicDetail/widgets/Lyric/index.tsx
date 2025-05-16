@@ -1,7 +1,8 @@
+// src/renderer/components/MusicDetail/widgets/Lyric/index.tsx
 import "./index.scss";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import Loading from "@/renderer/components/Loading";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react"; // 导入 React
 import { showCustomContextMenu } from "@/renderer/components/ContextMenu";
 import {
   getUserPreference,
@@ -11,7 +12,7 @@ import {
 import { toast } from "react-toastify";
 import { showModal } from "@/renderer/components/Modal";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import LyricParser from "@/renderer/utils/lyric-parser";
+import LyricParser, { IParsedLrcItem } from "@/renderer/utils/lyric-parser";
 import { getLinkedLyric, unlinkLyric } from "@/renderer/core/link-lyric";
 import { getMediaPrimaryKey } from "@/common/media-util";
 import { useTranslation } from "react-i18next";
@@ -39,7 +40,7 @@ export default function Lyric() {
   useEffect(() => {
     if (containerRef.current) {
       const currentIndex = lyricContext?.currentLrc?.index;
-      if (currentIndex >= 0) {
+      if (currentIndex !== undefined && currentIndex >= 0) { // 确保 currentIndex 不是 undefined
         const dom = document.querySelector(`#lyric-item-id-${currentIndex}`) as
           | HTMLDivElement
           | undefined;
@@ -56,7 +57,7 @@ export default function Lyric() {
       }
     }
     mountRef.current = true;
-  }, [currentLrc]);
+  }, [currentLrc, lyricContext]); // 添加 lyricContext 到依赖数组
 
   const optionsComponent = (
     <div className="lyric-options-container">
@@ -87,7 +88,7 @@ export default function Lyric() {
             x: e.clientX,
             y: e.clientY,
             width: 200,
-            height: 146,
+            // height: 146, // 高度应动态计算或移除
             component: (
               <LyricContextMenu
                 setLyricFontSize={setFontSize}
@@ -111,7 +112,7 @@ export default function Lyric() {
             falsy={<Loading></Loading>}
           >
             <Condition
-              condition={lyricParser}
+              condition={lyricParser && lyricParser.getLyricItems().length > 0} // 确保有歌词项
               falsy={
                 <>
                   <div className="lyric-item">{t("music_detail.no_lyric")}</div>
@@ -132,9 +133,9 @@ export default function Lyric() {
               }
             >
               {lyricParser?.getLyricItems?.()?.map((lyricItem, index) => (
-                <>
+                // 使用 React.Fragment 并提供唯一的 key
+                <React.Fragment key={`${lyricItem.time}-${index}`}>
                   <div
-                    key={index}
                     className="lyric-item"
                     id={`lyric-item-id-${index}`}
                     data-highlight={currentLrc?.index === index}
@@ -145,15 +146,14 @@ export default function Lyric() {
                     condition={lyricParser?.hasTranslation && showTranslation}
                   >
                     <div
-                      key={"tr" + index}
                       className="lyric-item lyric-item-translation"
-                      id={`tr-lyric-item-id-${index}`}
+                      id={`tr-lyric-item-id-${index}`} // id 也应该是唯一的
                       data-highlight={currentLrc?.index === index}
                     >
                       {lyricItem.translation}
                     </div>
                   </IfTruthy>
-                </>
+                </React.Fragment>
               ))}
             </Condition>
           </Condition>
@@ -166,24 +166,24 @@ export default function Lyric() {
 
 interface ILyricContextMenuProps {
   setLyricFontSize: (val: string) => void;
-  lyricParser: LyricParser;
+  lyricParser: LyricParser | undefined; // 允许 undefined
 }
 
 function LyricContextMenu(props: ILyricContextMenuProps) {
   const { setLyricFontSize, lyricParser } = props;
 
-  const [fontSize, setFontSize] = useState<string | null>(
+  const [fontSize, setFontSize] = useState<string>( // 确保 fontSize 有初始值
     getUserPreference("inlineLyricFontSize") ?? "13"
   );
   const [showTranslation, setShowTranslation] =
     useUserPreference("showTranslation");
 
-  const [linkedLyricInfo, setLinkedLyricInfo] = useState<IMedia.IUnique>(null);
+  const [linkedLyricInfo, setLinkedLyricInfo] = useState<IMedia.IUnique | null>(null); // 明确类型
 
   const { t } = useTranslation();
 
-  const currentMusicRef = useRef<IMusic.IMusicItem>(
-    trackPlayer.currentMusic ?? ({} as any)
+  const currentMusicRef = useRef<IMusic.IMusicItem | null>( // 允许 null
+    trackPlayer.currentMusic ?? null
   );
 
   useEffect(() => {
@@ -200,13 +200,17 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
     if (val) {
       const nVal = +val;
       if (8 <= nVal && nVal <= 32) {
-        setUserPreference("inlineLyricFontSize", `${val}`);
-        setLyricFontSize(`${val}`);
+        setUserPreference("inlineLyricFontSize", `${nVal}`); // 使用 nVal
+        setLyricFontSize(`${nVal}`); // 使用 nVal
       }
     }
   }
 
   async function downloadLyric(fileType: "lrc" | "txt") {
+    if (!lyricParser || !currentMusicRef.current) { // 增加检查
+      toast.error(t("music_detail.lyric_ctx_download_fail") + ": No lyric or music info");
+      return;
+    }
     let rawLrc = "";
     if (fileType === "lrc") {
       rawLrc = lyricParser.toString({
@@ -232,11 +236,10 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
       if (!result.canceled && result.filePath) {
         await fsUtil.writeFile(result.filePath, rawLrc, "utf-8");
         toast.success(t("music_detail.lyric_ctx_download_success"));
-      } else {
-        throw new Error();
       }
-    } catch {
-      toast.error(t("music_detail.lyric_ctx_download_fail"));
+      // 移除 else throw new Error(); 因为用户取消不应视为错误
+    } catch(error) { // 捕获具体错误
+      toast.error(t("music_detail.lyric_ctx_download_fail") + `: ${error.message}`);
     }
   }
 
@@ -253,15 +256,10 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           role="button"
           className="font-size-button"
           onClick={() => {
-            if (fontSize) {
+            if (fontSize) { // 确保 fontSize 存在
               setFontSize((prev) => {
-                const newFontSize = +prev - 1;
+                const newFontSize = Math.max(8, +prev - 1); // 确保不小于8
                 handleFontSize(newFontSize);
-                if (newFontSize < 8) {
-                  return "8";
-                } else if (newFontSize > 32) {
-                  return "32";
-                }
                 return `${newFontSize}`;
               });
             }
@@ -273,7 +271,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           type="number"
           max={32}
           min={8}
-          value={fontSize}
+          value={fontSize ?? ""} // 提供空字符串作为默认值
           onChange={(e) => {
             const val = e.target.value;
             handleFontSize(val);
@@ -284,15 +282,10 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
           role="button"
           className="font-size-button"
           onClick={() => {
-            if (fontSize) {
+            if (fontSize) { // 确保 fontSize 存在
               setFontSize((prev) => {
-                const newFontSize = +prev + 1;
+                const newFontSize = Math.min(32, +prev + 1); // 确保不大于32
                 handleFontSize(newFontSize);
-                if (newFontSize < 8) {
-                  return "8";
-                } else if (newFontSize > 32) {
-                  return "32";
-                }
                 return `${newFontSize}`;
               });
             }
@@ -340,7 +333,7 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
         role="button"
         onClick={() => {
           showModal("SearchLyric", {
-            defaultTitle: currentMusicRef.current.title,
+            defaultTitle: currentMusicRef.current?.title, // 安全访问
             musicItem: currentMusicRef.current,
           });
         }}
@@ -358,14 +351,17 @@ function LyricContextMenu(props: ILyricContextMenuProps) {
         role="button"
         data-disabled={!linkedLyricInfo}
         onClick={async () => {
-          try {
-            await unlinkLyric(currentMusicRef.current);
-            if (trackPlayer.isCurrentMusic(currentMusicRef.current)) {
-                trackPlayer.fetchCurrentLyric(true);
+          if (currentMusicRef.current) { // 增加检查
+            try {
+              await unlinkLyric(currentMusicRef.current);
+              if (trackPlayer.isCurrentMusic(currentMusicRef.current)) {
+                  trackPlayer.fetchCurrentLyric(true);
+              }
+              toast.success(t("music_detail.toast_media_lyric_unlinked"));
+              setLinkedLyricInfo(null); // 清除关联歌词信息
+            } catch {
+                // pass
             }
-            toast.success(t("music_detail.toast_media_lyric_unlinked"));
-          } catch {
-              // pass
           }
         }}
       >

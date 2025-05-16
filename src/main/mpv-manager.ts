@@ -1,13 +1,14 @@
 // src/main/mpv-manager.ts
-import NodeMpvPlayer, { ObserveProperty, Status as MpvNodeStatus, EndFileEvent as MpvNodeEndFileEvent } from "node-mpv"; // 修改导入名称以更清晰
+// 从导入中移除 ObserveProperty
+import NodeMpvPlayer, { Status as MpvNodeStatus, EndFileEvent as MpvNodeEndFileEvent } from "node-mpv";
 import { ipcMain, BrowserWindow, app } from "electron";
 import AppConfig from "@shared/app-config/main";
 import logger from "@shared/logger/main";
 import { PlayerState } from "@/common/constant";
-import fs from "fs";
+import fs from "fs"; // 保留，因为你在其他地方可能用到了 fs.promises.access
 
 class MpvManager {
-    private mpv: NodeMpvPlayer | null = null; // 使用修改后的导入名称
+    private mpv: NodeMpvPlayer | null = null;
     private mainWindow: BrowserWindow | null = null;
     private currentTrack: IMusic.IMusicItem | null = null;
     private lastKnownTime: number = 0;
@@ -20,7 +21,6 @@ class MpvManager {
 
 
     constructor() {
-        // 立即打印导入的模块，确认其类型
         logger.logInfo("MpvManager Constructor: Imported 'node-mpv' module:", NodeMpvPlayer);
         logger.logInfo("MpvManager Constructor: Type of imported 'node-mpv':", typeof NodeMpvPlayer);
         this.handleIPC();
@@ -45,7 +45,6 @@ class MpvManager {
             }
         }
 
-        // 从 node-mpv 的 readme 中移除 observeAllProperties，因为它不是标准选项
         return {
             binary: binaryPath || undefined,
             socket: process.platform === "win32" ? `\\\\.\\pipe\\mpvsocket_${process.pid}` : `/tmp/mpvsocket_${process.pid}_${Date.now()}`,
@@ -53,7 +52,6 @@ class MpvManager {
             verbose: !app.isPackaged,
             audio_only: true, 
             time_update: 1,
-            // observeAllProperties: false, // 移除此非标准选项
             additionalArgs: argsArray.filter(arg => arg.trim() !== "")
         };
     }
@@ -66,7 +64,6 @@ class MpvManager {
 
         const mpvOptions = this.getMpvOptions();
         logger.logInfo(`MpvManager: Initializing MPV. Binary: ${mpvOptions.binary || 'System PATH'}, Args: [${mpvOptions.additionalArgs.join(', ')}]`);
-
 
         if (mpvOptions.binary) {
              try {
@@ -93,7 +90,6 @@ class MpvManager {
         let mpvInstanceAttempt: NodeMpvPlayer | null = null;
         try {
             logger.logInfo("MpvManager: About to call 'new NodeMpvPlayer()'.");
-            // 构造函数选项中移除了 observeAllProperties
             mpvInstanceAttempt = new NodeMpvPlayer(
                 { 
                     binary: mpvOptions.binary,
@@ -143,11 +139,11 @@ class MpvManager {
         try {
             this.setupMpvEventHandlers();
             logger.logInfo("MpvManager: Attempting to start MPV process via this.mpv.start()...");
-            await this.mpv.start(); // 现在这里应该不会报 this.mpv.start is not a function
+            await this.mpv.start();
             logger.logInfo("MPV started successfully via this.mpv.start().");
             this.retryCount = 0;
 
-            await this.observeProperties();
+            await this.observeProperties(); // 在 start 之后观察属性
              if(isManualTrigger || AppConfig.getConfig("playMusic.backend") === "mpv") {
                 this.mainWindow?.webContents.send("mpv-init-success");
             }
@@ -160,7 +156,6 @@ class MpvManager {
             if (startError.stack) logger.logError("MPV startError Stack:", startError.stack);
             this.sendToRenderer("mpv-error", errorMsg);
             
-            // 尝试安全地退出MPV，即使它可能没有完全启动
             if (this.mpv) {
                 try {
                     await this.mpv.quit();
@@ -180,11 +175,13 @@ class MpvManager {
     private async observeProperties() {
         if (!this.mpv) return;
         try {
-            await this.mpv.observeProperty('time-pos', ObserveProperty.TIME); // node-mpv 内部使用数字 ID，但对外暴露属性名
-            await this.mpv.observeProperty('duration', ObserveProperty.TIME);
-            await this.mpv.observeProperty('pause', ObserveProperty.BOOLEAN);
-            await this.mpv.observeProperty('volume', ObserveProperty.NUMBER);
-            await this.mpv.observeProperty('playback-speed', ObserveProperty.NUMBER); // 'speed' 也是一个有效的MPV属性
+            // 调用 observeProperty 时只传递属性名
+            await this.mpv.observeProperty('time-pos');
+            await this.mpv.observeProperty('duration');
+            await this.mpv.observeProperty('pause');
+            await this.mpv.observeProperty('volume');
+            await this.mpv.observeProperty('speed'); // 或者 'playback-speed'
+            logger.logInfo("MPV properties observed successfully.");
         } catch (error: any) {
             logger.logError("Failed to observe MPV properties:", error);
              this.sendToRenderer("mpv-error", `观察MPV属性失败: ${error.message}`);
@@ -194,9 +191,7 @@ class MpvManager {
     private setupMpvEventHandlers() {
         if (!this.mpv) return;
 
-        // node-mpv v2 使用 'status' 事件，而不是 'statuschange'
-        // 并且它为每个变化的属性单独触发
-        this.mpv.on("status", (status: MpvNodeStatus) => { // status 是一个对象 { property: string, value: any }
+        this.mpv.on("status", (status: MpvNodeStatus) => {
             if (!status || typeof status.property !== 'string') return;
 
             const propertyName = status.property;
@@ -204,7 +199,6 @@ class MpvManager {
 
             if (propertyName === 'time-pos' && typeof value === 'number') {
                 this.lastKnownTime = value;
-                // 避免在 duration 未知时发送不准确的 statuschange
                 if (this.lastKnownDuration !== Infinity) {
                      this.sendToRenderer("mpv-statuschange", { time: this.lastKnownTime, duration: this.lastKnownDuration });
                 }
@@ -215,7 +209,6 @@ class MpvManager {
                  const newState = value ? PlayerState.Paused : PlayerState.Playing;
                  if (this.lastKnownPlayerState !== newState) {
                      this.lastKnownPlayerState = newState;
-                     // node-mpv v2 直接有 paused 和 resumed 事件
                  }
             } else if (propertyName === 'volume' && typeof value === 'number') {
                 this.sendToRenderer("mpv-volumechange", { volume: value / 100 });
@@ -223,7 +216,6 @@ class MpvManager {
                 this.sendToRenderer("mpv-speedchange", { speed: value });
             }
         });
-
 
         this.mpv.on("paused", () => {
             logger.logInfo("MPV event: paused");
@@ -233,7 +225,7 @@ class MpvManager {
             }
         });
 
-        this.mpv.on("resumed", () => { // node-mpv v2 使用 'resumed'
+        this.mpv.on("resumed", () => {
             logger.logInfo("MPV event: resumed");
              if (this.lastKnownPlayerState !== PlayerState.Playing) {
                 this.lastKnownPlayerState = PlayerState.Playing;
@@ -241,21 +233,20 @@ class MpvManager {
             }
         });
 
-        this.mpv.on("timeposition", (seconds: number) => { // node-mpv v2 有这个事件
+        this.mpv.on("timeposition", (seconds: number) => {
             this.lastKnownTime = seconds;
             this.sendToRenderer("mpv-timeposition", { time: seconds, duration: this.lastKnownDuration });
         });
 
-        this.mpv.on("stopped", () => { // node-mpv v2 有这个事件
+        this.mpv.on("stopped", () => {
             logger.logInfo("MPV event: stopped");
             this.lastKnownPlayerState = PlayerState.None;
-            // currentTrack 的管理由 TrackPlayer 负责，这里不应直接修改
             this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
         });
 
-        this.mpv.on("started", () => { // node-mpv v2 有这个事件
+        this.mpv.on("started", () => {
             logger.logInfo("MPV event: started (playback started for a new file)");
-             if (this.mpv) { // 确保 mpv 实例存在
+             if (this.mpv) {
                 this.mpv.getProperty("duration").then(duration => {
                     if (typeof duration === 'number' && duration > 0) {
                         this.lastKnownDuration = duration;
@@ -264,26 +255,22 @@ class MpvManager {
                     }
                 }).catch(err => {
                     logger.logError("Error getting duration on 'started' event:", err);
-                    this.lastKnownDuration = Infinity; // 保持默认值
+                    this.lastKnownDuration = Infinity;
                 });
             }
         });
         
-        // node-mpv v2 readme 中没有明确的 endfile 事件，但可能有类似的或通过 status/stopped 间接处理
-        // 如果 TrackPlayer 依赖此事件，需要确认 node-mpv v2 如何通知文件结束
-        // 假设 node-mpv v2 会在文件自然播放结束时触发 'stopped' 或 'paused' (如果 idle=yes)
-        // 对于错误导致的文件结束，应该由 'crashed' 或 'error' 事件处理
-
         this.mpv.on("error", (error: Error) => { 
             const errorMsg = `MPV error event: ${error.message}`;
             logger.logError("MPV error event:", error);
             this.sendToRenderer("mpv-error", errorMsg);
         });
 
-        this.mpv.on("crashed", async (exitCode: number) => {
+        this.mpv.on("crashed", async () => { // exitCode 参数在 jeffvli 的 fork 的 index.d.ts 中没有，但原始的有
             if (this.isQuitting) return;
-            const crashMsg = `MPV 播放器意外退出 (退出码: ${exitCode})。正在尝试重启...`;
-            logger.logError(crashMsg, new Error(`MPV Crashed - Exit code: ${exitCode}`));
+            // const crashMsg = `MPV 播放器意外退出 (退出码: ${exitCode})。正在尝试重启...`;
+            const crashMsg = `MPV 播放器意外退出。正在尝试重启...`;
+            logger.logError(crashMsg, new Error(`MPV Crashed`)); // 移除了 exitCode
             this.sendToRenderer("mpv-error", crashMsg); 
 
             const oldMpv: NodeMpvPlayer | null = this.mpv;
@@ -324,8 +311,9 @@ class MpvManager {
         }
         if (this.mpv) {
             try {
-                // node-mpv v2 的 isRunning 是一个方法
-                if (this.lastKnownPlayerState !== PlayerState.None && this.mpv.isRunning) {
+                // 检查 isRunning 是否是方法
+                const running = typeof this.mpv.isRunning === 'function' ? this.mpv.isRunning() : this.mpv.isRunning;
+                if (this.lastKnownPlayerState !== PlayerState.None && running) {
                      await this.mpv.stop().catch((e: unknown) => logger.logInfo("Error stopping MPV before quit (ignorable):", e as Error));
                 }
                 await this.mpv.quit();
@@ -361,8 +349,8 @@ class MpvManager {
             return;
         }
         try {
-            // node-mpv v2 的 isRunning 是一个方法
-            if (this.mpv.isRunning === false) { 
+            const running = typeof this.mpv.isRunning === 'function' ? this.mpv.isRunning() : this.mpv.isRunning;
+            if (running === false) { 
                 logger.logInfo("MPV process was not running, attempting to start it before loading.");
                 await this.mpv.start();
                 await this.observeProperties(); 
@@ -404,7 +392,7 @@ class MpvManager {
         ipcMain.handle("mpv-resume", async () => { 
             if (!this.mpv) { this.sendToRenderer("mpv-error", "MPV未初始化"); return; }
              try {
-                await this.mpv.play(); // 使用 play 方法恢复播放
+                await this.mpv.resume(); // 使用 resume 方法恢复播放
             } catch (e: any) { logger.logError("mpv-resume error", e); this.sendToRenderer("mpv-error", `恢复播放失败: ${e.message}`);}
         });
 
@@ -433,7 +421,7 @@ class MpvManager {
         ipcMain.handle("mpv-set-speed", async (_event, speed: number) => {
             if (!this.mpv) { this.sendToRenderer("mpv-error", "MPV未初始化"); return; }
             try {
-                await this.mpv.setProperty("speed", speed); // 使用 setProperty 设置播放速度
+                await this.mpv.speed(speed);
             } catch (e: any) { logger.logError("mpv-set-speed error", e); this.sendToRenderer("mpv-error", `倍速设置失败: ${e.message}`);}
         });
 
@@ -452,7 +440,7 @@ class MpvManager {
         ipcMain.handle("mpv-get-current-time", async () => {
              if (!this.mpv) return this.lastKnownTime;
              try {
-                const time = await this.mpv.getTimePosition(); // node-mpv v2 有 getTimePosition 方法
+                const time = await this.mpv.getTimePosition();
                 this.lastKnownTime = time;
                 return time;
              } catch(e: any) {
@@ -460,7 +448,20 @@ class MpvManager {
                  return this.lastKnownTime;
              }
         });
-
+         // 新增：允许直接设置MPV属性，用于如loop等
+        ipcMain.handle("mpv-set-property", async (_event, property: string, value: any) => {
+            if (!this.mpv) {
+                this.sendToRenderer("mpv-error", "MPV 未初始化，无法设置属性。");
+                return;
+            }
+            try {
+                await this.mpv.setProperty(property, value);
+                logger.logInfo(`MPV property set: ${property} = ${value}`);
+            } catch (error: any) {
+                logger.logError(`MPV failed to set property ${property}:`, error);
+                this.sendToRenderer("mpv-error", `设置属性 ${property} 失败: ${error.message}`);
+            }
+        });
         ipcMain.handle("mpv-quit", async () => {
             await this.quitMpv();
         });

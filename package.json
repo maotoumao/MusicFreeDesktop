@@ -99,7 +99,7 @@
     "lru-cache": "^10.2.2",
     "music-metadata": "^8.3.0",
     "nanoid": "^4.0.2",
-    "node-mpv": "^1.5.0",
+    "node-mpv": "github:jeffvli/Node-MPV#32b4d64395289ad710c41d481d2707a7acfc228f",
     "object-path": "^0.11.8",
     "p-queue": "^7.4.1",
     "qs": "^6.12.1",
