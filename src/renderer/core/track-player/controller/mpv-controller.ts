@@ -53,6 +53,11 @@ export default class MpvController extends ControllerBase implements IAudioContr
         });
         this.setupEventListeners();
         this.initialize();
+
+        window.electron.mpvPlayerListener.onVolumeChange((data: { volume: number }) => {
+            logger.logInfo("MpvController: Received mpv-volumechange.", data.volume);
+            this.onVolumeChange?.(data.volume);
+          });
     }
 
     public async initialize(): Promise<void> {

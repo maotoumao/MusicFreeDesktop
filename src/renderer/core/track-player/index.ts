@@ -228,6 +228,12 @@ class TrackPlayer {
         if (!this.audioController) return;
 
         this.audioController.onEnded = () => {
+            const autoNext = AppConfig.getConfig("playMusic.playError") === "skip";
+            if (autoNext) {
+                this.skipToNext();  // 跳到下一首
+            } else {
+                this.setPlayerState(PlayerState.None);
+            }
             this.resetProgress();
             switch (this.repeatMode) {
                 case RepeatMode.Queue:
@@ -447,7 +453,7 @@ class TrackPlayer {
         this.currentIndex = index;
 
         this.setPlayerState(PlayerState.Buffering);
-        if (this.audioController) await this.audioController.prepareTrack?.(nextMusicItem);
+        if (this.audioController) this.audioController.prepareTrack?.(nextMusicItem);
 
         try {
             const {mediaSource, quality} = await this.fetchMediaSource(nextMusicItem, intendedQuality);
@@ -912,9 +918,12 @@ class TrackPlayer {
             return;
         }
 
-        this.audioController.setTrackSource(mediaSource, musicItem);
+        // 强制同步状态更新
+        this.setPlayerState(PlayerState.Buffering);
+
+        await this.audioController.setTrackSource(mediaSource, musicItem);
         if (options.seekTo !== undefined && isFinite(options.seekTo) && options.seekTo >= 0) this.audioController.seekTo(options.seekTo);
-        if (options.autoPlay) await this.audioController.play();
+        if (options.autoPlay) this.audioController.play();
         else if (this.playerState !== PlayerState.Paused && this.playerState !== PlayerState.None) this.setPlayerState(PlayerState.Paused);
     }
 

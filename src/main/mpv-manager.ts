@@ -19,6 +19,7 @@ class MpvManager {
     private retryCount = 0;
     private isQuitting = false;
     private isMpvFullyInitialized = false;
+    private timeUpdateInterval: NodeJS.Timeout | null = null;
 
     constructor() {
         logger.logInfo("MpvManager MAIN: Constructor called.");
@@ -28,6 +29,24 @@ class MpvManager {
     public setMainWindow(window: BrowserWindow) {
         this.mainWindow = window;
         logger.logInfo("MpvManager MAIN: MainWindow set.");
+    }
+
+    private startTimeUpdateLoop() {
+        if (this.timeUpdateInterval) clearInterval(this.timeUpdateInterval);
+        this.timeUpdateInterval = setInterval(async () => {
+            if (this.mpv && this.isMpvFullyInitialized) {
+                try {
+                    const time = await this.mpv.getProperty('time-pos');
+                    const duration = await this.mpv.getProperty('duration');
+                    this.sendToRenderer("mpv-timeposition", { time, duration });
+                } catch {}
+            }
+        }, 1000); // 每秒推送一次
+    }
+    
+    private stopTimeUpdateLoop() {
+        if (this.timeUpdateInterval) clearInterval(this.timeUpdateInterval);
+        this.timeUpdateInterval = null;
     }
 
     private getMpvOptions() {
@@ -134,6 +153,7 @@ class MpvManager {
             this.retryCount = 0;
             await this.observeProperties();
             this.isMpvFullyInitialized = true;
+            this.startTimeUpdateLoop();
             this.sendToRenderer("mpv-init-success");
             logger.logInfo("MpvManager MAIN: MPV fully initialized and ready.");
             return true;
@@ -245,12 +265,25 @@ class MpvManager {
             if (this.isQuitting) { logger.logInfo("MpvManager MAIN: MPV 'stopped' ignored (quitting)."); return; }
             logger.logInfo("MpvManager MAIN: MPV direct event 'stopped'.");
             let isEof = false;
-            if (this.mpv) { try { isEof = await this.mpv.getProperty('eof-reached') as boolean; } catch(e){} }
-            
-            // If it stopped AND it was at the end of file, it's an "ended" scenario.
-            // The 'eof-reached' property change should ideally handle this.
-            // If it stopped for other reasons (e.g., error, user stop), then it's a 'stopped' scenario.
+            if (this.mpv) { 
+                try { 
+                    isEof = await this.mpv.getProperty('eof-reached') as boolean; 
+                } catch(e){} 
+            }
+            // 修正：如果 idle-active 为 true 也认为是播放结束
             if (!isEof) {
+                // 新增判断
+                let idleActive = false;
+                if (this.mpv) {
+                    try {
+                        idleActive = await this.mpv.getProperty('idle-active') as boolean;
+                    } catch {}
+                }
+                if (idleActive) {
+                    logger.logInfo("MpvManager MAIN: 'stopped' and 'idle-active' is true, treat as playback ended.");
+                    this.sendToRenderer("mpv-playback-ended", { reason: "eof" });
+                    return;
+                }
                 logger.logInfo("MpvManager MAIN: 'stopped' but not EOF. Resetting state and sending mpv-stopped.");
                 this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
                 this.lastKnownPlayerState = PlayerState.None;
@@ -340,6 +373,7 @@ class MpvManager {
             } finally {
                 if (this.mpv) this.mpv.removeAllListeners();
                 this.mpv = null; this.isMpvFullyInitialized = false;
+                this.stopTimeUpdateLoop();
                 logger.logInfo("MpvManager MAIN: MPV instance nulled and uninitialized.");
             }
         } else {
