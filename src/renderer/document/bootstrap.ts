@@ -1,3 +1,4 @@
+// src/renderer/document/bootstrap.ts
 import {localPluginHash, PlayerState, RepeatMode, supportLocalMediaType} from "@/common/constant";
 import MusicSheet from "../core/music-sheet";
 import trackPlayer from "../core/track-player";
@@ -162,6 +163,7 @@ function setupCommandAndEvents() {
 
     messageBus.onCommand("ToggleFavorite", async (item) => {
         const realItem = item || trackPlayer.currentMusic;
+        if (!realItem) return; // 添加空检查
         if (MusicSheet.frontend.isFavoriteMusic(realItem)) {
             MusicSheet.frontend.removeMusicFromFavorite(realItem);
         } else {
@@ -188,10 +190,10 @@ function setupCommandAndEvents() {
 
     const sendAppStateTo = (from: "main" | number) => {
         const appState: IAppState = {
-            repeatMode: trackPlayer.repeatMode || RepeatMode.Queue,
-            playerState: trackPlayer.playerState || PlayerState.None,
+            repeatMode: trackPlayer.repeatMode ?? RepeatMode.Queue, // 使用 ?? 提供默认值
+            playerState: trackPlayer.playerState ?? PlayerState.None, // 使用 ?? 提供默认值
             musicItem: trackPlayer.currentMusicBasicInfo || null,
-            lyricText: trackPlayer.lyric?.currentLrc?.lrc || null,
+            lyricText: trackPlayer.lyric?.currentLrc?.lrc ?? null, // 修改点
             parsedLrc: trackPlayer.lyric?.currentLrc || null,
             fullLyric: trackPlayer.lyric?.parser?.getLyricItems() || [],
             progress: trackPlayer.progress?.currentTime || 0,
@@ -204,7 +206,23 @@ function setupCommandAndEvents() {
     messageBus.onCommand("SyncAppState", (_, from) => {
         sendAppStateTo(from);
     });
-    sendAppStateTo("main");
+
+    // 初始化完成后发送一次状态
+    const initialSync = () => {
+        // 由于 isReady 是私有属性，直接发送一次状态，后续依赖事件同步
+        sendAppStateTo("main");
+        // 这里简单地在 musicChanged 后尝试同步，因为 musicChanged 意味着播放器状态可能已更新
+        const readyListener = () => {
+            sendAppStateTo("main");
+            // 移除监听器，如果 trackPlayer 没有 off 方法，则不移除
+            // 如果有 removeListener/on/removeEventListener 方法，请替换下面的注释为实际方法
+            // trackPlayer.removeListener?.(PlayerEvents.MusicChanged, readyListener);
+        };
+        trackPlayer.on(PlayerEvents.MusicChanged, readyListener);
+        // 或者如果 trackPlayer 有一个明确的 'ready' 事件，监听那个事件
+    };
+    initialSync();
+
 
     // 状态同步
     trackPlayer.on(PlayerEvents.StateChanged, state => {
@@ -221,14 +239,14 @@ function setupCommandAndEvents() {
 
     trackPlayer.on(PlayerEvents.CurrentLyricChanged, lyric => {
         messageBus.syncAppState({
-            lyricText: lyric.lrc,
+            lyricText: lyric?.lrc ?? null, // 修改点
             parsedLrc: lyric
         });
     })
 
-    trackPlayer.on(PlayerEvents.LyricChanged, lyric => {
+    trackPlayer.on(PlayerEvents.LyricChanged, lyricParser => {
         messageBus.syncAppState({
-            fullLyric: lyric?.getLyricItems?.() || []
+            fullLyric: lyricParser?.getLyricItems?.() || []
         })
     })
 
@@ -251,7 +269,9 @@ function setupCommandAndEvents() {
             progress: 0,
             duration: 0,
         });
-        addToRecentlyPlaylist(musicItem);
+        if (musicItem) { // 确保 musicItem 不为 null
+           addToRecentlyPlaylist(musicItem);
+        }
     });
 }
 
@@ -260,7 +280,7 @@ async function setupDeviceChange() {
         await navigator.mediaDevices.enumerateDevices().catch((): MediaDeviceInfo[] => []);
     let devices = (await getAudioDevices()) || [];
 
-    navigator.mediaDevices.ondevicechange = async (evt) => {
+    navigator.mediaDevices.ondevicechange = async (_evt) => { // evt 参数未使用，可以标记为 _evt
         const newDevices = await getAudioDevices();
         if (
             newDevices.length < devices.length &&
