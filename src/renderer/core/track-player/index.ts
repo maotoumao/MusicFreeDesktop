@@ -1,5 +1,6 @@
 // src/renderer/core/track-player/index.ts
-import {CurrentTime, ICurrentLyric, PlayerEvents} from "./enum";
+// ... (保留大部分 import)
+import {CurrentTime, ICurrentLyric, PlayerEvents,} from "./enum";
 import shuffle from "lodash.shuffle";
 import {
     addSortProperty,
@@ -127,13 +128,24 @@ class TrackPlayer {
     private indexMap: IIndexMap;
     private currentIndex = -1;
     private audioController: IAudioController | null = null;
-    private ee: EventEmitter<InternalPlayerEvents>;
+    private ee: EventEmitter<InternalPlayerEvents>; // ee 仍然是私有的
     private isReady = false;
 
     constructor() {
         this.indexMap = createIndexMap();
-        this.ee = new EventEmitter();
+        this.ee = new EventEmitter(); // 初始化 EventEmitter
     }
+
+    // 公共的事件监听方法
+    public on<E extends keyof InternalPlayerEvents>(event: E, listener: InternalPlayerEvents[E]): void {
+        this.ee.on(event, listener as any);
+    }
+
+    // 公共的移除事件监听方法 (可选，但推荐)
+    public off<E extends keyof InternalPlayerEvents>(event: E, listener: InternalPlayerEvents[E]): void {
+        this.ee.off(event, listener as any);
+    }
+
 
     private async initializeAudioBackend(previousState?: { music: IMusic.IMusicItem | null, time: number, isPlaying: boolean }) {
         const backendType = AppConfig.getConfig("playMusic.backend");
@@ -274,7 +286,7 @@ class TrackPlayer {
             }
             if (patch["playMusic.audioOutputDevice"] !== undefined && this.audioController) {
                 const deviceId = AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId;
-                await this.setAudioOutputDevice(deviceId); // Made await
+                await this.setAudioOutputDevice(deviceId);
             }
         });
 
@@ -303,7 +315,7 @@ class TrackPlayer {
         this.currentIndex = this.findMusicIndex(currentMusic);
 
         if (deviceId && this.audioController) {
-            await this.setAudioOutputDevice(deviceId); // Made await
+            await this.setAudioOutputDevice(deviceId);
         }
 
         if (volume !== null && volume !== undefined && this.audioController) {
@@ -324,7 +336,7 @@ class TrackPlayer {
                     this.setCurrentQuality(quality);
                 }
             }).catch(err => {
-                logger.logError("Error fetching media source on setup", err);
+                logger.logError("Error fetching media source on setup", err as Error);
                 this.ee.emit(PlayerEvents.Error, currentMusic, err);
             });
         }
@@ -425,7 +437,7 @@ class TrackPlayer {
                 });
             }
         } catch (e: any) {
-            logger.logError("Error in playIndex:", e, {musicItem: nextMusicItem?.title});
+            logger.logError("Error in playIndex:", e, {musicItemTitle: nextMusicItem?.title}); // 修改日志记录
             this.setCurrentQuality(AppConfig.getConfig("playMusic.defaultQuality"));
             if (this.audioController) this.audioController.reset();
             this.ee.emit(PlayerEvents.Error, nextMusicItem, e);
@@ -448,7 +460,7 @@ class TrackPlayer {
                 {
                     ...musicItem,
                     [timeStampSymbol]: Date.now(),
-                    [sortIndexSymbol]: this.musicQueue.length // Correct sortIndex
+                    [sortIndexSymbol]: this.musicQueue.length
                 }
             ]
             this.setMusicQueue(newQueue);
@@ -471,13 +483,13 @@ class TrackPlayer {
             this.reset();
             return;
         }
-        addSortProperty(musicList); // This will set timeStampSymbol and sortIndexSymbol for all items
+        addSortProperty(musicList);
         if (this.repeatMode === RepeatMode.Shuffle) {
             musicList = shuffle(musicList);
         }
         musicItem = musicItem ?? musicList[0];
         this.setMusicQueue(musicList);
-        await this.playMusic(musicItem); // playMusic will handle finding the index or adding if not found
+        await this.playMusic(musicItem);
     }
 
     public skipToPrev() {
@@ -504,7 +516,6 @@ class TrackPlayer {
         this.setCurrentMusic(null);
         this.currentIndex = -1;
         this.setPlayerState(PlayerState.None);
-        // resetProgress is called within setCurrentMusic if musicItem becomes null
     }
 
     public seekTo(seconds: number) {
@@ -544,34 +555,30 @@ class TrackPlayer {
         if (!this.isReady) return;
         let _musicItems: IMusic.IMusicItem[];
         if (Array.isArray(musicItems)) {
-            _musicItems = [...musicItems]; // Create a copy to avoid modifying the original array
+            _musicItems = [...musicItems];
         } else {
             _musicItems = [musicItems];
         }
 
         const now = Date.now();
-        // Assign sort properties to new items
         _musicItems.forEach((item, index) => {
+            // @ts-ignore
             item[timeStampSymbol] = now;
-            item[sortIndexSymbol] = index; // Relative sort index for the batch being added
+            // @ts-ignore
+            item[sortIndexSymbol] = index;
         });
 
-        const oldQueue = this.musicQueue;
-        const uniqueMapForNewItems = createUniqueMap(_musicItems);
         const itemsToAdd: IMusic.IMusicItem[] = [];
+        const uniqueMapForNewItems = createUniqueMap(_musicItems);
+        const oldQueue = this.musicQueue;
 
-        // Filter out items already in the queue from the new items batch
         for (const newItem of _musicItems) {
-            if (this.findMusicIndex(newItem) === -1) { // Not in current queue
+            if (this.findMusicIndex(newItem) === -1) {
                 itemsToAdd.push(newItem);
-            } else {
-                // If it's already in the queue, we might want to remove the old one first
-                // For simplicity here, we'll just not add duplicates if they are already present
-                // A more complex logic might involve moving the existing item
             }
         }
 
-        if (itemsToAdd.length === 0) return; // Nothing new to add
+        if (itemsToAdd.length === 0) return;
 
         let insertPosition = this.currentIndex + 1;
         if (insertPosition > oldQueue.length) {
@@ -601,9 +608,8 @@ class TrackPlayer {
                 const idx = this.findMusicIndex(item);
                 if (idx !== -1) indicesToRemove.push(idx);
             });
-            // Remove duplicates and sort in descending order for safe splicing
             indicesToRemove = [...new Set(indicesToRemove)].sort((a, b) => b - a);
-        } else { // Single IMusic.IMusicItem
+        } else {
             const idx = this.findMusicIndex(musicItemsToRemove);
             if (idx !== -1) indicesToRemove.push(idx);
         }
@@ -615,29 +621,34 @@ class TrackPlayer {
         let currentMusicWasRemoved = false;
 
         for (const index of indicesToRemove) {
-            if (index < newQueue.length) { // Ensure index is valid after previous splices
-                 newQueue.splice(index, 1);
-                if (index === newCurrentIndex) {
+            // Splicing modifies array in place, so adjust index if removing from earlier part
+            const adjustedIndex = index - (indicesToRemove.filter(i => i < index).length);
+            if (adjustedIndex < newQueue.length) {
+                 newQueue.splice(adjustedIndex, 1); // Use adjustedIndex for splicing
+                if (index === this.currentIndex) { // Compare with original index for currentMusic check
                     currentMusicWasRemoved = true;
-                } else if (index < newCurrentIndex) {
+                } else if (index < this.currentIndex) {
                     newCurrentIndex--;
                 }
             }
         }
-        this.currentIndex = newCurrentIndex; // Update currentIndex first
+        this.currentIndex = newCurrentIndex;
 
         if (currentMusicWasRemoved) {
             if (this.audioController) this.audioController.reset();
             this.resetProgress();
-            this.setCurrentMusic(null); // This will set currentIndex to -1 if currentMusic is null after setMusicQueue
+            this.setCurrentMusic(null);
         }
 
-        this.setMusicQueue(newQueue); // This will re-evaluate currentIndex if currentMusic is null
+        this.setMusicQueue(newQueue);
 
         if (currentMusicWasRemoved && newQueue.length > 0) {
-            // If the current song was removed, play the song at the new currentIndex, or the first song
             const playNextIdx = (this.currentIndex >= 0 && this.currentIndex < newQueue.length) ? this.currentIndex : 0;
-            this.playIndex(playNextIdx);
+            if (newQueue[playNextIdx]) { // Ensure the item exists
+                 this.playIndex(playNextIdx);
+            } else if (newQueue.length > 0) { // Fallback to first if calculated index is out of bounds
+                this.playIndex(0);
+            }
         } else if (newQueue.length === 0) {
             this.reset();
         }
@@ -662,13 +673,33 @@ class TrackPlayer {
                     this.setCurrentQuality(realQuality);
                 }
             } catch (e: any) {
-                logger.logError("Error setting quality:", e, {music: currentMusic.title});
+                logger.logError("Error setting quality:", e, {musicTitle: currentMusic.title}); // Use musicTitle
                 this.ee.emit(PlayerEvents.Error, currentMusic, e);
                 if (wasPlaying && this.audioController) this.audioController.play();
                 else this.setPlayerState(PlayerState.Paused);
             }
         }
     }
+
+    // 公共的 toggleRepeatMode 方法
+    public toggleRepeatMode() {
+        if (!this.isReady) return;
+        let nextRepeatMode = this.repeatMode;
+        switch (nextRepeatMode) {
+            case RepeatMode.Shuffle:
+                nextRepeatMode = RepeatMode.Loop;
+                break;
+            case RepeatMode.Loop:
+                nextRepeatMode = RepeatMode.Queue;
+                break;
+            case RepeatMode.Queue:
+            default: // Default to shuffle if current mode is somehow invalid
+                nextRepeatMode = RepeatMode.Shuffle;
+                break;
+        }
+        this.setRepeatMode(nextRepeatMode);
+    }
+
 
     public setRepeatMode(repeatMode: RepeatMode) {
         if (!this.isReady) {
@@ -684,7 +715,8 @@ class TrackPlayer {
         if (repeatMode === RepeatMode.Shuffle && oldRepeatMode !== RepeatMode.Shuffle) {
             this.setMusicQueue(shuffle(this.musicQueue));
         } else if (oldRepeatMode === RepeatMode.Shuffle && repeatMode !== RepeatMode.Shuffle) {
-            this.setMusicQueue(sortByTimestampAndIndex(this.musicQueue, true));
+            // When switching from shuffle to a non-shuffle mode, re-sort by original order
+            this.setMusicQueue(sortByTimestampAndIndex([...this.musicQueue], true)); // Use a copy for sorting
         }
         this.ee.emit(PlayerEvents.RepeatModeChanged, repeatMode);
     }
@@ -735,7 +767,7 @@ class TrackPlayer {
             if (!this.isCurrentMusic(currentMusic)) return;
 
             if (!lyricSource?.rawLrc && !lyricSource?.translation) {
-                this.setCurrentLyric({}); // Set to empty object if no lyric found
+                this.setCurrentLyric({});
                 return;
             }
             const parser = new LyricParser(lyricSource.rawLrc, {
@@ -748,7 +780,7 @@ class TrackPlayer {
             });
         } catch (e: any) {
             logger.logError("歌词解析失败", e);
-            this.setCurrentLyric({}); // Set to empty object on error
+            this.setCurrentLyric({});
         }
     }
 
@@ -756,8 +788,8 @@ class TrackPlayer {
         if (!this.isReady) {
             throw new Error("TrackPlayer not ready to fetch media source.");
         }
-        const defaultQuality = AppConfig.getConfig("playMusic.defaultQuality");
-        const whenQualityMissing = AppConfig.getConfig("playMusic.whenQualityMissing");
+        const defaultQuality = AppConfig.getConfig("playMusic.defaultQuality") || "standard"; // Ensure fallback
+        const whenQualityMissing = AppConfig.getConfig("playMusic.whenQualityMissing") || "lower"; // Ensure fallback
         const qualityOrder = getQualityOrder(quality ?? defaultQuality, whenQualityMissing);
         let mediaSource: IPlugin.IMediaSourceResult | null = null;
         let realQuality: IMusic.IQualityKey = qualityOrder[0];
@@ -767,7 +799,7 @@ class TrackPlayer {
             const {quality: downloadedQuality, path: _path} = downloadedData;
             if (await fsUtil.isFile(_path)) {
                 return {
-                    quality: downloadedQuality,
+                    quality: downloadedQuality || "standard", // Fallback for downloaded quality
                     mediaSource: { url: fsUtil.addFileScheme(_path) },
                 };
             }
@@ -792,8 +824,9 @@ class TrackPlayer {
         const isActuallyDifferent = !this.isCurrentMusic(musicItem) ||
                                   (musicItem && this.currentMusic && JSON.stringify(musicItem) !== JSON.stringify(this.currentMusic));
 
+        currentMusicStore.setValue(musicItem); // Update store regardless to reflect potential info changes
+
         if (isActuallyDifferent) {
-            currentMusicStore.setValue(musicItem);
             this.ee.emit(PlayerEvents.MusicChanged, musicItem);
             this.fetchCurrentLyric();
             this.resetProgress();
@@ -803,12 +836,6 @@ class TrackPlayer {
             } else {
                 removeUserPreference("currentMusic");
             }
-        } else if (musicItem && !this.currentMusic) { // Case where currentMusic was null and new musicItem is set
-            currentMusicStore.setValue(musicItem);
-            this.ee.emit(PlayerEvents.MusicChanged, musicItem);
-            this.fetchCurrentLyric();
-            this.resetProgress();
-            setUserPreference("currentMusic", musicItem);
         }
     }
 
@@ -825,15 +852,17 @@ class TrackPlayer {
         currentQualityStore.setValue(quality);
     }
 
-    private setCurrentLyric(lyric?: ICurrentLyric) {
+    private setCurrentLyric(lyric?: ICurrentLyric | {}) { // Allow empty object for no lyrics
         const prev = this.lyric;
-        currentLyricStore.setValue(lyric);
+        const newLyric = lyric === null || (typeof lyric === 'object' && !lyric.hasOwnProperty('parser')) ? null : lyric as ICurrentLyric;
+        currentLyricStore.setValue(newLyric);
 
-        if (lyric?.parser !== prev?.parser) {
-            this.ee.emit(PlayerEvents.LyricChanged, lyric?.parser ?? null);
+
+        if (newLyric?.parser !== prev?.parser) {
+            this.ee.emit(PlayerEvents.LyricChanged, newLyric?.parser ?? null);
         }
-        if (lyric?.currentLrc !== prev?.currentLrc) {
-            this.ee.emit(PlayerEvents.CurrentLyricChanged, lyric?.currentLrc ?? null);
+        if (newLyric?.currentLrc !== prev?.currentLrc) {
+            this.ee.emit(PlayerEvents.CurrentLyricChanged, newLyric?.currentLrc ?? null);
         }
     }
 

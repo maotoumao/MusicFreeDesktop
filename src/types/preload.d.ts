@@ -1,8 +1,9 @@
 // src/types/preload.d.ts
-import { PlayerState } from "@/common/constant"; // 确保 PlayerState 被正确导入
+import { PlayerState } from "@/common/constant";
+import type NodePath from "node:path"; // 导入 NodeJS path 模块的类型
 
 interface Window {
-  path: typeof import("node:path");
+  path: typeof NodePath; // 声明 window.path 的类型为 NodeJS path 模块的类型
   electron: {
     // ... 其他已有的 electron API
     mpvPlayer: {
@@ -13,14 +14,14 @@ interface Window {
       resume: () => Promise<void>;
       stop: () => Promise<void>;
       seek: (timeSeconds: number) => Promise<void>;
-      setVolume: (volume: number) => Promise<void>; // MPV 音量是 0-100
+      setVolume: (volume: number) => Promise<void>;
       setSpeed: (speed: number) => Promise<void>;
       getDuration: () => Promise<number | null>;
       getCurrentTime: () => Promise<number>;
       quit: () => Promise<void>;
     };
     mpvPlayerListener: {
-      onStatusChange: (callback: (status: any) => void) => Electron.IpcRenderer; // 返回 IpcRenderer 方便移除
+      onStatusChange: (callback: (status: any) => void) => Electron.IpcRenderer;
       onPaused: (callback: (data: { state: PlayerState }) => void) => Electron.IpcRenderer;
       onResumed: (callback: (data: { state: PlayerState }) => void) => Electron.IpcRenderer;
       onTimePosition: (callback: (data: { time: number, duration: number }) => void) => Electron.IpcRenderer;
@@ -32,5 +33,6 @@ interface Window {
       onInitSuccess: (callback: () => void) => Electron.IpcRenderer;
       removeAllMpvListeners: (channel?: string) => void;
     };
+    // 如果还有其他通过 contextBridge 暴露的 API，也在这里声明
   };
 }
