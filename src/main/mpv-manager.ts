@@ -31,37 +31,26 @@ class MpvManager {
         const binaryPath = AppConfig.getConfig("playMusic.mpvPath");
         const additionalArgsRaw = AppConfig.getConfig("playMusic.mpvArgs") || "";
         
-        // --- 修改开始: 改进参数解析 ---
         const argsArray: string[] = [];
         if (additionalArgsRaw.trim()) {
-            // 正则表达式匹配非空格字符序列或引号包围的字符串
-            // "([^"]*)" 匹配双引号内的内容
-            // '([^']*)' 匹配单引号内的内容
-            // ([^\s"']+) 匹配不包含空格和引号的单词
             const regex = /"([^"]*)"|'([^']*)'|([^\s"']+)/g;
             let match;
             while ((match = regex.exec(additionalArgsRaw)) !== null) {
-                // match[1] 是双引号内容, match[2] 是单引号内容, match[3] 是无引号内容
-                // 如果参数本身就需要引号（例如传递给mpv的 --profile="foo bar"），则保留它们
-                // 如果是 match[3]，则它是没有引号的，直接使用
-                if (match[1]) argsArray.push(match[1]); // 内容在双引号内
-                else if (match[2]) argsArray.push(match[2]); // 内容在单引号内
-                else argsArray.push(match[0]); // 无引号参数或整个带引号的参数（如果mpv需要引号）
-                                                // 对于 --foo="bar baz" 这样的，如果mpv需要引号，则此逻辑可能需要调整为保留引号
-                                                // 但通常node-mpv会处理参数的传递，我们只需正确分割
+                if (match[1]) argsArray.push(match[1]); 
+                else if (match[2]) argsArray.push(match[2]); 
+                else argsArray.push(match[0]); 
             }
         }
-        // --- 修改结束 ---
 
         return {
             binary: binaryPath || undefined,
             socket: process.platform === "win32" ? `\\\\.\\pipe\\mpvsocket_${process.pid}` : `/tmp/mpvsocket_${process.pid}_${Date.now()}`,
             debug: !app.isPackaged,
             verbose: !app.isPackaged,
-            audio_only: true,
+            audio_only: true, 
             time_update: 1,
             observeAllProperties: false,
-            additionalArgs: argsArray.filter(arg => arg.trim() !== "") // 确保过滤空参数
+            additionalArgs: argsArray.filter(arg => arg.trim() !== "")
         };
     }
 
@@ -72,7 +61,8 @@ class MpvManager {
         this.isQuitting = false;
 
         const mpvOptions = this.getMpvOptions();
-        logger.logInfo("Initializing MPV with options:", mpvOptions);
+        logger.logInfo(`MpvManager: Attempting to instantiate MpvAPI with binary: ${mpvOptions.binary}, and args: ${mpvOptions.additionalArgs}`);
+
 
         if (mpvOptions.binary) {
              try {
@@ -99,18 +89,20 @@ class MpvManager {
 
         try {
             this.mpv = new MpvAPI(
-                { // MpvAPI options
+                { 
                     binary: mpvOptions.binary,
                     socket: mpvOptions.socket,
-                    debug: mpvOptions.debug,
-                    verbose: mpvOptions.verbose,
+                    debug: mpvOptions.debug, 
+                    verbose: mpvOptions.verbose, 
                     audio_only: mpvOptions.audio_only,
                     time_update: mpvOptions.time_update,
                     observeAllProperties: mpvOptions.observeAllProperties,
                 },
-                mpvOptions.additionalArgs // Pass parsed arguments array here
+                mpvOptions.additionalArgs 
             );
+            logger.logInfo("MpvManager: MpvAPI instance created.");
             this.setupMpvEventHandlers();
+            logger.logInfo("MpvManager: Attempting to start MPV process...");
             await this.mpv.start();
             logger.logInfo("MPV started successfully.");
             this.retryCount = 0;
@@ -122,7 +114,10 @@ class MpvManager {
             return true;
         } catch (error: any) {
             const errorMsg = `MPV 初始化失败: ${error.message}. 请检查MPV附加参数是否正确。`;
-            logger.logError("Failed to initialize MPV:", error);
+            logger.logError("Failed to initialize MPV:", error); 
+            if (error.code) logger.logError("MPV Error Code:", error.code);
+            if (error.signal) logger.logError("MPV Error Signal:", error.signal);
+            if (error.stack) logger.logError("MPV Error Stack:", error.stack);
             this.sendToRenderer("mpv-error", errorMsg);
             this.mpv = null;
              if(isManualTrigger || AppConfig.getConfig("playMusic.backend") === "mpv") {
