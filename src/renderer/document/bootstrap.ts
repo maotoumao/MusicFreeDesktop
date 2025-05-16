@@ -38,7 +38,7 @@ export default async function () {
     setupCommandAndEvents();
     setupDeviceChange();
     localMusic.setupLocalMusic();
-    await Downloader.setup();
+    await Downloader.setupDownloader();
     setupRecentlyPlaylist();
     // 本地服务
     ServiceManager.setup();

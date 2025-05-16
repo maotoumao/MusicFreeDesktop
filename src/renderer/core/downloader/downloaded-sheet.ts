@@ -182,7 +182,7 @@ export async function removeDownloadedMusic(
       );
     });
   } catch (e) {
-    message = "删除失败 " + e?.message ?? "";
+    message = "删除失败 " + (e?.message ?? "");
   }
   if (message) {
     return [
@@ -196,43 +196,50 @@ export async function removeDownloadedMusic(
   }
 }
 
-export function isDownloaded(musicItem: IMedia.IMediaBase) {
+export function isDownloaded(musicItem: IMedia.IMediaBase | null): boolean {
   return musicItem ? downloadedSet.has(getMediaPrimaryKey(musicItem)) : false;
 }
 
 export const useDownloadedMusicList = downloadedMusicListStore.useValue;
 
-export function useDownloaded(musicItem: IMedia.IMediaBase) {
+export function useDownloaded(musicItem: IMedia.IMediaBase | null): boolean {
   const [downloaded, setDownloaded] = useState(isDownloaded(musicItem));
 
   useEffect(() => {
     const dlCb = (musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) => {
-      if (Array.isArray(musicItems)) {
-        setDownloaded(
-          (prev) =>
-            prev ||
-            musicItems.findIndex((it) => isSameMedia(it, musicItem)) !== -1
-        );
-      } else {
-        setDownloaded((prev) => prev || isSameMedia(musicItem, musicItems));
+      if (musicItem) { // 添加检查
+        if (Array.isArray(musicItems)) {
+          setDownloaded(
+            (prev) =>
+              prev ||
+              musicItems.findIndex((it) => isSameMedia(it, musicItem)) !== -1
+          );
+        } else {
+          setDownloaded((prev) => prev || isSameMedia(musicItem, musicItems));
+        }
       }
     };
 
     const rmCb = (musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) => {
-      if (Array.isArray(musicItems)) {
-        setDownloaded(
-          (prev) =>
-            prev &&
-            musicItems.findIndex((it) => isSameMedia(it, musicItem)) === -1
-        );
-      } else {
-        setDownloaded((prev) => prev && !isSameMedia(musicItem, musicItems));
+      if (musicItem) { // 添加检查
+        if (Array.isArray(musicItems)) {
+          setDownloaded(
+            (prev) =>
+              prev &&
+              musicItems.findIndex((it) => isSameMedia(it, musicItem)) === -1
+          );
+        } else {
+          setDownloaded((prev) => prev && !isSameMedia(musicItem, musicItems));
+        }
       }
     };
 
-    if (musicItem) {
+    if (musicItem) { // 添加检查
       setDownloaded(isDownloaded(musicItem));
+    } else {
+      setDownloaded(false); // 如果 musicItem 为 null，则不是已下载状态
     }
+
 
     ee.on(DownloadEvts.Downloaded, dlCb);
     ee.on(DownloadEvts.RemoveDownload, rmCb);

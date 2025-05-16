@@ -3,7 +3,7 @@ import * as backend from "../backend";
 import defaultSheet from "../common/default-sheet";
 import { useEffect, useRef, useState } from "react";
 import { RequestStateCode, localPluginName } from "@/common/constant";
-import { toMediaBase } from "@/common/media-util";
+import { getMediaPrimaryKey, toMediaBase } from "@/common/media-util";
 
 const musicSheetsStore = new Store<IMusic.IDBMusicSheetItem[]>([]);
 const starredSheetsStore = new Store<IMedia.IMediaBase[]>([]);
@@ -196,24 +196,25 @@ export async function removeMusicFromFavorite(
 }
 
 /** 是否是我喜欢的歌单 */
-export function isFavoriteMusic(musicItem: IMusic.IMusicItem) {
+export function isFavoriteMusic(musicItem: IMusic.IMusicItem | null): boolean {
+  if (!musicItem) return false; // 添加检查
   return backend.isFavoriteMusic(musicItem);
 }
 
 /** hook 某首歌曲是否被标记成喜欢 */
-export function useMusicIsFavorite(musicItem: IMusic.IMusicItem) {
-  const [isFav, setIsFav] = useState(backend.isFavoriteMusic(musicItem));
+export function useMusicIsFavorite(musicItem: IMusic.IMusicItem | null): boolean { // 允许 musicItem 为 null
+  const [isFav, setIsFav] = useState(isFavoriteMusic(musicItem)); // isFavoriteMusic 内部已处理 null
 
   useEffect(() => {
     const cb = () => {
-      setIsFav(backend.isFavoriteMusic(musicItem));
+      setIsFav(isFavoriteMusic(musicItem)); // isFavoriteMusic 内部已处理 null
     };
     cb();
     refreshFavCbs.add(cb);
     return () => {
       refreshFavCbs.delete(cb);
     };
-  }, [musicItem]);
+  }, [musicItem]); // musicItem 作为依赖
 
   return isFav;
 }
