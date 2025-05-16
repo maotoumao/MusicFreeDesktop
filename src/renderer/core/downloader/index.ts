@@ -1,257 +1,372 @@
 // src/renderer/core/downloader/index.ts
+// (原 src/renderer/core/downloader/index.new.ts 的内容)
+import path from 'path'; // <--- 新增导入
+import * as Comlink from "comlink";
+import {getGlobalContext} from "@shared/global-context/renderer";
+import AppConfig from "@shared/app-config/renderer";
 import {
-    getMediaPrimaryKey,
-    getQualityOrder,
-    isSameMedia,
-    setInternalData,
-  } from "@/common/media-util";
-  import * as Comlink from "comlink";
-  import { DownloadState, localPluginName } from "@/common/constant";
-  import PQueue from "p-queue";
-  import {
     addDownloadedMusicToList,
-    isDownloaded as checkIsDownloaded, // 重命名导入的 isDownloaded，避免与 Downloader 对象属性冲突
-    removeDownloadedMusic,
-    setupDownloadedMusicList,
-    useDownloaded,
-    useDownloadedMusicList,
-  } from "./downloaded-sheet";
-  import { getGlobalContext } from "@/shared/global-context/renderer";
-  import Store from "@/common/store";
-  import { useEffect, useState } from "react";
-  import { DownloadEvts, ee } from "./ee";
-  import AppConfig from "@shared/app-config/renderer";
-  import PluginManager from "@shared/plugin-manager/renderer";
-  
-  
-  export interface IDownloadStatus {
-    state: DownloadState;
-    downloaded?: number;
-    total?: number;
-    msg?: string;
-  }
-  
-  const downloadingMusicStore = new Store<Array<IMusic.IMusicItem>>([]);
-  const downloadingProgress = new Map<string, IDownloadStatus>();
-  
-  type ProxyMarkedFunction<T extends (...args: any) => void> = T &
+    isDownloaded,
+    setupDownloadedMusicList
+} from "@renderer/core/downloader/downloaded-sheet";
+import logger from "@shared/logger/renderer";
+import PQueue from "p-queue";
+import EventEmitter from "eventemitter3";
+import {DownloadState, localPluginName} from "@/common/constant";
+import {getQualityOrder, isSameMedia, setInternalData, getMediaPrimaryKey} from "@/common/media-util";
+import {downloadingMusicStore} from "@renderer/core/downloader/store";
+import PluginManager from "@shared/plugin-manager/renderer";
+import { useState as reactUseState, useEffect as reactUseEffect } from "react";
+
+type ProxyMarkedFunction<T> = T &
     Comlink.ProxyMarked;
-  
-  type IOnStateChangeFunc = (data: IDownloadStatus) => void;
-  
-  interface IDownloaderWorker {
-    downloadFile: (
-      mediaSource: IMusic.IMusicSource,
-      filePath: string,
-      onStateChange: ProxyMarkedFunction<IOnStateChangeFunc>
-    ) => Promise<void>;
-  }
-  
-  let downloaderWorker: IDownloaderWorker;
-  
-  async function setupDownloader() {
-    setupDownloaderWorker();
-    setupDownloadedMusicList();
-  }
-  
-  function setupDownloaderWorker() {
-    // 初始化worker
-    const downloaderWorkerPath = getGlobalContext().workersPath.downloader;
-    if (downloaderWorkerPath) {
-      const worker = new Worker(downloaderWorkerPath);
-      downloaderWorker = Comlink.wrap(worker);
+
+
+interface IDownloadFileOptions {
+    onProgress?: (progress: ICommon.IDownloadFileSize) => void;
+    onEnded?: () => void;
+    onError?: (reason: Error) => void;
+}
+
+interface IDownloaderWorker {
+    downloadFileNew: (mediaSource: IMusic.IMusicSource,
+                      filePath: string, options?: ProxyMarkedFunction<IDownloadFileOptions>) => void
+}
+
+
+export enum DownloaderEvent {
+    DOWNLOAD_STATE_CHANGED = "downloader:download-state-changed",
+    QUEUE_UPDATED = "queue_updated",
+}
+
+interface IDownloaderEvent {
+    [DownloaderEvent.DOWNLOAD_STATE_CHANGED]: (musicItem: IMusic.IMusicItem, status: ITaskStatus) => void;
+    [DownloaderEvent.QUEUE_UPDATED]: (queue: IMusic.IMusicItem[]) => void;
+}
+
+interface ITaskStatus {
+    status: DownloadState,
+    progress?: ICommon.IDownloadFileSize,
+    error?: Error,
+    // 以下为内部使用，用于在回调中传递额外信息
+    ['mediaSource']?: IPlugin.IMediaSourceResult;
+    ['realQuality']?: IMusic.IQualityKey;
+}
+
+class Downloader extends EventEmitter<IDownloaderEvent> {
+    private worker: IDownloaderWorker;
+    private static ConcurrencyLimit = 20;
+    private downloadTaskQueue: PQueue;
+    private currentTaskStatus: Map<string, Map<string, ITaskStatus>> = new Map();
+
+    public isReady = false;
+
+    constructor() {
+        super();
+
+        this.on(DownloaderEvent.DOWNLOAD_STATE_CHANGED, (musicItem, taskStatus) => {
+            // console.log("DOWNLOAD STATE CHANGE", getMediaPrimaryKey(musicItem), taskStatus.status);
+        })
     }
-    setDownloadingConcurrency(AppConfig.getConfig("download.concurrency"));
-  }
-  
-  const concurrencyLimit = 20;
-  const downloadingQueue = new PQueue({
-    concurrency: 5,
-  });
-  
-  function setDownloadingConcurrency(concurrency: number) {
-    if (isNaN(concurrency)) {
-      return;
-    }
-    downloadingQueue.concurrency = Math.min(
-      concurrency < 1 ? 1 : concurrency,
-      concurrencyLimit
-    );
-  }
-  
-  async function startDownload(
-    musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]
-  ) {
-    if (!downloaderWorker) {
-      setupDownloaderWorker();
-    }
-  
-    const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
-    // 过滤掉已下载的、本地音乐、任务中的音乐
-    const _validMusicItems = _musicItems.filter(
-      (it) => !checkIsDownloaded(it) && it.platform !== localPluginName // 使用 checkIsDownloaded
-    );
-  
-    const downloadCallbacks = _validMusicItems.map((it) => {
-      const pk = getMediaPrimaryKey(it);
-      downloadingProgress.set(pk, {
-        state: DownloadState.WAITING,
-      });
-  
-      return async () => {
-        // Not on waiting list
-        if (!downloadingProgress.has(pk)) {
-          return;
-        }
-  
-        downloadingProgress.get(pk).state = DownloadState.DOWNLOADING;
-        const fileName = `${it.title}-${it.artist}`.replace(/[/|\\?*"<>:]/g, "_");
-        await new Promise<void>((resolve) => {
-          downloadMusicImpl(it, fileName, (stateData) => {
-            downloadingProgress.set(pk, stateData);
-            ee.emit(DownloadEvts.DownloadStatusUpdated, it, stateData);
-            if (stateData.state === DownloadState.DONE) {
-              downloadingMusicStore.setValue((prev) =>
-                prev.filter((di) => !isSameMedia(it, di))
-              );
-              downloadingProgress.delete(pk);
-              resolve();
-            } else if (stateData.state === DownloadState.ERROR) {
-              resolve();
+
+    public async setup() {
+        if (this.isReady) return; // 防止重复初始化
+
+        // 1. config
+        const downloadConcurrency = AppConfig.getConfig("download.concurrency");
+
+        // 2. init worker
+        const workerPath = getGlobalContext().workersPath.downloader;
+        if (workerPath) {
+            try {
+                const worker = new Worker(workerPath);
+                this.worker = Comlink.wrap(worker);
+                this.isReady = true;
+                 logger.logInfo("Downloader worker initialized.");
+            } catch (e) {
+                logger.logError("Failed to initialize downloader worker", e as Error);
+                this.isReady = false;
             }
-          });
+        } else {
+            logger.logInfo("Downloader worker path is not defined. Downloads will not function.");
+            this.isReady = false;
+        }
+
+        // 3. setup downloading queue
+        this.downloadTaskQueue = new PQueue({
+            concurrency: downloadConcurrency || 5,
+            autoStart: true
+        })
+
+        // 4. setup musicsheet
+        await setupDownloadedMusicList();
+        logger.logInfo("Downloader setup complete.");
+    }
+
+    public async download(musicItems: IMusic.IMusicItem | IMusic.IMusicItem[]) {
+        if (!this.isReady || !this.worker) {
+            logger.logError("Downloader not ready or worker not available. Attempting setup...", new Error("Downloader not ready or worker not available."));
+            await this.setup();
+            if (!this.isReady || !this.worker) {
+                logger.logError("Downloader setup failed. Download cancelled for items:", new Error(JSON.stringify(musicItems)));
+                // 可以选择通知用户或静默失败
+                // toast.error("下载器初始化失败，请稍后再试。");
+                return;
+            }
+        }
+
+        const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
+        const itemsToQueue: IMusic.IMusicItem[] = [];
+
+        for (const it of _musicItems) {
+            if (isDownloaded(it) || it.platform === localPluginName) {
+                logger.logInfo(`Skipping download for already downloaded or local item: ${it.title}`);
+                continue;
+            }
+            const existingTaskStatus = this.getTaskStatus(it);
+            if (existingTaskStatus &&
+                (existingTaskStatus.status === DownloadState.WAITING || existingTaskStatus.status === DownloadState.DOWNLOADING)) {
+                logger.logInfo(`Skipping download for item already in queue or downloading: ${it.title}`);
+                continue;
+            }
+            itemsToQueue.push(it);
+        }
+
+
+        if (itemsToQueue.length === 0) {
+            logger.logInfo("No new valid music items to download.");
+            return;
+        }
+
+        downloadingMusicStore.setValue((prev) => {
+            const newItems = itemsToQueue.filter(newItem => !prev.find(p => isSameMedia(p, newItem)));
+            return [...prev, ...newItems];
         });
-      };
-    });
-  
-    downloadingMusicStore.setValue((prev) => [...prev, ..._validMusicItems]);
-    downloadingQueue.addAll(downloadCallbacks);
-  }
-  
-  async function downloadMusicImpl(
-    musicItem: IMusic.IMusicItem,
-    fileName: string,
-    onStateChange: IOnStateChangeFunc
-  ) {
-    const [defaultQuality, whenQualityMissing] = [
-      AppConfig.getConfig("download.defaultQuality"),
-      AppConfig.getConfig("download.whenQualityMissing"),
-    ];
-    const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
-    let mediaSource: IPlugin.IMediaSourceResult | null = null;
-    let realQuality: IMusic.IQualityKey = qualityOrder[0];
-    for (const quality of qualityOrder) {
-      try {
-        mediaSource = await PluginManager.callPluginDelegateMethod(
-          musicItem,
-          "getMediaSource",
-          musicItem,
-          quality
-        );
-        if (!mediaSource?.url) {
-          continue;
-        }
-        realQuality = quality;
-        break;
-      } catch {}
-    }
-  
-    try {
-      if (mediaSource?.url) {
-        const ext = mediaSource.url.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
-        const downloadBasePath =
-          AppConfig.getConfig("download.path") ??
-          getGlobalContext().appPath.downloads;
-        // Import path at the top if not already imported
-        // import * as path from "path";
-        const path = require("path");
-        const downloadPath = path.resolve(
-          downloadBasePath,
-          `./${fileName}.${ext}`
-        );
-        downloaderWorker.downloadFile(
-          mediaSource,
-          downloadPath,
-          Comlink.proxy((dataState) => {
-            onStateChange(dataState);
-            if (dataState.state === DownloadState.DONE) {
-              addDownloadedMusicToList(
-                setInternalData<IMusic.IMusicItemInternalData>(
-                  musicItem as any,
-                  "downloadData",
-                  {
-                    path: downloadPath,
-                    quality: realQuality,
-                  },
-                  true
-                ) as IMusic.IMusicItem
-              );
+
+
+        const downloadTasks = itemsToQueue.map((it) => {
+            this.setTaskStatus(it, {
+                status: DownloadState.WAITING
+            });
+
+            const task = async () => {
+                const currentStatus = this.getTaskStatus(it);
+                if (!currentStatus || (currentStatus.status !== DownloadState.WAITING && currentStatus.status !== DownloadState.DOWNLOADING /* Allow retry from error */)) {
+                    logger.logInfo(`Download task for ${it.title} skipped or invalid state, status is ${currentStatus?.status}`);
+                    if (currentStatus?.status !== DownloadState.ERROR && currentStatus?.status !== DownloadState.NONE) { // Only remove if not an error/none state we might want to retry
+                        downloadingMusicStore.setValue((prev) => prev.filter((di) => !isSameMedia(it, di)));
+                    }
+                    return;
+                }
+
+                this.setTaskStatus(it, {
+                    status: DownloadState.DOWNLOADING,
+                    progress: {
+                        currentSize: 0, // Initialize progress
+                        totalSize: 0
+                    }
+                });
+
+                const fileName = `${it.title}-${it.artist}`.replace(/[/|\\?*"<>:]/g, "_");
+
+                await new Promise<void>((resolve) => {
+                    this.downloadMusicImpl(it, fileName, {
+                        onError: (e) => {
+                            this.setTaskStatus(it, {
+                                status: DownloadState.ERROR,
+                                error: e
+                            });
+                            // Keep in downloadingMusicStore for potential retry or UI display
+                            resolve();
+                        },
+                        onProgress: (progress) => {
+                            if (this.getTaskStatus(it)?.status === DownloadState.DOWNLOADING) {
+                                this.setTaskStatus(it, {
+                                    status: DownloadState.DOWNLOADING,
+                                    progress
+                                });
+                            }
+                        },
+                        onEnded: async () => {
+                            const taskStatus = this.getTaskStatus(it);
+                            const mediaSource = taskStatus?.['mediaSource'] as IPlugin.IMediaSourceResult | undefined;
+                            const realQuality = taskStatus?.['realQuality'] as IMusic.IQualityKey | undefined;
+
+                            const downloadBasePath = AppConfig.getConfig("download.path") ?? getGlobalContext().appPath.downloads;
+                            const ext = mediaSource?.url?.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
+                            const downloadPath = path.resolve(downloadBasePath, `./${fileName}.${ext}`);
+
+                            const musicItemWithDownloadData = setInternalData<IMusic.IMusicItemInternalData>(
+                                it,
+                                "downloadData",
+                                {
+                                    path: downloadPath,
+                                    quality: realQuality || AppConfig.getConfig("download.defaultQuality"),
+                                },
+                                true
+                            ) as IMusic.IMusicItem;
+
+                            await addDownloadedMusicToList(musicItemWithDownloadData);
+
+                            this.setTaskStatus(it, {
+                                status: DownloadState.DONE
+                            });
+                            downloadingMusicStore.setValue((prev) =>
+                                prev.filter((di) => !isSameMedia(it, di))
+                            );
+                            resolve();
+                        }
+                    }).catch((e) => {
+                         logger.logError(`Error during downloadMusicImpl for ${it.title}`, e as Error);
+                        this.setTaskStatus(it, {
+                            status: DownloadState.ERROR,
+                            error: e instanceof Error ? e : new Error(String(e))
+                        });
+                        // Keep in downloadingMusicStore for potential retry or UI display
+                        resolve();
+                    })
+                })
             }
-          })
-        );
-      } else {
-        throw new Error("Invalid Source");
-      }
-    } catch (e) {
-      console.log(e, "ERROR");
-      onStateChange({
-        state: DownloadState.ERROR,
-        msg: e?.message,
-      });
+            return task;
+        })
+
+        this.downloadTaskQueue.addAll(downloadTasks).catch(error => {
+            logger.logError("Error adding tasks to download queue", error);
+        });
     }
-  }
-  
-  function useDownloadStatus(musicItem: IMusic.IMusicItem | null) { // 允许 musicItem 为 null
-    const [downloadStatus, setDownloadStatus] = useState<IDownloadStatus | null>(
-      null
-    );
-  
-    useEffect(() => {
-      if (musicItem) { // 添加检查
-        setDownloadStatus(
-          downloadingProgress.get(getMediaPrimaryKey(musicItem)) || null
-        );
-      } else {
-        setDownloadStatus(null);
-      }
-  
-  
-      const updateFn = (mi: IMusic.IMusicItem, stateData: IDownloadStatus) => {
-        if (musicItem && isSameMedia(mi, musicItem)) { // 添加检查
-          setDownloadStatus(stateData);
+
+    private async downloadMusicImpl(musicItem: IMusic.IMusicItem, fileName: string, options: IDownloadFileOptions) {
+        const [defaultQuality, whenQualityMissing] = [
+            AppConfig.getConfig("download.defaultQuality"),
+            AppConfig.getConfig("download.whenQualityMissing"),
+        ];
+        const downloadBasePath =
+            AppConfig.getConfig("download.path") ??
+            getGlobalContext().appPath.downloads;
+
+        const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
+
+        let mediaSource: IPlugin.IMediaSourceResult | null = null;
+        let realQuality: IMusic.IQualityKey = qualityOrder[0];
+
+
+        for (const quality of qualityOrder) {
+            try {
+                const source = await PluginManager.callPluginDelegateMethod(
+                    musicItem,
+                    "getMediaSource",
+                    musicItem,
+                    quality
+                );
+                if (!source?.url) {
+                    continue;
+                }
+                mediaSource = source; // Store the full source object
+                realQuality = quality;
+                // Store these in task status so onEnded can access them
+                const taskStatus = this.getTaskStatus(musicItem) || { status: DownloadState.DOWNLOADING };
+                this.setTaskStatus(musicItem, {
+                    ...taskStatus,
+                    ['mediaSource']: mediaSource,
+                    ['realQuality']: realQuality,
+                });
+                break;
+            } catch(e) {
+                logger.logError(`Failed to get media source for ${musicItem.title} (quality: ${quality})`, e as Error);
+            }
         }
-      };
-  
-      ee.on(DownloadEvts.DownloadStatusUpdated, updateFn);
-  
-      return () => {
-        ee.off(DownloadEvts.DownloadStatusUpdated, updateFn);
-      };
-    }, [musicItem]);
-  
-    return downloadStatus;
-  }
-  
-  // 下载状态
-  function useDownloadState(musicItem: IMusic.IMusicItem | null) { // 允许 musicItem 为 null
-    const musicStatus = useDownloadStatus(musicItem); // musicItem 可能为 null
-    const downloaded = useDownloaded(musicItem); // useDownloaded 内部应已处理 null
-  
-    return (
-      musicStatus?.state || (downloaded ? DownloadState.DONE : DownloadState.NONE)
-    );
-  }
-  
-  const Downloader = {
-    setupDownloader,
-    startDownload,
-    useDownloadStatus,
-    useDownloadingMusicList: downloadingMusicStore.useValue,
-    useDownloaded,
-    isDownloaded: checkIsDownloaded, // 使用重命名的函数
-    useDownloadedMusicList,
-    removeDownloadedMusic,
-    setDownloadingConcurrency,
-    useDownloadState,
-  };
-  export default Downloader;
+
+        if (mediaSource?.url) {
+            const ext = mediaSource.url.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
+            const downloadPath = path.resolve(downloadBasePath, `./${fileName}.${ext}`);
+
+            // Ensure worker is available
+            if (!this.worker) {
+                logger.logError("Downloader worker is not available in downloadMusicImpl.", new Error("Downloader worker not available."));
+                options.onError?.(new Error("Downloader worker not available."));
+                return;
+            }
+
+            this.worker.downloadFileNew(
+                mediaSource,
+                downloadPath,
+                Comlink.proxy({
+                    onError(reason) {
+                        options?.onError?.(reason);
+                    },
+                    onProgress(progress) {
+                        options?.onProgress?.(progress);
+                    },
+                    onEnded() {
+                        options?.onEnded?.();
+                    }
+                }),
+            );
+        } else {
+            const error = new Error("Invalid Source: No valid media URL found after trying all qualities.");
+            logger.logError(error.message, error);
+            options.onError?.(error);
+        }
+    }
+
+    public setConcurrency(concurrency: number) {
+        if (this.downloadTaskQueue) {
+            this.downloadTaskQueue.concurrency = Math.max(1, Math.min(
+                concurrency,
+                Downloader.ConcurrencyLimit
+            ));
+        }
+    }
+
+    public getTaskStatus(musicItem: IMusic.IMusicItem): ITaskStatus | null {
+        if (!musicItem) return null;
+        const platform = "" + musicItem.platform;
+        const id = "" + musicItem.id;
+        return this.currentTaskStatus.get(platform)?.get(id) ?? null;
+    }
+
+    private setTaskStatus(musicItem: IMusic.IMusicItem, taskStatus: ITaskStatus) {
+        const platform = "" + musicItem.platform;
+        const id = "" + musicItem.id;
+
+        if (!this.currentTaskStatus.has(platform)) {
+            this.currentTaskStatus.set(platform, new Map());
+        }
+        this.currentTaskStatus.get(platform)?.set(id, taskStatus);
+        this.emit(DownloaderEvent.DOWNLOAD_STATE_CHANGED, musicItem, taskStatus);
+    }
+
+    public useDownloadTaskStatus(musicItem: IMusic.IMusicItem | null) {
+      const [status, setStatus] = reactUseState<ITaskStatus | null>(musicItem ? this.getTaskStatus(musicItem) : null);
+
+      reactUseEffect(() => {
+        if (!musicItem) {
+            setStatus(null);
+            return;
+        }
+        const callback = (item: IMusic.IMusicItem, newStatus: ITaskStatus) => {
+          if (isSameMedia(item, musicItem)) {
+            setStatus(newStatus);
+          }
+        };
+        // Set initial status
+        setStatus(this.getTaskStatus(musicItem));
+
+        this.on(DownloaderEvent.DOWNLOAD_STATE_CHANGED, callback);
+        return () => {
+          this.off(DownloaderEvent.DOWNLOAD_STATE_CHANGED, callback);
+        };
+      }, [musicItem, this]); // Added 'this' to dependencies if methods of 'this' are used inside effect that might change
+      return status;
+    }
+
+    public getDownloadingMusicList() {
+        return downloadingMusicStore.getValue();
+    }
+
+    public useDownloadingMusicList() {
+        return downloadingMusicStore.useValue();
+    }
+}
+
+export default new Downloader();
