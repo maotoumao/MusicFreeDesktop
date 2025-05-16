@@ -45,7 +45,7 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
                 onChange={(e) => {
                     setTmpValue(e.target.value ?? null);
                 }}
-                type={type}
+                type={type || 'text'} // Default to 'text' if type is undefined
                 onBlur={() => {
                     if (tmpValue === null) {
                         return;

@@ -18,6 +18,7 @@ interface Window {
       getDuration: () => Promise<number | null>;
       getCurrentTime: () => Promise<number>;
       quit: () => Promise<void>;
+      setProperty: (property: string, value: any) => Promise<void>; // +++ 新增这一行 +++
     };
     mpvPlayerListener: {
       onStatusChange: (callback: (status: any) => void) => Electron.IpcRenderer;

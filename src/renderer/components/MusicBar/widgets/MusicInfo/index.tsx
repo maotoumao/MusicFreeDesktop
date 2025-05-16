@@ -111,12 +111,14 @@ export default function MusicInfo() {
 }
 
 function Progress() {
-    const {currentTime, duration} = useProgress();
+    const { currentTime, duration } = useProgress();
+    // 当 duration 无效时（Infinity 或 0），显示 --:--
+    const durationText = (duration && isFinite(duration) && duration > 0) ? secondsToDuration(duration) : "--:--";
+    const currentTimeText = secondsToDuration(currentTime || 0); // currentTime 可能为 undefined 或 null
+
     return (
         <div className="progress">
-            {isFinite(duration)
-                ? `${secondsToDuration(currentTime)}/${secondsToDuration(duration)}`
-                : null}
+            {`${currentTimeText}/${durationText}`}
         </div>
     );
 }

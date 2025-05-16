@@ -11,11 +11,20 @@ export default class MpvController extends ControllerBase implements IAudioContr
     private _playerState: PlayerState = PlayerState.None;
     public musicItem: IMusic.IMusicItem | null = null;
     private currentUrl: string | null = null;
-    private internalVolume: number = Number(AppConfig.getConfig("private.lastVolume" as any)) || 1; // 0-1, load from config or default
-    private internalSpeed: number = Number(AppConfig.getConfig("private.lastSpeed" as any)) || 1;   // load from config or default
-    private isMpvInitialized = false;
+    private internalVolume: number = Number(AppConfig.getConfig("private.lastVolume" as any)) || 1;
+    private internalSpeed: number = Number(AppConfig.getConfig("private.lastSpeed" as any)) || 1;
+    private isMpvFullyInitialized = false;
     private isMpvInitFailed = false;
     private lastReportedDuration: number = Infinity;
+    private initializationPromise: Promise<void> | null = null;
+
+    private readyPromise: Promise<void>;
+    private readyResolve!: () => void;
+    private readyReject!: (reason?: any) => void;
+
+    private trackLoadedAndStartedPromise: Promise<void> | null = null;
+    private trackLoadedAndStartedResolve: (() => void) | null = null;
+
 
     get playerState() {
         return this._playerState;
@@ -40,43 +49,122 @@ export default class MpvController extends ControllerBase implements IAudioContr
 
     constructor() {
         super();
-        this.initialize();
+        this.readyPromise = new Promise((resolve, reject) => {
+            this.readyResolve = resolve;
+            this.readyReject = reject;
+        });
+        this.setupEventListeners();
+        this.initialize().catch(e => {
+            logger.logError("MpvController: Background initialization failed in constructor", e);
+        });
     }
 
-    private async initialize() {
-        if (AppConfig.getConfig("playMusic.backend") !== "mpv") {
-            return;
+    public async initialize(): Promise<void> {
+        if (this.isMpvFullyInitialized) return Promise.resolve();
+        if (this.isMpvInitFailed && AppConfig.getConfig("playMusic.backend") === "mpv") {
+             return Promise.reject(new Error("MPV previously failed to initialize."));
         }
-        if (!AppConfig.getConfig("playMusic.mpvPath")) {
-             const errorMsg = "MPV 播放器路径未设置，请在 设置->播放 中配置。";
-             toast.warn(errorMsg);
-             this.isMpvInitFailed = true;
-             this.playerState = PlayerState.None;
-             this.onError?.(ErrorReason.EmptyResource, new Error(errorMsg));
-             return;
+        if (this.initializationPromise) return this.initializationPromise;
+
+        if (AppConfig.getConfig("playMusic.backend") !== "mpv") {
+            this.isMpvInitFailed = true;
+            const notSelectedError = new Error("MPV backend not selected.");
+            this.readyReject(notSelectedError);
+            return Promise.resolve();
         }
 
-        try {
-            const success = await window.electron.mpvPlayer.initialize();
-            if (success) {
-                this.isMpvInitialized = true;
-                this.isMpvInitFailed = false;
-                logger.logInfo("MPV Controller: Initialized successfully via main process.");
-                this.setupEventListeners();
-                await this.setVolume(this.internalVolume);
-                await this.setSpeed(this.internalSpeed);
-            } else {
-                // Error message should be handled by onInitFailed
-                // this.isMpvInitFailed = true; // This will be set by onInitFailed
-                // this.playerState = PlayerState.None;
-                // this.onError?.(ErrorReason.EmptyResource, new Error("MPV initialization failed in main process"));
-            }
-        } catch (e: any) {
-            const errorMsg = `MPV Controller: Initialization invoke error: ${e.message}`;
-            logger.logError(errorMsg, e);
+        if (!AppConfig.getConfig("playMusic.mpvPath")) {
+            const errorMsg = "MPV 播放器路径未设置，请在 设置->播放 中配置。";
+            if (this.playerState !== PlayerState.None && this.playerState !== PlayerState.Buffering) toast.warn(errorMsg);
             this.isMpvInitFailed = true;
             this.playerState = PlayerState.None;
             this.onError?.(ErrorReason.EmptyResource, new Error(errorMsg));
+            this.readyReject(new Error(errorMsg));
+            return Promise.reject(new Error(errorMsg));
+        }
+
+        this.initializationPromise = new Promise(async (resolve, reject) => {
+            let successTimeout: NodeJS.Timeout | null = null;
+            let resolvedOrRejected = false;
+
+            const successHandler = async () => {
+                if (resolvedOrRejected) return;
+                resolvedOrRejected = true;
+                if(successTimeout) clearTimeout(successTimeout);
+
+                this.isMpvFullyInitialized = true;
+                this.isMpvInitFailed = false;
+                logger.logInfo("MPV Controller: Initialized successfully (event).");
+                try {
+                    await this.applyInitialSettings();
+                    this.readyResolve();
+                    resolve();
+                } catch (err) {
+                    this.readyReject(err);
+                    reject(err);
+                } finally {
+                    cleanup();
+                }
+            };
+            const failHandler = (errorMsgFromMain?: string) => {
+                if (resolvedOrRejected) return;
+                resolvedOrRejected = true;
+                if(successTimeout) clearTimeout(successTimeout);
+
+                this.isMpvFullyInitialized = false;
+                this.isMpvInitFailed = true;
+                const displayError = errorMsgFromMain || "MPV 初始化失败，请检查路径或尝试重启应用。";
+                logger.logError("MpvController: Initialization failed (event)", new Error(displayError));
+                this.playerState = PlayerState.None;
+                this.onError?.(ErrorReason.EmptyResource, new Error(displayError));
+                cleanup();
+                this.readyReject(new Error(displayError));
+                reject(new Error(displayError));
+            };
+            const cleanup = () => {
+                window.electron.mpvPlayerListener.removeAllMpvListeners("mpv-init-success");
+                window.electron.mpvPlayerListener.removeAllMpvListeners("mpv-init-failed");
+            };
+
+            window.electron.mpvPlayerListener.onInitSuccess(successHandler);
+            window.electron.mpvPlayerListener.onInitFailed(failHandler);
+
+            const timeoutDuration = 15000;
+            successTimeout = setTimeout(() => {
+                if (!resolvedOrRejected) {
+                     failHandler("MPV 初始化超时。");
+                }
+            }, timeoutDuration);
+
+            try {
+                const mainProcessCmdSuccess = await window.electron.mpvPlayer.initialize();
+                if (!mainProcessCmdSuccess && !resolvedOrRejected) {
+                    failHandler("MPV 主进程初始化命令返回失败。");
+                }
+            } catch (e: any) {
+                if (!resolvedOrRejected) {
+                    failHandler(`MPV Controller: Invoking initialize IPC error: ${e.message}`);
+                }
+            }
+        });
+
+        try {
+            await this.initializationPromise;
+        } catch (e) {
+            logger.logError("MpvController: this.initializationPromise was rejected", e);
+        } finally {
+            this.initializationPromise = null;
+        }
+        return this.readyPromise;
+    }
+
+    private async applyInitialSettings() {
+        if (!this.isMpvFullyInitialized) return;
+        try {
+            await window.electron.mpvPlayer.setVolume(Math.max(0, Math.min(100, Math.round(this.internalVolume * 100))));
+            await window.electron.mpvPlayer.setSpeed(this.internalSpeed);
+        } catch (e) {
+            logger.logError("MpvController: Error applying initial settings", e);
         }
     }
 
@@ -86,12 +174,17 @@ export default class MpvController extends ControllerBase implements IAudioContr
 
         interface MpvTimePositionEvent {
             time: number;
-            duration: number; // Can be null or 0 if unknown
+            duration: number;
         }
 
         window.electron.mpvPlayerListener.onTimePosition((data: MpvTimePositionEvent) => {
-            this.lastReportedDuration = (data.duration != null && data.duration > 0 && isFinite(data.duration)) ? data.duration : Infinity;
-            this.onProgressUpdate?.({ currentTime: data.time, duration: this.lastReportedDuration });
+            const newDuration = (data.duration != null && data.duration > 0 && isFinite(data.duration)) ? data.duration : Infinity;
+            // MpvController doesn't have lastKnownTime, it receives time directly
+            // Only update if duration changed or time is valid and different enough (though time is pushed by main)
+            if (newDuration !== this.lastReportedDuration || (data.time !== undefined)) {
+                this.lastReportedDuration = newDuration;
+                this.onProgressUpdate?.({ currentTime: data.time || 0, duration: this.lastReportedDuration });
+            }
         });
         window.electron.mpvPlayerListener.onPaused(() => {
             this.playerState = PlayerState.Paused;
@@ -99,61 +192,66 @@ export default class MpvController extends ControllerBase implements IAudioContr
         window.electron.mpvPlayerListener.onResumed(() => {
             this.playerState = PlayerState.Playing;
         });
-        window.electron.mpvPlayerListener.onStopped(() => { // MPV stopped (e.g. user stop, not end of file)
-            this.playerState = PlayerState.None;
-            // Do not nullify currentUrl here, TrackPlayer handles track changes
-        });
-        interface MpvPlaybackEndedEvent {
-            reason: "eof" | "stop" | string; // 'stop' can also mean user stopped
-        }
 
-        window.electron.mpvPlayerListener.onPlaybackEnded((data: MpvPlaybackEndedEvent) => {
-            logger.logInfo(`MpvController: PlaybackEnded event, reason: ${data.reason}`);
-            if (data.reason === "eof") { // End of file
+        window.electron.mpvPlayerListener.onPlaybackEnded((data: { reason: string }) => {
+            logger.logInfo(`MpvController: Received mpv-playback-ended, reason: ${data.reason}`);
+            if (data.reason === "eof") {
                 this.playerState = PlayerState.None;
-                // this.currentUrl = null; // TrackPlayer should handle this
                 this.onEnded?.();
-            } else if (data.reason === "stop") { // Explicit stop
+            } else if (data.reason === "stop") {
                 this.playerState = PlayerState.None;
             }
-            // Other reasons might indicate errors or specific MPV behavior
         });
 
-        window.electron.mpvPlayerListener.onError((errorMsg: string) => { // errorMsg is string
+        window.electron.mpvPlayerListener.onStopped(() => {
+            logger.logInfo("MpvController: Received mpv-stopped.");
+            if (this.playerState !== PlayerState.None && this.playerState !== PlayerState.Paused ) {
+                this.playerState = PlayerState.None;
+            }
+        });
+
+        window.electron.mpvPlayerListener.onStarted(() => {
+            logger.logInfo("MpvController: Received mpv-started event (new file loaded and playback begins).");
+            if (this.trackLoadedAndStartedResolve) {
+                this.trackLoadedAndStartedResolve();
+                this.trackLoadedAndStartedPromise = null;
+                this.trackLoadedAndStartedResolve = null;
+            }
+             window.electron.mpvPlayer.getDuration().then(duration => {
+                this.lastReportedDuration = (duration != null && duration > 0 && isFinite(duration)) ? duration : Infinity;
+                return window.electron.mpvPlayer.getCurrentTime();
+            }).then(time => {
+                this.onProgressUpdate?.({ currentTime: time || 0, duration: this.lastReportedDuration });
+                if (this.playerState === PlayerState.Buffering) { // If we were buffering, now we are playing
+                    this.playerState = PlayerState.Playing;
+                }
+            }).catch(err => {
+                logger.logError("MpvController: Error fetching initial time/duration on started", err);
+                this.onProgressUpdate?.({ currentTime: 0, duration: Infinity });
+            });
+        });
+
+
+        window.electron.mpvPlayerListener.onError((errorMsg: string) => {
             logger.logError("MPV Playback Error from main:", new Error(errorMsg));
             this.playerState = PlayerState.None;
             this.onError?.(ErrorReason.EmptyResource, new Error(errorMsg));
         });
-        window.electron.mpvPlayerListener.onInitFailed((errorMsgFromMain?: string) => {
-            this.isMpvInitialized = false;
-            this.isMpvInitFailed = true;
-            const displayError = errorMsgFromMain || "MPV 初始化失败，请检查路径或尝试重启应用。";
-            toast.error(displayError);
-            this.playerState = PlayerState.None;
-            this.onError?.(ErrorReason.EmptyResource, new Error(displayError));
-        });
-        window.electron.mpvPlayerListener.onInitSuccess(() => {
-            this.isMpvInitialized = true;
-            this.isMpvInitFailed = false;
-            // toast.success("MPV 初始化成功。"); // Consider if this toast is too frequent
-        });
     }
 
     async prepareTrack(musicItem: IMusic.IMusicItem) {
-        if (this.isMpvInitFailed) {
-             const errorMsg = "MPV 初始化失败，无法准备轨道。";
+        try {
+            await this.readyPromise;
+        } catch (initError) {
+            this.onError?.(ErrorReason.EmptyResource, initError as Error);
+            this.playerState = PlayerState.None;
+            return;
+        }
+        if (this.isMpvInitFailed || !this.isMpvFullyInitialized) {
+             const errorMsg = "MPV 初始化失败或未就绪，无法准备轨道。";
              this.onError?.(ErrorReason.EmptyResource, new Error(errorMsg));
              this.playerState = PlayerState.None;
              return;
-        }
-        if (!this.isMpvInitialized && AppConfig.getConfig("playMusic.backend") === "mpv") {
-            await this.initialize(); // Attempt to re-initialize if needed
-            if (!this.isMpvInitialized) { // Check again after attempt
-                 const errorMsg = "MPV 仍未初始化，无法准备轨道。";
-                 this.onError?.(ErrorReason.EmptyResource, new Error(errorMsg));
-                 this.playerState = PlayerState.None;
-                return;
-            }
         }
 
         this.musicItem = { ...musicItem };
@@ -161,31 +259,26 @@ export default class MpvController extends ControllerBase implements IAudioContr
             title: musicItem.title,
             artist: musicItem.artist,
             album: musicItem.album,
-            artwork: [{ src: musicItem.artwork || "" }], // Ensure artwork is not null
+            artwork: [{ src: musicItem.artwork || "" }],
         });
-        if (this.playerState !== PlayerState.None) { // Only set to buffering if not already None
-            this.playerState = PlayerState.Buffering;
-        }
     }
 
     async setTrackSource(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem) {
-        if (this.isMpvInitFailed) {
-             const errorMsg = "MPV 初始化失败，无法设置音源。";
+        try {
+            await this.readyPromise;
+        } catch (initError) {
+            this.onError?.(ErrorReason.EmptyResource, initError as Error);
+            this.playerState = PlayerState.None;
+            return;
+        }
+        if (this.isMpvInitFailed || !this.isMpvFullyInitialized) {
+             const errorMsg = "MPV 初始化失败或未就绪，无法设置音源。";
              this.onError?.(ErrorReason.EmptyResource, new Error(errorMsg));
              this.playerState = PlayerState.None;
              return;
         }
-         if (!this.isMpvInitialized && AppConfig.getConfig("playMusic.backend") === "mpv") {
-            await this.initialize();
-             if (!this.isMpvInitialized) {
-                 const errorMsg = "MPV 仍未初始化，无法设置音源。";
-                 this.onError?.(ErrorReason.EmptyResource, new Error(errorMsg));
-                 this.playerState = PlayerState.None;
-                 return;
-             }
-        }
 
-        this.musicItem = { ...musicItem }; // Ensure musicItem is always updated
+        this.musicItem = { ...musicItem };
         this.currentUrl = trackSource.url;
         if (!this.currentUrl) {
             this.onError?.(ErrorReason.EmptyResource, new Error("Track source URL is empty."));
@@ -194,30 +287,42 @@ export default class MpvController extends ControllerBase implements IAudioContr
         }
 
         logger.logInfo("MPV Controller: Loading track - ", this.currentUrl);
+        this.playerState = PlayerState.Buffering;
+        this.trackLoadedAndStartedPromise = new Promise((resolve) => {
+            this.trackLoadedAndStartedResolve = resolve;
+        });
         try {
             await window.electron.mpvPlayer.load(this.currentUrl, this.musicItem);
-            // Duration might not be available immediately after load,
-            // it's better to get it from 'started' or 'statuschange' events.
-            this.lastReportedDuration = Infinity;
         } catch (e: any) {
             logger.logError("MPV Controller: Error loading track", e);
             this.onError?.(ErrorReason.EmptyResource, e);
             this.playerState = PlayerState.None;
+            if (this.trackLoadedAndStartedResolve) {
+                this.trackLoadedAndStartedResolve();
+                this.trackLoadedAndStartedPromise = null;
+                this.trackLoadedAndStartedResolve = null;
+            }
         }
     }
 
     async play() {
-        if (this.isMpvInitFailed) {
-            this.onError?.(ErrorReason.EmptyResource, new Error("MPV 初始化失败，无法播放。"));
+        try {
+            await this.readyPromise;
+        } catch (initError) {
+            this.onError?.(ErrorReason.EmptyResource, initError as Error);
             this.playerState = PlayerState.None;
             return;
         }
-        if (!this.isMpvInitialized || !this.hasSource) {
+        if (this.isMpvInitFailed || !this.isMpvFullyInitialized || !this.hasSource) {
             this.onError?.(ErrorReason.EmptyResource, new Error("MPV 未就绪或无音源可播。"));
-            this.playerState = PlayerState.None; // Ensure state reflects inability to play
+            this.playerState = PlayerState.None;
             return;
         }
-        logger.logInfo("MPV Controller: Play command");
+        if (this.trackLoadedAndStartedPromise) {
+            logger.logInfo("MPV Controller: Play command waiting for track to be loaded and started.");
+            await this.trackLoadedAndStartedPromise;
+        }
+        logger.logInfo(`MPV Controller: Play command for ${this.currentUrl || 'unknown source'}`);
         try {
             await window.electron.mpvPlayer.play();
         } catch (e: any) {
@@ -227,7 +332,10 @@ export default class MpvController extends ControllerBase implements IAudioContr
     }
 
     async pause() {
-        if (this.isMpvInitFailed || !this.isMpvInitialized) return;
+        try {
+            await this.readyPromise;
+        } catch (initError) { return; }
+        if (this.isMpvInitFailed || !this.isMpvFullyInitialized) return;
         logger.logInfo("MPV Controller: Pause command");
         try {
             await window.electron.mpvPlayer.pause();
@@ -237,8 +345,18 @@ export default class MpvController extends ControllerBase implements IAudioContr
         }
     }
 
+    async resume() {
+        await this.play();
+    }
+
     async seekTo(seconds: number) {
-        if (this.isMpvInitFailed || !this.isMpvInitialized || !this.hasSource) return;
+        try {
+            await this.readyPromise;
+        } catch (initError) { return; }
+        if (this.isMpvInitFailed || !this.isMpvFullyInitialized || !this.hasSource) return;
+        if (this.trackLoadedAndStartedPromise) {
+            await this.trackLoadedAndStartedPromise;
+        }
         logger.logInfo("MPV Controller: Seek to - ", seconds);
         try {
             await window.electron.mpvPlayer.seek(seconds);
@@ -248,29 +366,39 @@ export default class MpvController extends ControllerBase implements IAudioContr
         }
     }
 
-    async setVolume(volume: number) { // volume is 0-1
+    async setVolume(volume: number, internalCall = false) {
         this.internalVolume = volume;
-        AppConfig.setConfig({"private.lastVolume": volume} as any); // Save volume
-        if (this.isMpvInitFailed || !this.isMpvInitialized) return;
-        const mpvVolume = Math.max(0, Math.min(100, Math.round(volume * 100))); // MPV uses 0-100
+        AppConfig.setConfig({"private.lastVolume": volume} as any);
+        if (!internalCall) {
+            try {
+                await this.readyPromise;
+            } catch (initError) { return; }
+        }
+        if (this.isMpvInitFailed || !this.isMpvFullyInitialized) return;
+        const mpvVolume = Math.max(0, Math.min(100, Math.round(volume * 100)));
         logger.logInfo("MPV Controller: Set volume to - ", mpvVolume);
         try {
             await window.electron.mpvPlayer.setVolume(mpvVolume);
-            this.onVolumeChange?.(volume); // Notify TrackPlayer of the change
+            this.onVolumeChange?.(volume);
         } catch (e: any) {
             logger.logError("MPV Controller: Error setting volume", e);
             this.onError?.(ErrorReason.EmptyResource, new Error(`音量设置失败: ${e.message}`));
         }
     }
 
-    async setSpeed(speed: number) {
+    async setSpeed(speed: number, internalCall = false) {
         this.internalSpeed = speed;
-        AppConfig.setConfig({"private.lastSpeed": speed} as any); // Save speed
-        if (this.isMpvInitFailed || !this.isMpvInitialized) return;
+        AppConfig.setConfig({"private.lastSpeed": speed} as any);
+        if (!internalCall) {
+            try {
+                await this.readyPromise;
+            } catch (initError) { return; }
+        }
+        if (this.isMpvInitFailed || !this.isMpvFullyInitialized) return;
         logger.logInfo("MPV Controller: Set speed to - ", speed);
         try {
             await window.electron.mpvPlayer.setSpeed(speed);
-            this.onSpeedChange?.(speed); // Notify TrackPlayer
+            this.onSpeedChange?.(speed);
         } catch (e: any) {
             logger.logError("MPV Controller: Error setting speed", e);
             this.onError?.(ErrorReason.EmptyResource, new Error(`倍速设置失败: ${e.message}`));
@@ -284,46 +412,63 @@ export default class MpvController extends ControllerBase implements IAudioContr
         this.playerState = PlayerState.None;
         this.lastReportedDuration = Infinity;
         this.onProgressUpdate?.({ currentTime: 0, duration: Infinity });
-        if (this.isMpvInitialized && window.electron?.mpvPlayer) { // Check if mpvPlayer exists
-            try {
+        try {
+            await this.readyPromise;
+            if (this.isMpvFullyInitialized && window.electron?.mpvPlayer) {
                 await window.electron.mpvPlayer.stop();
-            } catch (e: any) {
-                logger.logError("MPV Controller: Error stopping on reset", e);
             }
+        } catch (e: any) {
+            logger.logError("MPV Controller: Error stopping on reset (or MPV not ready)", e);
         }
         navigator.mediaSession.metadata = null;
         navigator.mediaSession.playbackState = "none";
     }
 
-    destroy() {
+    async destroy() {
         logger.logInfo("MPV Controller: Destroying instance...");
-        this.reset();
-        if (window.electron?.mpvPlayerListener) { // Check if listener exists
+        await this.reset();
+        if (window.electron?.mpvPlayerListener) {
             window.electron.mpvPlayerListener.removeAllMpvListeners();
         }
-        if (this.isMpvInitialized && window.electron?.mpvPlayer) {
-             window.electron.mpvPlayer.quit().catch((e: unknown) => {
-                logger.logError(
-                    "Error quitting MPV on destroy",
-                    e instanceof Error ? e : new Error(typeof e === "string" ? e : String(e))
-                );
-            });
+        try {
+            await this.readyPromise;
+            if (this.isMpvFullyInitialized && window.electron?.mpvPlayer) {
+                await window.electron.mpvPlayer.quit();
+            }
+        } catch (e: unknown) {
+            logger.logError(
+                "Error quitting MPV on destroy (or MPV not ready)",
+                e instanceof Error ? e : new Error(typeof e === "string" ? e : String(e))
+            );
         }
-        this.isMpvInitialized = false;
-        this.isMpvInitFailed = false;
+        this.isMpvFullyInitialized = false;
+        this.isMpvInitFailed = true;
+        this.readyPromise = new Promise((resolve, reject) => {
+            this.readyResolve = resolve;
+            this.readyReject = reject;
+        });
     }
 
-    setLoop(isLoop: boolean): void {
+    async setLoop(isLoop: boolean): Promise<void> {
         logger.logInfo(`MPV Controller: setLoop called with ${isLoop}.`);
-        // The setProperty method does not exist on mpvPlayer; implement this in the main process and expose it if needed.
-        // For now, log a warning or handle as a no-op.
-        logger.logInfo("MPV Controller: setLoop is not implemented because setProperty is unavailable on mpvPlayer.");
+        try {
+            await this.readyPromise;
+        } catch (initError) { return; }
+        if (this.isMpvInitFailed || !this.isMpvFullyInitialized) return;
+
+        const loopValue = isLoop ? "inf" : "no";
+        try {
+            await window.electron.mpvPlayer.setProperty("loop-file", loopValue);
+            logger.logInfo(`MPV loop-file set to ${loopValue}`);
+        } catch (e: any) {
+            logger.logError("MPV Controller: Error setting loop-file property", e);
+            this.onError?.(ErrorReason.EmptyResource, new Error(`设置循环失败: ${e.message}`));
+        }
     }
 
-    async setSinkId(_deviceId: string): Promise<void> { // Parameter is not used currently
+
+    async setSinkId(_deviceId: string): Promise<void> {
         logger.logInfo(`MPV Controller: setSinkId called. MPV typically requires '--audio-device' at startup.`);
-        // MPV audio device is usually set via command-line arg, not dynamically like web audio.
-        // If dynamic switching is needed, it would require more complex MPV commands.
         return Promise.resolve();
     }
 }

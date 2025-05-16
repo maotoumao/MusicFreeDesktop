@@ -149,7 +149,7 @@ class TrackPlayer {
         logger.logInfo(`TrackPlayer: Initializing audio backend - ${backendType}`);
 
         if (this.audioController) {
-            this.audioController.destroy();
+            await this.audioController.destroy();
             this.audioController = null;
         }
 
@@ -160,26 +160,38 @@ class TrackPlayer {
         }
         this.setupAudioControllerEvents();
 
-        // 恢复播放状态的逻辑
-        const musicToRestore = previousState?.music || this.currentMusic;
-        const timeToRestore = previousState?.music ? previousState.time : this.progress.currentTime;
-        const qualityToRestore = this.currentQuality || AppConfig.getConfig("playMusic.defaultQuality");
-        const shouldAutoPlay = previousState?.music ? previousState.isPlaying : false; // 只有在明确有先前状态时才考虑自动播放
+        if (typeof (this.audioController as any).initialize === 'function') {
+            try {
+                await (this.audioController as any).initialize();
+                logger.logInfo(`TrackPlayer: Audio controller (${backendType}) initialized successfully.`);
+            } catch (e) {
+                logger.logError(`TrackPlayer: Audio controller (${backendType}) initialization failed.`, e);
+                this.setPlayerState(PlayerState.None);
+                this.ee.emit(PlayerEvents.Error, null, new Error(`音频后端 ${backendType} 初始化失败: ${(e as Error).message}`));
+                return;
+            }
+        }
 
-        if (musicToRestore && this.audioController) {
+        const musicToRestore = previousState?.music || this.currentMusic;
+        const timeToRestore = previousState?.music ? previousState.time : (this.progress.currentTime || 0);
+        const qualityToRestore = this.currentQuality || AppConfig.getConfig("playMusic.defaultQuality");
+        const shouldAutoPlay = previousState?.isPlaying === true;
+
+
+        if (musicToRestore && this.audioController && (this.audioController as any).isMpvInitialized !== false) {
             logger.logInfo("TrackPlayer: Attempting to load/restore track with new backend.", { title: musicToRestore.title, time: timeToRestore });
-            this.setCurrentMusic(musicToRestore); // 确保 currentMusic 已设置
-            this.currentIndex = this.findMusicIndex(musicToRestore); // 更新 currentIndex
-            this.audioController.prepareTrack?.(musicToRestore);
+            this.setCurrentMusic(musicToRestore);
+            this.currentIndex = this.findMusicIndex(musicToRestore);
+            await this.audioController.prepareTrack?.(musicToRestore);
 
             try {
                 const {mediaSource, quality: actualQuality} = await this.fetchMediaSource(musicToRestore, qualityToRestore);
                 if (!mediaSource?.url) {
                     throw new Error("Media source URL is empty for track restoration.");
                 }
-                if (this.isCurrentMusic(musicToRestore)) { // 再次检查，以防在异步操作中 currentMusic 已改变
+                if (this.isCurrentMusic(musicToRestore)) {
                     this.setCurrentQuality(actualQuality);
-                    this.setTrack(mediaSource, musicToRestore, {
+                    await this.setTrack(mediaSource, musicToRestore, {
                         seekTo: timeToRestore,
                         autoPlay: shouldAutoPlay
                     });
@@ -189,6 +201,9 @@ class TrackPlayer {
                 this.ee.emit(PlayerEvents.Error, musicToRestore, e instanceof Error ? e : new Error(String(e)));
                 this.setPlayerState(PlayerState.None);
             }
+        } else if (musicToRestore && this.audioController && (this.audioController as any).isMpvInitialized === false) {
+            logger.logInfo("TrackPlayer: MPV controller not initialized, skipping track restoration.");
+            this.setPlayerState(PlayerState.None);
         }
     }
 
@@ -243,7 +258,6 @@ class TrackPlayer {
     public async setup() {
         if (this.isReady) return;
 
-        // 1. 加载用户偏好设置并设置初始状态
         const [repeatMode, currentMusicFromPref, currentProgress, volume, speed, preferredQuality] = [
             getUserPreference("repeatMode"),
             getUserPreference("currentMusic"),
@@ -259,39 +273,43 @@ class TrackPlayer {
         this.indexMap.update(playList);
 
         if (repeatMode) {
-            this.setRepeatMode(repeatMode as RepeatMode, false); // false: 不立即重排队列
-        }
-        if (currentMusicFromPref) {
-            this.setCurrentMusic(currentMusicFromPref); // 这会触发歌词获取
-            this.currentIndex = this.findMusicIndex(currentMusicFromPref);
+            this.setRepeatMode(repeatMode as RepeatMode, false);
         }
         if (preferredQuality) {
             this.setCurrentQuality(preferredQuality);
         }
         if (currentProgress && isFinite(currentProgress)) {
-            // 仅设置初始进度值，不实际 seek
             progressStore.setValue({ currentTime: currentProgress, duration: Infinity });
         }
 
+        this.isReady = true;
 
-        // 2. 初始化音频后端
-        await this.initializeAudioBackend(); // 会根据当前状态（currentMusic, currentProgress）尝试加载
+        await this.initializeAudioBackend();
 
-        // 3. 设置音频设备、音量和速度（这些操作依赖 audioController）
+        if (currentMusicFromPref && !this.currentMusic) {
+            this.setCurrentMusic(currentMusicFromPref);
+            this.currentIndex = this.findMusicIndex(currentMusicFromPref);
+             if (this.audioController && (this.audioController as any).isMpvInitialized !== false) {
+                await this.audioController.prepareTrack?.(currentMusicFromPref);
+             }
+        } else if (!currentMusicFromPref) {
+            this.setPlayerState(PlayerState.None);
+            this.resetProgress();
+        }
+
         const deviceId = AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId;
-        if (deviceId && this.audioController) {
+        if (deviceId && this.audioController && (this.audioController as any).isMpvInitialized !== false) {
             await this.setAudioOutputDevice(deviceId).catch(e => logger.logError("Failed to set initial audio device", e));
         }
-        if (volume !== null && volume !== undefined && this.audioController) {
-            this.setVolume(volume); // audioController 内部会处理
+        if (volume !== null && volume !== undefined && this.audioController && (this.audioController as any).isMpvInitialized !== false) {
+            this.setVolume(volume);
         }
-        if (speed && this.audioController) {
-            this.setSpeed(speed); // audioController 内部会处理
+        if (speed && this.audioController && (this.audioController as any).isMpvInitialized !== false) {
+            this.setSpeed(speed);
         }
 
-        // 4. 设置其他事件监听器和配置更新处理
-        this.setupEvents(); // 通用播放器事件
-        AppConfig.onConfigUpdate(async (patch) => { // 配置变化处理
+        this.setupEvents();
+        AppConfig.onConfigUpdate(async (patch) => {
             if (patch["playMusic.backend"] !== undefined) {
                 logger.logInfo("TrackPlayer: Audio backend configuration changed, re-initializing.");
                 const previousMusic = this.currentMusic;
@@ -299,19 +317,18 @@ class TrackPlayer {
                 const wasPlaying = this.playerState === PlayerState.Playing;
 
                 if (this.audioController && wasPlaying) {
-                    this.audioController.pause();
+                    await this.audioController.pause();
                 }
-                this.setPlayerState(PlayerState.None);
+                this.setPlayerState(PlayerState.Buffering);
 
                 await this.initializeAudioBackend({ music: previousMusic, time: previousTime, isPlaying: wasPlaying });
             }
-            if (patch["playMusic.audioOutputDevice"] !== undefined && this.audioController) {
+            if (patch["playMusic.audioOutputDevice"] !== undefined && this.audioController && (this.audioController as any).isMpvInitialized !== false) {
                 const newDeviceId = AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId;
                 await this.setAudioOutputDevice(newDeviceId);
             }
         });
 
-        this.isReady = true;
         logger.logInfo("TrackPlayer: Setup complete.");
     }
 
@@ -319,17 +336,18 @@ class TrackPlayer {
     private setupEvents() {
         this.ee.on(PlayerEvents.Error, async (errorMusicItem, reason) => {
             logger.logError("TrackPlayer internal error event:", { musicTitle: errorMusicItem?.title, reason: reason.message, stack: reason.stack } as any);
-            this.resetProgress(); // 发生错误时重置进度
+            this.resetProgress();
             const needSkip = AppConfig.getConfig("playMusic.playError") === "skip";
             if (this.musicQueue.length > 1 && needSkip && errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
-                await delay(500); // 短暂延迟以避免快速连续跳过
-                if (this.isCurrentMusic(errorMusicItem)) { // 再次检查，以防在延迟期间状态已改变
+                if (this.playerState !== PlayerState.None) {
+                     await delay(1500);
+                }
+                if (this.isCurrentMusic(errorMusicItem)) {
                     this.skipToNext();
                 }
             } else if (errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
-                // 如果不跳过，或者队列中只有一首歌，则暂停并设置状态为 None
-                this.pause(); // 尝试暂停播放器
-                this.setPlayerState(PlayerState.None); // 将播放器状态设为 None
+                if (this.audioController) await this.audioController.pause();
+                this.setPlayerState(PlayerState.None);
             }
         });
 
@@ -355,14 +373,15 @@ class TrackPlayer {
     }
 
     public async playIndex(index: number, options: IPlayOptions = {}) {
-        if (!this.isReady) {
-             logger.logInfo("TrackPlayer not ready in playIndex. Attempting to setup.");
-             await this.setup(); // 确保已初始化
-        }
-        if (!this.audioController) {
-            logger.logError("TrackPlayer: audioController not initialized in playIndex.", new Error("audioController is null"));
-            this.ee.emit(PlayerEvents.Error, this.musicQueue[index] || null, new Error("播放器未正确初始化。"));
-            return;
+        if (!this.isReady) await this.setup();
+        if (!this.audioController) { this.ee.emit(PlayerEvents.Error, this.musicQueue[index] || null, new Error("播放器未正确初始化 (audioController is null)。")); return; }
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            try {
+                await (this.audioController as any).readyPromise;
+            } catch (e) {
+                this.ee.emit(PlayerEvents.Error, this.musicQueue[index] || null, new Error(`播放器后端初始化失败: ${(e as Error).message}`));
+                return;
+            }
         }
 
         const {refreshSource, restartOnSameMedia = true, seekTo, quality: intendedQuality} = options;
@@ -385,9 +404,9 @@ class TrackPlayer {
 
         if (this.currentIndex === index && this.isCurrentMusic(nextMusicItem) && !refreshSource) {
             if (restartOnSameMedia) {
-                this.seekTo(0);
+                await this.seekTo(0);
             }
-            this.audioController.play();
+            await this.audioController.play();
             return;
         }
 
@@ -395,39 +414,38 @@ class TrackPlayer {
         this.currentIndex = index;
 
         this.setPlayerState(PlayerState.Buffering);
-        this.audioController.prepareTrack?.(nextMusicItem);
+        await this.audioController.prepareTrack?.(nextMusicItem);
 
         try {
             const {mediaSource, quality} = await this.fetchMediaSource(nextMusicItem, intendedQuality);
             if (!mediaSource?.url) {
                 throw new Error("无法获取有效的媒体播放链接 (URL is empty).");
             }
-            if (!this.isCurrentMusic(nextMusicItem)) return; // 如果在异步获取音源时歌曲已切换，则中止
+            if (!this.isCurrentMusic(nextMusicItem)) return;
 
             this.setCurrentQuality(quality);
-            this.setTrack(mediaSource, nextMusicItem, {
+            await this.setTrack(mediaSource, nextMusicItem, {
                 seekTo,
                 autoPlay: true
             });
 
-            // 异步获取并更新音乐的详细信息（例如封面、更准确的时长等）
             PluginManager.callPluginDelegateMethod(
                 { platform: nextMusicItem.platform }, "getMusicInfo", nextMusicItem
             ).then(musicInfo => {
                 if (musicInfo && this.isCurrentMusic(nextMusicItem) && typeof musicInfo === "object") {
-                    this.setCurrentMusic({ // 更新 currentMusic，这会触发 MusicChanged 事件
+                    this.setCurrentMusic({
                         ...nextMusicItem,
                         ...musicInfo,
-                        platform: nextMusicItem.platform, // 确保 platform 和 id 不被覆盖
+                        platform: nextMusicItem.platform,
                         id: nextMusicItem.id,
                     });
                 }
             }).catch(voidCallback);
 
-        } catch (e: any) {
+        } catch (e:any) {
             logger.logError("Error in playIndex:", e, {musicItemTitle: nextMusicItem?.title, platform: nextMusicItem?.platform, id: nextMusicItem?.id});
-            this.setCurrentQuality(AppConfig.getConfig("playMusic.defaultQuality")); // 恢复默认音质
-            if (this.audioController) this.audioController.reset();
+            this.setCurrentQuality(AppConfig.getConfig("playMusic.defaultQuality"));
+            if (this.audioController) await this.audioController.reset();
             const errorToEmit = e instanceof Error ? e : new Error(String(e) || '播放时发生未知错误');
             this.ee.emit(PlayerEvents.Error, nextMusicItem, errorToEmit);
             this.setPlayerState(PlayerState.None);
@@ -435,57 +453,64 @@ class TrackPlayer {
     }
 
     public async playMusic(musicItem: IMusic.IMusicItem, options: IPlayOptions = {}) {
-        if (!this.isReady) {
-             logger.logInfo("TrackPlayer not ready in playMusic.");
-             await this.setup();
+        if (!this.isReady) await this.setup();
+        if (!this.audioController) { this.ee.emit(PlayerEvents.Error, musicItem, new Error("播放器未正确初始化 (audioController is null)。")); return; }
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+             try {
+                await (this.audioController as any).readyPromise;
+            } catch (e) {
+                this.ee.emit(PlayerEvents.Error, musicItem, new Error(`播放器后端初始化失败: ${(e as Error).message}`));
+                return;
+            }
         }
-        if (!this.audioController) {
-             logger.logError("TrackPlayer: audioController not initialized in playMusic.", new Error("audioController is null"));
-             this.ee.emit(PlayerEvents.Error, musicItem, new Error("播放器未正确初始化。"));
-             return;
-        }
+
         const queueIndex = this.findMusicIndex(musicItem);
-        if (queueIndex === -1) { // 歌曲不在当前队列中
+        if (queueIndex === -1) {
             const newQueue = [
                 ...this.musicQueue,
                 {
                     ...musicItem,
                     [timeStampSymbol]: Date.now(),
-                    [sortIndexSymbol]: this.musicQueue.length // 正确设置新歌曲的排序索引
+                    [sortIndexSymbol]: this.musicQueue.length
                 }
             ]
             this.setMusicQueue(newQueue);
-            await this.playIndex(newQueue.length - 1, options); // 播放新加入的歌曲
+            await this.playIndex(newQueue.length - 1, options);
         } else {
-            await this.playIndex(queueIndex, options); // 播放队列中已存在的歌曲
+            await this.playIndex(queueIndex, options);
         }
     }
 
     public async playMusicWithReplaceQueue(musicList: IMusic.IMusicItem[], musicItem?: IMusic.IMusicItem) {
-        if (!this.isReady) {
-            logger.logInfo("TrackPlayer not ready in playMusicWithReplaceQueue.");
-            await this.setup();
+        if (!this.isReady) await this.setup();
+         if (!this.audioController) { this.ee.emit(PlayerEvents.Error, musicItem || (musicList.length > 0 ? musicList[0] : null), new Error("播放器未正确初始化 (audioController is null)。")); return; }
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            try {
+                await (this.audioController as any).readyPromise;
+            } catch (e) {
+                this.ee.emit(PlayerEvents.Error, musicItem || (musicList.length > 0 ? musicList[0] : null), new Error(`播放器后端初始化失败: ${(e as Error).message}`));
+                return;
+            }
         }
-         if (!this.audioController) {
-             logger.logError("TrackPlayer: audioController not initialized in playMusicWithReplaceQueue.", new Error("audioController is null"));
-             this.ee.emit(PlayerEvents.Error, musicItem || (musicList.length > 0 ? musicList[0] : null), new Error("播放器未正确初始化。"));
-             return;
-        }
+
         if (!musicList.length && !musicItem) {
             this.reset();
             return;
         }
-        addSortProperty(musicList); // 为列表中的所有歌曲添加排序属性
+        addSortProperty(musicList);
         if (this.repeatMode === RepeatMode.Shuffle) {
-            musicList = shuffle(musicList); // 如果是随机模式，打乱列表
+            musicList = shuffle(musicList);
         }
-        musicItem = musicItem ?? musicList[0]; // 如果没有指定播放项，默认播放列表第一首
+        musicItem = musicItem ?? musicList[0];
         this.setMusicQueue(musicList);
-        await this.playMusic(musicItem); // 调用 playMusic 播放
+        await this.playMusic(musicItem);
     }
 
-    public skipToPrev() {
+    public async skipToPrev() {
         if (!this.isReady || !this.audioController) return;
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
+        }
         if (this.isEmpty) {
             this.reset();
             return;
@@ -493,8 +518,11 @@ class TrackPlayer {
         this.playIndex(this.currentIndex - 1);
     }
 
-    public skipToNext() {
+    public async skipToNext() {
         if (!this.isReady || !this.audioController) return;
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
+        }
         if (this.isEmpty) {
             this.reset();
             return;
@@ -502,47 +530,60 @@ class TrackPlayer {
         this.playIndex(this.currentIndex + 1);
     }
 
-    public reset() {
-        if (this.audioController) this.audioController.reset();
-        this.setMusicQueue([]); // 这会清空队列并更新 currentIndex
-        this.setCurrentMusic(null); // 这会重置当前歌曲和歌词
-        // currentIndex 会在 setMusicQueue 和 setCurrentMusic 中被间接重置为 -1
+    public async reset() {
+        if (this.audioController) await this.audioController.reset();
+        this.setMusicQueue([]);
+        this.setCurrentMusic(null);
         this.setPlayerState(PlayerState.None);
-        this.resetProgress(); // 确保进度也被重置
+        this.resetProgress();
     }
 
 
-    public seekTo(seconds: number) {
+    public async seekTo(seconds: number) {
         if (!this.isReady || !this.audioController) return;
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
+        }
         this.audioController.seekTo(seconds);
     }
 
-    public pause() {
+    public async pause() {
         if (!this.isReady || !this.audioController) return;
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
+        }
         this.audioController.pause();
     }
 
-    public resume() {
+    public async resume() {
         if (!this.isReady || !this.audioController) return;
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
+        }
         this.audioController.play();
     }
 
-    public setVolume(volume: number) {
+    public async setVolume(volume: number) {
         const clampedVolume = Math.max(0, Math.min(1, volume));
         if (!this.isReady || !this.audioController) {
-            // 如果播放器未就绪，仅更新存储的值
             currentVolumeStore.setValue(clampedVolume);
             setUserPreference("volume", clampedVolume);
             return;
         }
-        this.audioController.setVolume(clampedVolume); // audioController 内部会触发 onVolumeChange
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
+        }
+        this.audioController.setVolume(clampedVolume);
     }
 
-    public setSpeed(speed: number) {
+    public async setSpeed(speed: number) {
         if (!this.isReady || !this.audioController) {
             currentSpeedStore.setValue(speed);
             setUserPreference("speed", speed);
             return;
+        }
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
         }
         this.audioController.setSpeed(speed);
     }
@@ -551,33 +592,30 @@ class TrackPlayer {
         if (!this.isReady) return;
         let _musicItems: IMusic.IMusicItem[];
         if (Array.isArray(musicItems)) {
-            _musicItems = [...musicItems]; // 创建副本以避免修改原始数组
+            _musicItems = [...musicItems];
         } else {
             _musicItems = [musicItems];
         }
 
         const now = Date.now();
         _musicItems.forEach((item, index) => {
-            // 确保每个项目都有排序属性
             if (item[timeStampSymbol] === undefined) item[timeStampSymbol] = now;
             if (item[sortIndexSymbol] === undefined) item[sortIndexSymbol] = index;
         });
 
         const itemsToAdd: IMusic.IMusicItem[] = [];
-        // 使用当前队列的 indexMap 来检查重复，而不是为新项目创建临时的 uniqueMap
         for (const newItem of _musicItems) {
-            if (this.findMusicIndex(newItem) === -1) { // 如果歌曲不在当前队列中
+            if (this.findMusicIndex(newItem) === -1) {
                 itemsToAdd.push(newItem);
             }
         }
 
-        if (itemsToAdd.length === 0) return; // 没有新歌可添加
+        if (itemsToAdd.length === 0) return;
 
         const oldQueue = this.musicQueue;
         let insertPosition = this.currentIndex + 1;
-        // 确保插入位置有效
         if (insertPosition > oldQueue.length || insertPosition < 0) {
-            insertPosition = oldQueue.length; // 如果当前没有播放或索引无效，则追加到末尾
+            insertPosition = oldQueue.length;
         }
 
         const newQueue = [
@@ -585,7 +623,7 @@ class TrackPlayer {
             ...itemsToAdd,
             ...oldQueue.slice(insertPosition)
         ];
-        this.setMusicQueue(newQueue); // 更新队列
+        this.setMusicQueue(newQueue);
     }
 
 
@@ -593,26 +631,25 @@ class TrackPlayer {
         if (!this.isReady) return;
 
         const currentQueue = this.musicQueue;
-        if (currentQueue.length === 0) return; // 队列为空，无需操作
+        if (currentQueue.length === 0) return;
 
         let indicesToRemove: number[] = [];
 
-        if (typeof musicItemsToRemove === 'number') { // 按索引移除
+        if (typeof musicItemsToRemove === 'number') {
             if (musicItemsToRemove >= 0 && musicItemsToRemove < currentQueue.length) {
                 indicesToRemove.push(musicItemsToRemove);
             }
-        } else { // 按音乐项或音乐项数组移除
+        } else {
             const itemsArray = Array.isArray(musicItemsToRemove) ? musicItemsToRemove : [musicItemsToRemove];
             itemsArray.forEach(item => {
                 const idx = this.findMusicIndex(item);
                 if (idx !== -1) indicesToRemove.push(idx);
             });
-            indicesToRemove = [...new Set(indicesToRemove)]; // 去重
+            indicesToRemove = [...new Set(indicesToRemove)];
         }
 
         if (indicesToRemove.length === 0) return;
 
-        // 从大到小排序索引，这样删除时不会影响前面元素的索引
         indicesToRemove.sort((a, b) => b - a);
 
         const newQueue = [...currentQueue];
@@ -620,47 +657,48 @@ class TrackPlayer {
         let currentMusicWasRemoved = false;
 
         for (const index of indicesToRemove) {
-            newQueue.splice(index, 1); // 直接按原始索引删除（因为是从大到小删）
+            newQueue.splice(index, 1);
             if (index === this.currentIndex) {
                 currentMusicWasRemoved = true;
             } else if (index < this.currentIndex) {
-                newCurrentIndex--; // 如果删除的是当前播放歌曲之前的歌曲，调整当前索引
+                newCurrentIndex--;
             }
         }
-        this.currentIndex = newCurrentIndex; // 更新调整后的当前索引
+        this.currentIndex = newCurrentIndex;
 
         if (currentMusicWasRemoved) {
-            if (this.audioController) this.audioController.reset(); // 重置播放器（停止当前播放）
-            this.resetProgress(); // 重置进度
-            this.setCurrentMusic(null); // 清空当前歌曲信息
+            if (this.audioController) this.audioController.reset();
+            this.resetProgress();
+            this.setCurrentMusic(null);
         }
 
-        this.setMusicQueue(newQueue); // 更新队列
+        this.setMusicQueue(newQueue);
 
         if (currentMusicWasRemoved && newQueue.length > 0) {
-            // 如果被删除的是当前歌曲，且队列不为空，则尝试播放调整后的当前索引处的歌曲
-            // 如果调整后的索引无效（例如，删除了最后一首歌且它是当前歌曲），则播放第一首
             const playNextIdx = (this.currentIndex >= 0 && this.currentIndex < newQueue.length) ? this.currentIndex : 0;
             this.playIndex(playNextIdx);
         } else if (newQueue.length === 0) {
-            this.reset(); // 如果队列为空，则完全重置播放器
+            this.reset();
         }
     }
 
 
     public async setQuality(qualityKey: IMusic.IQualityKey) {
         if (!this.isReady || !this.audioController) return;
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
+        }
         const currentMusic = this.currentMusic;
         if (currentMusic && qualityKey !== this.currentQuality) {
             const currentTime = this.progress.currentTime;
             const wasPlaying = this.playerState === PlayerState.Playing;
-            if (wasPlaying && this.audioController) this.audioController.pause();
+            if (wasPlaying && this.audioController) await this.audioController.pause();
 
             this.setPlayerState(PlayerState.Buffering);
             try {
                 const {mediaSource, quality: realQuality} = await this.fetchMediaSource(currentMusic, qualityKey)
-                if (this.isCurrentMusic(currentMusic) && this.audioController) { // 再次检查
-                    this.setTrack(mediaSource, currentMusic, {
+                if (this.isCurrentMusic(currentMusic) && this.audioController) {
+                    await this.setTrack(mediaSource, currentMusic, {
                         seekTo: currentTime,
                         autoPlay: wasPlaying
                     })
@@ -669,9 +707,8 @@ class TrackPlayer {
             } catch (e: any) {
                 logger.logError("Error setting quality:", e, {musicTitle: currentMusic.title});
                 this.ee.emit(PlayerEvents.Error, currentMusic, e instanceof Error ? e : new Error(String(e)));
-                // 恢复播放状态，即使切换失败
-                if (wasPlaying && this.audioController) this.audioController.play();
-                else this.setPlayerState(PlayerState.Paused); // 如果之前是暂停，则保持暂停
+                if (wasPlaying && this.audioController) await this.audioController.play();
+                else this.setPlayerState(PlayerState.Paused);
             }
         }
     }
@@ -695,11 +732,11 @@ class TrackPlayer {
     }
 
     public setRepeatMode(repeatMode: RepeatMode, triggerReorder: boolean = true) {
-        const oldRepeatMode = this.repeatMode; // 获取旧模式
+        const oldRepeatMode = this.repeatMode;
         repeatModeStore.setValue(repeatMode);
         setUserPreference("repeatMode", repeatMode);
 
-        if (this.isReady && triggerReorder) { // 只有当播放器就绪且需要时才重排
+        if (this.isReady && triggerReorder) {
             if (repeatMode === RepeatMode.Shuffle && oldRepeatMode !== RepeatMode.Shuffle) {
                 this.setMusicQueue(shuffle(this.musicQueue));
             } else if (oldRepeatMode === RepeatMode.Shuffle && repeatMode !== RepeatMode.Shuffle) {
@@ -712,6 +749,9 @@ class TrackPlayer {
 
     public async setAudioOutputDevice(deviceId?: string) {
         if (!this.isReady || !this.audioController) return;
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+            await (this.audioController as any).readyPromise;
+        }
         try {
             await this.audioController.setSinkId(deviceId ?? "");
         } catch (e: any) {
@@ -723,7 +763,6 @@ class TrackPlayer {
         musicQueueStore.setValue(musicQueue);
         setUserPreferenceIDB("playList", musicQueue);
         this.indexMap.update(musicQueue);
-        // 更新当前播放歌曲在队列中的索引，如果歌曲不在新队列中，则currentIndex会变为-1
         this.currentIndex = this.findMusicIndex(this.currentMusic);
     }
 
@@ -732,12 +771,11 @@ class TrackPlayer {
         if (!this.isReady) return;
         const currentMusic = this.currentMusic;
         if (!currentMusic) {
-            this.setCurrentLyric(null); // 清空歌词
+            this.setCurrentLyric(null);
             return;
         }
 
-        const currentLyricData = this.lyric; // 使用 this.lyric
-        // 如果不需要强制加载，并且当前歌词解析器对应的音乐与正在播放的音乐相同，则不重新获取
+        const currentLyricData = this.lyric;
         if (!forceLoad && currentLyricData && this.isCurrentMusic(currentLyricData.parser?.musicItem)) {
             return;
         }
@@ -745,77 +783,73 @@ class TrackPlayer {
             const linkedLyricItem = await getLinkedLyric(currentMusic);
             let lyricSource: ILyric.ILyricSource | null = null;
 
-            // 尝试从关联的歌词项获取歌词
             if (linkedLyricItem) {
                 lyricSource = (await PluginManager.callPluginDelegateMethod(
-                    linkedLyricItem, "getLyric", linkedLyricItem // 使用 linkedLyricItem 作为参数
+                    linkedLyricItem, "getLyric", linkedLyricItem
                 ).catch(voidCallback)) || null;
             }
-            // 如果没有从关联项获取到歌词，或者当前歌曲已改变，则尝试从当前歌曲本身获取
             if ((!lyricSource || (!lyricSource.rawLrc && !lyricSource.translation)) && this.isCurrentMusic(currentMusic)) {
                 lyricSource = (await PluginManager.callPluginDelegateMethod(
                     currentMusic, "getLyric", currentMusic
                 ).catch(voidCallback)) || null;
             }
 
-            if (!this.isCurrentMusic(currentMusic)) return; // 再次检查，以防在异步操作中歌曲已切换
+            if (!this.isCurrentMusic(currentMusic)) return;
 
             if (!lyricSource?.rawLrc && !lyricSource?.translation) {
-                this.setCurrentLyric(null); // 设置为空歌词对象
+                this.setCurrentLyric(null);
                 return;
             }
             const parser = new LyricParser(lyricSource.rawLrc, {
-                musicItem: currentMusic, // 确保 parser 关联到正确的 musicItem
+                musicItem: currentMusic,
                 translation: lyricSource.translation
             });
-            this.setCurrentLyric({ // 设置歌词，包括解析器和当前行
+            this.setCurrentLyric({
                 parser,
                 currentLrc: parser.getPosition(this.progress.currentTime || 0)
             });
         } catch (e: any) {
             logger.logError("歌词解析失败", e);
-            this.setCurrentLyric(null); // 出错时设置为空歌词对象
+            this.setCurrentLyric(null);
         }
     }
 
 
     private async fetchMediaSource(musicItem: IMusic.IMusicItem, quality?: IMusic.IQualityKey): Promise<{ quality: IMusic.IQualityKey; mediaSource: IPlugin.IMediaSourceResult | null; }> {
-        if (!this.isReady) { // 确保播放器已就绪
+        if (!this.isReady) {
             throw new Error("TrackPlayer not ready to fetch media source.");
         }
         const defaultQuality = AppConfig.getConfig("playMusic.defaultQuality") || "standard";
         const whenQualityMissing = AppConfig.getConfig("playMusic.whenQualityMissing") || "lower";
-        const qualityOrder = getQualityOrder(quality ?? defaultQuality, whenQualityMissing);
+        const qualityOrder = getQualityOrder(quality ?? this.currentQuality ?? defaultQuality, whenQualityMissing);
         let mediaSource: IPlugin.IMediaSourceResult | null = null;
-        let realQuality: IMusic.IQualityKey = qualityOrder[0]; // 默认为尝试的第一个音质
+        let realQuality: IMusic.IQualityKey = qualityOrder[0];
 
-        // 检查本地下载
         const downloadedData = getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData");
         if (downloadedData) {
             const {quality: downloadedQuality, path: _path} = downloadedData;
-            if (await fsUtil.isFile(_path)) { // 确保文件存在
+            if (await fsUtil.isFile(_path)) {
                 return {
-                    quality: downloadedQuality || "standard", // 如果下载的音质未知，则默认为 standard
-                    mediaSource: { url: fsUtil.addFileScheme(_path) }, // 添加 file:// 协议头
+                    quality: downloadedQuality || "standard",
+                    mediaSource: { url: fsUtil.addFileScheme(_path) },
                 };
             }
         }
 
-        // 尝试从插件获取在线音源
         for (const q of qualityOrder) {
             try {
                 mediaSource = await PluginManager.callPluginDelegateMethod(
                     { platform: musicItem.platform }, "getMediaSource", musicItem, q
                 );
-                if (!mediaSource?.url) continue; // 如果没有 URL，尝试下一个音质
-                realQuality = q; // 记录实际获取到的音质
-                break; // 成功获取到音源，跳出循环
+                if (!mediaSource?.url) continue;
+                realQuality = q;
+                break;
             } catch (e: any) {
                 logger.logInfo(`Failed to get media source for quality ${q} for music ${musicItem.title}: ${e.message}`);
             }
         }
 
-        if (!mediaSource?.url) { // 如果所有音质都尝试失败
+        if (!mediaSource?.url) {
             throw new Error(`无法为歌曲 ${musicItem.title} 获取任何有效的播放链接。`);
         }
         return { quality: realQuality, mediaSource };
@@ -823,19 +857,18 @@ class TrackPlayer {
 
 
     private setCurrentMusic(musicItem: IMusic.IMusicItem | null) {
-        // 只有当歌曲实际发生变化时才执行复杂逻辑（例如，不同的歌，或者同一首歌但信息更新了）
         const isActuallyDifferent = !this.isCurrentMusic(musicItem) ||
                                   (musicItem && this.currentMusic && JSON.stringify(musicItem) !== JSON.stringify(this.currentMusic));
 
-        currentMusicStore.setValue(musicItem); // 总是更新 store 中的值
+        currentMusicStore.setValue(musicItem);
 
         if (isActuallyDifferent) {
             this.ee.emit(PlayerEvents.MusicChanged, musicItem);
-            this.fetchCurrentLyric(true); // 强制重新加载歌词
-            this.resetProgress(); // 新歌，重置进度
+            this.fetchCurrentLyric(true);
+            this.resetProgress();
 
             if (musicItem) {
-                setUserPreference("currentMusic", musicItem); // 保存到用户偏好
+                setUserPreference("currentMusic", musicItem);
             } else {
                 removeUserPreference("currentMusic");
             }
@@ -845,7 +878,7 @@ class TrackPlayer {
 
     private setProgress(progress: CurrentTime) {
         progressStore.setValue(progress);
-        if (isFinite(progress.currentTime)) { // 只有当 currentTime 是有效数字时才保存
+        if (isFinite(progress.currentTime)) {
             setUserPreference("currentProgress", progress.currentTime);
         }
         this.ee.emit(PlayerEvents.ProgressChanged, progress);
@@ -856,18 +889,15 @@ class TrackPlayer {
         currentQualityStore.setValue(quality);
     }
 
-    private setCurrentLyric(lyric?: ICurrentLyric | null) { // 允许传递 null 来清空歌词
+    private setCurrentLyric(lyric?: ICurrentLyric | null) {
         const prev = this.lyric;
-        // 如果 lyric 是 {} (空对象)，也视为 null
         const newLyric = (lyric && Object.keys(lyric).length > 0) ? lyric as ICurrentLyric : null;
         currentLyricStore.setValue(newLyric);
 
-        // 只有当解析器实际改变时才触发 LyricChanged
         if (newLyric?.parser !== prev?.parser) {
             this.ee.emit(PlayerEvents.LyricChanged, newLyric?.parser ?? null);
         }
-        // 只有当当前歌词行实际改变时才触发 CurrentLyricChanged
-        if (newLyric?.currentLrc?.lrc !== prev?.currentLrc?.lrc) { // 比较 lrc 内容以避免不必要的更新
+        if (newLyric?.currentLrc?.lrc !== prev?.currentLrc?.lrc) {
             this.ee.emit(PlayerEvents.CurrentLyricChanged, newLyric?.currentLrc ?? null);
         }
     }
@@ -884,44 +914,44 @@ class TrackPlayer {
     }
 
     private resetProgress() {
-        resetProgress(); // 调用 store 中的重置函数
-        removeUserPreference("currentProgress"); // 从用户偏好中移除
+        resetProgress();
+        removeUserPreference("currentProgress");
     }
 
 
-    private setTrack(mediaSource: IPlugin.IMediaSourceResult | null, musicItem: IMusic.IMusicItem, options: ITrackOptions = { autoPlay: true }) {
+    private async setTrack(mediaSource: IPlugin.IMediaSourceResult | null, musicItem: IMusic.IMusicItem, options: ITrackOptions = { autoPlay: true }) {
         if (!this.audioController) {
             logger.logError("setTrack called but audioController is null.", new Error("audioController is null"));
             this.ee.emit(PlayerEvents.Error, musicItem, new Error("播放器核心组件丢失。"));
             this.setPlayerState(PlayerState.None);
             return;
         }
-        // 在设置新轨道前，先重置播放器的当前状态和进度
-        this.audioController.reset(); // 这会停止当前播放并清除音源
-        this.resetProgress(); // 重置 TrackPlayer 内部的进度记录
+        if (typeof (this.audioController as any).readyPromise === 'object' && (this.audioController as any).readyPromise !== null) {
+             await (this.audioController as any).readyPromise;
+        }
+
+        await this.audioController.reset();
+        this.resetProgress();
 
         if (!mediaSource || !mediaSource.url) {
             const errorMsg = `setTrack called with invalid mediaSource for music: ${musicItem.title}`;
             logger.logError(errorMsg, new Error(`Invalid mediaSource: ${JSON.stringify(mediaSource)}`));
             this.ee.emit(PlayerEvents.Error, musicItem, new Error("无效的媒体源或URL为空"));
-            this.setPlayerState(PlayerState.None); // 确保状态反映错误
+            this.setPlayerState(PlayerState.None);
             return;
         }
 
-        this.audioController.setTrackSource(mediaSource, musicItem); // 设置新的音源
+        this.audioController.setTrackSource(mediaSource, musicItem);
 
-        // 如果需要跳转到特定时间
         if (options.seekTo !== undefined && isFinite(options.seekTo) && options.seekTo >= 0) {
             this.audioController.seekTo(options.seekTo);
         }
 
-        // 如果需要自动播放
         if (options.autoPlay) {
-            this.audioController.play();
+            await this.audioController.play();
         } else {
-            // 如果不自动播放，并且之前不是暂停状态，则可能是缓冲或无状态，此时确保是暂停
             if (this.playerState !== PlayerState.Paused) {
-                 this.setPlayerState(PlayerState.Paused); // 或者 PlayerState.None，取决于期望行为
+                 this.setPlayerState(PlayerState.Paused);
             }
         }
     }

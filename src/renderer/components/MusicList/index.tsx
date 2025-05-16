@@ -21,7 +21,7 @@ import {localPluginName, RequestStateCode} from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
 import {IContextMenuItem, showContextMenu} from "../ContextMenu";
 import {getInternalData, getMediaPrimaryKey, isSameMedia,} from "@/common/media-util";
-import {CSSProperties, memo, useCallback, useEffect, useRef, useState,} from "react";
+import React, {CSSProperties, memo, useCallback, useEffect, useRef, useState,} from "react"; // Import React
 import {showModal} from "../Modal";
 import useVirtualList from "@/hooks/useVirtualList";
 import hotkeys from "hotkeys-js";
@@ -316,7 +316,6 @@ function _MusicList(props: IMusicListProps) {
         onPageChange,
         musicSheet,
         virtualProps,
-        // getAllMusicItems,
         doubleClickBehavior,
         containerStyle,
         hideRows,
@@ -391,7 +390,6 @@ function _MusicList(props: IMusicListProps) {
     const _onDrop = useCallback(
         (fromIndex: number, toIndex: number) => {
             if (!onDragEnd || fromIndex === toIndex) {
-                // 没有移动
                 return;
             }
             const newData = musicList
@@ -406,6 +404,9 @@ function _MusicList(props: IMusicListProps) {
         },
         [onDragEnd, musicList]
     );
+    
+    const colSpan = table.getHeaderGroups()[0]?.headers?.length || 1;
+
 
     return (
         <div
@@ -461,16 +462,6 @@ function _MusicList(props: IMusicListProps) {
                                     </SwitchCase.Case>
                                 </SwitchCase.Switch>
                             </div>
-                            {/* <div
-                  onMouseDown={header.getResizeHandler()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  className={classNames({
-                    resizer: true,
-                    "resizer-resizing": header.column.getIsResizing(),
-                  })}
-                ></div> */}
                         </th>
                     ))}
                 </tr>
@@ -486,70 +477,36 @@ function _MusicList(props: IMusicListProps) {
                     if (!row.original) {
                         return null;
                     }
-                    // todo 拆出一个组件
-                    return (
+                    
+                    const musicItemRow = (
                         <tr
                             key={row.id}
-                            data-active={
-                                activeItems.has(virtualItem.rowIndex)
-                            }
+                            data-active={activeItems.has(virtualItem.rowIndex)}
                             onContextMenu={(e) => {
-                                if (
-                                    activeItems.size > 1
-                                ) {
+                                if (activeItems.size > 1) {
                                     const selectedItems: IMusic.IMusicItem[] = [];
                                     const rows = table.getRowModel().rows;
                                     activeItems.forEach(item => {
                                         selectedItems.push(rows[item].original)
                                     })
-
-                                    showMusicContextMenu(
-                                        selectedItems,
-                                        e.clientX,
-                                        e.clientY,
-                                        musicSheet?.platform === localPluginName
-                                            ? musicSheet.id
-                                            : undefined
-                                    );
+                                    showMusicContextMenu(selectedItems, e.clientX, e.clientY, musicSheet?.platform === localPluginName ? musicSheet.id : undefined);
                                 } else {
                                     lastActiveIndexRef.current = virtualItem.rowIndex;
                                     setActiveItems(new Set([virtualItem.rowIndex]));
-                                    showMusicContextMenu(
-                                        row.original,
-                                        e.clientX,
-                                        e.clientY,
-                                        musicSheet?.platform === localPluginName
-                                            ? musicSheet.id
-                                            : undefined
-                                    );
+                                    showMusicContextMenu(row.original, e.clientX, e.clientY, musicSheet?.platform === localPluginName ? musicSheet.id : undefined);
                                 }
                             }}
                             onClick={() => {
-                                // 如果点击的时候按下shift
                                 if (hotkeys.shift) {
                                     let start = lastActiveIndexRef.current;
                                     let end = virtualItem.rowIndex;
-
-                                    if (start >= end) {
-                                        [start, end] = [end, start];
-                                    }
-
-                                    if (end > musicListRef.current.length) {
-                                        end = musicListRef.current.length - 1;
-                                    }
-
-                                    setActiveItems(
-                                        new Set(
-                                            Array.from({length: end - start + 1}, (_, i) => start + i)
-                                        )
-                                    );
+                                    if (start >= end) [start, end] = [end, start];
+                                    if (end > musicListRef.current.length) end = musicListRef.current.length - 1;
+                                    setActiveItems(new Set(Array.from({length: end - start + 1}, (_, i) => start + i)));
                                 } else if (hotkeys.ctrl) {
                                     const newSet = new Set(activeItems);
-                                    if (newSet.has(virtualItem.rowIndex)) {
-                                        newSet.delete(virtualItem.rowIndex);
-                                    } else {
-                                        newSet.add(virtualItem.rowIndex);
-                                    }
+                                    if (newSet.has(virtualItem.rowIndex)) newSet.delete(virtualItem.rowIndex);
+                                    else newSet.add(virtualItem.rowIndex);
                                     setActiveItems(newSet);
                                 } else {
                                     setActiveItems(new Set([virtualItem.rowIndex]));
@@ -557,24 +514,15 @@ function _MusicList(props: IMusicListProps) {
                                 }
                             }}
                             onDoubleClick={() => {
-                                const config =
-                                    doubleClickBehavior ??
-                                    AppConfig.getConfig("playMusic.clickMusicList");
+                                const config = doubleClickBehavior ?? AppConfig.getConfig("playMusic.clickMusicList");
                                 if (config === "replace") {
-                                    trackPlayer.playMusicWithReplaceQueue(
-                                        table.getRowModel().rows.map((it) => it.original),
-                                        row.original
-                                    );
+                                    trackPlayer.playMusicWithReplaceQueue(table.getRowModel().rows.map((it) => it.original), row.original);
                                 } else {
                                     trackPlayer.playMusic(row.original);
                                 }
                             }}
                             draggable={enableDrag}
                             onDragStart={(e) => {
-                                // TODO
-                                // if(activeItems) {
-
-                                // }
                                 startDrag(e, virtualItem.rowIndex, "musiclist");
                             }}
                         >
@@ -582,35 +530,29 @@ function _MusicList(props: IMusicListProps) {
                                 <td
                                     key={cell.id}
                                     style={{
-                                        //@ts-ignore
-                                        width: cell.column.columnDef.fr
-                                            ? //@ts-ignore
-                                            `${cell.column.columnDef.fr * 100}%`
-                                            : cell.column.columnDef.size,
+                                        width: cell.column.getSize(), // Use getSize() for fixed width from columnDef
                                     }}
                                 >
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>
                             ))}
-                            <IfTruthy condition={enableDrag}>
-                                <IfTruthy condition={index === 0}>
-                                    <DragReceiver
-                                        position="top"
-                                        rowIndex={virtualItem.rowIndex}
-                                        onDrop={_onDrop}
-                                        tag="musiclist"
-                                        insideTable
-                                    ></DragReceiver>
-                                </IfTruthy>
-                                <DragReceiver
-                                    position="bottom"
-                                    rowIndex={virtualItem.rowIndex + 1}
-                                    onDrop={_onDrop}
-                                    tag="musiclist"
-                                    insideTable
-                                ></DragReceiver>
-                            </IfTruthy>
                         </tr>
+                    );
+
+                    const topDragReceiver = (enableDrag && index === 0) ? (
+                        <DragReceiver position="top" rowIndex={virtualItem.rowIndex} onDrop={_onDrop} tag="musiclist" insideTable colSpan={colSpan} />
+                    ) : null;
+            
+                    const bottomDragReceiver = enableDrag ? (
+                        <DragReceiver position="bottom" rowIndex={virtualItem.rowIndex + 1} onDrop={_onDrop} tag="musiclist" insideTable colSpan={colSpan} />
+                    ) : null;
+
+                    return (
+                        <React.Fragment key={`fragment-${row.id}`}>
+                            {topDragReceiver}
+                            {musicItemRow}
+                            {bottomDragReceiver}
+                        </React.Fragment>
                     );
                 })}
                 </tbody>

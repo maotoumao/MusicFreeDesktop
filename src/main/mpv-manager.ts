@@ -1,11 +1,13 @@
+// ================================================
+// FILE: src/main/mpv-manager.ts
+// ================================================
 // src/main/mpv-manager.ts
-// 从导入中移除 ObserveProperty
 import NodeMpvPlayer, { Status as MpvNodeStatus, EndFileEvent as MpvNodeEndFileEvent } from "node-mpv";
 import { ipcMain, BrowserWindow, app } from "electron";
 import AppConfig from "@shared/app-config/main";
 import logger from "@shared/logger/main";
 import { PlayerState } from "@/common/constant";
-import fs from "fs"; // 保留，因为你在其他地方可能用到了 fs.promises.access
+import fs from "fs";
 
 class MpvManager {
     private mpv: NodeMpvPlayer | null = null;
@@ -13,7 +15,7 @@ class MpvManager {
     private currentTrack: IMusic.IMusicItem | null = null;
     private lastKnownTime: number = 0;
     private lastKnownDuration: number = Infinity;
-    private lastKnownPlayerState: PlayerState = PlayerState.None;
+    private lastKnownPlayerState: PlayerState = PlayerState.None; // Reflects MPV's 'pause' property
     private retryTimeout: NodeJS.Timeout | null = null;
     private readonly MAX_RETRIES = 3;
     private retryCount = 0;
@@ -33,15 +35,15 @@ class MpvManager {
     private getMpvOptions() {
         const binaryPath = AppConfig.getConfig("playMusic.mpvPath");
         const additionalArgsRaw = AppConfig.getConfig("playMusic.mpvArgs") || "";
-        
+
         const argsArray: string[] = [];
         if (additionalArgsRaw.trim()) {
             const regex = /"([^"]*)"|'([^']*)'|([^\s"']+)/g;
             let match;
             while ((match = regex.exec(additionalArgsRaw)) !== null) {
-                if (match[1]) argsArray.push(match[1]); 
-                else if (match[2]) argsArray.push(match[2]); 
-                else argsArray.push(match[0]); 
+                if (match[1]) argsArray.push(match[1]);
+                else if (match[2]) argsArray.push(match[2]);
+                else argsArray.push(match[0]);
             }
         }
 
@@ -50,8 +52,8 @@ class MpvManager {
             socket: process.platform === "win32" ? `\\\\.\\pipe\\mpvsocket_${process.pid}` : `/tmp/mpvsocket_${process.pid}_${Date.now()}`,
             debug: !app.isPackaged,
             verbose: !app.isPackaged,
-            audio_only: true, 
-            time_update: 1,
+            audio_only: true,
+            time_update: 1, // Request time updates every 1 second from MPV
             additionalArgs: argsArray.filter(arg => arg.trim() !== "")
         };
     }
@@ -71,18 +73,16 @@ class MpvManager {
             } catch (err: any) {
                 const errorMsg = `MPV 路径 "${mpvOptions.binary}" 无效或不可执行。错误: ${err.message}`;
                 logger.logError(errorMsg, err);
-                this.sendToRenderer("mpv-error", errorMsg);
                 if(isManualTrigger || AppConfig.getConfig("playMusic.backend") === "mpv") {
-                    this.mainWindow?.webContents.send("mpv-init-failed", errorMsg);
+                    this.sendToRenderer("mpv-init-failed", errorMsg);
                 }
                 return false;
             }
-        } else if (AppConfig.getConfig("playMusic.backend") === "mpv") { 
+        } else if (AppConfig.getConfig("playMusic.backend") === "mpv") {
             const errorMsg = "MPV 播放器路径未设置，请在 设置->播放 中配置。";
             logger.logError(errorMsg, new Error("MPV path not configured"));
-            this.sendToRenderer("mpv-error", errorMsg);
-            if(isManualTrigger) { 
-                this.mainWindow?.webContents.send("mpv-init-failed", errorMsg);
+            if(isManualTrigger) {
+                this.sendToRenderer("mpv-init-failed", errorMsg);
             }
             return false;
         }
@@ -91,15 +91,15 @@ class MpvManager {
         try {
             logger.logInfo("MpvManager: About to call 'new NodeMpvPlayer()'.");
             mpvInstanceAttempt = new NodeMpvPlayer(
-                { 
+                {
                     binary: mpvOptions.binary,
                     socket: mpvOptions.socket,
-                    debug: mpvOptions.debug, 
-                    verbose: mpvOptions.verbose, 
+                    debug: mpvOptions.debug,
+                    verbose: mpvOptions.verbose,
                     audio_only: mpvOptions.audio_only,
                     time_update: mpvOptions.time_update,
                 },
-                mpvOptions.additionalArgs 
+                mpvOptions.additionalArgs
             );
             this.mpv = mpvInstanceAttempt;
             logger.logInfo("MpvManager: NodeMpvPlayer instance potentially created.");
@@ -109,7 +109,7 @@ class MpvManager {
             logger.logError("MpvManager: Error during 'new NodeMpvPlayer()' instantiation:", instantiationError);
             this.mpv = null;
             if(isManualTrigger || AppConfig.getConfig("playMusic.backend") === "mpv") {
-                this.mainWindow?.webContents.send("mpv-init-failed", errorMsg);
+                this.sendToRenderer("mpv-init-failed", errorMsg);
             }
             return false;
         }
@@ -118,7 +118,7 @@ class MpvManager {
              const errorMsg = "MPV 实例化后 this.mpv 仍为 null。";
              logger.logError("MpvManager: this.mpv is null after instantiation attempt.", new Error(errorMsg));
              if(isManualTrigger || AppConfig.getConfig("playMusic.backend") === "mpv") {
-                this.mainWindow?.webContents.send("mpv-init-failed", errorMsg);
+                this.sendToRenderer("mpv-init-failed", errorMsg);
             }
              return false;
         }
@@ -129,13 +129,13 @@ class MpvManager {
         } else {
             const errorMsg = "MpvAPI 实例缺少 start 方法或 this.mpv 不是有效实例。";
             logger.logError("MpvManager: 'this.mpv.start' is NOT a function after successful-looking instantiation.", new Error(errorMsg), { mpvInstanceKeys: Object.keys(this.mpv) });
-            this.mpv = null; 
+            this.mpv = null;
             if(isManualTrigger || AppConfig.getConfig("playMusic.backend") === "mpv") {
-                this.mainWindow?.webContents.send("mpv-init-failed", errorMsg);
+                this.sendToRenderer("mpv-init-failed", errorMsg);
             }
-            return false; 
+            return false;
         }
-        
+
         try {
             this.setupMpvEventHandlers();
             logger.logInfo("MpvManager: Attempting to start MPV process via this.mpv.start()...");
@@ -143,19 +143,18 @@ class MpvManager {
             logger.logInfo("MPV started successfully via this.mpv.start().");
             this.retryCount = 0;
 
-            await this.observeProperties(); // 在 start 之后观察属性
+            await this.observeProperties();
              if(isManualTrigger || AppConfig.getConfig("playMusic.backend") === "mpv") {
-                this.mainWindow?.webContents.send("mpv-init-success");
+                this.sendToRenderer("mpv-init-success");
             }
             return true;
         } catch (startError: any) {
             const errorMsg = `MPV 启动或后续设置失败: ${startError.message}.`;
-            logger.logError("Failed to start MPV or setup after instantiation:", startError); 
+            logger.logError("Failed to start MPV or setup after instantiation:", startError);
             if (startError.code) logger.logError("MPV startError Code:", startError.code);
             if (startError.signal) logger.logError("MPV startError Signal:", startError.signal);
             if (startError.stack) logger.logError("MPV startError Stack:", startError.stack);
-            this.sendToRenderer("mpv-error", errorMsg);
-            
+
             if (this.mpv) {
                 try {
                     await this.mpv.quit();
@@ -166,7 +165,7 @@ class MpvManager {
             this.mpv = null;
 
             if(isManualTrigger || AppConfig.getConfig("playMusic.backend") === "mpv") {
-                this.mainWindow?.webContents.send("mpv-init-failed", errorMsg);
+                this.sendToRenderer("mpv-init-failed", errorMsg);
             }
             return false;
         }
@@ -175,12 +174,12 @@ class MpvManager {
     private async observeProperties() {
         if (!this.mpv) return;
         try {
-            // 调用 observeProperty 时只传递属性名
             await this.mpv.observeProperty('time-pos');
             await this.mpv.observeProperty('duration');
             await this.mpv.observeProperty('pause');
             await this.mpv.observeProperty('volume');
-            await this.mpv.observeProperty('speed'); // 或者 'playback-speed'
+            await this.mpv.observeProperty('speed');
+            await this.mpv.observeProperty('idle-active');
             logger.logInfo("MPV properties observed successfully.");
         } catch (error: any) {
             logger.logError("Failed to observe MPV properties:", error);
@@ -190,6 +189,7 @@ class MpvManager {
 
     private setupMpvEventHandlers() {
         if (!this.mpv) return;
+        this.mpv.removeAllListeners();
 
         this.mpv.on("status", (status: MpvNodeStatus) => {
             if (!status || typeof status.property !== 'string') return;
@@ -199,19 +199,23 @@ class MpvManager {
 
             if (propertyName === 'time-pos' && typeof value === 'number') {
                 this.lastKnownTime = value;
-                if (this.lastKnownDuration !== Infinity) {
-                     this.sendToRenderer("mpv-statuschange", { time: this.lastKnownTime, duration: this.lastKnownDuration });
-                }
+                // Always send time position, duration might still be Infinity
+                this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastKnownDuration });
             } else if (propertyName === 'duration' && typeof value === 'number') {
-                this.lastKnownDuration = value > 0 ? value : Infinity;
-                 this.sendToRenderer("mpv-statuschange", { time: this.lastKnownTime, duration: this.lastKnownDuration });
+                const newDuration = value > 0 ? value : Infinity;
+                if (newDuration !== this.lastKnownDuration) {
+                    this.lastKnownDuration = newDuration;
+                    this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastKnownDuration });
+                }
             } else if (propertyName === 'pause' && typeof value === 'boolean') {
                  const newState = value ? PlayerState.Paused : PlayerState.Playing;
                  if (this.lastKnownPlayerState !== newState) {
                      this.lastKnownPlayerState = newState;
+                     if (value) this.sendToRenderer("mpv-paused", { state: PlayerState.Paused });
+                     else this.sendToRenderer("mpv-resumed", { state: PlayerState.Playing });
                  }
             } else if (propertyName === 'volume' && typeof value === 'number') {
-                this.sendToRenderer("mpv-volumechange", { volume: value / 100 });
+                this.sendToRenderer("mpv-volumechange", { volume: value });
             } else if ((propertyName === 'speed' || propertyName === 'playback-speed') && typeof value === 'number') {
                 this.sendToRenderer("mpv-speedchange", { speed: value });
             }
@@ -233,45 +237,61 @@ class MpvManager {
             }
         });
 
-        this.mpv.on("timeposition", (seconds: number) => {
-            this.lastKnownTime = seconds;
-            this.sendToRenderer("mpv-timeposition", { time: seconds, duration: this.lastKnownDuration });
-        });
-
-        this.mpv.on("stopped", () => {
-            logger.logInfo("MPV event: stopped");
-            this.lastKnownPlayerState = PlayerState.None;
-            this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
+        this.mpv.on("stopped", async () => {
+            if (this.isQuitting) return;
+            logger.logInfo("MPV (node-mpv) event: stopped");
+            try {
+                if (this.mpv) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    const idleActive = await this.mpv.getProperty('idle-active');
+                    logger.logInfo(`MPV idle-active status on stopped: ${idleActive}`);
+                    if (idleActive === true) {
+                        logger.logInfo("MPV is idle-active, sending mpv-playback-ended with reason: eof.");
+                        this.sendToRenderer("mpv-playback-ended", { reason: "eof" });
+                    } else {
+                        logger.logInfo(`MPV stopped, but not idle-active. Sending mpv-stopped.`);
+                        this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
+                    }
+                } else {
+                     logger.logInfo("MPV instance was null during 'stopped' event handling.");
+                     this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
+                }
+            } catch (err) {
+                logger.logError("Error checking idle-active on stopped event:", err);
+                this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
+            }
         });
 
         this.mpv.on("started", () => {
             logger.logInfo("MPV event: started (playback started for a new file)");
              if (this.mpv) {
                 this.mpv.getProperty("duration").then(duration => {
-                    if (typeof duration === 'number' && duration > 0) {
-                        this.lastKnownDuration = duration;
-                    } else {
-                        this.lastKnownDuration = Infinity;
-                    }
+                    this.lastKnownDuration = (typeof duration === 'number' && duration > 0) ? duration : Infinity;
+                    this.lastKnownTime = 0;
+                    this.sendToRenderer("mpv-timeposition", { time: 0, duration: this.lastKnownDuration });
                 }).catch(err => {
                     logger.logError("Error getting duration on 'started' event:", err);
                     this.lastKnownDuration = Infinity;
+                    this.sendToRenderer("mpv-timeposition", { time: 0, duration: this.lastKnownDuration });
                 });
             }
+            if (this.lastKnownPlayerState !== PlayerState.Playing) {
+                 this.lastKnownPlayerState = PlayerState.Playing;
+                 this.sendToRenderer("mpv-resumed", { state: PlayerState.Playing });
+            }
         });
-        
-        this.mpv.on("error", (error: Error) => { 
+
+        this.mpv.on("error", (error: Error) => {
             const errorMsg = `MPV error event: ${error.message}`;
             logger.logError("MPV error event:", error);
             this.sendToRenderer("mpv-error", errorMsg);
         });
 
-        this.mpv.on("crashed", async () => { // exitCode 参数在 jeffvli 的 fork 的 index.d.ts 中没有，但原始的有
+        this.mpv.on("crashed", async () => {
             if (this.isQuitting) return;
-            // const crashMsg = `MPV 播放器意外退出 (退出码: ${exitCode})。正在尝试重启...`;
             const crashMsg = `MPV 播放器意外退出。正在尝试重启...`;
-            logger.logError(crashMsg, new Error(`MPV Crashed`)); // 移除了 exitCode
-            this.sendToRenderer("mpv-error", crashMsg); 
+            logger.logError(crashMsg, new Error(`MPV Crashed`));
+            this.sendToRenderer("mpv-error", crashMsg);
 
             const oldMpv: NodeMpvPlayer | null = this.mpv;
             this.mpv = null;
@@ -311,7 +331,6 @@ class MpvManager {
         }
         if (this.mpv) {
             try {
-                // 检查 isRunning 是否是方法
                 const running = typeof this.mpv.isRunning === 'function' ? this.mpv.isRunning() : this.mpv.isRunning;
                 if (this.lastKnownPlayerState !== PlayerState.None && running) {
                      await this.mpv.stop().catch((e: unknown) => logger.logInfo("Error stopping MPV before quit (ignorable):", e as Error));
@@ -321,7 +340,7 @@ class MpvManager {
             } catch (error: any) {
                 logger.logError("Error quitting MPV:", error);
             } finally {
-                if (this.mpv) { 
+                if (this.mpv) {
                     this.mpv.removeAllListeners();
                 }
                 this.mpv = null;
@@ -343,22 +362,23 @@ class MpvManager {
                  return;
             }
         }
-        if (!this.mpv) { 
+        if (!this.mpv) {
             logger.logError("MPV instance is still null after attempted initialization in load().", new Error("MPV not initialized"));
             this.sendToRenderer("mpv-error", "MPV 实例丢失，无法加载文件。");
             return;
         }
         try {
             const running = typeof this.mpv.isRunning === 'function' ? this.mpv.isRunning() : this.mpv.isRunning;
-            if (running === false) { 
+            if (running === false) {
                 logger.logInfo("MPV process was not running, attempting to start it before loading.");
                 await this.mpv.start();
-                await this.observeProperties(); 
+                await this.observeProperties();
             }
             await this.mpv.load(filePath, mode);
             logger.logInfo(`MPV loaded: ${filePath} with mode ${mode}`);
             this.lastKnownTime = 0;
-            this.lastKnownDuration = Infinity; 
+            // Duration will be updated by 'started' or 'status' event
+            // this.lastKnownDuration = Infinity;
         } catch (error: any) {
             logger.logError(`MPV failed to load: ${filePath}`, error);
             this.sendToRenderer("mpv-error", `加载文件失败: ${error.message}`);
@@ -389,10 +409,10 @@ class MpvManager {
             } catch (e: any) { logger.logError("mpv-pause error", e); this.sendToRenderer("mpv-error", `暂停失败: ${e.message}`);}
         });
 
-        ipcMain.handle("mpv-resume", async () => { 
+        ipcMain.handle("mpv-resume", async () => {
             if (!this.mpv) { this.sendToRenderer("mpv-error", "MPV未初始化"); return; }
              try {
-                await this.mpv.resume(); // 使用 resume 方法恢复播放
+                await this.mpv.resume();
             } catch (e: any) { logger.logError("mpv-resume error", e); this.sendToRenderer("mpv-error", `恢复播放失败: ${e.message}`);}
         });
 
@@ -411,7 +431,7 @@ class MpvManager {
             } catch (e: any) { logger.logError("mpv-seek error", e); this.sendToRenderer("mpv-error", `跳转失败: ${e.message}`);}
         });
 
-        ipcMain.handle("mpv-set-volume", async (_event, volume: number) => { // volume 0-100 for mpv
+        ipcMain.handle("mpv-set-volume", async (_event, volume: number) => {
             if (!this.mpv) { this.sendToRenderer("mpv-error", "MPV未初始化"); return; }
             try {
                 await this.mpv.volume(volume);
@@ -428,7 +448,7 @@ class MpvManager {
         ipcMain.handle("mpv-get-duration", async () => {
             if (!this.mpv) return this.lastKnownDuration === Infinity ? null : this.lastKnownDuration;
             try {
-                const duration = await this.mpv.getDuration(); 
+                const duration = await this.mpv.getDuration();
                 this.lastKnownDuration = (duration != null && duration > 0) ? duration : Infinity;
                 return this.lastKnownDuration === Infinity ? null : this.lastKnownDuration;
             } catch (e: any) {
@@ -448,7 +468,6 @@ class MpvManager {
                  return this.lastKnownTime;
              }
         });
-         // 新增：允许直接设置MPV属性，用于如loop等
         ipcMain.handle("mpv-set-property", async (_event, property: string, value: any) => {
             if (!this.mpv) {
                 this.sendToRenderer("mpv-error", "MPV 未初始化，无法设置属性。");
