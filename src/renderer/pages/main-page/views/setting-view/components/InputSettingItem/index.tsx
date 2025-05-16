@@ -1,6 +1,7 @@
+// src/renderer/pages/main-page/views/setting-view/components/InputSettingItem/index.tsx
 import AppConfig from "@shared/app-config/renderer";
 import "./index.scss";
-import {HTMLInputTypeAttribute, useState} from "react";
+import {HTMLInputTypeAttribute, useState, useEffect} from "react"; // 确保 useEffect 被导入
 import {IAppConfig} from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
 
@@ -28,8 +29,13 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
         trim
     } = props;
 
-    const value = useAppConfig(keyPath);
-    const [tmpValue, setTmpValue] = useState<string | null>(value as string || "");
+    const configValue = useAppConfig(keyPath);
+    const [tmpValue, setTmpValue] = useState<string>(((configValue as unknown) as string) || "");
+
+    useEffect(() => {
+        setTmpValue(((configValue as unknown) as string) || "");
+    }, [configValue]);
+
 
     return (
         <div
@@ -42,31 +48,28 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
             <input
                 disabled={disabled}
                 spellCheck={false}
+                value={tmpValue} 
                 onChange={(e) => {
-                    setTmpValue(e.target.value ?? null);
+                    setTmpValue(e.target.value ?? ""); 
                 }}
-                type={type || 'text'} // Default to 'text' if type is undefined
+                type={type || 'text'}
                 onBlur={() => {
-                    if (tmpValue === null) {
-                        return;
-                    }
                     const event = new Event("ConfigChanged", {
                         cancelable: true
                     });
 
+                    const valueToSet = trim && tmpValue ? tmpValue.trim() : tmpValue;
+
                     if (onChange) {
-                        onChange(event, tmpValue as any);
+                        onChange(event, valueToSet as any);
                     }
 
                     if (!event.defaultPrevented) {
-                        console.log(tmpValue);
                         AppConfig.setConfig({
-                            [keyPath]: trim ? tmpValue.trim() as any : tmpValue as any
+                            [keyPath]: valueToSet as any
                         });
                     }
                 }}
-                defaultValue={value as string}
-                value={(tmpValue || "") as string}
             ></input>
         </div>
     );
