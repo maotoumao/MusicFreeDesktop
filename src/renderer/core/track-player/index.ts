@@ -54,6 +54,8 @@ interface InternalPlayerEvents {
     [PlayerEvents.Error]: (errorMusicItem: IMusic.IMusicItem | null, reason: Error) => void;
     [PlayerEvents.ProgressChanged]: (progress: CurrentTime) => void;
     [PlayerEvents.StateChanged]: (state: PlayerState) => void;
+    [PlayerEvents.VolumeChanged]: (volume: number) => void;
+    [PlayerEvents.SpeedChanged]: (speed: number) => void;
 }
 
 interface IPlayOptions {
@@ -254,15 +256,20 @@ class TrackPlayer {
         })
         this.audioController.onVolumeChange = (volume) => {
             currentVolumeStore.setValue(volume);
-            setUserPreference("volume", volume);
-        }
+            // setUserPreference("volume", volume); // 已在 MpvController 和 AudioController 中处理
+            this.ee.emit(PlayerEvents.VolumeChanged, volume); // 现在这里应该是类型正确的
+        };
+
         this.audioController.onSpeedChange = (speed) => {
             currentSpeedStore.setValue(speed);
-            setUserPreference("speed", speed);
-        }
+            // setUserPreference("speed", speed); // 已在 MpvController 和 AudioController 中处理
+            this.ee.emit(PlayerEvents.SpeedChanged, speed); // 现在这里应该是类型正确的
+        };
+
         this.audioController.onPlayerStateChanged = (state) => {
             this.setPlayerState(state);
-        }
+        };
+
         this.audioController.onError = async (type, reason: any) => {
             const errorMusicItem = this.audioController?.musicItem || this.currentMusic;
             logger.logError("TrackPlayer: Playback error from controller", { type, reason: reason?.message || String(reason), musicItem: errorMusicItem } as any);

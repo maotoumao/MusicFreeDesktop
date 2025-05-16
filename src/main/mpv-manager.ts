@@ -182,28 +182,28 @@ class MpvManager {
         this.mpv.on("status", (status: MpvNodeStatus) => {
             if (!status || typeof status.property !== 'string') return;
             const { property: propertyName, value } = status;
-
-            // 打印所有状态变化，以便调试
             logger.logInfo(`MpvManager MAIN: MPV STATUS RAW - ${propertyName} = ${JSON.stringify(value)}`);
 
             if (propertyName === 'time-pos' && typeof value === 'number' && isFinite(value)) {
                 this.lastKnownTime = value;
-                this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastKnownDuration });
+                // Ensure duration is also sent, even if it hasn't changed in this specific event
+                this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastReportedDuration === Infinity ? null : this.lastReportedDuration });
             } else if (propertyName === 'duration' && typeof value === 'number') {
                 const newDuration = value > 0 && isFinite(value) ? value : Infinity;
-                if (newDuration !== this.lastKnownDuration) {
-                    this.lastKnownDuration = newDuration;
+                if (newDuration !== this.lastReportedDuration) { // Only update if it actually changes
                     this.lastReportedDuration = newDuration;
-                    this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastKnownDuration });
                 }
+                 // Always send both, as the renderer expects both
+                this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastReportedDuration === Infinity ? null : this.lastReportedDuration });
             } else if (propertyName === 'pause' && typeof value === 'boolean') {
                  const newState = value ? PlayerState.Paused : PlayerState.Playing;
-                 if (this.lastKnownPlayerState !== newState) {
+                 // Only send if state genuinely changes to avoid redundant IPCs
+                 // if (this.lastKnownPlayerState !== newState) { // Commented out: renderer might rely on explicit pause/resume events
                      this.lastKnownPlayerState = newState;
                      this.sendToRenderer(value ? "mpv-paused" : "mpv-resumed", { state: newState });
-                 }
+                 // }
             } else if (propertyName === 'volume' && typeof value === 'number') {
-                const newVolume = Math.max(0, Math.min(1, value / 100));
+                const newVolume = Math.max(0, Math.min(1, value / 100)); // MPV volume is 0-100 (or more), convert to 0-1
                 this.sendToRenderer("mpv-volumechange", { volume: newVolume });
             } else if ((propertyName === 'speed' || propertyName === 'playback-speed') && typeof value === 'number') {
                 this.sendToRenderer("mpv-speedchange", { speed: value });
@@ -212,21 +212,19 @@ class MpvManager {
                 this.sendToRenderer("mpv-playback-ended", { reason: "eof" });
             } else if (propertyName === 'idle-active' && value === true) {
                 logger.logInfo(`MpvManager MAIN: MPV property 'idle-active' is true.`);
-                // 只有当 idle-active 为 true 且 eof-reached 也是 true 时，才认为是播放结束
-                // 这个逻辑可以被 'eof-reached' 事件本身覆盖，但作为双重保险
                 if (this.mpv) {
                     this.mpv.getProperty('eof-reached').then(isEof => {
                         if (isEof) {
                             logger.logInfo("MpvManager MAIN: 'idle-active' and 'eof-reached' both true. Confirmed playback ended.");
-                            this.sendToRenderer("mpv-playback-ended", { reason: "eof" });
-                        } else {
-                            logger.logInfo("MpvManager MAIN: 'idle-active' true, but 'eof-reached' false. Likely stopped or errored.");
+                            // Avoid sending duplicate if eof-reached already sent it.
+                            // This can be tricky. For now, let eof-reached handle it primarily.
+                            // If issues persist, one might send it here too, or add a flag.
                         }
-                    }).catch(e => logger.logError("MpvManager MAIN: Error checking eof-reached on idle-active", e));
+                    }).catch(e => logger.logError("MpvManager MAIN: Error checking eof-reached on idle-active", e as Error));
                 }
             }
         });
-        // ... (其他事件如 paused, resumed, stopped, started, error, crashed 保持不变，但可以加上 MAIN 标记日志)
+
         this.mpv.on("paused", () => {
             logger.logInfo("MpvManager MAIN: MPV direct event 'paused'.");
             if (this.lastKnownPlayerState !== PlayerState.Paused) {
@@ -234,6 +232,7 @@ class MpvManager {
                 this.sendToRenderer("mpv-paused", { state: PlayerState.Paused });
             }
         });
+
         this.mpv.on("resumed", () => {
             logger.logInfo("MpvManager MAIN: MPV direct event 'resumed'.");
             if (this.lastKnownPlayerState !== PlayerState.Playing) {
@@ -241,30 +240,42 @@ class MpvManager {
                 this.sendToRenderer("mpv-resumed", { state: PlayerState.Playing });
             }
         });
+        
         this.mpv.on("stopped", async () => {
             if (this.isQuitting) { logger.logInfo("MpvManager MAIN: MPV 'stopped' ignored (quitting)."); return; }
             logger.logInfo("MpvManager MAIN: MPV direct event 'stopped'.");
             let isEof = false;
             if (this.mpv) { try { isEof = await this.mpv.getProperty('eof-reached') as boolean; } catch(e){} }
+            
+            // If it stopped AND it was at the end of file, it's an "ended" scenario.
+            // The 'eof-reached' property change should ideally handle this.
+            // If it stopped for other reasons (e.g., error, user stop), then it's a 'stopped' scenario.
             if (!isEof) {
-                logger.logInfo("MpvManager MAIN: 'stopped' but not EOF. Resetting state.");
+                logger.logInfo("MpvManager MAIN: 'stopped' but not EOF. Resetting state and sending mpv-stopped.");
                 this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
                 this.lastKnownPlayerState = PlayerState.None;
                 this.currentTrack = null; this.lastKnownTime = 0; this.lastReportedDuration = Infinity;
             } else {
-                logger.logInfo("MpvManager MAIN: 'stopped' due to EOF.");
+                logger.logInfo("MpvManager MAIN: 'stopped' due to EOF. Relying on 'eof-reached' to send 'mpv-playback-ended'.");
             }
         });
+
+
         this.mpv.on("started", () => {
             logger.logInfo("MpvManager MAIN: MPV direct event 'started'.");
              if (this.mpv) {
                 this.mpv.getProperty("duration").then(duration => {
-                    this.lastKnownDuration = (typeof duration === 'number' && duration > 0 && isFinite(duration)) ? duration : Infinity;
-                    this.lastReportedDuration = this.lastKnownDuration;
-                    this.lastKnownTime = 0;
-                    this.sendToRenderer("mpv-timeposition", { time: 0, duration: this.lastKnownDuration });
-                }).catch(err => logger.logError("MpvManager MAIN: Error getting duration on 'started'", err));
+                    this.lastReportedDuration = (typeof duration === 'number' && duration > 0 && isFinite(duration)) ? duration : Infinity;
+                    this.lastKnownTime = 0; // Reset time on new track
+                    // Send initial time and duration
+                    this.sendToRenderer("mpv-timeposition", { time: 0, duration: this.lastReportedDuration === Infinity ? null : this.lastReportedDuration });
+                }).catch(err => {
+                    logger.logError("MpvManager MAIN: Error getting duration on 'started'", err);
+                    this.lastReportedDuration = Infinity;
+                    this.sendToRenderer("mpv-timeposition", { time: 0, duration: null });
+                });
             }
+            // Ensure player state is set to Playing
             if (this.lastKnownPlayerState !== PlayerState.Playing) {
                  this.lastKnownPlayerState = PlayerState.Playing;
                  this.sendToRenderer("mpv-resumed", { state: PlayerState.Playing });
@@ -390,19 +401,20 @@ class MpvManager {
             logger.logInfo("MpvManager MAIN: IPC 'mpv-play' received.");
             if (!this.mpv || !this.isMpvFullyInitialized) { this.sendToRenderer("mpv-error", "MPV未初始化 (play)"); return; }
             try {
-                const isPaused = await this.mpv.getProperty('pause');
-                logger.logInfo(`MpvManager MAIN: 'mpv-play' - current pause state: ${isPaused}`);
-                if (isPaused) { logger.logInfo("MpvManager MAIN: Calling mpv.resume()"); await this.mpv.resume(); }
-                else if(this.lastKnownPlayerState !== PlayerState.Playing) {
-                    logger.logInfo("MpvManager MAIN: Calling mpv.play() as not playing."); await this.mpv.play();
-                } else { logger.logInfo("MpvManager MAIN: MPV already playing."); }
-            } catch (e: any) { logger.logError("MpvManager MAIN: mpv-play/resume error", e); this.sendToRenderer("mpv-error", `播放/恢复失败: ${e.message}`);}
+                // Simpler: just tell MPV to play. It handles resuming from pause.
+                await this.mpv.setProperty("pause", false);
+                // Or, if you prefer the play/resume distinction:
+                // const isPaused = await this.mpv.getProperty('pause') as boolean;
+                // if (isPaused) await this.mpv.resume();
+                // else await this.mpv.play(); // Call play if it wasn't just paused (e.g. stopped or new track)
+            } catch (e: any) { logger.logError("MpvManager MAIN: mpv-play/resume error", e as Error); this.sendToRenderer("mpv-error", `播放/恢复失败: ${e.message}`);}
         });
         ipcMain.handle("mpv-pause", async () => {
             logger.logInfo("MpvManager MAIN: IPC 'mpv-pause' received.");
             if (!this.mpv || !this.isMpvFullyInitialized) { this.sendToRenderer("mpv-error", "MPV未初始化 (pause)"); return; }
-            try { await this.mpv.pause(); }
-            catch (e: any) { logger.logError("MpvManager MAIN: mpv-pause error", e); this.sendToRenderer("mpv-error", `暂停失败: ${e.message}`);}
+            try { await this.mpv.setProperty("pause", true); } // More direct
+            // try { await this.mpv.pause(); } // Alternative
+            catch (e: any) { logger.logError("MpvManager MAIN: mpv-pause error", e as Error); this.sendToRenderer("mpv-error", `暂停失败: ${e.message}`);}
         });
         ipcMain.handle("mpv-resume", async () => {
             logger.logInfo("MpvManager MAIN: IPC 'mpv-resume' received.");
@@ -422,11 +434,24 @@ class MpvManager {
             try { await this.mpv.seek(timeSeconds, "absolute"); }
             catch (e: any) { logger.logError("MpvManager MAIN: mpv-seek error", e); this.sendToRenderer("mpv-error", `跳转失败: ${e.message}`);}
         });
-        ipcMain.handle("mpv-set-volume", async (_event, volume: number) => {
+        ipcMain.handle("mpv-set-volume", async (_event, volume: number) => { // volume is 0-1 from renderer
             logger.logInfo(`MpvManager MAIN: IPC 'mpv-set-volume' to ${volume}`);
-            if (!this.mpv || !this.isMpvFullyInitialized) { this.sendToRenderer("mpv-error", "MPV未初始化 (setVolume)"); return; }
-            try { await this.mpv.volume(Math.round(volume * 100)); }
-            catch (e: any) { logger.logError("MpvManager MAIN: mpv-set-volume error", e); this.sendToRenderer("mpv-error", `音量设置失败: ${e.message}`);}
+            if (!this.mpv || !this.isMpvFullyInitialized) {
+                const errorMsg = "MPV未初始化 (setVolume)";
+                this.sendToRenderer("mpv-error", errorMsg);
+                throw new Error(errorMsg); // 让 invoke() 的 Promise reject
+            }
+            try {
+                const mpvVol = Math.round(volume * 100); // MPV expects 0-100
+                await this.mpv.volume(mpvVol);
+                logger.logInfo(`MpvManager MAIN: Volume set to ${mpvVol} for MPV.`);
+                // return true; // 可选：返回成功状态
+            } catch (e: any) {
+                const errorMsg = `音量设置失败: ${e.message || '未知错误'}`;
+                logger.logError("MpvManager MAIN: mpv-set-volume error", e as Error);
+                this.sendToRenderer("mpv-error", errorMsg);
+                throw new Error(errorMsg); // 让 invoke() 的 Promise reject
+            }
         });
         ipcMain.handle("mpv-set-speed", async (_event, speed: number) => {
             logger.logInfo(`MpvManager MAIN: IPC 'mpv-set-speed' to ${speed}`);

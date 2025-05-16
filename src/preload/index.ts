@@ -24,32 +24,38 @@ const mpvPlayer = {
 };
 
 const mpvPlayerListener = {
-    onStatusChange: (callback: (status: any) => void) =>
+    onStatusChange: (callback: (status: any) => void) => // This seems unused by MpvController
         ipcRenderer.on("mpv-statuschange", (_event, status) => callback(status)),
-    onPaused: (callback: (data: { state: PlayerState }) => void) => // 明确 PlayerState 类型
+    onPaused: (callback: (data: { state: PlayerState }) => void) =>
         ipcRenderer.on("mpv-paused", (_event, data) => callback(data)),
-    onResumed: (callback: (data: { state: PlayerState }) => void) => // 明确 PlayerState 类型
+    onResumed: (callback: (data: { state: PlayerState }) => void) =>
         ipcRenderer.on("mpv-resumed", (_event, data) => callback(data)),
-    onTimePosition: (callback: (data: { time: number, duration: number }) => void) =>
+    onTimePosition: (callback: (data: { time: number, duration: number | null }) => void) => // duration can be null
         ipcRenderer.on("mpv-timeposition", (_event, data) => callback(data)),
-    onStopped: (callback: (data: { state: PlayerState }) => void) => // 明确 PlayerState 类型
+    onStopped: (callback: (data: { state: PlayerState }) => void) =>
         ipcRenderer.on("mpv-stopped", (_event, data) => callback(data)),
-    onStarted: (callback: (data: { state: PlayerState }) => void) => // 明确 PlayerState 类型
-        ipcRenderer.on("mpv-started", (_event, data) => callback(data)),
+    onStarted: (callback: (data: { state: PlayerState }) => void) => // data might not be needed here
+        ipcRenderer.on("mpv-started", (_event, data) => callback(data)), // Renderer 'started' might just need to know it started
     onPlaybackEnded: (callback: (data: { reason: string }) => void) =>
         ipcRenderer.on("mpv-playback-ended", (_event, data) => callback(data)),
     onError: (callback: (error: string) => void) =>
         ipcRenderer.on("mpv-error", (_event, error) => callback(error)),
-    onInitFailed: (callback: (errorMsg?: string) => void) => // 修改点：接收可选的错误消息
+    onInitFailed: (callback: (errorMsg?: string) => void) =>
         ipcRenderer.on("mpv-init-failed", (_event, errorMsg) => callback(errorMsg)),
     onInitSuccess: (callback: () => void) =>
         ipcRenderer.on("mpv-init-success", () => callback()),
+    // +++ Add these for volume and speed UI feedback +++
+    onVolumeChange: (callback: (data: { volume: number }) => void) =>
+        ipcRenderer.on("mpv-volumechange", (_event, data) => callback(data)),
+    onSpeedChange: (callback: (data: { speed: number }) => void) =>
+        ipcRenderer.on("mpv-speedchange", (_event, data) => callback(data)),
+    // +++ End of additions +++
     removeAllMpvListeners: (channel?: string) => {
         const channels = channel ? [channel] : [
             "mpv-statuschange", "mpv-paused", "mpv-resumed",
             "mpv-timeposition", "mpv-stopped", "mpv-started",
-            "mpv-playback-ended", "mpv-error", "mpv-init-failed", "mpv-init-success"
-            // 添加其他你可能定义的 mpv 事件
+            "mpv-playback-ended", "mpv-error", "mpv-init-failed", "mpv-init-success",
+            "mpv-volumechange", "mpv-speedchange" // Add new channels here
         ];
         channels.forEach(ch => ipcRenderer.removeAllListeners(ch));
     }
