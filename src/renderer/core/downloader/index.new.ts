@@ -1,3 +1,5 @@
+// src/renderer/core/downloader/index.new.ts
+import path from 'path';
 import * as Comlink from "comlink";
 import {getGlobalContext} from "@shared/global-context/renderer";
 import AppConfig from "@shared/app-config/renderer";
@@ -10,9 +12,11 @@ import logger from "@shared/logger/renderer";
 import PQueue from "p-queue";
 import EventEmitter from "eventemitter3";
 import {DownloadState, localPluginName} from "@/common/constant";
-import {getQualityOrder, isSameMedia, setInternalData} from "@/common/media-util";
+import {getQualityOrder, isSameMedia, setInternalData, getMediaPrimaryKey} from "@/common/media-util";
 import {downloadingMusicStore} from "@renderer/core/downloader/store";
 import PluginManager from "@shared/plugin-manager/renderer";
+import { useState as reactUseState } from "react";
+import { useEffect as reactUseEffect } from "react";
 
 type ProxyMarkedFunction<T> = T &
     Comlink.ProxyMarked;
@@ -37,6 +41,7 @@ export enum DownloaderEvent {
 
 interface IDownloaderEvent {
     [DownloaderEvent.DOWNLOAD_STATE_CHANGED]: (musicItem: IMusic.IMusicItem, status: ITaskStatus) => void;
+    [DownloaderEvent.QUEUE_UPDATED]: (queue: IMusic.IMusicItem[]) => void;
 }
 
 interface ITaskStatus {
@@ -202,7 +207,7 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
         if (mediaSource?.url) {
             const ext = mediaSource.url.match(/.*\/.+\.([^./?#]+)/)?.[1] ?? "mp3";
 
-            const downloadPath = window.path.resolve(
+            const downloadPath = path.resolve( // 修改: 使用导入的 path
                 downloadBasePath,
                 `./${fileName}.${ext}`
             );
@@ -269,7 +274,39 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
         }
         this.emit(DownloaderEvent.DOWNLOAD_STATE_CHANGED, musicItem, taskStatus);
     }
+
+    public useDownloadTaskStatus(musicItem: IMusic.IMusicItem) {
+      const [status, setStatus] = useState<ITaskStatus | null>(this.getTaskStatus(musicItem));
+      useEffect(() => {
+        const callback = (item: IMusic.IMusicItem, newStatus: ITaskStatus) => {
+          if (isSameMedia(item, musicItem)) {
+            setStatus(newStatus);
+          }
+        };
+        this.on(DownloaderEvent.DOWNLOAD_STATE_CHANGED, callback);
+        // Set initial status
+        setStatus(this.getTaskStatus(musicItem));
+        return () => {
+          this.off(DownloaderEvent.DOWNLOAD_STATE_CHANGED, callback);
+        };
+      }, [musicItem, this]);
+      return status;
+    }
 }
 
 
 export default new Downloader();
+/**
+ * useState hook for React functional components.
+ * Delegates to React's useState implementation.
+ */
+function useState<T>(initialState: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  return reactUseState(initialState);
+}
+/**
+ * useEffect hook for React functional components.
+ * Delegates to React's useEffect implementation.
+ */
+function useEffect(effect: () => void | (() => void), deps: any[]) {
+  return reactUseEffect(effect, deps);
+}
