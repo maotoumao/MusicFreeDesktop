@@ -20,22 +20,21 @@ const mpvPlayer = {
     getDuration: () => ipcRenderer.invoke("mpv-get-duration"),
     getCurrentTime: () => ipcRenderer.invoke("mpv-get-current-time"),
     quit: () => ipcRenderer.invoke("mpv-quit"),
-    // 新增：允许直接设置MPV属性，用于如loop等
-    setProperty: (property: string, value: any) => ipcRenderer.invoke("mpv-set-property", property, value),
+    setProperty: (property: string, value: any) => ipcRenderer.invoke("mpv-set-property", property, value), // +++ 新增这一行 +++
 };
 
 const mpvPlayerListener = {
     onStatusChange: (callback: (status: any) => void) =>
         ipcRenderer.on("mpv-statuschange", (_event, status) => callback(status)),
-    onPaused: (callback: (data: { state: PlayerState }) => void) =>
+    onPaused: (callback: (data: { state: PlayerState }) => void) => // 明确 PlayerState 类型
         ipcRenderer.on("mpv-paused", (_event, data) => callback(data)),
-    onResumed: (callback: (data: { state: PlayerState }) => void) =>
+    onResumed: (callback: (data: { state: PlayerState }) => void) => // 明确 PlayerState 类型
         ipcRenderer.on("mpv-resumed", (_event, data) => callback(data)),
     onTimePosition: (callback: (data: { time: number, duration: number }) => void) =>
         ipcRenderer.on("mpv-timeposition", (_event, data) => callback(data)),
-    onStopped: (callback: (data: { state: PlayerState }) => void) =>
+    onStopped: (callback: (data: { state: PlayerState }) => void) => // 明确 PlayerState 类型
         ipcRenderer.on("mpv-stopped", (_event, data) => callback(data)),
-    onStarted: (callback: (data: { state: PlayerState }) => void) =>
+    onStarted: (callback: (data: { state: PlayerState }) => void) => // 明确 PlayerState 类型
         ipcRenderer.on("mpv-started", (_event, data) => callback(data)),
     onPlaybackEnded: (callback: (data: { reason: string }) => void) =>
         ipcRenderer.on("mpv-playback-ended", (_event, data) => callback(data)),
@@ -50,6 +49,7 @@ const mpvPlayerListener = {
             "mpv-statuschange", "mpv-paused", "mpv-resumed",
             "mpv-timeposition", "mpv-stopped", "mpv-started",
             "mpv-playback-ended", "mpv-error", "mpv-init-failed", "mpv-init-success"
+            // 添加其他你可能定义的 mpv 事件
         ];
         channels.forEach(ch => ipcRenderer.removeAllListeners(ch));
     }
@@ -57,7 +57,7 @@ const mpvPlayerListener = {
 
 
 contextBridge.exposeInMainWorld("electron", {
-    ...(window.electron || {}),
+    ...(window.electron || {}), // 保留其他可能已暴露的API
     mpvPlayer,
     mpvPlayerListener,
 });

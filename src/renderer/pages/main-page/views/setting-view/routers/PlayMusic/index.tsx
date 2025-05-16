@@ -17,7 +17,7 @@ export default function PlayMusic() {
     return (
         <div className="setting-view--play-music-container">
             <RadioGroupSettingItem // 新增 MPV 后端选择
-                label={t("播放后端")} // 你需要在语言文件中添加这个翻译
+                label={t("settings.play_music.backend")}
                 keyPath="playMusic.backend"
                 options={["web", "mpv"]}
                 renderItem={it => it === "web" ? "浏览器内置" : "MPV播放器"}
@@ -25,12 +25,12 @@ export default function PlayMusic() {
 
             <PathSettingItem // 新增 MPV 路径设置
                 keyPath="playMusic.mpvPath"
-                label={t("MPV播放器路径")} // 你需要在语言文件中添加这个翻译
+                label={t("settings.play_music.mpv_path")}
             ></PathSettingItem>
 
             <InputSettingItem // 新增 MPV 参数设置
                 keyPath="playMusic.mpvArgs"
-                label={t("MPV附加参数")} // 你需要在语言文件中添加这个翻译
+                label={t("settings.play_music.mpv_args")}
                 width="100%"
             ></InputSettingItem>
 
