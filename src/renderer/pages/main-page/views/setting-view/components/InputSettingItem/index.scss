@@ -1,16 +1,18 @@
 .setting-view--input-setting-item-container {
   display: flex;
   align-items: center;
-  /* width: 200px; */
-  column-gap: 12px;
+  column-gap: 8px; 
+  // width: 100%; // 移除这一行，让它的宽度由父组件或内容决定
 
   & .input-label {
-    width: 48px;
     white-space: nowrap;
+    flex-shrink: 0; 
   }
 
   & input {
-    flex: 1;
+    flex-grow: 1;   
+    min-width: 150px; // 给输入框一个最小宽度
+    max-width: 500px; // 给输入框一个最大宽度，防止过长
   }
 
   & input:disabled {

@@ -227,8 +227,8 @@
   "settings": {
     "choose_path": "选择路径",
     "change_path": "更改路径",
-    "file_not_exist": "文件不存在或路径无效",
-    "open_file_location": "打开文件位置",
+    "file_not_exist": "文件夹不存在",
+    "open_folder": "打开文件夹",
     "section_name": {
       "normal": "常规",
       "play_music": "播放",
