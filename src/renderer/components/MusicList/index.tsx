@@ -1,3 +1,4 @@
+// src/renderer/components/MusicList/index.tsx
 import {
     ColumnDef,
     createColumnHelper,
@@ -405,9 +406,6 @@ function _MusicList(props: IMusicListProps) {
         [onDragEnd, musicList]
     );
     
-    const colSpan = table.getHeaderGroups()[0]?.headers?.length || 1;
-
-
     return (
         <div
             className="music-list-container"
@@ -540,11 +538,11 @@ function _MusicList(props: IMusicListProps) {
                     );
 
                     const topDragReceiver = (enableDrag && index === 0) ? (
-                        <DragReceiver position="top" rowIndex={virtualItem.rowIndex} onDrop={_onDrop} tag="musiclist" insideTable colSpan={colSpan} />
+                        <DragReceiver position="top" rowIndex={virtualItem.rowIndex} onDrop={_onDrop} tag="musiclist" />
                     ) : null;
             
                     const bottomDragReceiver = enableDrag ? (
-                        <DragReceiver position="bottom" rowIndex={virtualItem.rowIndex + 1} onDrop={_onDrop} tag="musiclist" insideTable colSpan={colSpan} />
+                        <DragReceiver position="bottom" rowIndex={virtualItem.rowIndex + 1} onDrop={_onDrop} tag="musiclist" />
                     ) : null;
 
                     return (

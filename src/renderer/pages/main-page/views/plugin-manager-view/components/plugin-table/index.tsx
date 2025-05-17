@@ -1,3 +1,4 @@
+// src/renderer/pages/main-page/views/plugin-manager-view/components/plugin-table/index.tsx
 import AppConfig from "@shared/app-config/renderer";
 
 import {
@@ -302,14 +303,12 @@ export default function PluginTable() {
                   <DragReceiver
                     position="top"
                     rowIndex={0}
-                    insideTable
                     onDrop={onDrop}
                   ></DragReceiver>
                 </IfTruthy>
                 <DragReceiver
                   position="bottom"
                   rowIndex={index + 1}
-                  insideTable
                   onDrop={onDrop}
                 ></DragReceiver>
               </tr>
