@@ -38,14 +38,11 @@ class MpvManager {
         this.timeUpdateInterval = setInterval(async () => {
             if (this.mpv && this.isMpvFullyInitialized && !this.volatileIsQuitting) {
                 try {
-                    // 避免在没有播放时频繁获取不存在的属性
-                    if (this.lastKnownPlayerState === PlayerState.Playing || this.lastKnownPlayerState === PlayerState.Paused) {
-                        const time = await this.mpv.getProperty('time-pos');
-                        const duration = await this.mpv.getProperty('duration');
-                        this.sendToRenderer("mpv-timeposition", { time, duration: (duration && isFinite(duration) && duration > 0) ? duration : null });
-                    }
+                    const time = await this.mpv.getProperty('time-pos');
+                    const duration = await this.mpv.getProperty('duration');
+                    this.sendToRenderer("mpv-timeposition", { time, duration });
                 } catch (e) {
-                  // Silently handle: MPV might not be playing or ready
+                  // Silently handle
                 }
             }
         }, 1000);
@@ -79,12 +76,8 @@ class MpvManager {
             debug: !app.isPackaged,
             verbose: !app.isPackaged,
             audio_only: true,
-<<<<<<< HEAD
-            time_update: 1, // node-mpv's internal time_update, not directly used by our loop
-=======
             time_update: 1,
             // Filter out --input-ipc-server if user accidentally adds it
->>>>>>> dev
             additionalArgs: argsArray.filter(arg => arg.trim() !== "" && !arg.startsWith('--input-ipc-server'))
         };
         return options;
@@ -149,7 +142,6 @@ class MpvManager {
                     debug: mpvOptions.debug,
                     verbose: mpvOptions.verbose,
                     audio_only: mpvOptions.audio_only,
-                    // time_update: mpvOptions.time_update, // Pass time_update here
                 },
                  mpvOptions.additionalArgs
             );
@@ -266,14 +258,13 @@ class MpvManager {
 
             if (propertyName === 'time-pos' && typeof value === 'number' && isFinite(value)) {
                 this.lastKnownTime = value;
-                // Duration is now sent via timeposition loop or on 'duration' property change
+                this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastReportedDuration === Infinity ? null : this.lastReportedDuration });
             } else if (propertyName === 'duration' && typeof value === 'number') {
                 const newDuration = value > 0 && isFinite(value) ? value : Infinity;
                 if (newDuration !== this.lastReportedDuration) {
                     this.lastReportedDuration = newDuration;
-                    // Send update if duration changes
-                    this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastReportedDuration === Infinity ? null : this.lastReportedDuration });
                 }
+                this.sendToRenderer("mpv-timeposition", { time: this.lastKnownTime, duration: this.lastReportedDuration === Infinity ? null : this.lastReportedDuration });
             } else if (propertyName === 'pause' && typeof value === 'boolean') {
                  const newState = value ? PlayerState.Paused : PlayerState.Playing;
                  this.lastKnownPlayerState = newState;
@@ -284,21 +275,9 @@ class MpvManager {
             } else if ((propertyName === 'speed' || propertyName === 'playback-speed') && typeof value === 'number') {
                 this.sendToRenderer("mpv-speedchange", { speed: value });
             } else if (propertyName === 'eof-reached') {
-<<<<<<< HEAD
-                this.lastKnownEofReached = !!value; // 只更新状态
-                if (this.lastKnownEofReached) {
-                    logger.logInfo(`MpvManager MAIN: MPV property 'eof-reached' is now true.`);
-                }
-            } else if (propertyName === 'idle-active') {
-                this.lastKnownIdleActive = !!value;
-                if (this.lastKnownIdleActive === true && this.lastKnownPlayerState !== PlayerState.None && !this.currentTrack) {
-                    this.lastKnownPlayerState = PlayerState.None;
-                }
-=======
                 this.lastKnownEofReached = !!value;
             } else if (propertyName === 'idle-active') {
                 this.lastKnownIdleActive = !!value;
->>>>>>> dev
             }
         });
 
@@ -318,8 +297,6 @@ class MpvManager {
             }
         });
 
-<<<<<<< HEAD
-=======
         // *** 主播放结束事件处理 ***
         this.mpv.on("playback-finished", async (eventData: { reason: string }) => {
             if (this.volatileIsQuitting || !this.mpv) {
@@ -340,37 +317,11 @@ class MpvManager {
             }
         });
 
->>>>>>> dev
         this.mpv.on("stopped", async () => {
             if (this.volatileIsQuitting || !this.mpv) {
                  logger.logInfo("MpvManager MAIN: MPV 'stopped' ignored (quitting or no instance).");
                  return;
             }
-<<<<<<< HEAD
-            logger.logInfo("MpvManager MAIN: MPV direct event 'stopped'.");
-
-            if (this.lastKnownEofReached) { // 如果是因为 EOF 停止的
-                logger.logInfo(`MpvManager MAIN: 'stopped' event, and lastKnownEofReached was true. Signaling playback ended.`);
-                this.sendToRenderer("mpv-playback-ended", { reason: "eof" });
-                this.lastKnownEofReached = false; // 重置，避免下次非EOF停止时误判
-            } else if (this.lastKnownIdleActive) { // 如果不是EOF，但确实是idle (例如用户停止)
-                 logger.logInfo("MpvManager MAIN: Player stopped and is idle, but not EOF. Setting player state to None.");
-                 if (this.lastKnownPlayerState !== PlayerState.None) { // 避免不必要的事件
-                    this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
-                 }
-            } else { // 其他原因的停止 (例如错误，或者在非idle状态下停止)
-                logger.logInfo("MpvManager MAIN: 'stopped' for other reasons. Setting player state to None.");
-                this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
-            }
-
-            // 统一的状态重置
-            this.lastKnownPlayerState = PlayerState.None;
-            this.currentTrack = null;
-            this.lastKnownTime = 0;
-            this.lastReportedDuration = Infinity;
-            // this.lastKnownEofReached 已经在 EOF 分支中重置
-            this.lastKnownIdleActive = false;
-=======
             logger.logInfo("MpvManager MAIN: MPV direct event 'stopped'. This is now treated as an explicit stop or error, not EOF.");
 
             // 如果不是由 playback-finished (eof) 触发的停止，那么这可能是用户操作或错误
@@ -391,9 +342,7 @@ class MpvManager {
             // this.lastReportedDuration = Infinity;
             // this.lastKnownEofReached = false; // 确保重置
             // this.lastKnownIdleActive = false; // 确保重置
->>>>>>> dev
         });
-
 
         this.mpv.on("started", () => {
             if (this.volatileIsQuitting || !this.mpv) return;
@@ -570,11 +519,11 @@ class MpvManager {
             await this.mpv.speed(speed);
         }));
         ipcMain.handle("mpv-get-duration", makeSafeHandler("mpv-get-duration", async () => {
-             if (!this.mpv) return this.lastKnownDuration === Infinity ? null : this.lastKnownDuration;
-             const duration = await this.mpv.getDuration();
-             this.lastKnownDuration = (duration != null && duration > 0 && isFinite(duration)) ? duration : Infinity;
-             this.lastReportedDuration = this.lastKnownDuration; // Update reported duration as well
-             return this.lastKnownDuration === Infinity ? null : this.lastKnownDuration;
+            if (!this.mpv) return this.lastKnownDuration === Infinity ? null : this.lastKnownDuration;
+            const duration = await this.mpv.getDuration();
+            this.lastKnownDuration = (duration != null && duration > 0 && isFinite(duration)) ? duration : Infinity;
+            this.lastReportedDuration = this.lastKnownDuration;
+            return this.lastKnownDuration === Infinity ? null : this.lastKnownDuration;
         }));
         ipcMain.handle("mpv-get-current-time", makeSafeHandler("mpv-get-current-time", async () => {
              if (!this.mpv) return this.lastKnownTime;
