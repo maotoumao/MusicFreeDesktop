@@ -1,6 +1,6 @@
 // src/renderer/pages/main-page/views/plugin-manager-view/components/plugin-table/index.tsx
 import AppConfig from "@shared/app-config/renderer";
-
+import React, { CSSProperties, ReactNode } from "react";
 import {
   useReactTable,
   createColumnHelper,
@@ -8,7 +8,6 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import "./index.scss";
-import { CSSProperties, ReactNode } from "react";
 import Condition, { IfTruthy } from "@/renderer/components/Condition";
 import { hideModal, showModal } from "@/renderer/components/Modal";
 import Empty from "@/renderer/components/Empty";
@@ -253,6 +252,22 @@ export default function PluginTable() {
     });
   }
 
+  const dragReceiverRowStyle: React.CSSProperties = {
+    height: 0,
+    padding: 0,
+    margin: 0,
+    border: 'none',
+    lineHeight: 0,
+  };
+
+  const dragReceiverCellStyle: React.CSSProperties = {
+    height: 0,
+    padding: 0,
+    border: 'none',
+    position: 'relative',
+  };
+
+
   return (
     <div className="plugin-table--container">
       <Condition
@@ -279,39 +294,55 @@ export default function PluginTable() {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row, index) => (
-              <tr
-                key={row.id}
-                draggable
-                onDragStart={(e) => {
-                  startDrag(e, index);
-                }}
-              >
-                {row.getAllCells().map((cell) => (
+              <React.Fragment key={row.id}>
+                {index === 0 && (
+                  <tr style={dragReceiverRowStyle} data-row-type="drag-receiver">
+                    <td
+                      colSpan={table.getHeaderGroups()[0].headers.length}
+                      style={dragReceiverCellStyle}
+                    >
+                      <DragReceiver
+                        position="top"
+                        rowIndex={0}
+                        onDrop={onDrop}
+                      />
+                    </td>
+                  </tr>
+                )}
+                <tr
+                  draggable
+                  onDragStart={(e) => {
+                    startDrag(e, index);
+                  }}
+                  data-row-type="data" // 添加标记
+                >
+                  {row.getAllCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      style={{
+                        width: cell.column.getSize(),
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+                <tr style={dragReceiverRowStyle} data-row-type="drag-receiver">
                   <td
-                    key={cell.id}
-                    style={{
-                      width: cell.column.getSize(),
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
+                    colSpan={table.getHeaderGroups()[0].headers.length}
+                    style={dragReceiverCellStyle}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    <DragReceiver
+                      position="bottom"
+                      rowIndex={index + 1}
+                      onDrop={onDrop}
+                    />
                   </td>
-                ))}
-                <IfTruthy condition={index === 0}>
-                  <DragReceiver
-                    position="top"
-                    rowIndex={0}
-                    onDrop={onDrop}
-                  ></DragReceiver>
-                </IfTruthy>
-                <DragReceiver
-                  position="bottom"
-                  rowIndex={index + 1}
-                  onDrop={onDrop}
-                ></DragReceiver>
-              </tr>
+                </tr>
+              </React.Fragment>
             ))}
           </tbody>
         </table>

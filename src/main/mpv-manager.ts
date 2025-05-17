@@ -79,7 +79,12 @@ class MpvManager {
             debug: !app.isPackaged,
             verbose: !app.isPackaged,
             audio_only: true,
+<<<<<<< HEAD
             time_update: 1, // node-mpv's internal time_update, not directly used by our loop
+=======
+            time_update: 1,
+            // Filter out --input-ipc-server if user accidentally adds it
+>>>>>>> dev
             additionalArgs: argsArray.filter(arg => arg.trim() !== "" && !arg.startsWith('--input-ipc-server'))
         };
         return options;
@@ -279,6 +284,7 @@ class MpvManager {
             } else if ((propertyName === 'speed' || propertyName === 'playback-speed') && typeof value === 'number') {
                 this.sendToRenderer("mpv-speedchange", { speed: value });
             } else if (propertyName === 'eof-reached') {
+<<<<<<< HEAD
                 this.lastKnownEofReached = !!value; // 只更新状态
                 if (this.lastKnownEofReached) {
                     logger.logInfo(`MpvManager MAIN: MPV property 'eof-reached' is now true.`);
@@ -288,6 +294,11 @@ class MpvManager {
                 if (this.lastKnownIdleActive === true && this.lastKnownPlayerState !== PlayerState.None && !this.currentTrack) {
                     this.lastKnownPlayerState = PlayerState.None;
                 }
+=======
+                this.lastKnownEofReached = !!value;
+            } else if (propertyName === 'idle-active') {
+                this.lastKnownIdleActive = !!value;
+>>>>>>> dev
             }
         });
 
@@ -307,11 +318,35 @@ class MpvManager {
             }
         });
 
+<<<<<<< HEAD
+=======
+        // *** 主播放结束事件处理 ***
+        this.mpv.on("playback-finished", async (eventData: { reason: string }) => {
+            if (this.volatileIsQuitting || !this.mpv) {
+                logger.logInfo("MpvManager MAIN: MPV 'playback-finished' ignored (quitting or no instance).");
+                return;
+            }
+            if (eventData.reason === 'eof') {
+                logger.logInfo("MpvManager MAIN: MPV event 'playback-finished' (reason: eof). Signaling playback ended.");
+                this.sendToRenderer("mpv-playback-ended", { reason: "eof" });
+
+                // 状态重置逻辑
+                this.lastKnownPlayerState = PlayerState.None;
+                this.currentTrack = null;
+                this.lastKnownTime = 0;
+                this.lastReportedDuration = Infinity;
+                this.lastKnownEofReached = false; // 确保重置
+                this.lastKnownIdleActive = false; // 确保重置
+            }
+        });
+
+>>>>>>> dev
         this.mpv.on("stopped", async () => {
             if (this.volatileIsQuitting || !this.mpv) {
                  logger.logInfo("MpvManager MAIN: MPV 'stopped' ignored (quitting or no instance).");
                  return;
             }
+<<<<<<< HEAD
             logger.logInfo("MpvManager MAIN: MPV direct event 'stopped'.");
 
             if (this.lastKnownEofReached) { // 如果是因为 EOF 停止的
@@ -335,6 +370,28 @@ class MpvManager {
             this.lastReportedDuration = Infinity;
             // this.lastKnownEofReached 已经在 EOF 分支中重置
             this.lastKnownIdleActive = false;
+=======
+            logger.logInfo("MpvManager MAIN: MPV direct event 'stopped'. This is now treated as an explicit stop or error, not EOF.");
+
+            // 如果不是由 playback-finished (eof) 触发的停止，那么这可能是用户操作或错误
+            // 仍然需要通知渲染进程播放已停止，以便UI可以更新
+            // 检查 this.lastKnownEofReached 确保不是因为eof刚刚触发了playback-finished
+            if (!this.lastKnownEofReached) {
+                this.sendToRenderer("mpv-stopped", { state: PlayerState.None });
+            }
+
+            // 状态重置逻辑（如果适用，但要小心不要覆盖 playback-finished 后的状态）
+            if (this.lastKnownPlayerState !== PlayerState.None) {
+                this.lastKnownPlayerState = PlayerState.None;
+            }
+            // currentTrack 等的重置应该由 playback-finished 或显式停止命令处理
+            // 如果是显式stop，这里也可以重置
+            // this.currentTrack = null;
+            // this.lastKnownTime = 0;
+            // this.lastReportedDuration = Infinity;
+            // this.lastKnownEofReached = false; // 确保重置
+            // this.lastKnownIdleActive = false; // 确保重置
+>>>>>>> dev
         });
 
 

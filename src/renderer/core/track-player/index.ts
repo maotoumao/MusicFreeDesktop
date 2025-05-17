@@ -150,7 +150,7 @@ class TrackPlayer {
     private async initializeAudioBackend(previousState?: { music: IMusic.IMusicItem | null, time: number, isPlaying: boolean }) {
         const backendType = AppConfig.getConfig("playMusic.backend");
         logger.logInfo(`TrackPlayer: Initializing audio backend - ${backendType}`);
-        this.isMpvInitFailed = false; 
+        this.isMpvInitFailed = false;
 
         if (this.audioController) {
             await this.audioController.destroy();
@@ -192,7 +192,7 @@ class TrackPlayer {
 
         if (musicToRestore && this.audioController ) {
             // @ts-ignore
-            if (this.isMpvInitFailed && backendType === 'mpv') { 
+            if (this.isMpvInitFailed && backendType === 'mpv') {
                 logger.logInfo("TrackPlayer: MPV initialization was marked as failed, skipping track restoration.");
                 this.setPlayerState(PlayerState.None);
                 this.ee.emit(PlayerEvents.Error, musicToRestore, new Error("MPV播放器未能成功初始化，无法恢复播放。"));
@@ -228,24 +228,26 @@ class TrackPlayer {
         if (!this.audioController) return;
 
         this.audioController.onEnded = () => {
-            const autoNext = AppConfig.getConfig("playMusic.playError") === "skip";
-            if (autoNext) {
-                this.skipToNext();  // 跳到下一首
-            } else {
-                this.setPlayerState(PlayerState.None);
-            }
-            this.resetProgress();
+            logger.logInfo(`TrackPlayer: onEnded triggered. Current repeat mode: ${this.repeatMode}`);
             switch (this.repeatMode) {
                 case RepeatMode.Queue:
                 case RepeatMode.Shuffle: {
+                    logger.logInfo(`TrackPlayer: onEnded - Mode: ${this.repeatMode}, skipping to next.`);
                     this.skipToNext();
                     break;
                 }
                 case RepeatMode.Loop: {
+                    logger.logInfo(`TrackPlayer: onEnded - Mode: Loop, replaying index ${this.currentIndex}.`);
                     this.playIndex(this.currentIndex, {
                         restartOnSameMedia: true
                     });
+                    break;
                 }
+                default:
+                    logger.logInfo(`TrackPlayer: onEnded - Default behavior, setting player state to None.`);
+                    this.setPlayerState(PlayerState.None);
+                    this.resetProgress();
+                    break;
             }
         }
         this.audioController.onProgressUpdate = ((progress) => {
@@ -262,14 +264,12 @@ class TrackPlayer {
         })
         this.audioController.onVolumeChange = (volume) => {
             currentVolumeStore.setValue(volume);
-            // setUserPreference("volume", volume); // 已在 MpvController 和 AudioController 中处理
-            this.ee.emit(PlayerEvents.VolumeChanged, volume); // 现在这里应该是类型正确的
+            this.ee.emit(PlayerEvents.VolumeChanged, volume);
         };
 
         this.audioController.onSpeedChange = (speed) => {
             currentSpeedStore.setValue(speed);
-            // setUserPreference("speed", speed); // 已在 MpvController 和 AudioController 中处理
-            this.ee.emit(PlayerEvents.SpeedChanged, speed); // 现在这里应该是类型正确的
+            this.ee.emit(PlayerEvents.SpeedChanged, speed);
         };
 
         this.audioController.onPlayerStateChanged = (state) => {
@@ -280,12 +280,37 @@ class TrackPlayer {
             const errorMusicItem = this.audioController?.musicItem || this.currentMusic;
             logger.logError("TrackPlayer: Playback error from controller", { type, reason: reason?.message || String(reason), musicItem: errorMusicItem } as any);
             const errorToEmit = reason instanceof Error ? reason : new Error(String(reason) || "Unknown playback error");
+
             if (type === PlayerErrorReason.EmptyResource && AppConfig.getConfig("playMusic.backend") === "mpv") {
                  // @ts-ignore
                 if (this.audioController && this.audioController.isMpvInitialized === false) {
                      this.isMpvInitFailed = true;
                      this.ee.emit(PlayerEvents.Error, errorMusicItem, new Error(`MPV播放器初始化失败: ${errorToEmit.message}`));
                      return;
+                }
+            }
+
+            const errorBehavior = AppConfig.getConfig("playMusic.playError");
+            if (errorBehavior === "skip") {
+                logger.logInfo(`TrackPlayer: onError - Behavior: skip. Skipping to next track.`);
+                if (this.musicQueue.length > 1 && errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
+                    if (this.playerState !== PlayerState.None) {
+                         await delay(1500);
+                    }
+                    if (this.isCurrentMusic(errorMusicItem)) {
+                        this.skipToNext();
+                    }
+                } else if (errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
+                    if (this.audioController) await this.audioController.pause();
+                    this.setPlayerState(PlayerState.None);
+                    this.resetProgress();
+                }
+            } else {
+                logger.logInfo(`TrackPlayer: onError - Behavior: pause (or default). Pausing player.`);
+                if (errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
+                    if (this.audioController) await this.audioController.pause();
+                    this.setPlayerState(PlayerState.None);
+                    this.resetProgress();
                 }
             }
             this.ee.emit(PlayerEvents.Error, errorMusicItem, errorToEmit);
@@ -322,7 +347,7 @@ class TrackPlayer {
         this.isReady = true;
 
         await this.initializeAudioBackend();
-        
+
         const backendType = AppConfig.getConfig("playMusic.backend");
         // @ts-ignore
         const isControllerActuallyNotInitialized = backendType === "mpv" && this.audioController && this.audioController.isMpvInitialized === false;
@@ -381,24 +406,14 @@ class TrackPlayer {
     private setupEvents() {
         this.ee.on(PlayerEvents.Error, async (errorMusicItem, reason) => {
             logger.logError("TrackPlayer internal error event:", { musicTitle: errorMusicItem?.title, reason: reason.message, stack: reason.stack } as any);
-            this.resetProgress();
-            const needSkip = AppConfig.getConfig("playMusic.playError") === "skip";
-            
+            // this.resetProgress(); // Error handler in setupAudioControllerEvents already handles this
+            // const needSkip = AppConfig.getConfig("playMusic.playError") === "skip"; // Logic moved to onError
+
             if (this.isMpvInitFailed && AppConfig.getConfig("playMusic.backend") === "mpv") {
-                this.setPlayerState(PlayerState.None); 
+                this.setPlayerState(PlayerState.None);
                 return;
             }
-            if (this.musicQueue.length > 1 && needSkip && errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
-                if (this.playerState !== PlayerState.None) {
-                     await delay(1500);
-                }
-                if (this.isCurrentMusic(errorMusicItem)) {
-                    this.skipToNext();
-                }
-            } else if (errorMusicItem && this.isCurrentMusic(errorMusicItem)) {
-                if (this.audioController) await this.audioController.pause();
-                this.setPlayerState(PlayerState.None);
-            }
+            // The detailed skip/pause logic is now within this.audioController.onError
         });
 
         if (navigator.mediaSession) {
@@ -421,7 +436,7 @@ class TrackPlayer {
             this.ee.emit(PlayerEvents.Error, this.musicQueue[index] || null, new Error(errorMsg));
             return;
         }
-        
+
         // @ts-ignore
         if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) {
             try { // @ts-ignore
@@ -570,7 +585,7 @@ class TrackPlayer {
             await this.audioController.readyPromise; }
         this.audioController.pause();
     }
-    
+
     public async resume() {
         if (!this.isReady) await this.setup();
         // @ts-ignore
@@ -594,7 +609,7 @@ class TrackPlayer {
             logger.logInfo("TrackPlayer.resume: No source in controller, but currentMusic exists. Attempting to play current track.", this.currentMusicBasicInfo);
             const seekToTime = this.progress.currentTime > 0 ? this.progress.currentTime : undefined;
             await this.playIndex(this.currentIndex, {
-                restartOnSameMedia: false, 
+                restartOnSameMedia: false,
                 seekTo: seekToTime,
                 quality: this.currentQuality
             });
@@ -789,7 +804,7 @@ class TrackPlayer {
 
         const currentLyricData = this.lyric;
         if (!forceLoad && currentLyricData && this.isCurrentMusic(currentLyricData.parser?.musicItem)) return;
-        
+
         try {
             const linkedLyricItem = await getLinkedLyric(currentMusic);
             let lyricSource: ILyric.ILyricSource | null = null;
@@ -803,7 +818,7 @@ class TrackPlayer {
             if (!this.isCurrentMusic(currentMusic)) return;
 
             if (!lyricSource?.rawLrc && !lyricSource?.translation) { this.setCurrentLyric(null); return; }
-            
+
             const parser = new LyricParser(lyricSource.rawLrc, { musicItem: currentMusic, translation: lyricSource.translation });
             this.setCurrentLyric({ parser, currentLrc: parser.getPosition(this.progress.currentTime || 0) });
         } catch (e: any) {
@@ -815,7 +830,7 @@ class TrackPlayer {
 
     private async fetchMediaSource(musicItem: IMusic.IMusicItem, quality?: IMusic.IQualityKey): Promise<{ quality: IMusic.IQualityKey; mediaSource: IPlugin.IMediaSourceResult | null; }> {
         if (!this.isReady) throw new Error("TrackPlayer not ready to fetch media source.");
-        
+
         const defaultQuality = AppConfig.getConfig("playMusic.defaultQuality") || "standard";
         const whenQualityMissing = AppConfig.getConfig("playMusic.whenQualityMissing") || "lower";
         const qualityOrder = getQualityOrder(quality ?? this.currentQuality ?? defaultQuality, whenQualityMissing);
@@ -918,7 +933,6 @@ class TrackPlayer {
             return;
         }
 
-        // 强制同步状态更新
         this.setPlayerState(PlayerState.Buffering);
 
         await this.audioController.setTrackSource(mediaSource, musicItem);
