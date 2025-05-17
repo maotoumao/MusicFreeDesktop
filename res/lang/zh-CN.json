@@ -227,7 +227,7 @@
   "settings": {
     "choose_path": "选择路径",
     "change_path": "更改路径",
-    "folder_not_exist": "文件夹不存在",
+    "file_not_exist": "文件夹不存在",
     "open_folder": "打开文件夹",
     "section_name": {
       "normal": "常规",

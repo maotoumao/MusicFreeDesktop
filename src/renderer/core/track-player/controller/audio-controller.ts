@@ -183,14 +183,14 @@ class AudioController extends ControllerBase implements IAudioController {
         }
     }
 
-    public setTrackSource(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem): void {
+    public async setTrackSource(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem): Promise<void> {
         this.musicItem = { ...musicItem };
 
         let url = trackSource.url;
         if (!url) {
             this.onError?.(ErrorReason.EmptyResource, new Error("Track source URL is empty."));
             this.playerState = PlayerState.None;
-            return;
+            return; // async 函数返回 Promise.resolve(undefined)
         }
 
         const urlObj = new URL(url);
@@ -217,8 +217,8 @@ class AudioController extends ControllerBase implements IAudioController {
             const forwardedUrl = ServiceManager.RequestForwarderService.forwardRequest(url, "GET", headers);
             if (forwardedUrl) {
                 url = forwardedUrl;
-                headers = null;
-            } else if (!headers["Authorization"]) {
+                headers = null; // Headers are handled by the forwarder
+            } else if (!headers["Authorization"]) { // Only encode if not an Authorization header (fetch handles Auth)
                 url = encodeUrlHeaders(url, headers as Record<string, string>);
                 headers = null;
             }
@@ -226,42 +226,43 @@ class AudioController extends ControllerBase implements IAudioController {
 
         logger.logInfo("AudioController: Setting track source - ", url);
         this.audio.pause();
-        this.audio.removeAttribute("src");
-        this.audio.load();
-        this.destroyHls();
+        this.audio.removeAttribute("src"); // 清除旧的 src
+        this.audio.load(); // 重新加载 audio 元素以应用新的 src
+        this.destroyHls(); // 销毁任何现有的 HLS 实例
 
         if (getUrlExt(trackSource.url) === ".m3u8") {
             if (Hls.isSupported()) {
-                this.initHls();
-                if (this.hls) { // 确保 hls 实例已创建
-                    this.hls.loadSource(url);
+                this.initHls(); // 初始化 HLS
+                if (this.hls) {
+                    this.hls.loadSource(url); // 加载 HLS 源
                 }
             } else {
                 this.onError?.(ErrorReason.UnsupportedResource, new Error("HLS.js is not supported in this browser."));
                 this.playerState = PlayerState.None;
                 return;
             }
-        } else if (headers) {
-            fetch(url, { method: "GET", headers: headers as HeadersInit })
-                .then(async (res) => {
-                    if (!res.ok) throw new Error(`Failed to fetch audio: ${res.status} ${res.statusText}`);
-                    const blob = await res.blob();
-                    if (isSameMedia(this.musicItem, musicItem)) {
-                        this.audio.src = URL.createObjectURL(blob);
-                    } else {
-                        URL.revokeObjectURL(URL.createObjectURL(blob));
-                    }
-                })
-                .catch(e => {
-                    logger.logError("AudioController: Error fetching track with headers", e);
-                    this.onError?.(ErrorReason.EmptyResource, e);
-                    this.playerState = PlayerState.None;
-                });
+        } else if (headers) { // 如果仍然有 headers (例如 Authorization)，则使用 fetch
+            try {
+                const res = await fetch(url, { method: "GET", headers: headers as HeadersInit });
+                if (!res.ok) throw new Error(`Failed to fetch audio: ${res.status} ${res.statusText}`);
+                const blob = await res.blob();
+                if (isSameMedia(this.musicItem, musicItem)) { // 确保仍然是当前歌曲
+                    this.audio.src = URL.createObjectURL(blob);
+                } else {
+                    URL.revokeObjectURL(URL.createObjectURL(blob)); // 如果歌曲已更改，释放 blob URL
+                }
+            } catch (e: any) {
+                logger.logError("AudioController: Error fetching track with headers", e);
+                this.onError?.(ErrorReason.EmptyResource, e);
+                this.playerState = PlayerState.None;
+                return;
+            }
         } else {
-            this.audio.src = url;
+            this.audio.src = url; // 直接设置 src
         }
-        if (this.playerState !== PlayerState.None) {
-            this.playerState = PlayerState.Buffering;
+
+        if (this.playerState !== PlayerState.None) { // 如果之前不是 None 状态
+            this.playerState = PlayerState.Buffering; // 设置为缓冲中
         }
     }
 
