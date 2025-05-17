@@ -277,6 +277,9 @@
       "toast_switch_language_fail": "切換語言失敗"
     },
     "play_music": {
+      "backend": "播放後端",
+      "mpv_path": "MPV播放器路徑",
+      "mpv_args": "MPV附加參數",
       "case_sensitive_in_search": "搜尋歌單時區分大小寫",
       "default_play_quality": "預設播放音質",
       "when_quality_missing": "當播放音質缺失時",

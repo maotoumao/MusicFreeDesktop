@@ -277,6 +277,9 @@
       "toast_switch_language_fail": "Switching language failed"
     },
     "play_music": {
+      "backend": "Play backend",
+      "mpv_path": "MPV path",
+      "mpv_args": "MPV args",
       "case_sensitive_in_search": "Case-sensitive search in playlist",
       "default_play_quality": "Default playback quality",
       "when_quality_missing": "When playback quality is missing",
