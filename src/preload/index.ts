@@ -17,25 +17,25 @@ const mpvPlayer = {
     seek: (timeSeconds: number) => ipcRenderer.invoke("mpv-seek", timeSeconds),
     setVolume: (volume: number) => ipcRenderer.invoke("mpv-set-volume", volume),
     setSpeed: (speed: number) => ipcRenderer.invoke("mpv-set-speed", speed),
-    getDuration: () => ipcRenderer.invoke("mpv-get-duration"),
-    getCurrentTime: () => ipcRenderer.invoke("mpv-get-current-time"),
+    getDuration: (): Promise<number | null> => ipcRenderer.invoke("mpv-get-duration"),
+    getCurrentTime: (): Promise<number> => ipcRenderer.invoke("mpv-get-current-time"),
     quit: () => ipcRenderer.invoke("mpv-quit"),
-    setProperty: (property: string, value: any) => ipcRenderer.invoke("mpv-set-property", property, value), // +++ 新增这一行 +++
+    setProperty: (property: string, value: any) => ipcRenderer.invoke("mpv-set-property", property, value),
+    // +++ 新增：允许渲染进程通知主进程轨道已加载 +++
+    signalTrackLoaded: () => ipcRenderer.send("mpv-signal-track-loaded"),
 };
 
 const mpvPlayerListener = {
-    onStatusChange: (callback: (status: any) => void) => // This seems unused by MpvController
-        ipcRenderer.on("mpv-statuschange", (_event, status) => callback(status)),
     onPaused: (callback: (data: { state: PlayerState }) => void) =>
         ipcRenderer.on("mpv-paused", (_event, data) => callback(data)),
     onResumed: (callback: (data: { state: PlayerState }) => void) =>
         ipcRenderer.on("mpv-resumed", (_event, data) => callback(data)),
-    onTimePosition: (callback: (data: { time: number, duration: number | null }) => void) => // duration can be null
+    onTimePosition: (callback: (data: { time: number, duration: number | null }) => void) =>
         ipcRenderer.on("mpv-timeposition", (_event, data) => callback(data)),
-    onStopped: (callback: (data: { state: PlayerState }) => void) =>
+    onStopped: (callback: (data: { state: PlayerState, reason?: string }) => void) =>
         ipcRenderer.on("mpv-stopped", (_event, data) => callback(data)),
-    onStarted: (callback: (data: { state: PlayerState }) => void) => // data might not be needed here
-        ipcRenderer.on("mpv-started", (_event, data) => callback(data)), // Renderer 'started' might just need to know it started
+    onStarted: (callback: (data: { state: PlayerState }) => void) => // state is less important here, event itself matters
+        ipcRenderer.on("mpv-started", (_event, data) => callback(data)),
     onPlaybackEnded: (callback: (data: { reason: string }) => void) =>
         ipcRenderer.on("mpv-playback-ended", (_event, data) => callback(data)),
     onError: (callback: (error: string) => void) =>
@@ -44,18 +44,18 @@ const mpvPlayerListener = {
         ipcRenderer.on("mpv-init-failed", (_event, errorMsg) => callback(errorMsg)),
     onInitSuccess: (callback: () => void) =>
         ipcRenderer.on("mpv-init-success", () => callback()),
-    // +++ Add these for volume and speed UI feedback +++
     onVolumeChange: (callback: (data: { volume: number }) => void) =>
         ipcRenderer.on("mpv-volumechange", (_event, data) => callback(data)),
     onSpeedChange: (callback: (data: { speed: number }) => void) =>
         ipcRenderer.on("mpv-speedchange", (_event, data) => callback(data)),
-    // +++ End of additions +++
+    onReinitializedAfterCrash: (callback: (data: { track: IMusic.IMusicItem, time: number, wasPlaying: boolean }) => void) =>
+        ipcRenderer.on("mpv-reinitialized-after-crash", (_event, data) => callback(data)),
     removeAllMpvListeners: (channel?: string) => {
         const channels = channel ? [channel] : [
-            "mpv-statuschange", "mpv-paused", "mpv-resumed",
-            "mpv-timeposition", "mpv-stopped", "mpv-started",
-            "mpv-playback-ended", "mpv-error", "mpv-init-failed", "mpv-init-success",
-            "mpv-volumechange", "mpv-speedchange" // Add new channels here
+            "mpv-paused", "mpv-resumed", "mpv-timeposition",
+            "mpv-stopped", "mpv-started", "mpv-playback-ended",
+            "mpv-error", "mpv-init-failed", "mpv-init-success",
+            "mpv-volumechange", "mpv-speedchange", "mpv-reinitialized-after-crash"
         ];
         channels.forEach(ch => ipcRenderer.removeAllListeners(ch));
     }
@@ -63,7 +63,7 @@ const mpvPlayerListener = {
 
 
 contextBridge.exposeInMainWorld("electron", {
-    ...(window.electron || {}), // 保留其他可能已暴露的API
+    ...(window.electron || {}),
     mpvPlayer,
     mpvPlayerListener,
 });
