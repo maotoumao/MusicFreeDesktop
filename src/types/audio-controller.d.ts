@@ -1,3 +1,4 @@
+// src/types/audio-controller.d.ts
 import {PlayerState} from "@/common/constant";
 import {CurrentTime, ErrorReason} from "@renderer/core/track-player/enum";
 
@@ -8,6 +9,12 @@ export interface IAudioController {
     playerState: PlayerState;
 
     musicItem: IMusic.IMusicItem | null;
+
+    // 可选的初始化方法，主要用于像 MpvController 这样的异步初始化场景
+    initialize?(): Promise<void>;
+
+    // 可选的 readyPromise，用于等待控制器就绪
+    readyPromise?: Promise<void>;
 
     // 准备音乐信息
     prepareTrack?(musicItem: IMusic.IMusicItem): void;
@@ -55,4 +62,3 @@ export interface IAudioController {
     onSpeedChange?: (speed: number) => void;
 
 }
-

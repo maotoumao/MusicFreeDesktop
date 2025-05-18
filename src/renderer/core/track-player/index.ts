@@ -27,9 +27,8 @@ import MpvController from "@renderer/core/track-player/controller/mpv-controller
 import logger from "@shared/logger/renderer";
 import voidCallback from "@/common/void-callback";
 import {delay} from "@/common/time-util";
-import {createUniqueMap} from "@/common/unique-map";
 import {getLinkedLyric} from "@renderer/core/link-lyric";
-import {fsUtil} from "@shared/utils/renderer";
+import {fsUtil}from "@shared/utils/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
 
 const {
@@ -153,7 +152,7 @@ class TrackPlayer {
         this.isMpvInitFailed = false;
 
         if (this.audioController) {
-            await this.audioController.destroy();
+            await this.audioController.destroy?.();
             this.audioController = null;
         }
 
@@ -164,14 +163,11 @@ class TrackPlayer {
         }
         this.setupAudioControllerEvents();
 
-        // @ts-ignore
         if (typeof this.audioController.initialize === 'function') {
             try {
-                // @ts-ignore
                 await this.audioController.initialize();
                 logger.logInfo(`TrackPlayer: Audio controller (${backendType}) initialized successfully.`);
-                 // @ts-ignore
-                if (backendType === 'mpv' && this.audioController.isMpvInitialized === false) {
+                if (backendType === 'mpv' && (this.audioController as MpvController).isMpvInitialized === false) {
                     throw new Error("MpvController reported not initialized after successful initialize call.");
                 }
             } catch (e) {
@@ -191,7 +187,6 @@ class TrackPlayer {
 
 
         if (musicToRestore && this.audioController ) {
-            // @ts-ignore
             if (this.isMpvInitFailed && backendType === 'mpv') {
                 logger.logInfo("TrackPlayer: MPV initialization was marked as failed, skipping track restoration.");
                 this.setPlayerState(PlayerState.None);
@@ -200,15 +195,17 @@ class TrackPlayer {
             }
 
             logger.logInfo("TrackPlayer: Attempting to load/restore track with new backend.", { title: musicToRestore.title, time: timeToRestore });
-            this.setCurrentMusic(musicToRestore);
+            this.setCurrentMusic(musicToRestore); // Set current music first
             this.currentIndex = this.findMusicIndex(musicToRestore);
             if (this.audioController) await this.audioController.prepareTrack?.(musicToRestore);
 
             try {
-                const {mediaSource, quality: actualQuality} = await this.fetchMediaSource(musicToRestore, qualityToRestore);
+                // For restoration, always force fetching a new network source
+                const {mediaSource, quality: actualQuality} = await this.fetchMediaSource(musicToRestore, qualityToRestore, true);
                 if (!mediaSource?.url) {
                     throw new Error("Media source URL is empty for track restoration.");
                 }
+                // Check if musicItem is still the one we intend to restore
                 if (this.isCurrentMusic(musicToRestore) && this.audioController) {
                     this.setCurrentQuality(actualQuality);
                     await this.setTrack(mediaSource, musicToRestore, {
@@ -221,6 +218,9 @@ class TrackPlayer {
                 this.ee.emit(PlayerEvents.Error, musicToRestore, e instanceof Error ? e : new Error(String(e)));
                 this.setPlayerState(PlayerState.None);
             }
+        } else if (!musicToRestore) {
+            this.setPlayerState(PlayerState.None);
+            this.resetProgress();
         }
     }
 
@@ -238,13 +238,16 @@ class TrackPlayer {
                 }
                 case RepeatMode.Loop: {
                     logger.logInfo(`TrackPlayer: onEnded - Mode: Loop, replaying index ${this.currentIndex}.`);
+                    // For loop, force refresh source and seek to 0 to ensure reliable replay, especially for network streams
                     this.playIndex(this.currentIndex, {
-                        restartOnSameMedia: true
+                        refreshSource: true, // Key change: force refresh for loop
+                        seekTo: 0,
+                        restartOnSameMedia: true // Ensures it actually reloads/replays
                     });
                     break;
                 }
                 default:
-                    logger.logInfo(`TrackPlayer: onEnded - Default behavior, setting player state to None.`);
+                    logger.logInfo(`TrackPlayer: onEnded - Default behavior (should not happen), setting player state to None.`);
                     this.setPlayerState(PlayerState.None);
                     this.resetProgress();
                     break;
@@ -282,8 +285,7 @@ class TrackPlayer {
             const errorToEmit = reason instanceof Error ? reason : new Error(String(reason) || "Unknown playback error");
 
             if (type === PlayerErrorReason.EmptyResource && AppConfig.getConfig("playMusic.backend") === "mpv") {
-                 // @ts-ignore
-                if (this.audioController && this.audioController.isMpvInitialized === false) {
+                if (this.audioController && (this.audioController as MpvController).isMpvInitialized === false) {
                      this.isMpvInitFailed = true;
                      this.ee.emit(PlayerEvents.Error, errorMusicItem, new Error(`MPV播放器初始化失败: ${errorToEmit.message}`));
                      return;
@@ -349,8 +351,7 @@ class TrackPlayer {
         await this.initializeAudioBackend();
 
         const backendType = AppConfig.getConfig("playMusic.backend");
-        // @ts-ignore
-        const isControllerActuallyNotInitialized = backendType === "mpv" && this.audioController && this.audioController.isMpvInitialized === false;
+        const isControllerActuallyNotInitialized = backendType === "mpv" && this.audioController && (this.audioController as MpvController).isMpvInitialized === false;
 
 
         if (currentMusicFromPref && !this.currentMusic) {
@@ -359,7 +360,7 @@ class TrackPlayer {
             if (this.audioController && !isControllerActuallyNotInitialized) {
                 await this.audioController.prepareTrack?.(currentMusicFromPref);
             }
-        } else if (!currentMusicFromPref) {
+        } else if (!currentMusicFromPref && !this.currentMusic) {
             this.setPlayerState(PlayerState.None);
             this.resetProgress();
         }
@@ -391,8 +392,7 @@ class TrackPlayer {
                 await this.initializeAudioBackend({ music: previousMusic, time: previousTime, isPlaying: wasPlaying });
             }
             const currentBackend = AppConfig.getConfig("playMusic.backend");
-            // @ts-ignore
-            const isCurrentControllerNotInit = currentBackend === "mpv" && this.audioController && this.audioController.isMpvInitialized === false;
+            const isCurrentControllerNotInit = currentBackend === "mpv" && this.audioController && (this.audioController as MpvController).isMpvInitialized === false;
             if (patch["playMusic.audioOutputDevice"] !== undefined && this.audioController && !isCurrentControllerNotInit) {
                 const newDeviceId = AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId;
                 await this.setAudioOutputDevice(newDeviceId);
@@ -406,14 +406,10 @@ class TrackPlayer {
     private setupEvents() {
         this.ee.on(PlayerEvents.Error, async (errorMusicItem, reason) => {
             logger.logError("TrackPlayer internal error event:", { musicTitle: errorMusicItem?.title, reason: reason.message, stack: reason.stack } as any);
-            // this.resetProgress(); // Error handler in setupAudioControllerEvents already handles this
-            // const needSkip = AppConfig.getConfig("playMusic.playError") === "skip"; // Logic moved to onError
-
             if (this.isMpvInitFailed && AppConfig.getConfig("playMusic.backend") === "mpv") {
                 this.setPlayerState(PlayerState.None);
                 return;
             }
-            // The detailed skip/pause logic is now within this.audioController.onError
         });
 
         if (navigator.mediaSession) {
@@ -429,17 +425,15 @@ class TrackPlayer {
 
     public async playIndex(index: number, options: IPlayOptions = {}) {
         if (!this.isReady) await this.setup();
-        // @ts-ignore
-        if (!this.audioController || (AppConfig.getConfig("playMusic.backend") === "mpv" && this.audioController.isMpvInitialized === false) ) {
+        if (!this.audioController || (AppConfig.getConfig("playMusic.backend") === "mpv" && (this.audioController as MpvController).isMpvInitialized === false) ) {
             const errorMsg = "播放器未正确初始化或后端不可用 (playIndex)。";
             logger.logError(errorMsg, new Error("AudioController not ready or MPV init failed for playIndex"));
             this.ee.emit(PlayerEvents.Error, this.musicQueue[index] || null, new Error(errorMsg));
             return;
         }
 
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) {
-            try { // @ts-ignore
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') {
+            try {
                 await this.audioController.readyPromise;
             } catch (e) {
                 this.ee.emit(PlayerEvents.Error, this.musicQueue[index] || null, new Error(`播放器后端初始化等待失败 (playIndex): ${(e as Error).message}`));
@@ -447,7 +441,7 @@ class TrackPlayer {
             }
         }
 
-        const {refreshSource, restartOnSameMedia = true, seekTo, quality: intendedQuality} = options;
+        let {refreshSource = false, restartOnSameMedia = true, seekTo, quality: intendedQuality} = options;
 
         if (index === -1 && this.musicQueue.length === 0) { this.reset(); return; }
         index = (index + this.musicQueue.length) % this.musicQueue.length;
@@ -458,25 +452,37 @@ class TrackPlayer {
             this.reset(); return;
         }
 
-        if (this.currentIndex === index && this.isCurrentMusic(nextMusicItem) && !refreshSource) {
-            if (restartOnSameMedia) await this.seekTo(0);
-            if (this.audioController) await this.audioController.play();
-            return;
+        const isNewTrack = !this.isCurrentMusic(nextMusicItem);
+        if (isNewTrack) { // If it's a new track, always refresh the source
+            refreshSource = true;
         }
 
-        this.setCurrentMusic(nextMusicItem);
+        this.setCurrentMusic(nextMusicItem); // Set current music immediately
         this.currentIndex = index;
-
         this.setPlayerState(PlayerState.Buffering);
         if (this.audioController) this.audioController.prepareTrack?.(nextMusicItem);
 
         try {
-            const {mediaSource, quality} = await this.fetchMediaSource(nextMusicItem, intendedQuality);
-            if (!mediaSource?.url) throw new Error("无法获取有效的媒体播放链接 (URL is empty).");
-            if (!this.isCurrentMusic(nextMusicItem)) return;
+            let mediaSourceToUse: IPlugin.IMediaSourceResult | null = null;
+            let qualityToUse: IMusic.IQualityKey | undefined = intendedQuality;
 
-            this.setCurrentQuality(quality);
-            await this.setTrack(mediaSource, nextMusicItem, { seekTo, autoPlay: true });
+            if (refreshSource || !this.audioController.hasSource) {
+                const fetched = await this.fetchMediaSource(nextMusicItem, intendedQuality, refreshSource); // Pass refreshSource as forceNetwork
+                mediaSourceToUse = fetched.mediaSource;
+                qualityToUse = fetched.quality;
+                if (!mediaSourceToUse?.url) throw new Error("无法获取有效的媒体播放链接 (URL is empty).");
+                if (!this.isCurrentMusic(nextMusicItem)) return;
+                this.setCurrentQuality(qualityToUse);
+                await this.setTrack(mediaSourceToUse, nextMusicItem, { seekTo: seekTo ?? 0, autoPlay: true });
+            } else { // Same song, controller has source, not forced refresh
+                const actualSeekTo = restartOnSameMedia ? 0 : seekTo;
+                if (actualSeekTo !== undefined) {
+                    await this.audioController.seekTo(actualSeekTo);
+                }
+                if (this.playerState !== PlayerState.Playing) {
+                    await this.audioController.play();
+                }
+            }
 
             PluginManager.callPluginDelegateMethod({ platform: nextMusicItem.platform }, "getMusicInfo", nextMusicItem)
                 .then(musicInfo => {
@@ -496,14 +502,12 @@ class TrackPlayer {
 
     public async playMusic(musicItem: IMusic.IMusicItem, options: IPlayOptions = {}) {
         if (!this.isReady) await this.setup();
-        // @ts-ignore
-        if (!this.audioController || (AppConfig.getConfig("playMusic.backend") === "mpv" && this.audioController.isMpvInitialized === false) ) {
+        if (!this.audioController || (AppConfig.getConfig("playMusic.backend") === "mpv" && (this.audioController as MpvController).isMpvInitialized === false) ) {
             this.ee.emit(PlayerEvents.Error, musicItem, new Error("播放器未正确初始化或后端不可用 (playMusic)。")); return;
         }
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) {
-            try { // @ts-ignore
-                await this.audioController.readyPromise;
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') {
+            try {
+                 await this.audioController.readyPromise;
             } catch (e) {
                 this.ee.emit(PlayerEvents.Error, musicItem, new Error(`播放器后端初始化等待失败 (playMusic): ${(e as Error).message}`)); return;
             }
@@ -513,7 +517,7 @@ class TrackPlayer {
         if (queueIndex === -1) {
             const newQueue = [...this.musicQueue, {...musicItem, [timeStampSymbol]: Date.now(), [sortIndexSymbol]: this.musicQueue.length }];
             this.setMusicQueue(newQueue);
-            await this.playIndex(newQueue.length - 1, options);
+            await this.playIndex(newQueue.length - 1, {...options, refreshSource: true}); // Force refresh for newly added
         } else {
             await this.playIndex(queueIndex, options);
         }
@@ -521,13 +525,11 @@ class TrackPlayer {
 
     public async playMusicWithReplaceQueue(musicList: IMusic.IMusicItem[], musicItem?: IMusic.IMusicItem) {
         if (!this.isReady) await this.setup();
-        // @ts-ignore
-        if (!this.audioController || (AppConfig.getConfig("playMusic.backend") === "mpv" && this.audioController.isMpvInitialized === false) ) {
+        if (!this.audioController || (AppConfig.getConfig("playMusic.backend") === "mpv" && (this.audioController as MpvController).isMpvInitialized === false) ) {
             this.ee.emit(PlayerEvents.Error, musicItem || (musicList.length ? musicList[0] : null), new Error("播放器未正确初始化 (playMusicWithReplaceQueue)。")); return;
         }
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) {
-            try { // @ts-ignore
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') {
+            try {
                  await this.audioController.readyPromise;
             } catch (e) {
                 this.ee.emit(PlayerEvents.Error, musicItem || (musicList.length ? musicList[0] : null), new Error(`后端初始化等待失败 (playMusicWithReplaceQueue): ${(e as Error).message}`)); return;
@@ -535,29 +537,28 @@ class TrackPlayer {
         }
 
         if (!musicList.length && !musicItem) { this.reset(); return; }
+
         addSortProperty(musicList);
         if (this.repeatMode === RepeatMode.Shuffle) musicList = shuffle(musicList);
+
         musicItem = musicItem ?? musicList[0];
+
         this.setMusicQueue(musicList);
-        await this.playMusic(musicItem);
+        await this.playMusic(musicItem!, {refreshSource: true});
     }
 
     public async skipToPrev() {
         if (!this.isReady || !this.audioController) return;
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-             await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
         if (this.isEmpty) { this.reset(); return; }
-        this.playIndex(this.currentIndex - 1);
+        this.playIndex(this.currentIndex - 1, {refreshSource: true}); // Force refresh on skip
     }
 
     public async skipToNext() {
         if (!this.isReady || !this.audioController) return;
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-            await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
         if (this.isEmpty) { this.reset(); return; }
-        this.playIndex(this.currentIndex + 1);
+        this.playIndex(this.currentIndex + 1, {refreshSource: true}); // Force refresh on skip
     }
 
     public async reset() {
@@ -572,32 +573,26 @@ class TrackPlayer {
 
     public async seekTo(seconds: number) {
         if (!this.isReady || !this.audioController) return;
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-            await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
         this.audioController.seekTo(seconds);
     }
 
     public async pause() {
         if (!this.isReady || !this.audioController) return;
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-            await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
         this.audioController.pause();
     }
 
     public async resume() {
         if (!this.isReady) await this.setup();
-        // @ts-ignore
-        if (!this.audioController || (AppConfig.getConfig("playMusic.backend") === "mpv" && this.audioController.isMpvInitialized === false)) {
+        if (!this.audioController || (AppConfig.getConfig("playMusic.backend") === "mpv" && (this.audioController as MpvController).isMpvInitialized === false)) {
             const errorMsg = "播放器未正确初始化或后端不可用 (resume)";
             logger.logError(errorMsg, new Error("AudioController not ready or MPV init failed for resume"));
             this.ee.emit(PlayerEvents.Error, this.currentMusic, new Error(errorMsg));
             return;
         }
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) {
-            try { // @ts-ignore
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') {
+            try {
                 await this.audioController.readyPromise;
             } catch (e) {
                 this.ee.emit(PlayerEvents.Error, this.currentMusic, new Error(`播放器后端初始化等待失败 (resume): ${(e as Error).message}`));
@@ -611,7 +606,8 @@ class TrackPlayer {
             await this.playIndex(this.currentIndex, {
                 restartOnSameMedia: false,
                 seekTo: seekToTime,
-                quality: this.currentQuality
+                quality: this.currentQuality,
+                refreshSource: true
             });
         } else if (this.audioController.hasSource) {
             await this.audioController.play();
@@ -633,9 +629,7 @@ class TrackPlayer {
             setUserPreference("volume", clampedVolume);
             return;
         }
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-            await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
         this.audioController.setVolume(clampedVolume);
     }
 
@@ -645,9 +639,7 @@ class TrackPlayer {
             setUserPreference("speed", speed);
             return;
         }
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-            await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
         this.audioController.setSpeed(speed);
     }
 
@@ -665,7 +657,9 @@ class TrackPlayer {
 
         const itemsToAdd: IMusic.IMusicItem[] = [];
         for (const newItem of _musicItems) {
-            if (this.findMusicIndex(newItem) === -1) itemsToAdd.push(newItem);
+            if (this.findMusicIndex(newItem) === -1) {
+                itemsToAdd.push(newItem);
+            }
         }
         if (itemsToAdd.length === 0) return;
 
@@ -686,57 +680,75 @@ class TrackPlayer {
 
         let indicesToRemove: number[] = [];
         if (typeof musicItemsToRemove === 'number') {
-            if (musicItemsToRemove >= 0 && musicItemsToRemove < currentQueue.length) indicesToRemove.push(musicItemsToRemove);
+            if (musicItemsToRemove >= 0 && musicItemsToRemove < currentQueue.length) {
+                indicesToRemove.push(musicItemsToRemove);
+            }
         } else {
             const itemsArray = Array.isArray(musicItemsToRemove) ? musicItemsToRemove : [musicItemsToRemove];
             itemsArray.forEach(item => {
                 const idx = this.findMusicIndex(item);
-                if (idx !== -1) indicesToRemove.push(idx);
+                if (idx !== -1) {
+                    indicesToRemove.push(idx);
+                }
             });
             indicesToRemove = [...new Set(indicesToRemove)];
         }
+
         if (indicesToRemove.length === 0) return;
 
         indicesToRemove.sort((a, b) => b - a);
+
         const newQueue = [...currentQueue];
         let newCurrentIndex = this.currentIndex;
         let currentMusicWasRemoved = false;
 
         for (const index of indicesToRemove) {
             newQueue.splice(index, 1);
-            if (index === this.currentIndex) currentMusicWasRemoved = true;
-            else if (index < this.currentIndex) newCurrentIndex--;
+            if (index === this.currentIndex) {
+                currentMusicWasRemoved = true;
+            } else if (index < this.currentIndex) {
+                newCurrentIndex--;
+            }
         }
-        if (!currentMusicWasRemoved) this.currentIndex = newCurrentIndex;
+
+        if (!currentMusicWasRemoved) {
+            this.currentIndex = newCurrentIndex;
+        }
+
+        this.setMusicQueue(newQueue);
 
         if (currentMusicWasRemoved) {
             if (this.audioController) this.audioController.reset();
             this.resetProgress();
             this.setCurrentMusic(null);
-        }
-        this.setMusicQueue(newQueue);
 
-        if (currentMusicWasRemoved && newQueue.length > 0) {
-            const playNextIdx = (this.currentIndex >= 0 && this.currentIndex < newQueue.length) ? this.currentIndex : 0;
-            this.playIndex(playNextIdx);
-        } else if (newQueue.length === 0) this.reset();
+            if (newQueue.length > 0) {
+                const playNextIdx = (newCurrentIndex >= 0 && newCurrentIndex < newQueue.length) ? newCurrentIndex : 0;
+                this.playIndex(playNextIdx);
+            } else {
+                this.reset();
+            }
+        } else if (newQueue.length === 0) {
+            this.reset();
+        }
     }
 
 
     public async setQuality(qualityKey: IMusic.IQualityKey) {
         if (!this.isReady || !this.audioController) return;
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-            await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
+
         const currentMusic = this.currentMusic;
         if (currentMusic && qualityKey !== this.currentQuality) {
             const currentTime = this.progress.currentTime;
             const wasPlaying = this.playerState === PlayerState.Playing;
+
             if (wasPlaying && this.audioController) await this.audioController.pause();
 
             this.setPlayerState(PlayerState.Buffering);
             try {
-                const {mediaSource, quality: realQuality} = await this.fetchMediaSource(currentMusic, qualityKey)
+                // Force network fetch when changing quality
+                const {mediaSource, quality: realQuality} = await this.fetchMediaSource(currentMusic, qualityKey, true)
                 if (this.isCurrentMusic(currentMusic) && this.audioController) {
                     await this.setTrack(mediaSource, currentMusic, { seekTo: currentTime, autoPlay: wasPlaying });
                     this.setCurrentQuality(realQuality);
@@ -779,9 +791,7 @@ class TrackPlayer {
 
     public async setAudioOutputDevice(deviceId?: string) {
         if (!this.isReady || !this.audioController) return;
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-            await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
         try {
             await this.audioController.setSinkId(deviceId ?? "");
         } catch (e: any) {
@@ -815,11 +825,17 @@ class TrackPlayer {
             if ((!lyricSource || (!lyricSource.rawLrc && !lyricSource.translation)) && this.isCurrentMusic(currentMusic)) {
                 lyricSource = (await PluginManager.callPluginDelegateMethod(currentMusic, "getLyric", currentMusic).catch(voidCallback)) || null;
             }
+
             if (!this.isCurrentMusic(currentMusic)) return;
 
             if (!lyricSource?.rawLrc && !lyricSource?.translation) { this.setCurrentLyric(null); return; }
 
-            const parser = new LyricParser(lyricSource.rawLrc, { musicItem: currentMusic, translation: lyricSource.translation });
+            if (!lyricSource.rawLrc && lyricSource.translation) {
+                lyricSource.rawLrc = lyricSource.translation;
+                lyricSource.translation = undefined;
+            }
+
+            const parser = new LyricParser(lyricSource.rawLrc!, { musicItem: currentMusic, translation: lyricSource.translation });
             this.setCurrentLyric({ parser, currentLrc: parser.getPosition(this.progress.currentTime || 0) });
         } catch (e: any) {
             logger.logError("歌词解析失败", e);
@@ -828,33 +844,51 @@ class TrackPlayer {
     }
 
 
-    private async fetchMediaSource(musicItem: IMusic.IMusicItem, quality?: IMusic.IQualityKey): Promise<{ quality: IMusic.IQualityKey; mediaSource: IPlugin.IMediaSourceResult | null; }> {
+    private async fetchMediaSource(musicItem: IMusic.IMusicItem, quality?: IMusic.IQualityKey, forceNetwork = false): Promise<{ quality: IMusic.IQualityKey; mediaSource: IPlugin.IMediaSourceResult | null; }> {
         if (!this.isReady) throw new Error("TrackPlayer not ready to fetch media source.");
+
+        if (!forceNetwork) {
+            const downloadedData = getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData");
+            if (downloadedData) {
+                const {quality: downloadedQuality, path: _path} = downloadedData;
+                if (await fsUtil.isFile(_path)) {
+                    logger.logInfo(`Using downloaded file for ${musicItem.title} at path: ${_path}`);
+                    return { quality: downloadedQuality || "standard", mediaSource: { url: fsUtil.addFileScheme(_path) }};
+                } else {
+                    logger.logInfo(`Downloaded file for ${musicItem.title} not found at path: ${_path}. Fetching online.`);
+                }
+            }
+        }
+
 
         const defaultQuality = AppConfig.getConfig("playMusic.defaultQuality") || "standard";
         const whenQualityMissing = AppConfig.getConfig("playMusic.whenQualityMissing") || "lower";
         const qualityOrder = getQualityOrder(quality ?? this.currentQuality ?? defaultQuality, whenQualityMissing);
+
         let mediaSource: IPlugin.IMediaSourceResult | null = null;
         let realQuality: IMusic.IQualityKey = qualityOrder[0];
 
-        const downloadedData = getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData");
-        if (downloadedData) {
-            const {quality: downloadedQuality, path: _path} = downloadedData;
-            if (await fsUtil.isFile(_path)) {
-                return { quality: downloadedQuality || "standard", mediaSource: { url: fsUtil.addFileScheme(_path) }};
-            }
-        }
-
         for (const q of qualityOrder) {
             try {
-                mediaSource = await PluginManager.callPluginDelegateMethod({ platform: musicItem.platform }, "getMediaSource", musicItem, q);
-                if (!mediaSource?.url) continue;
-                realQuality = q;
-                break;
+                const sourceFromPlugin = await PluginManager.callPluginDelegateMethod({ platform: musicItem.platform }, "getMediaSource", musicItem, q);
+                if (sourceFromPlugin?.url) {
+                    mediaSource = sourceFromPlugin;
+                    realQuality = q;
+                    break;
+                }
             } catch (e: any) {
-                logger.logInfo(`Failed to get media source for quality ${q} for music ${musicItem.title}: ${e.message}`);
+                logger.logInfo(`Failed to get media source from plugin for quality ${q} for music ${musicItem.title}: ${e.message}`);
             }
         }
+        
+        if (!mediaSource?.url && (forceNetwork || !getInternalData<IMusic.IMusicItemInternalData>(musicItem, "downloadData")) ) { // Only fallback if not a downloaded item or if forcing network
+            logger.logInfo(`Plugin did not return a valid source for ${musicItem.title}. Trying fallback to musicItem.url or qualities.`);
+            const fallbackUrl = musicItem.qualities?.[realQuality]?.url || musicItem.url;
+            if (fallbackUrl) {
+                mediaSource = { url: fallbackUrl };
+            }
+        }
+        
         if (!mediaSource?.url) throw new Error(`无法为歌曲 ${musicItem.title} 获取任何有效的播放链接。`);
         return { quality: realQuality, mediaSource };
     }
@@ -863,7 +897,9 @@ class TrackPlayer {
     private setCurrentMusic(musicItem: IMusic.IMusicItem | null) {
         const isActuallyDifferent = !this.isCurrentMusic(musicItem) ||
                                   (musicItem && this.currentMusic && JSON.stringify(musicItem) !== JSON.stringify(this.currentMusic));
+
         currentMusicStore.setValue(musicItem);
+
         if (isActuallyDifferent) {
             this.ee.emit(PlayerEvents.MusicChanged, musicItem);
             this.fetchCurrentLyric(true);
@@ -918,9 +954,7 @@ class TrackPlayer {
             this.setPlayerState(PlayerState.None);
             return;
         }
-        // @ts-ignore
-        if (typeof this.audioController.readyPromise === 'object' && this.audioController.readyPromise !== null) { // @ts-ignore
-             await this.audioController.readyPromise; }
+        if (this.audioController.readyPromise && typeof this.audioController.readyPromise.then === 'function') { await this.audioController.readyPromise; }
 
         await this.audioController.reset();
         this.resetProgress();
@@ -936,9 +970,14 @@ class TrackPlayer {
         this.setPlayerState(PlayerState.Buffering);
 
         await this.audioController.setTrackSource(mediaSource, musicItem);
-        if (options.seekTo !== undefined && isFinite(options.seekTo) && options.seekTo >= 0) this.audioController.seekTo(options.seekTo);
-        if (options.autoPlay) this.audioController.play();
-        else if (this.playerState !== PlayerState.Paused && this.playerState !== PlayerState.None) this.setPlayerState(PlayerState.Paused);
+        if (options.seekTo !== undefined && isFinite(options.seekTo) && options.seekTo >= 0) {
+            this.audioController.seekTo(options.seekTo);
+        }
+        if (options.autoPlay) {
+            this.audioController.play();
+        } else if (this.playerState !== PlayerState.Paused && this.playerState !== PlayerState.None) {
+            this.setPlayerState(PlayerState.Paused);
+        }
     }
 
     public isCurrentMusic(musicItem: IMusic.IMusicItem | null) {
