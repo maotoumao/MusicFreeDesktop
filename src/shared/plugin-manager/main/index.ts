@@ -3,8 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import {Plugin} from "./plugin";
 import {rimraf} from "rimraf";
-import _axios from "axios";
-import https from "https";
+import axios from "axios";
 import voidCallback from "@/common/void-callback";
 import {localPluginHash, localPluginName} from "@/common/constant";
 import localPlugin from "./internal-plugins/local-plugin";
@@ -14,12 +13,6 @@ import AppConfig from "@shared/app-config/main";
 import {compare} from "compare-versions";
 import {nanoid} from "nanoid";
 import logger from "@shared/logger/main";
-
-const axios = _axios.create({
-    httpsAgent: new https.Agent({
-        rejectUnauthorized: false
-    })
-});
 
 interface ICallPluginMethodParams<
     T extends keyof IPlugin.IPluginInstanceMethods

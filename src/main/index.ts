@@ -233,7 +233,7 @@ async function bootstrap() {
                 break;
             }
         }
-
+        
         if (proxyUpdated) {
             if (config["network.proxy.enabled"]) {
                 handleProxy(true, config["network.proxy.host"], config["network.proxy.port"], config["network.proxy.username"], config["network.proxy.password"]);
@@ -258,22 +258,55 @@ async function bootstrap() {
 function handleProxy(enabled: boolean, host?: string | null, port?: string | null, username?: string | null, password?: string | null) {
     try {
         if (!enabled) {
+            // 直连模式
             axios.defaults.httpAgent = undefined;
             axios.defaults.httpsAgent = undefined;
-        } else if (host) {
-            const proxyUrl = new URL(host);
-            proxyUrl.port = port;
-            proxyUrl.username = username;
-            proxyUrl.password = password;
-            const agent = new HttpsProxyAgent(proxyUrl);
+            //axios默认行为应该为直连，不使用系统代理
+            axios.defaults.proxy = false;
 
+            console.log("Axios 已设置为直连模式。");
+        } else {
+            //代理模式
+            if (!host || !port) {
+                throw new Error("启用代理失败：缺少主机名或端口号。");
+            }
+            let hostUrl = host;
+            // 使用 startsWith() 方法检查 host 是否包含协议前缀
+            if (!hostUrl.startsWith("http://") && !hostUrl.startsWith("https://")) {
+                // 如果两个都不是，则为其添加默认的 http:// 前缀
+                hostUrl = `http://${host}`;
+            }
+            const proxyUrlObject = new URL(hostUrl);
+            proxyUrlObject.port = String(port);
+            if (username) {
+                proxyUrlObject.username = encodeURIComponent(username);
+            } else {
+                proxyUrlObject.username = "";
+            }
+            if (password) {
+                proxyUrlObject.password = encodeURIComponent(password);
+            } else {
+                proxyUrlObject.password = "";
+            }
+            const proxyUrl = proxyUrlObject.toString();
+
+            // 创建 agent 实例
+            const agent = new HttpsProxyAgent(proxyUrl, {
+                // 来自plugin-manager的设置
+                rejectUnauthorized: false
+            });
             axios.defaults.httpAgent = agent;
             axios.defaults.httpsAgent = agent;
-        } else {
-            throw new Error("Unknown Host");
+            // 清除 axios 内置的 proxy 设置，避免冲突
+            axios.defaults.proxy = undefined;
+
+            console.log(`Axios 已设置为代理模式: ${proxyUrl}`);
         }
-    } catch (e) {
+    } catch (e: any) {
+        console.error("设置代理时发生错误:", e.message);
+        // 如果出错，安全起见，恢复到直连状态
         axios.defaults.httpAgent = undefined;
         axios.defaults.httpsAgent = undefined;
+        axios.defaults.proxy = false;
     }
 }
