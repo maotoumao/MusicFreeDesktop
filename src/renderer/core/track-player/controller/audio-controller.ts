@@ -27,7 +27,6 @@ class AudioController extends ControllerBase implements IAudioController {
     private hls: Hls | null = null;
 
     private ffmpeg: FFmpeg;
-    private ffmpegLoaded = false;
     private audioContext: AudioContext | null = null;
     private pcmSourceNode: AudioBufferSourceNode | null = null;
     private pcmBuffer: AudioBuffer | null = null;
@@ -158,12 +157,7 @@ class AudioController extends ControllerBase implements IAudioController {
     }
 
     private async _loadFFmpeg() {
-        if (this.ffmpegLoaded) return;
-        if (this.ffmpeg.loaded) {
-            this.ffmpegLoaded = true;
-            console.log("FFmpeg core already loaded by the library instance.");
-            return;
-        }
+        if (this.ffmpeg.loaded) return;
     
         try {
             const globalContext = getGlobalContext();
@@ -172,38 +166,34 @@ class AudioController extends ControllerBase implements IAudioController {
     
             const coreJSPath = window.path.join(ffmpegBasePath, 'ffmpeg-core.js');
             const wasmPath = window.path.join(ffmpegBasePath, 'ffmpeg-core.wasm');
-            const mainWorkerJSPath = window.path.join(ffmpegBasePath, '814.ffmpeg.js');
     
-            const coreURL = electronFsUtil.addFileScheme(coreJSPath);
-            const wasmURL = electronFsUtil.addFileScheme(wasmPath);
-            const workerURL = electronFsUtil.addFileScheme(mainWorkerJSPath);
+            console.log("[FFMPEG] Attempting to load with UMD file:// URLs:");
+            console.log("[FFMPEG] coreURL:", electronFsUtil.addFileScheme(coreJSPath));
+            console.log("[FFMPEG] wasmURL:", electronFsUtil.addFileScheme(wasmPath));
     
-            console.log("[FFMPEG] Attempting to load with file:// URLs:");
-            console.log("[FFMPEG] coreURL:", coreURL);
-            console.log("[FFMPEG] wasmURL:", wasmURL);
-            console.log("[FFMPEG] workerURL:", workerURL);
-    
-            await this.ffmpeg.load({ coreURL, wasmURL, workerURL });
+            await this.ffmpeg.load({
+                coreURL: electronFsUtil.addFileScheme(coreJSPath),
+                wasmURL: electronFsUtil.addFileScheme(wasmPath),
+            });
     
             this.ffmpeg.on('log', ({ type, message }) => {
                 // console.log(`[FFMPEG Log - ${type}]: ${message}`); // 按需开启日志
             });
-            this.ffmpegLoaded = true;
-            console.log("FFmpeg core and main worker loaded successfully via file:// URLs.");
+            console.log("FFmpeg loaded successfully using UMD versions.");
     
         } catch (e) {
-            console.error("Failed to load FFmpeg with file:// URLs:", e);
+            console.error("Failed to load FFmpeg:", e);
+            throw e;
         }
     }
 
     public async tryDecodeAndPlayWithFFmpeg(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem) {
-        if (!this.ffmpegLoaded) {
-            console.warn("[FFMPEG] FFmpeg not loaded, attempting to load now...");
-            await this._loadFFmpeg();
-            if (!this.ffmpegLoaded) {
-                this.onError?.(ErrorReason.UnsupportedResource, new Error("FFmpeg core failed to load."));
-                this.playerState = PlayerState.None;
-                this.正在使用FFmpeg = false;
+        if (!this.ffmpeg.loaded) {
+            try {
+                await this._loadFFmpeg();
+            } catch (e) {
+                console.error("FFmpeg load failed:", e);
+                // 错误处理
                 return;
             }
         }
