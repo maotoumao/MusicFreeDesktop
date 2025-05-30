@@ -1,6 +1,7 @@
 import {app, BrowserWindow, globalShortcut} from "electron";
 import fs from "fs";
 import path from "path";
+import os from 'os';
 import {setAutoFreeze} from "immer";
 import {setupGlobalContext} from "@/shared/global-context/main";
 import {setupI18n} from "@/shared/i18n/main";
@@ -21,6 +22,19 @@ import utils from "@shared/utils/main";
 import messageBus from "@shared/message-bus/main";
 import shortCut from "@shared/short-cut/main";
 import voidCallback from "@/common/void-callback";
+
+try {
+    const appName = app.getName();
+    const appVersion = app.getVersion();
+    const platformOS = os.type();
+    const osVersion = os.release();
+    const arch = os.arch();
+
+    const customUserAgent = `${appName}/${appVersion} (${platformOS} ${osVersion}; ${arch})`;
+    app.userAgentFallback = customUserAgent;
+} catch (error) {
+    logger.logError("Failed to set custom User-Agent:", error as Error);
+}
 
 // portable
 if (process.platform === "win32") {
@@ -135,7 +149,7 @@ app.whenReady().then(async () => {
                         musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : "")
                     );
                 } else {
-                    mainWindow.setTitle(app.name);
+                    mainWindow.setTitle(app.getName());
                 }
             }
         } else if ("playerState" in patch) {

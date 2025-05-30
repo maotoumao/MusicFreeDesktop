@@ -36,6 +36,7 @@ class AudioController extends ControllerBase implements IAudioController {
     private 正在使用FFmpeg = false;
     private currentTrackSource: IMusic.IMusicSource | null = null;
     private ffmpegProgressAnimationId: number | null = null;
+    private gainNode: GainNode | null = null;
 
     private _playerState: PlayerState = PlayerState.None;
     get playerState() {
@@ -249,11 +250,16 @@ class AudioController extends ControllerBase implements IAudioController {
                     const parsedUrl = new URL(urlForFetching);
                     let tempPath = decodeURIComponent(parsedUrl.pathname);
     
-                    if (typeof window.process !== 'undefined' && window.process.platform === 'win32') {
-                        if (tempPath.length > 1 && tempPath[0] === '/' && tempPath[2] === ':') {
-                            tempPath = tempPath.substring(1);
+                    const isWindows = navigator.platform.indexOf('Win') > -1;
+                    if (isWindows) {
+                        if (tempPath.startsWith('/')) {
+                            tempPath = tempPath.replace(/^\//, '');
                         }
-                        filePath = tempPath;
+                        if (tempPath.startsWith('/')) {
+                            filePath = `\\\\${tempPath.replace(/\//g, '\\')}`;
+                        } else {
+                            filePath = tempPath.replace(/\//g, '\\');
+                        }
                     } else {
                         filePath = tempPath;
                     }
@@ -325,6 +331,7 @@ class AudioController extends ControllerBase implements IAudioController {
 
     private resetAudioContextAndSourceNode() {
         this.cancelFFmpegProgressUpdate();
+        
         if (this.pcmSourceNode) {
             try {
                 this.pcmSourceNode.onended = null;
@@ -333,10 +340,17 @@ class AudioController extends ControllerBase implements IAudioController {
             this.pcmSourceNode.disconnect();
             this.pcmSourceNode = null;
         }
+        
+        if (this.gainNode) {
+            this.gainNode.disconnect();
+            this.gainNode = null;
+        }
+        
         if (this.audioContext && this.audioContext.state !== 'closed') {
             this.audioContext.close().catch(e => console.warn("Error closing previous AudioContext", e));
         }
         this.audioContext = null;
+        
         this.pcmBuffer = null;
         this.pcmPlayStartTime = 0;
         this.pcmCurrentOffset = 0;
@@ -345,6 +359,11 @@ class AudioController extends ControllerBase implements IAudioController {
     private async _playPcmData(pcmData: Uint8Array) {
         if (!this.audioContext || this.audioContext.state === 'closed') {
             this.audioContext = new AudioContext();
+        }
+
+        if (!this.gainNode) {
+            this.gainNode = this.audioContext.createGain();
+            this.gainNode.connect(this.audioContext.destination);
         }
 
         const numberOfChannels = 2;
@@ -378,6 +397,10 @@ class AudioController extends ControllerBase implements IAudioController {
             return;
         }
 
+        if (this.pcmSourceNode && this.gainNode) {
+            this.pcmSourceNode.connect(this.gainNode);
+        }
+
         if (this.pcmSourceNode) {
             this.pcmSourceNode.onended = null;
             try { this.pcmSourceNode.stop(); } catch(e) {/* ignore */}
@@ -386,7 +409,11 @@ class AudioController extends ControllerBase implements IAudioController {
 
         this.pcmSourceNode = this.audioContext.createBufferSource();
         this.pcmSourceNode.buffer = this.pcmBuffer;
-        this.pcmSourceNode.connect(this.audioContext.destination);
+        if (this.gainNode) {
+            this.pcmSourceNode.connect(this.gainNode);
+        } else {
+            this.pcmSourceNode.connect(this.audioContext.destination);
+        }
 
         this.pcmSourceNode.onended = () => {
             if (this.playerState === PlayerState.Playing && this.正在使用FFmpeg) {
@@ -703,6 +730,9 @@ class AudioController extends ControllerBase implements IAudioController {
 
     setVolume(volume: number): void {
         this.audio.volume = volume;
+        if (this.正在使用FFmpeg && this.gainNode) {
+            this.gainNode.gain.value = volume;
+        }
     }
 }
 

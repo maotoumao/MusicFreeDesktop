@@ -1,5 +1,6 @@
 import type { Configuration } from "webpack";
 import path from "path";
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 import { rules } from "./webpack.rules";
 import { plugins } from "./webpack.plugins";
@@ -44,11 +45,23 @@ rules.push(
   }
 );
 
+const rendererPlugins = [
+  ...plugins,
+  new CopyWebpackPlugin({
+    patterns: [
+      {
+        from: path.resolve(__dirname, '../res/ffmpeg/814.ffmpeg.js'),
+        to: 'main_window/814.ffmpeg.js',
+      },
+    ],
+  }),
+];
+
 export const rendererConfig: Configuration = {
   module: {
     rules,
   },
-  plugins,
+  plugins: rendererPlugins,
   resolve: {
     extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".scss"],
     alias: {
