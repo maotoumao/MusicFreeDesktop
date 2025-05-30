@@ -460,14 +460,25 @@ class AudioController extends ControllerBase implements IAudioController {
     }
 
     private updateFFmpegProgress() {
-        if (this.正在使用FFmpeg && this.playerState === PlayerState.Playing && this.audioContext && this.pcmBuffer && this.pcmSourceNode && this.audioContext.state === 'running') {
+        if (this.正在使用FFmpeg && this.playerState === PlayerState.Playing && 
+            this.audioContext && this.pcmBuffer && this.pcmSourceNode && 
+            this.audioContext.state === 'running') {
+            
             const elapsedTimeSinceStart = this.audioContext.currentTime - this.pcmPlayStartTime;
             const currentPlaybackTime = this.pcmCurrentOffset + elapsedTimeSinceStart;
-
+    
             if (currentPlaybackTime >= 0 && currentPlaybackTime <= this.pcmBuffer.duration) {
-                this.onProgressUpdate?.({ currentTime: currentPlaybackTime, duration: this.pcmBuffer.duration });
+                try {
+                    this.onProgressUpdate?.({ 
+                        currentTime: currentPlaybackTime, 
+                        duration: this.pcmBuffer.duration 
+                    });
+                } catch (e) {
+                    console.error("Error in progress update callback:", e);
+                }
             }
-
+    
+            // 继续更新进度
             this.ffmpegProgressAnimationId = requestAnimationFrame(() => this.updateFFmpegProgress());
         } else {
             this.cancelFFmpegProgressUpdate();
@@ -574,7 +585,11 @@ class AudioController extends ControllerBase implements IAudioController {
                 if (!wasPlaying && this.playerState === PlayerState.Playing) {
                     this.pause();
                 }
-                this.onProgressUpdate?.({ currentTime: newOffset, duration: this.pcmBuffer.duration });
+                try {
+                    this.onProgressUpdate?.({ currentTime: newOffset, duration: this.pcmBuffer.duration });
+                } catch (e) {
+                    console.error("Error in progress update callback:", e);
+                }
             }
         } else {
             if (this.hasSource && isFinite(seconds)) {
