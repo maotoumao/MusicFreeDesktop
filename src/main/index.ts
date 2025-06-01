@@ -26,7 +26,14 @@ import voidCallback from "@/common/void-callback";
 try {
     const appName = app.getName();
     const appVersion = app.getVersion();
-    const platformOS = os.type();
+    let platformOS = os.type();
+    
+    if (platformOS === 'Windows_NT') {
+        platformOS = 'Windows NT';
+    } else if (platformOS === 'Darwin') {
+        platformOS = 'Macintosh';
+    }
+
     const osVersion = os.release();
     const arch = os.arch();
 
