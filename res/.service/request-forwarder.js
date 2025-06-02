@@ -8,9 +8,21 @@ const maxRetries = 20;
 let retryCount = 0;
 
 function forwardRequest(clientRes, url, method, headers) {
+
+    // 确保 host 正确
+    let host = headers?.host;
+
+    if (!host || host.includes("localhost") || host.includes("127.0.0.1")) {
+        // 如果没有提供 host，且是本地请求，则使用目标 URL 的主机名
+        host = new URL(url).host;
+    }
+
     const options = {
         method: method,
-        headers: headers,
+        headers: {
+            ...(headers || {}),
+            host, // 确保目标主机名正确
+        },
     };
 
     const protocol = url.startsWith("https") ? https : http;
@@ -27,7 +39,7 @@ function forwardRequest(clientRes, url, method, headers) {
 
     req.on("error", (error) => {
         console.error("Error forwarding request:", error);
-        clientRes.writeHead(500, {"Content-Type": "text/plain"});
+        clientRes.writeHead(500, { "Content-Type": "text/plain" });
         clientRes.end("Internal Server Error");
     });
 
@@ -47,15 +59,15 @@ function safeParse(data) {
 
 function startServer(port) {
 
-// 创建一个 HTTP 服务器
+    // 创建一个 HTTP 服务器
     const server = http.createServer((req, res) => {
         if (req.method !== "GET") {
-            res.writeHead(405, {"Content-Type": "text/plain"});
+            res.writeHead(405, { "Content-Type": "text/plain" });
             return res.end("Only GET requests are allowed");
         }
 
         if (req.url === "/heartbeat") {
-            res.writeHead(200, {"Content-Type": "text/plain"});
+            res.writeHead(200, { "Content-Type": "text/plain" });
             return res.end("OK");
         }
 
@@ -70,7 +82,7 @@ function startServer(port) {
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // 允许的方法
 
         if (!url) {
-            res.writeHead(400, {"Content-Type": "text/plain"});
+            res.writeHead(400, { "Content-Type": "text/plain" });
             return res.end("Bad Request: Missing URL");
         }
 
@@ -96,7 +108,7 @@ function startServer(port) {
             console.log(`Retrying on port: ${newPort} (attempt ${retryCount})`);
             startServer(newPort);
         } else {
-            process.send?.({type: "error", error: "Max retries reached"});
+            process.send?.({ type: "error", error: "Max retries reached" });
         }
     })
 }

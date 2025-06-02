@@ -1,18 +1,18 @@
 /**
  * 播放音乐
  */
-import {encodeUrlHeaders} from "@/common/normalize-util";
+import { encodeUrlHeaders } from "@/common/normalize-util";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import getUrlExt from "@/renderer/utils/get-url-ext";
-import Hls, {Events as HlsEvents, HlsConfig} from "hls.js";
-import {isSameMedia} from "@/common/media-util";
-import {PlayerState} from "@/common/constant";
+import Hls, { Events as HlsEvents, HlsConfig } from "hls.js";
+import { isSameMedia } from "@/common/media-util";
+import { PlayerState } from "@/common/constant";
 import ServiceManager from "@shared/service-manager/renderer";
 import ControllerBase from "@renderer/core/track-player/controller/controller-base";
-import {ErrorReason} from "@renderer/core/track-player/enum";
+import { ErrorReason } from "@renderer/core/track-player/enum";
 import Dexie from "dexie";
 import voidCallback from "@/common/void-callback";
-import {IAudioController} from "@/types/audio-controller";
+import { IAudioController } from "@/types/audio-controller";
 import Promise = Dexie.Promise;
 
 
@@ -162,7 +162,7 @@ class AudioController extends ControllerBase implements IAudioController {
     }
 
     prepareTrack(musicItem: IMusic.IMusicItem) {
-        this.musicItem = {...musicItem};
+        this.musicItem = { ...musicItem };
 
         // 1. update metadata
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -184,7 +184,7 @@ class AudioController extends ControllerBase implements IAudioController {
     }
 
     setTrackSource(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem): void {
-        this.musicItem = {...musicItem};
+        this.musicItem = { ...musicItem };
 
         // 1. update metadata
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -206,7 +206,7 @@ class AudioController extends ControllerBase implements IAudioController {
 
         // 2.1 convert user agent
         if (trackSource.headers || trackSource.userAgent) {
-            headers = {...(trackSource.headers ?? {})};
+            headers = { ...(trackSource.headers ?? {}) };
             if (trackSource.userAgent) {
                 headers["user-agent"] = trackSource.userAgent;
             }
