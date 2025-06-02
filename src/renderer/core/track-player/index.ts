@@ -1,4 +1,4 @@
-import {CurrentTime, ICurrentLyric, PlayerEvents,} from "./enum";
+import { CurrentTime, ICurrentLyric, PlayerEvents, } from "./enum";
 import shuffle from "lodash.shuffle";
 import {
     addSortProperty,
@@ -7,8 +7,8 @@ import {
     isSameMedia,
     sortByTimestampAndIndex,
 } from "@/common/media-util";
-import {PlayerState, RepeatMode, sortIndexSymbol, timeStampSymbol} from "@/common/constant";
-import LyricParser, {IParsedLrcItem} from "@/renderer/utils/lyric-parser";
+import { PlayerState, RepeatMode, sortIndexSymbol, timeStampSymbol } from "@/common/constant";
+import LyricParser, { IParsedLrcItem } from "@/renderer/utils/lyric-parser";
 import {
     getUserPreference,
     getUserPreferenceIDB,
@@ -17,17 +17,17 @@ import {
     setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
 import AppConfig from "@shared/app-config/renderer";
-import {createIndexMap, IIndexMap} from "@/common/index-map";
+import { createIndexMap, IIndexMap } from "@/common/index-map";
 import _trackPlayerStore from "./store";
 import EventEmitter from "eventemitter3";
-import {IAudioController} from "@/types/audio-controller";
+import { IAudioController } from "@/types/audio-controller";
 import AudioController from "@renderer/core/track-player/controller/audio-controller";
 import logger from "@shared/logger/renderer";
 import voidCallback from "@/common/void-callback";
-import {delay} from "@/common/time-util";
-import {createUniqueMap} from "@/common/unique-map";
-import {getLinkedLyric} from "@renderer/core/link-lyric";
-import {fsUtil} from "@shared/utils/renderer";
+import { delay } from "@/common/time-util";
+import { createUniqueMap } from "@/common/unique-map";
+import { getLinkedLyric } from "@renderer/core/link-lyric";
+import { fsUtil } from "@shared/utils/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
 
 const {
@@ -233,7 +233,7 @@ class TrackPlayer {
             getUserPreference("speed"),
             getUserPreference("currentQuality") || AppConfig.getConfig("playMusic.defaultQuality")
         ];
-        const playList = (await getUserPreferenceIDB("playList")) ?? [];
+        const playList = ((await getUserPreferenceIDB("playList")) ?? []).filter(it => !!it);
         addSortProperty(playList);
         const deviceId = AppConfig.getConfig("playMusic.audioOutputDevice")?.deviceId;
 
@@ -268,7 +268,7 @@ class TrackPlayer {
         this.fetchCurrentLyric();
 
         // 5. fetch music source
-        this.fetchMediaSource(currentMusic, defaultQuality).then(({mediaSource, quality}) => {
+        this.fetchMediaSource(currentMusic, defaultQuality).then(({ mediaSource, quality }) => {
             if (this.isCurrentMusic(currentMusic)) {
                 this.setTrack(mediaSource, currentMusic, {
                     seekTo: currentProgress,
@@ -299,7 +299,7 @@ class TrackPlayer {
     }
 
     public async playIndex(index: number, options: IPlayOptions = {}) {
-        const {refreshSource, restartOnSameMedia = true, seekTo, quality: intendedQuality} = options;
+        const { refreshSource, restartOnSameMedia = true, seekTo, quality: intendedQuality } = options;
         if (index === -1 && this.musicQueue.length === 0) {
             // 播放列表为空
             return;
@@ -326,7 +326,7 @@ class TrackPlayer {
         this.audioController.prepareTrack?.(nextMusicItem);
 
         try {
-            const {mediaSource, quality} = await this.fetchMediaSource(nextMusicItem, intendedQuality);
+            const { mediaSource, quality } = await this.fetchMediaSource(nextMusicItem, intendedQuality);
 
             if (!mediaSource.url) {
                 throw new Error("mediaSource.url is empty");
@@ -374,6 +374,9 @@ class TrackPlayer {
     }
 
     public async playMusic(musicItem: IMusic.IMusicItem, options: IPlayOptions = {}) {
+        if (!musicItem) {
+            return;
+        }
         const queueIndex = this.findMusicIndex(musicItem);
         if (queueIndex === -1) {
             // TODO: 用add代替
@@ -568,7 +571,7 @@ class TrackPlayer {
     public async setQuality(quality: IMusic.IQualityKey) {
         const currentMusic = this.currentMusic;
         if (currentMusic && quality !== this.currentQuality) {
-            const {mediaSource, quality: realQuality} = await this.fetchMediaSource(currentMusic, quality)
+            const { mediaSource, quality: realQuality } = await this.fetchMediaSource(currentMusic, quality)
             if (this.isCurrentMusic(currentMusic)) {
                 this.setTrack(mediaSource, currentMusic, {
                     seekTo: this.progress.currentTime ?? 0,
@@ -678,7 +681,7 @@ class TrackPlayer {
             "downloadData"
         );
         if (downloadedData) {
-            const {quality, path: _path} = downloadedData;
+            const { quality, path: _path } = downloadedData;
             if (await fsUtil.isFile(_path)) {
                 return {
                     quality,
