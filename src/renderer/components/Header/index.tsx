@@ -1,18 +1,18 @@
 import SvgAsset from "../SvgAsset";
 import "./index.scss";
-import {showModal} from "../Modal";
-import {useNavigate} from "react-router-dom";
-import {useRef, useState} from "react";
+import { showModal } from "../Modal";
+import { useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
 import HeaderNavigator from "./widgets/Navigator";
 import MusicDetail from "../MusicDetail";
 import Condition from "../Condition";
 import SearchHistory from "./widgets/SearchHistory";
-import {addSearchHistory} from "@/renderer/utils/search-history";
-import {useTranslation} from "react-i18next";
+import { addSearchHistory } from "@/renderer/utils/search-history";
+import { useTranslation } from "react-i18next";
 import useAppConfig from "@/hooks/useAppConfig";
 import AppConfig from "@shared/app-config/renderer";
-import {appUtil, appWindowUtil} from "@shared/utils/renderer";
-import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
+import { appUtil, appWindowUtil } from "@shared/utils/renderer";
+import { musicDetailShownStore } from "@renderer/components/MusicDetail/store";
 
 export default function AppHeader() {
     const navigate = useNavigate();
@@ -22,7 +22,7 @@ export default function AppHeader() {
 
     const isMiniMode = useAppConfig("private.minimode");
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     if (!showSearchHistory) {
         isHistoryFocusRef.current = false;
@@ -80,6 +80,7 @@ export default function AppHeader() {
                         <SearchHistory
                             onHistoryClick={(item) => {
                                 search(item);
+                                inputRef.current.value = item;
                             }}
                             onHistoryPanelBlur={() => {
                                 isHistoryFocusRef.current = false;
