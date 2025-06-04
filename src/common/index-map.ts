@@ -15,6 +15,9 @@ export function createIndexMap(mediaItems?: IMedia.IMediaBase[]): IIndexMap {
       return;
     }
     mediaItems?.forEach((mediaItem, index) => {
+      if (!mediaItem) {
+        return;
+      }
       const { platform, id } = mediaItem;
       let idMap = indexMap.get(platform);
       if (!idMap) {
@@ -36,7 +39,7 @@ export function createIndexMap(mediaItems?: IMedia.IMediaBase[]): IIndexMap {
     if (!mediaItem) {
       return false;
     }
-    return indexMap.get(mediaItem?.platform)?.has(mediaItem?.id)?? false;
+    return indexMap.get(mediaItem?.platform)?.has(mediaItem?.id) ?? false;
   }
 
   return {

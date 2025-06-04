@@ -26,11 +26,16 @@ async function setRecentlyPlaylist(musicItems: IMusic.IMusicItem[]) {
 }
 
 export async function setupRecentlyPlaylist() {
-  const playList = await fetchRecentlyPlaylist();
+  const playList = (await fetchRecentlyPlaylist()).filter(it => !!it);
+
   recentlyPlayListStore.setValue(playList);
 }
 
 export async function addToRecentlyPlaylist(musicItem: IMusic.IMusicItem) {
+  if (!musicItem || !musicItem.id || !musicItem.platform) {
+    return;
+  }
+
   const playList = recentlyPlayListStore.getValue();
   const existId = playList.findIndex((it) => isSameMedia(musicItem, it));
   let newPlayList = playList;
