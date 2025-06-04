@@ -244,6 +244,10 @@ interface IPlayListMusicItemProps {
 function _PlayListMusicItem(props: IPlayListMusicItemProps) {
     const { isPlaying, musicItem, isActive } = props;
 
+    if (!musicItem) {
+        return null;
+    }
+
     return (
         <div
             className="play-list--music-item-container"
