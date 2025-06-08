@@ -59,7 +59,12 @@
     "music_repeat_mode": "播放模式",
     "music_repeat_mode_loop": "单曲循环",
     "music_repeat_mode_queue": "列表循环",
-    "music_repeat_mode_shuffle": "随机播放"
+    "music_repeat_mode_shuffle": "随机播放",
+    "change_album_cover": "更换专辑封面",
+    "image_files": "图片文件",
+    "change_cover": "更换封面",
+    "cover_updated_successfully": "封面更新成功",
+    "failed_to_update_cover": "封面更新失败"
   },
   "plugin": {
     "prop_user_variable": "用户变量",

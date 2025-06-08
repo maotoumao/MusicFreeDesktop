@@ -66,7 +66,12 @@
     "music_repeat_mode": "重複模式",
     "music_repeat_mode_loop": "單曲重複",
     "music_repeat_mode_queue": "列表重複",
-    "music_repeat_mode_shuffle": "隨機播放"
+    "music_repeat_mode_shuffle": "隨機播放",
+    "change_album_cover": "更換專輯封面",
+    "image_files": "圖片檔案",
+    "change_cover": "更換封面",
+    "cover_updated_successfully": "封面更新成功",
+    "failed_to_update_cover": "封面更新失敗"
   },
 
   "plugin": {

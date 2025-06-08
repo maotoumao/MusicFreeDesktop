@@ -66,7 +66,12 @@
     "music_repeat_mode": "Repeat Mode",
     "music_repeat_mode_loop": "Single Loop",
     "music_repeat_mode_queue": "Queue Loop",
-    "music_repeat_mode_shuffle": "Shuffle Play"
+    "music_repeat_mode_shuffle": "Shuffle Play",
+    "change_album_cover": "Change Album Cover",
+    "image_files": "Image Files",
+    "change_cover": "Change Cover",
+    "cover_updated_successfully": "Cover Updated Successfully",
+    "failed_to_update_cover": "Failed to Update Cover"
   },
 
   "plugin": {

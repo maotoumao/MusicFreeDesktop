@@ -41,7 +41,7 @@ export async function addSheet(sheetName: string) {
     const newSheetDetail = await backend.addSheet(sheetName);
     musicSheetsStore.setValue(backend.getAllSheets());
     return newSheetDetail;
-  } catch {}
+  } catch { }
 }
 
 /**
@@ -55,9 +55,22 @@ export async function updateSheet(
   newData: Partial<IMusic.IMusicSheetItem>
 ) {
   try {
+    console.log("Frontend updateSheet - 歌单ID:", sheetId);
+    console.log("Frontend updateSheet - 更新数据:", newData);
+
     await backend.updateSheet(sheetId, newData);
+    console.log("Backend 更新成功，刷新歌单列表");
+
     musicSheetsStore.setValue(backend.getAllSheets());
-  } catch {}
+    console.log("歌单列表已刷新");
+
+    // 重要：触发歌单详情的更新，让useMusicSheet hook能够接收到变化
+    refetchSheetDetail(sheetId);
+    console.log("歌单详情已刷新");
+  } catch (error) {
+    console.error("Frontend updateSheet 失败:", error);
+    throw error; // 重新抛出错误，让调用者能够处理
+  }
 }
 
 /**
@@ -81,7 +94,7 @@ export async function updateSheetMusicOrder(
       musicList: musicList.map(toMediaBase) as any,
     });
     musicSheetsStore.setValue(backend.getAllSheets());
-  } catch {}
+  } catch { }
 }
 
 /**
@@ -93,7 +106,7 @@ export async function removeSheet(sheetId: string) {
   try {
     await backend.removeSheet(sheetId);
     musicSheetsStore.setValue(backend.getAllSheets());
-  } catch {}
+  } catch { }
 }
 
 /**
@@ -106,7 +119,7 @@ export async function clearSheet(sheetId: string) {
     await backend.clearSheet(sheetId);
     musicSheetsStore.setValue(backend.getAllSheets());
     refetchSheetDetail(sheetId);
-  } catch {}
+  } catch { }
 }
 
 /**

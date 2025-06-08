@@ -3,5 +3,10 @@
   "files.associations": {
     "*.html": "html",
     "map": "cpp"
-  }
+  },
+  "nuxt.isNuxtApp": false,
+  "i18n-ally.localesPaths": [
+    "res/lang",
+    "src/shared/i18n"
+  ]
 }
