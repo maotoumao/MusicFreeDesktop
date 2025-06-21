@@ -6,6 +6,7 @@ type LyricMeta = Record<string, any>;
 interface IOptions {
   musicItem?: IMusic.IMusicItem;
   translation?: string;
+  offset?: number; // Added offset option
 }
 
 export interface IParsedLrcItem {
@@ -21,6 +22,7 @@ export interface IParsedLrcItem {
 
 export default class LyricParser {
   private _musicItem?: IMusic.IMusicItem;
+  private _offset: number; // Added offset property
 
   private meta: LyricMeta;
   private lrcItems: Array<IParsedLrcItem>;
@@ -33,9 +35,14 @@ export default class LyricParser {
     return this._musicItem;
   }
 
+  get offset() {
+    return this._offset;
+  }
+
   constructor(raw: string, options?: IOptions) {
     // init
     this._musicItem = options?.musicItem;
+    this._offset = options?.offset ?? 0; // Initialize offset
     let translation = options?.translation;
     if (!raw && translation) {
       raw = translation;
@@ -74,7 +81,8 @@ export default class LyricParser {
   }
 
   getPosition(position: number): IParsedLrcItem | null {
-    position = position - (this.meta?.offset ?? 0);
+    // Apply the local offset in addition to the metadata offset
+    position = position - (this.meta?.offset ?? 0) - this._offset;
     let index;
     /** 最前面 */
     if (!this.lrcItems[0] || position < this.lrcItems[0].time) {

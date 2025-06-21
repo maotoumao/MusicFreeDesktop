@@ -11,10 +11,13 @@ import AppConfig from "@shared/app-config/renderer";
 import messageBus, {useAppStatePartial} from "@shared/message-bus/renderer/extension";
 import {IAppState} from "@shared/message-bus/type";
 
+const LYRIC_OFFSET_STEP = 0.1; // 100ms
+
 export default function LyricWindowPage() {
     const currentMusic = useAppStatePartial("musicItem");
     const playerState = useAppStatePartial("playerState");
     const lockLyric = useAppConfig("lyric.lockLyric");
+    const [lyricOffset, setLyricOffset] = useAppConfig("lyric.offset");
     const [showOperations, setShowOperations] = useState(false);
 
     const mouseOverTimerRef = useRef<number | null>(null);
@@ -106,6 +109,27 @@ export default function LyricWindowPage() {
                             >
                                 <SvgAsset iconName="skip-right"></SvgAsset>
                             </div>
+                            {/* Lyric Offset Adjustment Buttons */}
+                            <div
+                                className="operation-button"
+                                onClick={() => {
+                                    setLyricOffset((lyricOffset ?? 0) - LYRIC_OFFSET_STEP);
+                                }}
+                            >
+                                <SvgAsset iconName="font-size-smaller"></SvgAsset> {/* Placeholder icon */}
+                            </div>
+                            <div className="operation-button-text">
+                                {((lyricOffset ?? 0) * 1000).toFixed(0)}ms
+                            </div>
+                            <div
+                                className="operation-button"
+                                onClick={() => {
+                                    setLyricOffset((lyricOffset ?? 0) + LYRIC_OFFSET_STEP);
+                                }}
+                            >
+                                <SvgAsset iconName="font-size-larger"></SvgAsset> {/* Placeholder icon */}
+                            </div>
+                            {/* End Lyric Offset Adjustment Buttons */}
                             <div
                                 className="operation-button"
                                 onClick={() => {
@@ -139,6 +163,7 @@ function LyricContent() {
     const currentMusic = useAppStatePartial("musicItem");
     const currentLyric = useAppStatePartial("parsedLrc");
     const currentFullLyric = useAppStatePartial("fullLyric");
+    const [lyricOffset] = useAppConfig("lyric.offset"); // Get the offset
 
     const fontDataConfig = useAppConfig("lyric.fontData");
     const fontSizeConfig = useAppConfig("lyric.fontSize");

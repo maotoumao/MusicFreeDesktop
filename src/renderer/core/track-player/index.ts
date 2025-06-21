@@ -241,6 +241,11 @@ class TrackPlayer {
         this.createAudioController();
         this.setupEvents();
 
+        // Listen for lyric offset changes
+        AppConfig.onDidChange("lyric.offset", () => {
+            this.fetchCurrentLyric(true); // Force reload of lyrics
+        });
+
         // 3. resume state
         musicQueueStore.setValue(playList);
         this.indexMap.update(playList);
@@ -645,9 +650,11 @@ class TrackPlayer {
             if (!lyricSource?.rawLrc && !lyricSource?.translation) {
                 this.setCurrentLyric({});
             }
+            const lyricOffset = AppConfig.getConfig("lyric.offset") ?? 0; // Get lyric offset
             const parser = new LyricParser(lyricSource.rawLrc, {
                 musicItem: currentMusic,
-                translation: lyricSource.translation
+                translation: lyricSource.translation,
+                offset: lyricOffset // Pass offset to parser
             });
 
             this.setCurrentLyric({
