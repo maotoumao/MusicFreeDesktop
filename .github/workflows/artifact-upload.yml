@@ -1,0 +1,143 @@
+name: 发布到飞书
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'GitHub Action Run ID to download artifacts from'
+        required: true
+        type: string
+
+jobs:
+  download-and-upload:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies for upload script
+      run: |
+        npm install @larksuiteoapi/node-sdk
+        
+    - name: Download artifacts from specified run
+      id: download
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RUN_ID: ${{ github.event.inputs.run_id }}
+      run: |
+        echo "Checking artifacts for run ID: $RUN_ID"
+        
+        # Get artifacts list for the specified run
+        artifacts_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+          "https://api.github.com/repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts")
+        
+        # Check if there are any artifacts
+        artifacts_count=$(echo "$artifacts_response" | jq '.total_count')
+        
+        if [ "$artifacts_count" -eq 0 ]; then
+          echo "No artifacts found for run ID: $RUN_ID"
+          echo "has_artifacts=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        echo "Found $artifacts_count artifact(s)"
+        echo "has_artifacts=true" >> $GITHUB_OUTPUT
+        
+        # Create downloads directory
+        mkdir -p ./downloads
+        
+        # Download all artifacts
+        echo "$artifacts_response" | jq -r '.artifacts[] | "\(.id) \(.name)"' | while read artifact_id artifact_name; do
+          echo "Downloading artifact: $artifact_name (ID: $artifact_id)"
+          
+          # Download artifact
+          curl -L -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$artifact_id/zip" \
+            -o "./downloads/${artifact_name}.zip"
+            
+          echo "Downloaded: ${artifact_name}.zip"
+        done
+        
+    - name: Process and upload artifacts
+      if: steps.download.outputs.has_artifacts == 'true'
+      env:
+        FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+        FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+        FEISHU_PARENT_NODE: E438flrKhlBJvfdmT57cMpOunlE
+      run: |
+        cd ./downloads
+        
+        for zip_file in *.zip; do
+          if [ ! -f "$zip_file" ]; then
+            continue
+          fi
+          
+          echo "Processing: $zip_file"
+          
+          # Create a directory for this artifact
+          artifact_dir="${zip_file%.zip}"
+          mkdir -p "$artifact_dir"
+          
+          # Extract the artifact zip
+          unzip -q "$zip_file" -d "$artifact_dir"
+          
+          # Process files in the extracted directory
+          for file in "$artifact_dir"/*; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              echo "Processing file: $filename"
+              
+              # Check if filename contains "portable"
+              if [[ "$filename" == *"portable"* ]]; then
+                echo "File contains 'portable', uploading directly: $filename"
+                # Upload file directly without extraction
+                node ../scripts/feishu-upload.js "$file" "$filename"
+              else
+                echo "File does not contain 'portable', checking if it's a zip/archive: $filename"
+                
+                # Check if it's a zip file and extract it
+                if [[ "$filename" == *.zip ]]; then
+                  echo "Extracting and uploading contents of: $filename"
+                  extract_dir="${filename%.zip}_extracted"
+                  mkdir -p "$extract_dir"
+                  unzip -q "$file" -d "$extract_dir"
+                  
+                  # Upload all extracted files
+                  for extracted_file in "$extract_dir"/*; do
+                    if [ -f "$extracted_file" ]; then
+                      extracted_filename=$(basename "$extracted_file")
+                      echo "Uploading extracted file: $extracted_filename"
+                      node ../scripts/feishu-upload.js "$extracted_file" "$extracted_filename"
+                    fi
+                  done
+                else
+                  echo "Uploading file directly: $filename"
+                  # Upload non-zip files directly
+                  node ../scripts/feishu-upload.js "$file" "$filename"
+                fi
+              fi
+            fi
+          done
+          
+          # Clean up extracted directory
+          rm -rf "$artifact_dir"
+        done
+        
+    - name: Cleanup
+      if: always()
+      run: |
+        rm -rf ./downloads
+        
+    - name: Summary
+      run: |
+        if [ "${{ steps.download.outputs.has_artifacts }}" == "true" ]; then
+          echo "✅ Artifacts processed and uploaded successfully"
+        else
+          echo "ℹ️ No artifacts found for the specified run ID"
+        fi
