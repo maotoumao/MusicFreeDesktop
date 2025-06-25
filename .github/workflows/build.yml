@@ -11,27 +11,29 @@ jobs:
                 node-version: 18
             - run: echo (node -p -e '`VERSION=${require("./package.json").version}`') >> $Env:GITHUB_ENV
             - run: npm install
-            - run: npm run package
+            - run: npm run package            
             - uses: maotoumao/inno-setup-action-cli@main
               with: 
                   filepath: ./release/build-windows.iss
                   variables: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=${{ secrets.MYAPPID }}
+            - name: Rename Setup File
+              run: Rename-Item -Path "./out/MusicFreeSetup.exe" -NewName "MusicFree-${{ env.VERSION }}-win32-x64-setup.exe"
             - name: Upload Setup
               uses: actions/upload-artifact@v4
               with:
-                  name: windows-release
-                  path: ./out/MusicFreeSetup.exe
+                  name: MusicFree-${{ env.VERSION }}-win32-x64-setup
+                  path: ./out/MusicFree-${{ env.VERSION }}-win32-x64-setup.exe
             - name: Generate Portable
               run: mkdir ./out/MusicFree-win32-x64/portable
             - uses: vimtor/action-zip@v1.1
               with:
                 files: ./out/MusicFree-win32-x64
-                dest: MusicFree-win32-x64-portable.zip
+                dest: MusicFree-${{ env.VERSION }}-win32-x64-portable.zip
             - name: Upload Portable
               uses: actions/upload-artifact@v4
               with:
-                  name: windows-portable-release
-                  path: ${{ github.workspace }}/MusicFree-win32-x64-portable.zip
+                  name: MusicFree-${{ env.VERSION }}-win32-x64-portable
+                  path: ${{ github.workspace }}/MusicFree-${{ env.VERSION }}-win32-x64-portable.zip
 
     build-windows-legacy: 
         runs-on: windows-latest
@@ -43,27 +45,29 @@ jobs:
             - run: echo (node -p -e '`VERSION=${require("./package.json").version}`') >> $Env:GITHUB_ENV
             - run: npm install
             - run: npm install electron@22
-            - run: npm run package
+            - run: npm run package            
             - uses: maotoumao/inno-setup-action-cli@main
               with: 
                   filepath: ./release/build-windows.iss
                   variables: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=${{ secrets.MYAPPID }}
+            - name: Rename Setup File
+              run: Rename-Item -Path "./out/MusicFreeSetup.exe" -NewName "MusicFree-${{ env.VERSION }}-win32-x64-legacy-setup.exe"
             - name: Upload Setup
               uses: actions/upload-artifact@v4
               with:
-                  name: windows-legacy-release
-                  path: ./out/MusicFreeSetup.exe
+                  name: MusicFree-${{ env.VERSION }}-win32-x64-legacy-setup
+                  path: ./out/MusicFree-${{ env.VERSION }}-win32-x64-legacy-setup.exe
             - name: Generate Portable
               run: mkdir ./out/MusicFree-win32-x64/portable
             - uses: vimtor/action-zip@v1.1
               with:
                 files: ./out/MusicFree-win32-x64
-                dest: MusicFree-win32-x64-legacy-portable.zip
+                dest: MusicFree-${{ env.VERSION }}-win32-x64-legacy-portable.zip
             - name: Upload Portable
               uses: actions/upload-artifact@v4
               with:
-                  name: windows-legacy-portable-release
-                  path: ${{ github.workspace }}/MusicFree-win32-x64-legacy-portable.zip
+                  name: MusicFree-${{ env.VERSION }}-win32-x64-legacy-portable
+                  path: ${{ github.workspace }}/MusicFree-${{ env.VERSION }}-win32-x64-legacy-portable.zip
 
     build-macos-x64: 
         runs-on: macos-13
@@ -77,13 +81,15 @@ jobs:
                 node-version: 18
             - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
             - run: npm install
-            - run: npm run make
+            - run: npm run make            
             - run: ls ./out/make
+            - name: Rename DMG File
+              run: mv "./out/make/MusicFree-${{ env.VERSION }}-x64.dmg" "./out/make/MusicFree-${{ env.VERSION }}-darwin-x64.dmg"
             - name: Upload Setup
               uses: actions/upload-artifact@v4
               with:
-                  name: macos-x64-dmg-release
-                  path: ./out/make/MusicFree-${{ env.VERSION }}-x64.dmg
+                  name: MusicFree-${{ env.VERSION }}-darwin-x64
+                  path: ./out/make/MusicFree-${{ env.VERSION }}-darwin-x64.dmg
 
     build-macos-arm64: 
         runs-on: macos-latest
@@ -96,13 +102,15 @@ jobs:
               with:
                 node-version: 18
             - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
-            - run: npm install
+            - run: npm install            
             - run: npm run make -- --arch="arm64"
+            - name: Rename DMG File
+              run: mv "./out/make/MusicFree-${{ env.VERSION }}-arm64.dmg" "./out/make/MusicFree-${{ env.VERSION }}-darwin-arm64.dmg"
             - name: Upload Setup
               uses: actions/upload-artifact@v4
               with:
-                  name: macos-arm64-dmg-release
-                  path: ./out/make/MusicFree-${{ env.VERSION }}-arm64.dmg
+                  name: MusicFree-${{ env.VERSION }}-darwin-arm64
+                  path: ./out/make/MusicFree-${{ env.VERSION }}-darwin-arm64.dmg
 
     build-ubuntu: 
         runs-on: ubuntu-latest
@@ -112,11 +120,17 @@ jobs:
               with:
                 node-version: 18
             - run: node -p -e '`VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
-            - run: npm install
+            - run: npm install            
             - run: npm run make
+            - name: Find and Rename DEB File
+              run: |
+                  DEB_FILE=$(find ./out/make/deb/x64/ -name "*.deb" | head -1)
+                  if [ -n "$DEB_FILE" ]; then
+                      mv "$DEB_FILE" "./out/make/deb/x64/MusicFree-${{ env.VERSION }}-linux-amd64.deb"
+                  fi
             - name: Upload Setup
               uses: actions/upload-artifact@v4
               with:
-                  name: ubuntu-release
-                  path: ./out/make/deb/x64/
+                  name: MusicFree-${{ env.VERSION }}-linux-amd64
+                  path: ./out/make/deb/x64/MusicFree-${{ env.VERSION }}-linux-amd64.deb
 
