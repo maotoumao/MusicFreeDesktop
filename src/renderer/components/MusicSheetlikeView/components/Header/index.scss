@@ -3,10 +3,68 @@
   display: flex;
   min-height: 160px;
 
+  & .album-cover-container {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+
+    & img {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
+
+    & .cover-edit-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      -webkit-backdrop-filter: blur(2px);
+      backdrop-filter: blur(2px);
+
+      & svg {
+        margin-bottom: 8px;
+      }
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    &:hover .cover-edit-overlay {
+      opacity: 1;
+    }
+  }
+
+  // 保持原有的img样式作为后备
   & img {
     width: 160px;
     height: 160px;
     border-radius: 8px;
+    -webkit-user-select: none;
     user-select: none;
     -webkit-user-drag: none;
     object-fit: cover;
@@ -24,6 +82,7 @@
       display: flex;
       align-items: center;
       -webkit-user-drag: none;
+      -webkit-user-select: text;
       user-select: text;
 
       & .title {

@@ -4,13 +4,13 @@
  * 除了frontend文件夹外，其他任何地方不应该直接调用此处定义的函数
  */
 
-import {localPluginName, musicRefSymbol, sortIndexSymbol, timeStampSymbol,} from "@/common/constant";
-import {nanoid} from "nanoid";
+import { localPluginName, musicRefSymbol, sortIndexSymbol, timeStampSymbol, } from "@/common/constant";
+import { nanoid } from "nanoid";
 import musicSheetDB from "../../db/music-sheet-db";
-import {produce} from "immer";
+import { produce } from "immer";
 import defaultSheet from "../common/default-sheet";
-import {getMediaPrimaryKey, isSameMedia} from "@/common/media-util";
-import {getUserPreferenceIDB, setUserPreferenceIDB,} from "@/renderer/utils/user-perference";
+import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
+import { getUserPreferenceIDB, setUserPreferenceIDB, } from "@/renderer/utils/user-perference";
 
 /******************** 内存缓存 ***********************/
 // 默认歌单，快速判定是否在列表中
@@ -135,30 +135,48 @@ export async function updateSheet(
 ) {
     try {
         if (!newData) {
-            return;
+            throw new Error("更新数据不能为空");
         }
+
+        if (!sheetId) {
+            throw new Error("歌单ID不能为空");
+        }
+
+        console.log("Backend updateSheet - 歌单ID:", sheetId);
+        console.log("Backend updateSheet - 更新数据:", newData);
+
         await musicSheetDB.transaction(
             "readwrite",
             musicSheetDB.sheets,
             async () => {
-                musicSheetDB.sheets.update(sheetId, newData);
+                const result = await musicSheetDB.sheets.update(sheetId, newData);
+                console.log("数据库更新结果:", result);
+
+                if (result === 0) {
+                    throw new Error(`找不到ID为 ${sheetId} 的歌单`);
+                }
             }
         );
 
         musicSheets = produce(musicSheets, (draft) => {
             const currentIndex = draft.findIndex((_) => _.id === sheetId);
             if (currentIndex === -1) {
+                console.warn("在内存中找不到歌单，添加新的歌单项");
                 draft.push(newData as IMusic.IDBMusicSheetItem);
             } else {
+                console.log("更新内存中的歌单信息");
                 draft[currentIndex] = {
                     ...draft[currentIndex],
                     ...newData,
                 };
             }
         });
+
+        console.log("歌单信息更新成功");
     } catch (e) {
         // 更新歌单信息失败
-        console.log(e);
+        console.error("Backend updateSheet 失败:", e);
+        throw e; // 重新抛出错误，而不是静默忽略
     }
 }
 
