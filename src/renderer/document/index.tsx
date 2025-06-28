@@ -10,7 +10,7 @@ import { ToastContainer } from "react-toastify";
 
 import "rc-slider/assets/index.css";
 import "react-toastify/dist/ReactToastify.css";
-import "@/styles/index.scss"; // 全局样式
+import "./styles/index.scss"; // 全局样式
 import { toastDuration } from "@/common/constant";
 import useBootstrap from "./useBootstrap";
 import logger from "@shared/logger/renderer";
