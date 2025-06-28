@@ -10,8 +10,27 @@
     padding: 24px;
     background-color: var(--backgroundColor);
     color: var(--textColor);
-    font-size: 14px;    line-height: 1.6;
+    font-size: 14px;
+    line-height: 1.6;
     overflow-y: auto;
+
+    // 为整个容器添加滚动条样式
+    &::-webkit-scrollbar {
+        width: var(--scrollbarWidth);
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--dividerColor);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--listActiveColor);
+    }
 
     .fallback-content {
         max-width: 800px;
@@ -60,13 +79,32 @@
             margin-bottom: 12px;
             padding-bottom: 8px;
             border-bottom: 2px solid var(--dividerColor);
-        }        .section-content {
+        }
+
+        .section-content {
             background: var(--placeholderColor);
             border-radius: 8px;
             padding: 16px;
             border: 1px solid var(--dividerColor);
             max-height: 300px;
             overflow-y: auto;
+
+            &::-webkit-scrollbar {
+                width: var(--scrollbarWidth);
+            }
+
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: var(--dividerColor);
+                border-radius: 4px;
+            }
+
+            &::-webkit-scrollbar-thumb:hover {
+                background: var(--listActiveColor);
+            }
 
             pre {
                 margin: 0;
@@ -78,7 +116,7 @@
                 overflow-wrap: break-word;
 
                 &::-webkit-scrollbar {
-                    width: var(--scrollbar-width);
+                    width: var(--scrollbarWidth);
                 }
 
                 &::-webkit-scrollbar-track {

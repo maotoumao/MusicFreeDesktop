@@ -15,7 +15,7 @@ a {
 
 // 美化后的滚动条样式
 ::-webkit-scrollbar {
-    width: var(--scrollbar-width, 8px);
+    width: var(--scrollbarWidth, 8px);
     height: 8px;
 }
 

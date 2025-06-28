@@ -8,7 +8,7 @@ body,
 }
 
 ::-webkit-scrollbar {
-    width: var(--scrollbar-width, 8px);
+    width: var(--scrollbarWidth, 8px);
     height: 8px;
 }
 

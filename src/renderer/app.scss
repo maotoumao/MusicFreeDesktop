@@ -103,11 +103,12 @@
   --headerTextColor: white;
   /* --musicBarTextColor: #000; // 有必要再加*/
   --animate-duration: 300ms !important;
-  --scrollbar-width: 12px;
+  --scrollbarWidth: 12px;
 
   --appHeaderHeight: 54px;
   --appMusicBarHeight: 64px;
 
+  // 基础字体
   font-size: 13px;
   color: var(--textColor);
 
