@@ -34,15 +34,15 @@ class MessageBus {
             if (data.windowName !== "main") {
                 this.createPortForExtensionWindow(data.browserWindow);
             }
-        })
+        });
 
         ipcMain.on("@shared/message-bus/sync-app-state", (_, data: IAppState) => {
             this.appState = {
                 ...this.appState,
-                ...data
+                ...data,
             };
             this.ee.emit("stateChanged", this.appState, data);
-        })
+        });
     }
 
     public onAppStateChange(cb: (state: IAppState, changedAppState: IAppState) => void) {
@@ -61,9 +61,9 @@ class MessageBus {
                 type: "command",
                 payload: {
                     command,
-                    data
+                    data,
                 },
-                timestamp: Date.now()
+                timestamp: Date.now(),
             });
         }
     }
@@ -86,7 +86,7 @@ class MessageBus {
         mainWindow.webContents.postMessage("port", {
             payload: extWindowId,
             type: "mount",
-            timestamp: Date.now()
+            timestamp: Date.now(),
         }, [port1]);
 
         bWindow.webContents.postMessage("port", null, [port2]);
@@ -94,10 +94,10 @@ class MessageBus {
             mainWindow.webContents.postMessage("port", {
                 payload: extWindowId,
                 type: "unmount",
-                timestamp: Date.now()
+                timestamp: Date.now(),
             });
             this.extensionWindowIds.delete(extWindowId);
-        })
+        });
 
     }
 }

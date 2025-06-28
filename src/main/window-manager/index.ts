@@ -116,13 +116,13 @@ class WindowManager implements IWindowManager {
                 "private.mainWindowSize": {
                     width: wWidth,
                     height: wHeight,
-                }
+                },
             });
         }, 300, {
             leading: false,
-            trailing: true
+            trailing: true,
         });
-        mainWindow.on("resize", updateWindowSizeConfig)
+        mainWindow.on("resize", updateWindowSizeConfig);
 
         // 2. 加载主界面
         const initUrl = new URL(MAIN_WINDOW_WEBPACK_ENTRY);
@@ -150,7 +150,7 @@ class WindowManager implements IWindowManager {
                     let requestHeaders: Record<string, string> = {};
                     if (setHeadersOptions) {
                         const decodedHeaders = JSON.parse(
-                            decodeURIComponent(setHeadersOptions)
+                            decodeURIComponent(setHeadersOptions),
                         );
                         for (const k in originalRequestHeaders) {
                             requestHeaders[k.toLowerCase()] = originalRequestHeaders[k];
@@ -169,7 +169,7 @@ class WindowManager implements IWindowManager {
                         requestHeaders: details.requestHeaders,
                     });
                 }
-            }
+            },
         );
 
         mainWindow.on("close", (e) => {
@@ -178,7 +178,7 @@ class WindowManager implements IWindowManager {
                 mainWindow.hide();
                 mainWindow.setSkipTaskbar(true);
             }
-        })
+        });
 
         // 5. 更新thumbbar
         ThumbBarUtil.setThumbBarButtons(mainWindow, false);
@@ -187,7 +187,7 @@ class WindowManager implements IWindowManager {
         // 6. 发出信号
         this.emit("WindowCreated", {
             windowName: "main",
-            browserWindow: mainWindow
+            browserWindow: mainWindow,
         });
     }
 
@@ -223,17 +223,17 @@ class WindowManager implements IWindowManager {
     private static lyricWindowMinSize: ICommon.ISize = {
         width: 920,
         height: 92, // 60 + 16 * 2
-    }
+    };
     private static lyricWindowMaxSize: ICommon.ISize = {
         width: Infinity,
         height: 240, // 60 + 80 * 2
-    }
+    };
 
     private formatLyricWindowSize(width?: number, height?: number): ICommon.ISize {
         return {
             width: Math.min(Math.max(width ?? Infinity, WindowManager.lyricWindowMinSize.width), WindowManager.lyricWindowMaxSize.width),
             height: Math.min(Math.max(height ?? Infinity, WindowManager.lyricWindowMinSize.height), WindowManager.lyricWindowMaxSize.height),
-        }
+        };
     }
 
     private evaluateWindowHeight() {
@@ -247,8 +247,8 @@ class WindowManager implements IWindowManager {
 
         let {
             width,
-            height
-        } = this.formatLyricWindowSize(initSize?.width ?? WindowManager.lyricWindowMinSize.width, this.evaluateWindowHeight())
+            height,
+        } = this.formatLyricWindowSize(initSize?.width ?? WindowManager.lyricWindowMinSize.width, this.evaluateWindowHeight());
 
         const lyricWindow = new BrowserWindow({
             height,
@@ -291,12 +291,12 @@ class WindowManager implements IWindowManager {
             getWindowSize() {
                 return {
                     width,
-                    height
-                }
+                    height,
+                };
             },
             onDragEnd(point) {
                 AppConfig.setConfig({
-                    "private.lyricWindowPosition": point
+                    "private.lyricWindowPosition": point,
                 });
                 const currentDisplayBounds =
                     screen.getDisplayNearestPoint(point).bounds;
@@ -304,7 +304,7 @@ class WindowManager implements IWindowManager {
                     WindowManager.lyricWindowMaxSize.width = currentDisplayBounds.width;
                     lyricWindow.setMaximumSize(WindowManager.lyricWindowMaxSize.width, WindowManager.lyricWindowMaxSize.height);
                 }
-            }
+            },
         });
 
         const updateCallback = (patch: IAppConfig, _: any, from: "main" | "renderer") => {
@@ -328,13 +328,13 @@ class WindowManager implements IWindowManager {
                 "lyric.fontSize": fontSize,
                 "private.lyricWindowSize": {
                     width,
-                    height
+                    height,
                 },
             });
             width = wWidth;
             height = wHeight;
 
-        })
+        });
 
         // 初始化设置
         lyricWindow.once("ready-to-show", async () => {
@@ -342,7 +342,7 @@ class WindowManager implements IWindowManager {
             if (position) {
                 this.normalizeWindowPosition(lyricWindow, position, async (position) => {
                     AppConfig.setConfig({
-                        "private.lyricWindowPosition": position
+                        "private.lyricWindowPosition": position,
                     });
                 });
             }
@@ -364,7 +364,7 @@ class WindowManager implements IWindowManager {
         WindowManager.lrcWindow = lyricWindow;
         this.emit("WindowCreated", {
             windowName: "lyric",
-            browserWindow: lyricWindow
+            browserWindow: lyricWindow,
         });
     }
 
@@ -378,7 +378,7 @@ class WindowManager implements IWindowManager {
 
         lrcWindow.show();
         AppConfig.setConfig({
-            "lyric.enableDesktopLyric": true
+            "lyric.enableDesktopLyric": true,
         });
 
     }
@@ -387,7 +387,7 @@ class WindowManager implements IWindowManager {
         WindowManager.lrcWindow?.close();
         WindowManager.lrcWindow = null;
         AppConfig.setConfig({
-            "lyric.enableDesktopLyric": false
+            "lyric.enableDesktopLyric": false,
         });
     }
 
@@ -432,9 +432,9 @@ class WindowManager implements IWindowManager {
             height,
             onDragEnd(point) {
                 AppConfig.setConfig({
-                    "private.minimodeWindowPosition": point
+                    "private.minimodeWindowPosition": point,
                 });
-            }
+            },
         });
 
         miniWindow.once("ready-to-show", () => {
@@ -442,17 +442,17 @@ class WindowManager implements IWindowManager {
             if (position) {
                 this.normalizeWindowPosition(miniWindow, position, async (position) => {
                     AppConfig.setConfig({
-                        "private.minimodeWindowPosition": position
+                        "private.minimodeWindowPosition": position,
                     });
                 });
             }
 
-        })
+        });
         WindowManager.miniModeWindow = miniWindow;
         this.emit("WindowCreated", {
             windowName: "minimode",
-            browserWindow: miniWindow
-        })
+            browserWindow: miniWindow,
+        });
     }
 
     public showMiniModeWindow() {
@@ -472,7 +472,7 @@ class WindowManager implements IWindowManager {
         miniWindow.moveTop();
         miniWindow.setSkipTaskbar(false);
         AppConfig.setConfig({
-            "private.minimode": true
+            "private.minimode": true,
         });
     }
 
@@ -481,7 +481,7 @@ class WindowManager implements IWindowManager {
         WindowManager.miniModeWindow?.close();
         WindowManager.miniModeWindow = null;
         AppConfig.setConfig({
-            "private.minimode": false
+            "private.minimode": false,
         });
     }
 

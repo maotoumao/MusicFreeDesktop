@@ -9,7 +9,7 @@ export default function Fallback(props: IProps) {
     const { error, resetErrorBoundary } = props;
 
     return <div role='alert' style={{
-        margin: 24
+        margin: 24,
     }}>
         <div>出现问题啦...</div>
         <div>请点击右下角【重置配置项】按钮尝试修复，如果还有问题请将错误信息反馈到github或发送到公众号【一只猫头猫】</div>
@@ -26,5 +26,5 @@ export default function Fallback(props: IProps) {
             color: "white",
             padding: 16,
         }} onClick={resetErrorBoundary}>重置配置项和播放器状态</div>
-    </div>
+    </div>;
 }

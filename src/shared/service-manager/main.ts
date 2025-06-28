@@ -42,7 +42,7 @@ class ServiceInstance {
         this.serviceProcess.on("message", (msg: IMessage) => {
             const host = "http://127.0.0.1:" + msg.port;
             this.hostChangeCallback(host);
-        })
+        });
 
         this.serviceProcess.on("error", () => {
             if (this.started) {
@@ -52,7 +52,7 @@ class ServiceInstance {
 
                 this.retryTimeOut = this.retryTimeOut > 300000 ? 300000 : this.retryTimeOut * 2;
             }
-        })
+        });
 
         this.serviceProcess.on("exit", (code) => {
             if (this.started) {
@@ -117,9 +117,9 @@ class ServiceManager {
             if (!windowManager.mainWindow?.isDestroyed()) {
                 this.serviceMap.forEach((val) => {
                     val.instance.stop();
-                })
+                });
             }
-        })
+        });
 
         // put services here
         this.addService(ServiceName.RequestForwarder).start();
@@ -131,7 +131,7 @@ class ServiceManager {
                 if (val.host) {
                     serviceHosts[key] = val.host;
                 }
-            })
+            });
             return serviceHosts;
         });
 

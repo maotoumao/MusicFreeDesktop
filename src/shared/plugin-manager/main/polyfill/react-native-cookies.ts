@@ -22,7 +22,7 @@ async function set(
     try {
         await session.defaultSession.cookies.set({
             url,
-            ...cookie
+            ...cookie,
         });
         return true;
     } catch {
@@ -33,7 +33,7 @@ async function set(
 async function get(url: string): Promise<Cookies> {
     try {
         const result = await session.defaultSession.cookies.get({
-            url
+            url,
         });
         const resultMap: Cookies = {};
         for (const r of result) {

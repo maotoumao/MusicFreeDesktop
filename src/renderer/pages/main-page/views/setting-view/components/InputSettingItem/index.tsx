@@ -16,7 +16,7 @@ interface InputSettingItemProps<T extends keyof IAppConfig> {
 }
 
 export default function InputSettingItem<T extends keyof IAppConfig>(
-    props: InputSettingItemProps<T>
+    props: InputSettingItemProps<T>,
 ) {
     const {
         keyPath,
@@ -25,7 +25,7 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
         width,
         type,
         disabled,
-        trim
+        trim,
     } = props;
 
     const value = useAppConfig(keyPath);
@@ -51,7 +51,7 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
                         return;
                     }
                     const event = new Event("ConfigChanged", {
-                        cancelable: true
+                        cancelable: true,
                     });
 
                     if (onChange) {
@@ -61,7 +61,7 @@ export default function InputSettingItem<T extends keyof IAppConfig>(
                     if (!event.defaultPrevented) {
                         console.log(tmpValue);
                         AppConfig.setConfig({
-                            [keyPath]: trim ? tmpValue.trim() as any : tmpValue as any
+                            [keyPath]: trim ? tmpValue.trim() as any : tmpValue as any,
                         });
                     }
                 }}

@@ -12,62 +12,62 @@ const localThemePacksStore = new Store<Array<ICommon.IThemePack | null>>([]);
 const currentThemePackStore = new Store<ICommon.IThemePack | null>(null);
 
 async function selectTheme(themePack: ICommon.IThemePack | null) {
-  if (!themePack?.hash) {
-    themePack = null;
-  }
-  await mod.selectTheme(themePack);
-  currentThemePackStore.setValue(themePack);
+    if (!themePack?.hash) {
+        themePack = null;
+    }
+    await mod.selectTheme(themePack);
+    currentThemePackStore.setValue(themePack);
 }
 
 async function selectThemeByHash(hash: string) {
-  const targetTheme = localThemePacksStore
-    .getValue()
-    .find((it) => it.hash === hash);
+    const targetTheme = localThemePacksStore
+        .getValue()
+        .find((it) => it.hash === hash);
 
-  if (targetTheme) {
-    await mod.selectTheme(targetTheme);
-    currentThemePackStore.setValue(targetTheme);
-  }
+    if (targetTheme) {
+        await mod.selectTheme(targetTheme);
+        currentThemePackStore.setValue(targetTheme);
+    }
 }
 
 let themePacksLoaded = false;
 async function setupThemePacks() {
-  try {
-    const currentTheme = await mod.initCurrentTheme();
-    // 选中主题
-    await selectTheme(currentTheme);
-    // 调度
-    requestIdleCallback(() => {
-      if (!themePacksLoaded) {
-        mod.loadThemePacks();
-      }
-    });
+    try {
+        const currentTheme = await mod.initCurrentTheme();
+        // 选中主题
+        await selectTheme(currentTheme);
+        // 调度
+        requestIdleCallback(() => {
+            if (!themePacksLoaded) {
+                mod.loadThemePacks();
+            }
+        });
 
-    window.onresize = debounce(() => {
-      mod.selectTheme(currentThemePackStore.getValue());
-    }, 150, {
-      leading: false,
-      trailing: true
-    });
+        window.onresize = debounce(() => {
+            mod.selectTheme(currentThemePackStore.getValue());
+        }, 150, {
+            leading: false,
+            trailing: true,
+        });
 
-  } catch {
+    } catch {
     // pass
-  }
+    }
 }
 
 async function loadThemePacks() {
-  themePacksLoaded = true;
+    themePacksLoaded = true;
 
-  const themePacks = await mod.loadThemePacks();
-  localThemePacksStore.setValue(themePacks);
+    const themePacks = await mod.loadThemePacks();
+    localThemePacksStore.setValue(themePacks);
 }
 
 async function installThemePack(themePackPath: string) {
-  const themePackConfig = await mod.installThemePack(themePackPath);
-  if (themePackConfig) {
-    localThemePacksStore.setValue((prev) => [...prev, themePackConfig]);
-  }
-  return themePackConfig;
+    const themePackConfig = await mod.installThemePack(themePackPath);
+    if (themePackConfig) {
+        localThemePacksStore.setValue((prev) => [...prev, themePackConfig]);
+    }
+    return themePackConfig;
 }
 
 /**
@@ -77,64 +77,64 @@ async function installThemePack(themePackPath: string) {
  * @returns
  */
 async function installRemoteThemePack(remoteUrl: string, id?: string) {
-  const themePackConfig = await mod.installRemoteThemePack(remoteUrl);
+    const themePackConfig = await mod.installRemoteThemePack(remoteUrl);
 
-  let oldThemeConfig: ICommon.IThemePack | null = null;
-  if (id) {
-    oldThemeConfig = localThemePacksStore.getValue().find((it) => it.id === id);
-    if (oldThemeConfig) {
-      mod.uninstallThemePack(oldThemeConfig);
+    let oldThemeConfig: ICommon.IThemePack | null = null;
+    if (id) {
+        oldThemeConfig = localThemePacksStore.getValue().find((it) => it.id === id);
+        if (oldThemeConfig) {
+            mod.uninstallThemePack(oldThemeConfig);
+        }
     }
-  }
-  if (themePackConfig) {
-    localThemePacksStore.setValue((prev) =>
-      [themePackConfig].concat(
-        oldThemeConfig
-          ? prev.filter((it) => it.hash !== oldThemeConfig.hash)
-          : prev
-      )
-    );
-  }
-  return themePackConfig;
+    if (themePackConfig) {
+        localThemePacksStore.setValue((prev) =>
+            [themePackConfig].concat(
+                oldThemeConfig
+                    ? prev.filter((it) => it.hash !== oldThemeConfig.hash)
+                    : prev,
+            ),
+        );
+    }
+    return themePackConfig;
 }
 
 async function uninstallThemePack(themePack: ICommon.IThemePack) {
-  try {
-    await mod.uninstallThemePack(themePack);
-    localThemePacksStore.setValue((prev) =>
-      prev.filter((it) => it?.path !== themePack.path)
-    );
-    if (currentThemePackStore.getValue()?.path === themePack.path) {
-      selectTheme(null);
+    try {
+        await mod.uninstallThemePack(themePack);
+        localThemePacksStore.setValue((prev) =>
+            prev.filter((it) => it?.path !== themePack.path),
+        );
+        if (currentThemePackStore.getValue()?.path === themePack.path) {
+            selectTheme(null);
+        }
+    } catch {
+        toast.error("卸载失败");
     }
-  } catch {
-    toast.error("卸载失败");
-  }
 }
 
 function useLocalThemePacks() {
-  const val = localThemePacksStore.useValue();
+    const val = localThemePacksStore.useValue();
 
-  useEffect(() => {
-    if (!themePacksLoaded) {
-      loadThemePacks();
-    }
-  }, []);
+    useEffect(() => {
+        if (!themePacksLoaded) {
+            loadThemePacks();
+        }
+    }, []);
 
-  return val;
+    return val;
 }
 
 const ThemePack = {
-  selectTheme,
-  selectThemeByHash,
-  setupThemePacks,
-  loadThemePacks,
-  installThemePack,
-  installRemoteThemePack,
-  uninstallThemePack,
-  replaceAlias: mod.replaceAlias,
-  useLocalThemePacks,
-  useCurrentThemePack: currentThemePackStore.useValue,
+    selectTheme,
+    selectThemeByHash,
+    setupThemePacks,
+    loadThemePacks,
+    installThemePack,
+    installRemoteThemePack,
+    uninstallThemePack,
+    replaceAlias: mod.replaceAlias,
+    useLocalThemePacks,
+    useCurrentThemePack: currentThemePackStore.useValue,
 };
 
 export default ThemePack;

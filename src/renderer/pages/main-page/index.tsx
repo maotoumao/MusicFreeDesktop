@@ -18,49 +18,49 @@ import RecentlyPlayView from "./views/recently-play-view";
 import "./index.scss";
 
 export default function MainPage() {
-  return (
-    <>
-      <SideBar></SideBar>
-      <Routes>
-        <Route path="search/:query" element={<SearchView></SearchView>}></Route>
-        <Route
-          path="plugin-manager-view"
-          element={<PluginManagerView></PluginManagerView>}
-        ></Route>
-        <Route
-          path="musicsheet/:platform/:id"
-          element={<MusicSheetView></MusicSheetView>}
-        ></Route>
-        <Route
-          path="album/:platform/:id"
-          element={<AlbumView></AlbumView>}
-        ></Route>
-        <Route
-          path="artist/:platform/:id"
-          element={<ArtistView></ArtistView>}
-        ></Route>
-        <Route path="toplist" element={<ToplistView></ToplistView>}></Route>
-        <Route
-          path="toplist-detail/:platform"
-          element={<TopListDetailView></TopListDetailView>}
-        ></Route>
-        <Route
-          path="recommend-sheets"
-          element={<RecommendSheetsView></RecommendSheetsView>}
-        ></Route>
-        <Route
-          path="local-music"
-          element={<LocalMusicView></LocalMusicView>}
-        ></Route>
-        <Route path="download" element={<DownloadView></DownloadView>}></Route>
-        <Route path="setting" element={<SettingView></SettingView>}></Route>
-        <Route path="theme" element={<ThemeView></ThemeView>}></Route>
-        <Route
-          path="recently_play"
-          element={<RecentlyPlayView></RecentlyPlayView>}
-        ></Route>
-        <Route path="*" element={<Empty></Empty>}></Route>
-      </Routes>
-    </>
-  );
+    return (
+        <>
+            <SideBar></SideBar>
+            <Routes>
+                <Route path="search/:query" element={<SearchView></SearchView>}></Route>
+                <Route
+                    path="plugin-manager-view"
+                    element={<PluginManagerView></PluginManagerView>}
+                ></Route>
+                <Route
+                    path="musicsheet/:platform/:id"
+                    element={<MusicSheetView></MusicSheetView>}
+                ></Route>
+                <Route
+                    path="album/:platform/:id"
+                    element={<AlbumView></AlbumView>}
+                ></Route>
+                <Route
+                    path="artist/:platform/:id"
+                    element={<ArtistView></ArtistView>}
+                ></Route>
+                <Route path="toplist" element={<ToplistView></ToplistView>}></Route>
+                <Route
+                    path="toplist-detail/:platform"
+                    element={<TopListDetailView></TopListDetailView>}
+                ></Route>
+                <Route
+                    path="recommend-sheets"
+                    element={<RecommendSheetsView></RecommendSheetsView>}
+                ></Route>
+                <Route
+                    path="local-music"
+                    element={<LocalMusicView></LocalMusicView>}
+                ></Route>
+                <Route path="download" element={<DownloadView></DownloadView>}></Route>
+                <Route path="setting" element={<SettingView></SettingView>}></Route>
+                <Route path="theme" element={<ThemeView></ThemeView>}></Route>
+                <Route
+                    path="recently_play"
+                    element={<RecentlyPlayView></RecentlyPlayView>}
+                ></Route>
+                <Route path="*" element={<Empty></Empty>}></Route>
+            </Routes>
+        </>
+    );
 }

@@ -4,7 +4,7 @@ export default function A(
     props: React.DetailedHTMLProps<
         React.AnchorHTMLAttributes<HTMLAnchorElement>,
         HTMLAnchorElement
-    >
+    >,
 ) {
     return (
         <a

@@ -11,8 +11,8 @@ import Database from "better-sqlite3";
 let database: Database.Database;
 
 function setupWorker(dbPath: string) {
-  database = new Database(dbPath);
-  database.pragma("journal_mode = WAL");
+    database = new Database(dbPath);
+    database.pragma("journal_mode = WAL");
 }
 
 Comlink.expose({});

@@ -17,7 +17,7 @@ interface IPluginDelegateLike {
 }
 
 async function callPluginMethod<
-    T extends keyof IPlugin.IPluginInstanceMethods
+    T extends keyof IPlugin.IPluginInstanceMethods,
 >(
     pluginDelegate: IPluginDelegateLike,
     method: T,
@@ -59,7 +59,7 @@ const mod = {
     uninstallPlugin,
     updateAllPlugins,
     installPluginFromLocal,
-    installPluginFromRemote
+    installPluginFromRemote,
 };
 
 contextBridge.exposeInMainWorld("@shared/plugin-manager", mod);

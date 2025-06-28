@@ -33,7 +33,7 @@ function injectHandler() {
                     mod.dragWindow({
                         x: e.screenX - startClientPos.x,
                         y: e.screenY - startClientPos.y,
-                    })
+                    });
                 }
             });
 
@@ -53,6 +53,6 @@ function injectHandler() {
 
 const WindowDrag = {
     injectHandler,
-}
+};
 
 export default WindowDrag;

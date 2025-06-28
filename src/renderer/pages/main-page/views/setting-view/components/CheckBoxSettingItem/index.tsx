@@ -11,7 +11,7 @@ interface ICheckBoxSettingItemProps<T extends keyof IAppConfig> {
 }
 
 export default function CheckBoxSettingItem<T extends keyof IAppConfig>(
-    props: ICheckBoxSettingItemProps<T>
+    props: ICheckBoxSettingItemProps<T>,
 ) {
     const {
         keyPath,
@@ -32,15 +32,15 @@ export default function CheckBoxSettingItem<T extends keyof IAppConfig>(
                 role="button"
                 onClick={() => {
                     const event = new Event("ConfigChanged", {
-                        cancelable: true
+                        cancelable: true,
                     });
                     if (onChange) {
                         onChange(event, !checked);
                     }
                     if (!event.defaultPrevented) {
                         AppConfig.setConfig({
-                            [keyPath]: !checked
-                        })
+                            [keyPath]: !checked,
+                        });
                     }
                 }}
             >

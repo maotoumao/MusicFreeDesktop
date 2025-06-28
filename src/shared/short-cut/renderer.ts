@@ -51,7 +51,7 @@ class ShortCut {
                 evt.preventDefault();
                 messageBus.sendCommand(shortCutKeysCommands[key]);
             }
-        }
+        };
         this.localShortCutCallbackMap.set(key as string, callback);
         hotkeys(shortCut.join("+"), "all", callback);
 
@@ -61,10 +61,10 @@ class ShortCut {
                 ...(shortCuts || {} as any),
                 [key]: {
                     ...(shortCuts?.[key] || {}),
-                    local: shortCut
-                }
+                    local: shortCut,
+                },
             },
-        })
+        });
     }
 
     unregisterLocalShortCut(key: IShortCutKeys) {
@@ -79,10 +79,10 @@ class ShortCut {
                     ...(shortCuts || {} as any),
                     [key]: {
                         ...(shortCuts[key] || {}),
-                        local: null
-                    }
+                        local: null,
+                    },
                 },
-            })
+            });
         }
     }
 

@@ -16,14 +16,14 @@ interface IRadioGroupSettingItemProps<T extends keyof IAppConfig> {
 }
 
 export default function RadioGroupSettingItem<T extends keyof IAppConfig>(
-    props: IRadioGroupSettingItemProps<T>
+    props: IRadioGroupSettingItemProps<T>,
 ) {
     const {
         keyPath,
         label,
         options,
         direction = "horizontal",
-        renderItem
+        renderItem,
     } = props;
 
     const value = useAppConfig(keyPath);
@@ -34,8 +34,8 @@ export default function RadioGroupSettingItem<T extends keyof IAppConfig>(
                 value={value}
                 onChange={(val) => {
                     AppConfig.setConfig({
-                        [keyPath]: val
-                    })
+                        [keyPath]: val,
+                    });
                 }}
             >
                 <RadioGroup.Label className={"label-container"}>

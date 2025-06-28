@@ -6,39 +6,39 @@ import { useNavigate } from "react-router-dom";
 import MusicSheetlikeList from "@/renderer/components/MusicSheetlikeList";
 
 interface IMediaResultProps {
-  data: IAlbum.IAlbumItem[];
-  state: RequestStateCode;
-  pluginHash: string;
+    data: IAlbum.IAlbumItem[];
+    state: RequestStateCode;
+    pluginHash: string;
 }
 
 function SheetResult(props: IMediaResultProps) {
-  const { data, state, pluginHash } = props;
+    const { data, state, pluginHash } = props;
 
-  const search = useSearch();
-  const navigate = useNavigate();
+    const search = useSearch();
+    const navigate = useNavigate();
 
-  return (
-    <MusicSheetlikeList
-      data={data}
-      state={state}
-      onLoadMore={() => {
-        search(undefined, undefined, "sheet", pluginHash);
-      }}
-      onClick={(sheetItem) => {
-        navigate(`/main/musicsheet/${encodeURIComponent(sheetItem.platform)}/${encodeURIComponent(sheetItem.id)}`, {
-          state: {
-            sheetItem,
-          },
-        });
-      }}
-    ></MusicSheetlikeList>
-  );
+    return (
+        <MusicSheetlikeList
+            data={data}
+            state={state}
+            onLoadMore={() => {
+                search(undefined, undefined, "sheet", pluginHash);
+            }}
+            onClick={(sheetItem) => {
+                navigate(`/main/musicsheet/${encodeURIComponent(sheetItem.platform)}/${encodeURIComponent(sheetItem.id)}`, {
+                    state: {
+                        sheetItem,
+                    },
+                });
+            }}
+        ></MusicSheetlikeList>
+    );
 }
 
 export default memo(
-  SheetResult,
-  (prev, curr) =>
-    prev.data === curr.data &&
+    SheetResult,
+    (prev, curr) =>
+        prev.data === curr.data &&
     prev.state === curr.state &&
-    prev.pluginHash === curr.pluginHash
+    prev.pluginHash === curr.pluginHash,
 );

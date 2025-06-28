@@ -7,7 +7,7 @@ import Downloader from "../core/downloader";
 import AppConfig from "@shared/app-config/renderer";
 import { setupI18n } from "@/shared/i18n/renderer";
 import ThemePack from "@/shared/themepack/renderer";
-import { addToRecentlyPlaylist, setupRecentlyPlaylist, } from "../core/recently-playlist";
+import { addToRecentlyPlaylist, setupRecentlyPlaylist } from "../core/recently-playlist";
 import ServiceManager from "@shared/service-manager/renderer";
 import { CurrentTime, PlayerEvents } from "@renderer/core/track-player/enum";
 import { appWindowUtil, fsUtil } from "@shared/utils/renderer";
@@ -69,8 +69,8 @@ function dropHandler() {
                             hash: localPluginHash,
                         },
                         "importMusicSheet",
-                        f.path
-                    ))
+                        f.path,
+                    )),
                 );
             } else if (
                 supportLocalMediaType.some((postfix) => f.path.endsWith(postfix))
@@ -81,8 +81,8 @@ function dropHandler() {
                             hash: localPluginHash,
                         },
                         "importMusicItem",
-                        f.path
-                    )
+                        f.path,
+                    ),
                 );
             } else if (f.path.endsWith(".mftheme")) {
                 // 主题包
@@ -151,9 +151,9 @@ function setupCommandAndEvents() {
     });
     messageBus.onCommand("SetRepeatMode", (mode) => {
         trackPlayer.setRepeatMode(mode);
-    })
+    });
     messageBus.onCommand("VolumeUp", (val = 0.04) => {
-        trackPlayer.setVolume(Math.min(1, trackPlayer.volume + val))
+        trackPlayer.setVolume(Math.min(1, trackPlayer.volume + val));
     });
 
     messageBus.onCommand("VolumeDown", (val = 0.04) => {
@@ -173,8 +173,8 @@ function setupCommandAndEvents() {
         const enableDesktopLyric = AppConfig.getConfig("lyric.enableDesktopLyric");
         appWindowUtil.setLyricWindow(!enableDesktopLyric);
         AppConfig.setConfig({
-            "lyric.enableDesktopLyric": !enableDesktopLyric
-        })
+            "lyric.enableDesktopLyric": !enableDesktopLyric,
+        });
     });
 
     messageBus.onCommand("OpenMusicDetailPage", () => {
@@ -183,7 +183,7 @@ function setupCommandAndEvents() {
 
     messageBus.onCommand("ToggleMainWindowVisible", () => {
         appWindowUtil.toggleMainWindowVisible();
-    })
+    });
 
 
     const sendAppStateTo = (from: "main" | number) => {
@@ -195,11 +195,11 @@ function setupCommandAndEvents() {
             parsedLrc: trackPlayer.lyric?.currentLrc || null,
             fullLyric: trackPlayer.lyric?.parser?.getLyricItems() || [],
             progress: trackPlayer.progress?.currentTime || 0,
-            duration: trackPlayer.progress?.duration || 0
-        }
+            duration: trackPlayer.progress?.duration || 0,
+        };
 
         messageBus.syncAppState(appState, from);
-    }
+    };
 
     messageBus.onCommand("SyncAppState", (_, from) => {
         sendAppStateTo(from);
@@ -209,28 +209,28 @@ function setupCommandAndEvents() {
     // 状态同步
     trackPlayer.on(PlayerEvents.StateChanged, state => {
         messageBus.syncAppState({
-            playerState: state
+            playerState: state,
         });
     });
 
     trackPlayer.on(PlayerEvents.RepeatModeChanged, mode => {
         messageBus.syncAppState({
-            repeatMode: mode
-        })
+            repeatMode: mode,
+        });
     });
 
     trackPlayer.on(PlayerEvents.CurrentLyricChanged, lyric => {
         messageBus.syncAppState({
             lyricText: lyric.lrc,
-            parsedLrc: lyric
+            parsedLrc: lyric,
         });
-    })
+    });
 
     trackPlayer.on(PlayerEvents.LyricChanged, lyric => {
         messageBus.syncAppState({
-            fullLyric: lyric?.getLyricItems?.() || []
-        })
-    })
+            fullLyric: lyric?.getLyricItems?.() || [],
+        });
+    });
 
     const progressChangedHandler = throttle((currentTime: CurrentTime) => {
         messageBus.syncAppState({

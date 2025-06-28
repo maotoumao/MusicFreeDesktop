@@ -11,13 +11,13 @@ import "./index.scss";
 import WindowDrag from "@shared/window-drag/renderer";
 
 bootstrap().then(() => {
-  ReactDOM.createRoot(document.getElementById("root")).render(<Root></Root>);
+    ReactDOM.createRoot(document.getElementById("root")).render(<Root></Root>);
 });
 
 function Root() {
-  useEffect(() => {
-    WindowDrag.injectHandler();
-  }, []);
+    useEffect(() => {
+        WindowDrag.injectHandler();
+    }, []);
 
-  return <LyricWindowPage></LyricWindowPage>;
+    return <LyricWindowPage></LyricWindowPage>;
 }

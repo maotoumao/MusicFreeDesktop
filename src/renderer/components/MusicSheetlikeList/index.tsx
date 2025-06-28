@@ -7,43 +7,43 @@ import Condition from "../Condition";
 import Empty from "../Empty";
 
 interface IMusicSheetlikeListProps {
-  data: IMusic.IMusicSheetItem[];
-  state: RequestStateCode;
-  onLoadMore?: () => void;
-  onClick?: (mediaItem: IMusic.IMusicSheetItem) => void;
+    data: IMusic.IMusicSheetItem[];
+    state: RequestStateCode;
+    onLoadMore?: () => void;
+    onClick?: (mediaItem: IMusic.IMusicSheetItem) => void;
 }
 
 function MusicSheetlikeList(props: IMusicSheetlikeListProps) {
-  const { data = [], state, onLoadMore, onClick } = props;
+    const { data = [], state, onLoadMore, onClick } = props;
 
-  return (
-    <div className="music-sheet-like-list--container">
-      <Condition condition={data.length !== 0} falsy={<Empty></Empty>}>
-        <div className="music-sheet-like-list--body">
-          {data.map((mediaItem, index) => {
-            return (
-              <MusicSheetlikeItem
-                onClick={() => {
-                  onClick?.(mediaItem);
-                }}
-                mediaItem={mediaItem}
-                key={index}
-              ></MusicSheetlikeItem>
-            );
-          })}
+    return (
+        <div className="music-sheet-like-list--container">
+            <Condition condition={data.length !== 0} falsy={<Empty></Empty>}>
+                <div className="music-sheet-like-list--body">
+                    {data.map((mediaItem, index) => {
+                        return (
+                            <MusicSheetlikeItem
+                                onClick={() => {
+                                    onClick?.(mediaItem);
+                                }}
+                                mediaItem={mediaItem}
+                                key={index}
+                            ></MusicSheetlikeItem>
+                        );
+                    })}
+                </div>
+            </Condition>
+            <Condition condition={data.length !== 0}>
+                <BottomLoadingState
+                    state={state}
+                    onLoadMore={onLoadMore}
+                ></BottomLoadingState>
+            </Condition>
         </div>
-      </Condition>
-      <Condition condition={data.length !== 0}>
-        <BottomLoadingState
-          state={state}
-          onLoadMore={onLoadMore}
-        ></BottomLoadingState>
-      </Condition>
-    </div>
-  );
+    );
 }
 
 export default memo(
-  MusicSheetlikeList,
-  (prev, curr) => prev.data === curr.data && prev.state === curr.state
+    MusicSheetlikeList,
+    (prev, curr) => prev.data === curr.data && prev.state === curr.state,
 );

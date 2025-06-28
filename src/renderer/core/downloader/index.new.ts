@@ -4,7 +4,7 @@ import AppConfig from "@shared/app-config/renderer";
 import {
     addDownloadedMusicToList,
     isDownloaded,
-    setupDownloadedMusicList
+    setupDownloadedMusicList,
 } from "@renderer/core/downloader/downloaded-sheet";
 import logger from "@shared/logger/renderer";
 import PQueue from "p-queue";
@@ -26,7 +26,7 @@ interface IDownloadFileOptions {
 
 interface IDownloaderWorker {
     downloadFileNew: (mediaSource: IMusic.IMusicSource,
-                      filePath: string, options?: ProxyMarkedFunction<IDownloadFileOptions>) => void
+        filePath: string, options?: ProxyMarkedFunction<IDownloadFileOptions>) => void
 }
 
 
@@ -59,7 +59,7 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
         this.on(DownloaderEvent.DOWNLOAD_STATE_CHANGED, (...args) => {
             console.log("DOWNLOAD STATE CHANGE", ...args);
             console.log(this.downloadTaskQueue);
-        })
+        });
 
 
     }
@@ -81,8 +81,8 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
         // 3. setup downloading queue
         this.downloadTaskQueue = new PQueue({
             concurrency: downloadConcurrency || 5,
-            autoStart: false
-        })
+            autoStart: false,
+        });
         // @ts-ignore
         window.dd = this.downloadTaskQueue;
 
@@ -98,13 +98,13 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
         const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
         // 过滤掉已下载的、本地音乐、任务中的音乐
         const _validMusicItems = _musicItems.filter(
-            (it) => !isDownloaded(it) && it.platform !== localPluginName
+            (it) => !isDownloaded(it) && it.platform !== localPluginName,
         );
 
         const downloadTasks = _validMusicItems.map((it) => {
 
             this.setTaskStatus(it, {
-                status: DownloadState.WAITING
+                status: DownloadState.WAITING,
             });
 
 
@@ -116,8 +116,8 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
                     status: DownloadState.DOWNLOADING,
                     progress: {
                         currentSize: NaN,
-                        totalSize: NaN
-                    }
+                        totalSize: NaN,
+                    },
                 });
 
                 const fileName = `${it.title}-${it.artist}`.replace(/[/|\\?*"<>:]/g, "_");
@@ -127,39 +127,39 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
                         onError: (e) => {
                             this.setTaskStatus(it, {
                                 status: DownloadState.ERROR,
-                                error: e
+                                error: e,
                             });
                             resolve();
                         },
                         onProgress: (progress) => {
                             this.setTaskStatus(it, {
                                 status: DownloadState.DOWNLOADING,
-                                progress
-                            })
+                                progress,
+                            });
                         },
                         onEnded: () => {
                             this.setTaskStatus(it, {
-                                status: DownloadState.DONE
+                                status: DownloadState.DONE,
                             });
                             downloadingMusicStore.setValue((prev) =>
-                                prev.filter((di) => !isSameMedia(it, di))
+                                prev.filter((di) => !isSameMedia(it, di)),
                             );
                             resolve();
-                        }
+                        },
                     }).catch((e) => {
                         this.setTaskStatus(it, {
                             status: DownloadState.ERROR,
-                            error: e
+                            error: e,
                         });
                         resolve();
-                    })
+                    });
 
-                })
-            }
+                });
+            };
 
             task.musicItem = it;
             return task;
-        })
+        });
 
         this.downloadTaskQueue.addAll(downloadTasks);
         downloadingMusicStore.setValue((prev) => [...prev, ..._validMusicItems]);
@@ -187,7 +187,7 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
                     musicItem,
                     "getMediaSource",
                     musicItem,
-                    quality
+                    quality,
                 );
                 if (!mediaSource?.url) {
                     continue;
@@ -204,7 +204,7 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
 
             const downloadPath = window.path.resolve(
                 downloadBasePath,
-                `./${fileName}.${ext}`
+                `./${fileName}.${ext}`,
             );
             this.worker.downloadFileNew(
                 mediaSource,
@@ -226,10 +226,10 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
                                     path: downloadPath,
                                     quality: realQuality,
                                 },
-                                true
-                            ) as IMusic.IMusicItem
+                                true,
+                            ) as IMusic.IMusicItem,
                         );
-                    }
+                    },
                 }),
             );
         } else {
@@ -242,8 +242,8 @@ class Downloader extends EventEmitter<IDownloaderEvent> {
         if (this.downloadTaskQueue) {
             this.downloadTaskQueue.concurrency = Math.min(
                 concurrency < 1 ? 1 : concurrency,
-                Downloader.ConcurrencyLimit
-            )
+                Downloader.ConcurrencyLimit,
+            );
         }
     }
 

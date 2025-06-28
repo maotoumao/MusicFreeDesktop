@@ -104,11 +104,11 @@ app.whenReady().then(async () => {
         },
         onLanguageChanged(lang) {
             AppConfig.setConfig({
-                "normal.language": lang
+                "normal.language": lang,
             });
             if (process.platform === "win32") {
 
-                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, messageBus.getAppState().playerState === PlayerState.Playing)
+                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, messageBus.getAppState().playerState === PlayerState.Playing);
             }
         },
     });
@@ -132,7 +132,7 @@ app.whenReady().then(async () => {
                 }
                 if (musicItem) {
                     mainWindow.setTitle(
-                        musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : "")
+                        musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : ""),
                     );
                 } else {
                     mainWindow.setTitle(app.name);
@@ -143,7 +143,7 @@ app.whenReady().then(async () => {
             const playerState = patch.playerState;
 
             if (process.platform === "win32") {
-                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, playerState === PlayerState.Playing)
+                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, playerState === PlayerState.Playing);
             }
         } else if ("repeatMode" in patch) {
             TrayManager.buildTrayMenu();
@@ -154,7 +154,7 @@ app.whenReady().then(async () => {
                 TrayManager.setTitle("");
             }
         }
-    })
+    });
 
     messageBus.setup(windowManager);
 
@@ -170,7 +170,7 @@ async function bootstrap() {
     const downloadPath = AppConfig.getConfig("download.path");
     if (!downloadPath) {
         AppConfig.setConfig({
-            "download.path": app.getPath("downloads")
+            "download.path": app.getPath("downloads"),
         });
     }
 
@@ -213,7 +213,7 @@ async function bootstrap() {
                 shortCut.unregisterAllGlobalShortCuts();
             }
         }
-    })
+    });
 
 
     // 初始化代理
@@ -222,7 +222,7 @@ async function bootstrap() {
         "network.proxy.host",
         "network.proxy.port",
         "network.proxy.username",
-        "network.proxy.password"
+        "network.proxy.password",
     ];
 
     AppConfig.onConfigUpdated((patch, config) => {
@@ -248,7 +248,7 @@ async function bootstrap() {
         AppConfig.getConfig("network.proxy.host"),
         AppConfig.getConfig("network.proxy.port"),
         AppConfig.getConfig("network.proxy.username"),
-        AppConfig.getConfig("network.proxy.password")
+        AppConfig.getConfig("network.proxy.password"),
     );
 
 

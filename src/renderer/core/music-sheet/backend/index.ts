@@ -4,13 +4,13 @@
  * 除了frontend文件夹外，其他任何地方不应该直接调用此处定义的函数
  */
 
-import { localPluginName, musicRefSymbol, sortIndexSymbol, timeStampSymbol, } from "@/common/constant";
+import { localPluginName, musicRefSymbol, sortIndexSymbol, timeStampSymbol } from "@/common/constant";
 import { nanoid } from "nanoid";
 import musicSheetDB from "../../db/music-sheet-db";
 import { produce } from "immer";
 import defaultSheet from "../common/default-sheet";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
-import { getUserPreferenceIDB, setUserPreferenceIDB, } from "@/renderer/utils/user-perference";
+import { getUserPreferenceIDB, setUserPreferenceIDB } from "@/renderer/utils/user-perference";
 
 /******************** 内存缓存 ***********************/
 // 默认歌单，快速判定是否在列表中
@@ -53,12 +53,12 @@ export async function queryAllSheets() {
                 musicSheetDB.sheets,
                 async () => {
                     musicSheetDB.sheets.put(defaultSheet);
-                }
+                },
             );
             musicSheets = [defaultSheet, ...allSheets];
         } else {
             const dbDefaultSheet = allSheets.find(
-                (item) => item.id === defaultSheet.id
+                (item) => item.id === defaultSheet.id,
             );
             dbDefaultSheet.musicList.forEach((mi) => {
                 favoriteMusicListIds.add(getMediaPrimaryKey(mi));
@@ -114,7 +114,7 @@ export async function addSheet(sheetName: string) {
             musicSheetDB.sheets,
             async () => {
                 musicSheetDB.sheets.put(newSheet);
-            }
+            },
         );
         musicSheets = [...musicSheets, newSheet];
         return newSheet;
@@ -131,7 +131,7 @@ export async function addSheet(sheetName: string) {
  */
 export async function updateSheet(
     sheetId: string,
-    newData: Partial<IMusic.IMusicSheetItem>
+    newData: Partial<IMusic.IMusicSheetItem>,
 ) {
     try {
         if (!newData) {
@@ -142,7 +142,7 @@ export async function updateSheet(
             musicSheetDB.sheets,
             async () => {
                 musicSheetDB.sheets.update(sheetId, newData);
-            }
+            },
         );
 
         musicSheets = produce(musicSheets, (draft) => {
@@ -182,10 +182,10 @@ export async function removeSheet(sheetId: string) {
 
                 await removeMusicFromSheet(
                     targetSheet.musicList ?? ([] as any),
-                    sheetId
+                    sheetId,
                 );
                 musicSheetDB.sheets.delete(sheetId);
-            }
+            },
         );
         musicSheets = musicSheets.filter((it) => it.id !== sheetId);
         return musicSheets;
@@ -209,10 +209,10 @@ export async function clearSheet(sheetId: string) {
                 const targetSheet = musicSheets.find((item) => item.id === sheetId);
                 await removeMusicFromSheet(
                     targetSheet.musicList ?? ([] as any),
-                    sheetId
+                    sheetId,
                 );
                 targetSheet.musicList = [];
-            }
+            },
         );
         return [...musicSheets];
     } catch (e) {
@@ -236,7 +236,7 @@ export async function starMusicSheet(sheet: IMedia.IMediaBase) {
  */
 export async function unstarMusicSheet(sheet: IMedia.IMediaBase) {
     const newSheets = starredMusicSheets.filter(
-        (item) => !isSameMedia(item, sheet)
+        (item) => !isSameMedia(item, sheet),
     );
     await setUserPreferenceIDB("starredMusicSheets", newSheets);
     starredMusicSheets = newSheets;
@@ -261,7 +261,7 @@ export async function setStarredMusicSheets(sheets: IMedia.IMediaBase[]) {
  */
 export async function addMusicToSheet(
     musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
-    sheetId: string
+    sheetId: string,
 ) {
     const _musicItems = Array.isArray(musicItems) ? musicItems : [musicItems];
     try {
@@ -274,7 +274,7 @@ export async function addMusicToSheet(
         const targetMusicList = targetSheet.musicList;
         // 要添加到音乐列表中的项目
         const validMusicItems = _musicItems.filter(
-            (item) => -1 === targetMusicList.findIndex((mi) => isSameMedia(mi, item))
+            (item) => -1 === targetMusicList.findIndex((mi) => isSameMedia(mi, item)),
         );
 
         await musicSheetDB.transaction(
@@ -284,7 +284,7 @@ export async function addMusicToSheet(
             async () => {
                 // 寻找已入库的音乐项目
                 const allMusic = await musicSheetDB.musicStore.bulkGet(
-                    validMusicItems.map((item) => [item.platform, item.id])
+                    validMusicItems.map((item) => [item.platform, item.id]),
                 );
                 allMusic.forEach((mi, index) => {
                     if (mi) {
@@ -318,7 +318,7 @@ export async function addMusicToSheet(
                         targetSheet.musicList = obj.musicList;
                         musicSheets = [...musicSheets];
                     });
-            }
+            },
         );
 
         if (sheetId === defaultSheet.id) {
@@ -341,7 +341,7 @@ export async function addMusicToSheet(
  */
 export async function removeMusicFromSheet(
     musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
-    sheetId: string
+    sheetId: string,
 ) {
     const targetSheet = musicSheets.find((item) => item.id === sheetId);
     if (!targetSheet) {
@@ -371,7 +371,7 @@ export async function removeMusicFromSheet(
             async () => {
                 // 寻找引用
                 const toBeRemovedMusicDetail = await musicSheetDB.musicStore.bulkGet(
-                    toBeRemovedMusic.map((item) => [item.platform, item.id])
+                    toBeRemovedMusic.map((item) => [item.platform, item.id]),
                 );
                 // 如果引用计数为0，进入删除队列
                 const needDelete: any[] = [];
@@ -415,7 +415,7 @@ export async function removeMusicFromSheet(
                         targetSheet.musicList = obj.musicList;
                         musicSheets = [...musicSheets];
                     });
-            }
+            },
         );
 
         if (sheetId === defaultSheet.id) {
@@ -432,7 +432,7 @@ export async function removeMusicFromSheet(
 
 /** 获取歌单内的歌曲详细信息 */
 export async function getSheetItemDetail(
-    sheetId: string
+    sheetId: string,
 ): Promise<IMusic.IMusicSheetItem | null> {
     // 取太多歌曲时会卡顿， 1000首歌大约100ms
     const targetSheet = musicSheets.find((item) => item.id === sheetId);
@@ -453,9 +453,9 @@ export async function getSheetItemDetail(
                 return await musicSheetDB.musicStore.bulkGet(
                     musicList
                         .slice(i * groupSize, (i + 1) * groupSize)
-                        .map((item) => [item.platform, item.id])
+                        .map((item) => [item.platform, item.id]),
                 );
-            }
+            },
         );
 
         tmpResult.push(...(sliceResult ?? []));
@@ -489,9 +489,9 @@ export async function exportAllSheetDetails() {
             const musicLists = await Promise.all(
                 allSheets.map((sheet) =>
                     musicSheetDB.musicStore.bulkGet(
-                        (sheet.musicList ?? []).map((item) => [item.platform, item.id])
-                    )
-                )
+                        (sheet.musicList ?? []).map((item) => [item.platform, item.id]),
+                    ),
+                ),
             );
 
             const allSheetDetails = produce(allSheets, (draft) => {
@@ -501,6 +501,6 @@ export async function exportAllSheetDetails() {
             });
 
             return allSheetDetails;
-        }
+        },
     );
 }

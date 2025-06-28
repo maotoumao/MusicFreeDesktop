@@ -17,12 +17,12 @@ import logger from "@shared/logger/main";
 
 const axios = _axios.create({
     httpsAgent: new https.Agent({
-        rejectUnauthorized: false
-    })
+        rejectUnauthorized: false,
+    }),
 });
 
 interface ICallPluginMethodParams<
-    T extends keyof IPlugin.IPluginInstanceMethods
+    T extends keyof IPlugin.IPluginInstanceMethods,
 > {
     hash: string;
     platform: string;
@@ -72,7 +72,7 @@ class PluginManager {
         }
         this._pluginBasePath = path.resolve(
             app.getPath("userData"),
-            "./musicfree-plugins"
+            "./musicfree-plugins",
         );
         return this._pluginBasePath;
     }
@@ -82,7 +82,7 @@ class PluginManager {
         // 1. setup events
         ipcMain.handle("@shared/plugin-manager/call-plugin-method", (_evt, data) => {
             return this.callPluginMethod(data);
-        })
+        });
 
         ipcMain.handle("@shared/plugin-manager/get-all-plugins", () => this.clonedPlugins);
 
@@ -93,7 +93,7 @@ class PluginManager {
                 this.syncPlugins();
             }
             return this.clonedPlugins;
-        })
+        });
 
         ipcMain.handle("@shared/plugin-manager/uninstall-plugin", async (_, hash) => {
             await this.uninstallPlugin(hash);
@@ -108,7 +108,7 @@ class PluginManager {
 
         ipcMain.handle("@shared/plugin-manager/install-plugin-local", async (_, urlLike) => {
             return await this.installPluginFromLocalFile(urlLike);
-        })
+        });
 
         // 2. check if folder exists
         let folderExists = true;
@@ -134,11 +134,11 @@ class PluginManager {
 
     // 调用某个插件的方法
     private callPluginMethod({
-                                 hash,
-                                 platform,
-                                 method,
-                                 args,
-                             }: ICallPluginMethodParams<keyof IPlugin.IPluginInstanceMethods>
+        hash,
+        platform,
+        method,
+        args,
+    }: ICallPluginMethodParams<keyof IPlugin.IPluginInstanceMethods>,
     ) {
         let plugin: Plugin;
         if (hash === localPluginHash || platform === localPluginName) {
@@ -180,7 +180,7 @@ class PluginManager {
                 compare(
                     oldVersionPlugin.instance.version ?? "",
                     plugin.instance.version ?? "",
-                    ">"
+                    ">",
                 )
             ) {
                 throw new Error("已安装更新版本的插件");
@@ -283,8 +283,8 @@ class PluginManager {
     public async updateAllPlugins() {
         return Promise.allSettled(
             this.plugins.map((plg) =>
-                plg.instance.srcUrl ? this.installPluginFromRemoteUrl(plg.instance.srcUrl) : null
-            )
+                plg.instance.srcUrl ? this.installPluginFromRemoteUrl(plg.instance.srcUrl) : null,
+            ),
         );
     }
 

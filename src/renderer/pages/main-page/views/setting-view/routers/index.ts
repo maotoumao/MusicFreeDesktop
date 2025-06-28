@@ -10,40 +10,40 @@ import Plugin from "./Plugin";
 import ShortCut from "./ShortCut";
 
 export default [
-  {
-    id: "normal",
-    component: Normal,
-  },
-  {
-    id: "playMusic",
-    component: PlayMusic,
-  },
-  {
-    id: "download",
-    component: Download,
-  },
-  {
-    id: "lyric",
-    component: Lyric,
-  },
-  {
-    id: "plugin",
-    component: Plugin,
-  },
-  {
-    id: "shortCut",
-    component: ShortCut,
-  },
-  {
-    id: "network",
-    component: Network,
-  },
-  {
-    id: "backup",
-    component: Backup,
-  },
-  {
-    id: "about",
-    component: About,
-  },
+    {
+        id: "normal",
+        component: Normal,
+    },
+    {
+        id: "playMusic",
+        component: PlayMusic,
+    },
+    {
+        id: "download",
+        component: Download,
+    },
+    {
+        id: "lyric",
+        component: Lyric,
+    },
+    {
+        id: "plugin",
+        component: Plugin,
+    },
+    {
+        id: "shortCut",
+        component: ShortCut,
+    },
+    {
+        id: "network",
+        component: Network,
+    },
+    {
+        id: "backup",
+        component: Backup,
+    },
+    {
+        id: "about",
+        component: About,
+    },
 ];

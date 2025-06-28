@@ -7,5 +7,5 @@ export default {
     Base,
     UserVariables,
     PlayList,
-    MusicComment
-}
+    MusicComment,
+};

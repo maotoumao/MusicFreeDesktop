@@ -6,45 +6,45 @@ import { PlayerState } from "@/common/constant";
 import { usePlayerState } from "@renderer/core/track-player/hooks";
 
 export default function Controller() {
-  const playerState = usePlayerState();
+    const playerState = usePlayerState();
 
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
 
-  return (
-    <div className="music-controller">
-      <div className="skip controller-btn" title={t("music_bar.previous_music")} onClick={() => {
-          trackPlayer.skipToPrev();
+    return (
+        <div className="music-controller">
+            <div className="skip controller-btn" title={t("music_bar.previous_music")} onClick={() => {
+                trackPlayer.skipToPrev();
 
-      }}>
-        <SvgAsset iconName="skip-left"></SvgAsset>
-      </div>
-      <div
-        className="play-or-pause controller-btn primary-btn"
-        onClick={() => {
-          if(playerState === PlayerState.Playing) {
-            trackPlayer.pause();
-          } else {
-            trackPlayer.resume();
-          }
-        }}
-      >
-        <SvgAsset
-          iconName={
-            playerState !== PlayerState.Playing ? "play" : "pause"
-          }
-        ></SvgAsset>
-      </div>
-      <div
-        className="skip controller-btn"
-        title={t("music_bar.next_music")}
-        onClick={() => {
+            }}>
+                <SvgAsset iconName="skip-left"></SvgAsset>
+            </div>
+            <div
+                className="play-or-pause controller-btn primary-btn"
+                onClick={() => {
+                    if(playerState === PlayerState.Playing) {
+                        trackPlayer.pause();
+                    } else {
+                        trackPlayer.resume();
+                    }
+                }}
+            >
+                <SvgAsset
+                    iconName={
+                        playerState !== PlayerState.Playing ? "play" : "pause"
+                    }
+                ></SvgAsset>
+            </div>
+            <div
+                className="skip controller-btn"
+                title={t("music_bar.next_music")}
+                onClick={() => {
 
-          trackPlayer.skipToNext();
-        }}
-      >
-        <SvgAsset iconName="skip-right"></SvgAsset>
-      </div>
-    </div>
-  );
+                    trackPlayer.skipToNext();
+                }}
+            >
+                <SvgAsset iconName="skip-right"></SvgAsset>
+            </div>
+        </div>
+    );
 }

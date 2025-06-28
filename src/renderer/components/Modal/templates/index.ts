@@ -25,5 +25,5 @@ export default {
     SelectOne,
     PluginSubscription,
     SearchLyric,
-    ImportMusicSheet
-}
+    ImportMusicSheet,
+};

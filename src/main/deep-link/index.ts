@@ -27,7 +27,7 @@ async function handleMusicFreeScheme(url: URL) {
                 url.pathname.slice(1) || url.searchParams.get("plugin");
             const pluginUrls = pluginUrlStr.split(",").map(decodeURIComponent);
             await Promise.all(
-                pluginUrls.map((it) => PluginManager.installPluginFromRemoteUrl(it).catch(voidCallback))
+                pluginUrls.map((it) => PluginManager.installPluginFromRemoteUrl(it).catch(voidCallback)),
             );
         } catch {
             // pass

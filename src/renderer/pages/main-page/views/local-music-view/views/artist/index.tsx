@@ -6,54 +6,54 @@ import MusicList from "@/renderer/components/MusicList";
 import { Trans } from "react-i18next";
 
 interface IProps {
-  localMusicList: IMusic.IMusicItem[];
+    localMusicList: IMusic.IMusicItem[];
 }
 
 export default function ArtistView(props: IProps) {
-  const { localMusicList } = props;
+    const { localMusicList } = props;
 
-  const [keys, allMusic] = useMemo(() => {
-    const grouped = groupBy(localMusicList ?? [], (it) => it.artist);
-    return [Object.keys(grouped).sort((a, b) => a.localeCompare(b)), grouped];
-  }, [localMusicList]);
+    const [keys, allMusic] = useMemo(() => {
+        const grouped = groupBy(localMusicList ?? [], (it) => it.artist);
+        return [Object.keys(grouped).sort((a, b) => a.localeCompare(b)), grouped];
+    }, [localMusicList]);
 
-  const [selectedKey, setSelectedKey] = useState<string>();
+    const [selectedKey, setSelectedKey] = useState<string>();
 
-  const actualSelectedKey = selectedKey ?? keys?.[0];
+    const actualSelectedKey = selectedKey ?? keys?.[0];
 
-  return (
-    <div className="local-music--artist-view-container">
-      <div className="left-part">
-        {keys.map((it) => (
-          <div
-            className="artist-item list-behavior"
-            key={it}
-            data-selected={actualSelectedKey === it}
-            onClick={() => {
-              setSelectedKey(it);
-            }}
-          >
-            <span>{it}</span>
-            <span>
-              <Trans
-                i18nKey={"local_music_page.total_music_num"}
-                values={{
-                  number: allMusic?.[it]?.length ?? 0,
-                }}
-              ></Trans>
-            </span>
-          </div>
-        ))}
-      </div>
-      <div className="right-part">
-        <MusicList
-          musicList={allMusic[actualSelectedKey] ?? []}
-          hideRows={["artist"]}
-          virtualProps={{
-            fallbackRenderCount: -1,
-          }}
-        ></MusicList>
-      </div>
-    </div>
-  );
+    return (
+        <div className="local-music--artist-view-container">
+            <div className="left-part">
+                {keys.map((it) => (
+                    <div
+                        className="artist-item list-behavior"
+                        key={it}
+                        data-selected={actualSelectedKey === it}
+                        onClick={() => {
+                            setSelectedKey(it);
+                        }}
+                    >
+                        <span>{it}</span>
+                        <span>
+                            <Trans
+                                i18nKey={"local_music_page.total_music_num"}
+                                values={{
+                                    number: allMusic?.[it]?.length ?? 0,
+                                }}
+                            ></Trans>
+                        </span>
+                    </div>
+                ))}
+            </div>
+            <div className="right-part">
+                <MusicList
+                    musicList={allMusic[actualSelectedKey] ?? []}
+                    hideRows={["artist"]}
+                    virtualProps={{
+                        fallbackRenderCount: -1,
+                    }}
+                ></MusicList>
+            </div>
+        </div>
+    );
 }

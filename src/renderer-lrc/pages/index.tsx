@@ -62,8 +62,8 @@ export default function LyricWindowPage() {
                                     className="operation-button"
                                     onClick={() => {
                                         AppConfig.setConfig({
-                                            "lyric.lockLyric": false
-                                        })
+                                            "lyric.lockLyric": false,
+                                        });
                                     }}
                                     onMouseOver={() => {
                                         appWindowUtil.ignoreMouseEvent(false);
@@ -110,7 +110,7 @@ export default function LyricWindowPage() {
                                 className="operation-button"
                                 onClick={() => {
                                     AppConfig.setConfig({
-                                        "lyric.lockLyric": true
+                                        "lyric.lockLyric": true,
                                     });
                                 }}
                             >
@@ -202,7 +202,7 @@ function LyricContent() {
 
         return () => {
             messageBus.offStateChange(callback);
-        }
+        };
 
     }, [textWidth, currentFullLyric, currentLyric]);
 

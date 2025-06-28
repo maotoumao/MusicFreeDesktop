@@ -25,7 +25,7 @@ const mod = {
     setConfig,
     onConfigUpdate,
     reset,
-}
+};
 
 contextBridge.exposeInMainWorld("@shared/app-config", mod);
 

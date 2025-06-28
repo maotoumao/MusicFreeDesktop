@@ -25,7 +25,7 @@ export default function PlayMusic() {
                     "low",
                     "standard",
                     "high",
-                    "super"
+                    "super",
                 ]}
                 renderItem={it => t("media.music_quality_" + it)}
 
@@ -44,7 +44,7 @@ export default function PlayMusic() {
                     if (it === "pause") {
                         return t("settings.play_music.pause");
                     } else {
-                        return t("settings.play_music.skip_to_next")
+                        return t("settings.play_music.skip_to_next");
                     }
                 }}
             ></RadioGroupSettingItem>
@@ -56,7 +56,7 @@ export default function PlayMusic() {
                     if (it === "normal") {
                         return t("settings.play_music.add_music_to_playlist");
                     } else {
-                        return t("settings.play_music.replace_playlist_with_musiclist")
+                        return t("settings.play_music.replace_playlist_with_musiclist");
                     }
                 }}
 
@@ -72,7 +72,7 @@ export default function PlayMusic() {
                     evt.preventDefault();
                     await trackPlayer.setAudioOutputDevice(item.deviceId);
                     AppConfig.setConfig({
-                        "playMusic.audioOutputDevice": item.toJSON()
+                        "playMusic.audioOutputDevice": item.toJSON(),
                     });
                 }}
                 options={audioDevices}
@@ -84,7 +84,7 @@ export default function PlayMusic() {
                     if (it === "pause") {
                         return t("settings.play_music.pause");
                     } else {
-                        return t("settings.play_music.continue_playing")
+                        return t("settings.play_music.continue_playing");
                     }
                 }}
                 options={["pause", "play"]}

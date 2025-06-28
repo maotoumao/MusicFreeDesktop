@@ -33,7 +33,7 @@ export default function SettingView() {
             {
                 root: bodyContainerRef.current,
                 threshold: [0, 0.2, 0.8, 1],
-            }
+            },
         );
 
         for (const setting of routers) {

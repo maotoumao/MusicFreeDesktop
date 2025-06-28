@@ -34,7 +34,7 @@ export default function MusicComment(props: IProps) {
             </>}
         </div>
 
-    </Base>
+    </Base>;
 }
 
 
@@ -48,7 +48,7 @@ function MusicCommentItem(props: IMusicCommentItemProps) {
     return <div className="music-comment-panel--comment-item-container">
         <div className="comment-title-container">
             <img className="avatar"
-                 src={comment.avatar}></img>
+                src={comment.avatar}></img>
             <span>{comment.nickName}</span>
         </div>
         <div className="comment-body-container">
@@ -61,5 +61,5 @@ function MusicCommentItem(props: IMusicCommentItemProps) {
                 <span>{comment.like ?? "-"}</span>
             </div>
         </div>
-    </div>
+    </div>;
 }

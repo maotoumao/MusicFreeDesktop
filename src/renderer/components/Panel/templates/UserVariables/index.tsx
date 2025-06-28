@@ -32,7 +32,7 @@ export default function (props: IUserVariablesProps) {
                             currentConfig[plugin.platform] = currentPluginConfig;
                             AppConfig.setConfig({
                                 "private.pluginMeta": currentConfig,
-                            })
+                            });
 
                             hidePanel();
                             toast.success(t("panel.user_variable_setting_success"));
@@ -47,9 +47,9 @@ export default function (props: IUserVariablesProps) {
             <div className="panel--user-variables-container">
                 {variables.map((variable) => (
                     <div className="panel--user-variable-item" key={variable.key}>
-            <span title={variable.name ?? variable.key}>
-              {variable.name ?? variable.key}
-            </span>
+                        <span title={variable.name ?? variable.key}>
+                            {variable.name ?? variable.key}
+                        </span>
                         <input
                             spellCheck={false}
                             defaultValue={initValues[variable.key]}

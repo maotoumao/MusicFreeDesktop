@@ -1,5 +1,4 @@
 import { IAppConfig } from "@/types/app-config";
-import _defaultAppConfig from "@shared/app-config/default-app-config";
 import defaultAppConfig from "@shared/app-config/default-app-config";
 
 
@@ -13,7 +12,7 @@ interface IMod {
     reset(): void;
 }
 
-const mod = window["@shared/app-config" as any] as unknown as IMod
+const mod = window["@shared/app-config" as any] as unknown as IMod;
 
 class AppConfig {
     private config: IAppConfig = {};
@@ -34,9 +33,9 @@ class AppConfig {
         this.notifyCallbacks(this.config);
 
         mod.onConfigUpdate((patch) => {
-            this.config = { ..._defaultAppConfig, ...this.config, ...patch };
+            this.config = { ...defaultAppConfig, ...this.config, ...patch };
             this.notifyCallbacks(patch);
-        })
+        });
     }
 
     public onConfigUpdate(callback: (patch: IAppConfig, config: IAppConfig) => void) {

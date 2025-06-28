@@ -69,11 +69,11 @@ class AppConfig {
              * data: {key: value}
              */
             this._setConfig(data, "renderer");
-        })
+        });
 
         ipcMain.on("@shared/app-config/reset", () => {
             this.reset();
-        })
+        });
     }
 
     public onConfigUpdated(callback: (patch: IAppConfig, config: IAppConfig, from: "main" | "renderer") => void) {
@@ -148,7 +148,7 @@ class AppConfig {
                 "private.minimodeWindowPosition": oldConfig.private?.minimodeWindowPosition,
                 "private.pluginMeta": oldConfig.private?.pluginMeta,
                 "private.minimode": oldConfig.private?.minimode,
-            }
+            };
             this.config = newConfig;
             for (const k in _defaultAppConfig) {
                 if (newConfig[k] === null || newConfig[k] === undefined) {
@@ -175,7 +175,7 @@ class AppConfig {
                 this.config = {
                     ..._defaultAppConfig,
                     ...this.config,
-                }
+                };
             }
         } catch (e) {
             if (e.message === "Unexpected end of JSON input" || e.code === "EISDIR") {
@@ -218,11 +218,11 @@ class AppConfig {
             // 3. Notify to all windows
             this.windowManager.getAllWindows().forEach((window) => {
                 window.webContents.send("@shared/app-config/update-app-config", data);
-            })
+            });
 
             this.onAppConfigUpdatedCallbacks.forEach((callback) => {
                 callback(data, this.config, from);
-            })
+            });
 
         } catch (e) {
             logger.logError("设置配置失败", e);

@@ -22,14 +22,14 @@ function useFonts() {
 
     const fonts = useMemo(
         () => (allLocalFonts ? [defaultFont, ...allLocalFonts] : null),
-        [allLocalFonts]
+        [allLocalFonts],
     );
 
     return fonts;
 }
 
 export default function FontPickerSettingItem<T extends keyof IAppConfig>(
-    props: FontPickerSettingItemProps<T>
+    props: FontPickerSettingItemProps<T>,
 ) {
     const { keyPath, label } = props;
 
@@ -50,7 +50,7 @@ export default function FontPickerSettingItem<T extends keyof IAppConfig>(
                         fullName: (newValue as FontData).fullName,
                         postscriptName: (newValue as FontData).postscriptName,
                         style: (newValue as FontData).style,
-                    }
+                    },
                 });
             }}
         ></ListBoxSettingItem>

@@ -1,4 +1,4 @@
-import { CurrentTime, ICurrentLyric, PlayerEvents, } from "./enum";
+import { CurrentTime, ICurrentLyric, PlayerEvents } from "./enum";
 import shuffle from "lodash.shuffle";
 import {
     addSortProperty,
@@ -40,7 +40,7 @@ const {
     currentVolumeStore,
     currentSpeedStore,
     currentQualityStore,
-    resetProgress
+    resetProgress,
 } = _trackPlayerStore;
 
 
@@ -86,7 +86,7 @@ class TrackPlayer {
             id: currentMusic.id,
             album: currentMusic.album,
             artwork: currentMusic.artwork,
-        } as IMusic.IMusicItem
+        } as IMusic.IMusicItem;
     }
 
     get progress() {
@@ -159,11 +159,11 @@ class TrackPlayer {
 
         navigator.mediaSession.setActionHandler("nexttrack", () => {
             this.skipToNext();
-        })
+        });
 
         navigator.mediaSession.setActionHandler("previoustrack", () => {
             this.skipToPrev();
-        })
+        });
     }
 
 
@@ -181,11 +181,11 @@ class TrackPlayer {
                 }
                 case RepeatMode.Loop: {
                     this.playIndex(this.currentIndex, {
-                        restartOnSameMedia: true
+                        restartOnSameMedia: true,
                     });
                 }
             }
-        }
+        };
         // 进度更新
         audioController.onProgressUpdate = ((progress) => {
             this.setProgress(progress);
@@ -195,29 +195,29 @@ class TrackPlayer {
                 if (this.lyric.currentLrc?.lrc !== lyricItem?.lrc) {
                     this.setCurrentLyric({
                         parser: this.lyric.parser,
-                        currentLrc: lyricItem
-                    })
+                        currentLrc: lyricItem,
+                    });
                 }
             }
-        })
+        });
 
         audioController.onVolumeChange = (volume) => {
             currentVolumeStore.setValue(volume);
             setUserPreference("volume", volume);
-        }
+        };
 
         audioController.onSpeedChange = (speed) => {
             currentSpeedStore.setValue(speed);
             setUserPreference("speed", speed);
-        }
+        };
 
         audioController.onPlayerStateChanged = (state) => {
             this.setPlayerState(state);
-        }
+        };
 
         audioController.onError = async (type, reason) => {
             this.ee.emit(PlayerEvents.Error, audioController.musicItem, reason);
-        }
+        };
 
 
         this.audioController = audioController;
@@ -231,7 +231,7 @@ class TrackPlayer {
             getUserPreference("currentProgress"),
             getUserPreference("volume"),
             getUserPreference("speed"),
-            getUserPreference("currentQuality") || AppConfig.getConfig("playMusic.defaultQuality")
+            getUserPreference("currentQuality") || AppConfig.getConfig("playMusic.defaultQuality"),
         ];
         const playList = ((await getUserPreferenceIDB("playList")) ?? []).filter(it => !!it);
         addSortProperty(playList);
@@ -261,7 +261,7 @@ class TrackPlayer {
         }
 
         if (speed) {
-            this.setSpeed(speed)
+            this.setSpeed(speed);
         }
 
         // 4. reload lyric
@@ -272,7 +272,7 @@ class TrackPlayer {
             if (this.isCurrentMusic(currentMusic)) {
                 this.setTrack(mediaSource, currentMusic, {
                     seekTo: currentProgress,
-                    autoPlay: false
+                    autoPlay: false,
                 });
                 this.setCurrentQuality(quality);
             }
@@ -340,7 +340,7 @@ class TrackPlayer {
             this.setCurrentQuality(quality);
             this.setTrack(mediaSource, nextMusicItem, {
                 seekTo,
-                autoPlay: true
+                autoPlay: true,
             });
 
             // extra information
@@ -349,7 +349,7 @@ class TrackPlayer {
                     platform: nextMusicItem.platform,
                 },
                 "getMusicInfo",
-                nextMusicItem
+                nextMusicItem,
             ).catch(voidCallback);
 
             if (!(musicInfo && this.isCurrentMusic(nextMusicItem) && typeof musicInfo === "object")) {
@@ -367,7 +367,7 @@ class TrackPlayer {
             // 播放失败
             this.setCurrentQuality(AppConfig.getConfig("playMusic.defaultQuality"));
             this.audioController.reset();
-            this.ee.emit(PlayerEvents.Error, nextMusicItem, e)
+            this.ee.emit(PlayerEvents.Error, nextMusicItem, e);
         }
 
 
@@ -385,9 +385,9 @@ class TrackPlayer {
                 {
                     ...musicItem,
                     [timeStampSymbol]: Date.now(),
-                    [sortIndexSymbol]: 0
-                }
-            ]
+                    [sortIndexSymbol]: 0,
+                },
+            ];
             this.setMusicQueue(newQueue);
             await this.playIndex(newQueue.length - 1, options);
         } else {
@@ -517,7 +517,7 @@ class TrackPlayer {
         const newQueue = [
             ...startPart,
             ..._musicItems,
-            ...tailPart
+            ...tailPart,
         ];
 
         this.setMusicQueue(newQueue);
@@ -571,12 +571,12 @@ class TrackPlayer {
     public async setQuality(quality: IMusic.IQualityKey) {
         const currentMusic = this.currentMusic;
         if (currentMusic && quality !== this.currentQuality) {
-            const { mediaSource, quality: realQuality } = await this.fetchMediaSource(currentMusic, quality)
+            const { mediaSource, quality: realQuality } = await this.fetchMediaSource(currentMusic, quality);
             if (this.isCurrentMusic(currentMusic)) {
                 this.setTrack(mediaSource, currentMusic, {
                     seekTo: this.progress.currentTime ?? 0,
-                    autoPlay: this.playerState === PlayerState.Playing
-                })
+                    autoPlay: this.playerState === PlayerState.Playing,
+                });
                 this.setCurrentQuality(realQuality);
             }
         }
@@ -630,14 +630,14 @@ class TrackPlayer {
                 lyricSource = await PluginManager.callPluginDelegateMethod(
                     linkedLyricItem,
                     "getLyric",
-                    linkedLyricItem
-                )
+                    linkedLyricItem,
+                );
             }
             if (!lyricSource && this.isCurrentMusic(currentMusic)) {
                 lyricSource = await PluginManager.callPluginDelegateMethod(
                     currentMusic,
                     "getLyric",
-                    currentMusic
+                    currentMusic,
                 );
             }
 
@@ -650,12 +650,12 @@ class TrackPlayer {
             }
             const parser = new LyricParser(lyricSource.rawLrc, {
                 musicItem: currentMusic,
-                translation: lyricSource.translation
+                translation: lyricSource.translation,
             });
 
             this.setCurrentLyric({
                 parser,
-                currentLrc: parser.getPosition(this.progress.currentTime || 0)
+                currentLrc: parser.getPosition(this.progress.currentTime || 0),
             });
         } catch (e) {
             logger.logError("歌词解析失败", e);
@@ -678,7 +678,7 @@ class TrackPlayer {
         // 1. 判断是否已下载
         const downloadedData = getInternalData<IMusic.IMusicItemInternalData>(
             musicItem,
-            "downloadData"
+            "downloadData",
         );
         if (downloadedData) {
             const { quality, path: _path } = downloadedData;
@@ -703,7 +703,7 @@ class TrackPlayer {
                     },
                     "getMediaSource",
                     musicItem,
-                    quality
+                    quality,
                 );
                 if (!mediaSource?.url) {
                     continue;
@@ -716,8 +716,8 @@ class TrackPlayer {
         }
         return {
             quality: realQuality,
-            mediaSource: mediaSource
-        }
+            mediaSource: mediaSource,
+        };
     }
 
 
@@ -782,7 +782,7 @@ class TrackPlayer {
     }
 
     private setTrack(mediaSource: IPlugin.IMediaSourceResult, musicItem: IMusic.IMusicItem, options: ITrackOptions = {
-        autoPlay: true
+        autoPlay: true,
     }) {
         this.resetProgress();
         this.audioController.setTrackSource(mediaSource, musicItem);

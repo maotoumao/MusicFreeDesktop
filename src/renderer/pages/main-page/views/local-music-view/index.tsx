@@ -13,144 +13,144 @@ import FolderView from "./views/folder";
 import AppConfig from "@shared/app-config/renderer";
 
 enum DisplayView {
-  LIST,
-  ARTIST,
-  ALBUM,
-  FOLDER,
+    LIST,
+    ARTIST,
+    ALBUM,
+    FOLDER,
 }
 
 export default function LocalMusicView() {
-  const { t } = useTranslation();
-  const [displayView, setDisplayView] = useState(DisplayView.LIST);
+    const { t } = useTranslation();
+    const [displayView, setDisplayView] = useState(DisplayView.LIST);
 
-  const localMusicList = localMusicListStore.useValue();
-  const [inputSearch, setInputSearch] = useState("");
-  const [filterMusicList, setFilterMusicList] = useState<
+    const localMusicList = localMusicListStore.useValue();
+    const [inputSearch, setInputSearch] = useState("");
+    const [filterMusicList, setFilterMusicList] = useState<
     IMusic.IMusicItem[] | null
-  >(null);
+    >(null);
 
-  const [isPending, startTransition] = useTransition();
+    const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (inputSearch.trim() === "") {
-      setFilterMusicList(null);
-    } else {
-      startTransition(() => {
-        const caseSensitive = AppConfig.getConfig(
-          "playMusic.caseSensitiveInSearch"
-        );
-        if (caseSensitive) {
-          setFilterMusicList(
-            localMusicListStore
-              .getValue()
-              .filter(
-                (item) =>
-                  item.title?.includes(inputSearch) ||
-                  item.artist?.includes(inputSearch) ||
-                  item.album?.includes(inputSearch)
-              )
-          );
+    useEffect(() => {
+        if (inputSearch.trim() === "") {
+            setFilterMusicList(null);
         } else {
-          const searchText = inputSearch.toLocaleLowerCase();
-          setFilterMusicList(
-            localMusicListStore
-              .getValue()
-              .filter(
-                (item) =>
-                  item.title?.toLocaleLowerCase()?.includes(searchText) ||
+            startTransition(() => {
+                const caseSensitive = AppConfig.getConfig(
+                    "playMusic.caseSensitiveInSearch",
+                );
+                if (caseSensitive) {
+                    setFilterMusicList(
+                        localMusicListStore
+                            .getValue()
+                            .filter(
+                                (item) =>
+                                    item.title?.includes(inputSearch) ||
+                  item.artist?.includes(inputSearch) ||
+                  item.album?.includes(inputSearch),
+                            ),
+                    );
+                } else {
+                    const searchText = inputSearch.toLocaleLowerCase();
+                    setFilterMusicList(
+                        localMusicListStore
+                            .getValue()
+                            .filter(
+                                (item) =>
+                                    item.title?.toLocaleLowerCase()?.includes(searchText) ||
                   item.artist?.toLocaleLowerCase()?.includes(searchText) ||
-                  item.album?.toLocaleLowerCase()?.includes(searchText)
-              )
-          );
+                  item.album?.toLocaleLowerCase()?.includes(searchText),
+                            ),
+                    );
+                }
+            });
         }
-      });
-    }
-  }, [inputSearch]);
+    }, [inputSearch]);
 
-  const finalMusicList = filterMusicList ?? localMusicList;
+    const finalMusicList = filterMusicList ?? localMusicList;
 
-  return (
-    <div
-      id="page-container"
-      className="page-container local-music-view--container"
-      data-full-page={displayView !== DisplayView.LIST}
-    >
-      <div className="header">{t("local_music_page.local_music")}</div>
-      <div className="operations">
+    return (
         <div
-          data-type="normalButton"
-          role="button"
-          onClick={() => {
-            showModal("WatchLocalDir");
-          }}
+            id="page-container"
+            className="page-container local-music-view--container"
+            data-full-page={displayView !== DisplayView.LIST}
         >
-          {t("local_music_page.auto_scan")}
+            <div className="header">{t("local_music_page.local_music")}</div>
+            <div className="operations">
+                <div
+                    data-type="normalButton"
+                    role="button"
+                    onClick={() => {
+                        showModal("WatchLocalDir");
+                    }}
+                >
+                    {t("local_music_page.auto_scan")}
+                </div>
+                <div className="operations-layout">
+                    <input
+                        className="search-local-music"
+                        spellCheck={false}
+                        onChange={(evt) => {
+                            setInputSearch(evt.target.value);
+                        }}
+                        placeholder={t("local_music_page.search_local_music")}
+                    ></input>
+                    <div
+                        className="list-view-action"
+                        data-selected={displayView === DisplayView.LIST}
+                        title={t("local_music_page.list_view")}
+                        onClick={() => {
+                            setDisplayView(DisplayView.LIST);
+                        }}
+                    >
+                        <SvgAsset iconName="musical-note"></SvgAsset>
+                    </div>
+                    <div
+                        className="list-view-action"
+                        data-selected={displayView === DisplayView.ARTIST}
+                        title={t("local_music_page.artist_view")}
+                        onClick={() => {
+                            setDisplayView(DisplayView.ARTIST);
+                        }}
+                    >
+                        <SvgAsset iconName="user"></SvgAsset>
+                    </div>
+                    <div
+                        className="list-view-action"
+                        data-selected={displayView === DisplayView.ALBUM}
+                        title={t("local_music_page.album_view")}
+                        onClick={() => {
+                            setDisplayView(DisplayView.ALBUM);
+                        }}
+                    >
+                        <SvgAsset iconName="cd"></SvgAsset>
+                    </div>
+                    <div
+                        className="list-view-action"
+                        data-selected={displayView === DisplayView.FOLDER}
+                        title={t("local_music_page.folder_view")}
+                        onClick={() => {
+                            setDisplayView(DisplayView.FOLDER);
+                        }}
+                    >
+                        <SvgAsset iconName="folder-open"></SvgAsset>
+                    </div>
+                </div>
+            </div>
+            <SwitchCase.Switch switch={displayView}>
+                <SwitchCase.Case case={DisplayView.LIST}>
+                    <ListView localMusicList={finalMusicList}></ListView>
+                </SwitchCase.Case>
+                <SwitchCase.Case case={DisplayView.ARTIST}>
+                    <ArtistView localMusicList={finalMusicList}></ArtistView>
+                </SwitchCase.Case>
+                <SwitchCase.Case case={DisplayView.ALBUM}>
+                    <AlbumView localMusicList={finalMusicList}></AlbumView>
+                </SwitchCase.Case>
+                <SwitchCase.Case case={DisplayView.FOLDER}>
+                    <FolderView localMusicList={finalMusicList}></FolderView>
+                </SwitchCase.Case>
+            </SwitchCase.Switch>
         </div>
-        <div className="operations-layout">
-          <input
-            className="search-local-music"
-            spellCheck={false}
-            onChange={(evt) => {
-              setInputSearch(evt.target.value);
-            }}
-            placeholder={t("local_music_page.search_local_music")}
-          ></input>
-          <div
-            className="list-view-action"
-            data-selected={displayView === DisplayView.LIST}
-            title={t("local_music_page.list_view")}
-            onClick={() => {
-              setDisplayView(DisplayView.LIST);
-            }}
-          >
-            <SvgAsset iconName="musical-note"></SvgAsset>
-          </div>
-          <div
-            className="list-view-action"
-            data-selected={displayView === DisplayView.ARTIST}
-            title={t("local_music_page.artist_view")}
-            onClick={() => {
-              setDisplayView(DisplayView.ARTIST);
-            }}
-          >
-            <SvgAsset iconName="user"></SvgAsset>
-          </div>
-          <div
-            className="list-view-action"
-            data-selected={displayView === DisplayView.ALBUM}
-            title={t("local_music_page.album_view")}
-            onClick={() => {
-              setDisplayView(DisplayView.ALBUM);
-            }}
-          >
-            <SvgAsset iconName="cd"></SvgAsset>
-          </div>
-          <div
-            className="list-view-action"
-            data-selected={displayView === DisplayView.FOLDER}
-            title={t("local_music_page.folder_view")}
-            onClick={() => {
-              setDisplayView(DisplayView.FOLDER);
-            }}
-          >
-            <SvgAsset iconName="folder-open"></SvgAsset>
-          </div>
-        </div>
-      </div>
-      <SwitchCase.Switch switch={displayView}>
-        <SwitchCase.Case case={DisplayView.LIST}>
-          <ListView localMusicList={finalMusicList}></ListView>
-        </SwitchCase.Case>
-        <SwitchCase.Case case={DisplayView.ARTIST}>
-          <ArtistView localMusicList={finalMusicList}></ArtistView>
-        </SwitchCase.Case>
-        <SwitchCase.Case case={DisplayView.ALBUM}>
-          <AlbumView localMusicList={finalMusicList}></AlbumView>
-        </SwitchCase.Case>
-        <SwitchCase.Case case={DisplayView.FOLDER}>
-          <FolderView localMusicList={finalMusicList}></FolderView>
-        </SwitchCase.Case>
-      </SwitchCase.Switch>
-    </div>
-  );
+    );
 }

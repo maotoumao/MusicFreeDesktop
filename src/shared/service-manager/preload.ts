@@ -7,7 +7,7 @@ ipcRenderer.on("@shared/service-manager/host-changed", (_evt, serviceName: Servi
     if (host) {
         serviceHostMap.set(serviceName, host);
     } else {
-        serviceHostMap.delete(serviceName)
+        serviceHostMap.delete(serviceName);
     }
 });
 
@@ -27,8 +27,8 @@ function getServiceHost(serviceName: ServiceName) {
 
 const mod = {
     setup,
-    getServiceHost
-}
+    getServiceHost,
+};
 
 contextBridge.exposeInMainWorld("@shared/service-manager", mod);
 

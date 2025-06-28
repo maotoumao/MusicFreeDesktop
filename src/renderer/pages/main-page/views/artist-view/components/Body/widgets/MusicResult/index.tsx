@@ -7,33 +7,33 @@ import { RequestStateCode } from "@/common/constant";
 import Loading from "@/renderer/components/Loading";
 
 interface IBodyProps {
-  artistItem: IArtist.IArtistItem;
+    artistItem: IArtist.IArtistItem;
 }
 
 export default function MusicResult(props: IBodyProps) {
-  const { artistItem } = props;
-  const queryArtist = useQueryArtist();
-  const queryResult = queryResultStore.useValue().music;
+    const { artistItem } = props;
+    const queryArtist = useQueryArtist();
+    const queryResult = queryResultStore.useValue().music;
 
-  useEffect(() => {
-    queryArtist(artistItem, 1, "music");
-  }, []);
+    useEffect(() => {
+        queryArtist(artistItem, 1, "music");
+    }, []);
 
-  return (
-    <Condition
-      condition={
-        queryResult.state &&
+    return (
+        <Condition
+            condition={
+                queryResult.state &&
         queryResult.state !== RequestStateCode.PENDING_FIRST_PAGE
-      }
-      falsy={<Loading></Loading>}
-    >
-      <MusicList
-        musicList={queryResult.data ?? []}
-        state={queryResult.state}
-        onPageChange={() => {
-          queryArtist(artistItem, undefined, "music");
-        }}
-      ></MusicList>
-    </Condition>
-  );
+            }
+            falsy={<Loading></Loading>}
+        >
+            <MusicList
+                musicList={queryResult.data ?? []}
+                state={queryResult.state}
+                onPageChange={() => {
+                    queryArtist(artistItem, undefined, "music");
+                }}
+            ></MusicList>
+        </Condition>
+    );
 }

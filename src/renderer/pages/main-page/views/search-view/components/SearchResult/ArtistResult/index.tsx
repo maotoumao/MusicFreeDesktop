@@ -27,9 +27,9 @@ export default function ArtistResult(props: IMediaResultProps) {
                             `/main/artist/${encodeURIComponent(artistItem.platform)}/${encodeURIComponent(artistItem.id)}`,
                             {
                                 state: {
-                                    artistItem
+                                    artistItem,
                                 },
-                            }
+                            },
                         );
                     }}></ArtistItem>;
                 })}

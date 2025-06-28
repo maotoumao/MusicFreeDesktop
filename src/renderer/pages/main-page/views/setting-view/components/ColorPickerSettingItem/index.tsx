@@ -12,7 +12,7 @@ interface IColorPickerSettingItemProps<T extends keyof IAppConfig> {
 }
 
 export default function ColorPickerSettingItem<T extends keyof IAppConfig>(
-    props: IColorPickerSettingItemProps<T>
+    props: IColorPickerSettingItemProps<T>,
 ) {
     const { keyPath, label } = props;
     const realColor = useAppConfig(keyPath);
@@ -51,7 +51,7 @@ export default function ColorPickerSettingItem<T extends keyof IAppConfig>(
                                     role="button"
                                     onClick={() => {
                                         AppConfig.setConfig({
-                                            [keyPath]: color as any
+                                            [keyPath]: color as any,
                                         });
                                         close();
                                     }}

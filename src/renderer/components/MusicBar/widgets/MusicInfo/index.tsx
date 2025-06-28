@@ -56,7 +56,7 @@ export default function MusicInfo() {
                             </div>
                             <div className="music-info">
                                 <div className="music-title">
-                                  <span role="button" onClick={toggleMusicDetail}
+                                    <span role="button" onClick={toggleMusicDetail}
                                         title={musicItem.title}>{musicItem.title}</span>
                                     <Tag
                                         fill
@@ -78,7 +78,7 @@ export default function MusicInfo() {
                 </div>
             </div>
             <div data-detail-shown={musicDetailShown}
-                 className="music-info-content-container music-info-operations-container">
+                className="music-info-content-container music-info-operations-container">
                 <div
                     className="open-detail"
                     role="button"
@@ -94,13 +94,13 @@ export default function MusicInfo() {
                 <MusicFavorite musicItem={musicItem} size={22}></MusicFavorite>
                 <MusicDownloaded musicItem={musicItem} size={22}></MusicDownloaded>
                 <div role="button"
-                     data-disabled={!PluginManager.isSupportFeatureMethod(musicItem?.platform, "getMusicComments")}
-                     onClick={() => {
-                         showPanel("MusicComment", {
-                             musicItem: musicItem,
-                             coverHeader: true
-                         })
-                     }}>
+                    data-disabled={!PluginManager.isSupportFeatureMethod(musicItem?.platform, "getMusicComments")}
+                    onClick={() => {
+                        showPanel("MusicComment", {
+                            musicItem: musicItem,
+                            coverHeader: true,
+                        });
+                    }}>
                     <SvgAsset iconName="chat-bubble-left-ellipsis" size={22}></SvgAsset>
                 </div>
                 <div className="music-info-operation-divider"></div>

@@ -27,8 +27,8 @@ const _defaultAppConfig: IAppConfig =  {
     "download.concurrency": 5,
     "normal.musicListColumnsShown": [],
     "backup.resumeBehavior": "append",
-    "normal.language": "zh-CN"
-}
+    "normal.language": "zh-CN",
+};
 
 
 export default _defaultAppConfig;

@@ -35,7 +35,7 @@ export default function Download() {
                     "low",
                     "standard",
                     "high",
-                    "super"
+                    "super",
                 ]}
                 renderItem={(item) => t("media.music_quality_" + item)}
             ></RadioGroupSettingItem>
@@ -44,7 +44,7 @@ export default function Download() {
                 keyPath="download.whenQualityMissing"
                 options={[
                     "lower",
-                    "higher"
+                    "higher",
                 ]}
                 renderItem={(item) => t("settings.download.download_" + item + "_quality_version")}
 

@@ -31,6 +31,7 @@ export enum RequestStateCode {
     /** 空闲 */
     IDLE = 0b00000000,
     PENDING_FIRST_PAGE = 0b00000010,
+    // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
     LOADING = 0b00000010,
     /** 检索中 */
     PENDING_REST_PAGE = 0b00000011,
@@ -86,21 +87,21 @@ export const shortCutKeys: IShortCutKeys[] = [
     "volume-down",
     "toggle-desktop-lyric",
     "like/dislike",
-    "toggle-main-window-visible"
+    "toggle-main-window-visible",
 ];
 
 // 快捷键列表对应的指令
 export const shortCutKeysCommands: Record<IShortCutKeys, keyof ICommand> =
-    {
-        "play/pause": "TogglePlayerState",
-        "skip-next": "SkipToNext",
-        "skip-previous": "SkipToPrevious",
-        "volume-down": "VolumeDown",
-        "volume-up": "VolumeUp",
-        "toggle-desktop-lyric": "ToggleDesktopLyric",
-        "like/dislike": "ToggleFavorite",
-        "toggle-main-window-visible": "ToggleMainWindowVisible"
-    };
+{
+    "play/pause": "TogglePlayerState",
+    "skip-next": "SkipToNext",
+    "skip-previous": "SkipToPrevious",
+    "volume-down": "VolumeDown",
+    "volume-up": "VolumeUp",
+    "toggle-desktop-lyric": "ToggleDesktopLyric",
+    "like/dislike": "ToggleFavorite",
+    "toggle-main-window-visible": "ToggleMainWindowVisible",
+};
 
 // 主进程的Resource
 export enum ResourceName {
@@ -109,7 +110,7 @@ export enum ResourceName {
     PAUSE_ICON = "pause.png",
     PLAY_ICON = "play.png",
     DEFAULT_ALBUM_COVER_IMAGE = "album-cover.jpeg",
-    LOGO_IMAGE = "logo.png"
+    LOGO_IMAGE = "logo.png",
 
 }
 
@@ -188,4 +189,4 @@ export enum WindowRole {
 export const CommonConst = {
     /** 新建歌单名称长度限制 */
     NEW_SHEET_NAME_LENGTH_LIMIT: 120,
-}
+};

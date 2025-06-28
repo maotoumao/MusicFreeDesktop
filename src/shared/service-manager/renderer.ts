@@ -16,7 +16,7 @@ class RequestForwarderService {
             return null;
         }
 
-        const fUrl = new URL(host)
+        const fUrl = new URL(host);
         fUrl.searchParams.set("url", url);
         if (method) {
             fUrl.searchParams.set("method", method);
@@ -32,7 +32,7 @@ class RequestForwarderService {
 
 const ServiceManager = {
     setup: mod.setup,
-    RequestForwarderService
-}
+    RequestForwarderService,
+};
 
 export default ServiceManager;

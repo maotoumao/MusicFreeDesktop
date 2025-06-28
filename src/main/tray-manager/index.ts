@@ -51,7 +51,7 @@ if (process.platform === "darwin") {
                     },
                 ],
             },
-        ])
+        ]),
     );
 } else {
     Menu.setApplicationMenu(null);
@@ -64,8 +64,8 @@ class TrayManager {
     private observedKey: Array<keyof IAppConfig> = [
         "lyric.lockLyric",
         "lyric.enableDesktopLyric",
-        "normal.language"
-    ]
+        "normal.language",
+    ];
 
     public setup(windowManager: IWindowManager) {
         this.windowManager = windowManager;
@@ -73,7 +73,7 @@ class TrayManager {
             nativeImage.createFromPath(getResourcePath(ResourceName.LOGO_IMAGE)).resize({
                 width: 32,
                 height: 32,
-            })
+            }),
         );
 
         if (process.platform === "linux") {
@@ -97,15 +97,15 @@ class TrayManager {
                 if (debugClickCount === 5) {
                     windowManager.getAllWindows().forEach(win => {
                         win?.webContents?.openDevTools({
-                            mode: "undocked"
-                        })
+                            mode: "undocked",
+                        });
                     });
                 }
             } else {
                 debugClickCount = 1;
                 debugClickTime = Date.now();
             }
-        }
+        };
 
         tray.on("click", debugModeHandler);
 
@@ -117,7 +117,7 @@ class TrayManager {
                     return;
                 }
             }
-        })
+        });
 
         TrayManager.trayInstance = tray;
         this.buildTrayMenu();
@@ -143,14 +143,14 @@ class TrayManager {
         if (musicItem) {
             tray.setToolTip(
                 `${musicItem.title ?? t("media.unknown_title")}${musicItem.artist ? ` - ${musicItem.artist}` : ""
-                }`
+                }`,
             );
         } else {
             tray.setToolTip("MusicFree");
         }
         if (musicItem) {
             const fullName = `${musicItem.title ?? t("media.unknown_title")}${musicItem.artist ? ` - ${musicItem.artist}` : ""
-                }`;
+            }`;
             ctxMenu.push(
                 {
                     label: fullName.length > 12 ? fullName.slice(0, 12) + "..." : fullName,
@@ -159,7 +159,7 @@ class TrayManager {
                 {
                     label: `${t("media.media_platform")}: ${musicItem.platform}`,
                     click: this.openMusicDetail.bind(this),
-                }
+                },
             );
         } else {
             ctxMenu.push({
@@ -196,7 +196,7 @@ class TrayManager {
                 click() {
                     messageBus.sendCommand("SkipToNext");
                 },
-            }
+            },
         );
 
         ctxMenu.push({

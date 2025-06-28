@@ -1,5 +1,5 @@
 import localMusicListStore from "./store";
-import { getUserPreferenceIDB, } from "@/renderer/utils/user-perference";
+import { getUserPreferenceIDB } from "@/renderer/utils/user-perference";
 import * as Comlink from "comlink";
 import musicSheetDB from "../db/music-sheet-db";
 import { getGlobalContext } from "@/shared/global-context/renderer";
@@ -57,9 +57,9 @@ async function setupLocalMusic() {
                         await musicSheetDB.localMusicStore.bulkPut(musicItems);
                         const allMusic = await musicSheetDB.localMusicStore.toArray();
                         localMusicListStore.setValue(allMusic);
-                    }
+                    },
                 );
-            })
+            }),
         );
 
         localFileWatcherWorker.onRemove(
@@ -80,12 +80,12 @@ async function setupLocalMusic() {
                             }
                         });
                         await musicSheetDB.localMusicStore.bulkDelete(
-                            tobeDeletedPrimaryKeys
+                            tobeDeletedPrimaryKeys,
                         );
                         localMusicListStore.setValue(newCachedLocalMusic);
-                    }
+                    },
                 );
-            })
+            }),
         );
     } catch {
     }
@@ -113,12 +113,12 @@ async function changeWatchPath(logs: Map<string, "add" | "delete">) {
                 const tobeDeletedItems = localFiles
                     .filter((it) =>
                         tobeDeletedPaths.some((deletePath) =>
-                            isSubDir(deletePath, it.$$localPath)
-                        )
+                            isSubDir(deletePath, it.$$localPath),
+                        ),
                     )
                     .map((it) => [it.platform, it.id]);
                 await musicSheetDB.localMusicStore.bulkDelete(tobeDeletedItems);
-            }
+            },
         );
 
         localMusicListStore.setValue(await musicSheetDB.localMusicStore.toArray());

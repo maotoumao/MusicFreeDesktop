@@ -1,4 +1,4 @@
-import log from "electron-log/main"
+import log from "electron-log/main";
 import { safeStringify } from "@/common/safe-serialization";
 
 
@@ -23,7 +23,7 @@ function logPerf(msg: string) {
 const logger = {
     logInfo,
     logError,
-    logPerf
-}
+    logPerf,
+};
 
 export default logger;

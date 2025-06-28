@@ -12,7 +12,7 @@ interface IMod {
     onPluginUpdated: (callback: (plugins: IPlugin.IPluginDelegate[]) => void) => void,
 
     callPluginMethod<
-        T extends keyof IPlugin.IPluginInstanceMethods
+        T extends keyof IPlugin.IPluginInstanceMethods,
     >(
         pluginDelegate: IPluginDelegateLike,
         method: T,
@@ -33,10 +33,10 @@ const delegatePluginsStore = new Store<IPlugin.IPluginDelegate[]>([]);
 
 mod.onPluginUpdated((plugins) => {
     delegatePluginsStore.setValue(plugins);
-})
+});
 
 function getSupportedPlugin(
-    featureMethod: keyof IPlugin.IPluginInstanceMethods
+    featureMethod: keyof IPlugin.IPluginInstanceMethods,
 ) {
     return delegatePluginsStore
         .getValue()
@@ -44,7 +44,7 @@ function getSupportedPlugin(
 }
 
 function getSortedSupportedPlugin(
-    featureMethod: keyof IPlugin.IPluginInstanceMethods
+    featureMethod: keyof IPlugin.IPluginInstanceMethods,
 ) {
     const meta = AppConfig.getConfig("private.pluginMeta") ?? {};
     return delegatePluginsStore
@@ -60,23 +60,23 @@ function getSortedSupportedPlugin(
 }
 
 function getSearchablePlugins(
-    supportedSearchType?: IMedia.SupportMediaType
+    supportedSearchType?: IMedia.SupportMediaType,
 ) {
     return getSupportedPlugin("search").filter((_) =>
         supportedSearchType && _.supportedSearchType
             ? _.supportedSearchType.includes(supportedSearchType)
-            : true
+            : true,
     );
 }
 
 
 function getSortedSearchablePlugins(
-    supportedSearchType?: IMedia.SupportMediaType
+    supportedSearchType?: IMedia.SupportMediaType,
 ) {
     return getSortedSupportedPlugin("search").filter((_) =>
         supportedSearchType && _.supportedSearchType
             ? _.supportedSearchType.includes(supportedSearchType)
-            : true
+            : true,
     );
 }
 
@@ -124,12 +124,12 @@ const PluginManager = {
     uninstallPlugin: mod.uninstallPlugin,
     installPluginFromRemote: mod.installPluginFromRemote,
     installPluginFromLocal: mod.installPluginFromLocal,
-}
+};
 
 export default PluginManager;
 
 export function useSupportedPlugin(
-    featureMethod: keyof IPlugin.IPluginInstanceMethods
+    featureMethod: keyof IPlugin.IPluginInstanceMethods,
 ) {
     return delegatePluginsStore
         .useValue()
@@ -137,7 +137,7 @@ export function useSupportedPlugin(
 }
 
 export function useSortedSupportedPlugin(
-    featureMethod: keyof IPlugin.IPluginInstanceMethods
+    featureMethod: keyof IPlugin.IPluginInstanceMethods,
 ) {
     const meta = AppConfig.getConfig("private.pluginMeta") ?? {};
     return delegatePluginsStore

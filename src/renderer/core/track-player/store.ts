@@ -51,6 +51,6 @@ const _trackPlayerStore = {
     currentSpeedStore,
     currentQualityStore,
     resetProgress,
-}
+};
 
 export default _trackPlayerStore;

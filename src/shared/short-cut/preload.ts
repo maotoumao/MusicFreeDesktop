@@ -11,7 +11,7 @@ function unregisterGlobalShortCut(key: string) {
 
 const mod = {
     registerGlobalShortCut,
-    unregisterGlobalShortCut
+    unregisterGlobalShortCut,
 };
 
 contextBridge.exposeInMainWorld("@shared/short-cut", mod);

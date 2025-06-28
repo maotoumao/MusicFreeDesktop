@@ -77,7 +77,7 @@ export default function PlayList(props: IProps) {
         newData.splice(
             fromIndex > toIndex ? toIndex : toIndex - 1,
             0,
-            musicQueue[fromIndex]
+            musicQueue[fromIndex],
         );
         trackPlayer.setMusicQueue(newData);
     };
@@ -149,13 +149,13 @@ export default function PlayList(props: IProps) {
 
                                             activeItems.forEach(item => {
                                                 selectedItems.push(musicQueue[item]);
-                                            })
+                                            });
 
                                             showMusicContextMenu(
                                                 selectedItems,
                                                 e.clientX,
                                                 e.clientY,
-                                                "play-list"
+                                                "play-list",
                                             );
                                         } else {
                                             lastActiveIndexRef.current = virtualItem.rowIndex;
@@ -164,7 +164,7 @@ export default function PlayList(props: IProps) {
                                                 musicItem,
                                                 e.clientX,
                                                 e.clientY,
-                                                "play-list"
+                                                "play-list",
                                             );
                                         }
                                     }}
@@ -183,8 +183,8 @@ export default function PlayList(props: IProps) {
                                             }
                                             setActiveItems(
                                                 new Set(
-                                                    Array.from({ length: end - start + 1 }, (_, i) => start + i)
-                                                )
+                                                    Array.from({ length: end - start + 1 }, (_, i) => start + i),
+                                                ),
                                             );
                                         } else if (hotkeys.ctrl) {
                                             const newSet = new Set(activeItems);
@@ -293,5 +293,5 @@ const PlayListMusicItem = memo(
     (prev, curr) =>
         prev.isPlaying === curr.isPlaying &&
         prev.musicItem === curr.musicItem &&
-        prev.isActive === curr.isActive
+        prev.isActive === curr.isActive,
 );

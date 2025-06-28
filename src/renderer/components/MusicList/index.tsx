@@ -20,8 +20,8 @@ import MusicDownloaded from "../MusicDownloaded";
 import { localPluginName, RequestStateCode } from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
 import { IContextMenuItem, showContextMenu } from "../ContextMenu";
-import { getInternalData, getMediaPrimaryKey, isSameMedia, } from "@/common/media-util";
-import { CSSProperties, memo, useCallback, useEffect, useRef, useState, } from "react";
+import { getInternalData, getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
+import { CSSProperties, memo, useCallback, useEffect, useRef, useState } from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/hooks/useVirtualList";
 import hotkeys from "hotkeys-js";
@@ -148,7 +148,7 @@ export function showMusicContextMenu(
     musicItems: IMusic.IMusicItem | IMusic.IMusicItem[],
     x: number,
     y: number,
-    sheetType?: string
+    sheetType?: string,
 ) {
     const menuItems: IContextMenuItem[] = [];
     const isArray = Array.isArray(musicItems);
@@ -173,7 +173,7 @@ export function showMusicContextMenu(
             },
             {
                 divider: true,
-            }
+            },
         );
     }
     menuItems.push(
@@ -208,7 +208,7 @@ export function showMusicContextMenu(
             onClick() {
                 trackPlayer.removeMusic(musicItems);
             },
-        }
+        },
     );
 
     menuItems.push(
@@ -217,7 +217,7 @@ export function showMusicContextMenu(
             icon: "array-download-tray",
             show: isArray
                 ? !musicItems.every(
-                    (item) => isLocalMusic(item) || Downloader.isDownloaded(item)
+                    (item) => isLocalMusic(item) || Downloader.isDownloaded(item),
                 )
                 : !isLocalMusic(musicItems) && !Downloader.isDownloaded(musicItems),
             onClick() {
@@ -233,7 +233,7 @@ export function showMusicContextMenu(
             async onClick() {
                 const [isSuccess, info] = await Downloader.removeDownloadedMusic(
                     musicItems,
-                    true
+                    true,
                 );
                 if (isSuccess) {
                     if (isArray) {
@@ -242,8 +242,8 @@ export function showMusicContextMenu(
                                 "music_list_context_menu.delete_local_downloaded_songs_success",
                                 {
                                     musicNums: musicItems.length,
-                                }
-                            )
+                                },
+                            ),
                         );
                     } else {
                         toast.success(
@@ -251,8 +251,8 @@ export function showMusicContextMenu(
                                 "music_list_context_menu.delete_local_downloaded_song_success",
                                 {
                                     songName: (musicItems as IMusic.IMusicItem).title,
-                                }
-                            )
+                                },
+                            ),
                         );
                     }
                 } else if (info?.msg) {
@@ -262,7 +262,7 @@ export function showMusicContextMenu(
         },
         {
             title: i18n.t(
-                "music_list_context_menu.reveal_local_music_in_file_explorer"
+                "music_list_context_menu.reveal_local_music_in_file_explorer",
             ),
             icon: "folder-open",
             show:
@@ -282,7 +282,7 @@ export function showMusicContextMenu(
 
                         const downloadPath = getInternalData<IMusic.IMusicItemInternalData>(
                             realTimeMusicItem,
-                            "downloadData"
+                            "downloadData",
                         )?.path;
 
                         const result = await shellUtil.showItemInFolder(downloadPath);
@@ -293,12 +293,12 @@ export function showMusicContextMenu(
                 } catch (e) {
                     toast.error(
                         `${i18n.t(
-                            "music_list_context_menu.reveal_local_music_in_file_explorer_fail"
-                        )} ${e?.message ?? ""}`
+                            "music_list_context_menu.reveal_local_music_in_file_explorer_fail",
+                        )} ${e?.message ?? ""}`,
                     );
                 }
             },
-        }
+        },
     );
 
     showContextMenu({
@@ -332,8 +332,8 @@ function _MusicList(props: IMusicListProps) {
                 ...prev,
                 [curr]: false,
             }),
-            {}
-        )
+            {},
+        ),
     );
 
     const table = useReactTable({
@@ -399,11 +399,11 @@ function _MusicList(props: IMusicListProps) {
             newData.splice(
                 fromIndex > toIndex ? toIndex : toIndex - 1,
                 0,
-                musicList[fromIndex]
+                musicList[fromIndex],
             );
             onDragEnd?.(newData);
         },
-        [onDragEnd, musicList]
+        [onDragEnd, musicList],
     );
 
     return (
@@ -426,41 +426,41 @@ function _MusicList(props: IMusicListProps) {
                 }}
             >
                 <thead>
-                <tr>
-                    {table.getHeaderGroups()[0].headers.map((header) => (
-                        <th
-                            key={header.id}
-                            data-id={header.id}
-                            style={{
+                    <tr>
+                        {table.getHeaderGroups()[0].headers.map((header) => (
+                            <th
+                                key={header.id}
+                                data-id={header.id}
+                                style={{
                                 //@ts-ignore
-                                width: header.column.columnDef.fr
-                                    ? //@ts-ignore
-                                    `${header.column.columnDef.fr * 100}%`
-                                    : header.column.columnDef.size,
-                            }}
-                            onClick={header.column.getToggleSortingHandler()}
-                        >
-                            {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                            )}
-                            <div
-                                className="sort-container"
-                                data-sorting={header.column.getIsSorted() !== false}
+                                    width: header.column.columnDef.fr
+                                        ? //@ts-ignore
+                                        `${header.column.columnDef.fr * 100}%`
+                                        : header.column.columnDef.size,
+                                }}
+                                onClick={header.column.getToggleSortingHandler()}
                             >
-                                <SwitchCase.Switch switch={header.column.getIsSorted()}>
-                                    <SwitchCase.Case case={"asc"}>
-                                        <SvgAsset iconName="sort-asc"></SvgAsset>
-                                    </SwitchCase.Case>
-                                    <SwitchCase.Case case={"desc"}>
-                                        <SvgAsset iconName="sort-desc"></SvgAsset>
-                                    </SwitchCase.Case>
-                                    <SwitchCase.Case case={false}>
-                                        <SvgAsset iconName="sort"></SvgAsset>
-                                    </SwitchCase.Case>
-                                </SwitchCase.Switch>
-                            </div>
-                            {/* <div
+                                {flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext(),
+                                )}
+                                <div
+                                    className="sort-container"
+                                    data-sorting={header.column.getIsSorted() !== false}
+                                >
+                                    <SwitchCase.Switch switch={header.column.getIsSorted()}>
+                                        <SwitchCase.Case case={"asc"}>
+                                            <SvgAsset iconName="sort-asc"></SvgAsset>
+                                        </SwitchCase.Case>
+                                        <SwitchCase.Case case={"desc"}>
+                                            <SvgAsset iconName="sort-desc"></SvgAsset>
+                                        </SwitchCase.Case>
+                                        <SwitchCase.Case case={false}>
+                                            <SvgAsset iconName="sort"></SvgAsset>
+                                        </SwitchCase.Case>
+                                    </SwitchCase.Switch>
+                                </div>
+                                {/* <div
                   onMouseDown={header.getResizeHandler()}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -470,148 +470,148 @@ function _MusicList(props: IMusicListProps) {
                     "resizer-resizing": header.column.getIsResizing(),
                   })}
                 ></div> */}
-                        </th>
-                    ))}
-                </tr>
+                            </th>
+                        ))}
+                    </tr>
                 </thead>
                 <tbody
                     style={{
                         transform: `translateY(${virtualController.startTop}px)`,
                     }}
                 >
-                {virtualController.virtualItems.map((virtualItem, index) => {
-                    const row = virtualItem.dataItem;
+                    {virtualController.virtualItems.map((virtualItem, index) => {
+                        const row = virtualItem.dataItem;
 
-                    if (!row.original) {
-                        return null;
-                    }
-                    // todo 拆出一个组件
-                    return (
-                        <tr
-                            key={row.id}
-                            data-active={
-                                activeItems.has(virtualItem.rowIndex)
-                            }
-                            onContextMenu={(e) => {
-                                if (
-                                    activeItems.size > 1
-                                ) {
-                                    const selectedItems: IMusic.IMusicItem[] = [];
-                                    const rows = table.getRowModel().rows;
-                                    activeItems.forEach(item => {
-                                        selectedItems.push(rows[item].original)
-                                    })
-
-                                    showMusicContextMenu(
-                                        selectedItems,
-                                        e.clientX,
-                                        e.clientY,
-                                        musicSheet?.platform === localPluginName
-                                            ? musicSheet.id
-                                            : undefined
-                                    );
-                                } else {
-                                    lastActiveIndexRef.current = virtualItem.rowIndex;
-                                    setActiveItems(new Set([virtualItem.rowIndex]));
-                                    showMusicContextMenu(
-                                        row.original,
-                                        e.clientX,
-                                        e.clientY,
-                                        musicSheet?.platform === localPluginName
-                                            ? musicSheet.id
-                                            : undefined
-                                    );
+                        if (!row.original) {
+                            return null;
+                        }
+                        // todo 拆出一个组件
+                        return (
+                            <tr
+                                key={row.id}
+                                data-active={
+                                    activeItems.has(virtualItem.rowIndex)
                                 }
-                            }}
-                            onClick={() => {
-                                // 如果点击的时候按下shift
-                                if (hotkeys.shift) {
-                                    let start = lastActiveIndexRef.current;
-                                    let end = virtualItem.rowIndex;
+                                onContextMenu={(e) => {
+                                    if (
+                                        activeItems.size > 1
+                                    ) {
+                                        const selectedItems: IMusic.IMusicItem[] = [];
+                                        const rows = table.getRowModel().rows;
+                                        activeItems.forEach(item => {
+                                            selectedItems.push(rows[item].original);
+                                        });
 
-                                    if (start >= end) {
-                                        [start, end] = [end, start];
-                                    }
-
-                                    if (end > musicListRef.current.length) {
-                                        end = musicListRef.current.length - 1;
-                                    }
-
-                                    setActiveItems(
-                                        new Set(
-                                            Array.from({ length: end - start + 1 }, (_, i) => start + i)
-                                        )
-                                    );
-                                } else if (hotkeys.ctrl) {
-                                    const newSet = new Set(activeItems);
-                                    if (newSet.has(virtualItem.rowIndex)) {
-                                        newSet.delete(virtualItem.rowIndex);
+                                        showMusicContextMenu(
+                                            selectedItems,
+                                            e.clientX,
+                                            e.clientY,
+                                            musicSheet?.platform === localPluginName
+                                                ? musicSheet.id
+                                                : undefined,
+                                        );
                                     } else {
-                                        newSet.add(virtualItem.rowIndex);
+                                        lastActiveIndexRef.current = virtualItem.rowIndex;
+                                        setActiveItems(new Set([virtualItem.rowIndex]));
+                                        showMusicContextMenu(
+                                            row.original,
+                                            e.clientX,
+                                            e.clientY,
+                                            musicSheet?.platform === localPluginName
+                                                ? musicSheet.id
+                                                : undefined,
+                                        );
                                     }
-                                    setActiveItems(newSet);
-                                } else {
-                                    setActiveItems(new Set([virtualItem.rowIndex]));
-                                    lastActiveIndexRef.current = virtualItem.rowIndex;
-                                }
-                            }}
-                            onDoubleClick={() => {
-                                const config =
+                                }}
+                                onClick={() => {
+                                // 如果点击的时候按下shift
+                                    if (hotkeys.shift) {
+                                        let start = lastActiveIndexRef.current;
+                                        let end = virtualItem.rowIndex;
+
+                                        if (start >= end) {
+                                            [start, end] = [end, start];
+                                        }
+
+                                        if (end > musicListRef.current.length) {
+                                            end = musicListRef.current.length - 1;
+                                        }
+
+                                        setActiveItems(
+                                            new Set(
+                                                Array.from({ length: end - start + 1 }, (_, i) => start + i),
+                                            ),
+                                        );
+                                    } else if (hotkeys.ctrl) {
+                                        const newSet = new Set(activeItems);
+                                        if (newSet.has(virtualItem.rowIndex)) {
+                                            newSet.delete(virtualItem.rowIndex);
+                                        } else {
+                                            newSet.add(virtualItem.rowIndex);
+                                        }
+                                        setActiveItems(newSet);
+                                    } else {
+                                        setActiveItems(new Set([virtualItem.rowIndex]));
+                                        lastActiveIndexRef.current = virtualItem.rowIndex;
+                                    }
+                                }}
+                                onDoubleClick={() => {
+                                    const config =
                                     doubleClickBehavior ??
                                     AppConfig.getConfig("playMusic.clickMusicList");
-                                if (config === "replace") {
-                                    trackPlayer.playMusicWithReplaceQueue(
-                                        table.getRowModel().rows.map((it) => it.original),
-                                        row.original
-                                    );
-                                } else {
-                                    trackPlayer.playMusic(row.original);
-                                }
-                            }}
-                            draggable={enableDrag}
-                            onDragStart={(e) => {
+                                    if (config === "replace") {
+                                        trackPlayer.playMusicWithReplaceQueue(
+                                            table.getRowModel().rows.map((it) => it.original),
+                                            row.original,
+                                        );
+                                    } else {
+                                        trackPlayer.playMusic(row.original);
+                                    }
+                                }}
+                                draggable={enableDrag}
+                                onDragStart={(e) => {
                                 // TODO
                                 // if(activeItems) {
 
-                                // }
-                                startDrag(e, virtualItem.rowIndex, "musiclist");
-                            }}
-                        >
-                            {row.getVisibleCells().map((cell) => (
-                                <td
-                                    key={cell.id}
-                                    style={{
+                                    // }
+                                    startDrag(e, virtualItem.rowIndex, "musiclist");
+                                }}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <td
+                                        key={cell.id}
+                                        style={{
                                         //@ts-ignore
-                                        width: cell.column.columnDef.fr
-                                            ? //@ts-ignore
-                                            `${cell.column.columnDef.fr * 100}%`
-                                            : cell.column.columnDef.size,
-                                    }}
-                                >
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
-                            ))}
-                            <IfTruthy condition={enableDrag}>
-                                <IfTruthy condition={index === 0}>
+                                            width: cell.column.columnDef.fr
+                                                ? //@ts-ignore
+                                                `${cell.column.columnDef.fr * 100}%`
+                                                : cell.column.columnDef.size,
+                                        }}
+                                    >
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </td>
+                                ))}
+                                <IfTruthy condition={enableDrag}>
+                                    <IfTruthy condition={index === 0}>
+                                        <DragReceiver
+                                            position="top"
+                                            rowIndex={virtualItem.rowIndex}
+                                            onDrop={_onDrop}
+                                            tag="musiclist"
+                                            insideTable
+                                        ></DragReceiver>
+                                    </IfTruthy>
                                     <DragReceiver
-                                        position="top"
-                                        rowIndex={virtualItem.rowIndex}
+                                        position="bottom"
+                                        rowIndex={virtualItem.rowIndex + 1}
                                         onDrop={_onDrop}
                                         tag="musiclist"
                                         insideTable
                                     ></DragReceiver>
                                 </IfTruthy>
-                                <DragReceiver
-                                    position="bottom"
-                                    rowIndex={virtualItem.rowIndex + 1}
-                                    onDrop={_onDrop}
-                                    tag="musiclist"
-                                    insideTable
-                                ></DragReceiver>
-                            </IfTruthy>
-                        </tr>
-                    );
-                })}
+                            </tr>
+                        );
+                    })}
                 </tbody>
                 <tfoot
                     style={{
@@ -646,5 +646,5 @@ export default memo(
         prev.onDragEnd === curr.onDragEnd &&
         prev.musicSheet &&
         curr.musicSheet &&
-        isSameMedia(prev.musicSheet, curr.musicSheet)
+        isSameMedia(prev.musicSheet, curr.musicSheet),
 );

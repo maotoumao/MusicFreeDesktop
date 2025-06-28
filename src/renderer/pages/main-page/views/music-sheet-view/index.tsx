@@ -14,15 +14,15 @@ import "./index.scss";
  *
  */
 export default function MusicSheetView() {
-  const { platform } = useParams() ?? {};
+    const { platform } = useParams() ?? {};
 
-  return (
-    <div id="page-container" className="page-container">
-      {platform === localPluginName ? (
-        <LocalSheet></LocalSheet>
-      ) : (
-        <RemoteSheet></RemoteSheet>
-      )}
-    </div>
-  );
+    return (
+        <div id="page-container" className="page-container">
+            {platform === localPluginName ? (
+                <LocalSheet></LocalSheet>
+            ) : (
+                <RemoteSheet></RemoteSheet>
+            )}
+        </div>
+    );
 }

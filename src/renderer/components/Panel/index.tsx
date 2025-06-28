@@ -6,42 +6,42 @@ type ITemplate = typeof templates;
 type IPanelType = keyof ITemplate;
 
 interface IPanelInfo {
-  type: IPanelType | null;
-  payload: any;
+    type: IPanelType | null;
+    payload: any;
 }
 
 const panelStore = new Store<IPanelInfo>({
-  type: null,
-  payload: null,
+    type: null,
+    payload: null,
 });
 
 export default function PanelComponent() {
-  const modalState = panelStore.useValue();
+    const modalState = panelStore.useValue();
 
-  return useMemo(() => {
-    if (modalState.type) {
-      const Component = templates[modalState.type];
-      return <Component {...(modalState.payload ?? {})}></Component>;
-    }
-    return null;
-  }, [modalState]);
+    return useMemo(() => {
+        if (modalState.type) {
+            const Component = templates[modalState.type];
+            return <Component {...(modalState.payload ?? {})}></Component>;
+        }
+        return null;
+    }, [modalState]);
 }
 
 export function showPanel<T extends keyof ITemplate>(
-  type: T,
-  payload?: Parameters<ITemplate[T]>[0]
+    type: T,
+    payload?: Parameters<ITemplate[T]>[0],
 ) {
-  panelStore.setValue({
-    type,
-    payload,
-  });
+    panelStore.setValue({
+        type,
+        payload,
+    });
 }
 
 export function hidePanel() {
-  panelStore.setValue({
-    type: null,
-    payload: null,
-  });
+    panelStore.setValue({
+        type: null,
+        payload: null,
+    });
 }
 
 

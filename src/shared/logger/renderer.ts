@@ -24,7 +24,7 @@ function logPerf(msg: string) {
 const logger = {
     logInfo,
     logError,
-    logPerf
-}
+    logPerf,
+};
 
 export default logger;

@@ -36,7 +36,7 @@ export default function Backup() {
                         musicSheets: sheetDetails,
                     },
                     undefined,
-                    0
+                    0,
                 );
                 if (!(await client.exists("/MusicFree"))) {
                     await client.createDirectory("/MusicFree");
@@ -47,7 +47,7 @@ export default function Backup() {
                     backUp,
                     {
                         overwrite: true,
-                    }
+                    },
                 );
                 toast.success(t("settings.backup.backup_success"));
             } else {
@@ -57,7 +57,7 @@ export default function Backup() {
             toast.error(
                 t("settings.backup.backup_fail", {
                     reason: e?.message,
-                })
+                }),
             );
         }
     }
@@ -80,18 +80,18 @@ export default function Backup() {
 
                 if (!(await client.exists("/MusicFree/MusicFreeBackup.json"))) {
                     throw new Error(
-                        t("settings.backup.webdav_backup_file_not_exist")
+                        t("settings.backup.webdav_backup_file_not_exist"),
                     );
                 }
                 const resumeData = await client.getFileContents(
                     "/MusicFree/MusicFreeBackup.json",
                     {
                         format: "text",
-                    }
+                    },
                 );
                 await BackupResume.resume(
                     resumeData,
-                    AppConfig.getConfig("backup.resumeBehavior") === "overwrite"
+                    AppConfig.getConfig("backup.resumeBehavior") === "overwrite",
                 );
                 toast.success(t("settings.backup.resume_success"));
             } else {
@@ -101,7 +101,7 @@ export default function Backup() {
             toast.error(
                 t("settings.backup.resume_fail", {
                     reason: e?.message,
-                })
+                }),
             );
         }
 
@@ -113,7 +113,7 @@ export default function Backup() {
                 keyPath="backup.resumeBehavior"
                 options={[
                     "append",
-                    "overwrite"
+                    "overwrite",
                 ]}
                 renderItem={(item) => t("settings.backup.resume_mode_" + item)}
             ></RadioGroupSettingItem>
@@ -166,12 +166,12 @@ export default function Backup() {
                             try {
                                 const rawSheets = (await fsUtil.readFile(
                                     result.filePaths[0],
-                                    "utf-8"
+                                    "utf-8",
                                 )) as string;
 
                                 await BackupResume.resume(
                                     rawSheets,
-                                    AppConfig.getConfig("backup.resumeBehavior") === "overwrite"
+                                    AppConfig.getConfig("backup.resumeBehavior") === "overwrite",
                                 );
 
                                 toast.success(t("backup.backup_success"));
@@ -179,7 +179,7 @@ export default function Backup() {
                                 toast.error(
                                     t("backup.backup_fail", {
                                         reason: e?.message,
-                                    })
+                                    }),
                                 );
                             }
                         }

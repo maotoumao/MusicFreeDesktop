@@ -5,24 +5,24 @@ import MusicSheet, { defaultSheet } from "@/renderer/core/music-sheet";
 import { useTranslation } from "react-i18next";
 
 export default function LocalSheet() {
-  const { id } = useParams() ?? {};
-  const [musicSheet, loading] = MusicSheet.frontend.useMusicSheet(id);
-  const { t } = useTranslation();
+    const { id } = useParams() ?? {};
+    const [musicSheet, loading] = MusicSheet.frontend.useMusicSheet(id);
+    const { t } = useTranslation();
 
-  const _musicSheet =
+    const _musicSheet =
     id === defaultSheet.id
-      ? {
-          ...musicSheet,
-          title: t("media.default_favorite_sheet_name"),
+        ? {
+            ...musicSheet,
+            title: t("media.default_favorite_sheet_name"),
         }
-      : musicSheet;
+        : musicSheet;
 
-  return (
-    <MusicSheetlikeView
-      hidePlatform
-      musicSheet={_musicSheet}
-      state={loading}
-      musicList={musicSheet?.musicList ?? []}
-    ></MusicSheetlikeView>
-  );
+    return (
+        <MusicSheetlikeView
+            hidePlatform
+            musicSheet={_musicSheet}
+            state={loading}
+            musicList={musicSheet?.musicList ?? []}
+        ></MusicSheetlikeView>
+    );
 }

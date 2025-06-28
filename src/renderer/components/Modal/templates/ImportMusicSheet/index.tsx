@@ -36,14 +36,14 @@ export default function ImportMusicSheet(props: IProps) {
                                             "plugin_management_page.placeholder_import_music_sheet",
                                             {
                                                 plugin: it.platform,
-                                            }
+                                            },
                                         ),
                                         maxLength: 1000,
                                         onOk(text) {
                                             return PluginManager.callPluginDelegateMethod(
                                                 it,
                                                 "importMusicSheet",
-                                                text.trim()
+                                                text.trim(),
                                             );
                                         },
                                         onPromiseResolved(result) {

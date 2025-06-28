@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import PluginManager from "@shared/plugin-manager/renderer";
 
 
-export default function (){
+export default function () {
     // 当前正在搜索
     const currentQueryRef = useRef<string>("");
     const { t } = useTranslation();
@@ -25,9 +25,8 @@ export default function (){
         console.log("SEARCH LRC", query, queryPage);
         let plugins: IPlugin.IPluginDelegate[] = [];
         if (pluginHash) {
-           PluginManager.callPluginDelegateMethod
             const tgtPlugin = PluginManager.getPluginByHash(pluginHash);
-            if(tgtPlugin) {
+            if (tgtPlugin) {
                 plugins = [tgtPlugin];
             }
         } else {
@@ -127,8 +126,8 @@ export default function (){
                             data: newSearch
                                 ? currResult
                                 : (prevPluginResult.data ?? []).concat(
-                                      currResult,
-                                  ),
+                                    currResult,
+                                ),
                         };
                         return draft;
                     }),

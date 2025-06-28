@@ -21,9 +21,9 @@ export default function MinimodePage() {
 
     const textContent = (
         <div className="text-container">
-      <span>
-        {lyricItem?.lrc || currentMusicItem?.title || t("media.unknown_title")}
-      </span>
+            <span>
+                {lyricItem?.lrc || currentMusicItem?.title || t("media.unknown_title")}
+            </span>
             {showTranslation ? <span>{lyricItem?.translation}</span> : null}
         </div>
     );
@@ -54,7 +54,7 @@ export default function MinimodePage() {
                 className="option-item"
                 onClick={() => {
                     messageBus.sendCommand(
-                        "TogglePlayerState"
+                        "TogglePlayerState",
                     );
                 }}
             >

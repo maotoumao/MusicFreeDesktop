@@ -5,8 +5,8 @@ function dragWindow(position: ICommon.IPoint) {
 }
 
 const mod = {
-    dragWindow
-}
+    dragWindow,
+};
 
 contextBridge.exposeInMainWorld("@shared/window-drag", mod);
 

@@ -5,23 +5,21 @@ import { useTranslation } from "react-i18next";
 import { appUtil, appWindowUtil } from "@shared/utils/renderer";
 import AppConfig from "@shared/app-config/renderer";
 
-interface IProps {
-}
 
-export default function Header(props: IProps) {
+export default function Header() {
     const { t } = useTranslation();
 
 
     return <div className='music-detail--header-container' >
         <div
-          className="hide-music-detail"
-          role="button"
-          title={t("music_bar.close_music_detail_page")}
-          onClick={() => {
-            musicDetailShownStore.setValue(false);
-          }}
+            className="hide-music-detail"
+            role="button"
+            title={t("music_bar.close_music_detail_page")}
+            onClick={() => {
+                musicDetailShownStore.setValue(false);
+            }}
         >
-          <SvgAsset iconName="chevron-down"></SvgAsset>
+            <SvgAsset iconName="chevron-down"></SvgAsset>
         </div>
         <div className='music-detail--header-right'>
             <div
@@ -55,6 +53,6 @@ export default function Header(props: IProps) {
                 <SvgAsset iconName="x-mark"></SvgAsset>
             </div>
         </div>
-    </div>
+    </div>;
 
 }

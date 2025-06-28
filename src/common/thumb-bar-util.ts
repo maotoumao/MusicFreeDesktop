@@ -32,14 +32,14 @@ function setThumbBarButtons(window: BrowserWindow, isPlaying?: boolean) {
         },
         {
             icon: nativeImage.createFromPath(
-                getResourcePath(isPlaying ? ResourceName.PAUSE_ICON : ResourceName.PLAY_ICON)
+                getResourcePath(isPlaying ? ResourceName.PAUSE_ICON : ResourceName.PLAY_ICON),
             ),
             tooltip: isPlaying
                 ? t("media.music_state_pause")
                 : t("media.music_state_play"),
             click() {
                 messageBus.sendCommand(
-                    "TogglePlayerState"
+                    "TogglePlayerState",
                 );
             },
         },
@@ -58,7 +58,7 @@ function setThumbBarButtons(window: BrowserWindow, isPlaying?: boolean) {
 // 获取默认的图片
 const getDefaultAlbumCoverImage = asyncMemoize(async () => {
     return await fs.readFile((getResourcePath(ResourceName.DEFAULT_ALBUM_COVER_IMAGE)));
-})
+});
 
 let hookedFlag = false;
 
@@ -126,7 +126,7 @@ async function setThumbImage(window: BrowserWindow, src: string) {
                 width: size,
                 height: size,
             },
-            result.data
+            result.data,
         );
     } catch (ex) {
         logger.logError("Fail to setThumbImage", ex);
@@ -138,7 +138,7 @@ async function setThumbImage(window: BrowserWindow, src: string) {
 
 const ThumbBarManager = {
     setThumbBarButtons,
-    setThumbImage
+    setThumbImage,
 };
 
 export default ThumbBarManager;

@@ -147,8 +147,8 @@ function ShortCutItem(props: IShortCutItemProps) {
                             recordedKeysRef.current.add(key);
                             setTmpValue(
                                 [...recordedKeysRef.current].map((it) =>
-                                    it.replace(/^(.)/, (_, $1: string) => $1.toUpperCase())
-                                )
+                                    it.replace(/^(.)/, (_, $1: string) => $1.toUpperCase()),
+                                ),
                             );
                         }
                     }
@@ -191,8 +191,8 @@ function ShortCutItem(props: IShortCutItemProps) {
                         _recordShortCutKey.push(
                             keyCodeMap([...recordedSet.values()][0]).replace(
                                 /^(.)/,
-                                (_, $1: string) => $1.toUpperCase()
-                            )
+                                (_, $1: string) => $1.toUpperCase(),
+                            ),
                         );
                         setTmpValue(_recordShortCutKey);
                         onChange?.(_recordShortCutKey);
@@ -202,7 +202,7 @@ function ShortCutItem(props: IShortCutItemProps) {
 
                     recordedKeysRef.current.clear();
                 }
-            }
+            },
         );
     }, []);
 

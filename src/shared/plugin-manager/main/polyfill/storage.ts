@@ -42,7 +42,7 @@ async function saveStorage(newStorage: Record<string, string>) {
 
     if (!fileExist) {
         await fs.mkdir(path.resolve(storagePath, ".."), {
-            recursive: true
+            recursive: true,
         });
     }
     storage = newStorage;
@@ -56,7 +56,7 @@ async function setItem(key: string, value: unknown) {
     }
     const newStorage = {
         ...storage,
-        [key]: typeof value === "string" ? value : value?.toString?.()
+        [key]: typeof value === "string" ? value : value?.toString?.(),
     };
     await saveStorage(newStorage);
 }
@@ -73,7 +73,7 @@ async function removeItem(key: string) {
         await loadStorage();
     }
     const newStorage = {
-      ...storage,
+        ...storage,
     };
     delete newStorage[key];
     await saveStorage(newStorage);
@@ -82,5 +82,5 @@ async function removeItem(key: string) {
 export default {
     setItem,
     getItem,
-    removeItem
-}
+    removeItem,
+};

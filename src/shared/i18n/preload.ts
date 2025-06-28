@@ -13,8 +13,8 @@ async function changeLang(lang: string) {
 
 const mod = {
     setupLang,
-    changeLang
-}
+    changeLang,
+};
 
 contextBridge.exposeInMainWorld("@shared/i18n", mod);
 

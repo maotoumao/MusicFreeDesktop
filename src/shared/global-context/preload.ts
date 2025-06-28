@@ -5,14 +5,14 @@ import { _IpcRendererEvt } from "./internal/common";
 let globalContext: IGlobalContext;
 
 export function getGlobalContext() {
-  if (!globalContext) {
-    globalContext = ipcRenderer.sendSync(_IpcRendererEvt.GET_GLOBAL_DATA);
-  }
-  return globalContext;
+    if (!globalContext) {
+        globalContext = ipcRenderer.sendSync(_IpcRendererEvt.GET_GLOBAL_DATA);
+    }
+    return globalContext;
 }
 
 const mod = {
-  getGlobalContext,
+    getGlobalContext,
 };
 
 getGlobalContext();
