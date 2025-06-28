@@ -5,7 +5,7 @@ import { getUserPreference } from "@/renderer/utils/user-perference";
 import { toast } from "react-toastify";
 import A from "@/renderer/components/A";
 import { Trans, useTranslation } from "react-i18next";
-import {dialogUtil} from "@shared/utils/renderer";
+import { dialogUtil } from "@shared/utils/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function PluginManagerView() {

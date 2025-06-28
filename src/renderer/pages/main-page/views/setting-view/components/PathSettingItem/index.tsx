@@ -1,10 +1,10 @@
 import AppConfig from "@shared/app-config/renderer";
 import "./index.scss";
-import {toast} from "react-toastify";
-import {useTranslation} from "react-i18next";
-import {IAppConfig} from "@/types/app-config";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+import { IAppConfig } from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
-import {dialogUtil, fsUtil, shellUtil} from "@shared/utils/renderer";
+import { dialogUtil, fsUtil, shellUtil } from "@shared/utils/renderer";
 
 interface PathSettingItemProps<T extends keyof IAppConfig> {
     keyPath: T;
@@ -14,9 +14,9 @@ interface PathSettingItemProps<T extends keyof IAppConfig> {
 export default function PathSettingItem<T extends keyof IAppConfig>(
     props: PathSettingItemProps<T>
 ) {
-    const {keyPath, label} = props;
+    const { keyPath, label } = props;
     const value = useAppConfig(keyPath);
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <div className="setting-view--path-setting-item-container setting-row">

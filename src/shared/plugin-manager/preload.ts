@@ -1,4 +1,4 @@
-import {contextBridge, ipcRenderer} from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 
 ipcRenderer.on("@/shared/plugin-manager/sync-plugins", (_evt, newPlugins) => {
     pluginUpdateCallback?.(newPlugins);

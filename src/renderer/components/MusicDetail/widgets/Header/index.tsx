@@ -1,8 +1,8 @@
 import "./index.scss";
-import {musicDetailShownStore} from "@renderer/components/MusicDetail/store";
+import { musicDetailShownStore } from "@renderer/components/MusicDetail/store";
 import SvgAsset from "@renderer/components/SvgAsset";
-import {useTranslation} from "react-i18next";
-import {appUtil, appWindowUtil} from "@shared/utils/renderer";
+import { useTranslation } from "react-i18next";
+import { appUtil, appWindowUtil } from "@shared/utils/renderer";
 import AppConfig from "@shared/app-config/renderer";
 
 interface IProps {

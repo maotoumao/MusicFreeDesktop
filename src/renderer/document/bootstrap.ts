@@ -1,20 +1,20 @@
-import {localPluginHash, PlayerState, RepeatMode, supportLocalMediaType} from "@/common/constant";
+import { localPluginHash, PlayerState, RepeatMode, supportLocalMediaType } from "@/common/constant";
 import MusicSheet from "../core/music-sheet";
 import trackPlayer from "../core/track-player";
 import localMusic from "../core/local-music";
-import {setAutoFreeze} from "immer";
+import { setAutoFreeze } from "immer";
 import Downloader from "../core/downloader";
 import AppConfig from "@shared/app-config/renderer";
-import {setupI18n} from "@/shared/i18n/renderer";
+import { setupI18n } from "@/shared/i18n/renderer";
 import ThemePack from "@/shared/themepack/renderer";
-import {addToRecentlyPlaylist, setupRecentlyPlaylist,} from "../core/recently-playlist";
+import { addToRecentlyPlaylist, setupRecentlyPlaylist, } from "../core/recently-playlist";
 import ServiceManager from "@shared/service-manager/renderer";
-import {CurrentTime, PlayerEvents} from "@renderer/core/track-player/enum";
-import {appWindowUtil, fsUtil} from "@shared/utils/renderer";
+import { CurrentTime, PlayerEvents } from "@renderer/core/track-player/enum";
+import { appWindowUtil, fsUtil } from "@shared/utils/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
 import messageBus from "@shared/message-bus/renderer/main";
 import throttle from "lodash.throttle";
-import {IAppState} from "@shared/message-bus/type";
+import { IAppState } from "@shared/message-bus/type";
 import MusicDetail from "@renderer/components/MusicDetail";
 import shortCut from "@shared/short-cut/renderer";
 

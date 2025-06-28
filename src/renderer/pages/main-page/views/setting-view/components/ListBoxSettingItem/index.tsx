@@ -5,10 +5,10 @@ import Loading from "@/renderer/components/Loading";
 import { isBasicType } from "@/common/normalize-util";
 import useVirtualList from "@/hooks/useVirtualList";
 import { rem } from "@/common/constant";
-import {ReactNode, useRef} from "react";
+import { ReactNode, useRef } from "react";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { Tooltip } from "react-tooltip";
-import {IAppConfig} from "@/types/app-config";
+import { IAppConfig } from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
 import AppConfig from "@shared/app-config/renderer";
 

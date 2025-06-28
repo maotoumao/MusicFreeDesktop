@@ -1,7 +1,7 @@
-import {IAppState, ICommand} from "@shared/message-bus/type";
-import {IWindowManager} from "@/types/main/window-manager";
-import {BrowserWindow, ipcMain, MessageChannelMain} from "electron";
-import {PlayerState, RepeatMode} from "@/common/constant";
+import { IAppState, ICommand } from "@shared/message-bus/type";
+import { IWindowManager } from "@/types/main/window-manager";
+import { BrowserWindow, ipcMain, MessageChannelMain } from "electron";
+import { PlayerState, RepeatMode } from "@/common/constant";
 import EventEmitter from "eventemitter3";
 
 /**
@@ -78,7 +78,7 @@ class MessageBus {
         if (!mainWindow || bWindow === mainWindow) {
             return;
         }
-        const {port1, port2} = new MessageChannelMain();
+        const { port1, port2 } = new MessageChannelMain();
         const extWindowId = bWindow.id;
         this.extensionWindowIds.add(extWindowId);
 

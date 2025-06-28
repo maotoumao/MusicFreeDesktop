@@ -4,14 +4,14 @@ import debounce from "@/common/debounce";
 import { hideModal } from "../..";
 import SimpleInputWithState from "../SimpleInputWithState";
 import { useTranslation } from "react-i18next";
-import {CommonConst} from "@/common/constant";
+import { CommonConst } from "@/common/constant";
 
 interface IProps {
   initMusicItems: IMusic.IMusicItem | IMusic.IMusicItem[];
 }
 
 export default function AddNewSheet(props: IProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const onCreateNewSheetClick = useCallback(
     debounce(async (newSheetName) => {

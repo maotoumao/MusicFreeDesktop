@@ -1,5 +1,5 @@
-import {contextBridge, ipcRenderer} from "electron";
-import {ServiceName} from "@shared/service-manager/common";
+import { contextBridge, ipcRenderer } from "electron";
+import { ServiceName } from "@shared/service-manager/common";
 
 const serviceHostMap = new Map<ServiceName, string>();
 

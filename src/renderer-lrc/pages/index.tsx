@@ -1,15 +1,15 @@
 import "./index.scss";
 import classNames from "@/renderer/utils/classnames";
-import {useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import {PlayerState} from "@/common/constant";
+import { PlayerState } from "@/common/constant";
 import getTextWidth from "@/renderer/utils/get-text-width";
 import useAppConfig from "@/hooks/useAppConfig";
-import {appWindowUtil} from "@shared/utils/renderer";
+import { appWindowUtil } from "@shared/utils/renderer";
 import AppConfig from "@shared/app-config/renderer";
-import messageBus, {useAppStatePartial} from "@shared/message-bus/renderer/extension";
-import {IAppState} from "@shared/message-bus/type";
+import messageBus, { useAppStatePartial } from "@shared/message-bus/renderer/extension";
+import { IAppState } from "@shared/message-bus/type";
 
 export default function LyricWindowPage() {
     const currentMusic = useAppStatePartial("musicItem");

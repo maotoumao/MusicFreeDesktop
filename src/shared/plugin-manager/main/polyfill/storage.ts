@@ -1,7 +1,7 @@
-import {app} from "electron";
+import { app } from "electron";
 import path from "path";
 import fs from "fs/promises";
-import {rimraf} from "rimraf";
+import { rimraf } from "rimraf";
 
 const MAX_STORAGE_SIZE = 1024 * 1024 * 10;
 let storage: Record<string, string> = {};

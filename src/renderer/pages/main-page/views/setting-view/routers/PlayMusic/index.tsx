@@ -1,16 +1,16 @@
 import "./index.scss";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
-import {useOutputAudioDevices} from "@/hooks/useMediaDevices";
+import { useOutputAudioDevices } from "@/hooks/useMediaDevices";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import trackPlayer from "@renderer/core/track-player";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 import AppConfig from "@shared/app-config/renderer";
 
 
 export default function PlayMusic() {
     const audioDevices = useOutputAudioDevices();
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <div className="setting-view--play-music-container">

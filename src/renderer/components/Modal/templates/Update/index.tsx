@@ -3,7 +3,7 @@ import Base from "../Base";
 import "./index.scss";
 import { hideModal } from "../..";
 import { useTranslation } from "react-i18next";
-import {shellUtil} from "@shared/utils/renderer";
+import { shellUtil } from "@shared/utils/renderer";
 
 interface IUpdateProps {
   currentVersion: string;

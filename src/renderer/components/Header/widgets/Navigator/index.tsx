@@ -9,7 +9,7 @@ export default function HeaderNavigator() {
   const canBack = history.state.idx > 0;
   const canGo = history.state.idx < history.length - 1;
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
 
   return (

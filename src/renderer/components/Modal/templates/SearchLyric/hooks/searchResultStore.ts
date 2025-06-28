@@ -13,4 +13,4 @@ interface ISearchLyricStoreData {
     data: Record<string, ISearchLyricResult>;
 }
 
-export default new Store<ISearchLyricStoreData>({data: {}});
+export default new Store<ISearchLyricStoreData>({ data: {} });

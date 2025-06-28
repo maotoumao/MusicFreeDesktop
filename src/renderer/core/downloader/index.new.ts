@@ -1,5 +1,5 @@
 import * as Comlink from "comlink";
-import {getGlobalContext} from "@shared/global-context/renderer";
+import { getGlobalContext } from "@shared/global-context/renderer";
 import AppConfig from "@shared/app-config/renderer";
 import {
     addDownloadedMusicToList,
@@ -9,9 +9,9 @@ import {
 import logger from "@shared/logger/renderer";
 import PQueue from "p-queue";
 import EventEmitter from "eventemitter3";
-import {DownloadState, localPluginName} from "@/common/constant";
-import {getQualityOrder, isSameMedia, setInternalData} from "@/common/media-util";
-import {downloadingMusicStore} from "@renderer/core/downloader/store";
+import { DownloadState, localPluginName } from "@/common/constant";
+import { getQualityOrder, isSameMedia, setInternalData } from "@/common/media-util";
+import { downloadingMusicStore } from "@renderer/core/downloader/store";
 import PluginManager from "@shared/plugin-manager/renderer";
 
 type ProxyMarkedFunction<T> = T &

@@ -1,7 +1,7 @@
 import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
-import {IAppConfig} from "@/types/app-config";
+import { IAppConfig } from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
 import AppConfig from "@shared/app-config/renderer";
 

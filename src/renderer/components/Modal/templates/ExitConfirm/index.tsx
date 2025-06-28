@@ -3,7 +3,7 @@ import Base from "../Base";
 import "./index.scss";
 
 export default function ExitConfirm() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <Base withBlur>

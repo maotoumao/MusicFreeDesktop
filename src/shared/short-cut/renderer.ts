@@ -1,6 +1,6 @@
 import AppConfig from "@shared/app-config/renderer";
-import {IAppConfig} from "@/types/app-config";
-import {shortCutKeys, shortCutKeysCommands} from "@/common/constant";
+import { IAppConfig } from "@/types/app-config";
+import { shortCutKeys, shortCutKeysCommands } from "@/common/constant";
 import hotkeys from "hotkeys-js";
 import messageBus from "@shared/message-bus/renderer/main";
 

@@ -1,6 +1,6 @@
 import Store from "@/common/store";
 import templates from "./templates";
-import {useMemo} from "react";
+import { useMemo } from "react";
 
 type ITemplate = typeof templates;
 type IPanelType = keyof ITemplate;

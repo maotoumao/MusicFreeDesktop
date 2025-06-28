@@ -19,7 +19,7 @@ interface ISearchHistoryProps {
 export default function SearchHistory(props: ISearchHistoryProps) {
   const { onHistoryClick, onHistoryPanelBlur, onHistoryPanelFocus } = props;
   const [historyList, removeHistory] = useSearchHistory();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
 
   return (

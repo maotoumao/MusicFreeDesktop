@@ -1,15 +1,15 @@
 import SvgAsset from "@/renderer/components/SvgAsset";
-import {setFallbackAlbum} from "@/renderer/utils/img-on-error";
+import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import "./index.scss";
 
 import Tag from "@/renderer/components/Tag";
-import {secondsToDuration} from "@/common/time-util";
+import { secondsToDuration } from "@/common/time-util";
 import MusicFavorite from "@/renderer/components/MusicFavorite";
-import MusicDetail, {useMusicDetailShown} from "@/renderer/components/MusicDetail";
+import MusicDetail, { useMusicDetailShown } from "@/renderer/components/MusicDetail";
 import albumImg from "@/assets/imgs/album-cover.jpg";
-import {useTranslation} from "react-i18next";
-import {useCurrentMusic, useProgress} from "@renderer/core/track-player/hooks";
-import {hidePanel, showPanel} from "@renderer/components/Panel";
+import { useTranslation } from "react-i18next";
+import { useCurrentMusic, useProgress } from "@renderer/core/track-player/hooks";
+import { hidePanel, showPanel } from "@renderer/components/Panel";
 import MusicDownloaded from "@renderer/components/MusicDownloaded";
 import PluginManager from "@shared/plugin-manager/renderer";
 
@@ -17,7 +17,7 @@ export default function MusicInfo() {
     const musicItem = useCurrentMusic();
     const musicDetailShown = useMusicDetailShown();
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     function toggleMusicDetail() {
         if (musicDetailShown) {
@@ -111,7 +111,7 @@ export default function MusicInfo() {
 }
 
 function Progress() {
-    const {currentTime, duration} = useProgress();
+    const { currentTime, duration } = useProgress();
     return (
         <div className="progress">
             {isFinite(duration)

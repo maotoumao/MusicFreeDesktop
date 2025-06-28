@@ -1,4 +1,4 @@
-import {contextBridge, ipcRenderer} from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 
 function dragWindow(position: ICommon.IPoint) {
     ipcRenderer.send("set-window-draggable", position);

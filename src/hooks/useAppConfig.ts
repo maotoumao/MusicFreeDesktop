@@ -1,6 +1,6 @@
 import AppConfig from "@shared/app-config/renderer";
-import {IAppConfig} from "@/types/app-config";
-import {useEffect, useState} from "react";
+import { IAppConfig } from "@/types/app-config";
+import { useEffect, useState } from "react";
 
 
 export default function useAppConfig<K extends keyof IAppConfig>(configKey: K): IAppConfig[K] {

@@ -9,7 +9,7 @@ import PluginManager from "@shared/plugin-manager/renderer";
 export default function (){
     // 当前正在搜索
     const currentQueryRef = useRef<string>("");
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     /**
      * query: 搜索词

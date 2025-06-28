@@ -1,4 +1,4 @@
-import {IAppConfig} from "@/types/app-config";
+import { IAppConfig } from "@/types/app-config";
 import _defaultAppConfig from "@shared/app-config/default-app-config";
 import defaultAppConfig from "@shared/app-config/default-app-config";
 
@@ -34,7 +34,7 @@ class AppConfig {
         this.notifyCallbacks(this.config);
 
         mod.onConfigUpdate((patch) => {
-            this.config = {..._defaultAppConfig, ...this.config, ...patch};
+            this.config = { ..._defaultAppConfig, ...this.config, ...patch };
             this.notifyCallbacks(patch);
         })
     }

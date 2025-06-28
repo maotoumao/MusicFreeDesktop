@@ -1,9 +1,9 @@
-import {useRef} from "react";
+import { useRef } from "react";
 import Base from "../Base";
 import "./index.scss";
-import {hidePanel} from "../..";
-import {toast} from "react-toastify";
-import {useTranslation} from "react-i18next";
+import { hidePanel } from "../..";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 import AppConfig from "@shared/app-config/renderer";
 
 interface IUserVariablesProps {
@@ -13,10 +13,10 @@ interface IUserVariablesProps {
 }
 
 export default function (props: IUserVariablesProps) {
-    const {variables = [], initValues = {}, plugin} = props;
+    const { variables = [], initValues = {}, plugin } = props;
 
-    const valueRef = useRef<Record<string, string>>({...(initValues ?? {})});
-    const {t} = useTranslation();
+    const valueRef = useRef<Record<string, string>>({ ...(initValues ?? {}) });
+    const { t } = useTranslation();
 
     return (
         <Base>

@@ -1,9 +1,9 @@
-import {Popover} from "@headlessui/react";
+import { Popover } from "@headlessui/react";
 import "./index.scss";
-import {useState} from "react";
-import {HexAlphaColorPicker, HexColorInput} from "react-colorful";
+import { useState } from "react";
+import { HexAlphaColorPicker, HexColorInput } from "react-colorful";
 import useAppConfig from "@/hooks/useAppConfig";
-import {IAppConfig} from "@/types/app-config";
+import { IAppConfig } from "@/types/app-config";
 import AppConfig from "@shared/app-config/renderer";
 
 interface IColorPickerSettingItemProps<T extends keyof IAppConfig> {
@@ -14,7 +14,7 @@ interface IColorPickerSettingItemProps<T extends keyof IAppConfig> {
 export default function ColorPickerSettingItem<T extends keyof IAppConfig>(
     props: IColorPickerSettingItemProps<T>
 ) {
-    const {keyPath, label} = props;
+    const { keyPath, label } = props;
     const realColor = useAppConfig(keyPath);
     const [color, setColor] = useState<string>(realColor as string);
 
@@ -32,7 +32,7 @@ export default function ColorPickerSettingItem<T extends keyof IAppConfig>(
                 <div>{realColor as string}</div>
             </div>
             <Popover.Panel className={"setting-colorpicker-panel shadow"}>
-                {({close}) => {
+                {({ close }) => {
                     return (
                         <>
                             <HexAlphaColorPicker

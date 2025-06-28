@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import SearchResult from "./components/SearchResult";
 import useSearch from "./hooks/useSearch";
 import { currentMediaTypeStore, resetStore } from "./store/search-result";
-import PluginManager, {useSortedSupportedPlugin} from "@shared/plugin-manager/renderer";
+import PluginManager, { useSortedSupportedPlugin } from "@shared/plugin-manager/renderer";
 
 export default function SearchView() {
   const match = useMatch("/main/search/:query");

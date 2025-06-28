@@ -7,7 +7,7 @@ interface IConfig {
 }
 
 export default function(text: string, config: IConfig){
-    let {fontSize = "1rem", fontFamily = "sans-serif"} = config;
+    let { fontSize = "1rem", fontFamily = "sans-serif" } = config;
 
     if(typeof fontSize === "number") {
         fontSize = `${fontSize}px`;

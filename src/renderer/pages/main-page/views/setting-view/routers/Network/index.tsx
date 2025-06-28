@@ -1,11 +1,11 @@
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
 import InputSettingItem from "../../components/InputSettingItem";
-import {useEffect, useState} from "react";
-import {normalizeFileSize} from "@/common/normalize-util";
-import {Trans, useTranslation} from "react-i18next";
+import { useEffect, useState } from "react";
+import { normalizeFileSize } from "@/common/normalize-util";
+import { Trans, useTranslation } from "react-i18next";
 import useAppConfig from "@/hooks/useAppConfig";
-import {appUtil} from "@shared/utils/renderer";
+import { appUtil } from "@shared/utils/renderer";
 
 
 export default function Network() {
@@ -13,7 +13,7 @@ export default function Network() {
 
     const [cacheSize, setCacheSize] = useState(NaN);
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     useEffect(() => {
         appUtil.getCacheSize().then((res) => {

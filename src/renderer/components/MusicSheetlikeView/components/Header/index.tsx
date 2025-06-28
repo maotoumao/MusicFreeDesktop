@@ -1,14 +1,14 @@
-import {setFallbackAlbum} from "@/renderer/utils/img-on-error";
+import { setFallbackAlbum } from "@/renderer/utils/img-on-error";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 import "./index.scss";
 import Tag from "@/renderer/components/Tag";
-import Condition, {IfTruthy} from "@/renderer/components/Condition";
-import {useRef} from "react";
-import {useTranslation} from "react-i18next";
+import Condition, { IfTruthy } from "@/renderer/components/Condition";
+import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import trackPlayer from "@renderer/core/track-player";
 import SvgAsset from "@renderer/components/SvgAsset";
-import {showModal} from "@renderer/components/Modal";
+import { showModal } from "@renderer/components/Modal";
 
 interface IProps {
     musicSheet: IMusic.IMusicSheetItem;
@@ -17,9 +17,9 @@ interface IProps {
 }
 
 export default function Header(props: IProps) {
-    const {musicSheet, musicList, hidePlatform} = props;
+    const { musicSheet, musicList, hidePlatform } = props;
     const containerRef = useRef<HTMLDivElement>();
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <div className="music-sheetlike-view--header-container" ref={containerRef}>

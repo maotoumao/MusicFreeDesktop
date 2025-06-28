@@ -1,5 +1,5 @@
-import {CurrentTime, ErrorReason} from "@renderer/core/track-player/enum";
-import {PlayerState} from "@/common/constant";
+import { CurrentTime, ErrorReason } from "@renderer/core/track-player/enum";
+import { PlayerState } from "@/common/constant";
 
 export default class ControllerBase {
     public onPlayerStateChanged?: (state: PlayerState) => void;

@@ -1,14 +1,14 @@
-import {app, BrowserWindow, nativeImage, screen} from "electron";
-import getResourcePath from "@/common/main/get-resource-path";
-import {IWindowEvents, IWindowManager} from "@/types/main/window-manager";
-import {localPluginName, PlayerState, ResourceName} from "@/common/constant";
+import { app, BrowserWindow, nativeImage, screen } from "electron";
+import getResourcePath from "@/common/get-resource-path";
+import { IWindowEvents, IWindowManager } from "@/types/main/window-manager";
+import { localPluginName, PlayerState, ResourceName } from "@/common/constant";
 import voidCallback from "@/common/void-callback";
-import ThumbBarUtil from "@/common/main/thumb-bar-util";
+import ThumbBarUtil from "@/common/thumb-bar-util";
 import EventEmitter from "eventemitter3";
 import WindowDrag from "@shared/window-drag/main";
 import AppConfig from "@shared/app-config/main";
 import messageBus from "@shared/message-bus/main";
-import {IAppConfig} from "@/types/app-config";
+import { IAppConfig } from "@/types/app-config";
 import debounce from "@/common/debounce";
 
 

@@ -5,7 +5,7 @@ import ThemePack from "@/shared/themepack/renderer";
 import ThemeItem from "../ThemeItem";
 
 import "./index.scss";
-import {dialogUtil} from "@shared/utils/renderer";
+import { dialogUtil } from "@shared/utils/renderer";
 
 export default function LocalThemes() {
   const currentThemePack = ThemePack.useCurrentThemePack();

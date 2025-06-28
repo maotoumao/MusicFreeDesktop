@@ -1,5 +1,5 @@
-import {useEffect, useRef, useState} from "react";
-import {RequestStateCode} from "@/common/constant";
+import { useEffect, useRef, useState } from "react";
+import { RequestStateCode } from "@/common/constant";
 import PluginManager from "@shared/plugin-manager/renderer";
 
 export default function useComment(musicItem: IMusic.IMusicItem) {

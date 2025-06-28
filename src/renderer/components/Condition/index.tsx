@@ -64,13 +64,13 @@ If.Falsy = Falsy;
 
 
 function IfTruthy(props: IIfProps) {
-  const {condition, children} = props;
+  const { condition, children } = props;
 
   return condition ? children : null;
 }
 
 function IfFalsy(props: IIfProps) {
-  const {condition, children} = props;
+  const { condition, children } = props;
 
   return condition ? null : children;
 }

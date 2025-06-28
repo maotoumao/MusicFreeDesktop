@@ -1,6 +1,6 @@
-import {localPluginHash, localPluginName} from "@/common/constant";
-import {Plugin} from "../plugin";
-import {addFileScheme, parseLocalMusicItem, parseLocalMusicItemFolder} from "@/common/file-util";
+import { localPluginHash, localPluginName } from "@/common/constant";
+import { Plugin } from "../plugin";
+import { addFileScheme, parseLocalMusicItem, parseLocalMusicItemFolder } from "@/common/file-util";
 
 
 function localPluginDefine(): IPlugin.IPluginInstance {

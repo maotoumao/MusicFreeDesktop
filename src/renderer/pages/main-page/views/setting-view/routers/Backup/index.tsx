@@ -1,18 +1,18 @@
 import "./index.scss";
 import MusicSheet from "@/renderer/core/music-sheet";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import InputSettingItem from "../../components/InputSettingItem";
-import {AuthType, createClient} from "webdav";
+import { AuthType, createClient } from "webdav";
 import BackupResume from "@/renderer/core/backup-resume";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 import AppConfig from "@shared/app-config/renderer";
-import {dialogUtil, fsUtil} from "@shared/utils/renderer";
+import { dialogUtil, fsUtil } from "@shared/utils/renderer";
 
 
 
 export default function Backup() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
 
     async function onBackupClick() {

@@ -8,7 +8,7 @@ import { hideModal, showModal } from "@/renderer/components/Modal";
 import { localPluginName } from "@/common/constant";
 import { showContextMenu } from "@/renderer/components/ContextMenu";
 import { useTranslation } from "react-i18next";
-import {useSupportedPlugin} from "@shared/plugin-manager/renderer";
+import { useSupportedPlugin } from "@shared/plugin-manager/renderer";
 
 
 export default function MySheets() {

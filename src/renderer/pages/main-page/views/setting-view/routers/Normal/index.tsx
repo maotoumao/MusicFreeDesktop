@@ -4,14 +4,14 @@ import MultiRadioGroupSettingItem from "../../components/MultiRadioGroupSettingI
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 
 import "./index.scss";
-import {changeLang, getLangList} from "@/shared/i18n/renderer";
-import {toast} from "react-toastify";
-import {useTranslation} from "react-i18next";
-import {getGlobalContext} from "@/shared/global-context/renderer";
+import { changeLang, getLangList } from "@/shared/i18n/renderer";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 
 export default function Normal() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const allLangs = getLangList();
 

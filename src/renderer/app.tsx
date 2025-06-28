@@ -2,7 +2,7 @@ import AppHeader from "./components/Header";
 
 import "./app.scss";
 import MusicBar from "./components/MusicBar";
-import {Outlet} from "react-router";
+import { Outlet } from "react-router";
 import PanelComponent from "./components/Panel";
 import MusicDetail from "@renderer/components/MusicDetail";
 

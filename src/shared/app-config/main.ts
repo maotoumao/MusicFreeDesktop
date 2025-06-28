@@ -1,10 +1,10 @@
 import path from "path";
-import {app, ipcMain} from "electron";
+import { app, ipcMain } from "electron";
 import originalFs from "fs";
 import fs from "fs/promises";
-import {rimraf} from "rimraf";
-import {IAppConfig} from "@/types/app-config";
-import {IWindowManager} from "@/types/main/window-manager";
+import { rimraf } from "rimraf";
+import { IAppConfig } from "@/types/app-config";
+import { IWindowManager } from "@/types/main/window-manager";
 import logger from "@shared/logger/main";
 import _defaultAppConfig from "@shared/app-config/default-app-config";
 
@@ -120,7 +120,7 @@ class AppConfig {
                 "shortCut.enableGlobal": oldConfig.shortCut?.enableGlobal,
                 "shortCut.shortcuts": {
                     ...oldConfig.shortCut?.shortcuts,
-                    "toggle-main-window-visible": {local: null, global: null},
+                    "toggle-main-window-visible": { local: null, global: null },
                 },
 
                 "download.path": oldConfig.download?.path,
@@ -166,7 +166,7 @@ class AppConfig {
     async loadConfig() {
         try {
             if (this.config) {
-                return {..._defaultAppConfig, ...this.config};
+                return { ..._defaultAppConfig, ...this.config };
             } else {
                 const rawConfig = await fs.readFile(this.configPath, "utf8");
                 this.config = JSON.parse(rawConfig);
@@ -186,7 +186,7 @@ class AppConfig {
                 // 文件不存在
                 await this.checkPath();
             }
-            this.config = {..._defaultAppConfig};
+            this.config = { ..._defaultAppConfig };
         }
         return this.config;
     }
@@ -211,7 +211,7 @@ class AppConfig {
     private _setConfig(data: IAppConfig, from: "main" | "renderer") {
         try {
             // 1. Merge old one
-            this.config = {..._defaultAppConfig, ...this.config, ...data};
+            this.config = { ..._defaultAppConfig, ...this.config, ...data };
             // 2. Save to file
             const rawConfig = JSON.stringify(this.config, undefined, 4);
             originalFs.writeFileSync(this.configPath, rawConfig, "utf-8");

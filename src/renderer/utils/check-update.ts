@@ -1,7 +1,7 @@
 import { compare } from "compare-versions";
 import { showModal } from "../components/Modal";
 import { getUserPreference } from "./user-perference";
-import {appUtil} from "@shared/utils/renderer";
+import { appUtil } from "@shared/utils/renderer";
 
 export default async function checkUpdate(forceCheck?: boolean) {
   /** checkupdate */

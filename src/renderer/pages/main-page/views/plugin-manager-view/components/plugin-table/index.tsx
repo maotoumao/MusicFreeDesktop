@@ -16,7 +16,7 @@ import { showPanel } from "@/renderer/components/Panel";
 import DragReceiver, { startDrag } from "@/renderer/components/DragReceiver";
 import { produce } from "immer";
 import { i18n } from "@/shared/i18n/renderer";
-import PluginManager, {useSortedPlugins} from "@shared/plugin-manager/renderer";
+import PluginManager, { useSortedPlugins } from "@shared/plugin-manager/renderer";
 
 const t = i18n.t;
 

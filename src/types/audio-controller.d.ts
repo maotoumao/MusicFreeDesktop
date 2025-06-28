@@ -1,5 +1,5 @@
-import {PlayerState} from "@/common/constant";
-import {CurrentTime, ErrorReason} from "@renderer/core/track-player/enum";
+import { PlayerState } from "@/common/constant";
+import { CurrentTime, ErrorReason } from "@renderer/core/track-player/enum";
 
 export interface IAudioController {
     // 是否有音源

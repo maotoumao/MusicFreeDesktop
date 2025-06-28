@@ -1,8 +1,8 @@
-import {RadioGroup} from "@headlessui/react";
+import { RadioGroup } from "@headlessui/react";
 import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import classNames from "@/renderer/utils/classnames";
-import {IAppConfig} from "@/types/app-config";
+import { IAppConfig } from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
 import AppConfig from "@shared/app-config/renderer";
 
@@ -49,7 +49,7 @@ export default function RadioGroupSettingItem<T extends keyof IAppConfig>(
                 >
                     {options.map((option, index) => (
                         <RadioGroup.Option key={index} value={option}>
-                            {({checked}) => {
+                            {({ checked }) => {
                                 const title = renderItem ? renderItem(option) : option as string;
                                 return (
                                     <div

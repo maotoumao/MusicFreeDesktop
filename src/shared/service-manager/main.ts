@@ -1,8 +1,8 @@
-import {ChildProcess, fork} from "child_process";
-import {app, ipcMain} from "electron";
-import {IWindowManager} from "@/types/main/window-manager";
-import {ServiceName} from "@shared/service-manager/common";
-import getResourcePath from "@/common/main/get-resource-path";
+import { ChildProcess, fork } from "child_process";
+import { app, ipcMain } from "electron";
+import { IWindowManager } from "@/types/main/window-manager";
+import { ServiceName } from "@shared/service-manager/common";
+import getResourcePath from "@/common/get-resource-path";
 
 
 class ServiceInstance {
@@ -90,7 +90,7 @@ class ServiceManager {
 
     private addService(serviceName: ServiceName) {
         const instance = new ServiceInstance(serviceName, serviceName);
-        this.serviceMap.set(serviceName, {instance, host: null});
+        this.serviceMap.set(serviceName, { instance, host: null });
         instance.onHostChange((host) => {
             const mainWindow = this.windowManager?.mainWindow;
             if (mainWindow) {

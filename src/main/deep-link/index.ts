@@ -1,5 +1,5 @@
-import {supportLocalMediaType} from "@/common/constant";
-import {parseLocalMusicItem, safeStat} from "@/common/file-util";
+import { supportLocalMediaType } from "@/common/constant";
+import { parseLocalMusicItem, safeStat } from "@/common/file-util";
 import PluginManager from "@shared/plugin-manager/main";
 import voidCallback from "@/common/void-callback";
 import messageBus from "@shared/message-bus/main";

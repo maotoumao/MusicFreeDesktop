@@ -11,7 +11,7 @@ interface IProps {
 export default function BottomLoadingState(props: IProps) {
   const { state, onLoadMore } = props;
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <SwitchCase.Switch switch={state}>

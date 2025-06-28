@@ -165,7 +165,7 @@ async function downloadFileNew(
     options?: IOptions
 ) {
   let hasError = false;
-  const {onProgress: onProgressCallback, onEnded: onEndedCallback, onError: onErrorCallback} = options ?? {};
+  const { onProgress: onProgressCallback, onEnded: onEndedCallback, onError: onErrorCallback } = options ?? {};
   try {
     const stat = fs.statSync(filePath);
 

@@ -1,5 +1,4 @@
-import {ICommon} from "music-metadata/lib/aiff/AiffToken";
-import {getGlobalContext} from "@shared/global-context/renderer";
+import { getGlobalContext } from "@shared/global-context/renderer";
 
 
 interface IMod {

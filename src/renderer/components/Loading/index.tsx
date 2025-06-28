@@ -5,7 +5,7 @@ interface ILoadingProps {
   text?: string
 }
 export default function Loading(props: ILoadingProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className="loading-container">

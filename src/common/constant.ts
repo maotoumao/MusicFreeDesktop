@@ -1,5 +1,5 @@
-import {IAppConfig} from "@/types/app-config";
-import {ICommand} from "@shared/message-bus/type";
+import { IAppConfig } from "@/types/app-config";
+import { ICommand } from "@shared/message-bus/type";
 
 export const internalDataKey = "$";
 export const internalDataSymbol = Symbol.for("internal");

@@ -1,4 +1,4 @@
-import {shellUtil} from "@shared/utils/renderer";
+import { shellUtil } from "@shared/utils/renderer";
 
 export default function A(
     props: React.DetailedHTMLProps<

@@ -1,18 +1,18 @@
 import "./index.scss";
 import CheckBoxSettingItem from "../../components/CheckBoxSettingItem";
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 
 import hotkeys from "hotkeys-js";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 import useAppConfig from "@/hooks/useAppConfig";
-import {IAppConfig} from "@/types/app-config";
+import { IAppConfig } from "@/types/app-config";
 import shortCut from "@shared/short-cut/renderer";
-import {shortCutKeys} from "@/common/constant";
+import { shortCutKeys } from "@/common/constant";
 import SvgAsset from "@renderer/components/SvgAsset";
 
 
 export default function ShortCut() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <div className="setting-view--short-cut-container">
@@ -33,7 +33,7 @@ type IShortCutKeys = keyof IAppConfig["shortCut.shortcuts"];
 
 
 function ShortCutTable() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const enableLocalShortCut = useAppConfig("shortCut.enableLocal");
     const enableGlobalShortCut = useAppConfig("shortCut.enableGlobal");
@@ -115,13 +115,13 @@ function keyCodeMap(code: string) {
 }
 
 function ShortCutItem(props: IShortCutItemProps) {
-    const {value, onChange, enabled, isGlobal, showClearButton, onClear} = props;
+    const { value, onChange, enabled, isGlobal, showClearButton, onClear } = props;
     const [tmpValue, setTmpValue] = useState<string[] | null>();
     const realValue = formatValue(tmpValue ?? value ?? []);
     const isRecordingRef = useRef(false);
     const scopeRef = useRef(Math.random().toString().slice(2));
     const recordedKeysRef = useRef(new Set<string>());
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     useEffect(() => {
         hotkeys(

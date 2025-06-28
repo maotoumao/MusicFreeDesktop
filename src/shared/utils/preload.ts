@@ -1,6 +1,6 @@
-import {contextBridge, ipcRenderer} from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import fs from "fs/promises";
-import {rimraf} from "rimraf";
+import { rimraf } from "rimraf";
 import url from "url";
 
 
@@ -81,7 +81,7 @@ const app = {
 
 /****** window utils *****/
 function minMainWindow(skipTaskBar: boolean) {
-    ipcRenderer.send("@shared/utils/min-main-window", {skipTaskBar});
+    ipcRenderer.send("@shared/utils/min-main-window", { skipTaskBar });
 }
 
 function showMainWindow() {

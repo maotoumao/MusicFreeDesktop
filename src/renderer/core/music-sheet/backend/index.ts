@@ -4,13 +4,13 @@
  * 除了frontend文件夹外，其他任何地方不应该直接调用此处定义的函数
  */
 
-import {localPluginName, musicRefSymbol, sortIndexSymbol, timeStampSymbol,} from "@/common/constant";
-import {nanoid} from "nanoid";
+import { localPluginName, musicRefSymbol, sortIndexSymbol, timeStampSymbol, } from "@/common/constant";
+import { nanoid } from "nanoid";
 import musicSheetDB from "../../db/music-sheet-db";
-import {produce} from "immer";
+import { produce } from "immer";
 import defaultSheet from "../common/default-sheet";
-import {getMediaPrimaryKey, isSameMedia} from "@/common/media-util";
-import {getUserPreferenceIDB, setUserPreferenceIDB,} from "@/renderer/utils/user-perference";
+import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
+import { getUserPreferenceIDB, setUserPreferenceIDB, } from "@/renderer/utils/user-perference";
 
 /******************** 内存缓存 ***********************/
 // 默认歌单，快速判定是否在列表中

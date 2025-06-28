@@ -3,17 +3,17 @@ import "./index.scss";
 import ColorPickerSettingItem from "../../components/ColorPickerSettingItem";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import FontPickerSettingItem from "../../components/FontPickerSettingItem";
-import {IfTruthy} from "@/renderer/components/Condition";
-import {useTranslation} from "react-i18next";
-import {getGlobalContext} from "@/shared/global-context/renderer";
-import {appWindowUtil} from "@shared/utils/renderer";
+import { IfTruthy } from "@/renderer/components/Condition";
+import { useTranslation } from "react-i18next";
+import { getGlobalContext } from "@/shared/global-context/renderer";
+import { appWindowUtil } from "@shared/utils/renderer";
 
 const numberArray = Array(65)
     .fill(0)
     .map((_, index) => 16 + index);
 
 export default function Lyric() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <div className="setting-view--lyric-container">

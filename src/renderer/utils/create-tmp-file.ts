@@ -1,6 +1,6 @@
 import { getGlobalContext } from "@/shared/global-context/renderer";
 import { nanoid } from "nanoid";
-import {fsUtil} from "@shared/utils/renderer";
+import { fsUtil } from "@shared/utils/renderer";
 
 export async function createTmpFile(data: string) {
   const { appPath } = getGlobalContext();

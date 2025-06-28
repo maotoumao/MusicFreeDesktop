@@ -1,13 +1,13 @@
-import {useState} from "react";
+import { useState } from "react";
 import SvgAsset from "@/renderer/components/SvgAsset";
-import {PlayerState} from "@/common/constant";
+import { PlayerState } from "@/common/constant";
 import albumImg from "@/assets/imgs/album-cover.jpg";
 
 import "./index.scss";
-import {useTranslation} from "react-i18next";
-import {useUserPreference} from "@/renderer/utils/user-perference";
-import {appWindowUtil} from "@shared/utils/renderer";
-import messageBus, {useAppStatePartial} from "@shared/message-bus/renderer/extension";
+import { useTranslation } from "react-i18next";
+import { useUserPreference } from "@/renderer/utils/user-perference";
+import { appWindowUtil } from "@shared/utils/renderer";
+import messageBus, { useAppStatePartial } from "@shared/message-bus/renderer/extension";
 
 
 export default function MinimodePage() {
@@ -16,7 +16,7 @@ export default function MinimodePage() {
     const playerState = useAppStatePartial("playerState");
     const lyricItem = useAppStatePartial("parsedLrc");
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
     const [showTranslation] = useUserPreference("showTranslation");
 
     const textContent = (

@@ -1,13 +1,13 @@
 import "./index.scss";
 import routers from "./routers";
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import Condition from "@/renderer/components/Condition";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 import camelToSnake from "@/common/camel-to-snake";
 
 export default function SettingView() {
     const [selected, setSelected] = useState(routers[0].id);
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const intersectionObserverRef = useRef<IntersectionObserver>();
     const bodyContainerRef = useRef<HTMLDivElement>();

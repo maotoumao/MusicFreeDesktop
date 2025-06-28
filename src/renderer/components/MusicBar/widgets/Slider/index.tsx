@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./index.scss";
 import trackPlayer from "@renderer/core/track-player";
-import {useProgress} from "@renderer/core/track-player/hooks";
+import { useProgress } from "@renderer/core/track-player/hooks";
 
 export default function Slider() {
   const [seekPercent, _setSeekPercent] = useState<number | null>(null);

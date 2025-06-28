@@ -22,7 +22,7 @@ interface ISearchResultProps {
 function SearchResult(props: ISearchResultProps) {
   const { data, musicItem } = props;
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className="search-result-container">

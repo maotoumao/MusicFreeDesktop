@@ -1,18 +1,18 @@
-import {app, ipcMain} from "electron";
+import { app, ipcMain } from "electron";
 import fs from "fs/promises";
 import path from "path";
-import {Plugin} from "./plugin";
-import {rimraf} from "rimraf";
+import { Plugin } from "./plugin";
+import { rimraf } from "rimraf";
 import _axios from "axios";
 import https from "https";
 import voidCallback from "@/common/void-callback";
-import {localPluginHash, localPluginName} from "@/common/constant";
+import { localPluginHash, localPluginName } from "@/common/constant";
 import localPlugin from "./internal-plugins/local-plugin";
-import {addRandomHash} from "@/common/normalize-util";
-import {IWindowManager} from "@/types/main/window-manager";
+import { addRandomHash } from "@/common/normalize-util";
+import { IWindowManager } from "@/types/main/window-manager";
 import AppConfig from "@shared/app-config/main";
-import {compare} from "compare-versions";
-import {nanoid} from "nanoid";
+import { compare } from "compare-versions";
+import { nanoid } from "nanoid";
 import logger from "@shared/logger/main";
 
 const axios = _axios.create({
@@ -151,7 +151,7 @@ class PluginManager {
         if (!plugin) {
             return null;
         }
-        return plugin.methods[method]?.apply?.({plugin}, args);
+        return plugin.methods[method]?.apply?.({ plugin }, args);
     }
 
     private syncPlugins() {

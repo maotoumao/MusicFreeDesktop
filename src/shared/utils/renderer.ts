@@ -43,4 +43,4 @@ const utils = window["@shared/utils" as any] as unknown as IMod;
 
 
 export default utils;
-export const {fs: fsUtil, app: appUtil, appWindow: appWindowUtil, shell: shellUtil, dialog: dialogUtil} = utils;
+export const { fs: fsUtil, app: appUtil, appWindow: appWindowUtil, shell: shellUtil, dialog: dialogUtil } = utils;

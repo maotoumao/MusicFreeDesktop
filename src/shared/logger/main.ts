@@ -1,5 +1,5 @@
 import log from "electron-log/main"
-import {safeStringify} from "@/common/safe-serialization";
+import { safeStringify } from "@/common/safe-serialization";
 
 
 function logError(msg: string, error: Error, extra?: any) {

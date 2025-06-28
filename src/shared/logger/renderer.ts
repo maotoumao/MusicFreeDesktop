@@ -1,5 +1,5 @@
 import log from "electron-log/renderer";
-import {safeStringify} from "@/common/safe-serialization";
+import { safeStringify } from "@/common/safe-serialization";
 
 
 

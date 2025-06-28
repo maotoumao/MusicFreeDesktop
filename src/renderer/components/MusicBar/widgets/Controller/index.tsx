@@ -3,12 +3,12 @@ import "./index.scss";
 import trackPlayer from "@renderer/core/track-player";
 import { useTranslation } from "react-i18next";
 import { PlayerState } from "@/common/constant";
-import {usePlayerState} from "@renderer/core/track-player/hooks";
+import { usePlayerState } from "@renderer/core/track-player/hooks";
 
 export default function Controller() {
   const playerState = usePlayerState();
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
 
   return (

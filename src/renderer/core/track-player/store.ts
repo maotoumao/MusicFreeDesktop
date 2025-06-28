@@ -1,6 +1,6 @@
 import Store from "@/common/store";
-import {ICurrentLyric} from "@renderer/core/track-player/enum";
-import {PlayerState, RepeatMode} from "@/common/constant";
+import { ICurrentLyric } from "@renderer/core/track-player/enum";
+import { PlayerState, RepeatMode } from "@/common/constant";
 
 const initProgress = {
     currentTime: 0,

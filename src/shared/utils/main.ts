@@ -1,9 +1,9 @@
-import {app, BrowserWindow, dialog, ipcMain, shell} from "electron";
-import {IWindowManager} from "@/types/main/window-manager";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
+import { IWindowManager } from "@/types/main/window-manager";
 import fs from "fs/promises";
-import {appUpdateSources} from "@/common/constant";
+import { appUpdateSources } from "@/common/constant";
 import axios from "axios";
-import {compare} from "compare-versions";
+import { compare } from "compare-versions";
 
 class Utils {
     private windowManager: IWindowManager;
@@ -63,7 +63,7 @@ class Utils {
     }
 
     private setupWindowUtil() {
-        ipcMain.on("@shared/utils/min-main-window", (_, {skipTaskBar}) => {
+        ipcMain.on("@shared/utils/min-main-window", (_, { skipTaskBar }) => {
             const mainWindow = this.windowManager.mainWindow;
             if (mainWindow) {
                 if (skipTaskBar) {

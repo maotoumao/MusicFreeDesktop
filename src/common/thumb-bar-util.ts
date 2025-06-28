@@ -1,7 +1,11 @@
-import {BrowserWindow, nativeImage} from "electron";
-import getResourcePath from "@/common/main/get-resource-path";
-import {t} from "@shared/i18n/main";
-import {ResourceName} from "@/common/constant";
+/**
+ * Thumb Bar Util
+ */
+
+import { BrowserWindow, nativeImage } from "electron";
+import getResourcePath from "@/common/get-resource-path";
+import { t } from "@shared/i18n/main";
+import { ResourceName } from "@/common/constant";
 import asyncMemoize from "@/common/async-memoize";
 import fs from "fs/promises";
 import logger from "@shared/logger/main";

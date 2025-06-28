@@ -13,7 +13,7 @@ import SvgAsset from "@/renderer/components/SvgAsset";
 import Checkbox from "@/renderer/components/Checkbox";
 import localMusic from "@/renderer/core/local-music";
 import { useTranslation } from "react-i18next";
-import {dialogUtil} from "@shared/utils/renderer";
+import { dialogUtil } from "@shared/utils/renderer";
 
 interface IWatchDirProps {}
 export default function WatchLocalDir(props: IWatchDirProps) {

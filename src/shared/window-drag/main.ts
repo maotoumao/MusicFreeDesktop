@@ -2,7 +2,7 @@
  * https://github.com/electron/electron/issues/1354#issuecomment-1356330873
  */
 
-import {BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, ipcMain } from "electron";
 import * as process from "node:process";
 import debounce from "@/common/debounce";
 
@@ -22,7 +22,7 @@ const makeWin32WindowFullyDraggable = (
     browserWindow: BrowserWindow,
     options: IDragOptions
 ): void => {
-    const {height, width, getWindowSize, onDragEnd} = options;
+    const { height, width, getWindowSize, onDragEnd } = options;
     const initialPos = {
         x: 0,
         y: 0,

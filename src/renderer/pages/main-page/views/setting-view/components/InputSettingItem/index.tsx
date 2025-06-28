@@ -1,7 +1,7 @@
 import AppConfig from "@shared/app-config/renderer";
 import "./index.scss";
-import {HTMLInputTypeAttribute, useState} from "react";
-import {IAppConfig} from "@/types/app-config";
+import { HTMLInputTypeAttribute, useState } from "react";
+import { IAppConfig } from "@/types/app-config";
 import useAppConfig from "@/hooks/useAppConfig";
 
 interface InputSettingItemProps<T extends keyof IAppConfig> {

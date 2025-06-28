@@ -3,7 +3,7 @@ import RadioGroupSettingItem from "../../components/RadioGroupSettingItem";
 import ListBoxSettingItem from "../../components/ListBoxSettingItem";
 import Downloader from "@/renderer/core/downloader";
 import PathSettingItem from "../../components/PathSettingItem";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 
 const concurrencyList = Array(20)
@@ -12,7 +12,7 @@ const concurrencyList = Array(20)
 
 
 export default function Download() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <div className="setting-view--download-container">

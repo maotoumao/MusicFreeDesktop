@@ -1,8 +1,8 @@
 import localMusicListStore from "./store";
-import {getUserPreferenceIDB,} from "@/renderer/utils/user-perference";
+import { getUserPreferenceIDB, } from "@/renderer/utils/user-perference";
 import * as Comlink from "comlink";
 import musicSheetDB from "../db/music-sheet-db";
-import {getGlobalContext} from "@/shared/global-context/renderer";
+import { getGlobalContext } from "@/shared/global-context/renderer";
 
 type ProxyMarkedFunction<T extends (...args: any) => void> = T &
     Comlink.ProxyMarked;

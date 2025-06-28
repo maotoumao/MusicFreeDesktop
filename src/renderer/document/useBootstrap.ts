@@ -1,5 +1,5 @@
-import {useEffect, useLayoutEffect} from "react";
-import {useNavigate} from "react-router-dom";
+import { useEffect, useLayoutEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import checkUpdate from "../utils/check-update";
 import Themepack from "@/shared/themepack/renderer";
 import logger from "@shared/logger/renderer";

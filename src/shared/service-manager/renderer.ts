@@ -1,4 +1,4 @@
-import {ServiceName} from "@shared/service-manager/common";
+import { ServiceName } from "@shared/service-manager/common";
 
 interface IMod {
     setup: () => Promise<void>;

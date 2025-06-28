@@ -1,10 +1,10 @@
 import Base from "@renderer/components/Panel/templates/Base";
 import "./index.scss";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 import SvgAsset from "@renderer/components/SvgAsset";
 import dayjs from "dayjs";
 import useComment from "@renderer/components/Panel/templates/MusicComment/useComment";
-import {RequestStateCode} from "@/common/constant";
+import { RequestStateCode } from "@/common/constant";
 import Loading from "@renderer/components/Loading";
 import BottomLoadingState from "@renderer/components/BottomLoadingState";
 
@@ -14,8 +14,8 @@ interface IProps {
 }
 
 export default function MusicComment(props: IProps) {
-    const {coverHeader, musicItem} = props;
-    const {t} = useTranslation();
+    const { coverHeader, musicItem } = props;
+    const { t } = useTranslation();
 
     const [comments, reqState, loadMore] = useComment(musicItem);
 
@@ -43,7 +43,7 @@ interface IMusicCommentItemProps {
 }
 
 function MusicCommentItem(props: IMusicCommentItemProps) {
-    const {comment} = props;
+    const { comment } = props;
 
     return <div className="music-comment-panel--comment-item-container">
         <div className="comment-title-container">

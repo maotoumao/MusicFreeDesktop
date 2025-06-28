@@ -10,31 +10,31 @@ import {
 
 import "./index.scss";
 import Tag from "../Tag";
-import {secondsToDuration} from "@/common/time-util";
+import { secondsToDuration } from "@/common/time-util";
 import MusicSheet from "@/renderer/core/music-sheet";
 import trackPlayer from "@renderer/core/track-player";
-import Condition, {IfTruthy} from "../Condition";
+import Condition, { IfTruthy } from "../Condition";
 import Empty from "../Empty";
 import MusicFavorite from "../MusicFavorite";
 import MusicDownloaded from "../MusicDownloaded";
-import {localPluginName, RequestStateCode} from "@/common/constant";
+import { localPluginName, RequestStateCode } from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
-import {IContextMenuItem, showContextMenu} from "../ContextMenu";
-import {getInternalData, getMediaPrimaryKey, isSameMedia,} from "@/common/media-util";
-import {CSSProperties, memo, useCallback, useEffect, useRef, useState,} from "react";
-import {showModal} from "../Modal";
+import { IContextMenuItem, showContextMenu } from "../ContextMenu";
+import { getInternalData, getMediaPrimaryKey, isSameMedia, } from "@/common/media-util";
+import { CSSProperties, memo, useCallback, useEffect, useRef, useState, } from "react";
+import { showModal } from "../Modal";
 import useVirtualList from "@/hooks/useVirtualList";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import SwitchCase from "../SwitchCase";
 import SvgAsset from "../SvgAsset";
 import musicSheetDB from "@/renderer/core/db/music-sheet-db";
-import DragReceiver, {startDrag} from "../DragReceiver";
-import {i18n} from "@/shared/i18n/renderer";
+import DragReceiver, { startDrag } from "../DragReceiver";
+import { i18n } from "@/shared/i18n/renderer";
 import isLocalMusic from "@/renderer/utils/is-local-music";
 import AppConfig from "@shared/app-config/renderer";
-import {shellUtil} from "@shared/utils/renderer";
+import { shellUtil } from "@shared/utils/renderer";
 
 interface IMusicListProps {
     /** 展示的播放列表 */
@@ -343,7 +343,7 @@ function _MusicList(props: IMusicListProps) {
         state: {
             sorting: sorting,
             columnVisibility: hideRows
-                ? hideRows.reduce((prev, curr) => ({...prev, [curr]: false}), {
+                ? hideRows.reduce((prev, curr) => ({ ...prev, [curr]: false }), {
                     ...columnShownRef.current,
                 })
                 : columnShownRef.current,
@@ -378,7 +378,7 @@ function _MusicList(props: IMusicListProps) {
     useEffect(() => {
         const ctrlAHandler = (evt: Event) => {
             evt.preventDefault();
-            setActiveItems(new Set(Array.from({length: musicListRef.current.length}, (_, i) => i)));
+            setActiveItems(new Set(Array.from({ length: musicListRef.current.length }, (_, i) => i)));
         };
         hotkeys("Ctrl+A", "music-list", ctrlAHandler);
 
@@ -539,7 +539,7 @@ function _MusicList(props: IMusicListProps) {
 
                                     setActiveItems(
                                         new Set(
-                                            Array.from({length: end - start + 1}, (_, i) => start + i)
+                                            Array.from({ length: end - start + 1 }, (_, i) => start + i)
                                         )
                                     );
                                 } else if (hotkeys.ctrl) {

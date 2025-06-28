@@ -23,6 +23,13 @@
     "no-empty": "warn",
     "no-useless-catch": "warn",
     "prefer-const": "warn",
-    "quotes": [1, "double"]
+    "quotes": [
+      1,
+      "double"
+    ],
+    "@typescript-eslint/object-curly-spacing": [
+      "error",
+      "always"
+    ]
   }
 }

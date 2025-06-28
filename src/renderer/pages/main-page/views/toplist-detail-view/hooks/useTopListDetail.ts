@@ -21,7 +21,7 @@ export default function useTopListDetail(
       } else {
         setRequestState(RequestStateCode.PENDING_REST_PAGE);
       }
-      const result = await PluginManager.callPluginDelegateMethod({platform}, "getTopListDetail", topListItem, pageRef.current);
+      const result = await PluginManager.callPluginDelegateMethod({ platform }, "getTopListDetail", topListItem, pageRef.current);
       if (!result) {
         throw new Error();
       }

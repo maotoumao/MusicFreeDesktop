@@ -7,7 +7,7 @@ import * as cheerio from "cheerio";
 import he from "he";
 import PluginMethods from "./plugin-methods";
 import reactNativeCookies from "./polyfill/react-native-cookies";
-import {app} from "electron";
+import { app } from "electron";
 import * as webdav from "webdav";
 import AppConfig from "@shared/app-config/main";
 import pluginStorage from "@shared/plugin-manager/main/polyfill/storage";
@@ -83,7 +83,7 @@ export class Plugin {
         pluginPath: string
     ) {
         let _instance: IPlugin.IPluginInstance;
-        const _module: any = {exports: {}, loaded: false};
+        const _module: any = { exports: {}, loaded: false };
         let loadResolveCallback: () => void = null;
         const ensurePluginInitialized = new Promise<void>((resolve) => {
             loadResolveCallback = resolve;

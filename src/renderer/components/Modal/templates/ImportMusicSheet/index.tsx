@@ -1,7 +1,7 @@
-import {hideModal, showModal} from "../..";
+import { hideModal, showModal } from "../..";
 import Base from "../Base";
-import {toast} from "react-toastify";
-import {useTranslation} from "react-i18next";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 import "./index.scss";
 import NoPlugin from "@renderer/components/NoPlugin";
 import PluginManager from "@shared/plugin-manager/renderer";
@@ -11,9 +11,9 @@ interface IProps {
 }
 
 export default function ImportMusicSheet(props: IProps) {
-    const {plugins} = props;
+    const { plugins } = props;
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <Base withBlur={false}>

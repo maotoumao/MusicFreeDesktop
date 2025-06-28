@@ -1,4 +1,4 @@
-import {IAppState, ICommand} from "@shared/message-bus/type";
+import { IAppState, ICommand } from "@shared/message-bus/type";
 
 interface IMod {
     syncAppState: (appState: IAppState, to?: "main" | number) => void;

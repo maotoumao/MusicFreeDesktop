@@ -8,7 +8,7 @@ interface IEmptyProps {
 
 export default function Empty(props: IEmptyProps) {
   const { style } = props;
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className="components--empty-container" style={style}>
