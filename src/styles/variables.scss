@@ -1,0 +1,63 @@
+// 全局变量定义模块
+
+// Sass变量定义（用于内部计算和函数）
+$primary-color: #f17d34;
+$background-color: #fdfdfd;
+$text-color: #333333;
+$link-color: #0c66fc;
+
+$success-color: #08a34c;
+$danger-color: #fc5f5f;
+$info-color: #0a95c8;
+
+$divider-color: rgba(0, 0, 0, 0.1);
+$list-even-color: rgba(0, 0, 0, 0.05);
+$list-hover-color: rgba(0, 0, 0, 0.05);
+$list-active-color: rgba(0, 0, 0, 0.1);
+$mask-color: rgba(51, 51, 51, 0.5);
+$shadow-color: rgba(0, 0, 0, 0.2);
+$placeholder-color: #f4f4f4;
+
+// 尺寸变量
+$app-header-height: 54px;
+$app-music-bar-height: 64px;
+$scrollbar-width: 8px;
+
+// 动效变量
+$animate-duration: 300ms;
+
+// CSS自定义属性定义（供主题系统使用）
+:root {
+    // 主题色彩
+    --primaryColor: #{$primary-color};
+    --backgroundColor: #{$background-color};
+    --textColor: #{$text-color};
+    --linkColor: #{$link-color};
+
+    // 状态色彩
+    --successColor: #{$success-color};
+    --dangerColor: #{$danger-color};
+    --infoColor: #{$info-color};
+
+    // 布局色彩
+    --dividerColor: #{$divider-color};
+    --listEvenColor: #{$list-even-color};
+    --listHoverColor: #{$list-hover-color};
+    --listActiveColor: #{$list-active-color};
+    --maskColor: #{$mask-color};
+    --shadowColor: #{$shadow-color};
+    --placeholderColor: #{$placeholder-color};
+    --headerTextColor: white;
+
+    // 尺寸变量
+    --appHeaderHeight: 54px;
+    --appMusicBarHeight: 64px;
+    --scrollbar-width: 8px;
+
+    // 动效变量
+    --animate-duration: 300ms !important;
+
+    // 基础字体
+    font-size: 13px;
+    color: var(--textColor);
+}

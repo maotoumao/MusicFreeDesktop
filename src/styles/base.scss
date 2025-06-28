@@ -1,0 +1,77 @@
+// 基础样式重置和全局样式
+html,
+body {
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--backgroundColor);
+}
+
+// 链接样式
+a {
+    color: var(--linkColor);
+}
+
+// 美化后的滚动条样式
+::-webkit-scrollbar {
+    width: var(--scrollbar-width, 8px);
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg,
+            rgba(0, 0, 0, 0.15) 0%,
+            rgba(0, 0, 0, 0.25) 100%);
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg,
+            rgba(0, 0, 0, 0.25) 0%,
+            rgba(0, 0, 0, 0.35) 100%);
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(135deg,
+            rgba(0, 0, 0, 0.35) 0%,
+            rgba(0, 0, 0, 0.45) 100%);
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+// 在深色主题下的滚动条样式优化
+@media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.25) 100%);
+        background-clip: content-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.25) 0%,
+                rgba(255, 255, 255, 0.35) 100%);
+        background-clip: content-box;
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.35) 0%,
+                rgba(255, 255, 255, 0.45) 100%);
+        background-clip: content-box;
+    }
+}

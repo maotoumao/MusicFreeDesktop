@@ -1,0 +1,55 @@
+// 工具类样式
+.blur10 {
+    backdrop-filter: blur(10px);
+}
+
+.divider {
+    width: 100%;
+    height: 1px;
+    background-color: var(--dividerColor);
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.shadow {
+    box-shadow: var(--shadow, var(--shadowColor) 2px 2px 8px);
+}
+
+.background-color {
+    background: var(--backgroundColor);
+}
+
+.backdrop-color {
+    background: var(--backdropColor, var(--backgroundColor));
+}
+
+.opacity-button {
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.highlight {
+    color: var(--primaryColor) !important;
+}
+
+// 列表行为样式
+.list-behavior {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+        background-color: var(--listHoverColor);
+    }
+
+    &:active {
+        background-color: var(--listActiveColor);
+    }
+
+    &[data-selected="true"] {
+        background-color: var(--listActiveColor);
+    }
+}

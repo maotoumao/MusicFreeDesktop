@@ -1,0 +1,124 @@
+// 表单组件样式
+input {
+    outline: none;
+    font-size: 1rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--dividerColor);
+    box-sizing: border-box;
+    background: var(--placeholderColor);
+    color: var(--textColor);
+    transition: all 0.2s ease;
+
+    &:focus {
+        border-color: var(--primaryColor);
+        background: var(--backgroundColor);
+        box-shadow: 0 0 0 2px rgba(241, 125, 52, 0.1);
+    }
+
+    &::placeholder {
+        opacity: 0.6;
+        color: var(--textColor);
+    }
+}
+
+// 按钮组件样式
+div[role="button"] {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+
+    &[data-disabled]:not([data-disabled="false"]) {
+        cursor: default;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    &[data-type="primaryButton"] {
+        background-color: var(--primaryColor);
+        font-size: 1em;
+        padding: 0.6em 1em;
+        border-radius: 8px;
+        color: white;
+        width: fit-content;
+        line-height: 1em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(241, 125, 52, 0.2);
+
+        &:hover {
+            background-color: color-mix(in srgb, var(--primaryColor) 90%, black);
+            box-shadow: 0 4px 8px rgba(241, 125, 52, 0.3);
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(241, 125, 52, 0.2);
+        }
+    }
+
+    &[data-type="normalButton"] {
+        font-size: 1em;
+        padding: 0.6em 1em;
+        border-radius: 8px;
+        color: var(--textColor);
+        border: 1px solid currentColor;
+        width: fit-content;
+        line-height: 1em;
+        background-color: color-mix(in srgb, currentColor 8%, transparent);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &:hover {
+            background-color: color-mix(in srgb, currentColor 15%, transparent);
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+            background-color: color-mix(in srgb, currentColor 20%, transparent);
+        }
+    }
+
+    &[data-type="dangerButton"] {
+        font-size: 1em;
+        padding: 0.6em 1em;
+        border-radius: 8px;
+        color: var(--dangerColor);
+        border: 1px solid currentColor;
+        width: fit-content;
+        line-height: 1em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: color-mix(in srgb, var(--dangerColor) 8%, transparent);
+
+        &:hover {
+            background-color: color-mix(in srgb, var(--dangerColor) 15%, transparent);
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+            background-color: color-mix(in srgb, var(--dangerColor) 20%, transparent);
+        }
+
+        &[data-fill="true"] {
+            color: white;
+            background: var(--dangerColor);
+            box-shadow: 0 2px 4px rgba(252, 95, 95, 0.2);
+
+            &:hover {
+                background: color-mix(in srgb, var(--dangerColor) 90%, black);
+                box-shadow: 0 4px 8px rgba(252, 95, 95, 0.3);
+            }
+
+            &:active {
+                box-shadow: 0 2px 4px rgba(252, 95, 95, 0.2);
+            }
+        }
+    }
+}
