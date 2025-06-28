@@ -1,0 +1,225 @@
+// 错误边界页面样式
+
+.fallback-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    max-height: 100vh;
+    padding: 24px;
+    background-color: var(--backgroundColor);
+    color: var(--textColor);
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-y: auto;
+
+    // 为整个容器添加滚动条样式
+    &::-webkit-scrollbar {
+        width: var(--scrollbar-width);
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--dividerColor);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--listActiveColor);
+    }
+
+    .fallback-content {
+        max-width: 800px;
+        width: 100%;
+        background: var(--backgroundColor);
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 20px var(--shadowColor);
+        border: 1px solid var(--dividerColor);
+        margin: auto;
+        flex-shrink: 0;
+    }
+
+    .fallback-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--dangerColor);
+        margin-bottom: 16px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        &::before {
+            content: "⚠️";
+            font-size: 28px;
+        }
+    }
+
+    .fallback-description {
+        color: var(--textColor);
+        margin-bottom: 24px;
+        text-align: center;
+        opacity: 0.8;
+        line-height: 1.8;
+    }
+
+    .fallback-section {
+        margin-bottom: 24px;
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--textColor);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--dividerColor);
+        }
+
+        .section-content {
+            background: var(--placeholderColor);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--dividerColor);
+            max-height: 300px;
+            overflow-y: auto;
+
+            &::-webkit-scrollbar {
+                width: var(--scrollbar-width);
+            }
+
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: var(--dividerColor);
+                border-radius: 4px;
+            }
+
+            &::-webkit-scrollbar-thumb:hover {
+                background: var(--listActiveColor);
+            }
+
+            pre {
+                margin: 0;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                font-size: 12px;
+                line-height: 1.5;
+                white-space: pre-wrap;
+                word-break: break-word;
+                overflow-wrap: break-word;
+
+                &::-webkit-scrollbar {
+                    width: var(--scrollbar-width);
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: var(--dividerColor);
+                    border-radius: 4px;
+                }
+
+                &::-webkit-scrollbar-thumb:hover {
+                    background: var(--listActiveColor);
+                }
+
+                &.error-message {
+                    color: var(--dangerColor);
+                    background: rgba(252, 95, 95, 0.1);
+                    padding: 12px;
+                    border-radius: 6px;
+                    border-left: 4px solid var(--dangerColor);
+                    margin-bottom: 8px;
+                }
+
+                &.music-info {
+                    color: var(--infoColor);
+                    background: rgba(10, 149, 200, 0.1);
+                    padding: 12px;
+                    border-radius: 6px;
+                    border-left: 4px solid var(--infoColor);
+                }
+            }
+        }
+    }
+
+    .fallback-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 32px;
+        margin-bottom: 32px;
+    }
+
+    .reset-button {
+        background: linear-gradient(135deg, var(--dangerColor), #ff4757);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--animate-duration) ease;
+        box-shadow: 0 4px 12px rgba(252, 95, 95, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(252, 95, 95, 0.4);
+            background: linear-gradient(135deg, #ff4757, var(--dangerColor));
+        }
+
+        &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(252, 95, 95, 0.3);
+        }
+
+        &::before {
+            content: "🔄";
+            font-size: 16px;
+        }
+    }
+
+    // 响应式设计
+    @media (max-width: 768px) {
+        padding: 16px;
+
+        .fallback-content {
+            padding: 24px;
+        }
+
+        .fallback-title {
+            font-size: 20px;
+        }
+
+        .section-content {
+            max-height: 250px;
+
+            pre {
+                font-size: 11px;
+            }
+        }
+    }
+
+    // 深色主题适配
+    @media (prefers-color-scheme: dark) {
+        .fallback-content {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .section-content {
+            background: rgba(255, 255, 255, 0.03);
+        }
+    }
+}
