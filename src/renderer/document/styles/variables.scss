@@ -47,12 +47,10 @@ $animate-duration: 300ms;
     --maskColor: #{$mask-color};
     --shadowColor: #{$shadow-color};
     --placeholderColor: #{$placeholder-color};
-    --headerTextColor: white;
-
-    // 尺寸变量
+    --headerTextColor: white; // 尺寸变量
     --appHeaderHeight: 54px;
     --appMusicBarHeight: 64px;
-    --scrollbar-width: 8px;
+    --scrollbar-width: 12px;
 
     // 动效变量
     --animate-duration: 300ms !important;
