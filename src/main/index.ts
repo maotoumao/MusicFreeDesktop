@@ -261,7 +261,13 @@ function handleProxy(enabled: boolean, host?: string | null, port?: string | nul
             axios.defaults.httpAgent = undefined;
             axios.defaults.httpsAgent = undefined;
         } else if (host) {
-            const proxyUrl = new URL(host);
+            let hostUrl = host;
+            // 使用 startsWith() 方法检查 host 是否包含协议前缀
+            if (!hostUrl.startsWith("http://") && !hostUrl.startsWith("https://")) {
+                // 如果两个都不是，则为其添加默认的 http:// 前缀
+                hostUrl = `http://${host}`;
+            }
+            const proxyUrl = new URL(hostUrl);
             proxyUrl.port = port;
             proxyUrl.username = username;
             proxyUrl.password = password;
