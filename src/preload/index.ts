@@ -6,3 +6,4 @@ import "@shared/service-manager/preload";
 import "@shared/plugin-manager/preload";
 import "@shared/message-bus/preload/main";
 import "@shared/short-cut/preload";
+import "@shared/database/preload";

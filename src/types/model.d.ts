@@ -18,9 +18,9 @@ declare namespace IDataBaseModel {
         // 歌单作者
         artist?: string;
         // 原始数据
-        _raw: string;
+        _raw?: string;
         // 排序信息
-        _sortIndex: number;
+        _sortIndex?: number;
     }
 
 
@@ -40,9 +40,9 @@ declare namespace IDataBaseModel {
         /** 添加到歌单的时间 */
         _timestamp: number;
         // 完整信息
-        _raw: string;
+        _raw?: string;
         // 在歌单内的顺序
-        _sortIndex: number;
+        _sortIndex?: number;
         // 歌单ID
         _musicSheetId: string;
         // 歌单

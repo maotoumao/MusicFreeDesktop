@@ -1,5 +1,5 @@
 import Store from "@/common/store";
-import * as backend from "../backend";
+import * as backend from "../backend/index";
 import defaultSheet from "../common/default-sheet";
 import { useEffect, useRef, useState } from "react";
 import { RequestStateCode, localPluginName } from "@/common/constant";
@@ -232,6 +232,7 @@ function updateSheetDetail(newSheet: IMusic.IMusicSheetItem) {
  * @param sheetId
  */
 async function refetchSheetDetail(sheetId: string) {
+    console.time("获取歌单详情");
     let sheetDetail = await backend.getSheetItemDetail(sheetId);
     if (!sheetDetail) {
     // 可能已经被删除了
@@ -244,6 +245,7 @@ async function refetchSheetDetail(sheetId: string) {
     }
 
     updateSheetDetail(sheetDetail);
+    console.timeEnd("获取歌单详情");
 }
 
 /**

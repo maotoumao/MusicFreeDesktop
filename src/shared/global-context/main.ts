@@ -4,7 +4,6 @@ import path from "path";
 
 declare const WORKER_DOWNLOADER_WEBPACK_ENTRY: string;
 declare const LOCAL_FILE_WATCHER_WEBPACK_ENTRY: string;
-declare const DB_WEBPACK_ENTRY: string;
 
 export function setupGlobalContext() {
     ipcMain.on(_IpcRendererEvt.GET_GLOBAL_DATA, (evt) => {
@@ -13,7 +12,6 @@ export function setupGlobalContext() {
             workersPath: {
                 downloader: WORKER_DOWNLOADER_WEBPACK_ENTRY,
                 localFileWatcher: LOCAL_FILE_WATCHER_WEBPACK_ENTRY,
-                db: DB_WEBPACK_ENTRY,
             },
             appPath: {
                 downloads: app.getPath("downloads"),
