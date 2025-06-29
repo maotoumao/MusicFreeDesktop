@@ -41,7 +41,7 @@
     "@stylistic/eslint-plugin": "^5.0.0",
     "@svgr/webpack": "^8.1.0",
     "@timfish/forge-externals-plugin": "^0.2.1",
-    "@types/better-sqlite3": "^7.6.10",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/crypto-js": "^4.2.2",
     "@types/he": "^1.2.3",
     "@types/lodash.debounce": "^4.0.9",

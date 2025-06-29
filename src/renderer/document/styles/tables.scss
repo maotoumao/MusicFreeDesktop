@@ -50,9 +50,6 @@ table {
             &[data-active="true"] {
                 background: var(--listActiveColor);
 
-                & td {
-                    border-bottom-color: var(--primaryColor);
-                }
             }
         }
     }
