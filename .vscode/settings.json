@@ -3,5 +3,10 @@
   "files.associations": {
     "*.html": "html",
     "map": "cpp"
-  }
+  },
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "eslint.format.enable": true
 }

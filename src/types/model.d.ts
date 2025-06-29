@@ -28,7 +28,7 @@ declare namespace IDataBaseModel {
         platform: string;
         id: string;
         /** 作者 */
-        artist: string;
+        artist?: string;
         /** 歌曲标题 */
         title: string;
         /** 时长(s) */
@@ -37,10 +37,12 @@ declare namespace IDataBaseModel {
         album?: string;
         /** 专辑封面图 */
         artwork?: string;
+        /** 添加到歌单的时间 */
+        _timestamp: number;
         // 完整信息
         _raw: string;
         // 在歌单内的顺序
-        _sortOrder: number;
+        _sortIndex: number;
         // 歌单ID
         _musicSheetId: string;
         // 歌单

@@ -4,9 +4,11 @@
  * 此模块负责加载数据库相关的功能，提供渲染进程需要的业务逻辑。
  */
 
+
 import { app } from "electron";
 import path from "node:path";
 import Database from "better-sqlite3";
+
 
 const appDbPath = path.resolve(app.getPath("userData"), "./app-database/database.db");
 
@@ -126,15 +128,18 @@ function migrateDatabase() {
     });
 
     upgrade();
+
 }
 
 migrateDatabase();
+
 
 //////////////////// 歌单增删查改
 
 class LocalMusicSheetDB {
     private static readonly SORT_BASE = 1000; // 排序基础值
     private static readonly SORT_INCREMENT = 1000; // 排序增量
+    private static readonly MIN_SORT_INTERVAL = 0.000001; // 最小排序间隔，低于此值需要重新均衡
 
     /**
      * 添加歌单
@@ -172,7 +177,8 @@ class LocalMusicSheetDB {
             );
 
             return result.changes > 0;
-        } catch {
+        } catch (error) {
+            console.error("添加歌单失败:", error);
             return false;
         }
     }
@@ -183,9 +189,7 @@ class LocalMusicSheetDB {
      * @returns 成功添加的数量
      */
     static batchAddMusicSheets(musicSheets: IDataBaseModel.IMusicSheetModel[]): number {
-        if (!musicSheets.length) {
-            return 0;
-        }
+        if (!musicSheets.length) return 0;
 
         try {
             const transaction = database.transaction(() => {
@@ -227,8 +231,8 @@ class LocalMusicSheetDB {
                         if (insertResult.changes > 0) {
                             successCount++;
                         }
-                    } catch {
-                        // 忽略单个添加失败的情况
+                    } catch (error) {
+                        console.warn(`批量添加歌单失败 (${sheet.platform}:${sheet.id}):`, error);
                     }
                 }
 
@@ -236,7 +240,8 @@ class LocalMusicSheetDB {
             });
 
             return transaction();
-        } catch {
+        } catch (error) {
+            console.error("批量添加歌单失败:", error);
             return 0;
         }
     }
@@ -252,7 +257,8 @@ class LocalMusicSheetDB {
             const deleteStmt = database.prepare("DELETE FROM LocalMusicSheets WHERE platform = ? AND id = ?");
             const result = deleteStmt.run(platform, id);
             return result.changes > 0;
-        } catch {
+        } catch (error) {
+            console.error("删除歌单失败:", error);
             return false;
         }
     }
@@ -263,9 +269,7 @@ class LocalMusicSheetDB {
      * @returns 成功删除的数量
      */
     static batchDeleteMusicSheets(sheets: Array<{ platform: string; id: string }>): number {
-        if (!sheets.length) {
-            return 0;
-        }
+        if (!sheets.length) return 0;
 
         try {
             const transaction = database.transaction(() => {
@@ -278,8 +282,8 @@ class LocalMusicSheetDB {
                         if (result.changes > 0) {
                             successCount++;
                         }
-                    } catch {
-                        // 忽略单个删除失败的情况
+                    } catch (error) {
+                        console.warn(`批量删除歌单失败 (${sheet.platform}:${sheet.id}):`, error);
                     }
                 }
 
@@ -287,7 +291,8 @@ class LocalMusicSheetDB {
             });
 
             return transaction();
-        } catch {
+        } catch (error) {
+            console.error("批量删除歌单失败:", error);
             return 0;
         }
     }
@@ -306,9 +311,7 @@ class LocalMusicSheetDB {
             `);
             const result = selectStmt.get(platform, id) as any;
 
-            if (!result) {
-                return null;
-            }
+            if (!result) return null;
 
             return {
                 platform: result.platform,
@@ -323,7 +326,8 @@ class LocalMusicSheetDB {
                 _raw: result._raw,
                 _sortIndex: result._sortIndex,
             };
-        } catch {
+        } catch (error) {
+            console.error("查询歌单失败:", error);
             return null;
         }
     }
@@ -361,7 +365,8 @@ class LocalMusicSheetDB {
                 _raw: result._raw,
                 _sortIndex: result._sortIndex,
             }));
-        } catch {
+        } catch (error) {
+            console.error("查询所有歌单失败:", error);
             return [];
         }
     }
@@ -400,7 +405,8 @@ class LocalMusicSheetDB {
                 _raw: result._raw,
                 _sortIndex: result._sortIndex,
             }));
-        } catch {
+        } catch (error) {
+            console.error("按平台查询歌单失败:", error);
             return [];
         }
     }
@@ -447,7 +453,132 @@ class LocalMusicSheetDB {
 
             const result = updateStmt.run(...values);
             return result.changes > 0;
-        } catch {
+        } catch (error) {
+            console.error("更新歌单失败:", error);
+            return false;
+        }
+    }
+
+    /**
+     * 批量更新歌单
+     * @param updates 更新数据数组，每个元素包含 platform, id 和要更新的字段
+     * @returns 成功更新的数量
+     */
+    static batchUpdateMusicSheets(
+        updates: Array<{
+            platform: string;
+            id: string;
+            data: Partial<Omit<IDataBaseModel.IMusicSheetModel, "platform" | "id">>;
+        }>,
+    ): number {
+        if (!updates.length) return 0;
+
+        try {
+            const transaction = database.transaction(() => {
+                let successCount = 0;
+
+                for (const update of updates) {
+                    try {
+                        if (this.updateMusicSheet(update.platform, update.id, update.data)) {
+                            successCount++;
+                        }
+                    } catch (error) {
+                        console.warn(`批量更新歌单失败 (${update.platform}:${update.id}):`, error);
+                    }
+                }
+
+                return successCount;
+            });
+
+            return transaction();
+        } catch (error) {
+            console.error("批量更新歌单失败:", error);
+            return 0;
+        }
+    }
+
+    /**
+     * 更新歌单排序
+     * @param platform 平台
+     * @param id 歌单ID
+     * @param newSortIndex 新的排序索引
+     * @returns 是否更新成功
+     */
+    static updateMusicSheetSort(platform: string, id: string, newSortIndex: number): boolean {
+        try {
+            const updateStmt = database.prepare(`
+                UPDATE LocalMusicSheets 
+                SET _sortIndex = ? 
+                WHERE platform = ? AND id = ?
+            `);
+            const result = updateStmt.run(newSortIndex, platform, id);
+            return result.changes > 0;
+        } catch (error) {
+            console.error("更新歌单排序失败:", error);
+            return false;
+        }
+    }
+
+    /**
+     * 在两个歌单之间插入新歌单（使用浮点数排序法）
+     * @param platform 平台
+     * @param id 歌单ID
+     * @param afterPlatform 插入位置前一个歌单的平台（null表示插入到开头）
+     * @param afterId 插入位置前一个歌单的ID（null表示插入到开头）
+     * @param beforePlatform 插入位置后一个歌单的平台（null表示插入到末尾）
+     * @param beforeId 插入位置后一个歌单的ID（null表示插入到末尾）
+     * @returns 是否更新成功
+     */
+    static insertMusicSheetBetween(
+        platform: string,
+        id: string,
+        afterPlatform: string | null,
+        afterId: string | null,
+        beforePlatform: string | null,
+        beforeId: string | null,
+    ): boolean {
+        try {
+            let newSortIndex: number;
+
+            if (!afterPlatform && !afterId) {
+                // 插入到开头
+                const firstStmt = database.prepare("SELECT MIN(_sortIndex) as minSort FROM LocalMusicSheets");
+                const result = firstStmt.get() as { minSort: number | null };
+                newSortIndex = (result.minSort || this.SORT_BASE) - this.SORT_INCREMENT;
+            } else if (!beforePlatform && !beforeId) {
+                // 插入到末尾
+                const lastStmt = database.prepare("SELECT MAX(_sortIndex) as maxSort FROM LocalMusicSheets");
+                const result = lastStmt.get() as { maxSort: number | null };
+                newSortIndex = (result.maxSort || this.SORT_BASE) + this.SORT_INCREMENT;
+            } else {
+                // 插入到中间
+                const afterStmt = database.prepare("SELECT _sortIndex FROM LocalMusicSheets WHERE platform = ? AND id = ?");
+                const beforeStmt = database.prepare("SELECT _sortIndex FROM LocalMusicSheets WHERE platform = ? AND id = ?");
+
+                const afterResult = afterStmt.get(afterPlatform, afterId) as { _sortIndex: number } | undefined;
+                const beforeResult = beforeStmt.get(beforePlatform, beforeId) as { _sortIndex: number } | undefined;
+
+                if (!afterResult || !beforeResult) {
+                    return false;
+                }
+
+                newSortIndex = (afterResult._sortIndex + beforeResult._sortIndex) / 2;
+
+                // 检查是否需要重新均衡
+                if (Math.abs(beforeResult._sortIndex - afterResult._sortIndex) < this.MIN_SORT_INTERVAL) {
+                    this.rebalanceSortIndexes();
+                    // 重新计算新的排序值
+                    const newAfterResult = afterStmt.get(afterPlatform, afterId) as { _sortIndex: number } | undefined;
+                    const newBeforeResult = beforeStmt.get(beforePlatform, beforeId) as { _sortIndex: number } | undefined;
+                    if (newAfterResult && newBeforeResult) {
+                        newSortIndex = (newAfterResult._sortIndex + newBeforeResult._sortIndex) / 2;
+                    }
+                }
+            }
+
+            return this.updateMusicSheetSort(platform, id, newSortIndex);
+        } catch (error) {
+            console.error("插入歌单排序失败:", error);
             return false;
         }
     }
@@ -475,104 +606,93 @@ class LocalMusicSheetDB {
             });
 
             return transaction();
-        } catch {
+        } catch (error) {
+            console.error("重新均衡排序索引失败:", error);
             return false;
         }
     }
 
     /**
-     * 批量移动歌单到指定位置（支持所有拖拽和排序场景）
-     * @param selectedSheets 要移动的歌单标识数组
-     * @param targetPlatform 目标歌单的平台（null表示移动到开头/末尾）
-     * @param targetId 目标歌单的ID（null表示移动到开头/末尾）  
-     * @param position 相对于目标歌单的位置："before" | "after"，默认"after"
-     * @returns 成功移动的数量
-     * 
-     * @example
-     * // 移动到开头
-     * batchMoveMusicSheets(sheets, null, null, "before")
-     * 
-     * // 移动到末尾  
-     * batchMoveMusicSheets(sheets, null, null, "after")
-     * 
-     * // 移动到指定歌单之前
-     * batchMoveMusicSheets(sheets, "platform1", "id1", "before")
-     * 
-     * // 移动到指定歌单之后
-     * batchMoveMusicSheets(sheets, "platform1", "id1", "after")
+     * 获取歌单中的所有歌曲
+     * @param platform 歌单平台
+     * @param id 歌单ID
+     * @param orderBy 排序字段，默认按_sortIndex排序
+     * @param order 排序方向
+     * @returns 歌曲数组
      */
-    static batchMoveMusicSheets(
-        selectedSheets: Array<{ platform: string; id: string }>,
-        targetPlatform: string | null = null,
-        targetId: string | null = null,
-        position: "before" | "after" = "after",
-    ): number {
-        if (!selectedSheets.length) {
+    static getMusicItemsInSheet(
+        platform: string,
+        id: string,
+        orderBy: string = "_sortIndex",
+        order: "ASC" | "DESC" = "ASC",
+    ): IDataBaseModel.IMusicItemModel[] {
+        try {
+            const allowedFields = ["_sortIndex", "title", "artist", "album", "_timestamp"];
+            if (!allowedFields.includes(orderBy)) {
+                orderBy = "_sortIndex";
+            }
+
+            const selectStmt = database.prepare(`
+                SELECT * FROM LocalMusicItems 
+                WHERE _musicSheetPlatform = ? AND _musicSheetId = ?
+                ORDER BY ${orderBy} ${order}
+            `);
+            const results = selectStmt.all(platform, id) as any[];
+
+            return results.map(result => ({
+                platform: result.platform,
+                id: result.id,
+                artist: result.artist,
+                title: result.title,
+                duration: result.duration,
+                album: result.album,
+                artwork: result.artwork,
+                _timestamp: result._timestamp,
+                _raw: result._raw,
+                _sortIndex: result._sortIndex,
+                _musicSheetId: result._musicSheetId,
+                _musicSheetPlatform: result._musicSheetPlatform,
+            }));
+        } catch (error) {
+            console.error("获取歌单歌曲失败:", error);
+            return [];
+        }
+    }
+
+    /**
+     * 获取歌单中歌曲的数量
+     * @param platform 歌单平台
+     * @param id 歌单ID
+     * @returns 歌曲数量
+     */
+    static getMusicItemCountInSheet(platform: string, id: string): number {
+        try {
+            const countStmt = database.prepare(`
+                SELECT COUNT(*) as count FROM LocalMusicItems 
+                WHERE _musicSheetPlatform = ? AND _musicSheetId = ?
+            `);
+            const result = countStmt.get(platform, id) as { count: number };
+            return result.count;
+        } catch (error) {
+            console.error("获取歌单歌曲数量失败:", error);
             return 0;
         }
+    }
 
+    /**
+     * 检查歌单是否存在
+     * @param platform 平台
+     * @param id 歌单ID
+     * @returns 是否存在
+     */
+    static existsMusicSheet(platform: string, id: string): boolean {
         try {
-            const transaction = database.transaction(() => {
-                // 获取所有歌单的排序信息
-                const allSheetsStmt = database.prepare(`
-                    SELECT platform, id, _sortIndex 
-                    FROM LocalMusicSheets 
-                    ORDER BY _sortIndex ASC
-                `);
-                const allSheets = allSheetsStmt.all() as Array<{
-                    platform: string;
-                    id: string;
-                    _sortIndex: number;
-                }>;
-
-                // 分离要移动的歌单和剩余的歌单
-                const selectedSheetIds = new Set(selectedSheets.map(s => `${s.platform}:${s.id}`));
-                const sheetsToMove = allSheets.filter(s => selectedSheetIds.has(`${s.platform}:${s.id}`));
-                const remainingSheets = allSheets.filter(s => !selectedSheetIds.has(`${s.platform}:${s.id}`));
-
-                if (!sheetsToMove.length) {
-                    return 0;
-                }
-
-                // 计算插入位置
-                let insertIndex = 0;
-                if (targetPlatform && targetId) {
-                    const targetIndex = remainingSheets.findIndex(s =>
-                        s.platform === targetPlatform && s.id === targetId,
-                    );
-                    insertIndex = targetIndex === -1 ? 0 :
-                        (position === "after" ? targetIndex + 1 : targetIndex);
-                } else {
-                    insertIndex = position === "before" ? 0 : remainingSheets.length;
-                }
-
-                // 构建新的排序数组并重新分配排序索引
-                const newOrderedSheets = [...remainingSheets];
-                newOrderedSheets.splice(insertIndex, 0, ...sheetsToMove);
-
-                const updateStmt = database.prepare(`
-                    UPDATE LocalMusicSheets SET _sortIndex = ? WHERE platform = ? AND id = ?
-                `);
-
-                let successCount = 0;
-                newOrderedSheets.forEach((sheet, index) => {
-                    const newSortIndex = this.SORT_BASE + (index * this.SORT_INCREMENT);
-                    try {
-                        const result = updateStmt.run(newSortIndex, sheet.platform, sheet.id);
-                        if (result.changes > 0 && selectedSheetIds.has(`${sheet.platform}:${sheet.id}`)) {
-                            successCount++;
-                        }
-                    } catch {
-                        // 静默处理单个歌单移动失败的情况
-                    }
-                });
-
-                return successCount;
-            });
-
-            return transaction();
-        } catch {
-            return 0;
+            const countStmt = database.prepare("SELECT COUNT(*) as count FROM LocalMusicSheets WHERE platform = ? AND id = ?");
+            const result = countStmt.get(platform, id) as { count: number };
+            return result.count > 0;
+        } catch (error) {
+            console.error("检查歌单是否存在失败:", error);
+            return false;
         }
     }
 
@@ -622,94 +742,108 @@ class LocalMusicSheetDB {
                 artist: result.artist,
                 _raw: result._raw,
                 _sortIndex: result._sortIndex,
-            }));
-        } catch {
+            }));        
+        } catch (error) {
+            console.error("搜索歌单失败:", error);
             return [];
         }
     }
 
     /**
-     * 获取歌单中的所有歌曲
-     * @param platform 歌单平台
-     * @param id 歌单ID
-     * @param orderBy 排序字段，默认按_sortIndex排序
-     * @param order 排序方向
-     * @returns 歌曲数组
+     * 批量移动歌单到指定位置（支持所有拖拽和排序场景）
+     * @param selectedSheets 要移动的歌单标识数组
+     * @param targetPlatform 目标歌单的平台（null表示移动到开头/末尾）
+     * @param targetId 目标歌单的ID（null表示移动到开头/末尾）  
+     * @param position 相对于目标歌单的位置："before" | "after"，默认"after"
+     * @returns 成功移动的数量
+     * 
+     * @example
+     * // 移动到开头
+     * batchMoveMusicSheets(sheets, null, null, "before")
+     * 
+     * // 移动到末尾  
+     * batchMoveMusicSheets(sheets, null, null, "after")
+     * 
+     * // 移动到指定歌单之前
+     * batchMoveMusicSheets(sheets, "platform1", "id1", "before")
+     * 
+     * // 移动到指定歌单之后
+     * batchMoveMusicSheets(sheets, "platform1", "id1", "after")
      */
-    static getMusicItemsInSheet(
-        platform: string,
-        id: string,
-        orderBy: string = "_sortIndex",
-        order: "ASC" | "DESC" = "ASC",
-    ): IDataBaseModel.IMusicItemModel[] {
+    static batchMoveMusicSheets(
+        selectedSheets: Array<{ platform: string; id: string }>,
+        targetPlatform: string | null = null,
+        targetId: string | null = null,        position: "before" | "after" = "after",
+    ): number {
+        if (!selectedSheets.length) return 0;
+
         try {
-            const allowedFields = ["_sortIndex", "title", "artist", "album", "_timestamp"];
-            if (!allowedFields.includes(orderBy)) {
-                orderBy = "_sortIndex";
-            }
+            const transaction = database.transaction(() => {
+                // 获取所有歌单的排序信息
+                const allSheetsStmt = database.prepare(`
+                    SELECT platform, id, _sortIndex 
+                    FROM LocalMusicSheets 
+                    ORDER BY _sortIndex ASC
+                `);
+                const allSheets = allSheetsStmt.all() as Array<{
+                    platform: string;
+                    id: string;
+                    _sortIndex: number;
+                }>;
 
-            const selectStmt = database.prepare(`
-                SELECT * FROM LocalMusicItems 
-                WHERE _musicSheetPlatform = ? AND _musicSheetId = ?
-                ORDER BY ${orderBy} ${order}
-            `);
-            const results = selectStmt.all(platform, id) as any[];
+                // 分离要移动的歌单和剩余的歌单
+                const selectedSheetIds = new Set(selectedSheets.map(s => `${s.platform}:${s.id}`));
+                const sheetsToMove = allSheets.filter(s => selectedSheetIds.has(`${s.platform}:${s.id}`));
+                const remainingSheets = allSheets.filter(s => !selectedSheetIds.has(`${s.platform}:${s.id}`));
 
-            return results.map(result => ({
-                platform: result.platform,
-                id: result.id,
-                artist: result.artist,
-                title: result.title,
-                duration: result.duration,
-                album: result.album,
-                artwork: result.artwork,
-                _timestamp: result._timestamp,
-                _raw: result._raw,
-                _sortIndex: result._sortIndex,
-                _musicSheetId: result._musicSheetId,
-                _musicSheetPlatform: result._musicSheetPlatform,
-            }));
-        } catch {
-            return [];
-        }
-    }
+                if (!sheetsToMove.length) return 0;
 
-    /**
-     * 获取歌单中歌曲的数量
-     * @param platform 歌单平台
-     * @param id 歌单ID
-     * @returns 歌曲数量
-     */
-    static getMusicItemCountInSheet(platform: string, id: string): number {
-        try {
-            const countStmt = database.prepare(`
-                SELECT COUNT(*) as count FROM LocalMusicItems 
-                WHERE _musicSheetPlatform = ? AND _musicSheetId = ?
-            `);
-            const result = countStmt.get(platform, id) as { count: number };
-            return result.count;
-        } catch {
+                // 计算插入位置
+                let insertIndex = 0;
+                if (targetPlatform && targetId) {
+                    const targetIndex = remainingSheets.findIndex(s => 
+                        s.platform === targetPlatform && s.id === targetId,
+                    );
+                    insertIndex = targetIndex === -1 ? 0 : 
+                        (position === "after" ? targetIndex + 1 : targetIndex);
+                } else {
+                    insertIndex = position === "before" ? 0 : remainingSheets.length;
+                }
+
+                // 构建新的排序数组并重新分配排序索引
+                const newOrderedSheets = [...remainingSheets];
+                newOrderedSheets.splice(insertIndex, 0, ...sheetsToMove);
+
+                const updateStmt = database.prepare(`
+                    UPDATE LocalMusicSheets SET _sortIndex = ? WHERE platform = ? AND id = ?
+                `);
+
+                let successCount = 0;
+                newOrderedSheets.forEach((sheet, index) => {
+                    const newSortIndex = this.SORT_BASE + (index * this.SORT_INCREMENT);
+                    try {
+                        const result = updateStmt.run(newSortIndex, sheet.platform, sheet.id);
+                        if (result.changes > 0 && selectedSheetIds.has(`${sheet.platform}:${sheet.id}`)) {
+                            successCount++;
+                        }
+                    } catch (error) {
+                        console.warn(`批量移动歌单失败 (${sheet.platform}:${sheet.id}):`, error);
+                    }
+                });
+
+                return successCount;
+            });
+
+            return transaction();
+        } catch (error) {
+            console.error("批量移动歌单失败:", error);
             return 0;
-        }
-    }
-
-    /**
-     * 检查歌单是否存在
-     * @param platform 平台
-     * @param id 歌单ID
-     * @returns 是否存在
-     */
-    static existsMusicSheet(platform: string, id: string): boolean {
-        try {
-            const countStmt = database.prepare("SELECT COUNT(*) as count FROM LocalMusicSheets WHERE platform = ? AND id = ?");
-            const result = countStmt.get(platform, id) as { count: number };
-            return result.count > 0;
-        } catch {
-            return false;
-        }
+        }    
     }
 }
 
-
 // 导出数据库实例和类
 export { database, LocalMusicSheetDB };
+
+
+
