@@ -33,13 +33,16 @@ $height: 100%;
 .lyric-container {
   width: $width;
   height: $height;
-  overflow-y: auto;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
   font-size: 1rem;
   cursor: default;
   position: relative;
 
   &::-webkit-scrollbar {
-    display: none;
+    width: 8px;
   }
 
   &::-webkit-scrollbar-track {
@@ -47,12 +50,20 @@ $height: 100%;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #999;
+    background: transparent;
+    background-color: transparent;
+    box-shadow: none;
+    border: none;
     border-radius: 8px;
+    background-clip: padding-box;
   }
 
-  &:hover::-webkit-scrollbar {
-    display: block;
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: #999;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   &[data-loading="false"] {
