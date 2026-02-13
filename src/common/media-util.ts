@@ -13,7 +13,7 @@ export function isSameMedia(
     b?: IMedia.IMediaBase | null,
 ) {
     if (a && b) {
-        return a.id === b.id && a.platform === b.platform;
+        return a.id == b.id && a.platform == b.platform;
     }
     return false;
 }

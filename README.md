@@ -1,4 +1,15 @@
 # MusicFree 桌面版
+![GitHub Repo stars](https://img.shields.io/github/stars/maotoumao/MusicFreeDesktop) 
+![GitHub forks](https://img.shields.io/github/forks/maotoumao/MusicFreeDesktop)
+![star](https://gitcode.com/maotoumao/MusicFreeDesktop/star/badge.svg)
+
+![GitHub License](https://img.shields.io/github/license/maotoumao/MusicFreeDesktop)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/maotoumao/MusicFreeDesktop/total)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/maotoumao/MusicFreeDesktop)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/maotoumao/MusicFreeDesktop)
+
+<a href="https://trendshift.io/repositories/3961" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3961" alt="maotoumao%2FMusicFreeDesktop | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+---
 
 ## 项目使用约定：
 本项目基于 AGPL 3.0 协议开源，使用此项目时请遵守开源协议。  
