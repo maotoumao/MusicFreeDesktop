@@ -647,10 +647,11 @@ class TrackPlayer {
 
             if (!lyricSource?.rawLrc && !lyricSource?.translation) {
                 this.setCurrentLyric({});
+                return;
             }
-            const parser = new LyricParser(lyricSource.rawLrc, {
+            const parser = new LyricParser(lyricSource?.rawLrc ?? "", {
                 musicItem: currentMusic,
-                translation: lyricSource.translation,
+                translation: lyricSource?.translation,
             });
 
             this.setCurrentLyric({
