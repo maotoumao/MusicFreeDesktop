@@ -124,7 +124,7 @@ jobs:
                   node-version: 22
                   cache: pnpm
             - name: Fix node-gyp for Python 3.12+
-              run: python3 -m pip install setuptools --break-system-packages
+              run: pip install setuptools
             - run: pnpm install --frozen-lockfile
             - name: Read version
               run: |
@@ -151,7 +151,7 @@ jobs:
                   node-version: 22
                   cache: pnpm
             - name: Fix node-gyp for Python 3.12+
-              run: python3 -m pip install setuptools --break-system-packages
+              run: pip install setuptools
             - run: pnpm install --frozen-lockfile
             - name: Read version
               run: |
