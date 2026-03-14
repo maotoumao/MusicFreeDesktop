@@ -35,10 +35,15 @@ const config: ForgeConfig = {
         }),
         new MakerDeb({
             options: {
+                bin: 'MusicFree',
                 mimeType: ['x-scheme-handler/musicfree'],
             },
         }),
-        new MakerRpm({}),
+        new MakerRpm({
+            options: {
+                bin: 'MusicFree',
+            },
+        }),
     ],
     plugins: [
         new AutoUnpackNativesPlugin({}),
