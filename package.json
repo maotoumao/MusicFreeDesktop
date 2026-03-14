@@ -41,7 +41,8 @@
     "pnpm": {
         "onlyBuiltDependencies": [
             "electron",
-            "macos-alias"
+            "macos-alias",
+            "fs-xattr"
         ]
     },
     "devDependencies": {

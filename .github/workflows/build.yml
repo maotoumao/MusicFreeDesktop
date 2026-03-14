@@ -48,6 +48,7 @@ jobs:
             - name: Generate portable
               run: |
                   New-Item -ItemType Directory -Path "./out/MusicFree-win32-x64/portable" -Force
+                  New-Item -ItemType File -Path "./out/MusicFree-win32-x64/portable/.portable" -Force
             - name: Archive portable
               run: |
                   Compress-Archive -Path "./out/MusicFree-win32-x64/*" -DestinationPath "./out/MusicFree-${{ env.VERSION }}-win32-x64-portable.zip"
@@ -98,6 +99,7 @@ jobs:
             - name: Generate portable
               run: |
                   New-Item -ItemType Directory -Path "./out/MusicFree-win32-x64/portable" -Force
+                  New-Item -ItemType File -Path "./out/MusicFree-win32-x64/portable/.portable" -Force
             - name: Archive portable
               run: |
                   Compress-Archive -Path "./out/MusicFree-win32-x64/*" -DestinationPath "./out/MusicFree-${{ env.VERSION }}-win32-x64-legacy-portable.zip"
