@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useCallback, type MouseEvent } from 'react';
+import { type ReactNode, useEffect, useCallback, useRef, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,6 +25,8 @@ export interface DrawerProps {
     closeOnEscape?: boolean;
     /** 是否显示遮罩 @default true */
     showOverlay?: boolean;
+    /** 是否点击抽屉外部区域关闭 @default false */
+    closeOnClickOutside?: boolean;
     /** 抽屉内容 */
     children?: ReactNode;
     /** 额外 className */
@@ -74,10 +76,33 @@ export default function Drawer({
     closeOnBackdrop = true,
     closeOnEscape = true,
     showOverlay = true,
+    closeOnClickOutside = false,
     children,
     className,
 }: DrawerProps) {
     const { t } = useTranslation();
+    const drawerRef = useRef<HTMLDivElement>(null);
+
+    // ── Click outside ──
+    useEffect(() => {
+        if (!open || !closeOnClickOutside) return;
+        const handler = (e: globalThis.MouseEvent) => {
+            const target = e.target as HTMLElement;
+            // 忽略 Drawer 内部点击
+            if (drawerRef.current?.contains(target)) return;
+            // 忽略 portal 浮层（ContextMenu / Modal / Toast）内的点击
+            if (
+                target.closest(
+                    '[role="menu"], [role="dialog"], [role="alert"], [data-click-outside-ignore]',
+                )
+            )
+                return;
+            onClose();
+        };
+        window.addEventListener('mousedown', handler);
+        return () => window.removeEventListener('mousedown', handler);
+    }, [open, closeOnClickOutside, onClose]);
+
     // ── Escape ──
     useEffect(() => {
         if (!open || !closeOnEscape) return;
@@ -116,6 +141,7 @@ export default function Drawer({
                         />
                     )}
                     <motion.aside
+                        ref={drawerRef}
                         className={cn('drawer', className)}
                         role="dialog"
                         aria-modal="true"

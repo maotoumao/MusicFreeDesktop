@@ -266,6 +266,7 @@ export default function QueueDrawer() {
             onClose={closeQueueDrawer}
             closable={false}
             showOverlay={false}
+            closeOnClickOutside
             className="l-queue-drawer"
         >
             {/* Custom header — Drawer closable=false, 我们自己画 header */}
