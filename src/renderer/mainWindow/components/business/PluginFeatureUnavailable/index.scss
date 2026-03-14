@@ -1,0 +1,112 @@
+// ============================================================================
+// PluginFeatureUnavailable — 通用业务组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: flex-col, items-center, justify-center, py-112(28×4), min-h-360
+//   图标容器: 64×64, rounded-2xl(16px), bg white/4, border white/6, mb-24
+//   图标: 28×28, color white/20, strokeWidth 1.5
+//   主文案: 15px, color white/50, font-weight medium, mb-6
+//   副文案: 13px, color white/25, max-w-320, text-center, leading-relaxed, mb-24
+//   CTA: inline-flex, gap-8, px-20 py-8, rounded-lg(8px), 13px font-medium
+//        bg primary/15, text primary, border primary/20
+//        hover → bg primary/25, border primary/30
+//        :active → opacity 0.7
+//
+
+.plugin-feature-unavailable {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 112px 0;
+    min-height: 360px;
+
+    // ── 图标容器 ──
+    &__icon-box {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+    }
+
+    // ── 图标 ──
+    &__icon {
+        width: 28px;
+        height: 28px;
+        color: rgba(255, 255, 255, 0.2);
+    }
+
+    // ── 主文案 ──
+    &__title {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: var(--font-weight-medium);
+        margin-bottom: 6px;
+    }
+
+    // ── 副文案 ──
+    &__desc {
+        font-size: var(--text-label-size);
+        color: rgba(255, 255, 255, 0.25);
+        max-width: 320px;
+        text-align: center;
+        line-height: var(--text-label-leading);
+        margin-bottom: 24px;
+    }
+
+    // ── CTA 按钮 ──
+    &__cta {
+        // button 重置
+        border: none;
+        background: none;
+
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: var(--radius-control);
+        font-size: var(--text-label-size);
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+        white-space: nowrap;
+
+        // 品牌色调
+        background-color: var(--color-fill-brand-muted);
+        color: var(--color-text-brand);
+        // default: ~20% brand opacity; --color-border-brand is 30%
+        border: 1px solid color-mix(in srgb, var(--color-fill-brand) 20%, transparent);
+
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            border-color var(--duration-normal) var(--ease-standard),
+            opacity var(--duration-instant) var(--ease-standard);
+
+        &:hover {
+            background-color: color-mix(in srgb, var(--color-fill-brand) 25%, transparent);
+            border-color: var(--color-border-brand);
+        }
+
+        &:active {
+            opacity: var(--opacity-pressed);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+    }
+
+    // ── CTA 图标 ──
+    &__cta-icon {
+        width: 14px;
+        height: 14px;
+    }
+}

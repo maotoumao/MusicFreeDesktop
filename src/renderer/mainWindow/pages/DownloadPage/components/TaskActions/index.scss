@@ -1,0 +1,46 @@
+// ============================================================================
+// TaskActions — 操作按钮组
+// ============================================================================
+
+.p-download__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.p-download__action-btn {
+    // ── 重置 button 默认样式 ──
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-control-sm);
+    height: var(--size-control-sm);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-text-primary);
+    }
+
+    &:active {
+        opacity: var(--opacity-pressed);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+
+    &--danger:hover {
+        color: var(--color-status-danger-text);
+    }
+}

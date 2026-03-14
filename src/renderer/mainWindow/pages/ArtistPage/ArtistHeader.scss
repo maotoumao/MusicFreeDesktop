@@ -1,0 +1,127 @@
+// ============================================================================
+// .p-artist-header — 作者详情页头部样式
+// ============================================================================
+//
+// 与 MusicSheetHeader 同级视觉重量，差异在于圆形头像。
+//   容器: flex, gap var(--space-7), items-center, mb var(--space-6)
+//   头像: 200×200, 圆形, shadow-md, ring 1px border-subtle
+//   名称: 32px, extrabold, tracking-tight, line-clamp-2
+//   描述: 13px, text-muted, line-clamp-2 可展开
+//   元信息: 13px, text-secondary
+//
+
+.p-artist-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-7);
+    margin-bottom: var(--space-6);
+
+    // ── 圆形头像 ──
+    &__cover {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    &__avatar {
+        &,
+        .artwork__img,
+        .artwork__fallback {
+            border-radius: 50%;
+        }
+
+        box-shadow:
+            var(--shadow-md),
+            0 0 0 1px var(--color-border-subtle);
+    }
+
+    &__cover-placeholder {
+        width: 48px;
+        height: 48px;
+        color: var(--color-text-disabled);
+    }
+
+    // ── 来源徽章 ──
+    &__source-badge {
+        position: absolute;
+        bottom: var(--space-2);
+        right: var(--space-2);
+        padding: var(--space-0-5) var(--space-2);
+        border-radius: var(--radius-control);
+        background: var(--color-bg-overlay);
+        backdrop-filter: blur(var(--blur-xs));
+        font-size: var(--text-overline-size);
+        color: var(--color-text-primary);
+        line-height: 1.5;
+    }
+
+    // ── 信息区 ──
+    &__info {
+        flex: 1;
+        min-width: 0;
+        padding-bottom: var(--space-1);
+    }
+
+    &__name {
+        font-size: 32px;
+        font-weight: var(--font-weight-extrabold);
+        letter-spacing: var(--tracking-tight);
+        color: var(--color-text-primary);
+        line-height: var(--text-title-leading);
+        margin: 0 0 var(--space-3);
+
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    // ── 描述 ──
+    &__desc-wrap {
+        margin-bottom: var(--space-3);
+        max-width: 560px;
+    }
+
+    &__desc {
+        font-size: var(--text-label-size);
+        color: var(--color-text-muted);
+        line-height: 1.6;
+        margin: 0;
+
+        &--clamped {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    }
+
+    &__desc-expand {
+        margin-top: var(--space-1-5);
+        padding: 0;
+        border: none;
+        background: none;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-disabled);
+        cursor: pointer;
+        transition: color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-secondary);
+        }
+    }
+
+    // ── 元信息行 ──
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        font-size: var(--text-label-size);
+        color: var(--color-text-secondary);
+        line-height: var(--text-label-leading);
+    }
+
+    &__meta-sep {
+        color: var(--color-border-default);
+    }
+}

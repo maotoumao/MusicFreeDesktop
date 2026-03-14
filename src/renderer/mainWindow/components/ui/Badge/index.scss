@@ -1,0 +1,96 @@
+// ============================================================================
+// Badge — 原子组件样式
+// ============================================================================
+//
+// 三种变体 × 三种色彩语义
+//   变体: outline | filled | tint
+//   色彩: default | danger | warn
+//
+// 设计稿还原（像素级）：
+//   容器: inline-flex, items-center, nowrap, leading-1
+//   outline: text badge-size, color text-muted, border 1px border-strong,
+//            rounded badge(4px), px-6 py-4, font-weight medium
+//   filled:  text badge-size, color text-on-brand, bg fill-brand,
+//            border 1px transparent, rounded pill, px-8 py-4, font-weight medium
+//   tint:    text badge-size, color text-brand, bg fill-brand-muted,
+//            border 1px border-brand, rounded pill, px-8 py-4, font-weight medium
+//
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    line-height: 1;
+
+    // ── outline: 描边徽章 ──
+    &--outline {
+        font-size: var(--text-badge-size);
+        color: var(--color-text-muted);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-badge);
+        padding: 4px 6px;
+        font-weight: var(--font-weight-medium);
+    }
+
+    // ── filled: 填充徽章 ──
+    &--filled {
+        font-size: var(--text-badge-size);
+        color: var(--color-text-on-brand);
+        background-color: var(--color-fill-brand);
+        border: 1px solid transparent;
+        border-radius: var(--radius-pill);
+        padding: 4px 8px;
+        font-weight: var(--font-weight-medium);
+    }
+
+    // ── tint: 品牌色调徽章 ──
+    &--tint {
+        font-size: var(--text-badge-size);
+        color: var(--color-text-brand);
+        background-color: var(--color-fill-brand-muted);
+        border: 1px solid var(--color-border-brand);
+        border-radius: var(--radius-pill);
+        padding: 4px 8px;
+        font-weight: var(--font-weight-medium);
+    }
+
+    // ── ColorScheme: Danger ──
+    // 可与任意 variant 组合，覆盖为红色色调
+    &--danger {
+        &.badge--outline {
+            color: var(--color-status-danger-text);
+            border-color: var(--color-status-danger-border);
+        }
+
+        &.badge--filled {
+            background-color: var(--color-status-danger-fill);
+            color: var(--color-text-on-brand);
+        }
+
+        &.badge--tint {
+            color: var(--color-status-danger-text);
+            background-color: var(--color-status-danger-bg);
+            border-color: var(--color-status-danger-border);
+        }
+    }
+
+    // ── ColorScheme: Warn ──
+    // 可与任意 variant 组合，覆盖为橙色色调
+    &--warn {
+        &.badge--outline {
+            color: var(--color-status-warn-text);
+            border-color: var(--color-status-warn-border);
+        }
+
+        &.badge--filled {
+            background-color: var(--color-status-warn-fill);
+            color: var(--color-text-on-brand);
+        }
+
+        &.badge--tint {
+            color: var(--color-status-warn-text);
+            background-color: var(--color-status-warn-bg);
+            border-color: var(--color-status-warn-border);
+        }
+    }
+}

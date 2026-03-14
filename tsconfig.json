@@ -1,26 +1,28 @@
 {
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "target": "ES2021",
-    "allowJs": true,
-    "module": "commonjs",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "noImplicitAny": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "outDir": "dist",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "paths": {
-      "*": ["node_modules/*"],
-      "@/*": ["src/*"],
-      "@main/*": ["src/main/*"],
-      "@shared/*": ["src/shared/*"],
-      "@native/*": ["src/main/native_modules/*"],
-      "@renderer/*": ["src/renderer/*"],
-      "@renderer-lrc/*": ["src/renderer-lrc/*"]
-    }
-  },
-  "include": ["src/**/*"]
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "target": "ES2021",
+        "allowJs": true,
+        "module": "commonjs",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "baseUrl": ".",
+        "outDir": "dist",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "experimentalDecorators": true,
+        "paths": {
+            "*": ["node_modules/*"],
+            "@common/*": ["src/common/*"],
+            "@main/*": ["src/main/*"],
+            "@renderer/*": ["src/renderer/*"],
+            "@preload/*": ["src/preload/*"],
+            "@assets/*": ["src/assets/*"],
+            "@appTypes/*": ["src/types/*"],
+            "@infra/*": ["src/infra/*"]
+        }
+    },
+    "include": ["src/**/*"]
 }

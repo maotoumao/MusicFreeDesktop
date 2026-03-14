@@ -1,0 +1,225 @@
+// ============================================================================
+// PluginManagerPage — 页面样式
+// ============================================================================
+//
+// BEM Block: p-plugin-manager
+// 设计稿对标: Plugins.tsx (设计稿)
+// 所有数值均引用 global.scss 设计令牌，禁止硬编码。
+
+// ── 按钮基础重置 mixin ──
+@mixin btn-reset {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+}
+
+.p-plugin-manager {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: fade-in var(--duration-normal) ease;
+
+    // ── 头部：标题 + 操作按钮 ──
+
+    &__header {
+        flex-shrink: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding-top: var(--space-4);
+        padding-bottom: var(--space-6);
+    }
+
+    &__title-group {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-3);
+    }
+
+    &__title {
+        font-size: var(--text-title-size);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+        line-height: var(--text-title-leading);
+    }
+
+    &__count {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        line-height: var(--text-caption-leading);
+        white-space: nowrap;
+    }
+
+    &__header-actions {
+        display: flex;
+        gap: var(--space-3);
+    }
+
+    // ── 滚动内容区 ──
+
+    &__body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding-bottom: var(--space-20);
+        margin-right: calc(var(--space-8) * -1);
+        padding-right: var(--space-8);
+    }
+
+    // ── 插件列表 ──
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    // ── 插件卡片 ──
+
+    &__item {
+        background: var(--color-bg-surface);
+        border-radius: var(--radius-card);
+        padding: var(--space-4) var(--space-6);
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            box-shadow var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            background: var(--color-bg-surface-raised);
+        }
+
+        &.is-dragging {
+            box-shadow: var(--shadow-lg);
+            background: var(--color-bg-surface-raised);
+        }
+
+        &.is-disabled {
+            opacity: var(--opacity-disabled);
+        }
+    }
+
+    &__item-main {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+    }
+
+    // ── 拖拽手柄 ──
+
+    &__drag-handle {
+        @include btn-reset;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        color: var(--color-text-disabled);
+        cursor: grab;
+        border-radius: var(--radius-badge);
+        touch-action: none;
+        transition: color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-secondary);
+        }
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+
+    // ── 信息区 ──
+
+    &__item-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__item-title-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-bottom: 2px;
+    }
+
+    &__item-name {
+        font-size: var(--text-body-size);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+        line-height: var(--text-body-leading);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__item-version {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        line-height: var(--text-caption-leading);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    &__item-meta {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        line-height: var(--text-caption-leading);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // ── 右侧操作区（帮助按钮 + Toggle） ──
+
+    &__item-right {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        flex-shrink: 0;
+    }
+
+    // ── 帮助按钮 (?) ──
+
+    &__help-btn {
+        @include btn-reset;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: var(--radius-pill);
+        color: var(--color-text-disabled);
+        transition:
+            color var(--duration-normal) var(--ease-standard),
+            background-color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-secondary);
+            background: var(--color-fill-subtle-hover);
+        }
+    }
+
+    // ── 操作按钮行 ──
+
+    &__item-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2);
+        margin-top: var(--space-4);
+        padding-left: calc(24px + var(--space-6)); // 与信息区左对齐（手柄宽 + gap）
+    }
+}

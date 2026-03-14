@@ -1,0 +1,192 @@
+// ============================================================================
+// Select — 组合组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   触发器: h-36, min-w-190, bg white/5, border white/10, rounded-lg(8px)
+//           12px 文字, 右侧 ▼ 10px
+//   下拉面板: bg popover, border default, rounded-xl(12px)
+//             shadow-lg, p-4, max-h 260px
+//   选项: 每个 option 之间 4px gap，px-12 py-10, rounded-lg(8px)
+//         hover → bg subtle-hover; 选中 → bg brand-muted text-primary
+//
+
+.select {
+    position: relative;
+    display: inline-flex;
+
+    // ── 触发器 ──
+    &__trigger {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: var(--size-control-md);
+        min-width: 220px;
+        padding: 0 40px 0 12px;
+        background: var(--color-fill-subtle);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--radius-control);
+        font-size: var(--text-caption-size);
+        color: var(--color-text-primary);
+        cursor: pointer;
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            border-color var(--duration-normal) var(--ease-standard);
+        white-space: nowrap;
+
+        &:hover:not(:disabled) {
+            background: var(--color-fill-subtle-hover);
+        }
+    }
+
+    // ── 选中值文本 ──
+    &__value {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+
+        &--placeholder {
+            color: var(--color-text-placeholder);
+        }
+    }
+
+    // ── 箭头 ──
+    &__arrow {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 10px;
+        color: var(--color-text-muted);
+        transition: transform var(--duration-normal) var(--ease-standard);
+        pointer-events: none;
+
+        &.is-flipped {
+            transform: translateY(-50%) rotate(180deg);
+        }
+    }
+
+    // ── is-open 态 ──
+    &.is-open {
+        .select__trigger {
+            background: var(--color-fill-subtle-hover);
+            border-color: var(--color-border-focus);
+        }
+    }
+
+    // ── disabled 态 ──
+    &.is-disabled {
+        opacity: var(--opacity-disabled);
+        cursor: not-allowed;
+
+        .select__trigger {
+            cursor: not-allowed;
+        }
+    }
+
+    // ── 下拉面板 ──
+    &__dropdown {
+        position: absolute;
+        z-index: var(--z-popover);
+        left: 0;
+        width: 100%;
+        min-width: 100%;
+        max-width: 360px;
+        background: var(--color-bg-popover);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-lg);
+        padding: 4px;
+        max-height: 260px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        // 入场动画
+        animation: select-dropdown-in var(--duration-fast) var(--ease-popup) forwards;
+
+        // ── 向下弹出 ──
+        &--down {
+            top: 100%;
+            margin-top: 8px;
+        }
+
+        // ── 向上弹出 ──
+        &--up {
+            bottom: 100%;
+            margin-bottom: 8px;
+        }
+    }
+
+    // ── 选项 ──
+    &__option {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: var(--radius-control);
+        font-size: var(--text-caption-size);
+        color: var(--color-text-primary);
+        cursor: pointer;
+        transition:
+            background-color var(--duration-fast) var(--ease-standard),
+            color var(--duration-fast) var(--ease-standard);
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex-shrink: 0;
+
+        &:hover:not(.is-selected):not(.is-disabled) {
+            background: var(--color-fill-subtle-hover);
+            color: var(--color-text-primary);
+        }
+
+        // ── 选中态 ──
+        &.is-selected {
+            background: var(--color-fill-brand-muted);
+            color: var(--color-text-primary);
+        }
+
+        // ── 禁用态 ──
+        &.is-disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+    }
+}
+
+// ── 自定义滚动条（沿用全局样式，此处确保下拉内滚动条不突兀） ──
+.select__dropdown {
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--color-fill-neutral);
+        border-radius: 2px;
+
+        &:hover {
+            background: var(--color-fill-neutral-hover);
+        }
+    }
+}
+
+@keyframes select-dropdown-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

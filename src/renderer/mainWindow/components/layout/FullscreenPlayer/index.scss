@@ -1,0 +1,574 @@
+// ============================================================================
+// FullscreenPlayer — 全屏播放详情页样式
+// ============================================================================
+
+.l-fullscreen-player {
+    // 全局语义颜色覆盖，确保全屏播放器在任何主题下都使用深色调
+    --color-bg-fullscreen: rgb(9, 9, 11);
+    --color-bg-overlay: rgba(0, 0, 0, 0.6);
+    --color-bg-placeholder: rgb(39, 39, 42);
+
+    --color-fill-neutral: rgba(255, 255, 255, 0.1);
+    --color-fill-neutral-hover: rgba(255, 255, 255, 0.16);
+    --color-fill-neutral-active: rgba(255, 255, 255, 0.2);
+    --color-fill-subtle-hover: rgba(255, 255, 255, 0.1);
+
+    --color-text-primary: rgb(255, 255, 255);
+    --color-text-secondary: rgb(161, 161, 170);
+    --color-text-muted: rgba(255, 255, 255, 0.6);
+    --color-text-placeholder: rgba(255, 255, 255, 0.5);
+    --color-text-disabled: rgba(255, 255, 255, 0.3);
+
+    --color-border-default: rgba(255, 255, 255, 0.08);
+
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-fullscreen);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-fullscreen);
+
+    // ── 动态模糊背景 ──
+
+    &__bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+
+    &__bg-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: blur(var(--blur-ambient));
+        opacity: var(--opacity-ambient);
+        transform: scale(1.1);
+    }
+
+    &__bg-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.2),
+            rgba(0, 0, 0, 0.4) 50%,
+            rgba(0, 0, 0, 0.8)
+        );
+    }
+
+    // ── Header ──
+
+    &__header {
+        position: relative;
+        z-index: 20;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        padding: var(--space-6) var(--space-10);
+        -webkit-app-region: drag;
+    }
+
+    &__close-btn {
+        border: none;
+        background: none;
+        padding: 0;
+        -webkit-app-region: no-drag;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--size-control-lg);
+        height: var(--size-control-lg);
+        border-radius: var(--radius-pill);
+        color: var(--color-text-primary);
+        cursor: pointer;
+        transition: background-color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            background-color: var(--color-fill-subtle-hover);
+        }
+
+        &:active {
+            opacity: var(--opacity-pressed);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-fullscreen),
+                var(--focus-ring);
+        }
+    }
+
+    // ── Body ──
+
+    &__body {
+        position: relative;
+        z-index: 10;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10% var(--space-10);
+        gap: 8%;
+    }
+
+    // ── 左: 封面 ──
+
+    &__artwork-wrapper {
+        width: 40%;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__artwork {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: var(--radius-artwork);
+        overflow: hidden;
+        box-shadow: var(--shadow-xl);
+        background-color: var(--color-bg-placeholder);
+    }
+
+    &__artwork-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform var(--duration-glacial) var(--ease-standard);
+
+        &:hover {
+            transform: scale(1.05);
+        }
+    }
+
+    &__artwork-fallback {
+        width: 100%;
+        height: 100%;
+        background-color: var(--color-bg-placeholder);
+    }
+
+    // ── 右: 歌词区域 ──
+
+    &__right {
+        flex: 1;
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        align-self: stretch;
+        justify-content: center;
+        padding: var(--space-6) 0;
+    }
+
+    // ── 歌曲信息 ──
+
+    &__song-info {
+        flex-shrink: 0;
+        margin-bottom: var(--space-8);
+        text-align: left;
+    }
+
+    &__song-title {
+        font-size: var(--text-display-lg-size);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        line-height: var(--text-display-leading);
+        margin-bottom: var(--space-2);
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    &__song-artist {
+        font-size: var(--text-heading-size);
+        color: var(--color-text-muted);
+        line-height: var(--text-body-leading);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    &__dot {
+        margin: 0 var(--space-2);
+    }
+
+    // ── 歌词容器（含遮罩） ──
+
+    &__lyric-container {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+    }
+
+    // ── 歌词滚动区域 ──
+
+    &__lyric-scroll {
+        height: 100%;
+        overflow-y: auto;
+        padding: var(--space-6) var(--space-3) 0 0;
+        text-align: left;
+        cursor: grab;
+        user-select: none;
+
+        &.is-dragging {
+            cursor: grabbing;
+        }
+        // 顶部/底部渐变遮罩
+        mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            black 10%,
+            black 85%,
+            transparent 100%
+        );
+
+        // 隐藏滚动条
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        scrollbar-width: none;
+    }
+
+    // ── 空歌词状态 ──
+
+    &__lyric-empty {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-4);
+    }
+
+    &__lyric-empty-text {
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-placeholder);
+    }
+    // ── 歌词行 ──
+
+    &__lyric-line {
+        padding: var(--space-3) 0;
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-placeholder);
+        line-height: var(--text-title-leading);
+        transition:
+            color var(--duration-moderate) var(--ease-standard),
+            filter var(--duration-moderate) var(--ease-standard);
+
+        &:hover:not(.is-active) {
+            color: var(--color-text-secondary);
+        }
+
+        &.is-active {
+            color: var(--color-text-brand);
+            filter: drop-shadow(0 0 20px var(--color-text-disabled));
+        }
+    }
+
+    &__lyric-text {
+        line-height: var(--text-title-leading);
+    }
+
+    &__lyric-trans {
+        margin-top: var(--space-1);
+        font-size: 0.6em;
+        font-weight: var(--font-weight-normal);
+        color: var(--color-text-muted);
+
+        .is-active & {
+            color: var(--color-text-brand);
+        }
+    }
+
+    // 底部留白
+    &__lyric-spacer {
+        height: 50%;
+    }
+
+    // ── 设置锚点 ──
+
+    &__settings-anchor {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-4);
+    }
+
+    // ── 控制面板（封面下方） ──
+
+    &__controls {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        margin-top: var(--space-12);
+    }
+
+    // ── 播控行 ──
+
+    &__playback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-6);
+    }
+
+    &__ctrl-btn {
+        border: none;
+        background: none;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--size-control-lg);
+        height: var(--size-control-lg);
+        border-radius: var(--radius-pill);
+        color: var(--color-text-primary);
+        cursor: pointer;
+        transition: background-color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            background-color: var(--color-fill-subtle-hover);
+        }
+
+        &:active {
+            opacity: var(--opacity-pressed);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-fullscreen),
+                var(--focus-ring);
+        }
+
+        &--play {
+            // 全屏播放按钮，比 --size-control-lg(40px) 更大以突出主操作
+            width: 56px;
+            height: 56px;
+            background-color: var(--color-fill-neutral);
+
+            &:hover {
+                background-color: var(--color-fill-neutral-hover);
+            }
+        }
+    }
+
+    // ── 进度条行 ──
+
+    &__progress {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+
+        .progress-bar {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    &__time {
+        flex-shrink: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        font-variant-numeric: tabular-nums;
+        min-width: 3.5em;
+
+        &:first-child {
+            text-align: right;
+        }
+
+        &:last-child {
+            text-align: left;
+        }
+    }
+
+    // ── 右下角工具按钮（翻译/桌面歌词） ──
+
+    &__tool-btn {
+        border: none;
+        background: none;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--icon-lg);
+        height: var(--icon-lg);
+        border-radius: var(--radius-pill);
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: color var(--duration-fast) var(--ease-standard);
+
+        &:hover:not(.is-active):not(.is-disabled) {
+            color: var(--color-text-primary);
+        }
+
+        &:active:not(.is-disabled) {
+            opacity: var(--opacity-pressed);
+        }
+
+        &.is-active {
+            color: var(--color-text-brand);
+        }
+
+        &.is-disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-fullscreen),
+                var(--focus-ring);
+        }
+    }
+
+    &__settings-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--size-control-lg);
+        height: var(--size-control-lg);
+        border-radius: var(--radius-pill);
+        background-color: var(--color-fill-neutral);
+        color: var(--color-text-primary);
+        cursor: pointer;
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            background-color: var(--color-fill-neutral-hover);
+        }
+
+        &.is-active {
+            background-color: var(--color-fill-neutral-active);
+        }
+
+        &:active {
+            opacity: var(--opacity-pressed);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-fullscreen),
+                var(--focus-ring);
+        }
+    }
+
+    // ── 设置面板 ──
+
+    &__settings {
+        position: absolute;
+        right: 0;
+        bottom: calc(var(--size-control-lg) + var(--space-4));
+        width: 260px;
+        border-radius: var(--radius-modal);
+        background-color: var(--color-bg-overlay);
+        border: 1px solid var(--color-border-default);
+        backdrop-filter: blur(var(--blur-xl));
+        padding: var(--space-4);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    &__settings-title {
+        font-size: var(--text-body-size);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+    }
+
+    &__settings-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+
+        &--bordered {
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--color-border-default);
+        }
+    }
+
+    &__settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__settings-label {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+    }
+
+    &__settings-value {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+    }
+
+    &__settings-reset {
+        border: none;
+        background: none;
+        padding: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-brand);
+        cursor: pointer;
+        transition: opacity var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            opacity: var(--opacity-hover-emphasis);
+        }
+
+        &:disabled {
+            color: var(--color-text-secondary);
+            cursor: default;
+        }
+    }
+
+    &__settings-slider {
+        width: 100%;
+        accent-color: var(--color-fill-brand);
+        cursor: pointer;
+    }
+
+    &__settings-btn-group {
+        display: flex;
+        gap: var(--space-2);
+    }
+
+    &__settings-btn {
+        flex: 1;
+        font-size: var(--text-caption-size) !important;
+    }
+
+    &__settings-action {
+        width: 100%;
+        justify-content: center;
+        font-size: var(--text-caption-size) !important;
+    }
+
+    &__settings-associated-info {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: var(--text-caption-size);
+        line-height: var(--text-caption-leading);
+        color: var(--color-text-secondary);
+    }
+}
