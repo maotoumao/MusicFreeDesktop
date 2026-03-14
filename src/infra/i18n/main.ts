@@ -122,7 +122,7 @@ class I18n {
             } else if (this.allLangNames.includes('en-US')) {
                 defaultLang = 'en-US';
             } else {
-                defaultLang = this.allLangNames[0];
+                defaultLang = 'zh-CN';
             }
         }
 
