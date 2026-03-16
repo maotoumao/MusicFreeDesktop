@@ -83,6 +83,21 @@ export enum ErrorReason {
 /** 标记 slim 对象的内部 key（值为 '$slim'） */
 export const INTERNAL_SLIM_KEY = '$slim';
 
+/** 支持的音频文件扩展名（小写，含点号） */
+export const SUPPORTED_AUDIO_EXTS = new Set([
+    '.mp3',
+    '.mp4',
+    '.m4s',
+    '.m4a',
+    '.flac',
+    '.wav',
+    '.ogg',
+    '.aac',
+    '.wma',
+    '.ape',
+    '.opus',
+]);
+
 /** 本地插件平台名 */
 export const LOCAL_PLUGIN_NAME = '本地';
 

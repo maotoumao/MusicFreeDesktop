@@ -9,7 +9,7 @@
 import fsp from 'fs/promises';
 import path from 'path';
 import type { IFileInfo, IDiffResult } from '@appTypes/infra/localMusic';
-import { AUDIO_EXTS } from '../common/constant';
+import { SUPPORTED_AUDIO_EXTS } from '@common/constant';
 
 /**
  * 检查路径是否应被排除。
@@ -54,7 +54,7 @@ async function discoverRecursive(dir: string, normalizedExcluded: string[]): Pro
             for (const item of sub) {
                 results.push(item);
             }
-        } else if (AUDIO_EXTS.has(path.extname(entry.name).toLowerCase())) {
+        } else if (SUPPORTED_AUDIO_EXTS.has(path.extname(entry.name).toLowerCase())) {
             try {
                 const stat = await fsp.stat(fullPath);
                 results.push({

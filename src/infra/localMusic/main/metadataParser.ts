@@ -9,8 +9,8 @@
 
 import { createHash } from 'crypto';
 import path from 'path';
-import { parseFile } from 'music-metadata';
 import { LOCAL_PLUGIN_NAME } from '@common/constant';
+import { parseAudioMeta } from '@infra/localMusic/common/parseAudioMeta';
 import type { ILocalMusicItem } from '@appTypes/infra/localMusic';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 
@@ -18,7 +18,7 @@ import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
  * 解析单个文件的元数据。
  *
  * 1. 先查 mediaMeta.download_path 反查：如果命中，复用原始 platform+id
- * 2. 否则用 music-metadata 解析 ID3/Vorbis 标签
+ * 2. 否则用 parseAudioMeta 解析 ID3/Vorbis 标签（含 CJK 编码修正）
  * 3. 兜底用文件名作为标题
  */
 export async function parseFileMetadata(
@@ -36,11 +36,6 @@ export async function parseFileMetadata(
 
     let platform: string;
     let musicId: string;
-    let title = parsed.name;
-    let artist = '';
-    let album = '';
-    let duration: number | null = null;
-    const artwork: string | null = null;
 
     if (linked) {
         platform = linked.platform;
@@ -51,27 +46,17 @@ export async function parseFileMetadata(
     }
 
     // ─── 2. 解析文件元数据 ───
-    try {
-        const metadata = await parseFile(filePath, { duration: true, skipCovers: true });
-        const common = metadata?.common;
-        if (common?.title) title = common.title;
-        if (common?.artist) artist = common.artist;
-        if (common?.album) album = common.album;
-        if (metadata?.format?.duration) duration = metadata.format.duration;
-        // v1 不处理封面
-    } catch {
-        /* 使用文件名 fallback */
-    }
+    const meta = await parseAudioMeta(filePath, { skipCovers: true, skipLyrics: true });
 
     return {
         filePath,
         platform,
         id: musicId,
-        title,
-        artist,
-        album,
-        duration,
-        artwork,
+        title: meta.title ?? parsed.name,
+        artist: meta.artist ?? '',
+        album: meta.album ?? '',
+        duration: meta.duration ?? null,
+        artwork: null,
         folder,
         fileSize,
         fileMtime: Math.floor(fileMtime),

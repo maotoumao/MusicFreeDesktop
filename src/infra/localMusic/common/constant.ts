@@ -1,19 +1,6 @@
 /** contextBridge key */
 export const CONTEXT_BRIDGE_KEY = '@infra/local-music';
 
-/** 支持扫描的音频扩展名 */
-export const AUDIO_EXTS = new Set([
-    '.mp3',
-    '.flac',
-    '.wav',
-    '.ogg',
-    '.m4a',
-    '.aac',
-    '.wma',
-    '.ape',
-    '.opus',
-]);
-
 /** metadata 解析批大小 */
 export const SCAN_BATCH_SIZE = 100;
 
