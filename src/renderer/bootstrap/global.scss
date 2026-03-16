@@ -205,11 +205,14 @@ $scale-icon-2xl: 48px;
     --bg-image:
         radial-gradient(
             at 0% 0%,
-            color-mix(in srgb, var(--color-fill-brand) 15%, transparent) 0px,
+            color-mix(in srgb, var(--color-fill-brand) 12%, transparent) 0px,
             transparent 50%
         ),
-        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+        radial-gradient(
+            at 100% 100%,
+            color-mix(in srgb, var(--color-fill-brand) 6%, transparent) 0px,
+            transparent 50%
+        );
 
     // ── 2.7 圆角 (Radius) ──
 
