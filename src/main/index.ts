@@ -72,6 +72,12 @@ app.on('child-process-gone', (_event, details) => {
     }
 });
 
+// ─── 单实例锁 ───
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+    app.quit();
+}
+
 // ─── Phase 1: 同步初始化（不依赖 app.isReady） ───
 
 setupGlobalContext();
