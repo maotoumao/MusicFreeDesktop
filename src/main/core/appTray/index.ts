@@ -100,8 +100,8 @@ class AppTray {
 
         if (this.nativeTrayMenu) {
             // Native 模式：手动处理右键事件
-            tray.on('right-click', (_event, bounds) => {
-                this.nativeTrayMenu!.showAt(bounds);
+            tray.on('right-click', (_event) => {
+                this.nativeTrayMenu!.showAt();
             });
         }
 
