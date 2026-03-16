@@ -24,10 +24,31 @@ import localMusic from '@infra/localMusic/renderer';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import { runPostBootstrapTasks } from './postBootstrap';
 import { setupCommandHandlers } from '@renderer/mainWindow/core/commandHandlers';
+import { syncKV } from '@renderer/common/kvStore';
+
+// TODO(v1.1.0): Remove this function and its call in bootstrapMainWindow
+function migrateLegacyKVKeys(): void {
+    const legacy = localStorage.getItem('currentMusic');
+    if (legacy === null) return;
+
+    if (syncKV.get('player.currentMusic') === null) {
+        try {
+            syncKV.set('player.currentMusic', JSON.parse(legacy));
+        } catch {
+            // 旧数据格式异常，丢弃
+        }
+    }
+
+    localStorage.removeItem('currentMusic');
+}
 
 export default async function bootstrapMainWindow(): Promise<void> {
     // Phase 1: appConfig 必须最先初始化
     await appConfig.setup();
+
+    // Phase 1.5: 旧版 localStorage key 迁移（同步，须在 trackPlayer.setup 之前）
+    // TODO(v1.1.0): Remove this call
+    migrateLegacyKVKeys();
 
     // Phase 2: 无相互依赖的模块并行初始化
     await Promise.all([
