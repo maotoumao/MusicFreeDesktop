@@ -23,6 +23,7 @@ async function parseLocalMusicItem(filePath: string): Promise<IMusic.IMusicItem>
         title: meta.title ?? (path.parse(filePath).name || filePath),
         artist: meta.artist ?? i18n.t('media.unknown_artist'),
         album: meta.album ?? i18n.t('media.unknown_album'),
+        duration: meta.duration ?? null,
         url: addFileScheme(filePath),
         localPath: filePath,
         artwork: meta.artwork,
@@ -62,15 +63,41 @@ const localPluginDefine: IPlugin.IPluginInstance = {
         };
     },
     async getLyric(musicItem) {
-        return {
-            rawLrc: musicItem.rawLrc,
-        };
+        if (musicItem.rawLrc) {
+            return {
+                rawLrc: musicItem.rawLrc,
+            };
+        } else {
+            const meta = await parseAudioMeta(musicItem.localPath!, {
+                skipCovers: true,
+                skipLyrics: false,
+            });
+            if (meta.rawLrc) {
+                return {
+                    rawLrc: meta.rawLrc,
+                };
+            }
+        }
     },
     async importMusicItem(filePath) {
         return parseLocalMusicItem(filePath);
     },
     async importMusicSheet(folderPath) {
         return parseLocalMusicItemFolder(folderPath);
+    },
+    async getMusicInfo(musicItem) {
+        if (!musicItem.artwork) {
+            const meta = await parseAudioMeta(musicItem.localPath!, {
+                skipCovers: false,
+                skipLyrics: true,
+            });
+            if (meta.artwork) {
+                return {
+                    artwork: meta.artwork,
+                };
+            }
+        }
+        return null;
     },
 };
 

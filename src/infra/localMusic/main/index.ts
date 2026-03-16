@@ -422,6 +422,7 @@ class LocalMusicManager {
                 duration: row.duration ?? undefined,
                 artwork: row.artwork ?? undefined,
                 url: pathToFileURL(row.filePath).toString(),
+                localPath: row.filePath,
                 folder: row.folder,
             } as IMusic.IMusicItem;
         }
@@ -435,6 +436,7 @@ class LocalMusicManager {
             artwork: row.artwork ?? undefined,
             [INTERNAL_SLIM_KEY]: true,
             folder: row.folder,
+            localPath: row.filePath,
         } as IMusic.IMusicItem;
     }
 
