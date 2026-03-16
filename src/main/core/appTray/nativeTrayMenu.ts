@@ -124,8 +124,8 @@ class NativeTrayMenu {
     }
 
     /** 在指定位置显示菜单 */
-    showAt(bounds: Electron.Rectangle): void {
-        this.module.showAt(bounds.x, bounds.y, bounds.width, bounds.height);
+    showAt(): void {
+        this.module.showAt();
     }
 
     /** 释放资源 */

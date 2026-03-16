@@ -48,6 +48,12 @@ declare module '@main/native_modules/CustomTrayMenu/CustomTrayMenu.node' {
         isLiked: boolean;
         /** Repeat/shuffle mode: "queue-repeat" | "loop" | "shuffle" */
         playMode?: RepeatMode;
+        /**
+         * Tooltip texts for the 5 media control buttons.
+         * Order: [Like, Prev, Play/Pause, Next, PlayMode]
+         * If omitted, no tooltips are shown.
+         */
+        buttonTooltips?: [string, string, string, string, string];
     }
 
     export interface MenuItem {
@@ -130,13 +136,8 @@ declare module '@main/native_modules/CustomTrayMenu/CustomTrayMenu.node' {
     /**
      * Show the menu at the specified tray icon position.
      * The menu automatically positions itself relative to the taskbar.
-     *
-     * @param x - Tray icon X coordinate (screen pixels)
-     * @param y - Tray icon Y coordinate (screen pixels)
-     * @param trayWidth - Tray icon width
-     * @param trayHeight - Tray icon height
      */
-    export function showAt(x: number, y: number, trayWidth: number, trayHeight: number): void;
+    export function showAt(): void;
 
     /**
      * Hide the menu if currently visible.
