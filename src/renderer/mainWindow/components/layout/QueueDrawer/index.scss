@@ -70,14 +70,14 @@
     border: none;
     border-radius: var(--radius-control);
     background: none;
-    color: color-mix(in srgb, white 30%, transparent); // 设计稿 text-white/30
+    color: var(--color-text-muted);
     cursor: pointer;
     transition:
         color var(--duration-fast) var(--ease-standard),
         background-color var(--duration-fast) var(--ease-standard);
 
     &:hover {
-        color: color-mix(in srgb, white 60%, transparent); // 设计稿 hover text-white/60
+        color: var(--color-text-secondary);
         background: var(--color-fill-subtle);
     }
 
@@ -98,7 +98,7 @@
     border: none;
     border-radius: var(--radius-pill);
     background: none;
-    color: color-mix(in srgb, white 25%, transparent); // 设计稿 text-white/25
+    color: var(--color-text-placeholder);
     cursor: pointer;
     transition:
         color var(--duration-fast) var(--ease-standard),
@@ -201,13 +201,13 @@
 
 .l-queue-drawer__item-num {
     font-size: var(--text-overline-size); // 11px
-    color: color-mix(in srgb, white 15%, transparent); // 设计稿 text-white/15
+    color: var(--color-text-disabled);
     font-variant-numeric: tabular-nums;
 }
 
 .l-queue-drawer__item-play {
     display: none;
-    color: color-mix(in srgb, white 50%, transparent); // 设计稿 text-white/50
+    color: var(--color-text-secondary);
     fill: currentColor;
 }
 
@@ -286,7 +286,7 @@
 
 .l-queue-drawer__item-artist {
     font-size: var(--text-overline-size); // 11px
-    color: color-mix(in srgb, white 25%, transparent); // 设计稿 text-white/25
+    color: var(--color-text-placeholder);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -294,7 +294,7 @@
 
 .l-queue-drawer__item-source {
     font-size: 9px; // 设计稿特殊值，介于 badge(10) 和无 token 之间
-    color: color-mix(in srgb, white 20%, transparent); // 设计稿 text-white/20
+    color: var(--color-text-disabled);
     border: 1px solid var(--color-border-default); // white/8%
     border-radius: var(--radius-badge);
     padding: 0.5px var(--space-1);
@@ -314,7 +314,7 @@
     border: none;
     border-radius: var(--radius-pill);
     background: none;
-    color: color-mix(in srgb, white 25%, transparent); // 设计稿 text-white/25
+    color: var(--color-text-placeholder);
     opacity: 0; // hover 显示
     cursor: pointer;
     transition:
@@ -345,7 +345,7 @@
 }
 
 .l-queue-drawer__empty-icon {
-    color: color-mix(in srgb, white 8%, transparent); // 设计稿 text-white/[0.08]
+    color: var(--color-text-disabled);
     margin-bottom: var(--space-4);
 }
 
