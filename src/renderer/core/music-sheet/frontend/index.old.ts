@@ -41,7 +41,7 @@ export async function addSheet(sheetName: string) {
         const newSheetDetail = await backend.addSheet(sheetName);
         musicSheetsStore.setValue(backend.getAllSheets());
         return newSheetDetail;
-    } catch {}
+    } catch { }
 }
 
 /**
@@ -57,7 +57,7 @@ export async function updateSheet(
     try {
         await backend.updateSheet(sheetId, newData);
         musicSheetsStore.setValue(backend.getAllSheets());
-    } catch {}
+    } catch { }
 }
 
 /**
@@ -77,11 +77,21 @@ export async function updateSheetMusicOrder(
             ...targetSheet,
             musicList,
         });
+
+        // 需要导入这些符号
+        const sortIndexSymbol = Symbol.for("sort-index");
+        const timeStampSymbol = Symbol.for("time-stamp");
+        const timestamp = Date.now();
+
         await backend.updateSheet(sheetId, {
-            musicList: musicList.map(toMediaBase) as any,
+            musicList: musicList.map((item, index) => ({
+                ...toMediaBase(item),
+                [sortIndexSymbol]: index,
+                [timeStampSymbol]: timestamp,
+            })) as any,
         });
         musicSheetsStore.setValue(backend.getAllSheets());
-    } catch {}
+    } catch { }
 }
 
 /**
@@ -93,7 +103,7 @@ export async function removeSheet(sheetId: string) {
     try {
         await backend.removeSheet(sheetId);
         musicSheetsStore.setValue(backend.getAllSheets());
-    } catch {}
+    } catch { }
 }
 
 /**
@@ -106,7 +116,7 @@ export async function clearSheet(sheetId: string) {
         await backend.clearSheet(sheetId);
         musicSheetsStore.setValue(backend.getAllSheets());
         refetchSheetDetail(sheetId);
-    } catch {}
+    } catch { }
 }
 
 /**
@@ -153,7 +163,7 @@ export async function addMusicToSheet(
 
     musicSheetsStore.setValue(backend.getAllSheets());
     if (sheetId === defaultSheet.id) {
-    // 更新默认列表的状态
+        // 更新默认列表的状态
         refreshFavoriteState();
     }
     refetchSheetDetail(sheetId);
@@ -182,7 +192,7 @@ export async function removeMusicFromSheet(
 
     musicSheetsStore.setValue(backend.getAllSheets());
     if (sheetId === defaultSheet.id) {
-    // 更新默认列表的状态
+        // 更新默认列表的状态
         refreshFavoriteState();
     }
     refetchSheetDetail(sheetId);
@@ -234,7 +244,7 @@ function updateSheetDetail(newSheet: IMusic.IMusicSheetItem) {
 async function refetchSheetDetail(sheetId: string) {
     let sheetDetail = await backend.getSheetItemDetail(sheetId);
     if (!sheetDetail) {
-    // 可能已经被删除了
+        // 可能已经被删除了
         sheetDetail = {
             id: sheetId,
             title: "已删除歌单",
