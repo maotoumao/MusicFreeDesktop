@@ -45,8 +45,6 @@ if (process.platform === 'win32') {
 
 // ─── Phase 0.5: Chromium 启动参数 & GPU 降级 ───
 
-// 禁止 Chromium 劫持系统媒体键，由应用自行处理
-app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling');
 // 禁用 GPU 沙箱，兼容无显卡/驱动异常的机器（不影响性能）
 app.commandLine.appendSwitch('disable-gpu-sandbox');
 
