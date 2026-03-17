@@ -386,15 +386,14 @@ class WindowManager implements IWindowManager {
             }
         });
 
-        // 关闭行为: Windows 下支持最小化到托盘
+        // 关闭行为: 最小化到托盘
         mainWindow.on('close', (e) => {
-            if (
-                process.platform === 'win32' &&
-                appConfig.getConfigByKey('normal.closeBehavior') === 'minimize'
-            ) {
+            if (appConfig.getConfigByKey('normal.closeBehavior') === 'minimize') {
                 e.preventDefault();
                 mainWindow.hide();
-                mainWindow.setSkipTaskbar(true);
+                if (process.platform === 'win32') {
+                    mainWindow.setSkipTaskbar(true);
+                }
             }
         });
 

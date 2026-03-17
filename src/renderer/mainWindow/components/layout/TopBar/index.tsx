@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useMatch } from 'react-router';
 import { ChevronLeft, ChevronRight, Search, Minus, Square, X } from 'lucide-react';
 import systemUtil from '@infra/systemUtil/renderer';
+import appConfig from '@infra/appConfig/renderer';
 import { searchRoute, RoutePaths } from '../../../routes';
 import { Chip } from '../../ui/Chip';
 import {
@@ -129,7 +130,11 @@ export default function TopBar() {
     }, []);
 
     const handleClose = useCallback(() => {
-        systemUtil.minimizeWindow(true);
+        if (appConfig.getConfigByKey('normal.closeBehavior') === 'exit_app') {
+            systemUtil.exitApp();
+        } else {
+            systemUtil.minimizeWindow(true);
+        }
     }, []);
 
     return (
