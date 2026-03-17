@@ -102,8 +102,6 @@ interface _IAppConfig {
 
     'private.minimodeWindowPosition': IPoint;
 
-    'private.pluginMeta': Record<string, IPlugin.IPluginMeta>;
-
     /** 插件订阅源列表 */
     'private.pluginSubscription': Array<{ name: string; srcUrl: string }>;
 }

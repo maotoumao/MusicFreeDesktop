@@ -5,7 +5,7 @@ import { Button } from '@renderer/mainWindow/components/ui/Button';
 import { Input } from '@renderer/mainWindow/components/ui/Input';
 import { showToast } from '@renderer/mainWindow/components/ui/Toast';
 import pluginManager from '@infra/pluginManager/renderer';
-import appConfig from '@infra/appConfig/renderer';
+import { usePluginMeta } from '@infra/pluginManager/renderer/hooks';
 import './index.scss';
 
 interface PluginUserVariableModalProps {
@@ -20,17 +20,17 @@ interface PluginUserVariableModalProps {
  */
 export default function PluginUserVariableModal({ close, plugin }: PluginUserVariableModalProps) {
     const { t } = useTranslation();
+    const allPluginMeta = usePluginMeta();
 
     // 初始化变量值：先从 pluginMeta 中取存储的值
     const initialValues = useMemo(() => {
-        const stored =
-            appConfig.getConfigByKey('private.pluginMeta')?.[plugin.hash]?.userVariables ?? {};
+        const stored = allPluginMeta[plugin.hash]?.userVariables ?? {};
         const values: Record<string, string> = {};
         for (const v of plugin.userVariables ?? []) {
             values[v.key] = stored[v.key] ?? '';
         }
         return values;
-    }, [plugin.hash, plugin.userVariables]);
+    }, [plugin.hash, plugin.userVariables, allPluginMeta]);
 
     const [values, setValues] = useState<Record<string, string>>(initialValues);
     const [saving, setSaving] = useState(false);
