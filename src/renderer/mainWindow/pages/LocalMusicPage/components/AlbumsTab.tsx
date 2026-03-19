@@ -15,7 +15,7 @@ import { RequestStatus } from '@common/constant';
 import { SongTable } from '../../../components/business/SongTable';
 import { StatusPlaceholder } from '../../../components/ui/StatusPlaceholder';
 import { ScrollArea } from '../../../components/ui/ScrollArea';
-import { useStatusColumn, useRowContextMenu } from '../shared';
+import { useStatusColumn, useRowContextMenu, useSelection } from '../hooks';
 import { filteredLocalMusicAtom, albumListAtom } from '../store';
 
 interface AlbumsTabProps {
@@ -75,6 +75,13 @@ export function AlbumsTab({ isEmpty, searchKeyword }: AlbumsTabProps) {
         return songsForAlbum.filter((item) => item.title.toLowerCase().includes(keyword));
     }, [songsForAlbum, searchKeyword]);
 
+    // ── 多选 ──
+    const { selectionProps } = useSelection([
+        effectiveSelected?.album,
+        effectiveSelected?.artist,
+        searchKeyword,
+    ]);
+
     // ── 操作回调 ──
     const handleRowContextMenu = useRowContextMenu();
     const statusColumn = useStatusColumn();
@@ -129,6 +136,7 @@ export function AlbumsTab({ isEmpty, searchKeyword }: AlbumsTabProps) {
                         onRowContextMenu={handleRowContextMenu}
                         statusColumn={statusColumn}
                         hideColumns={['platform', 'album']}
+                        {...selectionProps}
                     />
                 ) : (
                     <StatusPlaceholder

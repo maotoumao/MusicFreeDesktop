@@ -15,7 +15,7 @@ import { cn } from '@common/cn';
 import { RequestStatus } from '@common/constant';
 import { SongTable } from '../../../components/business/SongTable';
 import { StatusPlaceholder } from '../../../components/ui/StatusPlaceholder';
-import { useStatusColumn, useRowContextMenu } from '../shared';
+import { useStatusColumn, useRowContextMenu, useSelection } from '../hooks';
 import { filteredLocalMusicAtom, folderListAtom, type FolderAggregation } from '../store';
 
 interface FoldersTabProps {
@@ -136,6 +136,7 @@ function FolderSongList({ folder, searchKeyword }: { folder: string; searchKeywo
         );
     }, [songsForFolder, searchKeyword]);
 
+    const { selectionProps } = useSelection([folder, searchKeyword]);
     const handleRowContextMenu = useRowContextMenu();
     const statusColumn = useStatusColumn();
 
@@ -147,6 +148,7 @@ function FolderSongList({ folder, searchKeyword }: { folder: string; searchKeywo
                 onRowContextMenu={handleRowContextMenu}
                 statusColumn={statusColumn}
                 hideColumns={['platform']}
+                {...selectionProps}
             />
         </div>
     );

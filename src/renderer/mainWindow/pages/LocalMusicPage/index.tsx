@@ -9,7 +9,7 @@ import { Input } from '../../components/ui/Input';
 import { SongTable } from '../../components/business/SongTable';
 import { StatusPlaceholder } from '../../components/ui/StatusPlaceholder';
 import { showModal } from '../../components/ui/Modal/modalManager';
-import { useStatusColumn, useRowContextMenu } from './shared';
+import { useStatusColumn, useRowContextMenu, useSelection } from './hooks';
 import {
     filteredLocalMusicAtom,
     localMusicLoadingAtom,
@@ -105,6 +105,9 @@ export default function LocalMusicPage() {
         );
     }, [allSongs, deferredSearch]);
 
+    // ── 多选 ──
+    const { selectionProps } = useSelection([deferredSearch]);
+
     // ── 操作回调 ──
     const handleRowContextMenu = useRowContextMenu();
 
@@ -170,6 +173,7 @@ export default function LocalMusicPage() {
                             onRowContextMenu={handleRowContextMenu}
                             statusColumn={statusColumn}
                             hideColumns={['platform']}
+                            {...selectionProps}
                         />
                     ))}
 
