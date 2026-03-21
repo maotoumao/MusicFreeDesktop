@@ -13,11 +13,12 @@
  *  - 通过 Map + WindowType 做统一管理，避免每类窗口一套独立方法
  */
 
-import { app, BrowserWindow, nativeImage, screen, MessagePortMain } from 'electron';
+import { app, BrowserWindow, Menu, nativeImage, screen, MessagePortMain } from 'electron';
 import EventEmitter from 'eventemitter3';
 import path from 'path';
 
 import appConfig from '@infra/appConfig/main';
+import i18n from '@infra/i18n/main';
 import windowDrag from '@infra/windowDrag/main';
 import debounce from '@common/debounce';
 import throttle from '@common/throttle';
@@ -296,6 +297,23 @@ class WindowManager implements IWindowManager {
 
     private registerWindow(windowType: WindowType, win: BrowserWindow): void {
         this.windows.set(windowType, win);
+
+        win.webContents.on('context-menu', (_event, params) => {
+            if (!params.isEditable) return;
+
+            const { editFlags } = params;
+            Menu.buildFromTemplate([
+                { label: i18n.t('common.cut'), role: 'cut', enabled: editFlags.canCut },
+                { label: i18n.t('common.copy'), role: 'copy', enabled: editFlags.canCopy },
+                { label: i18n.t('common.paste'), role: 'paste', enabled: editFlags.canPaste },
+                { type: 'separator' },
+                {
+                    label: i18n.t('common.select_all'),
+                    role: 'selectAll',
+                    enabled: editFlags.canSelectAll,
+                },
+            ]).popup({ window: win });
+        });
 
         win.on('closed', () => {
             this.windows.delete(windowType);
