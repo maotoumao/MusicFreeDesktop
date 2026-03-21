@@ -18,6 +18,10 @@ const mod = {
     syncScanFolders: (folderPaths: string[]) =>
         ipcRenderer.invoke(IPC.SYNC_SCAN_FOLDERS, folderPaths),
 
+    // ─── 删除 ───
+    deleteItems: (musicBases: IMedia.IMediaBase[]): Promise<void> =>
+        ipcRenderer.invoke(IPC.DELETE_ITEMS, musicBases),
+
     // ─── 事件监听 ───
     onLibraryChanged: (cb: () => void): (() => void) => {
         const handler = () => cb();

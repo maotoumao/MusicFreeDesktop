@@ -395,6 +395,21 @@ class MusicSheetManager {
             },
         );
 
+        ipcMain.handle(IPC.REMOVE_FROM_ALL_SHEETS, (_evt, musicBases: IMedia.IMediaBase[]) => {
+            const db = this.db.getDatabase();
+            db.transaction(() => {
+                for (const item of musicBases) {
+                    this.queries.removeFromAllSheets.run({
+                        platform: item.platform,
+                        musicId: String(item.id),
+                        excludeSheetId: PLAY_QUEUE_SHEET_ID,
+                    });
+                }
+            })();
+            this.scheduleOrphanCleanup();
+            this.broadcastMusicSheetEvent({ origin: 'user' });
+        });
+
         ipcMain.handle(
             IPC.UPDATE_MUSIC_ORDER,
             (_evt, sheetId: string, orderedKeys: IMedia.IMediaBase[]) => {

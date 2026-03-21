@@ -8,6 +8,7 @@ import {
 } from '@renderer/mainWindow/core/recentlyPlayed';
 import musicSheet from '@infra/musicSheet/renderer';
 import downloadManager from '@infra/downloadManager/renderer';
+import localMusic from '@infra/localMusic/renderer';
 import fsUtil from '@infra/fsUtil/renderer';
 import systemUtil from '@infra/systemUtil/renderer';
 import i18n from '@infra/i18n/renderer';
@@ -160,7 +161,7 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
         });
     }
 
-    // ── 已下载 / 本地歌曲操作（打开文件夹 + 删除本地下载） ──
+    // ── 已下载 / 本地歌曲操作（打开文件夹 + 删除下载记录）——仅单曲 ──
     if (isSingle) {
         const singleItem = items[0];
         const downloaded = downloadManager.isDownloaded(singleItem);
@@ -232,7 +233,7 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
         }
 
         if (downloaded) {
-            // 删除本地文件（同时删除下载记录）—— 所有歌单中均可显示
+            // 删除已下载的本地文件（同时删除下载记录）
             entries.push({
                 id: 'delete-local-file',
                 icon: <Trash2 />,
@@ -249,6 +250,40 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
                                 String(singleItem.id),
                                 true,
                             );
+                        },
+                    });
+                },
+            });
+        }
+    }
+
+    // ── 删除纯本地文件（支持批量，移至回收站 + 从所有歌单移除 + 从播放队列移除） ──
+    // 仅当选中项全部为本地歌曲时显示
+    {
+        const allLocal = items.every((item) => item.platform === LOCAL_PLUGIN_NAME);
+
+        if (allLocal) {
+            entries.push({
+                id: 'delete-local-music',
+                icon: <Trash2 />,
+                label: i18n.t('local_music.delete_file'),
+                danger: true,
+                onClick: () => {
+                    const message =
+                        items.length === 1
+                            ? i18n.t('local_music.confirm_trash_message')
+                            : i18n.t('local_music.confirm_trash_batch_message', {
+                                  count: items.length,
+                              });
+
+                    showModal('ConfirmModal', {
+                        title: i18n.t('local_music.confirm_delete_title'),
+                        message,
+                        confirmDanger: true,
+                        onConfirm: async () => {
+                            await localMusic.deleteItems(items);
+                            musicSheet.removeFromAllSheets(items);
+                            trackPlayer.removeMusic(items);
                         },
                     });
                 },

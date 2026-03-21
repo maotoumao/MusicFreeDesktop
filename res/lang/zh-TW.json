@@ -546,6 +546,8 @@
         "delete_file": "刪除本地檔案",
         "confirm_delete_title": "刪除本地檔案",
         "confirm_delete_message": "確定要刪除本地檔案嗎？刪除後無法恢復。",
+        "confirm_trash_message": "確定要刪除本地檔案嗎？檔案將移至資源回收筒，同時從所有歌單中移除。",
+        "confirm_trash_batch_message": "確定要刪除 {{count}} 個本地檔案嗎？檔案將移至資源回收筒，同時從所有歌單中移除。",
         "reveal_in_explorer": "打開歌曲文件夾",
         "reveal_fail": "打開失敗：",
         "scan_title": "掃描本地資料夾",

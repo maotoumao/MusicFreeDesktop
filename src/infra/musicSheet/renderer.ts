@@ -45,6 +45,7 @@ interface IMod {
         musicItems: IMusic.IMusicItem[],
     ): Promise<{ added: number; truncated: number }>;
     removeMusic(sheetId: string, musicBases: IMedia.IMediaBase[]): Promise<void>;
+    removeFromAllSheets(musicBases: IMedia.IMediaBase[]): Promise<void>;
     updateMusicOrder(sheetId: string, orderedKeys: IMedia.IMediaBase[]): Promise<void>;
     getRawMusicItem(platform: string, id: string): Promise<IMusic.IMusicItem | null>;
     getRawMusicItems(keys: IMedia.IMediaBase[]): Promise<IMusic.IMusicItem[]>;
@@ -267,6 +268,27 @@ class MusicSheetRenderer {
 
     removeMusicFromFavorite(musicItems: IMedia.IMediaBase | IMedia.IMediaBase[]): void {
         this.removeMusicFromSheet(musicItems, DEFAULT_FAVORITE_SHEET_ID);
+    }
+
+    /**
+     * 从所有歌单中移除歌曲（排除播放队列，由 trackPlayer 自行管理）。
+     * 乐观更新当前 musicListAtom + favoriteIdSet。
+     */
+    removeFromAllSheets(musicItems: IMedia.IMediaBase | IMedia.IMediaBase[]): void {
+        const items = Array.isArray(musicItems) ? musicItems : [musicItems];
+        const removeSet = new Set(items.map((it) => compositeKey(it.platform, it.id)));
+
+        store.set(musicListAtom, (prev) =>
+            prev.filter((m) => !removeSet.has(compositeKey(m.platform, m.id))),
+        );
+
+        for (const it of items) {
+            this.favoriteIdSet.delete(compositeKey(it.platform, it.id));
+        }
+        this.events.emit('favoriteChange');
+
+        const bases = items.map((it) => ({ platform: it.platform, id: it.id }));
+        this.mutationQueue.enqueue(() => mod.removeFromAllSheets(bases));
     }
 
     updateMusicOrder(sheetId: string, orderedMusicList: IMusicItemSlim[]): void {

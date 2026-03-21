@@ -546,6 +546,8 @@
         "delete_file": "删除本地文件",
         "confirm_delete_title": "删除本地文件",
         "confirm_delete_message": "确定要删除本地文件吗？删除后无法恢复。",
+        "confirm_trash_message": "确定要删除本地文件吗？文件将移至回收站，同时从所有歌单中移除。",
+        "confirm_trash_batch_message": "确定要删除 {{count}} 个本地文件吗？文件将移至回收站，同时从所有歌单中移除。",
         "reveal_in_explorer": "打开歌曲所在文件夹",
         "reveal_fail": "打开失败: ",
         "scan_title": "扫描本地文件夹",

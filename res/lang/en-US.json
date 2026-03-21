@@ -546,6 +546,8 @@
         "delete_file": "Delete Local File",
         "confirm_delete_title": "Delete Local File",
         "confirm_delete_message": "Are you sure you want to delete the local file? This cannot be undone.",
+        "confirm_trash_message": "Are you sure you want to delete this local file? The file will be moved to the Recycle Bin and removed from all playlists.",
+        "confirm_trash_batch_message": "Are you sure you want to delete {{count}} local files? Files will be moved to the Recycle Bin and removed from all playlists.",
         "reveal_in_explorer": "Show in File Explorer",
         "reveal_fail": "Open Failed: ",
         "scan_title": "Scan Local Folders",

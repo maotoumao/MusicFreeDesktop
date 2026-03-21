@@ -9,7 +9,7 @@
  * - 启动后 60s 空闲静默 rescan
  */
 
-import { ipcMain } from 'electron';
+import { ipcMain, shell } from 'electron';
 import { nanoid } from 'nanoid';
 import path from 'path';
 import type Database from 'better-sqlite3';
@@ -40,6 +40,8 @@ interface ILocalMusicQueries {
     upsertLocalMusic: Database.Statement;
     deleteLocalMusic: Database.Statement;
     deleteLocalMusicByScanFolder: Database.Statement;
+    deleteLocalMusicByKey: Database.Statement;
+    getFilePathByMusicKey: Database.Statement;
     getLocalMusicByScanFolder: Database.Statement;
 
     getAllMusic: Database.Statement;
@@ -83,6 +85,12 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
         deleteLocalMusic: db.prepare('DELETE FROM local_music WHERE file_path = ?'),
         deleteLocalMusicByScanFolder: db.prepare(
             'DELETE FROM local_music WHERE scan_folder_id = ?',
+        ),
+        deleteLocalMusicByKey: db.prepare(
+            'DELETE FROM local_music WHERE platform = ? AND music_id = ?',
+        ),
+        getFilePathByMusicKey: db.prepare(
+            'SELECT file_path AS filePath FROM local_music WHERE platform = ? AND music_id = ?',
         ),
         getLocalMusicByScanFolder: db.prepare(
             'SELECT file_path, file_size, file_mtime FROM local_music WHERE scan_folder_id = ?',
@@ -248,6 +256,36 @@ class LocalMusicManager {
             const rows = this.queries.getAllMusic.all() as ILocalMusicItem[];
             return this.toMusicItems(rows);
         });
+
+        ipcMain.handle(
+            IPC.DELETE_ITEMS,
+            async (_evt, musicBases: IMedia.IMediaBase[]): Promise<void> => {
+                // 1. 查找对应的文件路径并移至回收站
+                for (const base of musicBases) {
+                    const row = this.queries.getFilePathByMusicKey.get(
+                        base.platform,
+                        String(base.id),
+                    ) as { filePath: string } | undefined;
+                    if (row?.filePath) {
+                        try {
+                            await shell.trashItem(row.filePath);
+                        } catch {
+                            // 文件可能已不存在，忽略
+                        }
+                    }
+                }
+
+                // 2. 删除 DB 记录
+                const db = this.db.getDatabase();
+                db.transaction(() => {
+                    for (const base of musicBases) {
+                        this.queries.deleteLocalMusicByKey.run(base.platform, String(base.id));
+                    }
+                })();
+
+                this.broadcastLibraryChanged();
+            },
+        );
     }
 
     // ─── 扫描队列 ───

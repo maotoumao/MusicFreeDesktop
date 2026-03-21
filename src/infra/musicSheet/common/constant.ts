@@ -44,6 +44,7 @@ export const IPC = {
     // ─── 歌曲操作 ───
     ADD_MUSIC: '@infra/music-sheet/add-music',
     REMOVE_MUSIC: '@infra/music-sheet/remove-music',
+    REMOVE_FROM_ALL_SHEETS: '@infra/music-sheet/remove-from-all-sheets',
     UPDATE_MUSIC_ORDER: '@infra/music-sheet/update-music-order',
     GET_RAW_MUSIC_ITEM: '@infra/music-sheet/get-raw-music-item',
     GET_RAW_MUSIC_ITEMS: '@infra/music-sheet/get-raw-music-items',

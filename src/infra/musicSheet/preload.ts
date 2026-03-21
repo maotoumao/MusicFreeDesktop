@@ -27,6 +27,8 @@ const mod = {
         ipcRenderer.invoke(IPC.ADD_MUSIC, sheetId, musicItems),
     removeMusic: (sheetId: string, musicBases: IMedia.IMediaBase[]) =>
         ipcRenderer.invoke(IPC.REMOVE_MUSIC, sheetId, musicBases),
+    removeFromAllSheets: (musicBases: IMedia.IMediaBase[]) =>
+        ipcRenderer.invoke(IPC.REMOVE_FROM_ALL_SHEETS, musicBases),
     updateMusicOrder: (sheetId: string, orderedKeys: IMedia.IMediaBase[]) =>
         ipcRenderer.invoke(IPC.UPDATE_MUSIC_ORDER, sheetId, orderedKeys),
     getRawMusicItem: (platform: string, id: string) =>

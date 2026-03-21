@@ -183,6 +183,13 @@ export function createQueries(db: Database.Database) {
             WHERE sheet_id = @fromSheetId
             ORDER BY sort_order ASC
         `),
+
+        /** 从所有歌单中移除歌曲（排除播放队列，由 trackPlayer 自行管理） */
+        removeFromAllSheets: db.prepare(`
+            DELETE FROM sheet_music_relation
+            WHERE platform = @platform AND music_id = @musicId
+              AND sheet_id != @excludeSheetId
+        `),
     };
 }
 
