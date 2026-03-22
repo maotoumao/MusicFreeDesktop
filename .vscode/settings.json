@@ -30,7 +30,7 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[json]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "eslint.format.enable": false,
     "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
