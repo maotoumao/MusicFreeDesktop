@@ -40,5 +40,5 @@
     "[markdown]": {
         "files.trimTrailingWhitespace": false
     },
-    "typescript.preferences.preferTypeOnlyAutoImports": true
+    "js/ts.preferences.preferTypeOnlyAutoImports": true
 }
