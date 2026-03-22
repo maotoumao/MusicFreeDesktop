@@ -1,0 +1,20 @@
+/**
+ * BackupProgressModal
+ *
+ * 设计稿还原：
+ *   容器: flex-col, gap-16, py-8
+ *   进度文字: text-xs, color text-secondary, text-center
+ */
+.backup-progress-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-16);
+    padding: var(--spacing-8) 0;
+
+    &__text {
+        font-size: var(--font-size-xs);
+        color: var(--color-text-secondary);
+        text-align: center;
+        line-height: var(--line-height-xs);
+    }
+}

@@ -1,0 +1,46 @@
+// ============================================================================
+// AppShell — 布局骨架样式
+// ============================================================================
+//
+// 布局结构 (设计规范):
+//   ┌────────────┬──────────────────────────────────┐
+//   │  Sidebar   │  TopBar (nav + search)  [winctrls]│
+//   │  260px     ├──────────────────────────────────┤
+//   │  全高       │  Content / <Outlet />            │
+//   │            │  (flex-1, scrollable)            │
+//   │            ├──────────────────────────────────┤
+//   │            │  PlayerBar (72px, fixed 底部)     │
+//   └────────────┴──────────────────────────────────┘
+//   PlayerBar 从 sidebar 右侧开始，不覆盖 sidebar
+
+// ─── 根容器 ───
+
+.l-app-shell {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    color: var(--color-text-primary);
+}
+
+// ─── 主内容区域 ───
+
+.l-app-shell__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; // 防止 flex 子项溢出
+    position: relative;
+}
+
+.l-app-shell__content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    padding: 0 var(--space-8);
+    // 用 margin 而非 padding 为 PlayerBar 腾出空间，
+    // 这样滚动条轨道在 margin 区域之前就结束，不会被 PlayerBar 遮挡。
+    margin-bottom: calc(var(--size-player-h) + var(--space-5));
+}

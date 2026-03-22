@@ -1,0 +1,56 @@
+// ============================================================================
+// ThemePreview — 主题卡片预览区样式
+// ============================================================================
+//
+// BEM Block: theme-preview
+//
+// 设计稿还原（像素级）：
+//   容器: w-full, h-full, position relative
+//   默认: gradient bg-base → fill-neutral → fill-subtle
+//   Fallback: bg fill-neutral
+//   图片: object-fit cover
+//   徽章: position absolute, bottom space-2, right space-2
+
+.theme-preview {
+    width: 100%;
+    height: 100%;
+    position: relative;
+
+    // ── 默认主题渐变 ──
+    &--default {
+        background: linear-gradient(
+            135deg,
+            var(--color-bg-base) 0%,
+            var(--color-fill-neutral) 50%,
+            var(--color-fill-subtle) 100%
+        );
+    }
+
+    // ── Fallback 纯色 ──
+    &--fallback {
+        background: var(--color-fill-neutral);
+    }
+
+    // ── 图片模式 ──
+    &__img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    // ── "使用中" 徽章定位 ──
+    &__badge {
+        position: absolute;
+        bottom: var(--space-2);
+        right: var(--space-2);
+    }
+
+    // ── "新" 角标定位 ──
+    &__badge-new {
+        position: absolute;
+        top: var(--space-2);
+        left: var(--space-2);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+}

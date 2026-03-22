@@ -1,0 +1,84 @@
+// ============================================================================
+// ComponentShowcasePage — 组件展示页样式
+// ============================================================================
+
+.p-component-showcase {
+    padding: 32px;
+    max-width: 960px;
+
+    // ── 页面标题 ──
+    &__title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--color-text-primary);
+        margin-bottom: 32px;
+    }
+
+    // ── 每个组件分区 ──
+    &__section {
+        margin-bottom: 40px;
+    }
+
+    &__section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    // ── 子分组（同一组件不同状态） ──
+    &__group {
+        margin-bottom: 16px;
+    }
+
+    &__group-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--color-text-muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    // ── 展示行 ──
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    &__row--col {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    // ── 进度条容器（需限宽） ──
+    &__progress-wrap {
+        width: 320px;
+    }
+
+    // ── ContextMenu 触发区域 ──
+    &__context-trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 240px;
+        height: 64px;
+        border-radius: var(--radius-card);
+        background: var(--color-fill-neutral);
+        border: 1px dashed var(--color-border-subtle);
+        color: var(--color-text-secondary);
+        font-size: 13px;
+        cursor: context-menu;
+        user-select: none;
+    }
+
+    // ── 组件间距辅助 ──
+    &__spacer {
+        height: 8px;
+    }
+}

@@ -1,0 +1,83 @@
+// ============================================================================
+// FavoriteButton — 业务组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: inline-flex, items-center, justify-center, rounded-pill
+//   默认: bg transparent, color text-secondary
+//   hover: bg fill-subtle-hover, color text-primary
+//   已收藏: color favorite（红色）
+//   active: opacity 0.6
+//   尺寸: sm(--icon-sm) md(--icon-md) lg(--icon-lg) xl(--icon-xl)
+//
+
+.favorite-btn {
+    // ── 重置 button 默认样式 ──
+    border: none;
+    background: none;
+    padding: 0;
+
+    // ── 布局 ──
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+
+    // ── 默认外观 ──
+    color: var(--color-text-secondary);
+
+    // ── 过渡 ──
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        opacity var(--duration-instant) var(--ease-standard);
+
+    // ── hover ──
+    &:hover:not(.is-active) {
+        color: var(--color-text-primary);
+    }
+
+    // ── :active ──
+    &:active {
+        opacity: var(--opacity-pressed);
+    }
+
+    // ── 已收藏（红色） ──
+    &.is-active {
+        color: var(--color-favorite);
+
+        &:hover {
+            opacity: var(--opacity-hover-emphasis);
+        }
+    }
+
+    // ── :focus-visible ──
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+
+    // ── 尺寸 ──
+    &--sm {
+        width: var(--icon-sm);
+        height: var(--icon-sm);
+    }
+
+    &--md {
+        width: var(--icon-md);
+        height: var(--icon-md);
+    }
+
+    &--lg {
+        width: var(--icon-lg);
+        height: var(--icon-lg);
+    }
+
+    &--xl {
+        width: var(--icon-xl);
+        height: var(--icon-xl);
+    }
+}

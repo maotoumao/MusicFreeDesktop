@@ -1,0 +1,216 @@
+// ============================================================================
+// TopBar — 顶部导航栏样式
+// ============================================================================
+
+.l-topbar {
+    height: var(--size-topbar-h);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-8);
+    flex-shrink: 0;
+    position: relative;
+    z-index: var(--z-header);
+    gap: var(--space-4);
+
+    // 拖拽区域覆盖整个 TopBar
+    &__drag-region {
+        position: absolute;
+        inset: 0;
+        -webkit-app-region: drag;
+        z-index: -1;
+    }
+
+    // ── 导航按钮组 ──
+
+    &__nav {
+        display: flex;
+        -webkit-app-region: no-drag;
+    }
+
+    &__nav-btn {
+        width: var(--size-control-md);
+        height: var(--size-control-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--color-border-default);
+        background-color: var(--color-fill-subtle);
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition:
+            background-color var(--duration-fast) var(--ease-standard),
+            color var(--duration-fast) var(--ease-standard);
+
+        &:hover:not(:disabled) {
+            background-color: var(--color-fill-subtle-hover);
+            color: var(--color-text-primary);
+        }
+
+        &:active:not(:disabled) {
+            background-color: var(--color-fill-neutral);
+        }
+
+        &:disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+
+        &--left {
+            border-radius: var(--radius-control) 0 0 var(--radius-control);
+            border-right: 1px solid var(--color-border-subtle);
+        }
+
+        &--right {
+            border-radius: 0 var(--radius-control) var(--radius-control) 0;
+        }
+    }
+
+    // ── 搜索框 ──
+
+    &__search {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        width: 320px;
+        height: var(--size-control-md);
+        padding: 0 var(--space-3);
+        border-radius: var(--radius-pill);
+        border: 1px solid transparent;
+        background-color: var(--color-fill-subtle);
+        transition:
+            width var(--duration-normal) var(--ease-standard),
+            background-color var(--duration-fast) var(--ease-standard),
+            border-color var(--duration-fast) var(--ease-standard);
+        -webkit-app-region: no-drag;
+        position: relative; // 搜索面板定位锚点
+
+        &.is-focused {
+            border-color: var(--color-border-default);
+            background-color: var(--color-fill-subtle-hover);
+        }
+    }
+
+    &__search-icon {
+        flex-shrink: 0;
+        color: var(--color-text-muted);
+    }
+
+    &__search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--color-text-primary);
+        font-size: var(--text-label-size);
+        font-family: inherit;
+
+        &::placeholder {
+            color: var(--color-text-placeholder);
+        }
+
+        &:focus-visible {
+            box-shadow: none;
+        }
+    }
+
+    // ── 窗口控制按钮 ──
+
+    &__window-controls {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: flex;
+        -webkit-app-region: no-drag;
+        z-index: 1;
+    }
+
+    &__win-btn {
+        width: 46px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition:
+            background-color var(--duration-fast) var(--ease-standard),
+            color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            background-color: var(--color-fill-subtle-hover);
+            color: var(--color-text-primary);
+        }
+
+        &--close:hover {
+            background-color: #e81123;
+            color: #fff;
+        }
+    }
+
+    // ── 搜索下拉面板 ──
+
+    &__search-panel {
+        position: absolute;
+        top: calc(100% + var(--space-2)); // 8px 间距
+        left: 0;
+        width: 100%;
+        border-radius: var(--radius-panel);
+        background-color: var(--color-bg-popover);
+        border: 1px solid var(--color-border-default);
+        backdrop-filter: blur(var(--blur-md));
+        box-shadow: var(--shadow-lg);
+        padding: var(--space-4); // 16px
+        z-index: var(--z-popover);
+        animation: topbar-panel-enter var(--duration-fast) ease-out;
+    }
+
+    &__search-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--space-3);
+    }
+
+    &__search-panel-label {
+        font-size: var(--text-caption-size); // 12px
+        color: var(--color-text-secondary);
+    }
+
+    &__search-panel-clear {
+        border: none;
+        background: none;
+        padding: 0;
+        font-size: 11px;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: color var(--duration-fast) ease;
+
+        &:hover {
+            color: var(--color-text-primary);
+        }
+    }
+
+    &__search-panel-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    &__search-panel-empty {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+    }
+}
+
+@keyframes topbar-panel-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

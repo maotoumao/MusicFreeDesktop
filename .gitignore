@@ -90,13 +90,3 @@ typings/
 
 # Electron-Forge
 out/
-
-tmp
-
-plugins
-
-.VSCodeCounter
-
-.idea/
-
-undefinedelectron-log-preload.js

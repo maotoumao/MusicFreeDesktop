@@ -1,0 +1,223 @@
+// ────────────────────────────────────────────────────────────────────────────
+// SongTable — 虚拟列表歌曲表格（业务组件）
+//
+// 设计稿还原（像素级）：
+//   table-layout: fixed, font: --text-body-size (14px)
+//   表头: --text-caption-size (12px), color-text-secondary, font-weight-normal,
+//         border-bottom 1px border-subtle, py-12 px-16, bg-base
+//   行: px-16, height 48px, hover bg-surface, fast transition
+//   行默认色: color-text-secondary (灰)
+//   标题列: color-text-primary (白), font-weight-medium (500)
+//   激活行: color-text-brand (覆盖全行包括标题列)
+//   选中行: bg-surface-raised
+//   状态列: 72px, 两图标 16×16 gap-8
+//   来源列: badge 10px, white/40, border white/10, px-8 py-2, rounded-sm
+//   拖拽浮层: bg-surface-raised, shadow-md, brand 左侧条, 多选计数 badge
+// ────────────────────────────────────────────────────────────────────────────
+
+.song-table {
+    width: 100%;
+    outline: none; // tabIndex focus ring handled by custom styles if needed
+
+    &:focus-visible {
+        outline: 1px solid var(--color-fill-brand);
+        outline-offset: -1px;
+        border-radius: var(--radius-control);
+    }
+}
+
+// ── Table 元素 ──
+
+.song-table__table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: var(--text-body-size);
+    line-height: var(--text-body-leading);
+}
+
+// ── 表头 ──
+
+.song-table__header-row {
+    // 表头行不需要 hover 效果
+}
+
+.song-table__header-cell {
+    padding: var(--space-3) var(--space-4); // 12px 16px
+    font-weight: var(--font-weight-normal);
+    font-size: var(--text-caption-size);
+    color: var(--color-text-secondary);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid var(--color-border-subtle);
+
+    &--center {
+        text-align: center;
+    }
+
+    &--right {
+        text-align: right;
+    }
+}
+
+// ── 数据行 ──
+
+.song-table__row {
+    height: 48px;
+    cursor: default;
+    color: var(--color-text-secondary); // 默认灰色 — 序号、歌手、专辑、时长
+    transition: background-color var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+        background-color: var(--color-bg-surface);
+    }
+
+    // ── 状态 ──
+
+    &.is-selected {
+        background-color: var(--color-bg-surface-raised);
+    }
+
+    &.is-active {
+        color: var(--color-text-brand);
+    }
+
+    &.is-active.is-selected {
+        background-color: var(--color-bg-surface-raised);
+        color: var(--color-text-brand);
+    }
+
+    // 拖拽中：被拖拽行及多选 ghost 行半透明
+    &.is-dragging,
+    &.is-drag-ghost {
+        opacity: var(--opacity-ambient);
+    }
+
+    // ── 拖拽放置指示线（用 box-shadow 避免 ::after 在 <tr> 上生成匿名单元格） ──
+
+    &.is-drop-above {
+        box-shadow: inset 0 var(--space-0-5) 0 0 var(--color-fill-brand);
+    }
+
+    &.is-drop-below {
+        box-shadow: inset 0 calc(-1 * var(--space-0-5)) 0 0 var(--color-fill-brand);
+    }
+}
+
+// ── 单元格 ──
+
+.song-table__cell {
+    padding: 0 var(--space-4); // 0 16px — 垂直居中靠行高控制
+    vertical-align: middle;
+    text-align: left;
+    overflow: hidden;
+
+    &--center {
+        text-align: center;
+    }
+
+    &--right {
+        text-align: right;
+    }
+
+    // ── 标题列：白色 + medium 字重 ──
+    &--title {
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-medium);
+
+        // 激活行时继承 brand 色
+        .song-table__row.is-active & {
+            color: inherit;
+        }
+    }
+
+    // ── 序号列：等宽数字，居中，不截断 ──
+    &--index {
+        font-variant-numeric: tabular-nums;
+        font-size: var(--text-label-size); // 13px，比 body 略小以容纳更多位数
+
+        .song-table__cell-content {
+            overflow: visible;
+            text-overflow: unset;
+            text-align: center;
+        }
+    }
+
+    // ── 时长列：允许溢出显示，不截断 ──
+    &--duration {
+        .song-table__cell-content {
+            overflow: visible;
+            text-overflow: unset;
+        }
+    }
+
+    // ── 状态列 ──
+    &--status {
+        .song-table__cell-content {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2); // 8px
+            line-height: normal; // 状态列按 flex 居中，不需要行高撑开
+        }
+    }
+}
+
+.song-table__cell-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: inherit; // 继承行高，由 rowHeight 自适应
+}
+
+// ── 来源 badge ──
+
+.song-table__platform-badge {
+    display: inline-block;
+    font-size: var(--text-badge-size); // 10px
+    line-height: var(--text-badge-leading);
+    color: color-mix(in srgb, var(--color-text-primary) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-text-primary) 10%, transparent);
+    padding: var(--space-0-5) var(--space-2); // 2px 8px
+    border-radius: var(--radius-badge); // 4px
+    white-space: nowrap;
+}
+
+// ── 状态图标 ──
+
+.song-table__status-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: color-mix(in srgb, var(--color-text-primary) 20%, transparent);
+
+    // 激活态（描边品牌色）
+    &.is-active {
+        color: var(--color-fill-brand);
+    }
+
+    // 激活态（描边 + 填充品牌色，用于 Heart）
+    &.is-active-fill {
+        color: var(--color-fill-brand);
+        fill: var(--color-fill-brand);
+    }
+}
+
+// ── 拖拽多选计数 badge ──
+
+.song-table__drag-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-fill-brand);
+    color: var(--color-text-on-brand);
+    font-size: var(--text-caption-size);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+    pointer-events: none;
+}

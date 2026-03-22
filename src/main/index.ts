@@ -1,279 +1,228 @@
-import { app, BrowserWindow, globalShortcut } from "electron";
-import fs from "fs";
-import path from "path";
-import { setAutoFreeze } from "immer";
-import { setupGlobalContext } from "@/shared/global-context/main";
-import { setupI18n } from "@/shared/i18n/main";
-import { handleDeepLink } from "./deep-link";
-import logger from "@shared/logger/main";
-import { PlayerState } from "@/common/constant";
-import ThumbBarUtil from "@/common/thumb-bar-util";
-import windowManager from "@main/window-manager";
-import AppConfig from "@shared/app-config/main";
-import TrayManager from "@main/tray-manager";
-import WindowDrag from "@shared/window-drag/main";
-import { IAppConfig } from "@/types/app-config";
-import axios from "axios";
-import { HttpsProxyAgent } from "https-proxy-agent";
-import PluginManager from "@shared/plugin-manager/main";
-import ServiceManager from "@shared/service-manager/main";
-import utils from "@shared/utils/main";
-import messageBus from "@shared/message-bus/main";
-import shortCut from "@shared/short-cut/main";
-import voidCallback from "@/common/void-callback";
+import './core/polyfills';
+import { setupGlobalContext } from '@infra/globalContext/main';
+import requestForwarder from '@infra/requestForwarder/main';
+import appConfig from '@infra/appConfig/main';
+import shortCut from '@infra/shortCut/main';
+import pluginManager from '@infra/pluginManager/main';
+import { app, BrowserWindow } from 'electron';
+import windowManager from '@main/core/windowManager';
+import type { IWindowManager } from '@appTypes/main/windowManager';
+import appSync from '@infra/appSync/main';
+import i18n from '@infra/i18n/main';
+import themePack from '@infra/themepack/main';
+import systemUtil from '@infra/systemUtil/main';
+import logger from '@infra/logger/main';
+import database from '@infra/database/main';
+import musicSheet from '@infra/musicSheet/main';
+import mediaMeta from '@infra/mediaMeta/main';
+import downloadManager from '@infra/downloadManager/main';
+import localMusic from '@infra/localMusic/main';
+import backup from '@infra/backup/main';
+import appTray from '@main/core/appTray';
+import appThumbar from '@main/core/appThumbar';
+import proxyManager from '@main/core/proxyManager';
+import { handleDeepLink } from '@main/core/deepLink';
+import localPluginDefine from './core/builtinPlugins/localPlugin';
+import windowDrag from '@infra/windowDrag/main';
+import { LOCAL_PLUGIN_HASH } from '@common/constant';
+import fs from 'fs';
+import path from 'path';
 
-// portable
-if (process.platform === "win32") {
+// ─── Phase 0: Portable 模式检测（仅 Windows） ───
+// 若 exe 同级目录下存在 portable/ 文件夹，则将 appData/userData 重定向至该目录，
+// 实现免安装便携运行，所有用户数据随 exe 移动。
+if (process.platform === 'win32') {
     try {
-        const appPath = app.getPath("exe");
-        const portablePath = path.resolve(appPath, "../portable");
-        const portableFolderStat = fs.statSync(portablePath);
-        if (portableFolderStat.isDirectory()) {
-            const appPathNames = ["appData", "userData"];
-            appPathNames.forEach((it) => {
-                app.setPath(it, path.resolve(portablePath, it));
-            });
+        const portablePath = path.resolve(app.getPath('exe'), '..', 'portable');
+        if (fs.statSync(portablePath).isDirectory()) {
+            app.setPath('appData', path.resolve(portablePath, 'appData'));
+            app.setPath('userData', path.resolve(portablePath, 'userData'));
         }
-    } catch (e) {
-        // pass
+    } catch {
+        // portable 目录不存在，使用正常模式
     }
 }
 
-setAutoFreeze(false);
+// ─── Phase 0.5: Chromium 启动参数 & GPU 降级 ───
 
+// 禁用 GPU 沙箱，兼容无显卡/驱动异常的机器（不影响性能）
+app.commandLine.appendSwitch('disable-gpu-sandbox');
 
-if (process.defaultApp) {
-    if (process.argv.length >= 2) {
-        app.setAsDefaultProtocolClient("musicfree", process.execPath, [
-            path.resolve(process.argv[1]),
-        ]);
+// GPU 崩溃自动降级：上次运行若 GPU 崩溃，本次禁用硬件加速
+const gpuCrashFlagPath = path.join(app.getPath('userData'), '.gpu-crash-flag');
+try {
+    if (fs.existsSync(gpuCrashFlagPath)) {
+        app.disableHardwareAcceleration();
+        fs.unlinkSync(gpuCrashFlagPath);
     }
-} else {
-    app.setAsDefaultProtocolClient("musicfree");
+} catch {
+    // 标记文件读取/删除失败，忽略
 }
+
+// 监听 GPU 进程异常退出，写入标记供下次启动降级
+app.on('child-process-gone', (_event, details) => {
+    if (details.type === 'GPU' && details.reason !== 'clean-exit') {
+        try {
+            fs.writeFileSync(gpuCrashFlagPath, String(Date.now()));
+        } catch {
+            // 写入失败，忽略
+        }
+    }
+});
+
+// ─── 单实例锁 ───
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+    app.quit();
+}
+
+// ─── Phase 1: 同步初始化（不依赖 app.isReady） ───
+
+setupGlobalContext();
+requestForwarder.setup();
+
+// ─── Phase 2: app ready 后按依赖顺序初始化全部 infra ───
+
+/**
+ * 按依赖顺序初始化所有 infra 模块。
+ *
+ * 初始化顺序:
+ *   globalContext → requestForwarder → appConfig → appSync → i18n → shortCut
+ */
+async function bootstrapInfra(windowManager: IWindowManager) {
+    await logger.setup();
+    await appConfig.setup(windowManager);
+    await i18n.setup(appConfig);
+    appSync.setup(windowManager);
+    shortCut.setup({
+        windowManager,
+        appConfigReader: appConfig,
+        appSync,
+    });
+    themePack.setup(windowManager);
+    systemUtil.setup(windowManager);
+    windowDrag.setup();
+    await appTray.setup(windowManager);
+    appThumbar.setup(windowManager);
+    await proxyManager.setup({
+        appConfig,
+        updateWorkerProxy: (proxyUrl) => requestForwarder.updateWorkerProxy(proxyUrl),
+    });
+
+    database.setup();
+    musicSheet.setup({ db: database, windowManager });
+    mediaMeta.setup({ db: database, windowManager });
+
+    const mediaMetaProvider = mediaMeta.getProvider();
+    const musicItemProvider = musicSheet.getMusicItemProvider();
+
+    pluginManager.setup({
+        appConfigReader: appConfig,
+        mediaMeta: mediaMetaProvider,
+        musicItemProvider,
+        windowManager,
+    });
+
+    downloadManager.setup({
+        db: database,
+        appConfig,
+        windowManager,
+        pluginManager,
+        mediaMeta: mediaMetaProvider,
+        downloadedSheet: musicSheet.getDownloadedSheetProvider(),
+        musicItemProvider,
+    });
+
+    localMusic.setup({
+        db: database,
+        windowManager,
+        appConfig,
+        mediaMeta: mediaMetaProvider,
+    });
+
+    backup.setup({
+        windowManager,
+        appConfig,
+        backupProvider: musicSheet.getBackupProvider(),
+    });
+
+    // 注册内建插件
+    pluginManager.registerBuiltinPlugin(localPluginDefine, LOCAL_PLUGIN_HASH);
+}
+
+/** 根据持久化配置恢复窗口状态 */
+function restoreWindowState() {
+    if (appConfig.getConfigByKey('lyric.enableDesktopLyric')) {
+        windowManager.showWindow('lyric');
+    }
+}
+
+app.on('ready', async () => {
+    await bootstrapInfra(windowManager);
+    windowManager.showWindow('main');
+    restoreWindowState();
+
+    // 处理启动时传入的 deep link（Windows: 命令行参数）
+    const launchUrl = process.argv.find((arg) => arg.startsWith('musicfree:'));
+    if (launchUrl) {
+        handleDeepLink(launchUrl);
+    }
+});
+
+// 处理 macOS 上通过 open-url 事件传入的 deep link
+app.on('open-url', (_event, url) => {
+    handleDeepLink(url);
+});
+
+// 处理 Windows/Linux 上二次启动传入的 deep link
+app.on('second-instance', (_event, argv) => {
+    if (windowManager.isWindowExist('main')) {
+        windowManager.showWindow('main');
+    }
+
+    const url = argv.find((arg) => arg.startsWith('musicfree:'));
+    if (url) {
+        handleDeepLink(url);
+    }
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
         app.quit();
     }
 });
 
-app.on("activate", () => {
+let isCleaningUp = false;
+app.on('will-quit', async (event) => {
+    if (isCleaningUp) return;
+
+    // 阻止默认退出，等异步清理完成后再退出
+    event.preventDefault();
+    isCleaningUp = true;
+
+    appTray.dispose();
+    musicSheet.dispose();
+    downloadManager.dispose();
+    requestForwarder.dispose();
+    shortCut.dispose();
+    pluginManager.dispose();
+    await logger.dispose();
+    database.dispose(); // 最后关闭 DB
+
+    // 使用 app.exit() 直接退出，不再触发 will-quit 事件
+    app.exit(0);
+});
+
+app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-        windowManager.showMainWindow();
+        windowManager.showWindow('main');
     }
-});
-
-if (!app.requestSingleInstanceLock()) {
-    app.exit(0);
-}
-
-app.on("second-instance", (_evt, commandLine) => {
-    if (windowManager.mainWindow) {
-        windowManager.showMainWindow();
-    }
-
-    if (process.platform !== "darwin") {
-        handleDeepLink(commandLine.pop());
-    }
-});
-
-app.on("open-url", (_evt, url) => {
-    handleDeepLink(url);
-});
-
-app.on("will-quit", () => {
-    globalShortcut.unregisterAll();
 });
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-app.whenReady().then(async () => {
-    logger.logPerf("App Ready");
-    setupGlobalContext();
-    await AppConfig.setup(windowManager);
-
-    await setupI18n({
-        getDefaultLang() {
-            return AppConfig.getConfig("normal.language");
-        },
-        onLanguageChanged(lang) {
-            AppConfig.setConfig({
-                "normal.language": lang,
-            });
-            if (process.platform === "win32") {
-
-                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, messageBus.getAppState().playerState === PlayerState.Playing);
-            }
-        },
-    });
-    utils.setup(windowManager);
-    PluginManager.setup(windowManager);
-    TrayManager.setup(windowManager);
-    WindowDrag.setup();
-    shortCut.setup().then(voidCallback);
-    logger.logPerf("Create Main Window");
-    // Setup message bus & app state
-    messageBus.onAppStateChange((_, patch) => {
-        if ("musicItem" in patch) {
-            TrayManager.buildTrayMenu();
-            const musicItem = patch.musicItem;
-            const mainWindow = windowManager.mainWindow;
-
-            if (mainWindow) {
-                const thumbStyle = AppConfig.getConfig("normal.taskbarThumb");
-                if (process.platform === "win32" && thumbStyle === "artwork") {
-                    ThumbBarUtil.setThumbImage(mainWindow, musicItem?.artwork);
-                }
-                if (musicItem) {
-                    mainWindow.setTitle(
-                        musicItem.title + (musicItem.artist ? ` - ${musicItem.artist}` : ""),
-                    );
-                } else {
-                    mainWindow.setTitle(app.name);
-                }
-            }
-        } else if ("playerState" in patch) {
-            TrayManager.buildTrayMenu();
-            const playerState = patch.playerState;
-
-            if (process.platform === "win32") {
-                ThumbBarUtil.setThumbBarButtons(windowManager.mainWindow, playerState === PlayerState.Playing);
-            }
-        } else if ("repeatMode" in patch) {
-            TrayManager.buildTrayMenu();
-        } else if ("lyricText" in patch && process.platform === "darwin") {
-            if (AppConfig.getConfig("lyric.enableStatusBarLyric")) {
-                TrayManager.setTitle(patch.lyricText);
-            } else {
-                TrayManager.setTitle("");
-            }
-        }
-    });
-
-    messageBus.setup(windowManager);
-
-    windowManager.showMainWindow();
-
-    bootstrap();
-
-});
-
-async function bootstrap() {
-    ServiceManager.setup(windowManager);
-
-    const downloadPath = AppConfig.getConfig("download.path");
-    if (!downloadPath) {
-        AppConfig.setConfig({
-            "download.path": app.getPath("downloads"),
-        });
-    }
-
-    const minimodeEnabled = AppConfig.getConfig("private.minimode");
-
-    if (minimodeEnabled) {
-        windowManager.showMiniModeWindow();
-    }
-
-    /** 一些初始化设置 */
-    // 初始化桌面歌词
-    const desktopLyricEnabled = AppConfig.getConfig("lyric.enableDesktopLyric");
-
-    if (desktopLyricEnabled) {
-        windowManager.showLyricWindow();
-    }
-
-    AppConfig.onConfigUpdated((patch) => {
-        // 桌面歌词锁定状态
-        if ("lyric.lockLyric" in patch) {
-            const lyricWindow = windowManager.lyricWindow;
-            const lockState = patch["lyric.lockLyric"];
-
-            if (!lyricWindow) {
-                return;
-            }
-            if (lockState) {
-                lyricWindow.setIgnoreMouseEvents(true, {
-                    forward: true,
-                });
-            } else {
-                lyricWindow.setIgnoreMouseEvents(false);
-            }
-        }
-        if ("shortCut.enableGlobal" in patch) {
-            const enableGlobal = patch["shortCut.enableGlobal"];
-            if (enableGlobal) {
-                shortCut.registerAllGlobalShortCuts();
-            } else {
-                shortCut.unregisterAllGlobalShortCuts();
-            }
-        }
-    });
-
-
-    // 初始化代理
-    const proxyConfigKeys: Array<keyof IAppConfig> = [
-        "network.proxy.enabled",
-        "network.proxy.host",
-        "network.proxy.port",
-        "network.proxy.username",
-        "network.proxy.password",
-    ];
-
-    AppConfig.onConfigUpdated((patch, config) => {
-        let proxyUpdated = false;
-        for (const proxyConfigKey of proxyConfigKeys) {
-            if (proxyConfigKey in patch) {
-                proxyUpdated = true;
-                break;
-            }
-        }
-
-        if (proxyUpdated) {
-            if (config["network.proxy.enabled"]) {
-                handleProxy(true, config["network.proxy.host"], config["network.proxy.port"], config["network.proxy.username"], config["network.proxy.password"]);
-            } else {
-                handleProxy(false);
-            }
-        }
-    });
-
-    handleProxy(
-        AppConfig.getConfig("network.proxy.enabled"),
-        AppConfig.getConfig("network.proxy.host"),
-        AppConfig.getConfig("network.proxy.port"),
-        AppConfig.getConfig("network.proxy.username"),
-        AppConfig.getConfig("network.proxy.password"),
-    );
-
-
-}
-
-
-function handleProxy(enabled: boolean, host?: string | null, port?: string | null, username?: string | null, password?: string | null) {
-    try {
-        if (!enabled) {
-            axios.defaults.httpAgent = undefined;
-            axios.defaults.httpsAgent = undefined;
-        } else if (host) {
-            const proxyUrl = new URL(host);
-            proxyUrl.port = port;
-            proxyUrl.username = username;
-            proxyUrl.password = password;
-            const agent = new HttpsProxyAgent(proxyUrl);
-
-            axios.defaults.httpAgent = agent;
-            axios.defaults.httpsAgent = agent;
-        } else {
-            throw new Error("Unknown Host");
-        }
-    } catch (e) {
-        axios.defaults.httpAgent = undefined;
-        axios.defaults.httpsAgent = undefined;
-    }
-}

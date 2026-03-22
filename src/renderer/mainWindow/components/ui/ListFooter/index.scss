@@ -1,0 +1,113 @@
+// ============================================================================
+// ListFooter — 模式组件样式
+// ============================================================================
+//
+// 列表底部指示器，消费 RequestStatus 枚举。
+//
+// 设计稿还原（像素级）：
+//   loading: Loader2 16×16 旋转 + "加载中…" 13px, color white/25, gap-10, py-32
+//   error:   "加载失败" 13px white/30 + "·" white/10 + "点击重试" 13px primary, py-24
+//   done:    线 h-1px bg white/4 + "没有更多了" 12px white/15 + 线, gap-16, py-32
+//
+
+.list-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+
+    // ── loading ──
+    &--loading {
+        gap: 10px;
+        padding: 32px 0;
+        color: rgba(255, 255, 255, 0.25);
+    }
+
+    // ── error ──
+    &--error {
+        gap: 12px;
+        padding: 24px 0;
+    }
+
+    // ── done ──
+    &--done {
+        gap: 16px;
+        padding: 32px 0;
+    }
+
+    // ── 旋转图标 ──
+    &__spinner {
+        width: 16px;
+        height: 16px;
+        animation: list-footer-spin 1s linear infinite;
+    }
+
+    // ── 文字 ──
+    &__text {
+        font-size: var(--text-label-size);
+    }
+
+    // loading 态文字颜色继承父级
+    &--loading &__text {
+        color: rgba(255, 255, 255, 0.25);
+    }
+
+    // error 态文字
+    &--error &__text {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    // done 态文字
+    &--done &__text {
+        font-size: var(--text-caption-size);
+        color: rgba(255, 255, 255, 0.15);
+        flex-shrink: 0;
+    }
+
+    // ── 分隔点 ──
+    &__dot {
+        color: rgba(255, 255, 255, 0.1);
+    }
+
+    // ── 重试按钮 ──
+    &__retry {
+        // button 重置
+        border: none;
+        background: none;
+        padding: 0;
+
+        font-size: var(--text-label-size);
+        color: color-mix(in srgb, var(--color-text-brand) 80%, transparent);
+        cursor: pointer;
+
+        transition: color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-brand);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+    }
+
+    // ── 水平分隔线 ──
+    &__line {
+        flex: 1;
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.04);
+    }
+}
+
+// ── spin 动画 ──
+@keyframes list-footer-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

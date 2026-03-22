@@ -1,0 +1,14 @@
+// ============================================================================
+// TextModal — 纯文本展示弹窗样式
+// ============================================================================
+
+.text-modal {
+    &__content {
+        font-size: var(--text-body-size);
+        color: var(--color-text-secondary);
+        line-height: 1.8;
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+}

@@ -1,0 +1,38 @@
+// ============================================================================
+// A — 外部链接原子组件样式
+// ============================================================================
+//
+// 与原生 <a> 行为一致，仅提供下划线 + hover 规则。
+// font-size、color 由父容器或 className 控制。
+//
+// 下划线透明度：使用 color-mix(currentColor, 30%) 跟随文字色
+// hover: 下划线恢复完全不透明
+
+.ext-link {
+    // 重置
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+
+    // 下划线
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 60%, transparent);
+    text-underline-offset: 3px;
+
+    transition:
+        color var(--duration-normal) var(--ease-standard),
+        text-decoration-color var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        text-decoration-color: currentColor;
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+        border-radius: var(--radius-xs);
+    }
+}

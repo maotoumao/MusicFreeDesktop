@@ -1,0 +1,101 @@
+name: 🐛 Bug 报告
+description: 报告一个软件缺陷
+labels: ['bug']
+body:
+    - type: markdown
+      attributes:
+          value: |
+              感谢你提交 Bug 报告！请尽可能详细地填写以下信息，这将帮助我们更快地定位和修复问题。
+
+              > **注意**：插件相关的问题请勿在此提交，本项目仅是播放器，不提供音源。
+
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: 提交前确认
+          options:
+              - label: 我已搜索过现有 Issues，确认没有重复的问题
+                required: true
+              - label: 我确认这不是插件相关的问题
+                required: true
+
+    - type: input
+      id: version
+      attributes:
+          label: 软件版本
+          description: 打开设置页面可查看版本号
+          placeholder: '例如：0.5.0'
+      validations:
+          required: true
+
+    - type: dropdown
+      id: os
+      attributes:
+          label: 操作系统
+          options:
+              - Windows
+              - macOS
+              - Linux
+      validations:
+          required: true
+
+    - type: input
+      id: os-version
+      attributes:
+          label: 系统版本
+          placeholder: '例如：Windows 11 23H2 / macOS 15.0 / Ubuntu 24.04'
+      validations:
+          required: true
+
+    - type: textarea
+      id: description
+      attributes:
+          label: 问题描述
+          description: 清晰简洁地描述你遇到的问题
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: 复现步骤
+          description: 详细描述如何复现这个问题
+          placeholder: |
+              1. 打开软件
+              2. 点击 ...
+              3. 执行 ...
+              4. 出现错误
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected
+      attributes:
+          label: 预期行为
+          description: 描述你期望发生的行为
+      validations:
+          required: true
+
+    - type: textarea
+      id: actual
+      attributes:
+          label: 实际行为
+          description: 描述实际发生的行为
+      validations:
+          required: true
+
+    - type: textarea
+      id: screenshots
+      attributes:
+          label: 截图或日志
+          description: 如有截图或错误日志，请粘贴在此处
+      validations:
+          required: false
+
+    - type: textarea
+      id: additional
+      attributes:
+          label: 补充信息
+          description: 其他可能有帮助的信息
+      validations:
+          required: false

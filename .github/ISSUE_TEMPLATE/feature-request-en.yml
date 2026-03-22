@@ -1,0 +1,51 @@
+name: ✨ Feature Request
+description: Suggest a new feature or improvement
+labels: ['enhancement']
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thank you for your feature suggestion! Please describe your use case as clearly as possible to help us better understand and evaluate the request.
+
+              > **Note**: Please do not submit plugin-related feature requests here.
+
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: Pre-submission checklist
+          options:
+              - label: I have searched existing Issues and confirmed this is not a duplicate request
+                required: true
+
+    - type: textarea
+      id: problem
+      attributes:
+          label: Problem / Use Case
+          description: Describe the problem you're facing or the inconvenience. What problem would this feature solve?
+          placeholder: "When I'm doing ..., I wish I could ..."
+      validations:
+          required: true
+
+    - type: textarea
+      id: solution
+      attributes:
+          label: Proposed Solution
+          description: Describe the feature or solution you'd like
+      validations:
+          required: true
+
+    - type: textarea
+      id: alternatives
+      attributes:
+          label: Alternatives Considered
+          description: Describe any alternative solutions you've considered (if any)
+      validations:
+          required: false
+
+    - type: textarea
+      id: additional
+      attributes:
+          label: Additional Context
+          description: Any other screenshots or information that might be helpful
+      validations:
+          required: false
