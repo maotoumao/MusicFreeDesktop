@@ -12,6 +12,7 @@ import { useSyncExternalStore, useCallback } from 'react';
 import EventEmitter from 'eventemitter3';
 import { compositeKey } from '@common/mediaKey';
 import debounce from '@common/debounce';
+import mediaMeta from '@infra/mediaMeta/renderer';
 import { CONTEXT_BRIDGE_KEY } from './common/constant';
 import type {
     IDownloadTask,
@@ -103,6 +104,7 @@ class DownloadManagerRenderer {
     /** IPC 事件取消订阅函数 */
     private unsubProgress: (() => void) | null = null;
     private unsubTaskEvent: (() => void) | null = null;
+    private unsubMetaChanged: (() => void) | null = null;
 
     /** 防抖刷新任务列表（批量下载时避免高频 IPC） */
     private debouncedRefresh = debounce(async () => {
@@ -197,6 +199,29 @@ class DownloadManagerRenderer {
             this.debouncedRefresh();
         });
 
+        // 监听 mediaMeta 变更，当 downloadData 被写入（如导入歌单时）实时更新 downloadedMap
+        this.unsubMetaChanged = mediaMeta.onMetaChanged((event) => {
+            const { platform, musicId, meta } = event;
+            const key = compositeKey(platform, musicId);
+            if (meta?.downloadData) {
+                const prev = this.downloadedMap.get(key);
+                if (
+                    !prev ||
+                    prev.path !== meta.downloadData.path ||
+                    prev.quality !== meta.downloadData.quality
+                ) {
+                    this.downloadedMap.set(key, {
+                        path: meta.downloadData.path,
+                        quality: meta.downloadData.quality,
+                    });
+                    this.events.emit('downloadChange');
+                }
+            } else if (meta && !meta.downloadData && this.downloadedMap.has(key)) {
+                this.downloadedMap.delete(key);
+                this.events.emit('downloadChange');
+            }
+        });
+
         this.isSetup = true;
     }
 
@@ -268,6 +293,8 @@ class DownloadManagerRenderer {
         this.unsubProgress = null;
         this.unsubTaskEvent?.();
         this.unsubTaskEvent = null;
+        this.unsubMetaChanged?.();
+        this.unsubMetaChanged = null;
         this.events.removeAllListeners();
         this.activeTaskMap.clear();
         this.downloadedMap.clear();

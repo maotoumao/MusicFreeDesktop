@@ -7,6 +7,7 @@
  * - 导出歌单详情
  * - IPC 注册 + 事件广播
  */
+import fs from 'fs';
 import { ipcMain } from 'electron';
 import { nanoid } from 'nanoid';
 import i18n from '@infra/i18n/main';
@@ -32,6 +33,7 @@ import { createQueries, type IMusicSheetQueries } from './queries';
 import { INTERNAL_SLIM_KEY } from '@common/constant';
 import { safeStringify, safeParse } from '@common/safeSerialize';
 import type { IBackupProvider, IBackupSheet, RestoreMode } from '@appTypes/infra/backup';
+import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 
 class MusicSheetManager {
     private isSetup = false;
@@ -73,30 +75,7 @@ class MusicSheetManager {
      * 主进程内部调用，不通过 IPC。
      */
     public addMusicToSheet(musicItem: IMusic.IMusicItem | IMusicItemSlim, sheetId: string): void {
-        const db = this.db.getDatabase();
-        db.transaction(() => {
-            const minOrder = (this.queries.getMinSortOrder.get(sheetId) as any).minOrder;
-            const sid = String(musicItem.id);
-            const now = Date.now();
-
-            this.queries.upsertMusicItem.run({
-                platform: musicItem.platform,
-                id: sid,
-                title: musicItem.title,
-                artist: musicItem.artist ?? '',
-                album: musicItem.album ?? '',
-                duration: musicItem.duration ?? null,
-                artwork: musicItem.artwork ?? null,
-                raw: (musicItem as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(musicItem),
-            });
-            this.queries.insertRelation.run({
-                sheetId,
-                platform: musicItem.platform,
-                musicId: sid,
-                sortOrder: minOrder - 1,
-                addedAt: now,
-            });
-        })();
+        this.addMusicToSheetSilently(musicItem, sheetId);
         this.broadcastMusicSheetEvent({ origin: 'internal', sheetId });
     }
 
@@ -147,8 +126,10 @@ class MusicSheetManager {
     /**
      * 返回 backup 模块所需的 DI 适配器。
      * 封装了歌单导出和导入操作，主进程内直接调用，不经 IPC。
+     *
+     * @param deps.mediaMeta - 用于将导入歌曲的 $.downloadData 写入 media_meta 表
      */
-    public getBackupProvider(): IBackupProvider {
+    public getBackupProvider(deps?: { mediaMeta?: IMediaMetaProvider }): IBackupProvider {
         return {
             /** 获取所有可导出歌单的元数据（排除 system 类型） */
             getExportableSheets: (): Array<{ id: string; title: string }> => {
@@ -177,6 +158,15 @@ class MusicSheetManager {
             ): { sheetsCount: number; songsCount: number } => {
                 const db = this.db.getDatabase();
                 let totalSongs = 0;
+
+                // 收集含 downloadData 的歌曲（Map 去重，同一首歌可能在多个歌单中出现）
+                const downloadItems = new Map<
+                    string,
+                    {
+                        item: IMusic.IMusicItem;
+                        downloadData: { path: string; quality: IMusic.IQualityKey };
+                    }
+                >();
 
                 // overwrite 清理在单独事务中执行
                 if (mode === 'overwrite') {
@@ -239,9 +229,44 @@ class MusicSheetManager {
                                 sortOrder: ++maxOrder,
                                 addedAt: now,
                             });
+
+                            // 收集含 $.downloadData 的歌曲
+                            const internalData = (item as any).$;
+                            if (
+                                internalData?.downloadData?.path &&
+                                internalData?.downloadData?.quality
+                            ) {
+                                const key = `${item.platform}@@${sid}`;
+                                if (!downloadItems.has(key)) {
+                                    downloadItems.set(key, {
+                                        item,
+                                        downloadData: internalData.downloadData,
+                                    });
+                                }
+                            }
                         }
                         totalSongs += sheet.musicList.length;
                     })();
+                }
+
+                // 将含下载数据且本地路径有效的歌曲写入 media_meta 并加入 __downloaded__ 歌单
+                if (downloadItems.size > 0 && deps?.mediaMeta) {
+                    for (const [, { item, downloadData }] of downloadItems) {
+                        const existingDownload = deps.mediaMeta.getDownloadData(
+                            item.platform,
+                            String(item.id),
+                        );
+                        if (existingDownload && fs.existsSync(existingDownload.path)) {
+                            continue;
+                        }
+                        if (!fs.existsSync(downloadData.path)) {
+                            continue;
+                        }
+                        deps.mediaMeta.setMeta(item.platform, String(item.id), {
+                            downloadData,
+                        });
+                        this.addMusicToSheetSilently(item, DOWNLOADED_SHEET_ID);
+                    }
                 }
 
                 this.scheduleOrphanCleanup();
@@ -250,6 +275,36 @@ class MusicSheetManager {
                 return { sheetsCount: sheets.length, songsCount: totalSongs };
             },
         };
+    }
+
+    private addMusicToSheetSilently(
+        musicItem: IMusic.IMusicItem | IMusicItemSlim,
+        sheetId: string,
+    ): void {
+        const db = this.db.getDatabase();
+        db.transaction(() => {
+            const minOrder = (this.queries.getMinSortOrder.get(sheetId) as any).minOrder;
+            const sid = String(musicItem.id);
+            const now = Date.now();
+
+            this.queries.upsertMusicItem.run({
+                platform: musicItem.platform,
+                id: sid,
+                title: musicItem.title,
+                artist: musicItem.artist ?? '',
+                album: musicItem.album ?? '',
+                duration: musicItem.duration ?? null,
+                artwork: musicItem.artwork ?? null,
+                raw: (musicItem as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(musicItem),
+            });
+            this.queries.insertRelation.run({
+                sheetId,
+                platform: musicItem.platform,
+                musicId: sid,
+                sortOrder: minOrder - 1,
+                addedAt: now,
+            });
+        })();
     }
 
     private registerIpcHandlers() {

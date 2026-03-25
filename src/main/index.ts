@@ -143,7 +143,9 @@ async function bootstrapInfra(windowManager: IWindowManager) {
     backup.setup({
         windowManager,
         appConfig,
-        backupProvider: musicSheet.getBackupProvider(),
+        backupProvider: musicSheet.getBackupProvider({
+            mediaMeta: mediaMetaProvider,
+        }),
     });
 
     // 注册内建插件
