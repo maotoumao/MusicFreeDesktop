@@ -1,0 +1,98 @@
+name: Release
+
+on:
+    workflow_dispatch:
+        inputs:
+            run_id:
+                description: 'Build workflow run ID to download artifacts from'
+                required: true
+                type: string
+            release_notes:
+                description: 'Release notes (optional, overrides release/version.json changeLog)'
+                required: false
+                type: string
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Download all artifacts from build run
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  mkdir -p artifacts
+                  gh run download ${{ inputs.run_id }} --dir artifacts
+
+            - name: Read build metadata
+              id: meta
+              run: |
+                  META_FILE="artifacts/build-meta/build-meta.json"
+                  if [ ! -f "$META_FILE" ]; then
+                    echo "::error::build-meta.json not found. Make sure the build workflow completed successfully."
+                    exit 1
+                  fi
+                  VERSION=$(jq -r '.version' "$META_FILE")
+                  BRANCH=$(jq -r '.branch' "$META_FILE")
+                  COMMIT=$(jq -r '.commit' "$META_FILE")
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+                  echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+                  echo "commit=$COMMIT" >> $GITHUB_OUTPUT
+                  echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+                  # Auto-detect prerelease from branch name
+                  if [[ "$BRANCH" == *"dev"* ]] || [[ "$BRANCH" == *"beta"* ]] || [[ "$BRANCH" == *"alpha"* ]]; then
+                    echo "prerelease=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "prerelease=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Generate release notes
+              id: notes
+              env:
+                  RELEASE_NOTES_INPUT: ${{ inputs.release_notes }}
+              run: |
+                  if [ -n "$RELEASE_NOTES_INPUT" ]; then
+                    printf '%s\n' "$RELEASE_NOTES_INPUT" > release-notes.md
+                  else
+                    jq -r '.changeLog | join("\n")' release/version.json > release-notes.md
+                  fi
+                  echo "=== Release notes ==="
+                  cat release-notes.md
+
+            - name: Collect release assets
+              run: |
+                  mkdir -p release-assets
+                  find artifacts -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" \) -exec cp {} release-assets/ \;
+                  echo "=== Release assets ==="
+                  ls -lh release-assets/
+
+            - name: Create tag
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  TAG="${{ steps.meta.outputs.tag }}"
+                  COMMIT="${{ steps.meta.outputs.commit }}"
+                  # Check if tag already exists
+                  if gh api "repos/${{ github.repository }}/git/refs/tags/${TAG}" &>/dev/null; then
+                    echo "::error::Tag ${TAG} already exists. Aborting."
+                    exit 1
+                  fi
+                  gh api "repos/${{ github.repository }}/git/refs" \
+                    -X POST \
+                    -f ref="refs/tags/${TAG}" \
+                    -f sha="${COMMIT}"
+
+            - name: Create GitHub Draft Release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh release create "${{ steps.meta.outputs.tag }}" \
+                    --title "MusicFree ${{ steps.meta.outputs.version }}" \
+                    --notes-file release-notes.md \
+                    --draft \
+                    ${{ steps.meta.outputs.prerelease == 'true' && '--prerelease' || '' }} \
+                    release-assets/*
