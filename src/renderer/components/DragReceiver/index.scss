@@ -2,25 +2,27 @@
 .components--drag-receiver {
     position: absolute;
     left: 0;
-    height: 12px;
+    height: 20px;
     width: 100%;
     display: flex;
     align-items: center;
+    z-index: 10;
   
     & .components--drag-receiver-content {
       width: 100%;
-      height: 2px;
+      height: 3px;
       background-color: var(--primaryColor);
       pointer-events: none;
+      box-shadow: 0 0 4px var(--primaryColor);
     }
   }
   
   .components--drag-receiver-top {
-    top: -6px;
+    top: -10px;
   }
   
   .components--drag-receiver-bottom {
-    bottom: -6px;
+    bottom: -10px;
   }
   
   .components--drag-receiver-table-container {

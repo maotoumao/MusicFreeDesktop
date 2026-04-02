@@ -19,7 +19,9 @@ export default function DragReceiver(props: IDragReceiverProps) {
     const { position, rowIndex, onDrop, tag, insideTable } = props;
     const [draggingOver, setDraggingOver] = useState(false);
 
-    const onDragOver = useCallback(() => {
+    const onDragOver = useCallback((e: DragEvent) => {
+        e.preventDefault(); // 允许拖放
+        e.stopPropagation();
         setDraggingOver(true);
     }, []);
 

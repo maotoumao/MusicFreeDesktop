@@ -393,17 +393,29 @@ function _MusicList(props: IMusicListProps) {
                 // 没有移动
                 return;
             }
-            const newData = musicList
+            // 获取排序后的数据
+            const sortedRows = table.getRowModel().rows;
+            const sortedMusicList = sortedRows.map(row => row.original);
+            
+            // 在排序后的列表上进行拖拽操作
+            const newData = sortedMusicList
                 .slice(0, fromIndex)
-                .concat(musicList.slice(fromIndex + 1));
+                .concat(sortedMusicList.slice(fromIndex + 1));
             newData.splice(
                 fromIndex > toIndex ? toIndex : toIndex - 1,
                 0,
-                musicList[fromIndex],
+                sortedMusicList[fromIndex],
             );
-            onDragEnd?.(newData);
+            
+            // 检查是否是倒序排列
+            const isDescending = sorting.length > 0 && sorting[0].desc === true;
+            
+            // 如果是倒序，需要将结果反转回正序再保存
+            const finalData = isDescending ? [...newData].reverse() : newData;
+            
+            onDragEnd?.(finalData);
         },
-        [onDragEnd, musicList],
+        [onDragEnd, musicList, table, sorting],
     );
 
     return (

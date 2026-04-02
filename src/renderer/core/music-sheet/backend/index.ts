@@ -303,16 +303,16 @@ export async function addMusicToSheet(
                     .equals(sheetId)
                     .modify((obj) => {
                         obj.artwork =
-                            validMusicItems[validMusicItems.length - 1]?.artwork ??
+                            validMusicItems[0]?.artwork ??
                             obj.artwork;
                         obj.musicList = [
-                            ...(obj.musicList ?? []),
                             ...validMusicItems.map((item, index) => ({
                                 platform: item.platform,
                                 id: item.id,
                                 [sortIndexSymbol]: index,
                                 [timeStampSymbol]: timeStamp,
                             })),
+                            ...(obj.musicList ?? []),
                         ];
                         targetSheet.artwork = obj.artwork;
                         targetSheet.musicList = obj.musicList;
