@@ -416,11 +416,11 @@ class AppTray {
                                 label: i18n.t('common.about'),
                                 role: 'about',
                             },
+                            { type: 'separator' },
                             {
                                 label: i18n.t('common.exit'),
-                                click() {
-                                    app.quit();
-                                },
+                                role: 'quit',
+                                accelerator: 'Command+Q',
                             },
                         ],
                     },
@@ -458,6 +458,22 @@ class AppTray {
                                 label: i18n.t('common.select_all'),
                                 accelerator: 'Command+A',
                                 role: 'selectAll',
+                            },
+                        ],
+                    },
+                    {
+                        label: i18n.t('common.window'),
+                        role: 'window',
+                        submenu: [
+                            {
+                                label: i18n.t('common.close'),
+                                role: 'close',
+                                accelerator: 'Command+W',
+                            },
+                            {
+                                label: i18n.t('common.minimize'),
+                                role: 'minimize',
+                                accelerator: 'Command+M',
                             },
                         ],
                     },

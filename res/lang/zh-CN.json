@@ -30,6 +30,8 @@
         "open": "打开",
         "status": "状态",
         "close": "关闭",
+        "window": "窗口",
+        "minimize": "最小化",
         "search": "搜索",
         "retry": "重试",
         "select_hint": "请选择",
