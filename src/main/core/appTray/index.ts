@@ -36,7 +36,11 @@ import NativeTrayMenu from './nativeTrayMenu';
 // ─── 图标路径 ───
 
 function getLogoPath(): string {
-    return path.resolve(globalContext.appPath.res, 'logo.png');
+    if (process.platform === 'darwin') {
+        return path.resolve(globalContext.appPath.res, 'tray-icon-mac.png');
+    } else {
+        return path.resolve(globalContext.appPath.res, 'tray.ico');
+    }
 }
 
 // ─── 需要监听的配置 key ───
@@ -69,13 +73,13 @@ class AppTray {
         // macOS: 设置应用菜单栏
         this.setupApplicationMenu();
 
+        const iconPath = getLogoPath();
+
+        const trayIcon = nativeImage.createFromPath(iconPath);
+        if (process.platform === 'darwin') trayIcon.setTemplateImage(true);
+
         // 创建托盘图标
-        const tray = new Tray(
-            nativeImage.createFromPath(getLogoPath()).resize({
-                width: 32,
-                height: 32,
-            }),
-        );
+        const tray = new Tray(trayIcon);
 
         // 点击行为: 单击/双击展示主窗口，其他平台双击
         tray.on('click', () => {
