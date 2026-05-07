@@ -422,8 +422,11 @@ class WindowManager implements IWindowManager {
             ) {
                 e.preventDefault();
                 mainWindow.hide();
+                // Windows 和 macOS: 隐藏时从任务栏/程序坞中移除
                 if (process.platform === 'win32') {
                     mainWindow.setSkipTaskbar(true);
+                } else if (process.platform === 'darwin' && app.dock) {
+                    app.dock.hide();
                 }
             }
         });

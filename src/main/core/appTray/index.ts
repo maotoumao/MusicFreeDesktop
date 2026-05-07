@@ -81,13 +81,21 @@ class AppTray {
         // 创建托盘图标
         const tray = new Tray(trayIcon);
 
-        // 点击行为: 单击/双击展示主窗口，其他平台双击
+        // 点击行为: 单击/双击展示主窗口
         tray.on('click', () => {
             this.windowManager.showWindow('main');
         });
         tray.on('double-click', () => {
             this.windowManager.showWindow('main');
         });
+
+        // macOS: 右键显示完整菜单（不使用 setContextMenu，避免左键点击弹出菜单）
+        if (process.platform === 'darwin') {
+            tray.on('right-click', (event) => {
+                const popupMenu = Menu.buildFromTemplate(this.buildMenuTemplate());
+                popupMenu.popup({ ...(event as any) });
+            });
+        }
 
         // 调试模式: 连续快速点击 5 次打开所有窗口 DevTools
         this.setupDebugHandler(tray);
@@ -215,11 +223,9 @@ class AppTray {
 
     // ─── Electron 标准菜单 ───
 
-    private buildElectronMenu(): void {
-        if (!this.tray) return;
-
+    /** 构建菜单模板（用于右键菜单或 setContextMenu） */
+    private buildMenuTemplate(): Array<MenuItemConstructorOptions | MenuItem> {
         const ctxMenu: Array<MenuItemConstructorOptions | MenuItem> = [];
-        const tray = this.tray;
 
         const { musicItem, playerState, repeatMode } = appSync.getAppState() as {
             musicItem?: IMusic.IMusicItem | null;
@@ -384,7 +390,17 @@ class AppTray {
             },
         });
 
-        tray.setContextMenu(Menu.buildFromTemplate(ctxMenu));
+        return ctxMenu;
+    }
+
+    private buildElectronMenu(): void {
+        if (!this.tray) return;
+
+        // macOS 不使用 setContextMenu（已在 right-click 事件中手动处理）
+        if (process.platform !== 'darwin') {
+            const menuTemplate = this.buildMenuTemplate();
+            this.tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
+        }
     }
 
     // ─── macOS 应用菜单 ───
