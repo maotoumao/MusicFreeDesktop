@@ -63,6 +63,8 @@ class AppTray {
 
     private refreshPending = false;
 
+    private menuTemplate: (Electron.MenuItemConstructorOptions | MenuItem)[] = [];
+
     // ─── 初始化 ───
 
     public async setup(windowManager: IWindowManager): Promise<void> {
@@ -81,19 +83,17 @@ class AppTray {
         // 创建托盘图标
         const tray = new Tray(trayIcon);
 
+        // macOS: 初始化时不设置 contextMenu，让左键点击能触发 click 事件
+        // macOS 右键事件: 动态设置 contextMenu 然后立即显示
+        if (process.platform === 'darwin') {
+            tray.on('right-click', () => {
+                tray.popUpContextMenu(Menu.buildFromTemplate(this.menuTemplate));
+            });
+        }
+
         // 点击行为: 单击/双击展示主窗口
         tray.on('click', () => {
-            // 左键点击：清除菜单防止弹窗，显示主窗口，延迟后恢复菜单
-            if (process.platform === 'darwin') {
-                tray.setContextMenu(null);
-                this.windowManager.showWindow('main');
-                setTimeout(() => {
-                    const menuTemplate = this.buildMenuTemplate();
-                    tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
-                }, 200);
-            } else {
-                this.windowManager.showWindow('main');
-            }
+            this.windowManager.showWindow('main');
         });
         tray.on('double-click', () => {
             this.windowManager.showWindow('main');
@@ -398,8 +398,10 @@ class AppTray {
     private buildElectronMenu(): void {
         if (!this.tray) return;
 
-        const menuTemplate = this.buildMenuTemplate();
-        this.tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
+        this.menuTemplate = this.buildMenuTemplate();
+        if (process.platform !== 'darwin') {
+            this.tray.setContextMenu(Menu.buildFromTemplate(this.menuTemplate));
+        }
     }
 
     // ─── macOS 应用菜单 ───

@@ -165,6 +165,9 @@ class WindowManager implements IWindowManager {
         } else {
             win.show();
         }
+        if (process.platform === 'darwin') {
+            app.focus({ steal: true });
+        }
         win.moveTop();
 
         if (windowType === 'main') {
