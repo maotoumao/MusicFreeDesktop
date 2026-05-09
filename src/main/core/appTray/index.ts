@@ -83,19 +83,21 @@ class AppTray {
 
         // 点击行为: 单击/双击展示主窗口
         tray.on('click', () => {
-            this.windowManager.showWindow('main');
+            // 左键点击：清除菜单防止弹窗，显示主窗口，延迟后恢复菜单
+            if (process.platform === 'darwin') {
+                tray.setContextMenu(null);
+                this.windowManager.showWindow('main');
+                setTimeout(() => {
+                    const menuTemplate = this.buildMenuTemplate();
+                    tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
+                }, 200);
+            } else {
+                this.windowManager.showWindow('main');
+            }
         });
         tray.on('double-click', () => {
             this.windowManager.showWindow('main');
         });
-
-        // macOS: 右键显示完整菜单（不使用 setContextMenu，避免左键点击弹出菜单）
-        if (process.platform === 'darwin') {
-            tray.on('right-click', (event) => {
-                const popupMenu = Menu.buildFromTemplate(this.buildMenuTemplate());
-                popupMenu.popup({ ...(event as any) });
-            });
-        }
 
         // 调试模式: 连续快速点击 5 次打开所有窗口 DevTools
         this.setupDebugHandler(tray);
@@ -396,11 +398,8 @@ class AppTray {
     private buildElectronMenu(): void {
         if (!this.tray) return;
 
-        // macOS 不使用 setContextMenu（已在 right-click 事件中手动处理）
-        if (process.platform !== 'darwin') {
-            const menuTemplate = this.buildMenuTemplate();
-            this.tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
-        }
+        const menuTemplate = this.buildMenuTemplate();
+        this.tray.setContextMenu(Menu.buildFromTemplate(menuTemplate));
     }
 
     // ─── macOS 应用菜单 ───
