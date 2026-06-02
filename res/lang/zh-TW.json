@@ -141,7 +141,9 @@
     "reveal_local_music_in_file_explorer_fail": "打開失敗：",
 
     "delete_local_downloaded_songs_success": "已刪除 {{musicNums}} 首本地歌曲",
-    "delete_local_downloaded_song_success": "已刪除本地歌曲 [{{songName}}]"
+    "delete_local_downloaded_song_success": "已刪除本地歌曲 [{{songName}}]",
+    "rename_music": "修改曲名",
+    "rename_music_success": "曲名修改成功"
   },
 
   "search_result_page": {

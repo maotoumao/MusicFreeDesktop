@@ -141,7 +141,9 @@
     "reveal_local_music_in_file_explorer_fail": "Open Failed: ",
 
     "delete_local_downloaded_songs_success": "Deleted {{musicNums}} local songs",
-    "delete_local_downloaded_song_success": "Deleted local song [{{songName}}]"
+    "delete_local_downloaded_song_success": "Deleted local song [{{songName}}]",
+    "rename_music": "Rename Title",
+    "rename_music_success": "Title renamed successfully"
   },
 
   "search_result_page": {

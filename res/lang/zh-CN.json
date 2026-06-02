@@ -125,7 +125,9 @@
     "reveal_local_music_in_file_explorer": "打开歌曲所在文件夹",
     "reveal_local_music_in_file_explorer_fail": "打开失败: ",
     "delete_local_downloaded_songs_success": "已删除 {{musicNums}} 首本地歌曲",
-    "delete_local_downloaded_song_success": "已删除本地歌曲 [{{songName}}]"
+    "delete_local_downloaded_song_success": "已删除本地歌曲 [{{songName}}]",
+    "rename_music": "修改曲名",
+    "rename_music_success": "曲名修改成功"
   },
   "search_result_page": {
     "search_result_title": "的搜索结果"
