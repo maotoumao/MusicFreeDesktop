@@ -22,7 +22,7 @@ import BottomLoadingState from "../BottomLoadingState";
 import { IContextMenuItem, showContextMenu } from "../ContextMenu";
 import { getInternalData, getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import { CSSProperties, memo, useCallback, useEffect, useRef, useState } from "react";
-import { showModal } from "../Modal";
+import { showModal, hideModal } from "../Modal";
 import useVirtualList from "@/hooks/useVirtualList";
 import hotkeys from "hotkeys-js";
 import Downloader from "@/renderer/core/downloader";
@@ -222,6 +222,27 @@ export function showMusicContextMenu(
                 : !isLocalMusic(musicItems) && !Downloader.isDownloaded(musicItems),
             onClick() {
                 Downloader.startDownload(musicItems);
+            },
+        },
+        {
+            title: i18n.t("music_list_context_menu.rename_music"),
+            icon: "pencil",
+            show:
+                !isArray && Downloader.isDownloaded(musicItems),
+            onClick() {
+                showModal("SimpleInputWithState", {
+                    title: i18n.t("music_list_context_menu.rename_music"),
+                    defaultValue: (musicItems as IMusic.IMusicItem).title,
+                    placeholder: i18n.t("media.media_title"),
+                    maxLength: 200,
+                    onOk: async (newTitle: string) => {
+                        const musicItem = musicItems as IMusic.IMusicItem;
+                        const updatedItem = { ...musicItem, title: newTitle };
+                        await musicSheetDB.musicStore.put(updatedItem);
+                        toast.success(i18n.t("music_list_context_menu.rename_music_success"));
+                        hideModal();
+                    },
+                });
             },
         },
         {
