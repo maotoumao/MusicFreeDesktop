@@ -90,7 +90,7 @@ export class DownloadTask {
             });
 
             // 4. 解析总大小
-            const contentLength = parseInt(response.headers['content-length'] ?? '0', 10);
+            const contentLength = parseInt(String(response.headers['content-length'] ?? '0'), 10);
             const isPartial = response.status === 206;
 
             if (isPartial) {
@@ -137,7 +137,7 @@ export class DownloadTask {
             });
 
             // 7. 推断文件扩展名（从 Content-Type，兜底 .mp3）
-            const contentType = response.headers['content-type'] ?? '';
+            const contentType = String(response.headers['content-type'] ?? '');
             const finalPath = await this.resolveFinalPath(contentType);
 
             // 8. 下载完成 → rename 临时文件
