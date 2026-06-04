@@ -36,36 +36,40 @@ function getB64Picture(picture: IPicture): string {
  * 检测并修正 CJK 元数据中的编码问题。
  * 部分音频文件的标签使用 GB2312 等编码写入，但 music-metadata 按 latin1 解析，
  * 导致标题/艺术家/专辑字段乱码，需要检测后重新解码。
+ *
+ * 策略：不用 jschardet 的编码名判断（短字符串易误判），而是直接尝试用各中文编码
+ * 解码 latin1 字节序列，若结果含 CJK 字符（U+4E00~U+9FFF）则视为正确解码。
  */
 async function fixCJKEncoding(common: ICommonTagsResult): Promise<void> {
-    const testFields = [common.title, common.artist, common.album];
-    if (testFields.every((f) => !f)) return;
+    const fields: Array<{ value: string | undefined; set: (v: string) => void }> = [
+        { value: common.title, set: (v) => { common.title = v; } },
+        { value: common.artist, set: (v) => { common.artist = v; } },
+        { value: common.album, set: (v) => { common.album = v; } },
+    ];
 
-    const jschardet = await import('jschardet');
-    let bestEncoding: string | null = null;
-    let bestConfidence = 0;
-
-    for (const field of testFields) {
-        if (!field) continue;
-        const result = jschardet.detect(field, { minimumThreshold: 0.4 });
-        if (result.confidence > bestConfidence) {
-            bestConfidence = result.confidence;
-            bestEncoding = result.encoding;
-        }
-        if (bestConfidence > 0.9) break;
-    }
-
-    if (!bestEncoding || !SPECIAL_ENCODINGS.has(bestEncoding)) return;
+    const hasAnyField = fields.some((f) => f.value);
+    if (!hasAnyField) return;
 
     const iconv = await import('iconv-lite');
-    const decode = (value: string) => iconv.decode(Buffer.from(value, 'latin1'), bestEncoding!);
 
-    if (common.title) common.title = decode(common.title);
-    if (common.artist) common.artist = decode(common.artist);
-    if (common.album) common.album = decode(common.album);
-    if (common.lyrics) {
-        for (const lyric of common.lyrics) {
-            if (lyric.text) lyric.text = decode(lyric.text);
+    /** 尝试将一个字段从 latin1 重新解码为中文编码，若含 CJK 字符则返回解码结果 */
+    const tryFix = (value: string): string | null => {
+        const buf = Buffer.from(value, 'latin1');
+        for (const enc of SPECIAL_ENCODINGS) {
+            const decoded = iconv.decode(buf, enc);
+            // 检查是否包含 CJK 统一表意文字区段
+            if (/[\u4e00-\u9fff]/.test(decoded)) {
+                return decoded;
+            }
+        }
+        return null;
+    };
+
+    for (const field of fields) {
+        if (!field.value) continue;
+        const fixed = tryFix(field.value);
+        if (fixed !== null) {
+            field.set(fixed);
         }
     }
 }
