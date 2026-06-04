@@ -34,38 +34,42 @@ function getB64Picture(picture: IPicture): string {
 
 /**
  * 检测并修正 CJK 元数据中的编码问题。
+ *
  * 部分音频文件的标签使用 GB2312 等编码写入，但 music-metadata 按 latin1 解析，
- * 导致标题/艺术家/专辑字段乱码，需要检测后重新解码。
+ * 导致标题/艺术家/专辑字段乱码。
+ *
+ * 策略：
+ *   1. 若字段已含 CJK 字符（U+4E00~U+9FFF）→ 已正确解码，不动
+ *   2. 否则尝试以各中文编码重新解码 latin1 字节
+ *      若解码结果含 CJK 字符 → 采纳
+ *      均不含 CJK → 保持原值（可能是纯英文/数字）
  */
 async function fixCJKEncoding(common: ICommonTagsResult): Promise<void> {
-    const testFields = [common.title, common.artist, common.album];
-    if (testFields.every((f) => !f)) return;
+    const fields: Array<{ value: string | undefined; set: (v: string) => void }> = [
+        { value: common.title, set: (v) => { common.title = v; } },
+        { value: common.artist, set: (v) => { common.artist = v; } },
+        { value: common.album, set: (v) => { common.album = v; } },
+    ];
 
-    const jschardet = await import('jschardet');
-    let bestEncoding: string | null = null;
-    let bestConfidence = 0;
+    const hasAnyField = fields.some((f) => f.value);
+    if (!hasAnyField) return;
 
-    for (const field of testFields) {
-        if (!field) continue;
-        const result = jschardet.detect(field, { minimumThreshold: 0.4 });
-        if (result.confidence > bestConfidence) {
-            bestConfidence = result.confidence;
-            bestEncoding = result.encoding;
-        }
-        if (bestConfidence > 0.9) break;
-    }
-
-    if (!bestEncoding || !SPECIAL_ENCODINGS.has(bestEncoding)) return;
-
+    const HAS_CJK = /[\u4e00-\u9fff]/;
     const iconv = await import('iconv-lite');
-    const decode = (value: string) => iconv.decode(Buffer.from(value, 'latin1'), bestEncoding!);
 
-    if (common.title) common.title = decode(common.title);
-    if (common.artist) common.artist = decode(common.artist);
-    if (common.album) common.album = decode(common.album);
-    if (common.lyrics) {
-        for (const lyric of common.lyrics) {
-            if (lyric.text) lyric.text = decode(lyric.text);
+    for (const field of fields) {
+        if (!field.value) continue;
+
+        // 已有 CJK → 正确的 UTF-8，不碰
+        if (HAS_CJK.test(field.value)) continue;
+
+        const buf = Buffer.from(field.value, 'latin1');
+        for (const enc of SPECIAL_ENCODINGS) {
+            const decoded = iconv.decode(buf, enc);
+            if (HAS_CJK.test(decoded)) {
+                field.set(decoded);
+                break;
+            }
         }
     }
 }
