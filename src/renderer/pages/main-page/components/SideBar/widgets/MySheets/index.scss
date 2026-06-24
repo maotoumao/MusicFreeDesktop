@@ -52,4 +52,49 @@
       }
     }
   }
+
+  & .sheet-group-title {
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding-left: 1rem;
+    color: var(--textColor);
+    cursor: pointer;
+    user-select: none;
+    transition: all linear 100ms;
+
+    & svg {
+      width: 1.2rem;
+      height: 1.2rem;
+      margin-right: 0.5rem;
+      flex-shrink: 0;
+      transition: transform linear 100ms;
+    }
+
+    & span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 0.5rem;
+    }
+
+    &:hover {
+      background: var(--listHoverColor);
+    }
+
+    &[data-selected="true"] {
+      color: var(--primaryColor);
+    }
+
+    &[data-headlessui-state="open"] {
+      & svg {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  & .side-bar--list-item-container.grouped-sheet {
+    padding-left: 2.7rem;
+  }
 }
