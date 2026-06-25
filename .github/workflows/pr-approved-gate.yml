@@ -1,0 +1,131 @@
+name: PR approved-issue gate
+
+on:
+    pull_request_target:
+        types: [opened, reopened, edited]
+
+permissions:
+    pull-requests: write
+    issues: write
+
+jobs:
+    require-accepted-issue:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/github-script@v7
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      const { owner, repo } = context.repo;
+                      const number = pr.number;
+
+                      // 分支闸门已处理非 dev 的 PR，这里只关注 dev | Branch guard handles non-dev PRs
+                      if (pr.base.ref !== 'dev') {
+                          core.info('PR does not target dev; handled by branch guard.');
+                          return;
+                      }
+
+                      // 维护者本人的 PR 豁免 | The maintainer's own PRs are exempt
+                      const assoc = pr.author_association;
+                      if (['OWNER', 'MEMBER', 'COLLABORATOR'].includes(assoc)) {
+                          core.info(`Author association ${assoc}; exempt from approved-issue gate.`);
+                          return;
+                      }
+
+                      // 判断某个标签是否由「有写权限的人」打上 | Whether a label was applied by someone with write access.
+                      // 防止他人通过手动加标签绕过闸门 | Prevents bypassing the gate by manually adding labels.
+                      const TRUSTED_ROLES = ['admin', 'maintain', 'write'];
+                      const permCache = new Map();
+                      async function hasWriteAccess(login) {
+                          if (!login) return false;
+                          if (permCache.has(login)) return permCache.get(login);
+                          let ok = false;
+                          try {
+                              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                                  owner, repo, username: login,
+                              });
+                              ok = TRUSTED_ROLES.includes(data.role_name);
+                          } catch (e) {
+                              if (e.status !== 404) throw e;
+                          }
+                          permCache.set(login, ok);
+                          return ok;
+                      }
+                      async function labelAppliedByMaintainer(issue_number, labelName) {
+                          const events = await github.paginate(
+                              github.rest.issues.listEventsForTimeline,
+                              { owner, repo, issue_number, per_page: 100 },
+                          );
+                          // 取该标签最近一次 labeled 事件的操作者 | Use the actor of the latest `labeled` event
+                          const labeled = events.filter(
+                              (e) => e.event === 'labeled' && e.label && e.label.name === labelName,
+                          );
+                          if (labeled.length === 0) return false;
+                          const actor = labeled[labeled.length - 1].actor;
+                          return hasWriteAccess(actor && actor.login);
+                      }
+
+                      // 琐碎/安全类改动豁免（标签须由有写权限者打上）| Exempt trivial/security changes (label must be maintainer-applied)
+                      const exemptLabels = ['docs', 'i18n', 'security'];
+                      const prLabels = (pr.labels || []).map((l) => l.name);
+                      for (const name of exemptLabels) {
+                          if (prLabels.includes(name) && (await labelAppliedByMaintainer(number, name))) {
+                              core.info(`PR has maintainer-applied exempt label '${name}'; skipping gate.`);
+                              return;
+                          }
+                      }
+
+                      // 从标题和描述中解析关联的 issue 编号 | Parse referenced issue numbers from title + body
+                      const text = `${pr.title || ''}\n${pr.body || ''}`;
+                      const refs = new Set();
+                      const re = /#(\d+)\b/g;
+                      let m;
+                      while ((m = re.exec(text)) !== null) {
+                          refs.add(parseInt(m[1], 10));
+                      }
+
+                      // 逐个检查：关联的 issue 是否带 accepted，且该标签确由有写权限者打上
+                      // For each ref: issue must carry `accepted`, AND that label must be maintainer-applied
+                      let acceptedRef = null;
+                      for (const n of refs) {
+                          if (n === number) continue;
+                          try {
+                              const { data: issue } = await github.rest.issues.get({
+                                  owner, repo, issue_number: n,
+                              });
+                              if (issue.pull_request) continue; // 跳过 PR 引用 | skip PR refs
+                              const labels = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
+                              if (labels.includes('accepted') && (await labelAppliedByMaintainer(n, 'accepted'))) {
+                                  acceptedRef = n;
+                                  break;
+                              }
+                          } catch (e) {
+                              if (e.status === 404) continue;
+                              throw e;
+                          }
+                      }
+
+                      if (acceptedRef !== null) {
+                          core.info(`Linked to accepted issue #${acceptedRef}; OK.`);
+                          return;
+                      }
+
+                      // 未关联已 accepted 的 issue → 留言并关闭 | No accepted issue → comment + close
+                      await github.rest.issues.createComment({
+                          owner, repo, issue_number: number,
+                          body: [
+                              '🚫 此 PR 未关联任何已标记为 `accepted` 的 Issue，已被自动关闭。',
+                              '',
+                              '本项目仅接受针对**已被接受的需求/缺陷**的 PR。请先提交一个 Issue，待其被标记 `accepted` 后，在 PR 描述中用 `Closes #编号` 关联该 Issue 再重新提交。',
+                              '',
+                              '---',
+                              '',
+                              '🚫 This PR is not linked to any issue marked `accepted`, so it has been closed automatically.',
+                              '',
+                              'This project only accepts PRs that address an **accepted** feature/bug. Please open an issue first, wait for it to be marked `accepted`, then reference it with `Closes #<number>` in your PR description and resubmit.',
+                          ].join('\n'),
+                      });
+
+                      await github.rest.pulls.update({
+                          owner, repo, pull_number: number, state: 'closed',
+                      });

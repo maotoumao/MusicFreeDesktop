@@ -1,0 +1,263 @@
+// ============================================================================
+// LocalMusicPage — 本地音乐页面样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   页面: pt --space-4
+//   页头: title-size bold, flex justify-between, mb --space-5
+//   TabBar: mb --space-4
+//   master-detail: flex, 左侧 220px, 右侧 flex-1
+//   文件夹: 可展开行, bg fill-subtle when expanded
+//
+
+.p-local-music {
+    // Available body height: viewport minus all chrome heights
+    // topbar + playerbar + player spacing + page-pt + header-mb + tabbar-mb + interior(header+tabbar)
+    --_body-h: calc(
+        100vh - var(--size-topbar-h) - var(--size-player-h) - var(--space-5) - var(--space-4) - var(
+                --space-5
+            ) - var(--space-4) -
+            68px
+    );
+
+    padding-top: var(--space-4);
+
+    // ── 页头 ──
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--space-5);
+    }
+
+    &__title {
+        font-size: var(--text-title-size);
+        font-weight: var(--font-weight-bold);
+        line-height: var(--text-title-leading);
+        color: var(--color-text-primary);
+    }
+
+    &__title-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    &__scan-indicator {
+        color: var(--color-text-brand);
+        animation: p-local-music-spin 1.2s linear infinite;
+    }
+
+    // ── TabBar + 搜索框行 ──
+    &__tab-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--space-4);
+    }
+
+    &__search {
+        width: 260px;
+        flex-shrink: 0;
+    }
+
+    // ── Tab 内容区 ──
+    &__body {
+        min-height: 0;
+    }
+
+    // ── Master-Detail 分栏布局（歌手/专辑 Tab） ──
+    &__split {
+        display: flex;
+        gap: var(--space-4);
+        height: var(--_body-h);
+        min-height: 300px;
+    }
+
+    &__split-master {
+        width: 220px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-0-5);
+        border-right: 1px solid var(--color-border-subtle);
+        padding-right: var(--space-3);
+    }
+
+    &__split-detail {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    // ── Master 列表项 ──
+    &__master-item {
+        // 重置 button 默认样式
+        border: none;
+        background: none;
+        text-align: left;
+
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-control);
+        cursor: pointer;
+        gap: var(--space-0-5);
+
+        transition:
+            background-color var(--duration-fast) var(--ease-standard),
+            color var(--duration-fast) var(--ease-standard);
+
+        &:hover:not(.is-active) {
+            background-color: var(--color-fill-subtle);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+
+        &.is-active {
+            background-color: var(--color-fill-subtle);
+        }
+
+        &-name {
+            font-size: var(--text-body-size);
+            line-height: var(--text-body-leading);
+            color: var(--color-text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            .is-active > & {
+                color: var(--color-text-brand);
+                font-weight: var(--font-weight-medium);
+            }
+        }
+
+        &-count {
+            font-size: var(--text-caption-size);
+            line-height: var(--text-caption-leading);
+            color: var(--color-text-muted);
+        }
+
+        &-sub {
+            font-size: var(--text-caption-size);
+            line-height: var(--text-caption-leading);
+            color: var(--color-text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    // ── 文件夹 Tab ──
+    &__folders {
+        max-height: var(--_body-h);
+        min-height: 300px;
+    }
+
+    &__folder-node {
+        margin-bottom: var(--space-0-5);
+    }
+
+    &__folder-row {
+        // 重置 button 默认样式
+        border: none;
+        background: none;
+        text-align: left;
+
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        width: 100%;
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-control);
+        cursor: pointer;
+
+        transition: background-color var(--duration-fast) var(--ease-standard);
+
+        &:hover:not(.is-expanded) {
+            background-color: var(--color-fill-subtle);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+
+        &.is-expanded {
+            background-color: var(--color-fill-subtle);
+        }
+    }
+
+    &__folder-chevron {
+        flex-shrink: 0;
+        color: var(--color-text-muted);
+        transition: transform var(--duration-fast) var(--ease-standard);
+
+        &.is-collapsed {
+            transform: rotate(-90deg);
+        }
+    }
+
+    &__folder-icon {
+        flex-shrink: 0;
+        color: var(--color-text-muted);
+
+        &.is-open {
+            color: var(--color-text-brand);
+        }
+    }
+
+    &__folder-name {
+        flex-shrink: 0;
+        font-size: var(--text-body-size);
+        line-height: var(--text-body-leading);
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-medium);
+    }
+
+    &__folder-path {
+        flex: 1;
+        min-width: 0;
+        font-size: var(--text-caption-size);
+        line-height: var(--text-caption-leading);
+        color: var(--color-text-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__folder-count {
+        flex-shrink: 0;
+        font-size: var(--text-badge-size);
+        line-height: var(--text-caption-leading);
+        color: var(--color-text-secondary);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__folder-songs {
+        padding-left: var(--space-8);
+        padding-right: var(--space-1);
+        margin-top: var(--space-0-5);
+        margin-bottom: var(--space-2);
+        border-left: 2px solid var(--color-border-subtle);
+        margin-left: var(--space-5);
+    }
+}
+
+@keyframes p-local-music-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

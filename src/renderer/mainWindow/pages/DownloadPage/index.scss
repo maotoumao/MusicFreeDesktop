@@ -1,0 +1,32 @@
+// ============================================================================
+// DownloadPage — 下载管理页面样式（页面布局）
+// ============================================================================
+
+.p-download {
+    padding-top: var(--space-4);
+
+    // ── 页头 ──
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--space-6);
+    }
+
+    &__title {
+        font-size: var(--text-title-size);
+        font-weight: var(--font-weight-bold);
+        line-height: var(--text-title-leading);
+        color: var(--color-text-primary);
+    }
+
+    // ── TabBar ──
+    &__tab-bar {
+        margin-bottom: var(--space-4);
+    }
+
+    // ── Tab 内容区 ──
+    &__body {
+        min-height: 0;
+    }
+}

@@ -1,0 +1,35 @@
+// ============================================================================
+// ScrollArea — 原子组件样式
+// ============================================================================
+//
+// 全局滚动条样式已在 global.scss 中定义。
+// 此文件仅处理 ScrollArea 容器本身的溢出行为。
+//
+
+.scroll-area {
+    position: relative;
+    min-height: 0; // flex 子元素 overflow 正常工作的关键
+
+    &--vertical {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    &--horizontal {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    &--both {
+        overflow: auto;
+    }
+
+    &--hide-scrollbar {
+        scrollbar-width: none; // Firefox
+        -ms-overflow-style: none; // IE/Edge
+
+        &::-webkit-scrollbar {
+            display: none; // Webkit/Blink
+        }
+    }
+}

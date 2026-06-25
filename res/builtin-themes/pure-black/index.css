@@ -1,0 +1,51 @@
+:root {
+    /* ── Background ── */
+    --color-bg-base: rgb(0, 0, 0);
+    --color-bg-sidebar: rgba(10, 10, 10, 0.6);
+    --color-bg-player: rgba(8, 8, 8, 0.95);
+    --color-bg-surface: rgba(255, 255, 255, 0.05);
+    --color-bg-surface-raised: rgba(255, 255, 255, 0.09);
+    --color-bg-drawer: rgba(5, 5, 5, 0.98);
+    --color-bg-overlay: rgba(0, 0, 0, 0.72);
+    --color-bg-modal: rgb(12, 12, 12);
+    --color-bg-popover: rgba(12, 12, 12, 0.98);
+    --color-bg-fullscreen: rgb(0, 0, 0);
+    --color-bg-placeholder: rgb(22, 22, 24);
+
+    /* ── Fill ── */
+    --color-fill-brand: rgb(167, 139, 250);
+    --color-fill-brand-hover: rgba(167, 139, 250, 0.85);
+    --color-fill-brand-muted: rgba(167, 139, 250, 0.18);
+    --color-fill-neutral: rgba(255, 255, 255, 0.12);
+    --color-fill-neutral-hover: rgba(255, 255, 255, 0.18);
+    --color-fill-neutral-active: rgba(255, 255, 255, 0.24);
+    --color-fill-subtle: rgba(255, 255, 255, 0.06);
+    --color-fill-subtle-hover: rgba(255, 255, 255, 0.12);
+
+    /* ── Border ── */
+    --color-border-default: rgba(255, 255, 255, 0.12);
+    --color-border-subtle: rgba(255, 255, 255, 0.07);
+    --color-border-strong: rgba(255, 255, 255, 0.2);
+    --color-border-focus: rgba(255, 255, 255, 0.24);
+    --color-border-brand: rgba(167, 139, 250, 0.3);
+
+    /* ── Status ── */
+    --color-status-danger-fill: rgb(239, 68, 68);
+    --color-status-warn-fill: rgb(251, 191, 36);
+
+    /* ── Text ── */
+    --color-text-brand: rgb(167, 139, 250);
+    --color-text-on-brand: rgb(18, 18, 18);
+
+    /* ── Background Image ── */
+    --bg-image: none;
+
+    /* ── Shadow ── */
+    --shadow-xs: none;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
+    --shadow-up: none;
+    --shadow-left: none;
+}

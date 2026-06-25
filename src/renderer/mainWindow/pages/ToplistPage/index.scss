@@ -1,0 +1,126 @@
+// ============================================================================
+// ToplistPage — 排行榜页样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   页面: padding-top 16px
+//   标题: 24px, bold, text-primary
+//   TabBar: margin-top 16px, margin-bottom 24px
+//   分组标题: 14px, semibold, text-primary, mb 12px
+//   卡片网格: 2~4 列自适应, gap 12px
+//   卡片: padding 16px, radius-card(12px), bg-surface, hover bg-surface-raised,
+//         flex items-center, gap 8px, border 1px border-subtle
+//   卡片封面: 36×36, radius-control(8px)
+//   卡片标题: 14px, semibold, text-primary, truncate
+
+.p-toplist {
+    padding-top: var(--space-4);
+
+    &__title {
+        font-size: var(--text-title-size);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+        line-height: var(--text-title-leading);
+    }
+
+    &__tabs {
+        margin-top: var(--space-4);
+        margin-bottom: var(--space-6);
+    }
+
+    // ── 内容区 ──
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+    }
+
+    &__group-title {
+        font-size: var(--text-body-size);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        margin-bottom: var(--space-3);
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: var(--space-3);
+    }
+
+    // ── 卡片 ──
+
+    &__card {
+        // 重置 button 默认样式
+        border: none;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        border-radius: var(--radius-card);
+        background-color: var(--color-bg-surface);
+        border: 1px solid var(--color-border-subtle);
+
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            border-color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            background-color: var(--color-bg-surface-raised);
+            border-color: var(--color-border-default);
+        }
+
+        &:active {
+            opacity: var(--opacity-pressed);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+    }
+
+    &__card-header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    &__card-cover {
+        flex-shrink: 0;
+
+        .artwork {
+            width: 36px;
+            height: 36px;
+        }
+    }
+
+    &__card-icon {
+        width: var(--icon-sm);
+        height: var(--icon-sm);
+        color: var(--color-text-brand);
+    }
+
+    &__card-title {
+        font-size: var(--text-body-size);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+    }
+
+    &__card-preview {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        padding-top: var(--space-1);
+    }
+}

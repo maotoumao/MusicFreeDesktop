@@ -1,0 +1,104 @@
+// ============================================================================
+// SearchPage — 搜索结果页样式
+// ============================================================================
+
+.p-search {
+    padding-top: var(--space-4); // 16px
+    animation: search-page-fade-in var(--duration-normal) ease-out;
+
+    // ── 标题行 ──
+
+    &__header {
+        margin-bottom: var(--space-6); // 24px
+    }
+
+    &__title {
+        font-size: var(--text-title-size); // 24px
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+        line-height: var(--text-title-leading);
+    }
+
+    &__title-keyword {
+        color: var(--color-text-brand);
+    }
+
+    // ── Tab + Plugin 区 ──
+
+    &__filters {
+        margin-top: var(--space-4);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3); // 12px
+    }
+
+    &__plugins {
+        padding-top: var(--space-3);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2); // 8px
+    }
+
+    // ── 结果区 ──
+
+    &__result-body {
+        min-height: 200px;
+    }
+
+    // ── Artist Grid（圆形头像网格） ──
+
+    &__artist-grid-inner {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: var(--space-6) var(--space-6); // 24px × 24px
+    }
+
+    &__artist-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: var(--space-2) 0;
+        cursor: pointer;
+    }
+
+    &__artist-avatar {
+        // 覆盖 Artwork 的固定尺寸，改为 120×120 圆形
+        &.artwork {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+        }
+
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--space-3); // 12px
+    }
+
+    &__artist-name {
+        font-size: var(--text-body-size); // 14px
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        text-align: center;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__artist-fans {
+        font-size: var(--text-caption-size); // 12px
+        color: var(--color-text-secondary);
+        margin-top: var(--space-0-5);
+    }
+}
+
+@keyframes search-page-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

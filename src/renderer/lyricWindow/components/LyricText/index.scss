@@ -1,0 +1,26 @@
+// ============================================================================
+// LyricText — 歌词文字样式
+// ============================================================================
+
+.lyric-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0 var(--space-4);
+    min-height: 0;
+
+    &.is-scrollable {
+        justify-content: flex-start;
+    }
+
+    &__content {
+        white-space: nowrap;
+        user-select: none;
+        -webkit-text-stroke-width: 1px;
+        paint-order: stroke fill;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+    }
+}

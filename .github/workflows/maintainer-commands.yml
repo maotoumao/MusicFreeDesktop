@@ -1,0 +1,71 @@
+name: Maintainer commands
+
+on:
+    issue_comment:
+        types: [created]
+
+permissions:
+    issues: write
+
+jobs:
+    accept:
+        # 仅处理 Issue 评论（排除 PR），且评论内容以 /accept 开头
+        # Only handle issue comments (exclude PRs) whose body starts with /accept
+        if: ${{ !github.event.issue.pull_request && startsWith(github.event.comment.body, '/accept') }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Verify commenter is a maintainer
+              id: check
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const assoc = context.payload.comment.author_association;
+                      const allowed = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+                      if (!allowed.includes(assoc)) {
+                          core.setOutput('isMaintainer', 'false');
+                          core.info(`Commenter association is ${assoc}; ignoring.`);
+                      } else {
+                          core.setOutput('isMaintainer', 'true');
+                      }
+
+            - name: Accept issue
+              if: steps.check.outputs.isMaintainer == 'true'
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const issue_number = context.payload.issue.number;
+                      const { owner, repo } = context.repo;
+
+                      // 添加 accepted 标签 | Add the accepted label
+                      await github.rest.issues.addLabels({
+                          owner, repo, issue_number,
+                          labels: ['accepted'],
+                      });
+
+                      // 移除 stale 标签（若存在）| Remove stale label if present
+                      try {
+                          await github.rest.issues.removeLabel({
+                              owner, repo, issue_number, name: 'stale',
+                          });
+                      } catch (e) {
+                          if (e.status !== 404) throw e;
+                      }
+
+                      // 若 Issue 已关闭则重新打开 | Reopen the issue if it was closed
+                      if (context.payload.issue.state === 'closed') {
+                          await github.rest.issues.update({
+                              owner, repo, issue_number, state: 'open',
+                          });
+                      }
+
+                      // 回复确认 | Reply to confirm
+                      await github.rest.issues.createComment({
+                          owner, repo, issue_number,
+                          body: [
+                              '✅ 此 Issue 已被维护者标记为 `accepted`，将进入排期。关联此 Issue 的 PR 可以提交（请提交到 `dev` 分支，并在描述中使用 `Closes #' + issue_number + '` 关联）。',
+                              '',
+                              '---',
+                              '',
+                              '✅ This issue has been marked `accepted` by a maintainer and is now eligible for work. A PR linking this issue may be submitted (target the `dev` branch and reference it with `Closes #' + issue_number + '` in the description).',
+                          ].join('\n'),
+                      });

@@ -1,0 +1,89 @@
+// ============================================================================
+// AddMusicToSheetModal — 添加歌曲到歌单弹窗样式
+// ============================================================================
+
+.add-music-to-sheet-modal {
+    // 抵消 .modal__body 的 padding，使列表项与弹窗面板边缘齐平
+    margin: -20px -24px;
+
+    // ── 歌单列表 ──
+    &__list {
+        max-height: 380px;
+        padding: var(--space-1) var(--space-2) var(--space-4);
+    }
+
+    // ── 歌单项（通用） ──
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        border: none;
+        background: none;
+        border-radius: var(--radius-sm);
+        font-size: var(--text-body-size);
+        color: var(--color-text-primary);
+        text-align: left;
+        cursor: pointer;
+        transition: background-color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            background: var(--color-fill-subtle);
+        }
+
+        &:active {
+            opacity: var(--opacity-muted);
+        }
+    }
+
+    // ── 新建歌单项 ──
+    &__item--create {
+        color: var(--color-fill-brand);
+    }
+
+    // ── 封面 ──
+    &__item-artwork {
+        flex-shrink: 0;
+    }
+
+    &__item-artwork--create {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        border: 1px dashed var(--color-fill-brand);
+        color: var(--color-fill-brand);
+    }
+
+    // ── 歌单标题 ──
+    &__item-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    // ── 歌曲数量 ──
+    &__item-count {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        flex-shrink: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+    }
+
+    // ── 空态 ──
+    &__empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-8) var(--space-4);
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+    }
+}

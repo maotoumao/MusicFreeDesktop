@@ -1,0 +1,102 @@
+// ============================================================================
+// TaskTable — 下载任务表格
+// ============================================================================
+
+.p-download__table {
+    width: 100%;
+    table-layout: fixed;
+    text-align: left;
+    font-size: var(--text-body-size);
+    border-collapse: collapse;
+}
+
+.p-download__header-row {
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.p-download__header-cell {
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
+    padding: var(--space-3) var(--space-4);
+
+    &--artist {
+        width: 18%;
+    }
+
+    &--album {
+        width: 16%;
+    }
+
+    &--size {
+        width: 120px;
+    }
+
+    &--status {
+        width: 160px;
+    }
+
+    &--actions {
+        width: 100px;
+        text-align: right;
+    }
+}
+
+// ── 行 ──
+.p-download__row {
+    transition: background-color var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        background-color: var(--color-fill-subtle);
+    }
+}
+
+.p-download__cell {
+    padding: var(--space-3) var(--space-4);
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &--title {
+        color: var(--color-text-primary);
+    }
+
+    &--size {
+        font-size: var(--text-caption-size);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &--actions {
+        overflow: visible;
+        text-overflow: clip;
+        text-align: right;
+    }
+}
+
+// ── 标题单元格 ──
+.p-download__title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.p-download__song-title {
+    font-weight: var(--font-weight-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── 状态文本 ──
+.p-download__status-text {
+    font-size: var(--text-overline-size);
+
+    &--pending {
+        color: var(--color-text-secondary);
+    }
+
+    &--error {
+        color: var(--color-status-danger-text);
+    }
+}

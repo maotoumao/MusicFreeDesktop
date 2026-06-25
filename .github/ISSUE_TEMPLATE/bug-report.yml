@@ -1,0 +1,126 @@
+name: 🐛 Bug 报告 | Bug Report
+description: 报告一个软件缺陷 | Report a software bug
+labels: ['bug']
+body:
+    - type: markdown
+      attributes:
+          value: |
+              感谢你提交 Bug 报告！请尽可能详细地填写以下信息，这将帮助我们更快地定位和修复问题。
+
+              Thank you for submitting a bug report! Please fill in the following information as thoroughly as possible to help us locate and fix the issue faster.
+
+              > **注意**：插件相关的问题请勿在此提交，本项目仅是播放器，不提供音源。Issue 默认保持开放，被标记为 `accepted` 后才会进入排期；长期未被 `accepted` 且无活动的 Issue 会被自动标记 `stale` 并关闭。修复此问题的 PR 需在描述中用 `Closes #编号` 关联一个已 `accepted` 的 Issue。
+              >
+              > **Note**: Please do not submit plugin-related issues here. This project is a player only and does not provide music sources. Issues stay open by default and only get scheduled once marked `accepted`. Issues left without `accepted` and with no activity are eventually marked `stale` and closed. A PR fixing this bug must reference an `accepted` issue via `Closes #<number>` in its description.
+
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: 提交前确认 | Pre-submission checklist
+          options:
+              - label: 我已搜索过现有 Issues，确认没有重复的问题 | I have searched existing Issues and confirmed this is not a duplicate
+                required: true
+              - label: 我确认这不是插件相关的问题 | I confirm this is not a plugin-related issue
+                required: true
+
+    - type: input
+      id: version
+      attributes:
+          label: 软件版本 | App Version
+          description: |
+              打开设置页面可查看版本号
+
+              You can find the version number on the Settings page
+          placeholder: '例如 | e.g. 0.5.0'
+      validations:
+          required: true
+
+    - type: dropdown
+      id: os
+      attributes:
+          label: 操作系统 | Operating System
+          options:
+              - Windows
+              - macOS
+              - Linux
+      validations:
+          required: true
+
+    - type: input
+      id: os-version
+      attributes:
+          label: 系统版本 | OS Version
+          placeholder: '例如 | e.g. Windows 11 23H2 / macOS 15.0 / Ubuntu 24.04'
+      validations:
+          required: true
+
+    - type: textarea
+      id: description
+      attributes:
+          label: 问题描述 | Bug Description
+          description: |
+              清晰简洁地描述你遇到的问题
+
+              A clear and concise description of the bug
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: 复现步骤 | Steps to Reproduce
+          description: |
+              详细描述如何复现这个问题
+
+              Detailed steps to reproduce the issue
+          placeholder: |
+              1. 打开软件 | Open the app
+              2. 点击 ... | Click on ...
+              3. 执行 ... | Perform ...
+              4. 出现错误 | Error occurs
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected
+      attributes:
+          label: 预期行为 | Expected Behavior
+          description: |
+              描述你期望发生的行为
+
+              Describe what you expected to happen
+      validations:
+          required: true
+
+    - type: textarea
+      id: actual
+      attributes:
+          label: 实际行为 | Actual Behavior
+          description: |
+              描述实际发生的行为
+
+              Describe what actually happened
+      validations:
+          required: true
+
+    - type: textarea
+      id: screenshots
+      attributes:
+          label: 截图或日志 | Screenshots or Logs
+          description: |
+              如有截图或错误日志，请粘贴在此处
+
+              If applicable, paste screenshots or error logs here
+      validations:
+          required: false
+
+    - type: textarea
+      id: additional
+      attributes:
+          label: 补充信息 | Additional Context
+          description: |
+              其他可能有帮助的信息
+
+              Any other information that might be helpful
+      validations:
+          required: false

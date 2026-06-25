@@ -1,0 +1,7 @@
+node_modules
+.pnpm-store
+.git
+.webpack
+dist
+out
+release

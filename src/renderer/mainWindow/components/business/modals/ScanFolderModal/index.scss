@@ -1,0 +1,132 @@
+// ============================================================================
+// ScanFolderModal — 扫描文件夹弹窗样式
+// ============================================================================
+
+.scan-folder-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    // ── 区域标题 ──
+    &__section-label {
+        font-size: var(--text-caption-size);
+        line-height: var(--text-caption-leading);
+        color: var(--color-text-secondary);
+    }
+
+    // ── 文件夹列表 ──
+    &__folder-list {
+        max-height: 200px;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+
+    // ── 单个文件夹条目 ──
+    &__folder-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-1-5) var(--space-3);
+        border-radius: var(--radius-control);
+        background: var(--color-fill-subtle);
+        border: 1px solid var(--color-border-subtle);
+    }
+
+    &__folder-icon {
+        flex-shrink: 0;
+        color: var(--color-text-muted);
+    }
+
+    &__folder-path {
+        flex: 1;
+        min-width: 0;
+        font-size: var(--text-body-size);
+        line-height: var(--text-body-leading);
+        color: var(--color-text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__remove-btn {
+        border: none;
+        background: none;
+        flex-shrink: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        padding: var(--space-0-5) var(--space-1);
+        border-radius: var(--radius-badge);
+
+        transition: color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+
+        &:disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+    }
+
+    // ── 添加文件夹按钮 ──
+    &__add-btn {
+        border: none;
+        background: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-card);
+        border: 1px dashed var(--color-border-subtle);
+        color: var(--color-text-secondary);
+        font-size: var(--text-body-size);
+        cursor: pointer;
+
+        transition:
+            color var(--duration-fast) var(--ease-standard),
+            border-color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+            border-color: var(--color-fill-brand);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+
+        &:disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+    }
+
+    // ── 空状态 ──
+    &__empty {
+        padding: var(--space-4);
+        text-align: center;
+        font-size: var(--text-body-size);
+        color: var(--color-text-muted);
+    }
+
+    // ── 提示文本 ──
+    &__hint {
+        font-size: var(--text-caption-size);
+        line-height: var(--text-caption-leading);
+        color: var(--color-text-muted);
+    }
+}

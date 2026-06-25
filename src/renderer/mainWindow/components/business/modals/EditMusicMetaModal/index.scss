@@ -1,0 +1,35 @@
+// ============================================================================
+// EditMusicMetaModal — 编辑歌曲元数据弹窗样式
+// ============================================================================
+
+.edit-music-meta-modal {
+    &__hint {
+        margin-bottom: 16px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--color-warning, #d97706);
+        background: color-mix(in srgb, var(--color-warning, #d97706) 10%, transparent);
+    }
+
+    &__field {
+        margin-bottom: 16px;
+
+        &:last-of-type {
+            margin-bottom: 0;
+        }
+    }
+
+    &__label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--color-text-secondary);
+    }
+
+    &__input {
+        width: 100%;
+    }
+}

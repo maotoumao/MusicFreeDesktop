@@ -1,0 +1,52 @@
+name: PR branch guard
+
+on:
+    pull_request_target:
+        types: [opened, reopened]
+
+permissions:
+    pull-requests: write
+    issues: write
+
+jobs:
+    enforce-dev-branch:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/github-script@v7
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      const { owner, repo } = context.repo;
+                      const number = pr.number;
+
+                      // 维护者豁免（例如发布时合并到 main）| Maintainers are exempt (e.g. release merges into main)
+                      const assoc = pr.author_association;
+                      if (['OWNER', 'MEMBER', 'COLLABORATOR'].includes(assoc)) {
+                          core.info(`Author association ${assoc}; skipping branch check.`);
+                          return;
+                      }
+
+                      // 目标分支必须是 dev | The base branch must be dev
+                      if (pr.base.ref === 'dev') {
+                          core.info('PR targets dev; OK.');
+                          return;
+                      }
+
+                      await github.rest.issues.createComment({
+                          owner, repo, issue_number: number,
+                          body: [
+                              '🚫 此 PR 的目标分支是 `' + pr.base.ref + '`，但所有 PR 必须提交到 `dev` 分支。此 PR 已被自动关闭。',
+                              '',
+                              '请将改动重新提交到 `dev` 分支后再发起 PR。',
+                              '',
+                              '---',
+                              '',
+                              '🚫 This PR targets `' + pr.base.ref + '`, but all PRs must be submitted against the `dev` branch. It has been closed automatically.',
+                              '',
+                              'Please re-open your PR against the `dev` branch.',
+                          ].join('\n'),
+                      });
+
+                      await github.rest.pulls.update({
+                          owner, repo, pull_number: number, state: 'closed',
+                      });

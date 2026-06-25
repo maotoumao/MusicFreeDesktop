@@ -1,0 +1,31 @@
+// ============================================================================
+// RemoteThemes — 在线主题市场样式
+// ============================================================================
+//
+// BEM Block: remote-themes
+//
+// Grid 布局、底部提示样式。
+
+.remote-themes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+
+    &__filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--space-6);
+    }
+
+    &__submit-hint {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        line-height: var(--text-caption-leading);
+    }
+}

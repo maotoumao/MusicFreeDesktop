@@ -1,155 +1,9 @@
-import { IAppConfig } from "@/types/app-config";
-import { ICommand } from "@shared/message-bus/type";
-
-export const internalDataKey = "$";
-export const internalDataSymbol = Symbol.for("internal");
-// 加入播放列表/歌单的时间
-export const timeStampSymbol = Symbol.for("time-stamp");
-// 加入播放列表的辅助顺序
-export const sortIndexSymbol = Symbol.for("sort-index");
 /**
- * 歌曲引用次数
- * TODO: 没必要算引用 如果真有需要直接取异或就可以了
+ * 全局通用常量
  */
-export const musicRefSymbol = "$$ref";
 
-/** 本地存储路径 */
-export const localFilePathSymbol = Symbol.for("local-file-path");
-export const localPluginName = "本地";
-export const localPluginHash = "本地";
-
-export const supportedMediaType = [
-    "music",
-    "album",
-    "artist",
-    "sheet",
-] as const;
-
-export const rem = 13;
-
-export enum RequestStateCode {
-    /** 空闲 */
-    IDLE = 0b00000000,
-    PENDING_FIRST_PAGE = 0b00000010,
-    // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-    LOADING = 0b00000010,
-    /** 检索中 */
-    PENDING_REST_PAGE = 0b00000011,
-    /** 部分结束 */
-    PARTLY_DONE = 0b00000100,
-    /** 全部结束 */
-    FINISHED = 0b0001000,
-    /** 出错了 */
-    ERROR = 0b10000000,
-}
-
-/** 音质列表 */
-export const qualityKeys: IMusic.IQualityKey[] = [
-    "low",
-    "standard",
-    "high",
-    "super",
-];
-
-export const supportLocalMediaType = [
-    ".mp3",
-    ".mp4",
-    ".m4s",
-    ".flac",
-    ".wma",
-    ".wav",
-    ".m4a",
-    ".ogg",
-    ".acc",
-    ".aac",
-    // ".ape",
-    ".opus",
-];
-
-export const toastDuration = {
-    short: 1000,
-    long: 2500,
-};
-
-export const defaultFont = {
-    fullName: "默认",
-    family: "",
-    postscriptName: "",
-    style: "",
-};
-
-type IShortCutKeys = keyof IAppConfig["shortCut.shortcuts"];
-export const shortCutKeys: IShortCutKeys[] = [
-    "play/pause",
-    "skip-next",
-    "skip-previous",
-    "volume-up",
-    "volume-down",
-    "toggle-desktop-lyric",
-    "like/dislike",
-    "toggle-main-window-visible",
-];
-
-// 快捷键列表对应的指令
-export const shortCutKeysCommands: Record<IShortCutKeys, keyof ICommand> =
-{
-    "play/pause": "TogglePlayerState",
-    "skip-next": "SkipToNext",
-    "skip-previous": "SkipToPrevious",
-    "volume-down": "VolumeDown",
-    "volume-up": "VolumeUp",
-    "toggle-desktop-lyric": "ToggleDesktopLyric",
-    "like/dislike": "ToggleFavorite",
-    "toggle-main-window-visible": "ToggleMainWindowVisible",
-};
-
-// 主进程的Resource
-export enum ResourceName {
-    SKIP_LEFT_ICON = "skip-left.png",
-    SKIP_RIGHT_ICON = "skip-right.png",
-    PAUSE_ICON = "pause.png",
-    PLAY_ICON = "play.png",
-    DEFAULT_ALBUM_COVER_IMAGE = "album-cover.jpeg",
-    LOGO_IMAGE = "logo.png",
-
-}
-
-/** 下载状态 */
-export enum DownloadState {
-    /** 空闲状态 */
-    NONE = "NONE",
-    /** 排队等待中 */
-    WAITING = "WAITING",
-    /** 下载中 */
-    DOWNLOADING = "DOWNLOADING",
-    /** 失败 */
-    ERROR = "ERROR",
-    /** 下载完成 */
-    DONE = "DONE",
-}
-
-// 主题更新链接
-export const themePackStoreBaseUrl = [
-    "https://raw.githubusercontent.com/maotoumao/MusicFreeThemePacks/master/", //github
-    "https://cdn.jsdelivr.net/gh/maotoumao/MusicFreeThemePacks@master/",
-    "https://dev.azure.com/maotoumao/MusicFree/_apis/git/repositories/MusicFreeThemePacks/items?scopePath=/.publish/publish.json&api-version=6.0", // azure
-];
-
-export const appUpdateSources = [
-    "https://gitee.com/maotoumao/MusicFreeDesktop/raw/master/release/version.json",
-    "https://raw.githubusercontent.com/maotoumao/MusicFreeDesktop/master/release/version.json",
-    "https://cdn.jsdelivr.net/gh/maotoumao/MusicFreeDesktop@master/release/version.json",
-];
-
-export enum TrackPlayerSyncType {
-    SyncPlayerState = "SyncPlayerState",
-    MusicChanged = "MusicChanged",
-    PlayerStateChanged = "PlayerStateChanged",
-    RepeatModeChanged = "RepeatModeChanged",
-    LyricChanged = "LyricChanged",
-    CurrentLyricChanged = "CurrentLyricChanged",
-    ProgressChanged = "ProgressChanged",
-}
+/** 音质键名，从低到高排列 */
+export const QUALITY_KEYS: IMusic.IQualityKey[] = ['low', 'standard', 'high', 'super'];
 
 /** 播放器状态 */
 export enum PlayerState {
@@ -166,27 +20,86 @@ export enum PlayerState {
 /** 播放模式 */
 export enum RepeatMode {
     /** 随机 */
-    Shuffle = "shuffle",
+    Shuffle = 'shuffle',
     /** 播放队列 */
-    Queue = "queue-repeat",
+    Queue = 'queue-repeat',
     /** 单曲循环 */
-    Loop = "loop",
+    Loop = 'loop',
 }
 
-
-/** 窗口类型 */
-export enum WindowType {
-    MAIN = "MAIN",
-    LYRIC = "LYRIC",
-    MINIMODE = "MINIMODE",
-}
-
-export enum WindowRole {
-    MAIN = "MAIN",
-    SLAVE = "SLAVE",
-}
-
-export const CommonConst = {
-    /** 新建歌单名称长度限制 */
-    NEW_SHEET_NAME_LENGTH_LIMIT: 120,
+/** RepeatMode 循环切换顺序：Queue → Shuffle → Loop → Queue */
+export const REPEAT_MODE_NEXT: Record<RepeatMode, RepeatMode> = {
+    [RepeatMode.Queue]: RepeatMode.Shuffle,
+    [RepeatMode.Shuffle]: RepeatMode.Loop,
+    [RepeatMode.Loop]: RepeatMode.Queue,
 };
+
+/** 日志级别 */
+export enum LogLevel {
+    Debug = 'debug',
+    Info = 'info',
+    Warn = 'warn',
+    Error = 'error',
+}
+
+// 主进程的Resource
+export enum ResourceName {
+    SKIP_LEFT_ICO = 'skip-left.ico',
+    SKIP_RIGHT_ICO = 'skip-right.ico',
+    PAUSE_ICO = 'pause.ico',
+    PLAY_ICO = 'play.ico',
+    LOGO_ICO = 'logo.ico',
+    DEFAULT_ALBUM_COVER_IMAGE = 'album-cover.jpeg',
+    LOGO_IMAGE = 'logo.png',
+}
+
+/**
+ * RequestStatus — 通用请求/加载状态枚举
+ *
+ * 用于网络请求、页面加载、分页等所有涉及异步状态的场景。
+ * 所有 UI 组件（StatusPlaceholder、ListFooter 等）统一消费此枚举。
+ */
+export enum RequestStatus {
+    /** 初始态，尚未发起请求 */
+    Idle = 'idle',
+    /** 请求中 */
+    Pending = 'pending',
+    /** 请求成功完成 */
+    Done = 'done',
+    /** 请求失败 */
+    Error = 'error',
+}
+
+/** 播放错误原因 */
+export enum ErrorReason {
+    /** 空资源（无 URL） */
+    EmptyResource,
+    /** 不支持的资源格式 */
+    UnsupportedResource,
+    /** 恢复播放失败（启动时） */
+    HydrationFailed,
+}
+
+/** 标记 slim 对象的内部 key（值为 '$slim'） */
+export const INTERNAL_SLIM_KEY = '$slim';
+
+/** 支持的音频文件扩展名（小写，含点号） */
+export const SUPPORTED_AUDIO_EXTS = new Set([
+    '.mp3',
+    '.mp4',
+    '.m4s',
+    '.m4a',
+    '.flac',
+    '.wav',
+    '.ogg',
+    '.aac',
+    '.wma',
+    '.ape',
+    '.opus',
+]);
+
+/** 本地插件平台名 */
+export const LOCAL_PLUGIN_NAME = '本地';
+
+/** 本地插件哈希 */
+export const LOCAL_PLUGIN_HASH = '本地';

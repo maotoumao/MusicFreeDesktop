@@ -1,0 +1,29 @@
+// .p-recently-played 页面样式
+//
+// 设计稿还原：
+//   页面: pt --space-4 (16px)
+//   标题: --text-title-size (24px), --font-weight-bold, --color-text-primary
+//   副标题: --text-caption-size (12px), --color-text-secondary, mt --space-1
+//   底部留白由 .l-app-shell__content 的 margin-bottom 统一处理
+
+.p-recently-played {
+    padding-top: var(--space-4);
+
+    &__title {
+        font-size: var(--text-title-size);
+        line-height: var(--text-title-leading);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+    }
+
+    &__meta {
+        font-size: var(--text-caption-size);
+        line-height: var(--text-caption-leading);
+        color: var(--color-text-secondary);
+        margin-top: var(--space-1);
+    }
+
+    &__toolbar {
+        margin-top: var(--space-2);
+    }
+}

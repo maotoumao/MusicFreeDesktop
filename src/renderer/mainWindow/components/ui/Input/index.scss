@@ -1,0 +1,129 @@
+// ============================================================================
+// Input — 原子组件样式
+// ============================================================================
+//
+// 状态：default | focus | disabled | error
+// 支持 prefix / suffix 插槽
+//
+
+.input {
+    // ── 容器 ──
+    display: inline-flex;
+    align-items: center;
+    height: var(--size-control-md);
+    background: var(--color-fill-subtle);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-control);
+    padding: 0 12px;
+    gap: 8px;
+    outline: none;
+    transition:
+        background-color var(--duration-normal) var(--ease-standard),
+        border-color var(--duration-normal) var(--ease-standard);
+
+    // 容器内有 input 获焦时，浏览器可能对容器绘制 outline — 强制移除
+    &:focus-within {
+        outline: none;
+    }
+
+    // ── Elements ──
+
+    &__native {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        appearance: none;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-primary);
+        line-height: var(--text-caption-leading);
+
+        &:focus,
+        &:focus-visible {
+            outline: none;
+            box-shadow: none;
+        }
+
+        &::placeholder {
+            color: var(--color-text-placeholder);
+        }
+    }
+
+    &__prefix,
+    &__suffix {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--color-text-secondary);
+    }
+
+    // ── State: Focused ──
+    &.is-focused {
+        background-color: var(--color-fill-subtle-hover);
+        border-color: var(--color-border-focus);
+        outline: none;
+    }
+
+    // ── State: Error ──
+    &.has-error {
+        border-color: var(--color-status-danger-border);
+        background-color: var(--color-status-danger-bg);
+
+        .input__native::placeholder {
+            color: var(--color-status-danger-text);
+        }
+    }
+
+    &.has-error.is-focused {
+        border-color: var(--color-status-danger-text);
+    }
+
+    // ── State: Disabled ──
+    &.is-disabled {
+        opacity: var(--opacity-disabled);
+        pointer-events: none;
+        cursor: not-allowed;
+
+        .input__native {
+            cursor: not-allowed;
+        }
+    }
+
+    // ── Focus-visible on native input ──
+    &__native:focus-visible {
+        outline: none;
+    }
+
+    // ── 清空按钮 ──
+    &__clear-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+        padding: 0;
+        border: none;
+        border-radius: var(--radius-pill);
+        background: var(--color-fill-neutral);
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition:
+            color var(--duration-fast) var(--ease-standard),
+            background-color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+            background: var(--color-fill-subtle-hover);
+        }
+
+        svg {
+            width: 12px;
+            height: 12px;
+        }
+    }
+}

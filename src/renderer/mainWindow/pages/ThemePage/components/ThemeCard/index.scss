@@ -1,0 +1,92 @@
+// ============================================================================
+// ThemeCard — 主题卡片样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: bg fill-subtle, rounded-card (12px), border border-default,
+//         overflow-hidden, p-12, cursor-pointer
+//   hover: border border-strong
+//   激活: border brand + inset box-shadow
+//   预览区: h-120, rounded-control (8px), overflow-hidden, mb-12
+//   名称: text-body (14px), font-bold, text-primary
+//   作者: text-caption (12px), text-secondary
+//   底部: mt-12
+
+.theme-card {
+    background: var(--color-fill-subtle);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border-default);
+    overflow: hidden;
+    padding: var(--space-3);
+    cursor: pointer;
+
+    transition: border-color var(--duration-normal) var(--ease-standard);
+
+    // ── hover ──
+    &:hover:not(.is-active) {
+        border-color: var(--color-border-strong);
+    }
+
+    // ── :active 点击反馈 ──
+    &:active {
+        opacity: var(--opacity-pressed);
+    }
+
+    // ── 激活态 ──
+    &.is-active {
+        border-color: var(--color-fill-brand);
+        outline: 1px solid var(--color-fill-brand);
+        outline-offset: -1px;
+    }
+
+    // ── focus-visible ──
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+
+    // ── 预览区 ──
+    &__preview {
+        height: 120px;
+        border-radius: var(--radius-control);
+        overflow: hidden;
+        margin-bottom: var(--space-3);
+    }
+
+    // ── 信息区 ──
+    &__info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+
+    &__name {
+        font-size: var(--text-body-size);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+        line-height: var(--text-body-leading);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__author {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        line-height: var(--text-caption-leading);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    // ── 底部操作区 ──
+    &__footer {
+        margin-top: var(--space-3);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--space-2);
+    }
+}

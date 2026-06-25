@@ -1,0 +1,129 @@
+// ============================================================================
+// TabBar — 组合组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: position relative, border-bottom 1px border-subtle, pb-12
+//   Tab list: flex, gap-24
+//     wrap 模式 → flex-wrap
+//     scroll 模式 → nowrap, overflow-x auto, 隐藏滚动条
+//   Tab:
+//     flex items-center, gap-8, text-sm(14px), pb-8
+//     默认 → color secondary, hover → color primary
+//     激活 → color primary, font-weight semibold
+//   指示器:
+//     position absolute, top 动态计算 (跟随激活 tab 所在行), height 2px
+//     bg fill-brand, rounded-full
+//     transition: left/top/width 200ms
+//   图标: 16×16
+//
+
+.tab-bar {
+    position: relative;
+    border-bottom: 1px solid var(--color-border-subtle);
+    padding-bottom: 12px;
+
+    // ── Tab 列表 ──
+    &__list {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+
+    // ── 模式：换行 ──
+    &--wrap {
+        .tab-bar__list {
+            flex-wrap: wrap;
+        }
+    }
+
+    // ── 模式：滚动 ──
+    &--scroll {
+        .tab-bar__list {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    }
+
+    // ── 单个 Tab ──
+    &__tab {
+        // ── button 重置 ──
+        border: none;
+        background: none;
+        text-align: left;
+
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        font-size: var(--text-body-size);
+        color: var(--color-text-secondary);
+        padding: 0;
+        padding-bottom: 8px;
+        cursor: pointer;
+        user-select: none;
+        transition: color var(--duration-normal) var(--ease-standard);
+        flex-shrink: 0;
+
+        &:hover:not(.is-disabled):not(.is-active) {
+            color: var(--color-text-primary);
+        }
+
+        // ── 激活态 ──
+        &.is-active {
+            color: var(--color-text-primary);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        // ── 禁用态 ──
+        &.is-disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+
+        // ── focus-visible ──
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+            border-radius: var(--radius-badge);
+        }
+    }
+
+    // ── Tab 图标 ──
+    &__tab-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+
+    // ── 底部指示器 ──
+    &__indicator {
+        position: absolute;
+        height: 2px;
+        background: var(--color-fill-brand);
+        border-radius: var(--radius-pill);
+        transition:
+            left var(--duration-normal) var(--ease-standard),
+            top var(--duration-normal) var(--ease-standard),
+            width var(--duration-normal) var(--ease-standard);
+        pointer-events: none;
+    }
+}

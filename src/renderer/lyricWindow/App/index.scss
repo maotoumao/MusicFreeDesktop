@@ -1,0 +1,34 @@
+// ============================================================================
+// l-lyric-shell — 歌词窗口根容器
+// ============================================================================
+// NOTE: 歌词窗口浮于桌面，背景不确定，因此颜色值不引用主题 token 而使用固定值。
+// 通过自定义属性集中管理，便于后续主题化。
+
+body[data-window='lyric'] {
+    background: transparent;
+    background-color: transparent;
+}
+
+:root {
+    --lyric-bg-hover: rgba(0, 0, 0, 0.25);
+    --lyric-text-color: rgba(255, 255, 255, 0.85);
+    --lyric-active-color: #34d399;
+    --lyric-btn-hover-bg: rgba(255, 255, 255, 0.15);
+    --lyric-btn-active-bg: rgba(255, 255, 255, 0.25);
+    --lyric-toolbar-height: 46px;
+}
+
+.l-lyric-shell {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    border-radius: var(--radius-card);
+    transition: background var(--duration-normal) var(--ease-standard);
+
+    &.is-unlocked.is-hovered {
+        background: var(--lyric-bg-hover);
+    }
+}

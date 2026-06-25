@@ -1,0 +1,198 @@
+// ============================================================================
+// Button — 原子组件样式
+// ============================================================================
+//
+// 四种变体：primary | secondary | ghost | icon
+// 四种尺寸：lg | md | sm | sq
+// 状态：hover | active | focus-visible | disabled | loading
+//
+
+.btn {
+    // ── 基础样式 ──
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border: none;
+    cursor: pointer;
+    font-weight: var(--font-weight-normal);
+    white-space: nowrap;
+    user-select: none;
+    vertical-align: middle;
+    text-decoration: none;
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard),
+        opacity var(--duration-instant) var(--ease-standard);
+
+    // ── :active 透明度反馈 — 所有变体共享 ──
+    &:active:not(.is-disabled) {
+        opacity: var(--opacity-pressed);
+    }
+
+    // ── :focus-visible 焦点环 ──
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+
+    // ── Elements ──
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    &__label {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    &__spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: var(--radius-pill);
+        animation: btn-spin 0.6s linear infinite;
+        flex-shrink: 0;
+    }
+
+    // ── Variant: Primary ──
+    &--primary {
+        background-color: var(--color-fill-brand);
+        color: var(--color-text-on-brand);
+        font-weight: var(--font-weight-normal);
+        box-shadow: var(--shadow-xs);
+
+        &:hover:not(.is-disabled) {
+            background-color: var(--color-fill-brand-hover);
+        }
+    }
+
+    // ── Variant: Secondary ──
+    &--secondary {
+        background-color: var(--color-fill-neutral);
+        color: var(--color-text-primary);
+        border: 1px solid var(--color-border-default);
+
+        &:hover:not(.is-disabled) {
+            background-color: var(--color-fill-neutral-hover);
+        }
+    }
+
+    // ── Variant: Ghost ──
+    &--ghost {
+        background-color: transparent;
+        color: var(--color-text-secondary);
+
+        &:hover:not(.is-disabled) {
+            background-color: var(--color-fill-subtle-hover);
+            color: var(--color-text-primary);
+        }
+    }
+
+    // ── Variant: Icon ──
+    &--icon {
+        background-color: transparent;
+        color: var(--color-text-secondary);
+        border-radius: var(--radius-pill);
+        padding: 0;
+
+        &:hover:not(.is-disabled) {
+            background-color: var(--color-fill-subtle-hover);
+            color: var(--color-text-primary);
+        }
+    }
+
+    // ── Size: Large ──
+    &--lg {
+        height: var(--size-control-lg);
+        padding: 0 20px;
+        font-size: var(--text-body-size);
+        border-radius: var(--radius-control);
+    }
+
+    // ── Size: Medium ──
+    &--md {
+        height: var(--size-control-md);
+        padding: 0 16px;
+        font-size: var(--text-label-size);
+        border-radius: var(--radius-control);
+    }
+
+    // ── Size: Small ──
+    &--sm {
+        height: var(--size-control-sm);
+        padding: 0 12px;
+        font-size: var(--text-caption-size);
+        border-radius: var(--radius-control);
+    }
+
+    // ── Size: Square (图标按钮正方形) ──
+    &--sq {
+        width: var(--size-control-md);
+        height: var(--size-control-md);
+        padding: 0;
+        border-radius: var(--radius-pill);
+    }
+
+    // ── State: Disabled ──
+    &.is-disabled {
+        opacity: var(--opacity-disabled);
+        cursor: not-allowed;
+    }
+
+    // ── State: Loading ──
+    &--loading {
+        pointer-events: none;
+    }
+
+    // ── Modifier: Danger ──
+    // 可与任意 variant 组合，覆盖为红色色调
+    &--danger {
+        color: var(--color-status-danger-text);
+
+        .btn__icon,
+        .btn__label {
+            color: inherit;
+        }
+
+        &.btn--primary {
+            background-color: var(--color-status-danger-fill);
+            color: var(--color-text-on-brand);
+            border-color: transparent;
+
+            &:hover:not(.is-disabled) {
+                opacity: 0.9;
+            }
+        }
+
+        &.btn--secondary {
+            background: var(--color-status-danger-bg);
+            border-color: var(--color-status-danger-border);
+
+            &:hover:not(.is-disabled) {
+                background: var(--color-status-danger-border);
+            }
+        }
+
+        &.btn--ghost {
+            &:hover:not(.is-disabled) {
+                background: var(--color-status-danger-bg);
+            }
+        }
+    }
+}
+
+@keyframes btn-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
