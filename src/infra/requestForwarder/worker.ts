@@ -11,6 +11,7 @@
  *   本机任意网页都能向 127.0.0.1 发请求，没有 token 即成为任意网页可用的 SSRF 跳板
  * - 不返回 CORS 头：唯一调用方是 <audio src>（no-cors 加载），不需要跨源读取
  * - 仅转发 http/https，且方法固定为 GET
+ * - 上游重定向由本服务跟随（保留插件 headers），跨源时仅保留非凭据类白名单头
  */
 
 import http from 'http';
@@ -44,6 +45,28 @@ const HOP_BY_HOP_HEADERS = new Set([
 
 /** 上游空闲超时：源站接受连接后若该时长内无数据收发则回收（活跃流式会自动重置计时） */
 const UPSTREAM_IDLE_TIMEOUT_MS = 30_000;
+
+/**
+ * 上游重定向在 worker 内跟随，而不是交给 <audio> 自行跟随：
+ * 后者会丢失插件指定的 headers（Referer/User-Agent/Cookie 等，CDN 防盗链常依赖），
+ * 且相对地址的 Location 会被解析到本服务、因缺少 token 被拒。
+ */
+const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
+const MAX_REDIRECTS = 10;
+
+/**
+ * 跨源重定向时仅转发的请求头：CDN 防盗链依赖的 UA/Referer 与分段请求所需头。
+ * 其余（Authorization/Cookie/X-Api-Key 等插件凭据）一律不带给重定向目标，host 按新目标重算。
+ */
+const CROSS_ORIGIN_ALLOWED_HEADERS = new Set([
+    'user-agent',
+    'referer',
+    'range',
+    'if-range',
+    'accept',
+    'accept-encoding',
+    'accept-language',
+]);
 
 let retryCount = 0;
 let server: http.Server | null = null;
@@ -105,16 +128,48 @@ function filterResponseHeaders(headers: http.IncomingHttpHeaders): http.Incoming
     return result;
 }
 
+/**
+ * 跨源重定向下一跳的请求头：仅保留白名单头，Referer 收敛为 origin
+ * （与浏览器默认的 strict-origin-when-cross-origin 一致，保留防盗链所需的域名、不泄露路径与查询串）
+ */
+function crossOriginHeaders(headers: Record<string, string>): Record<string, string> {
+    const result: Record<string, string> = {};
+    for (const [key, value] of Object.entries(headers)) {
+        const name = key.toLowerCase();
+        if (!CROSS_ORIGIN_ALLOWED_HEADERS.has(name)) continue;
+        if (name === 'referer') {
+            try {
+                const { origin } = new URL(value);
+                // data:/about: 等无真实 origin 的 Referer（origin 为 'null'）直接丢弃
+                if (origin !== 'null') {
+                    result[key] = `${origin}/`;
+                }
+            } catch {
+                // 无法解析的 Referer 直接丢弃
+            }
+            continue;
+        }
+        result[key] = value;
+    }
+    return result;
+}
+
+/** 仅允许转发 http/https 目标 */
+function isForwardableUrl(url: URL): boolean {
+    return url.protocol === 'http:' || url.protocol === 'https:';
+}
+
 function respondText(res: http.ServerResponse, statusCode: number, text: string): void {
     res.writeHead(statusCode, { 'Content-Type': 'text/plain' });
     res.end(text);
 }
 
-/** 将请求以 GET 方式转发到目标服务器 */
+/** 将请求以 GET 方式转发到目标服务器，并跟随上游重定向 */
 function forwardRequest(
     clientRes: http.ServerResponse,
     targetUrl: URL,
     headers: Record<string, string>,
+    redirectCount = 0,
 ): void {
     // 修正 host header
     let host = headers?.host;
@@ -146,7 +201,42 @@ function forwardRequest(
         options.agent = agent as unknown as http.Agent;
     }
 
+    /** 已交由下一跳处理重定向，本跳不再写 clientRes */
+    let handedOff = false;
+
+    const followRedirect = (location: string) => {
+        handedOff = true;
+        clientRes.off('close', onClientClose);
+        // 丢弃重定向响应体并释放本跳连接
+        req.destroy();
+
+        // 客户端已断开，无需继续跟随
+        if (clientRes.destroyed) return;
+
+        if (redirectCount >= MAX_REDIRECTS) {
+            return respondText(clientRes, 502, 'Bad Gateway: Too Many Redirects');
+        }
+        let nextUrl: URL;
+        try {
+            nextUrl = new URL(location, targetUrl);
+        } catch {
+            return respondText(clientRes, 502, 'Bad Gateway: Invalid Redirect');
+        }
+        if (!isForwardableUrl(nextUrl)) {
+            return respondText(clientRes, 502, 'Bad Gateway: Unsupported Redirect Protocol');
+        }
+
+        const nextHeaders =
+            nextUrl.origin === targetUrl.origin ? headers : crossOriginHeaders(headers);
+        forwardRequest(clientRes, nextUrl, nextHeaders, redirectCount + 1);
+    };
+
     const onResponse = (targetRes: http.IncomingMessage) => {
+        const location = targetRes.headers.location;
+        if (location && REDIRECT_STATUS_CODES.has(targetRes.statusCode ?? 0)) {
+            return followRedirect(location);
+        }
+
         try {
             // 上游可能返回非法状态码（如 099）或非法响应头，writeHead 会同步抛错
             clientRes.writeHead(
@@ -187,12 +277,14 @@ function forwardRequest(
     }
 
     // 客户端断连（seek/切歌/缓冲中止）时中止上游请求，防止上游 socket 泄漏耗尽并发连接
-    clientRes.on('close', () => {
+    const onClientClose = () => {
         req.destroy();
-    });
+    };
+    clientRes.on('close', onClientClose);
 
     // 上游空闲超时：源站接受连接却迟迟不返回数据时回收，防止挂起连接累积
     req.setTimeout(UPSTREAM_IDLE_TIMEOUT_MS, () => {
+        if (handedOff) return;
         if (!clientRes.headersSent && clientRes.writable) {
             clientRes.writeHead(504, { 'Content-Type': 'text/plain' });
             clientRes.end('Gateway Timeout');
@@ -203,12 +295,14 @@ function forwardRequest(
     // 源站返回 101 时 Node 不会触发 response/error，需显式结束客户端响应，否则客户端一直挂起
     req.on('upgrade', (_upgradeRes, socket) => {
         socket.destroy();
+        if (handedOff) return;
         if (!clientRes.headersSent && clientRes.writable) {
             respondText(clientRes, 502, 'Bad Gateway');
         }
     });
 
     req.on('error', (error) => {
+        if (handedOff) return;
         console.error('[RequestForwarder Worker] Forward error:', error.message);
         if (!clientRes.headersSent && clientRes.writable) {
             clientRes.writeHead(502, { 'Content-Type': 'text/plain' });
@@ -255,7 +349,7 @@ function startServer(port: number): void {
         } catch {
             return respondText(res, 400, 'Bad Request: Invalid URL');
         }
-        if (targetUrl.protocol !== 'http:' && targetUrl.protocol !== 'https:') {
+        if (!isForwardableUrl(targetUrl)) {
             return respondText(res, 400, 'Bad Request: Unsupported Protocol');
         }
 
