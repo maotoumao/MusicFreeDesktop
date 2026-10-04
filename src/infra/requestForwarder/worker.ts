@@ -2,17 +2,26 @@
  * requestForwarder — Worker
  *
  * 运行在 Electron UtilityProcess 中的 HTTP 代理服务器。
- * 接收带有 url/headers/method 查询参数的 GET 请求，
- * 转发到目标服务器并将响应流式回传客户端。
+ * 接收带有 token/url/headers 查询参数的 GET 请求，
+ * 以 GET 方式转发到目标服务器并将响应流式回传客户端。
+ *
+ * 安全约束：
+ * - 仅监听 127.0.0.1，局域网不可达
+ * - 每个请求必须携带主进程下发的随机 token，否则 403。
+ *   本机任意网页都能向 127.0.0.1 发请求，没有 token 即成为任意网页可用的 SSRF 跳板
+ * - 不返回 CORS 头：唯一调用方是 <audio src>（no-cors 加载），不需要跨源读取
+ * - 仅转发 http/https，且方法固定为 GET
  */
 
 import http from 'http';
 import https from 'https';
+import crypto from 'crypto';
 import { pipeline } from 'stream';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import type { IWorkerMessage, IMainMessage } from '@appTypes/infra/requestForwarder';
 import { safeParse } from '@common/safeSerialize';
+import { TOKEN_PARAM } from './common/constant';
 
 const DEFAULT_PORT = 52735;
 const MAX_PORT_RETRIES = 20;
@@ -39,6 +48,9 @@ const UPSTREAM_IDLE_TIMEOUT_MS = 30_000;
 let retryCount = 0;
 let server: http.Server | null = null;
 
+/** 访问令牌（由主进程通过 init 消息下发，收到后才启动服务器） */
+let tokenBuffer: Buffer | null = null;
+
 /** 代理 Agent（由主进程通过 IPC 动态更新） */
 let httpAgent: HttpProxyAgent<string> | undefined;
 let httpsAgent: HttpsProxyAgent<string> | undefined;
@@ -56,51 +68,123 @@ function stripHopByHopHeaders<T extends http.IncomingHttpHeaders | http.Outgoing
     return result;
 }
 
-/** 将请求转发到目标服务器 */
+/** 常量时间校验 token，防止计时侧信道 */
+function isAuthorized(token: string | null): boolean {
+    if (!tokenBuffer || !token) return false;
+    const candidate = Buffer.from(token);
+    return (
+        candidate.length === tokenBuffer.length && crypto.timingSafeEqual(candidate, tokenBuffer)
+    );
+}
+
+/**
+ * 规范化调用方传入的 headers：JSON 可能是任意形状（数组、嵌套对象、数字等），
+ * 仅保留字符串值，数字/布尔转为字符串，其余丢弃，避免后续处理因类型不符抛错。
+ */
+function sanitizeHeaders(raw: unknown): Record<string, string> {
+    const result: Record<string, string> = {};
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return result;
+    for (const [key, value] of Object.entries(raw)) {
+        if (typeof value === 'string') {
+            result[key] = value;
+        } else if (typeof value === 'number' || typeof value === 'boolean') {
+            result[key] = String(value);
+        }
+    }
+    return result;
+}
+
+/** 上游响应头：剔除逐跳头与 CORS 头（CORS 策略由本服务决定，不能被上游放开） */
+function filterResponseHeaders(headers: http.IncomingHttpHeaders): http.IncomingHttpHeaders {
+    const result = stripHopByHopHeaders(headers);
+    for (const key of Object.keys(result)) {
+        if (key.toLowerCase().startsWith('access-control-')) {
+            delete result[key];
+        }
+    }
+    return result;
+}
+
+function respondText(res: http.ServerResponse, statusCode: number, text: string): void {
+    res.writeHead(statusCode, { 'Content-Type': 'text/plain' });
+    res.end(text);
+}
+
+/** 将请求以 GET 方式转发到目标服务器 */
 function forwardRequest(
     clientRes: http.ServerResponse,
-    url: string,
-    method: string,
+    targetUrl: URL,
     headers: Record<string, string>,
 ): void {
     // 修正 host header
     let host = headers?.host;
 
     if (!host || host.includes('localhost') || host.includes('127.0.0.1')) {
-        try {
-            host = new URL(url).host;
-        } catch {
-            clientRes.writeHead(400, { 'Content-Type': 'text/plain' });
-            clientRes.end('Bad Request: Invalid URL');
-            return;
+        host = targetUrl.host;
+    }
+
+    const isHttps = targetUrl.protocol === 'https:';
+
+    const requestHeaders: http.OutgoingHttpHeaders = stripHopByHopHeaders(headers || {});
+    // 转发的 GET 不带请求体，调用方传入的 Content-Length 会让源站一直等待请求体
+    for (const key of Object.keys(requestHeaders)) {
+        if (key.toLowerCase() === 'content-length') {
+            delete requestHeaders[key];
         }
     }
 
-    const isHttps = url.startsWith('https');
-
     const options: http.RequestOptions = {
-        method,
+        method: 'GET',
         headers: {
-            ...stripHopByHopHeaders(headers || {}),
+            ...requestHeaders,
             host,
         },
     };
 
-    const protocol = isHttps ? https : http;
     const agent = isHttps ? httpsAgent : httpAgent;
     if (agent) {
         options.agent = agent as unknown as http.Agent;
     }
 
-    const req = protocol.request(url, options, (targetRes) => {
-        clientRes.writeHead(targetRes.statusCode ?? 502, stripHopByHopHeaders(targetRes.headers));
+    const onResponse = (targetRes: http.IncomingMessage) => {
+        try {
+            // 上游可能返回非法状态码（如 099）或非法响应头，writeHead 会同步抛错
+            clientRes.writeHead(
+                targetRes.statusCode ?? 502,
+                filterResponseHeaders(targetRes.headers),
+            );
+        } catch (err) {
+            console.error(
+                '[RequestForwarder Worker] Invalid upstream response:',
+                (err as Error).message,
+            );
+            targetRes.destroy();
+            if (!clientRes.headersSent && clientRes.writable) {
+                respondText(clientRes, 502, 'Bad Gateway');
+            } else {
+                clientRes.destroy();
+            }
+            return;
+        }
         // pipeline 自动传播两端错误并销毁两端，避免未处理的 stream error 导致 worker 崩溃
         pipeline(targetRes, clientRes, (err) => {
             if (err) {
                 console.error('[RequestForwarder Worker] Stream error:', err.message);
             }
         });
-    });
+    };
+
+    let req: http.ClientRequest;
+    try {
+        req = isHttps
+            ? https.request(targetUrl, options, onResponse)
+            : http.request(targetUrl, options, onResponse);
+    } catch (err) {
+        // 非法 header 名/值（如含换行）会让 http.request 同步抛错，不能让它打崩 worker
+        console.error('[RequestForwarder Worker] Invalid request:', (err as Error).message);
+        respondText(clientRes, 400, 'Bad Request: Invalid Request Options');
+        return;
+    }
 
     // 客户端断连（seek/切歌/缓冲中止）时中止上游请求，防止上游 socket 泄漏耗尽并发连接
     clientRes.on('close', () => {
@@ -114,6 +198,14 @@ function forwardRequest(
             clientRes.end('Gateway Timeout');
         }
         req.destroy();
+    });
+
+    // 源站返回 101 时 Node 不会触发 response/error，需显式结束客户端响应，否则客户端一直挂起
+    req.on('upgrade', (_upgradeRes, socket) => {
+        socket.destroy();
+        if (!clientRes.headersSent && clientRes.writable) {
+            respondText(clientRes, 502, 'Bad Gateway');
+        }
     });
 
     req.on('error', (error) => {
@@ -137,34 +229,37 @@ function postMessage(message: IWorkerMessage): void {
 /** 启动代理服务器 */
 function startServer(port: number): void {
     server = http.createServer((req, res) => {
-        // 仅允许 GET 请求
-        if (req.method !== 'GET') {
-            res.writeHead(405, { 'Content-Type': 'text/plain' });
-            return res.end('Only GET requests are allowed');
-        }
-
-        // 健康检查端点
-        if (req.url === '/heartbeat') {
-            res.writeHead(200, { 'Content-Type': 'text/plain' });
-            return res.end('OK');
-        }
-
         // 解析查询参数
         const query = new URLSearchParams(req.url?.slice(1) ?? '');
-        const url = query.get('url');
-        const method = query.get('method') || 'GET';
-        const headers = safeParse<Record<string, string>>(query.get('headers') ?? '', {}) ?? {};
 
-        // CORS 头
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-
-        if (!url) {
-            res.writeHead(400, { 'Content-Type': 'text/plain' });
-            return res.end('Bad Request: Missing URL');
+        // 鉴权先于一切其他处理，未授权请求一律 403，不暴露任何行为差异
+        if (!isAuthorized(query.get(TOKEN_PARAM))) {
+            return respondText(res, 403, 'Forbidden');
         }
 
-        forwardRequest(res, url, method, {
+        // 仅允许 GET 请求
+        if (req.method !== 'GET') {
+            return respondText(res, 405, 'Only GET requests are allowed');
+        }
+
+        const url = query.get('url');
+        const headers = sanitizeHeaders(safeParse<unknown>(query.get('headers') ?? '', {}));
+
+        if (!url) {
+            return respondText(res, 400, 'Bad Request: Missing URL');
+        }
+
+        let targetUrl: URL;
+        try {
+            targetUrl = new URL(url);
+        } catch {
+            return respondText(res, 400, 'Bad Request: Invalid URL');
+        }
+        if (targetUrl.protocol !== 'http:' && targetUrl.protocol !== 'https:') {
+            return respondText(res, 400, 'Bad Request: Unsupported Protocol');
+        }
+
+        forwardRequest(res, targetUrl, {
             ...((req.headers as Record<string, string>) || {}),
             ...(headers || {}),
         });
@@ -199,6 +294,14 @@ function startServer(port: number): void {
 process.parentPort?.on('message', (e: Electron.MessageEvent) => {
     const data = e.data as IMainMessage;
     switch (data?.type) {
+        case 'init': {
+            // token 下发后才开始监听，保证服务器从第一个请求起就处于鉴权状态
+            if (!tokenBuffer && data.token) {
+                tokenBuffer = Buffer.from(data.token);
+                startServer(DEFAULT_PORT);
+            }
+            break;
+        }
         case 'shutdown': {
             console.log('[RequestForwarder Worker] Received shutdown signal');
             server?.close(() => {
@@ -221,6 +324,3 @@ process.parentPort?.on('message', (e: Electron.MessageEvent) => {
         }
     }
 });
-
-// 启动服务器
-startServer(DEFAULT_PORT);

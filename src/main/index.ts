@@ -79,7 +79,7 @@ if (!gotTheLock) {
 // ─── Phase 1: 同步初始化（不依赖 app.isReady） ───
 
 setupGlobalContext();
-requestForwarder.setup();
+requestForwarder.setup(windowManager);
 
 // ─── Phase 2: app ready 后按依赖顺序初始化全部 infra ───
 

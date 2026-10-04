@@ -4,13 +4,19 @@
  * 使用 Electron UtilityProcess 管理代理服务器的生命周期：
  * - fork 子进程运行 HTTP 代理
  * - 监控子进程健康，异常退出时指数退避自动重启
- * - 通过 IPC 向渲染进程提供端口查询和端口变更通知
+ * - 生成访问令牌并下发给 worker，worker 只接受携带该令牌的请求
+ * - 通过 IPC 向渲染进程提供连接信息（端口 + 令牌）查询和变更通知
  */
 
 import path from 'path';
+import crypto from 'crypto';
 import { app, ipcMain, utilityProcess } from 'electron';
 import type { IWindowManager } from '@appTypes/main/windowManager';
-import type { IWorkerMessage } from '@appTypes/infra/requestForwarder';
+import type {
+    IMainMessage,
+    IRequestForwarderInfo,
+    IWorkerMessage,
+} from '@appTypes/infra/requestForwarder';
 import { IPC } from './common/constant';
 
 const MAX_RESTART_COUNT = 5;
@@ -26,6 +32,12 @@ class RequestForwarder {
     private restartTimer: ReturnType<typeof setTimeout> | null = null;
     private lastProxyUrl: string | null = null;
 
+    /**
+     * 访问令牌：每次应用启动生成一次，worker 重启时沿用，
+     * 使已发出的代理 URL（如正在播放的音频 seek 时的 Range 请求）在重启后依旧有效。
+     */
+    private readonly token = crypto.randomBytes(32).toString('hex');
+
     /** worker 脚本路径（与主进程 bundle 同目录） */
     private get workerPath(): string {
         return path.resolve(__dirname, 'requestForwarderWorker.js');
@@ -33,16 +45,16 @@ class RequestForwarder {
 
     /**
      * 初始化模块
-     * @param windowManager 可选，提供后支持端口变更广播
+     * @param windowManager 可选，提供后支持连接信息变更广播
      */
     public setup(windowManager?: IWindowManager): void {
         if (this.isSetup) return;
 
         this.windowManager = windowManager ?? null;
 
-        // 注册 IPC：渲染进程查询端口
-        ipcMain.handle(IPC.GET_PORT, () => {
-            return this.port;
+        // 注册 IPC：渲染进程查询连接信息
+        ipcMain.handle(IPC.GET_INFO, () => {
+            return this.getInfo();
         });
 
         // 启动 worker：utilityProcess 需要 app ready 后才能 fork
@@ -67,16 +79,15 @@ class RequestForwarder {
         return this.port;
     }
 
+    /** 获取当前连接信息，代理未就绪时为 null */
+    public getInfo(): IRequestForwarderInfo | null {
+        return this.port === null ? null : { port: this.port, token: this.token };
+    }
+
     /** 向 worker 发送代理配置更新 */
     public updateWorkerProxy(proxyUrl: string | null): void {
         this.lastProxyUrl = proxyUrl;
-        if (this.worker) {
-            try {
-                this.worker.postMessage({ type: 'update-proxy', proxyUrl });
-            } catch {
-                // worker 可能未就绪
-            }
-        }
+        this.postToWorker({ type: 'update-proxy', proxyUrl });
     }
 
     /** 关闭模块，停止 worker */
@@ -90,11 +101,7 @@ class RequestForwarder {
 
         if (this.worker) {
             // 优雅关闭：先发 shutdown 消息
-            try {
-                this.worker.postMessage({ type: 'shutdown' });
-            } catch {
-                // worker 可能已经退出
-            }
+            this.postToWorker({ type: 'shutdown' });
 
             // 等待 3 秒后强制 kill
             const killTimer = setTimeout(() => {
@@ -127,20 +134,25 @@ class RequestForwarder {
             return;
         }
 
+        // 进程启动后下发令牌，worker 收到后才开始监听
+        const worker = this.worker;
+        worker.once('spawn', () => {
+            if (this.worker === worker) {
+                this.postToWorker({ type: 'init', token: this.token });
+            }
+        });
+
         // 接收 worker 消息
         this.worker.on('message', (message: IWorkerMessage) => {
             switch (message.type) {
                 case 'ready': {
-                    const oldPort = this.port;
                     this.port = message.port;
                     this.restartCount = 0; // 成功启动，重置重试计数
 
                     console.log(`[RequestForwarder] Proxy server ready on port ${this.port}`);
 
-                    // 端口变化时广播通知渲染进程
-                    if (oldPort !== null && oldPort !== this.port) {
-                        this.broadcastPortChanged();
-                    }
+                    // worker（重）启动后通知渲染进程：退出时已广播过 null，此处需恢复
+                    this.broadcastInfoChanged();
 
                     // 重新发送代理配置（worker 重启后需要恢复）
                     if (this.lastProxyUrl !== null) {
@@ -162,6 +174,8 @@ class RequestForwarder {
             this.port = null;
 
             if (!this.disposed) {
+                // 通知渲染进程代理暂不可用，期间降级为直接请求
+                this.broadcastInfoChanged();
                 this.scheduleRestart();
             }
         });
@@ -191,10 +205,19 @@ class RequestForwarder {
         }, delay);
     }
 
-    /** 广播端口变更到所有渲染进程 */
-    private broadcastPortChanged(): void {
+    /** 向当前 worker 发送消息，worker 不存在或已退出时静默忽略 */
+    private postToWorker(message: IMainMessage): void {
         try {
-            this.windowManager?.broadcast(IPC.PORT_CHANGED, this.port);
+            this.worker?.postMessage(message);
+        } catch {
+            // worker 可能未就绪或已经退出
+        }
+    }
+
+    /** 广播连接信息变更到所有渲染进程 */
+    private broadcastInfoChanged(): void {
+        try {
+            this.windowManager?.broadcast(IPC.INFO_CHANGED, this.getInfo());
         } catch {
             // windowManager 可能尚未就绪
         }

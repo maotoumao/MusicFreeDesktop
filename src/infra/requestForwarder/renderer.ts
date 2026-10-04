@@ -2,21 +2,22 @@
  * requestForwarder — Renderer 层
  *
  * 提供类型安全的代理 URL 构建工具。
- * 初始化时从主进程获取端口并缓存，之后 buildProxyUrl() 为纯同步计算。
- * 监听端口变更事件，worker 重启后自动更新。
+ * 初始化时从主进程获取连接信息（端口 + 令牌）并缓存，之后 buildProxyUrl() 为纯同步计算。
+ * 监听连接信息变更事件，worker 重启后自动更新。
  */
 
-import { CONTEXT_BRIDGE_KEY } from './common/constant';
+import type { IRequestForwarderInfo } from '@appTypes/infra/requestForwarder';
+import { CONTEXT_BRIDGE_KEY, TOKEN_PARAM } from './common/constant';
 
 interface IMod {
-    getPort(): Promise<number | null>;
-    onPortChanged(callback: (port: number | null) => void): () => void;
+    getInfo(): Promise<IRequestForwarderInfo | null>;
+    onInfoChanged(callback: (info: IRequestForwarderInfo | null) => void): () => void;
 }
 
 const mod = window[CONTEXT_BRIDGE_KEY as any] as unknown as IMod;
 
 class RequestForwarder {
-    private port: number | null = null;
+    private info: IRequestForwarderInfo | null = null;
     private isSetupDone = false;
     private readyResolvers: Array<() => void> = [];
 
@@ -27,17 +28,19 @@ class RequestForwarder {
     async setup(): Promise<void> {
         if (this.isSetupDone) return;
 
-        this.port = await mod.getPort();
-        if (this.port !== null) {
-            this.flushReadyResolvers();
-        }
-
-        mod.onPortChanged((newPort) => {
-            this.port = newPort;
-            if (newPort !== null) {
-                this.flushReadyResolvers();
-            }
+        // 先注册监听再查询，避免两者之间 worker 状态变化导致错过广播。
+        // 主进程每次状态变化都会广播，因此查询期间只要收到过广播，广播就不旧于查询结果，
+        // 此时丢弃查询结果，防止其覆盖更新的状态（如 worker 退出后的 null）。
+        let receivedBroadcast = false;
+        mod.onInfoChanged((newInfo) => {
+            receivedBroadcast = true;
+            this.applyInfo(newInfo);
         });
+
+        const info = await mod.getInfo();
+        if (!receivedBroadcast) {
+            this.applyInfo(info);
+        }
 
         this.isSetupDone = true;
     }
@@ -53,7 +56,7 @@ class RequestForwarder {
      * ```
      */
     whenReady(): Promise<void> {
-        if (this.port !== null) return Promise.resolve();
+        if (this.info !== null) return Promise.resolve();
         return new Promise<void>((resolve) => {
             this.readyResolvers.push(resolve);
         });
@@ -61,18 +64,18 @@ class RequestForwarder {
 
     /** 代理服务器是否就绪 */
     isReady(): boolean {
-        return this.port !== null;
+        return this.info !== null;
     }
 
     /** 获取当前代理端口 */
     getPort(): number | null {
-        return this.port;
+        return this.info?.port ?? null;
     }
 
     /**
      * 构建代理 URL
      *
-     * 将目标 URL 和自定义 headers 编码为本地代理服务器的查询参数。
+     * 将访问令牌、目标 URL 和自定义 headers 编码为本地代理服务器的查询参数。
      * 如果代理未就绪或 URL 不需要代理，返回原始 URL（优雅降级）。
      *
      * @param url 目标音频 URL
@@ -89,18 +92,20 @@ class RequestForwarder {
      * ```
      */
     buildProxyUrl(url: string, headers?: Record<string, string>): string {
-        if (!this.isReady() || !this.isProxyRequired(url)) {
+        const info = this.info;
+        if (info === null || !this.isProxyRequired(url)) {
             return url;
         }
 
         const params = new URLSearchParams();
+        params.set(TOKEN_PARAM, info.token);
         params.set('url', url);
 
         if (headers && Object.keys(headers).length > 0) {
             params.set('headers', JSON.stringify(headers));
         }
 
-        return `http://127.0.0.1:${this.port}/?${params.toString()}`;
+        return `http://127.0.0.1:${info.port}/?${params.toString()}`;
     }
 
     /**
@@ -115,6 +120,13 @@ class RequestForwarder {
             return protocol === 'http:' || protocol === 'https:';
         } catch {
             return false;
+        }
+    }
+
+    private applyInfo(info: IRequestForwarderInfo | null): void {
+        this.info = info;
+        if (info !== null) {
+            this.flushReadyResolvers();
         }
     }
 
