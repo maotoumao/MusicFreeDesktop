@@ -1,0 +1,431 @@
+// ============================================================================
+// PlayerBar — 底部播放栏样式
+// ============================================================================
+
+.l-player-bar {
+    position: fixed;
+    bottom: 0;
+    left: var(--size-sidebar-w);
+    right: 0;
+    z-index: var(--z-player);
+    display: flex;
+    flex-direction: column;
+
+    // ── 进度条 ──
+    // 使用 margin-bottom 负值叠加在 body 上方，防止 hover 展开时导致高度跳变
+
+    &__progress {
+        position: relative;
+        margin-bottom: -6px;
+        z-index: 1;
+    }
+
+    // ── 三列主体 ──
+
+    &__body {
+        position: relative;
+        height: var(--size-player-h);
+        display: flex;
+        align-items: center;
+        padding: 0 var(--space-4);
+        gap: var(--space-4);
+
+        // 背景 + 模糊放到伪元素，避免 backdrop-filter 创建层叠上下文
+        // 从而使气泡面板可以凭 z-index 盖过进度条
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: var(--color-bg-player);
+            backdrop-filter: blur(var(--blur-xl));
+            z-index: -1;
+        }
+    }
+
+    // ── 左侧: 歌曲信息 ──
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        width: 270px;
+        flex-shrink: 0;
+        min-width: 0;
+    }
+
+    &__cover {
+        box-shadow: var(--shadow-lg);
+        cursor: pointer;
+    }
+
+    &__info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1-5);
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__info-row {
+        cursor: pointer;
+        transition: color var(--duration-fast) var(--ease-standard);
+    }
+
+    &__title {
+        font-size: var(--text-label-size);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        line-height: 1.375; // leading-snug
+        white-space: nowrap;
+        transition: color var(--duration-fast) var(--ease-standard);
+    }
+
+    &__dot {
+        font-size: var(--text-caption-size);
+        // 设计稿 text-white/30 — 对应 disabled(0.30)
+        color: var(--color-text-disabled);
+        margin: 0 var(--space-1-5);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    &__artist {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        white-space: nowrap;
+    }
+
+    &__source-badge {
+        font-size: var(--text-badge-size);
+        font-weight: var(--font-weight-medium);
+        // 设计稿 text-white/35 — 最接近令牌 disabled(0.30)
+        color: var(--color-text-disabled);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--radius-badge);
+        padding: 1px 6px;
+        line-height: 1.25; // leading-tight
+        white-space: nowrap;
+        vertical-align: middle;
+        flex-shrink: 0;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1-5);
+        flex-shrink: 0;
+    }
+
+    &__divider {
+        width: 1px;
+        height: 12px;
+        background-color: var(--color-border-subtle);
+        margin: 0 var(--space-1);
+        flex-shrink: 0;
+
+        &--tall {
+            height: 16px;
+            margin: 0 var(--space-1-5);
+        }
+    }
+
+    &__time {
+        font-size: var(--text-overline-size);
+        color: var(--color-text-disabled);
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__empty-hint {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-disabled);
+        line-height: 1.5;
+    }
+
+    // ── 中间: 播放控制 ──
+
+    &__center {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+    }
+
+    // ── 右侧: 工具 ──
+
+    &__right {
+        width: 240px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--space-1);
+    }
+
+    &__quality {
+        font-size: var(--text-caption-size);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-secondary);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--radius-badge);
+        padding: 4px 6px;
+        line-height: 1;
+        letter-spacing: 0;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition:
+            color var(--duration-fast) var(--ease-standard),
+            border-color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+            border-color: var(--color-border-strong);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+    }
+
+    // ── 垂直气泡面板（音量 / 倍速共用） ──
+
+    &__popover-anchor {
+        position: relative;
+        margin-left: var(--space-1);
+
+        &--no-ml {
+            margin-left: 0;
+        }
+    }
+
+    &__popover {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) scale(0.9);
+        margin-bottom: 12px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-2);
+        width: 36px;
+        padding: 12px 0;
+
+        background-color: var(--color-bg-modal);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-card); // 12px
+        box-shadow: var(--shadow-md);
+        z-index: var(--z-popover);
+
+        opacity: 0;
+        pointer-events: none;
+        transform-origin: bottom center;
+        transition:
+            opacity var(--duration-normal) var(--ease-standard),
+            transform var(--duration-normal) var(--ease-standard);
+
+        &.is-visible {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+            pointer-events: auto;
+        }
+
+        // 隐形桥接区域，防止鼠标从按钮移到面板时触发 mouseLeave
+        &::before {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            right: 0;
+            height: 12px;
+        }
+
+        // 底部小三角箭头
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 10px;
+            height: 10px;
+            background-color: var(--color-bg-modal);
+            border-right: 1px solid var(--color-border-subtle);
+            border-bottom: 1px solid var(--color-border-subtle);
+            border-radius: 1px;
+        }
+
+        // ── 列表变体（音质选择） ──
+
+        &--list {
+            width: auto;
+            min-width: 72px;
+            padding: var(--space-1-5) 0;
+            gap: 0;
+        }
+    }
+
+    // ── 音质选项 ──
+
+    &__quality-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-2);
+        width: 100%;
+        height: var(--space-7);
+        padding: 0 var(--space-3);
+        border: none;
+        background: transparent;
+        color: var(--color-text-secondary);
+        font-size: var(--text-caption-size);
+        font-weight: var(--font-weight-bold);
+        cursor: pointer;
+        transition:
+            color var(--duration-fast) var(--ease-standard),
+            background-color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+            background-color: var(--color-fill-neutral-hover);
+        }
+
+        &:active {
+            opacity: var(--opacity-pressed);
+        }
+
+        &.is-active {
+            color: var(--color-text-brand);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+    }
+
+    &__quality-option-label {
+        white-space: nowrap;
+    }
+
+    &__quality-option-check {
+        flex-shrink: 0;
+    }
+
+    &__popover-value {
+        font-size: var(--text-caption-size);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-disabled);
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    &__popover-track {
+        width: 4px;
+        height: 100px;
+        background-color: var(--color-fill-neutral);
+        border-radius: var(--radius-pill);
+        position: relative;
+        cursor: pointer;
+        touch-action: none; // 防止拖拽时页面滚动
+
+        // 拖拽中取消子元素 transition，避免滞后感
+        &:active {
+            .l-player-bar__popover-fill,
+            .l-player-bar__popover-thumb {
+                transition: none;
+            }
+        }
+    }
+
+    &__popover-fill {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background-color: var(--color-fill-brand-hover);
+        border-radius: var(--radius-pill);
+        transition: height 0.05s linear;
+    }
+
+    &__popover-thumb {
+        position: absolute;
+        left: 50%;
+        // bottom 由 JS 内联 style 控制；transform 居中
+        transform: translate(-50%, 50%);
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: var(--shadow-md);
+        transition: bottom 0.05s linear;
+    }
+
+    // ── 控制按钮 ──
+
+    &__ctrl-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border: none;
+        background: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        padding: 0;
+        border-radius: 50%;
+        transition: color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+
+        &.is-active {
+            color: var(--color-text-brand);
+        }
+
+        // 大按钮 — 上一首 / 下一首
+        &--lg {
+            width: var(--size-control-md);
+            height: var(--size-control-md);
+        }
+
+        // 播放/暂停按钮 — 品牌色圆形，与 minimode 一致
+        &--play {
+            width: var(--size-control-lg);
+            height: var(--size-control-lg);
+            border-radius: 50%;
+            background-color: var(--color-fill-brand);
+            color: var(--color-text-on-brand);
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--duration-fast) var(--ease-standard);
+
+            &:hover {
+                transform: scale(1.06);
+                background-color: var(--color-fill-brand-hover);
+                color: var(--color-text-on-brand);
+            }
+
+            // 设计稿明确要求 scale 反馈（非通用 opacity 模式）
+            &:active {
+                transform: scale(0.97);
+            }
+        }
+    }
+}

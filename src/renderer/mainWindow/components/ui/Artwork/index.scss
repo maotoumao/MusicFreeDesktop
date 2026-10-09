@@ -1,0 +1,55 @@
+// ============================================================================
+// Artwork — 原子组件样式
+// ============================================================================
+
+.artwork {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: var(--color-bg-placeholder);
+    box-shadow: var(--shadow-md);
+    flex-shrink: 0;
+
+    &--sm {
+        border-radius: var(--radius-control);
+    }
+
+    &--md {
+        border-radius: var(--radius-card);
+    }
+
+    &--lg {
+        border-radius: var(--radius-artwork);
+    }
+
+    &__img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    &__fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-text-muted);
+    }
+
+    &__overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--color-bg-overlay);
+        opacity: 0;
+        transition: opacity var(--duration-normal) var(--ease-standard);
+    }
+
+    &:hover .artwork__overlay {
+        opacity: 1;
+    }
+}

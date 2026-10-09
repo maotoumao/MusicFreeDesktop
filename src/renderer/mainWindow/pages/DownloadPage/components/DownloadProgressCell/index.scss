@@ -1,0 +1,33 @@
+// ============================================================================
+// DownloadProgressCell — 进度条 + 百分比 + 速度
+// ============================================================================
+
+.p-download__progress-cell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.p-download__progress-track {
+    height: 3px;
+    background-color: var(--color-fill-subtle);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.p-download__progress-fill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background-color: color-mix(in srgb, var(--color-fill-brand) 80%, transparent);
+    transition: width var(--duration-normal) var(--ease-standard);
+
+    &--paused {
+        background-color: var(--color-status-warn-text);
+    }
+}
+
+.p-download__progress-text {
+    font-size: var(--text-overline-size);
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}

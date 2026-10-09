@@ -1,0 +1,94 @@
+// ============================================================================
+// Chip — 原子组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: inline-flex, items-center, gap 6px,
+//         px-12 py-6, rounded-full, text-xs(12px)
+//   默认: bg fill-subtle, color text-secondary
+//   hover: color text-primary
+//   激活: bg fill-neutral-active (white/20), color text-primary
+//   禁用: opacity disabled, pointer-events none
+//
+
+.chip {
+    // ── 重置 button 默认样式 ──
+    border: none;
+    background: none;
+    text-align: left;
+
+    // ── 布局 ──
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+
+    // ── 排版 ──
+    font-size: var(--text-caption-size);
+    line-height: var(--text-caption-leading);
+
+    // ── 默认外观 ──
+    background-color: var(--color-fill-subtle);
+    color: var(--color-text-secondary);
+
+    // ── 过渡 ──
+    transition:
+        background-color var(--duration-normal) var(--ease-standard),
+        color var(--duration-normal) var(--ease-standard),
+        opacity var(--duration-instant) var(--ease-standard);
+
+    // ── hover ──
+    &:hover:not(.is-active):not(.is-disabled) {
+        color: var(--color-text-primary);
+    }
+
+    // ── 点击 ──
+    &:active:not(.is-disabled) {
+        opacity: var(--opacity-pressed);
+    }
+
+    // ── 激活态 ──
+    &.is-active {
+        background-color: var(--color-fill-neutral-active);
+        color: var(--color-text-primary);
+    }
+
+    // ── 禁用态 ──
+    &.is-disabled {
+        opacity: var(--opacity-disabled);
+        cursor: not-allowed;
+    }
+
+    // ── focus-visible ──
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+
+    // ── 前缀 / 后缀插槽 ──
+    &__prefix,
+    &__suffix {
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    // ── 后缀内的可交互元素（如关闭按钮）──
+    &__suffix {
+        // 小一号的图标尺寸
+        svg {
+            width: 14px;
+            height: 14px;
+        }
+    }
+
+    &__label {
+        // 文本不截断，由容器控制
+    }
+}

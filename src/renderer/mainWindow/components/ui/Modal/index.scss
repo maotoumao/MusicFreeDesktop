@@ -1,0 +1,142 @@
+/* ============================================================
+ *  Modal — 对话框 UI 外壳
+ *
+ *  遮罩: bg-overlay rgba(0,0,0,0.6), blur-overlay 12px
+ *  面板: bg-modal rgb(30,30,30), radius 20px, shadow-xl
+ *  尺寸: sm 400, md 520, lg 600
+ * ============================================================ */
+
+// ── Backdrop ────────────────────────────────────────────────
+
+// backdrop-filter 必须放在纯 CSS 元素上，不能由 framer-motion 控制，
+// 否则 motion.div 隐式创建的合成层（will-change / transform）会破坏 backdrop-filter 的采样。
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--color-bg-overlay);
+    backdrop-filter: blur(var(--blur-overlay));
+    animation: modal-backdrop-in 0.2s ease;
+}
+
+@keyframes modal-backdrop-in {
+    from {
+        background-color: transparent;
+        backdrop-filter: blur(0px);
+    }
+}
+
+// 居中容器（由 framer-motion 控制 opacity 动画，不含 backdrop-filter）
+.modal-centering {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// ── Panel ───────────────────────────────────────────────────
+
+.modal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    border-radius: var(--radius-modal);
+    background: var(--color-bg-modal);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+
+    &--sm {
+        width: 400px;
+    }
+
+    &--md {
+        width: 520px;
+    }
+
+    &--lg {
+        width: 600px;
+    }
+}
+
+// ── Header ──────────────────────────────────────────────────
+
+.modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 24px;
+    flex-shrink: 0;
+}
+
+.modal__titles {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal__title {
+    font-size: 16px;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.4;
+    color: var(--color-text-primary);
+}
+
+.modal__subtitle {
+    margin-top: 2px;
+    font-size: var(--text-caption-size);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+
+// ── Close Button ────────────────────────────────────────────
+
+.modal__close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: var(--color-text-primary);
+    }
+}
+
+.modal__close-icon {
+    width: 16px;
+    height: 16px;
+}
+
+// ── Body ────────────────────────────────────────────────────
+
+.modal__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 24px 24px;
+}
+
+// ── Footer ──────────────────────────────────────────────────
+
+.modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    flex-shrink: 0;
+    border-top: 1px solid var(--color-border-default);
+}

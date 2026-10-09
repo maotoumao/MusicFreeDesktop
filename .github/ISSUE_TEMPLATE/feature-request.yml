@@ -1,0 +1,67 @@
+name: ✨ 功能请求 | Feature Request
+description: 提出一个新功能或改进建议 | Suggest a new feature or improvement
+labels: ['enhancement']
+body:
+    - type: markdown
+      attributes:
+          value: |
+              感谢你提出功能建议！请尽量描述清楚你的需求场景，这将帮助我们更好地理解和评估。
+
+              Thank you for your feature suggestion! Please describe your use case as clearly as possible to help us better understand and evaluate the request.
+
+              > **注意**：插件相关的功能请求请勿在此提交。并非所有功能请求都会被实现。Issue 默认保持开放，被标记为 `accepted` 后才会进入排期；长期未被 `accepted` 且无活动的 Issue 会被自动标记 `stale` 并关闭。实现此功能的 PR 需在描述中用 `Closes #编号` 关联一个已 `accepted` 的 Issue，否则会被自动关闭。
+              >
+              > **Note**: Please do not submit plugin-related feature requests here. Not every feature request will be implemented. Issues stay open by default and only get scheduled once marked `accepted`. Issues left without `accepted` and with no activity are eventually marked `stale` and closed. A PR implementing this feature must reference an `accepted` issue via `Closes #<number>` in its description, otherwise it will be closed automatically.
+
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: 提交前确认 | Pre-submission checklist
+          options:
+              - label: 我已搜索过现有 Issues，确认没有重复的请求 | I have searched existing Issues and confirmed this is not a duplicate request
+                required: true
+
+    - type: textarea
+      id: problem
+      attributes:
+          label: 问题场景 | Problem / Use Case
+          description: |
+              描述你遇到的问题或不便之处，这个功能要解决什么问题？
+
+              Describe the problem you're facing or the inconvenience. What problem would this feature solve?
+          placeholder: "当我在 ... 的时候，我希望能够 ... | When I'm doing ..., I wish I could ..."
+      validations:
+          required: true
+
+    - type: textarea
+      id: solution
+      attributes:
+          label: 期望的方案 | Proposed Solution
+          description: |
+              描述你期望的功能或解决方案
+
+              Describe the feature or solution you'd like
+      validations:
+          required: true
+
+    - type: textarea
+      id: alternatives
+      attributes:
+          label: 替代方案 | Alternatives Considered
+          description: |
+              描述你考虑过的其他替代方案（如有）
+
+              Describe any alternative solutions you've considered (if any)
+      validations:
+          required: false
+
+    - type: textarea
+      id: additional
+      attributes:
+          label: 补充信息 | Additional Context
+          description: |
+              其他可能有帮助的截图或信息
+
+              Any other screenshots or information that might be helpful
+      validations:
+          required: false

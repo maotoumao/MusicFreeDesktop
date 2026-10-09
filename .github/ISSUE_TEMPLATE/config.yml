@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+    - name: 💬 讨论区 | Discussions
+      url: https://github.com/maotoumao/MusicFreeDesktop/discussions
+      about: 提问或交流请前往 Discussions | For questions or general discussion, please visit Discussions
+    - name: 🔌 插件相关问题 | Plugin Issues
+      url: https://github.com/maotoumao/MusicFreeDesktop/discussions
+      about: 插件问题请前往讨论区，本项目不提供音源 | For plugin-related issues, please visit Discussions. This project does not provide music sources.

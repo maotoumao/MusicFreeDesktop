@@ -1,0 +1,15 @@
+// ============================================================================
+// ToplistDetailPage — 排行榜详情页样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   页面: padding-top 16px
+//   与 SheetPage 样式结构一致（MusicSheetHeader + SongToolbar + SongTable）
+
+.p-toplist-detail {
+    padding-top: var(--space-4);
+
+    &__toolbar {
+        margin-top: var(--space-2);
+    }
+}

@@ -1,0 +1,166 @@
+/* ============================================================
+ *  Toast — 通知 toast 组件
+ *
+ *  容器: fixed 右上角, top: 72px (TopBar 64 + 8)
+ *  卡片: min-w 260px, max-w 320px, rounded 20px
+ *  变体: info (cyan), warn (amber)
+ * ============================================================ */
+
+.toast-container {
+    position: fixed;
+    top: calc(var(--size-topbar-h) + 8px);
+    right: 24px;
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+// ── Card ─────────────────────────────────────────────────────
+
+.toast {
+    min-width: 260px;
+    max-width: 320px;
+    border-radius: var(--radius-modal);
+    border: 1px solid transparent;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--blur-xl));
+    pointer-events: auto;
+    overflow: hidden;
+
+    // Info（默认）
+    &--info {
+        background: var(--color-status-info-bg);
+        border-color: var(--color-status-info-border);
+    }
+
+    // Warn
+    &--warn {
+        background: var(--color-status-warn-bg);
+        border-color: var(--color-status-warn-border);
+    }
+}
+
+// ── Body ─────────────────────────────────────────────────────
+
+.toast__body {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 14px 14px 16px;
+}
+
+// ── Icon ─────────────────────────────────────────────────────
+
+.toast__icon-wrapper {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+
+    // 图标圈底色 = status text color @ 20% opacity
+    .toast--info & {
+        background: rgba(34, 211, 238, 0.2); // cyan-400 / 20%
+    }
+
+    .toast--warn & {
+        background: rgba(251, 191, 36, 0.2); // amber-400 / 20%
+    }
+}
+
+.toast__icon {
+    width: 16px;
+    height: 16px;
+
+    .toast--info & {
+        color: var(--color-status-info-text);
+    }
+
+    .toast--warn & {
+        color: var(--color-status-warn-text);
+    }
+}
+
+// ── Content ──────────────────────────────────────────────────
+
+.toast__content {
+    flex: 1;
+    min-width: 0;
+    padding-top: 3px; // 视觉基线对齐
+}
+
+.toast__title {
+    font-size: 13px;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.4;
+    color: var(--color-text-primary);
+    word-break: break-all;
+}
+
+.toast__desc {
+    margin-top: 2px;
+    font-size: var(--text-caption-size);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+
+// ── Action ───────────────────────────────────────────────────
+
+.toast__action {
+    display: inline-flex;
+    margin-top: 6px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: var(--text-caption-size);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+
+    .toast--info & {
+        color: var(--color-status-info-text);
+    }
+
+    .toast--warn & {
+        color: var(--color-status-warn-text);
+    }
+
+    &:hover {
+        opacity: var(--opacity-hover-emphasis);
+    }
+}
+
+// ── Close ────────────────────────────────────────────────────
+
+.toast__close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-top: 1px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--color-text-primary);
+    }
+}
+
+.toast__close-icon {
+    width: 14px;
+    height: 14px;
+}

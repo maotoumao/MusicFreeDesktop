@@ -1,0 +1,362 @@
+// ============================================================================
+// QueueDrawer — 播放队列抽屉样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   面板: 复用 Drawer 基础组件（320px、毛玻璃、右侧滑入）
+//   Header: h-52px, px-20, 标题 15px semibold, 计数 11px text-quaternary
+//   队列项: h-48px, hover bg-surface, active bg-brand-muted
+//   序号: w-20px, 11px tabular-nums, hover → Play 图标
+//   均衡器: 3 根动画柱条, brand 色
+//   激活指示条: left 0, w-3px h-20px, brand 色, 圆角 pill
+//   来源 badge: 9px, border white/8%, px-4 py-0.5
+//   删除按钮: hover 显示, 24×24, danger hover
+//   空态: ListMusic 48×48, 标题 14px, 描述 12px
+
+// ── 覆盖 Drawer 定位：QueueDrawer 不占全屏高，嵌在 TopBar 和 PlayerBar 之间 ──
+.l-queue-drawer {
+    &.drawer {
+        top: var(--size-topbar-h); // 64px — TopBar 下方
+        bottom: calc(var(--size-player-h) + 6px); // 72px + 6px progress padding
+    }
+
+    // ── 覆盖 Drawer 默认 body padding（我们自己管内边距） ──
+    .drawer__body {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; // Virtuoso 自己管滚动
+    }
+}
+
+// ── Header ──
+.l-queue-drawer__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    height: 52px;
+    padding: 0 var(--space-5); // 0 20px
+}
+
+.l-queue-drawer__header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.l-queue-drawer__title {
+    font-size: 15px; // 设计稿特殊值，介于 body(14) 和 heading(18) 之间
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.l-queue-drawer__count {
+    font-size: var(--text-overline-size); // 11px
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.l-queue-drawer__header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.l-queue-drawer__clear-btn {
+    font-size: var(--text-caption-size);
+    padding: var(--space-1) 10px;
+    border: none;
+    border-radius: var(--radius-control);
+    background: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition:
+        color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-text-secondary);
+        background: var(--color-fill-subtle);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+}
+
+.l-queue-drawer__close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--color-text-placeholder);
+    cursor: pointer;
+    transition:
+        color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-text-primary);
+        background: var(--color-fill-subtle-hover);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+}
+
+// ── Divider ──
+.l-queue-drawer__divider {
+    height: 1px;
+    margin: 0 var(--space-4);
+    background: var(--color-border-subtle);
+    flex-shrink: 0;
+}
+
+// ── Virtuoso List ──
+.l-queue-drawer__list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+// Virtuoso 自定义 List 容器内边距
+.l-queue-drawer__list-inner {
+    padding: var(--space-2);
+}
+
+// ── Queue Item ──
+.l-queue-drawer__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 var(--space-2) 0 var(--space-3);
+    border-radius: var(--radius-control);
+    cursor: pointer;
+    position: relative;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+        background: var(--color-bg-surface);
+    }
+
+    &.is-active {
+        background: var(--color-fill-brand-muted);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+
+    // ── Hover: 序号 → Play 图标 ──
+    &:not(.is-active):hover {
+        .l-queue-drawer__item-num {
+            display: none;
+        }
+        .l-queue-drawer__item-play {
+            display: block;
+        }
+    }
+
+    // ── Hover: 显示删除按钮 ──
+    &:hover .l-queue-drawer__item-remove {
+        opacity: 1;
+    }
+}
+
+// ── Active indicator bar ──
+.l-queue-drawer__active-bar {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--color-fill-brand);
+    border-radius: var(--radius-pill);
+}
+
+// ── Index / Equalizer column ──
+.l-queue-drawer__item-index {
+    width: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.l-queue-drawer__item-num {
+    font-size: var(--text-overline-size); // 11px
+    color: var(--color-text-disabled);
+    font-variant-numeric: tabular-nums;
+}
+
+.l-queue-drawer__item-play {
+    display: none;
+    color: var(--color-text-secondary);
+    fill: currentColor;
+}
+
+// ── Equalizer animation ──
+.l-queue-drawer__equalizer {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-0-5); // 2px
+    height: 12px;
+}
+
+.l-queue-drawer__eq-bar {
+    width: 2px;
+    background: var(--color-fill-brand);
+    border-radius: var(--radius-pill);
+
+    &--1 {
+        animation: eq-bounce 0.8s ease-in-out infinite alternate;
+        animation-delay: 0s;
+    }
+
+    &--2 {
+        animation: eq-bounce 0.8s ease-in-out infinite alternate;
+        animation-delay: 0.2s;
+    }
+
+    &--3 {
+        animation: eq-bounce 0.8s ease-in-out infinite alternate;
+        animation-delay: 0.4s;
+    }
+}
+
+@keyframes eq-bounce {
+    0% {
+        height: 3px;
+    }
+    100% {
+        height: 12px;
+    }
+}
+
+// Reduced motion: 禁用均衡器动画
+@media (prefers-reduced-motion: reduce) {
+    .l-queue-drawer__eq-bar {
+        animation: none;
+        height: 8px;
+    }
+}
+
+// ── Track info ──
+.l-queue-drawer__item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.l-queue-drawer__item-title {
+    font-size: var(--text-label-size);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+
+    .is-active & {
+        color: var(--color-text-brand);
+    }
+}
+
+.l-queue-drawer__item-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1-5); // 6px
+    margin-top: var(--space-0-5); // 2px
+}
+
+.l-queue-drawer__item-artist {
+    font-size: var(--text-overline-size); // 11px
+    color: var(--color-text-placeholder);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.l-queue-drawer__item-source {
+    font-size: 9px; // 设计稿特殊值，介于 badge(10) 和无 token 之间
+    color: var(--color-text-disabled);
+    border: 1px solid var(--color-border-default); // white/8%
+    border-radius: var(--radius-badge);
+    padding: 0.5px var(--space-1);
+    line-height: 1.4;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+// ── Remove button ──
+.l-queue-drawer__item-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--color-text-placeholder);
+    opacity: 0; // hover 显示
+    cursor: pointer;
+    transition:
+        opacity var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-status-danger-text);
+        background: var(--color-status-danger-bg);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+}
+
+// ── Empty state ──
+.l-queue-drawer__empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.l-queue-drawer__empty-icon {
+    color: var(--color-text-disabled);
+    margin-bottom: var(--space-4);
+}
+
+.l-queue-drawer__empty-title {
+    font-size: var(--text-body-size);
+    font-weight: var(--font-weight-medium);
+    color: color-mix(in srgb, white 40%, transparent); // 设计稿 text-white/40
+}
+
+.l-queue-drawer__empty-desc {
+    font-size: var(--text-caption-size);
+    color: color-mix(in srgb, white 20%, transparent); // 设计稿 text-white/20
+    margin-top: var(--space-1-5); // 6px
+}

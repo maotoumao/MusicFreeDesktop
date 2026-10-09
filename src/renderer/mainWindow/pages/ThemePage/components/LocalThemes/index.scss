@@ -1,0 +1,27 @@
+// ============================================================================
+// LocalThemes — 已安装主题列表样式
+// ============================================================================
+//
+// BEM Block: local-themes
+//
+// Grid 布局和卡片操作区样式。
+
+.local-themes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-6);
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    &__delete-btn {
+        color: var(--color-text-secondary);
+
+        &:hover {
+            color: var(--color-text-primary);
+        }
+    }
+}

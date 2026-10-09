@@ -1,62 +1,39 @@
-import type { Configuration } from "webpack";
-import path from "path";
+import type { Configuration } from 'webpack';
+import path from 'path';
 
-import { rules } from "./webpack.rules";
-import { plugins } from "./webpack.plugins";
+import { rules } from './webpack.rules';
+import { plugins } from './webpack.plugins';
 
-rules.push(
-  {
+const rendererRules = [...rules];
+
+rendererRules.push({
     test: /\.css$/,
-    use: [{ loader: "style-loader" }, { loader: "css-loader" }],
-  },
-  {
-    test: /\.scss$/,
-    use: [
-      { loader: "style-loader" },
-      { loader: "css-loader" },
-      { loader: "sass-loader" },
-    ],
-  },
-  {
-    test: /\.(woff|woff2|eot|ttf|otf)$/i,
-    type: "asset/resource",
-  },
-  {
-    test: /\.(png|jpg|jpeg|gif)$/i,
-    type: "asset/resource",
-  },
-  {
-    test: /\.svg$/,
-    use: [
-      {
-        loader: "@svgr/webpack",
-        options: {
-          prettier: false,
-          svgo: false,
-          svgoConfig: {
-            plugins: [{ removeViewBox: false }],
-          },
-          titleProp: true,
-          ref: true,
-        },
-      },
-    ],
-  }
-);
+    use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+});
+
+rendererRules.push({
+    test: /\.s[ac]ss$/,
+    use: [{ loader: 'style-loader' }, { loader: 'css-loader' }, { loader: 'sass-loader' }],
+});
+
+rendererRules.push({
+    test: /\.(png|jpe?g|gif|webp|ico)$/i,
+    type: 'asset/resource',
+});
 
 export const rendererConfig: Configuration = {
-  module: {
-    rules,
-  },
-  plugins,
-  resolve: {
-    extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".scss"],
-    alias: {
-      "@": path.join(__dirname, "../src"),
-      "@renderer": path.join(__dirname, "../src/renderer"),
-      "@renderer-lrc": path.join(__dirname, "../src/renderer-lrc"),
-      "@shared": path.join(__dirname, "../src/shared")
+    module: {
+        rules: rendererRules,
     },
-  },
-  externals: process.platform !== "darwin" ? ["fsevents"] : undefined,
+    plugins,
+    resolve: {
+        extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.scss', '.sass'],
+        alias: {
+            '@renderer': path.join(__dirname, '../src/renderer'),
+            '@assets': path.join(__dirname, '../src/assets'),
+            '@common': path.join(__dirname, '../src/common'),
+            '@infra': path.join(__dirname, '../src/infra'),
+            '@appTypes': path.join(__dirname, '../src/types'),
+        },
+    },
 };

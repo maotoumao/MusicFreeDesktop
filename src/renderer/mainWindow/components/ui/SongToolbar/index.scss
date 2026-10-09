@@ -1,0 +1,41 @@
+// ============================================================================
+// SongToolbar — 组合组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: flex, justify-between, items-center, py-12, mb-4
+//   左侧: flex, gap-8
+//   右侧: SearchInput width 200px
+//
+
+.song-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    margin-bottom: 4px;
+
+    // ── 左侧操作区 ──
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    // ── 右侧搜索 ──
+    &__right {
+        flex-shrink: 0;
+    }
+
+    &__search {
+        width: 280px;
+    }
+
+    // ── 禁用状态 ──
+    // 内置 Button/Input 通过 disabled prop 原生禁用；
+    // 插槽按钮（children）无法传 prop，统一用 CSS 禁用。
+    &.is-disabled &__left > .btn:not(.is-disabled):not(.always-enabled) {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+}

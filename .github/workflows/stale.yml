@@ -1,0 +1,62 @@
+name: Mark and close stale issues
+
+on:
+    schedule:
+        # 每天 01:30 UTC 运行一次 | Runs daily at 01:30 UTC
+        - cron: '30 1 * * *'
+    workflow_dispatch:
+
+permissions:
+    issues: write
+    pull-requests: write
+
+jobs:
+    stale:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/stale@v9
+              with:
+                  # 60 天无活动标记 stale，再 14 天关闭 | 60 days to stale, 14 more days to close
+                  days-before-stale: 60
+                  days-before-close: 14
+
+                  # 只清理「未被 accepted」的 issue | Only clean up issues without `accepted`
+                  exempt-issue-labels: 'accepted,pinned,roadmap,security'
+                  # PR 不走 accepted 体系，仅长期无活动才标记 | PRs only get stale by inactivity
+                  exempt-pr-labels: 'pinned,security'
+
+                  stale-issue-label: 'stale'
+                  stale-pr-label: 'stale'
+
+                  stale-issue-message: |
+                      此 Issue 已 60 天没有活动，被自动标记为 `stale`。若仍然有效，请在 14 天内补充信息或回复，否则将被自动关闭。被维护者标记 `accepted` 的 Issue 不受此影响。
+
+                      ---
+
+                      This issue has had no activity for 60 days and has been marked as `stale`. If it is still relevant, please add details or comment within 14 days, otherwise it will be closed automatically. Issues marked `accepted` by a maintainer are exempt.
+
+                  close-issue-message: |
+                      此 Issue 因长期无活动且未被维护者标记 `accepted` 而被自动关闭。如有需要，欢迎补充信息后重新打开。
+
+                      ---
+
+                      This issue was closed automatically due to prolonged inactivity and not being marked `accepted` by a maintainer. Feel free to reopen with more details if needed.
+
+                  stale-pr-message: |
+                      此 PR 已 60 天没有活动，被自动标记为 `stale`，请在 14 天内更新，否则将被自动关闭。
+
+                      ---
+
+                      This pull request has had no activity for 60 days and has been marked as `stale`. Please update it within 14 days, otherwise it will be closed automatically.
+
+                  close-pr-message: |
+                      此 PR 因长期无活动而被自动关闭。
+
+                      ---
+
+                      This pull request was closed automatically due to prolonged inactivity.
+
+                  # 有新活动时自动移除 stale 标签 | Remove stale label when there is new activity
+                  remove-stale-when-updated: true
+                  # 每次运行处理的数量上限 | Max items processed per run
+                  operations-per-run: 200

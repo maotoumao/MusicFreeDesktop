@@ -1,0 +1,628 @@
+// ============================================================================
+// MusicFree Desktop — Global Stylesheet
+// ============================================================================
+//
+// 职责：
+//   1. 定义原语层 SCSS 变量（编译后不出现在产物中）
+//   2. 定义语义层 CSS Custom Properties（运行时可被主题覆盖）
+//   3. 现代 CSS Reset（覆盖浏览器默认样式）
+//   4. 全局基础样式（字体、滚动条、选区等）
+//   5. 玻璃态 utility classes
+//
+// 设计原则：
+//   - 组件只引用语义层变量，禁止直接使用 SCSS 原语或硬编码值
+//   - 主题切换只覆盖语义层，原语层作为编译期常量保持稳定
+//   - 所有可视样式必须可被 Token 控制
+//
+// ============================================================================
+
+// ────────────────────────────────────────────────────────────────────────────
+// § 1. 原语层 (Primitives) — SCSS 变量，编译后内联，产物中不存在
+// ────────────────────────────────────────────────────────────────────────────
+
+// ── 1.1 调色板 (Palette) ──
+// 值为 R, G, B 格式，供语义层通过 rgba(#{$var}, alpha) 编译期组合透明度
+// 仅保留被 ≥2 个语义 token 引用的色值
+
+// 中性色
+$palette-black: 0, 0, 0;
+$palette-white: 255, 255, 255;
+$palette-zinc-950: 18, 18, 18;
+
+// 品牌色
+$palette-emerald-400: 52, 211, 153;
+
+// 功能色
+$palette-red-500: 239, 68, 68;
+$palette-cyan-400: 34, 211, 238;
+$palette-amber-400: 251, 191, 36;
+
+// ── 1.2 字号刻度 (Type Scale) ──
+// 基于 16px 基准，rem 单位
+
+$scale-font-2xs: 0.625rem; // 10px
+$scale-font-xs: 0.6875rem; // 11px
+$scale-font-sm: 0.8125rem; // 13px
+$scale-font-base: 0.875rem; // 14px
+$scale-font-md: 0.9375rem; // 15px
+$scale-font-lg: 1rem; // 16px
+$scale-font-xl: 1.125rem; // 18px
+$scale-font-2xl: 1.5rem; // 24px
+$scale-font-3xl: 2rem; // 32px
+$scale-font-4xl: 2.25rem; // 36px
+
+// ── 1.3 行高刻度 (Leading Scale) ──
+
+$scale-leading-tight: 1.25;
+$scale-leading-normal: 1.5;
+$scale-leading-relaxed: 1.75;
+
+// ── 1.4 间距刻度 (Space Scale) ──
+// 基于 4px 网格
+
+$scale-space-0: 0;
+$scale-space-0-5: 0.125rem; // 2px
+$scale-space-1: 0.25rem; // 4px
+$scale-space-1-5: 0.375rem; // 6px
+$scale-space-2: 0.5rem; // 8px
+$scale-space-3: 0.75rem; // 12px
+$scale-space-4: 1rem; // 16px
+$scale-space-5: 1.25rem; // 20px
+$scale-space-6: 1.5rem; // 24px
+$scale-space-7: 1.75rem; // 28px
+$scale-space-8: 2rem; // 32px
+$scale-space-10: 2.5rem; // 40px
+$scale-space-12: 3rem; // 48px
+$scale-space-16: 4rem; // 64px
+$scale-space-20: 5rem; // 80px
+
+// ── 1.5 圆角刻度 (Radius Scale) ──
+
+$scale-radius-xs: 4px;
+$scale-radius-sm: 6px;
+$scale-radius-md: 8px;
+$scale-radius-lg: 12px;
+$scale-radius-xl: 16px;
+$scale-radius-2xl: 20px;
+$scale-radius-3xl: 24px;
+$scale-radius-full: 9999px;
+
+// ── 1.6 缓动曲线 (Easing) ──
+
+$ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+$ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+$ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+$ease-popup: cubic-bezier(0.16, 1, 0.3, 1);
+
+// ── 1.7 图标尺寸刻度 (Icon Size Scale) ──
+
+$scale-icon-xs: 14px;
+$scale-icon-sm: 16px;
+$scale-icon-md: 20px;
+$scale-icon-lg: 28px;
+$scale-icon-xl: 36px;
+$scale-icon-2xl: 48px;
+
+// ────────────────────────────────────────────────────────────────────────────
+// § 2. 语义层 (Semantics) — CSS Custom Properties，运行时可被主题覆盖
+// ────────────────────────────────────────────────────────────────────────────
+
+:root {
+    // ── 2.1 背景色 (Background) — 按海拔递增 ──
+
+    // L0: 页面底层 — body 背景
+    --color-bg-base: rgb(#{$palette-zinc-950});
+    // L1: 侧边栏
+    --color-bg-sidebar: rgba(30, 30, 30, 0.4);
+    // L1: 播放底栏
+    --color-bg-player: rgba(25, 25, 25, 0.9);
+    // L2: 卡片、列表行 hover、设置区块
+    --color-bg-surface: rgba(#{$palette-white}, 0.04);
+    // L2: 输入框、标签、高亮元素 — 需从 surface 中突出
+    --color-bg-surface-raised: rgba(#{$palette-white}, 0.08);
+    // L3: 队列抽屉面板
+    --color-bg-drawer: rgba(24, 24, 27, 0.95);
+    // L4: 弹窗遮罩
+    --color-bg-overlay: rgba(#{$palette-black}, 0.6);
+    // L5: 弹窗容器
+    --color-bg-modal: rgb(30, 30, 30);
+    // L6: 浮层容器（右键菜单、下拉等）
+    --color-bg-popover: rgba(30, 30, 30, 0.95);
+    // L7: 全屏播放器底色
+    --color-bg-fullscreen: rgb(#{$palette-zinc-950});
+    // 封面/头像占位背景
+    --color-bg-placeholder: rgb(39, 39, 42);
+
+    // ── 2.2 填充色 (Fill) — 按交互强度分级 ──
+
+    // 品牌填充 (Primary)
+    --color-fill-brand: rgb(#{$palette-emerald-400});
+    --color-fill-brand-hover: rgba(#{$palette-emerald-400}, 0.85);
+    --color-fill-brand-muted: rgba(#{$palette-emerald-400}, 0.15);
+
+    // 中性填充 (Neutral)
+    --color-fill-neutral: rgba(#{$palette-white}, 0.1);
+    --color-fill-neutral-hover: rgba(#{$palette-white}, 0.16);
+    --color-fill-neutral-active: rgba(#{$palette-white}, 0.2);
+
+    // 弱填充 (Subtle)
+    --color-fill-subtle: rgba(#{$palette-white}, 0.05);
+    --color-fill-subtle-hover: rgba(#{$palette-white}, 0.1);
+
+    // ── 2.3 文本色 (Text) ──
+
+    --color-text-primary: rgb(#{$palette-white});
+    --color-text-secondary: rgb(161, 161, 170);
+    --color-text-muted: rgba(#{$palette-white}, 0.6);
+    --color-text-placeholder: rgba(#{$palette-white}, 0.5);
+    --color-text-disabled: rgba(#{$palette-white}, 0.3);
+    --color-text-on-brand: rgb(#{$palette-zinc-950});
+    --color-text-brand: rgb(#{$palette-emerald-400});
+
+    // ── 2.4 边框色 (Border) ──
+
+    --color-border-default: rgba(#{$palette-white}, 0.08);
+    --color-border-subtle: rgba(#{$palette-white}, 0.05);
+    --color-border-strong: rgba(#{$palette-white}, 0.16);
+    --color-border-focus: rgba(#{$palette-white}, 0.2);
+    --color-border-brand: rgba(#{$palette-emerald-400}, 0.3);
+
+    // ── 2.4a 焦点环 (Focus Ring) ──
+
+    --focus-ring: 0 0 0 2px var(--color-fill-brand);
+    --focus-ring-offset: 2px;
+
+    // ── 2.5 状态色 (Status) ──
+
+    // Info — 蓝青主调
+    --color-status-info-bg: rgba(23, 29, 34, 0.95);
+    --color-status-info-border: rgba(#{$palette-cyan-400}, 0.3);
+    --color-status-info-text: rgb(#{$palette-cyan-400});
+
+    // Warning — 琥珀主调
+    --color-status-warn-bg: rgba(32, 23, 20, 0.95);
+    --color-status-warn-border: rgba(#{$palette-amber-400}, 0.3);
+    --color-status-warn-text: rgb(#{$palette-amber-400});
+    --color-status-warn-fill: rgb(#{$palette-amber-400});
+
+    // Danger — 红色
+    --color-status-danger-bg: rgba(#{$palette-red-500}, 0.1);
+    --color-status-danger-border: rgba(#{$palette-red-500}, 0.2);
+    --color-status-danger-text: rgba(#{$palette-red-500}, 0.8);
+    --color-status-danger-fill: rgb(#{$palette-red-500});
+
+    // Success — 复用品牌色
+    --color-status-success-text: rgb(110, 231, 183);
+
+    // ── 2.5a 专用色 (Specific) ──
+
+    // 收藏红心 — 独立于 danger，防止状态色变更影响
+    --color-favorite: rgba(#{$palette-red-500}, 0.8);
+
+    // ── 2.6 背景图 (Background Image) ──
+
+    --bg-image:
+        radial-gradient(
+            at 0% 0%,
+            color-mix(in srgb, var(--color-fill-brand) 12%, transparent) 0px,
+            transparent 50%
+        ),
+        radial-gradient(
+            at 100% 100%,
+            color-mix(in srgb, var(--color-fill-brand) 6%, transparent) 0px,
+            transparent 50%
+        );
+
+    // ── 2.7 圆角 (Radius) ──
+
+    --radius-badge: #{$scale-radius-xs}; // 4px
+    --radius-control: #{$scale-radius-md}; // 8px
+    --radius-card: #{$scale-radius-lg}; // 12px
+    --radius-panel: #{$scale-radius-xl}; // 16px
+    --radius-modal: #{$scale-radius-2xl}; // 20px
+    --radius-artwork: #{$scale-radius-3xl}; // 24px — 全屏播放器封面
+    --radius-pill: #{$scale-radius-full}; // 9999px
+
+    // ── 2.8 阴影 (Shadow) ──
+
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.35);
+    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --shadow-up: 0 -8px 16px rgba(0, 0, 0, 0.24);
+    --shadow-left: -10px 0 30px rgba(0, 0, 0, 0.3);
+
+    // ── 2.9 模糊 (Blur) ──
+
+    --blur-xs: 8px;
+    --blur-sm: 12px;
+    --blur-md: 20px;
+    --blur-lg: 30px;
+    --blur-xl: 40px;
+    --blur-overlay: 12px;
+    --blur-ambient: 100px;
+
+    // ── 2.10 层级 (Z-Index) ──
+
+    --z-base: 1;
+    --z-sticky: 20;
+    --z-sidebar: 30;
+    --z-drawer: 40;
+    --z-header: 50;
+    --z-player: 100;
+    --z-fullscreen: 200;
+    --z-overlay: 1000;
+    --z-modal: 1010;
+    --z-toast: 1100;
+    --z-popover: 1200;
+
+    // ── 2.11 排版 (Typography) ──
+
+    --font-family:
+        system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+    // 排版预设
+    --text-display-size: #{$scale-font-3xl}; // 32px — 歌单/专辑详情标题
+    --text-display-lg-size: #{$scale-font-4xl}; // 36px — 全屏播放器标题
+    --text-display-leading: #{$scale-leading-tight};
+    --text-title-size: #{$scale-font-2xl}; // 24px
+    --text-title-leading: #{$scale-leading-tight};
+    --text-heading-size: #{$scale-font-xl}; // 18px
+    --text-heading-leading: #{$scale-leading-tight};
+    --text-body-size: #{$scale-font-base}; // 14px
+    --text-body-leading: #{$scale-leading-normal};
+    --text-label-size: #{$scale-font-sm}; // 13px
+    --text-label-leading: #{$scale-leading-normal};
+    --text-caption-size: 0.75rem; // 12px
+    --text-caption-leading: #{$scale-leading-normal};
+    --text-overline-size: #{$scale-font-xs}; // 11px — overline labels, badge-adjacent text
+    --text-overline-leading: #{$scale-leading-normal};
+    --text-badge-size: #{$scale-font-2xs}; // 10px
+    --text-badge-leading: #{$scale-leading-tight};
+
+    // 字重
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    // 字距
+    --tracking-tight: -0.5px;
+    --tracking-normal: 0;
+    --tracking-wide: 0.05em;
+
+    // ── 2.12 动效 (Motion) ──
+
+    --duration-instant: 80ms;
+    --duration-fast: 120ms;
+    --duration-normal: 200ms;
+    --duration-moderate: 300ms;
+    --duration-slow: 500ms;
+    --duration-glacial: 700ms;
+
+    --ease-standard: #{$ease-standard};
+    --ease-decelerate: #{$ease-decelerate};
+    --ease-accelerate: #{$ease-accelerate};
+    --ease-spring: #{$ease-spring};
+    --ease-popup: #{$ease-popup};
+
+    // ── 2.13 透明度 (Opacity) ──
+
+    --opacity-disabled: 0.5;
+    --opacity-muted: 0.6;
+    --opacity-pressed: 0.7;
+    --opacity-hover-emphasis: 0.8;
+    --opacity-ambient: 0.4;
+    --opacity-overlay: 0.6;
+
+    // ── 2.14 布局尺寸 (Layout Dimensions) ──
+
+    --size-sidebar-w: 260px;
+    --size-player-h: 72px;
+    --size-drawer-w: 340px;
+    --size-modal-w: 520px;
+    --size-modal-w-sm: 400px;
+    --size-topbar-h: 64px;
+
+    // ── 2.15 控件尺寸 (Control Sizes) ──
+
+    --size-control-sm: 32px;
+    --size-control-md: 36px;
+    --size-control-lg: 40px;
+
+    // ── 2.16 间距 (Spacing) — 映射 $scale-space 以供运行时引用 ──
+
+    --space-0: #{$scale-space-0};
+    --space-0-5: #{$scale-space-0-5};
+    --space-1: #{$scale-space-1};
+    --space-1-5: #{$scale-space-1-5};
+    --space-2: #{$scale-space-2};
+    --space-3: #{$scale-space-3};
+    --space-4: #{$scale-space-4};
+    --space-5: #{$scale-space-5};
+    --space-6: #{$scale-space-6};
+    --space-7: #{$scale-space-7};
+    --space-8: #{$scale-space-8};
+    --space-10: #{$scale-space-10};
+    --space-12: #{$scale-space-12};
+    --space-16: #{$scale-space-16};
+    --space-20: #{$scale-space-20};
+
+    // ── 2.17 图标尺寸 (Icon Size) ──
+
+    --icon-xs: #{$scale-icon-xs};
+    --icon-sm: #{$scale-icon-sm};
+    --icon-md: #{$scale-icon-md};
+    --icon-lg: #{$scale-icon-lg};
+    --icon-xl: #{$scale-icon-xl};
+    --icon-2xl: #{$scale-icon-2xl};
+}
+
+// ── 禁用模糊 ──
+// 将所有 blur token 归零并移除 backdrop-filter 合成层，消除 GPU 开销。
+// 启用方式: document.documentElement.classList.add('no-blur')
+:root.no-blur {
+    --blur-xs: 0px;
+    --blur-sm: 0px;
+    --blur-md: 0px;
+    --blur-lg: 0px;
+    --blur-xl: 0px;
+    --blur-overlay: 0px;
+    --blur-ambient: 0px;
+
+    // 彻底移除合成层，避免 blur(0px) 仍创建 GPU layer
+    *,
+    *::before,
+    *::after {
+        backdrop-filter: none !important;
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// § 3. 现代 CSS Reset
+// ────────────────────────────────────────────────────────────────────────────
+//
+// 设计决策：采用 Modern CSS Reset 方案（融合 Josh Comeau + Andy Bell 的思路），
+// 针对 Electron 桌面端环境裁剪。相比 normalize.css 更激进地移除浏览器默认样式，
+// 为设计系统提供干净的起点。
+//
+// 不使用 normalize.css 的理由：
+//   - normalize 的目标是"跨浏览器一致性"，在 Electron 单引擎环境中无此需求
+//   - normalize 保留了过多默认样式（margin、padding），反而增加覆盖工作量
+//   - 现代 Reset 更轻量、更适合从 Token 出发构建一切样式
+//
+
+// 3.1 全局 box-sizing 重置
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+// 3.2 移除所有默认 margin 和 padding
+* {
+    margin: 0;
+    padding: 0;
+}
+
+// 3.3 根元素与 body
+html {
+    // 使用 token 中的基准字号（rem 基于此）
+    font-size: 16px;
+    // 防止 iOS 横屏时字号自动调整（Electron 不需要但保持一致性）
+    -webkit-text-size-adjust: 100%;
+    // 亚像素抗锯齿 — 暗色背景下文字更清晰
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    // 优化文本渲染
+    text-rendering: optimizeLegibility;
+    // 禁用触摸高亮（Electron 桌面端无需）
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--text-body-size);
+    line-height: var(--text-body-leading);
+    color: var(--color-text-primary);
+
+    // 铺满视口
+    min-height: 100vh;
+    // 防止内容溢出产生横向滚动
+    overflow: hidden;
+    // 桌面端禁用文本选择（portal 内容也需要继承，所以放在 body 而非 .l-app-shell）
+    user-select: none;
+    // 启用字体特性
+    font-feature-settings:
+        'kern' 1,
+        'liga' 1;
+    &[data-window='main'] {
+        background-color: var(--color-bg-base);
+        background-image: var(--bg-image);
+    }
+}
+
+// 3.4 排版元素重置
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+p,
+blockquote,
+pre,
+dl,
+dd,
+ol,
+ul,
+figure,
+fieldset,
+legend {
+    margin: 0;
+}
+
+ol,
+ul {
+    list-style: none;
+}
+
+// 3.5 链接重置
+a {
+    color: inherit;
+    text-decoration: none;
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+        border-radius: var(--radius-badge);
+    }
+}
+
+// 3.6 媒体元素
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+    display: block;
+}
+
+img,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+// 3.7 表单元素重置
+button,
+input,
+select,
+textarea {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    outline: none;
+}
+
+button {
+    cursor: pointer;
+    // 移除按钮默认的内边距和外边距
+    padding: 0;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+input,
+textarea {
+    &::placeholder {
+        color: var(--color-text-placeholder);
+        opacity: 1; // Firefox 默认 placeholder 不透明度不是 1
+    }
+}
+
+// 3.8 表格重置
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+// 3.9 杂项
+// 移除 summary 默认三角箭头
+summary {
+    display: list-item;
+    cursor: pointer;
+}
+
+// 移除 dialog 默认样式
+dialog {
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+// 隐藏属性
+[hidden] {
+    display: none !important;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// § 4. 全局基础样式
+// ────────────────────────────────────────────────────────────────────────────
+
+// 4.1 文本选区
+::selection {
+    background-color: var(--color-fill-brand-muted);
+    color: var(--color-text-primary);
+}
+
+// 4.2 统一焦点环 — 键盘可访问性
+// 仅在键盘导航时显示（:focus-visible），鼠标点击不触发
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+        var(--focus-ring);
+}
+
+// 4.3 自定义滚动条 — 基于 ScrollArea 规范
+// Webkit / Blink 引擎（Electron 使用 Chromium）
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-fill-neutral);
+    border-radius: 2px;
+
+    &:hover {
+        background: var(--color-fill-neutral-hover);
+    }
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+// 4.4 平滑滚动（仅对非 reduced-motion 用户）
+@media (prefers-reduced-motion: no-preference) {
+    :root {
+        scroll-behavior: smooth;
+    }
+}
+
+// 4.5 Reduced motion 支持 — 尊重用户的无障碍偏好
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

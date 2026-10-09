@@ -1,0 +1,574 @@
+// ============================================================================
+// plugin-modal — 插件相关弹窗共享样式
+// ============================================================================
+//
+// 所有 Plugin*Modal 共用的 BEM Block，聚合于此文件。
+// 独立于 PluginManagerPage 页面样式，遵循高内聚原则。
+
+// ── 按钮基础重置 mixin ──
+@mixin btn-reset {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+}
+
+.plugin-modal {
+    // ── Tab 切换 ──
+
+    &__tabs {
+        display: flex;
+        gap: var(--space-4);
+        border-bottom: 1px solid var(--color-border-subtle);
+        padding-bottom: 0;
+        margin-bottom: var(--space-4);
+    }
+
+    &__tab {
+        @include btn-reset;
+
+        font-size: var(--text-label-size);
+        color: var(--color-text-secondary);
+        padding-bottom: var(--space-3);
+        border-bottom: 2px solid transparent;
+        transition:
+            color var(--duration-normal) var(--ease-standard),
+            border-color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+        }
+
+        &.is-active {
+            color: var(--color-text-brand);
+            border-bottom-color: var(--color-fill-brand);
+        }
+    }
+
+    // ── 本地安装 dropzone ──
+
+    &__local {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    &__dropzone {
+        @include btn-reset;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        border: 2px dashed var(--color-border-default);
+        border-radius: var(--radius-card);
+        padding: var(--space-8);
+        color: var(--color-text-secondary);
+        transition:
+            border-color var(--duration-normal) var(--ease-standard),
+            color var(--duration-normal) var(--ease-standard);
+
+        &:hover,
+        &.is-drag-over {
+            border-color: var(--color-fill-brand-muted);
+            color: var(--color-text-primary);
+        }
+
+        &.is-drag-over {
+            background: var(--color-fill-subtle);
+        }
+
+        &:disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+    }
+
+    &__dropzone-icon {
+        color: var(--color-text-disabled);
+    }
+
+    &__dropzone-text {
+        font-size: var(--text-label-size);
+    }
+
+    // ── 提示文字 ──
+
+    &__hint {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+    }
+
+    &__hint-item {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-2);
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        line-height: var(--text-caption-leading);
+
+        &::before {
+            content: '·';
+            flex-shrink: 0;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-disabled);
+        }
+    }
+
+    // ── URL 输入区 ──
+
+    &__url {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    // ── 导入弹窗 ──
+
+    &__import {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    &__hints {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        padding: var(--space-3);
+        border-radius: var(--radius-control);
+        background: var(--color-fill-subtle);
+    }
+
+    // ── 歌单选择列表（导入第二步） ──
+
+    &__sheet-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    &__sheet-item {
+        @include btn-reset;
+
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-control);
+        font-size: var(--text-body-size);
+        color: var(--color-text-primary);
+        transition: background-color var(--duration-normal) var(--ease-standard);
+        text-align: left;
+
+        &:hover {
+            background: var(--color-fill-subtle-hover);
+        }
+
+        svg {
+            color: var(--color-text-muted);
+            flex-shrink: 0;
+        }
+    }
+
+    // ── 弱化文字 ──
+
+    &__muted-text {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        line-height: var(--text-caption-leading);
+    }
+
+    // ── 用户变量 ──
+
+    &__variables {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__var-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    &__var-row {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1-5);
+    }
+
+    &__var-label {
+        font-size: var(--text-label-size);
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-medium);
+    }
+
+    &__var-hint {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        margin-left: var(--space-2);
+    }
+
+    // ── Markdown 渲染 ──
+
+    &__markdown {
+        font-size: var(--text-body-size);
+        color: var(--color-text-secondary);
+        line-height: var(--text-body-leading);
+        word-break: break-word;
+
+        h2,
+        h3,
+        h4 {
+            color: var(--color-text-primary);
+            font-weight: var(--font-weight-semibold);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-2);
+        }
+
+        h2 {
+            font-size: var(--text-heading-size);
+        }
+
+        h3 {
+            font-size: var(--text-body-size);
+        }
+
+        h4 {
+            font-size: var(--text-label-size);
+        }
+
+        p {
+            margin-bottom: var(--space-2);
+        }
+
+        a {
+            color: var(--color-text-brand);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+
+            &:hover {
+                opacity: var(--opacity-hover-emphasis);
+            }
+        }
+
+        strong {
+            color: var(--color-text-primary);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        code {
+            background: var(--color-fill-subtle);
+            border-radius: var(--radius-badge);
+            padding: 1px var(--space-1);
+            font-size: var(--text-caption-size);
+        }
+
+        pre {
+            background: var(--color-fill-subtle);
+            border-radius: var(--radius-control);
+            padding: var(--space-3);
+            overflow-x: auto;
+            margin: var(--space-2) 0;
+
+            code {
+                background: none;
+                padding: 0;
+            }
+        }
+
+        ul {
+            padding-left: var(--space-4);
+            margin: var(--space-2) 0;
+
+            li {
+                list-style-type: disc;
+                margin-bottom: var(--space-1);
+            }
+        }
+    }
+
+    // ── 订阅管理 ──
+
+    &__subscriptions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    // ── 快速添加栏 ──
+
+    &__quick-add {
+        display: flex;
+        gap: var(--space-2);
+        align-items: center;
+    }
+
+    &__quick-add-input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    // ── 列表容器 ──
+
+    &__sub-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        max-height: 340px;
+        overflow-y: auto;
+        padding-right: var(--space-1);
+        margin-right: calc(var(--space-1) * -1);
+    }
+
+    // ── 独立卡片行 ──
+
+    &__sub-card {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3);
+        background: var(--color-fill-subtle);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-card);
+        transition:
+            background-color var(--duration-fast) var(--ease-standard),
+            border-color var(--duration-fast) var(--ease-standard),
+            box-shadow var(--duration-fast) var(--ease-standard);
+
+        &:hover:not(.is-editing) {
+            background: var(--color-fill-subtle-hover);
+            border-color: var(--color-border-strong);
+        }
+
+        &.is-editing {
+            background: var(--color-fill-base);
+            border-color: var(--color-border-brand);
+            box-shadow: 0 0 0 1px var(--color-border-brand);
+            flex-direction: column;
+            align-items: stretch;
+            gap: var(--space-3);
+        }
+    }
+
+    // ── 卡片内图标 ──
+
+    &__sub-card-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-control);
+        background: color-mix(in srgb, var(--color-fill-brand) 10%, transparent);
+        color: var(--color-text-brand);
+        flex-shrink: 0;
+    }
+
+    // ── 卡片主体 ──
+
+    &__sub-card-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-0-5);
+    }
+
+    &__sub-card-name {
+        font-size: var(--text-body-size);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-primary);
+        line-height: var(--text-body-leading);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__sub-card-url {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        line-height: var(--text-caption-leading);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // ── 操作按钮 (悬浮显示) ──
+
+    &__sub-card-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        flex-shrink: 0;
+        opacity: 0;
+        transition: opacity var(--duration-fast) var(--ease-standard);
+
+        .plugin-modal__sub-card:hover & {
+            opacity: 1;
+        }
+
+        @media (hover: none) {
+            opacity: 1;
+        }
+    }
+
+    &__sub-card-btn {
+        @include btn-reset;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-control);
+        color: var(--color-text-disabled);
+        transition:
+            color var(--duration-normal) var(--ease-standard),
+            background-color var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-secondary);
+            background: var(--color-fill-subtle-hover);
+        }
+
+        &--danger:hover {
+            color: var(--color-status-danger-text);
+            background: var(--color-status-danger-bg);
+        }
+    }
+
+    // ── 编辑模式 ──
+
+    &__sub-card-edit-inputs {
+        display: flex;
+        gap: var(--space-2);
+        width: 100%;
+
+        > * {
+            flex: 1;
+        }
+    }
+
+    &__sub-card-edit-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+    }
+
+    // ── 空状态 ──
+
+    &__sub-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: var(--space-12) 0 var(--space-10);
+        gap: var(--space-3);
+        background: var(--color-fill-subtle);
+        border: 1px dashed var(--color-border-subtle);
+        border-radius: var(--radius-card);
+    }
+
+    &__sub-empty-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--color-fill-brand) 8%, transparent);
+        color: var(--color-text-brand);
+        margin-bottom: var(--space-1);
+    }
+
+    &__sub-empty-title {
+        font-size: var(--text-body-size);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-primary);
+        line-height: var(--text-body-leading);
+    }
+
+    &__sub-empty-hint {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        line-height: var(--text-caption-leading);
+        max-width: 240px;
+        text-align: center;
+    }
+
+    // ── 音源重定向 ──
+
+    &__redirect-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    &__redirect-item {
+        @include btn-reset;
+
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-control);
+        font-size: var(--text-body-size);
+        color: var(--color-text-primary);
+        text-align: left;
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            box-shadow var(--duration-normal) var(--ease-standard);
+
+        &:hover {
+            background: var(--color-fill-subtle-hover);
+        }
+
+        &.is-selected {
+            background: var(--color-fill-subtle);
+            box-shadow: inset 0 0 0 1px var(--color-border-brand);
+        }
+    }
+
+    &__redirect-item-icon {
+        color: var(--color-text-muted);
+        flex-shrink: 0;
+    }
+
+    &__redirect-item-name {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__redirect-item-version {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        flex-shrink: 0;
+    }
+
+    &__footer-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+    }
+}
