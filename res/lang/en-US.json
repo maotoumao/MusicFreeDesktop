@@ -30,6 +30,8 @@
         "open": "Open",
         "status": "Status",
         "close": "Close",
+        "window": "Window",
+        "minimize": "Minimize",
         "search": "Search",
         "retry": "Retry",
         "select_hint": "Select",

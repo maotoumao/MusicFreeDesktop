@@ -36,7 +36,11 @@ declare const MINIMODE_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 // ─── 图标路径 ───
 
 function getLogoPath(): string {
-    return path.resolve(globalContext.appPath.res, 'logo.png');
+    if (process.platform === 'darwin') {
+        return path.resolve(globalContext.appPath.res, 'tray-icon-mac.png');
+    } else {
+        return path.resolve(globalContext.appPath.res, 'logo.ico');
+    }
 }
 
 // ─── 窗口位置归一化 ───
@@ -160,6 +164,9 @@ class WindowManager implements IWindowManager {
             win.focus();
         } else {
             win.show();
+        }
+        if (process.platform === 'darwin') {
+            app.focus({ steal: true });
         }
         win.moveTop();
 

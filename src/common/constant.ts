@@ -50,7 +50,6 @@ export enum ResourceName {
     PLAY_ICO = 'play.ico',
     LOGO_ICO = 'logo.ico',
     DEFAULT_ALBUM_COVER_IMAGE = 'album-cover.jpeg',
-    LOGO_IMAGE = 'logo.png',
 }
 
 /**

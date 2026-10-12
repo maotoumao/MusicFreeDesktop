@@ -7,7 +7,8 @@
     "private": true,
     "scripts": {
         "start": "electron-forge start",
-        "dev": "chcp 65001 && electron-forge start --inspect-electron",
+        "dev": "electron-forge start --inspect-electron",
+        "dev:win": "chcp 65001 && electron-forge start --inspect-electron",
         "package": "cross-env NODE_ENV=production electron-forge package",
         "make": "cross-env NODE_ENV=production electron-forge make",
         "publish": "electron-forge publish",

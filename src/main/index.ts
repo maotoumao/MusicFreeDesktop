@@ -217,9 +217,11 @@ app.on('will-quit', async (event) => {
 });
 
 app.on('activate', () => {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
+    // macOS: 点击程序坞图标时显示窗口（包括窗口被隐藏的情况）
     if (BrowserWindow.getAllWindows().length === 0) {
+        windowManager.showWindow('main');
+    } else {
+        // 窗口存在但被隐藏时，显示主窗口
         windowManager.showWindow('main');
     }
 });

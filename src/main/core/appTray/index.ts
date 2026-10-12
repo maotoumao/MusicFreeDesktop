@@ -36,7 +36,11 @@ import NativeTrayMenu from './nativeTrayMenu';
 // ─── 图标路径 ───
 
 function getLogoPath(): string {
-    return path.resolve(globalContext.appPath.res, 'logo.png');
+    if (process.platform === 'darwin') {
+        return path.resolve(globalContext.appPath.res, 'tray-icon-mac.png');
+    } else {
+        return path.resolve(globalContext.appPath.res, 'tray.ico');
+    }
 }
 
 // ─── 需要监听的配置 key ───
@@ -59,6 +63,8 @@ class AppTray {
 
     private refreshPending = false;
 
+    private menuTemplate: (Electron.MenuItemConstructorOptions | MenuItem)[] = [];
+
     // ─── 初始化 ───
 
     public async setup(windowManager: IWindowManager): Promise<void> {
@@ -69,15 +75,23 @@ class AppTray {
         // macOS: 设置应用菜单栏
         this.setupApplicationMenu();
 
-        // 创建托盘图标
-        const tray = new Tray(
-            nativeImage.createFromPath(getLogoPath()).resize({
-                width: 32,
-                height: 32,
-            }),
-        );
+        const iconPath = getLogoPath();
 
-        // 点击行为: 单击/双击展示主窗口，其他平台双击
+        const trayIcon = nativeImage.createFromPath(iconPath);
+        if (process.platform === 'darwin') trayIcon.setTemplateImage(true);
+
+        // 创建托盘图标
+        const tray = new Tray(trayIcon);
+
+        // macOS: 初始化时不设置 contextMenu，让左键点击能触发 click 事件
+        // macOS 右键事件: 动态设置 contextMenu 然后立即显示
+        if (process.platform === 'darwin') {
+            tray.on('right-click', () => {
+                tray.popUpContextMenu(Menu.buildFromTemplate(this.menuTemplate));
+            });
+        }
+
+        // 点击行为: 单击/双击展示主窗口
         tray.on('click', () => {
             this.windowManager.showWindow('main');
         });
@@ -211,11 +225,9 @@ class AppTray {
 
     // ─── Electron 标准菜单 ───
 
-    private buildElectronMenu(): void {
-        if (!this.tray) return;
-
+    /** 构建菜单模板（用于右键菜单或 setContextMenu） */
+    private buildMenuTemplate(): Array<MenuItemConstructorOptions | MenuItem> {
         const ctxMenu: Array<MenuItemConstructorOptions | MenuItem> = [];
-        const tray = this.tray;
 
         const { musicItem, playerState, repeatMode } = appSync.getAppState() as {
             musicItem?: IMusic.IMusicItem | null;
@@ -380,7 +392,16 @@ class AppTray {
             },
         });
 
-        tray.setContextMenu(Menu.buildFromTemplate(ctxMenu));
+        return ctxMenu;
+    }
+
+    private buildElectronMenu(): void {
+        if (!this.tray) return;
+
+        this.menuTemplate = this.buildMenuTemplate();
+        if (process.platform !== 'darwin') {
+            this.tray.setContextMenu(Menu.buildFromTemplate(this.menuTemplate));
+        }
     }
 
     // ─── macOS 应用菜单 ───
@@ -396,11 +417,11 @@ class AppTray {
                                 label: i18n.t('common.about'),
                                 role: 'about',
                             },
+                            { type: 'separator' },
                             {
                                 label: i18n.t('common.exit'),
-                                click() {
-                                    app.quit();
-                                },
+                                role: 'quit',
+                                accelerator: 'Command+Q',
                             },
                         ],
                     },
@@ -438,6 +459,22 @@ class AppTray {
                                 label: i18n.t('common.select_all'),
                                 accelerator: 'Command+A',
                                 role: 'selectAll',
+                            },
+                        ],
+                    },
+                    {
+                        label: i18n.t('common.window'),
+                        role: 'window',
+                        submenu: [
+                            {
+                                label: i18n.t('common.close'),
+                                role: 'close',
+                                accelerator: 'Command+W',
+                            },
+                            {
+                                label: i18n.t('common.minimize'),
+                                role: 'minimize',
+                                accelerator: 'Command+M',
                             },
                         ],
                     },
