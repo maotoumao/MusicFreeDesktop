@@ -604,6 +604,8 @@
         "duplicate_cache_cleared": "指纹缓存已清空",
         "duplicate_phase_compute": "计算指纹",
         "duplicate_phase_compare": "对比",
+        "duplicate_phase_audio_compute": "计算音纹",
+        "duplicate_phase_audio_compare": "对比文件",
         "duplicate_groups_title": "重复组 · 建议清理（{{count}}组）",
         "duplicate_group_item": "组{{index}} · {{count}}首",
         "duplicate_version_title": "版本组 · 建议保留（{{count}}组）",

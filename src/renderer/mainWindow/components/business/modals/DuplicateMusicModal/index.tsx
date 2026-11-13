@@ -97,17 +97,21 @@ function formatFileName(filePath: string): string {
     return filePath.split(/[/\\]/).pop() ?? filePath;
 }
 
-/**
- * 进度条整体百分比：
- * - 音纹任务有「计算 → 对比」两个阶段，合并成一条单调上升的进度，
- *   避免计算完成进入对比时进度条从满格突然回跳到一半
- * - 其他模式只有单一阶段，直接按当前阶段进度展示
- */
+/** 进度条百分比：按当前阶段自身进度展示，阶段切换（计算 → 对比）时重置 */
 function scanProgressPercent(prog: FingerprintScanProgress): number {
     if (!prog.total) return 0;
-    const ratio = prog.done / prog.total;
-    if (prog.mode !== 'audio') return ratio * 100;
-    return prog.phase === 'compute' ? ratio * 50 : 50 + ratio * 50;
+    return (prog.done / prog.total) * 100;
+}
+
+/** 进度行文案：音纹任务用完整的阶段名（计算音纹 / 对比文件），其他模式沿用「模式 + 阶段」 */
+function formatProgressLabel(t: TFn, prog: FingerprintScanProgress): string {
+    if (prog.mode === 'audio')
+        return t(
+            `local_music.${prog.phase === 'compute' ? 'duplicate_phase_audio_compute' : 'duplicate_phase_audio_compare'}`,
+        );
+    return `${t(`local_music.${MODE_LABEL_KEYS[prog.mode]}`)}${t(
+        `local_music.${prog.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
+    )}`;
 }
 
 export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps) {
@@ -475,11 +479,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                 }`}
                             >
                                 <span className="duplicate-music-modal__progress-label">
-                                    {t(`local_music.${MODE_LABEL_KEYS[prog.mode]}`)}
-                                    {t(
-                                        `local_music.${prog.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
-                                    )}{' '}
-                                    {prog.done}/{prog.total}
+                                    {formatProgressLabel(t, prog)} {prog.done}/{prog.total}
                                 </span>
                                 <div className="duplicate-music-modal__progress-bar">
                                     <span

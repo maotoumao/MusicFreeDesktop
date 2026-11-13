@@ -604,6 +604,8 @@
         "duplicate_cache_cleared": "指紋快取已清除",
         "duplicate_phase_compute": "計算指紋",
         "duplicate_phase_compare": "比對",
+        "duplicate_phase_audio_compute": "計算音紋",
+        "duplicate_phase_audio_compare": "比對檔案",
         "duplicate_groups_title": "重複組 · 建議清理（{{count}} 組）",
         "duplicate_group_item": "組{{index}} · {{count}} 首",
         "duplicate_version_title": "版本組 · 建議保留（{{count}} 組）",

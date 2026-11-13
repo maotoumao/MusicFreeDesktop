@@ -604,6 +604,8 @@
         "duplicate_cache_cleared": "Fingerprint cache cleared",
         "duplicate_phase_compute": "Computing fingerprints",
         "duplicate_phase_compare": "Comparing",
+        "duplicate_phase_audio_compute": "Computing fingerprints",
+        "duplicate_phase_audio_compare": "Comparing files",
         "duplicate_groups_title": "{{count}} duplicate groups · review before deleting",
         "duplicate_group_item": "Group {{index}} · {{count}} songs",
         "duplicate_version_title": "{{count}} version groups · keep recommended",
