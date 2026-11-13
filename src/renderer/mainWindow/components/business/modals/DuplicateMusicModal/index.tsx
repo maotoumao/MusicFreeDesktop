@@ -372,6 +372,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                     <TabBar
                         items={modeTabs}
                         activeKey={mode}
+                        mode="scroll"
                         onChange={(k) => setUi({ ...ui, mode: k as ScanMode })}
                     />
                     {mode !== 'audio' ? (
