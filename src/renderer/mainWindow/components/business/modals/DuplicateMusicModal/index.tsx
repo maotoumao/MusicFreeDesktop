@@ -50,6 +50,7 @@ import {
     markTabUnseen,
     clearTabUnseen,
     getScanUi,
+    type FingerprintScanProgress,
 } from './store';
 import {
     detectVersionReason,
@@ -94,6 +95,19 @@ function formatReasonText(t: TFn, reason: VersionReason): string {
 
 function formatFileName(filePath: string): string {
     return filePath.split(/[/\\]/).pop() ?? filePath;
+}
+
+/**
+ * 进度条整体百分比：
+ * - 音纹任务有「计算 → 对比」两个阶段，合并成一条单调上升的进度，
+ *   避免计算完成进入对比时进度条从满格突然回跳到一半
+ * - 其他模式只有单一阶段，直接按当前阶段进度展示
+ */
+function scanProgressPercent(prog: FingerprintScanProgress): number {
+    if (!prog.total) return 0;
+    const ratio = prog.done / prog.total;
+    if (prog.mode !== 'audio') return ratio * 100;
+    return prog.phase === 'compute' ? ratio * 50 : 50 + ratio * 50;
 }
 
 export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps) {
@@ -470,7 +484,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                 <div className="duplicate-music-modal__progress-bar">
                                     <span
                                         style={{
-                                            width: `${prog.total ? Math.round((prog.done / prog.total) * 100) : 0}%`,
+                                            width: `${Math.round(scanProgressPercent(prog))}%`,
                                         }}
                                     />
                                 </div>
