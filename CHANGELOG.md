@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### 新增
 
+- 本地音乐新增「歌曲去重」：支持音纹相似（Chromaprint 指纹，fpcalc 随包提供 Win/macOS/Linux 三平台二进制）、完全相同、相同标签、相同文件名四种模式；音纹计算结果带磁盘缓存，重复扫描只算新增；疑似版本（翻唱/中英文/同名）自动归入建议保留区，也可手动标记。
 - 下载设置新增「下载间隔」与「随机抖动」：可设置两次下载任务启动之间的最小间隔（秒），并在其基础上叠加随机浮动，默认关闭。
 - 引入 Issue / PR 治理工作流：长期无活动且未被接受的 Issue 会被自动标记 `stale` 并关闭；PR 必须提交到 `dev` 分支并关联一个已被接受的 Issue。
 
@@ -23,6 +24,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Added
 
+- Add "Song Deduplication" for local music: four modes (acoustic fingerprint via Chromaprint with bundled fpcalc binaries for Win/macOS/Linux, exact content, same tags, same filename); fingerprint results are cached on disk so repeat scans only compute new files; suspected versions (covers, cross-language titles, same-title tracks) are grouped into a keep-recommended section and can also be marked manually.
 - Add "Download interval" and "Random jitter" download settings: configure the minimum interval (seconds) between starting two download tasks, with an optional random variation on top. Disabled by default.
 - Add issue/PR governance workflows: inactive and unaccepted issues are automatically marked `stale` and closed; PRs must target the `dev` branch and link an accepted issue.
 

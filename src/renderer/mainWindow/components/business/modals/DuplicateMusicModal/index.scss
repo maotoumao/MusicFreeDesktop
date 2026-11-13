@@ -1,0 +1,251 @@
+// ============================================================================
+// DuplicateMusicModal — 本地音乐去重弹窗样式
+// ============================================================================
+
+.duplicate-music-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    // ── 工具条：模式 Tab + 操作按钮 ──
+    &__toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+    }
+
+    // ── 音纹行：阈值选择 + 计算/对比/缓存 ──
+    &__audio-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    &__threshold-label {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+    }
+
+    &__cache-size {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+    }
+
+    // ── 错误 ──
+    &__error {
+        font-size: var(--text-body-size);
+        color: var(--color-danger, #fc5f5f);
+    }
+
+    // ── 进度条 ──
+    &__progress {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        min-height: 40px;
+        box-sizing: border-box;
+    }
+
+    &__progress-bar {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background-color: var(--color-border-subtle);
+        overflow: hidden;
+
+        span {
+            display: block;
+            height: 100%;
+            background-color: var(--color-fill-brand);
+            transition: width 0.2s ease;
+        }
+    }
+
+    &__cancel {
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        white-space: nowrap;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    // ── 选择助手 ──
+    &__assist {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    // ── 结果区（列表 + 版本专区）：定死高度，单滚动条 ──
+    &__results {
+        flex: 0 1 360px;
+        min-height: 180px;
+        max-height: 360px;
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-card);
+        overflow-y: auto;
+    }
+
+    &__groups-header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: var(--color-bg-base);
+        padding: var(--space-2) var(--space-3) var(--space-1);
+        font-size: var(--text-caption-size);
+        font-weight: 600;
+        color: var(--color-text-brand);
+    }
+
+    &__group-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-2);
+        padding: var(--space-1-5) var(--space-3) var(--space-0-5);
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+    }
+
+    &__link-btn {
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-brand);
+        white-space: nowrap;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__row {
+        display: flex;
+        gap: var(--space-3);
+        align-items: center;
+        padding: var(--space-1-5) var(--space-3);
+        cursor: pointer;
+
+        &:hover {
+            background: var(--color-fill-subtle);
+        }
+
+        &.is-selected {
+            background: var(--color-fill-neutral);
+        }
+    }
+
+    // ── 行内勾选框 ──
+    &__checkbox {
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 1.5px solid var(--color-border-default);
+        background: transparent;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+
+        &[aria-checked='true'] {
+            background: var(--color-fill-brand);
+            border-color: var(--color-fill-brand);
+        }
+    }
+
+    &__titles {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    &__title-row,
+    &__file-row {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-3);
+    }
+
+    &__title,
+    &__file-name {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__meta {
+        flex-shrink: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        white-space: nowrap;
+    }
+
+    &__file-name {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+    }
+
+    &__action {
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-brand);
+        white-space: nowrap;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    // ── 版本专区 ──
+    &__version-section {
+        border-top: 1px dashed var(--color-border-subtle);
+    }
+
+    &__version-header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: var(--color-bg-base);
+        width: 100%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-2) var(--space-3);
+        cursor: pointer;
+        font-size: var(--text-caption-size);
+        font-weight: 600;
+        color: var(--color-text-brand);
+
+        &:hover {
+            background: var(--color-fill-subtle);
+        }
+    }
+
+    // ── 底部说明 ──
+    &__footer-hint {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+    }
+}

@@ -98,6 +98,8 @@ interface _IAppConfig {
     'localMusic.excludedPaths': string[];
     /** 本地音乐：最短时长过滤（秒），低于此值的文件在渲染进程侧过滤 */
     'localMusic.minDurationSec': number;
+    /** 本地音乐：歌曲指纹缓存目录，为空时随 userData */
+    'localMusic.fingerprintCacheDir': string;
 
     /** 不需要用户配置的数据 */
     'private.mainWindowSize': ISize;
