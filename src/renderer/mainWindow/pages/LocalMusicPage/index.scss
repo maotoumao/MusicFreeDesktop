@@ -48,6 +48,18 @@
         animation: p-local-music-spin 1.2s linear infinite;
     }
 
+    &__header-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    &__dedup-status {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-brand);
+        white-space: nowrap;
+    }
+
     // ── TabBar + 搜索框行 ──
     &__tab-row {
         display: flex;

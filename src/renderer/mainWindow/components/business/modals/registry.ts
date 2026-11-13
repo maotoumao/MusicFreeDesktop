@@ -21,6 +21,7 @@ import RenameSheetModal from './RenameSheetModal';
 import TextModal from './TextModal';
 import SearchLyricModal from './SearchLyricModal';
 import ScanFolderModal from './ScanFolderModal';
+import DuplicateMusicModal from './DuplicateMusicModal';
 import ThemeDetailModal from './ThemeDetailModal';
 import UpdateModal from './UpdateModal';
 import BackupProgressModal from './BackupProgressModal';
@@ -42,6 +43,7 @@ export const modalRegistry = {
     TextModal,
     SearchLyricModal,
     ScanFolderModal,
+    DuplicateMusicModal,
     ThemeDetailModal,
     UpdateModal,
     BackupProgressModal,

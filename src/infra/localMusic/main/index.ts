@@ -506,6 +506,7 @@ class LocalMusicManager {
                 url: pathToFileURL(row.filePath).toString(),
                 localPath: row.filePath,
                 folder: row.folder,
+                fileSize: row.fileSize ?? undefined,
             } as IMusic.IMusicItem;
         }
         return {
@@ -519,6 +520,7 @@ class LocalMusicManager {
             [INTERNAL_SLIM_KEY]: true,
             folder: row.folder,
             localPath: row.filePath,
+            fileSize: row.fileSize ?? undefined,
         } as IMusic.IMusicItem;
     }
 
