@@ -397,8 +397,8 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
         );
         setScanChecked(runKey, []);
         setDeleteConfirmKey(null);
-        // 删除可能破坏了试听队列，直接结束本轮试听
-        if (preview.state.current) preview.stop();
+        // 同步试听队列：删到当前曲目时自动切下一首，其余情况不打断播放
+        preview.removeItems(gone);
         // 顺手清理指纹缓存里的失效条目
         try {
             const remaining = (await localMusic.getAllMusicItems()).map((m) => {

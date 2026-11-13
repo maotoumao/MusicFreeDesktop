@@ -33,6 +33,8 @@ export interface PreviewPlayer {
     next: () => void;
     /** ratio 0–1 */
     seekTo: (ratio: number) => void;
+    /** 结果列表删除后同步试听队列：删除当前曲目会自动切到下一首 */
+    removeItems: (removedKeys: Set<string>) => void;
     /** 停止并清空试听队列，恢复外部播放器状态 */
     stop: () => void;
 }
@@ -75,7 +77,7 @@ export function usePreviewPlayer(): PreviewPlayer {
     }, []);
 
     const playItem = useCallback(
-        (item: ScanItem, queue: ScanItem[]) => {
+        (item: ScanItem, queue: ScanItem[], autoplay = true) => {
             const audio = ensureAudio();
             const index = queue.findIndex((it) => it.key === item.key);
             queueRef.current = queue;
@@ -95,7 +97,13 @@ export function usePreviewPlayer(): PreviewPlayer {
             }
 
             audio.src = fsUtil.addFileScheme(item.localPath);
-            audio.play().catch(() => {
+            if (!autoplay) {
+                setPlaying(false);
+                return;
+            }
+            audio.play().catch((err: unknown) => {
+                // 快速切歌/暂停会中止上一次 play，这不是播放错误
+                if (err instanceof DOMException && err.name === 'AbortError') return;
                 setPlaying(false);
                 setError(true);
             });
@@ -154,6 +162,60 @@ export function usePreviewPlayer(): PreviewPlayer {
         }
     }, []);
 
+    /**
+     * 删除结果后同步试听队列：
+     * - 当前试听曲目被删：自动切到其后第一首未被删除的歌（没有则向前找），保持原播放/暂停状态
+     * - 其他曲目被删：仅更新队列与「下一首」可用状态，不打断当前播放
+     */
+    const removeItems = useCallback(
+        (removedKeys: Set<string>) => {
+            if (!removedKeys.size) return;
+            const audio = audioRef.current;
+            const currentItem = currentRef.current;
+            const oldQueue = queueRef.current;
+            if (!currentItem || !oldQueue.length) return;
+
+            const oldIndex = indexRef.current;
+            const currentRemoved = removedKeys.has(currentItem.key);
+            const wasPlaying = audio ? !audio.paused : false;
+
+            if (!currentRemoved) {
+                const queue = oldQueue.filter((it) => !removedKeys.has(it.key));
+                const index = queue.findIndex((it) => it.key === currentItem.key);
+                queueRef.current = queue;
+                indexRef.current = index;
+                setHasNext(index >= 0 && index + 1 < queue.length);
+                return;
+            }
+
+            // 当前曲目被删：优先顺延到后面第一首未删除的曲目
+            let nextItem: ScanItem | null = null;
+            for (let i = oldIndex + 1; i < oldQueue.length; i++) {
+                if (!removedKeys.has(oldQueue[i].key)) {
+                    nextItem = oldQueue[i];
+                    break;
+                }
+            }
+            if (!nextItem) {
+                for (let i = oldIndex - 1; i >= 0; i--) {
+                    if (!removedKeys.has(oldQueue[i].key)) {
+                        nextItem = oldQueue[i];
+                        break;
+                    }
+                }
+            }
+
+            const queue = oldQueue.filter((it) => !removedKeys.has(it.key));
+            if (!nextItem) {
+                // 队列已被删空：结束试听并恢复主播放器
+                stop();
+                return;
+            }
+            playItem(nextItem, queue, wasPlaying);
+        },
+        [playItem, stop],
+    );
+
     // 双向互斥：试听期间若外部播放器被其他入口恢复，则让出播放权暂停试听
     useEffect(() => {
         if (playing && externalState === PlayerState.Playing) {
@@ -184,6 +246,7 @@ export function usePreviewPlayer(): PreviewPlayer {
         toggle,
         next,
         seekTo,
+        removeItems,
         stop,
     };
 }
