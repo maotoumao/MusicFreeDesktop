@@ -375,7 +375,9 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                         mode="scroll"
                         onChange={(k) => setUi({ ...ui, mode: k as ScanMode })}
                     />
-                    {mode !== 'audio' ? (
+                </div>
+                {mode !== 'audio' && (
+                    <div className="duplicate-music-modal__action-row">
                         <Button
                             variant="primary"
                             disabled={currentKey in scanState.scanning}
@@ -387,26 +389,64 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                     : 'local_music.duplicate_compare',
                             )}
                         </Button>
-                    ) : diskCount > 0 ? (
-                        <>
-                            <Button variant="primary" onClick={() => startAudioTask('compute-new')}>
-                                {t('local_music.duplicate_compute_new')}
-                            </Button>
-                            <Button
-                                variant="secondary"
-                                onClick={() => startAudioTask('compute-all')}
+                    </div>
+                )}
+                {Object.entries(scanState.scanning)
+                    .filter(([key]) => key !== currentKey)
+                    .map(([key, prog]) => (
+                        <div key={key} className="duplicate-music-modal__bg-task">
+                            <span>
+                                {t(`local_music.${MODE_LABEL_KEYS[prog.mode]}`)}
+                                {t(
+                                    `local_music.${prog.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
+                                )}{' '}
+                                {prog.done}/{prog.total}
+                            </span>
+                            <div className="duplicate-music-modal__bg-bar">
+                                <span
+                                    style={{
+                                        width: `${prog.total ? Math.round((prog.done / prog.total) * 100) : 0}%`,
+                                    }}
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                className="duplicate-music-modal__cancel"
+                                onClick={() => cancelScan(key)}
                             >
-                                {t('local_music.duplicate_compute_all')}
-                            </Button>
-                        </>
-                    ) : (
-                        <Button variant="primary" onClick={() => startAudioTask('compute-new')}>
-                            {t('local_music.duplicate_compute')}
-                        </Button>
-                    )}
-                </div>
+                                {t('common.cancel')}
+                            </button>
+                        </div>
+                    ))}
                 {mode === 'audio' && (
+                    <>
                     <div className="duplicate-music-modal__audio-row">
+                        {diskCount > 0 ? (
+                            <>
+                                <Button
+                                    variant="primary"
+                                    disabled={!!findAudioRun()}
+                                    onClick={() => startAudioTask('compute-new')}
+                                >
+                                    {t('local_music.duplicate_compute_new')}
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    disabled={!!findAudioRun()}
+                                    onClick={() => startAudioTask('compute-all')}
+                                >
+                                    {t('local_music.duplicate_compute_all')}
+                                </Button>
+                            </>
+                        ) : (
+                            <Button
+                                variant="primary"
+                                disabled={!!findAudioRun()}
+                                onClick={() => startAudioTask('compute-new')}
+                            >
+                                {t('local_music.duplicate_compute')}
+                            </Button>
+                        )}
                         <span className="duplicate-music-modal__threshold-label">
                             {t('local_music.duplicate_threshold')}
                         </span>
@@ -438,6 +478,10 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                             {t('local_music.duplicate_clear_cache')}
                         </Button>
                     </div>
+                    <div className="duplicate-music-modal__footnote">
+                        {t('local_music.duplicate_footnote')}
+                    </div>
+                    </>
                 )}
                 {binError && <div className="duplicate-music-modal__error">{binError}</div>}
                 {mainProg && (
@@ -552,11 +596,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                             onClick={() => {
                                                 const sig = buildVersionSignature(g.ids);
                                                 if (!manualMarks.includes(sig)) {
-                                                    const next = [...manualMarks, sig];
-                                                    setManualMarks(next);
-                                                    audioFingerprint.saveMarks(next).catch(() => {
-                                                        // 写失败下次重进恢复旧值
-                                                    });
+                                                    saveManualMarks([...manualMarks, sig]);
                                                 }
                                             }}
                                         >
@@ -734,16 +774,12 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                             <button
                                                 type="button"
                                                 className="duplicate-music-modal__link-btn"
-                                                onClick={() => {
-                                                    const sig = buildVersionSignature(g.ids);
-                                                    const next = manualMarks.filter(
-                                                        (s) => s !== sig,
-                                                    );
-                                                    setManualMarks(next);
-                                                    audioFingerprint.saveMarks(next).catch(() => {
-                                                        // 写失败下次重进恢复旧值
-                                                    });
-                                                }}
+                                            onClick={() => {
+                                                const sig = buildVersionSignature(g.ids);
+                                                saveManualMarks(
+                                                    manualMarks.filter((s) => s !== sig),
+                                                );
+                                            }}
                                             >
                                                 {t('local_music.duplicate_unmark_version')}
                                             </button>
@@ -796,9 +832,6 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                 ))}
                         </div>
                     )}
-                </div>
-                <div className="duplicate-music-modal__footer-hint">
-                    {t('local_music.duplicate_footnote')}
                 </div>
             </div>
         </Modal>

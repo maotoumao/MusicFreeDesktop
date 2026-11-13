@@ -243,8 +243,41 @@
         }
     }
 
-    // ── 底部说明 ──
-    &__footer-hint {
+    // ── 对比操作行（非音频模式） ──
+    &__action-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    // ── 后台任务条（非当前 tab 的进行中任务） ──
+    &__bg-task {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: 6px 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+    }
+
+    &__bg-bar {
+        flex: 1;
+        height: 4px;
+        border-radius: 2px;
+        background-color: var(--color-border-subtle);
+        overflow: hidden;
+
+        span {
+            display: block;
+            height: 100%;
+            background-color: var(--color-fill-brand);
+            opacity: 0.6;
+            transition: width 0.2s ease;
+        }
+    }
+
+    // ── 计算区下方说明 ──
+    &__footnote {
         font-size: var(--text-caption-size);
         color: var(--color-text-muted);
     }
