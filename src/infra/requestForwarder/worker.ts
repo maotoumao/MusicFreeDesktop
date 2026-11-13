@@ -366,18 +366,20 @@ function startServer(port: number): void {
     });
 
     server.on('error', (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EADDRINUSE' && retryCount < MAX_PORT_RETRIES) {
+        // EADDRINUSE：端口被占用；EACCES：端口落在 Windows 保留段（Hyper-V/WinNAT）
+        // 或被安全软件拦截。两种情况都顺延尝试下一个端口。
+        const retriable = err.code === 'EADDRINUSE' || err.code === 'EACCES';
+        if (retriable && retryCount < MAX_PORT_RETRIES) {
             retryCount++;
             const nextPort = port + 1;
             console.log(
-                `[RequestForwarder Worker] Port ${port} in use, trying ${nextPort} (attempt ${retryCount}/${MAX_PORT_RETRIES})`,
+                `[RequestForwarder Worker] Port ${port} unavailable (${err.code}), trying ${nextPort} (attempt ${retryCount}/${MAX_PORT_RETRIES})`,
             );
             startServer(nextPort);
         } else {
-            const errorMsg =
-                err.code === 'EADDRINUSE'
-                    ? `All ports ${DEFAULT_PORT}-${port} are in use`
-                    : err.message;
+            const errorMsg = retriable
+                ? `No available port in ${DEFAULT_PORT}-${port} (${err.code})`
+                : err.message;
             console.error('[RequestForwarder Worker] Failed to start server:', errorMsg);
             postMessage({ type: 'error', error: errorMsg });
         }
