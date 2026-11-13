@@ -486,6 +486,12 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                 {binError && <div className="duplicate-music-modal__error">{binError}</div>}
                 {mainProg && (
                     <div className="duplicate-music-modal__progress">
+                        <span className="duplicate-music-modal__progress-label">
+                            {t(
+                                `local_music.${mainProg.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
+                            )}{' '}
+                            {mainProg.done}/{mainProg.total}
+                        </span>
                         <div className="duplicate-music-modal__progress-bar">
                             <span
                                 style={{
@@ -493,12 +499,6 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                 }}
                             />
                         </div>
-                        <span>
-                            {t(
-                                `local_music.${mainProg.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
-                            )}{' '}
-                            {mainProg.done}/{mainProg.total}
-                        </span>
                         {mainProgKey && (
                             <button
                                 type="button"
