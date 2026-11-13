@@ -152,21 +152,21 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
         ([, a], [, b]) => (a.startedAt ?? 0) - (b.startedAt ?? 0),
     );
 
-    // 版本组拆分（仅音纹模式）：手动标记优先，其次恰好 2 首命中自动规则
+    // 版本组拆分：手动标记在所有模式生效；自动识别（恰好 2 首命中版本规则）仅音纹模式
     const manualSet = new Set(manualMarks);
     const versionGroups: DuplicateGroup[] = [];
     const manualVersionGroups: DuplicateGroup[] = [];
     const normalGroups: DuplicateGroup[] = [];
-    if (mode === 'audio') {
-        groups.forEach((g) => {
-            if (manualSet.has(buildVersionSignature(g.ids))) manualVersionGroups.push(g);
-            else if (g.items.length === 2 && detectVersionReason(g.items[0], g.items[1]))
-                versionGroups.push(g);
-            else normalGroups.push(g);
-        });
-    } else {
-        normalGroups.push(...groups);
-    }
+    groups.forEach((g) => {
+        if (manualSet.has(buildVersionSignature(g.ids))) manualVersionGroups.push(g);
+        else if (
+            mode === 'audio' &&
+            g.items.length === 2 &&
+            detectVersionReason(g.items[0], g.items[1])
+        )
+            versionGroups.push(g);
+        else normalGroups.push(g);
+    });
 
     // ── 指纹缓存占用 ──
 
@@ -675,6 +675,8 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                                 if (!manualMarks.includes(sig)) {
                                                     saveManualMarks([...manualMarks, sig]);
                                                 }
+                                                // 标记后组会移到下方版本区，自动展开让用户看到结果
+                                                setVersionOpen(true);
                                             }}
                                         >
                                             {t('local_music.duplicate_mark_version')}
