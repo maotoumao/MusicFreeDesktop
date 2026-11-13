@@ -60,9 +60,16 @@ export function DeduplicateSection() {
                 description={t('settings.deduplicate.path_desc')}
                 control={
                     <div className="p-setting__path-picker">
-                        <div className="p-setting__path-display">{cacheDir}</div>
+                        <div
+                            className="p-setting__path-display p-setting__path-display--clickable"
+                            role="button"
+                            title={cacheDir}
+                            onClick={handleOpenPath}
+                        >
+                            {cacheDir}
+                        </div>
                         <Button variant="secondary" size="sm" onClick={handleChoosePath}>
-                            {t('settings.deduplicate.change')}
+                            {t('settings.deduplicate.path_change')}
                         </Button>
                         <Button
                             variant="icon"

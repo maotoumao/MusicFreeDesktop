@@ -161,7 +161,7 @@ class AudioFingerprintManager {
 
     private enqueueCacheWrite<T>(task: () => Promise<T>): Promise<T> {
         const run = this.cacheWriteChain.then(task, task);
-        this.cacheWriteChain = run.catch(() => undefined);
+        this.cacheWriteChain = run.catch((): undefined => undefined);
         return run;
     }
 
