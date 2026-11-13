@@ -144,18 +144,25 @@
         overflow-y: auto;
     }
 
+    // ── 弹窗固定 footer：试听条 + 关闭按钮同一行，不参与内容滚动 ──
+    &__footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--space-3);
+        width: 100%;
+        min-width: 0;
+    }
+
     // ── 弹窗内独立试听条：只显示去重列表自己的试听队列 ──
+    // 位于固定 footer，不用 sticky，避免滚动时盖住结果区最后的版本组
     &__mini-player {
-        position: sticky;
-        bottom: 0;
+        flex: 1;
+        min-width: 0;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: var(--space-2) var(--space-3);
-        padding: var(--space-2) var(--space-3);
-        border: 1px solid var(--color-border-subtle);
-        border-radius: var(--radius-card);
-        background: var(--color-bg-modal);
     }
 
     &__mini-cover {

@@ -428,9 +428,17 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
             title={t('local_music.duplicate_title')}
             size="lg"
             footer={
-                <Button variant="secondary" onClick={close}>
-                    {t('common.close')}
-                </Button>
+                <div className="duplicate-music-modal__footer">
+                    <DuplicateMiniPlayer
+                        state={preview.state}
+                        onToggle={preview.toggle}
+                        onNext={preview.next}
+                        onSeek={preview.seekTo}
+                    />
+                    <Button variant="secondary" onClick={close}>
+                        {t('common.close')}
+                    </Button>
+                </div>
             }
         >
             <div className="duplicate-music-modal">
@@ -878,12 +886,6 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                         </div>
                     )}
                 </div>
-                <DuplicateMiniPlayer
-                    state={preview.state}
-                    onToggle={preview.toggle}
-                    onNext={preview.next}
-                    onSeek={preview.seekTo}
-                />
             </div>
         </Modal>
     );
