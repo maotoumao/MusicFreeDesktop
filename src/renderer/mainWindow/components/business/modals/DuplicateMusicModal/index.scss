@@ -15,6 +15,16 @@
         gap: var(--space-3);
     }
 
+    // tab 上的待查看红点：有结果产出但用户没在看这个 tab
+    &__tab-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #fc5f5f;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
     // ── 音纹行：阈值选择 + 计算/对比/缓存 ──
     &__audio-row {
         display: flex;

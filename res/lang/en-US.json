@@ -585,7 +585,7 @@
         "duplicate_songs": "Song Deduplication",
         "duplicate_scanning": "Deduping {{pct}}%",
         "duplicate_mode_audio": "Similar Audio",
-        "duplicate_mode_exact": "Exact Content",
+        "duplicate_mode_exact": "Same Hash",
         "duplicate_mode_tag": "Same Tags",
         "duplicate_mode_filename": "Same Filename",
         "duplicate_level_strict": "Strict",

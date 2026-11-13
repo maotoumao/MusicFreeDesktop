@@ -39,6 +39,7 @@ import {
     checkedByKeyAtom,
     scanningAtom,
     uiAtom,
+    unseenTabsAtom,
     setScanProgress,
     setScanGroups,
     setScanChecked,
@@ -47,6 +48,9 @@ import {
     cancelScan,
     isScanCancelled,
     clearScanCancelled,
+    markTabUnseen,
+    clearTabUnseen,
+    getScanUi,
 } from './store';
 import {
     detectVersionReason,
@@ -157,6 +161,13 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
             });
     }, []);
 
+    const unseenTabs = useAtomValue(unseenTabsAtom);
+
+    // 看到哪个 tab 就清掉它的红点
+    useEffect(() => {
+        clearTabUnseen(mode);
+    }, [mode]);
+
     const saveManualMarks = async (marks: string[]) => {
         setManualMarks(marks);
         try {
@@ -187,7 +198,11 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                 },
                 () => isScanCancelled(key),
             );
-            if (!isScanCancelled(key)) setScanGroups(key, g);
+            if (!isScanCancelled(key)) {
+                setScanGroups(key, g);
+                // 跑完时人不在这个 tab 就标红点
+                if (getScanUi().mode !== mode) markTabUnseen(mode);
+            }
         } finally {
             clearScanCancelled(key);
             setScanProgress(key, null);
@@ -261,6 +276,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
             if (isScanCancelled(runKey)) return;
             if (kind === 'compare') {
                 setScanGroups(runKey, g);
+                if (getScanUi().mode !== 'audio') markTabUnseen('audio');
             } else {
                 const after =
                     (await audioFingerprint.getCacheInfo().catch(() => ({ count: 0 }))).count ?? 0;
@@ -353,6 +369,9 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
     const modeTabs = (Object.keys(MODE_LABEL_KEYS) as ScanMode[]).map((m) => ({
         key: m,
         label: t(`local_music.${MODE_LABEL_KEYS[m]}`),
+        icon: unseenTabs.includes(m) ? (
+            <span className="duplicate-music-modal__tab-dot" />
+        ) : undefined,
     }));
 
     return (
@@ -487,6 +506,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                 {mainProg && (
                     <div className="duplicate-music-modal__progress">
                         <span className="duplicate-music-modal__progress-label">
+                            {t(`local_music.${MODE_LABEL_KEYS[mainProg.mode]}`)}
                             {t(
                                 `local_music.${mainProg.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
                             )}{' '}

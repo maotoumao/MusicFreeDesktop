@@ -61,6 +61,23 @@ export function findAudioRun(): { key: string; prog: FingerprintScanProgress } |
     return key ? { key, prog: scanning[key] } : null;
 }
 
+/** 有了新结果但用户没在看的 tab：红点提示待查看，看过即清 */
+export const unseenTabsAtom = atom<ScanMode[]>([]);
+
+export function markTabUnseen(mode: ScanMode): void {
+    const prev = store.get(unseenTabsAtom);
+    if (!prev.includes(mode)) store.set(unseenTabsAtom, [...prev, mode]);
+}
+
+export function clearTabUnseen(mode: ScanMode): void {
+    const prev = store.get(unseenTabsAtom);
+    if (prev.includes(mode)) store.set(unseenTabsAtom, prev.filter((m) => m !== mode));
+}
+
+export function getScanUi(): { mode: ScanMode; level: SimilarityLevel } {
+    return store.get(uiAtom);
+}
+
 /** 被用户取消的扫描 key：只停掉排队与落盘 */
 const cancelledScanKeys = new Set<string>();
 

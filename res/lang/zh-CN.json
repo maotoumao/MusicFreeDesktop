@@ -585,7 +585,7 @@
         "duplicate_songs": "歌曲去重",
         "duplicate_scanning": "去重中 {{pct}}%",
         "duplicate_mode_audio": "音纹相似",
-        "duplicate_mode_exact": "完全相同",
+        "duplicate_mode_exact": "hash相同",
         "duplicate_mode_tag": "相同标签",
         "duplicate_mode_filename": "相同文件名",
         "duplicate_level_strict": "严格",
