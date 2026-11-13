@@ -12,6 +12,8 @@ export interface FingerprintScanProgress {
     total: number;
     mode: ScanMode;
     phase: 'compute' | 'compare';
+    /** 任务首次启动时间：进度行统一按启动先后排序，最新启动的在最下面 */
+    startedAt: number;
 }
 
 const store = getDefaultStore();
@@ -28,10 +30,16 @@ export const uiAtom = atom<{ mode: ScanMode; level: SimilarityLevel }>({
     level: 'standard',
 });
 
-export function setScanProgress(key: string, prog: FingerprintScanProgress | null): void {
+export function setScanProgress(
+    key: string,
+    prog: Omit<FingerprintScanProgress, 'startedAt'> | null,
+): void {
     const prev = store.get(scanningAtom);
-    if (prog) store.set(scanningAtom, { ...prev, [key]: prog });
-    else {
+    if (prog) {
+        // 同一任务刷新进度时保留首次启动时间，避免进度行来回跳
+        const startedAt = prev[key]?.startedAt ?? Date.now();
+        store.set(scanningAtom, { ...prev, [key]: { ...prog, startedAt } });
+    } else {
         const next = { ...prev };
         delete next[key];
         store.set(scanningAtom, next);
@@ -71,7 +79,11 @@ export function markTabUnseen(mode: ScanMode): void {
 
 export function clearTabUnseen(mode: ScanMode): void {
     const prev = store.get(unseenTabsAtom);
-    if (prev.includes(mode)) store.set(unseenTabsAtom, prev.filter((m) => m !== mode));
+    if (prev.includes(mode))
+        store.set(
+            unseenTabsAtom,
+            prev.filter((m) => m !== mode),
+        );
 }
 
 export function getScanUi(): { mode: ScanMode; level: SimilarityLevel } {

@@ -3,7 +3,7 @@
  *
  * 功能：
  *  - 四种去重模式：音纹相似 / 完全相同 / 相同标签 / 相同文件名
- *  - 音纹模式分两步：计算音纹（写磁盘缓存，可复用）与对比（分组展示）
+ *  - 音纹模式：计算音纹（写磁盘缓存，可复用）后自动对比并分组
  *  - 结果分组展示，支持试听、定位、勾选、移至回收站
  *  - 音纹两两成组自动识别为版本组（建议保留），支持手动标记/移回
  *  - 会话级状态常驻内存：关弹窗不丢结果与进度，随软件退出释放
@@ -18,8 +18,6 @@ import { TabBar } from '@renderer/mainWindow/components/ui/TabBar';
 import { Select } from '@renderer/mainWindow/components/ui/Select';
 import { StatusPlaceholder } from '@renderer/mainWindow/components/ui/StatusPlaceholder';
 import { showToast } from '@renderer/mainWindow/components/ui/Toast';
-import { showModal } from '@renderer/mainWindow/components/ui/Modal/modalManager';
-import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import localMusic from '@infra/localMusic/renderer';
 import audioFingerprint from '@infra/audioFingerprint/renderer';
 import systemUtil from '@infra/systemUtil/renderer';
@@ -31,6 +29,7 @@ import {
     toScanItems,
     THRESHOLDS,
     type ScanMode,
+    type ScanItem,
     type SimilarityLevel,
     type DuplicateGroup,
 } from './scan';
@@ -57,6 +56,8 @@ import {
     buildVersionSignature,
 } from '@infra/audioFingerprint/common/fingerprint';
 import type { VersionReason } from '@infra/audioFingerprint/common/fingerprint';
+import DuplicateMiniPlayer from './MiniPlayer';
+import { usePreviewPlayer } from './usePreviewPlayer';
 import './index.scss';
 
 export interface DuplicateMusicModalProps {
@@ -99,6 +100,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
     const { t } = useTranslation();
     const [ui, setUi] = useAtom(uiAtom);
     const { mode, level } = ui;
+    const preview = usePreviewPlayer();
     const scanState = {
         groupsByKey: useAtomValue(groupsByKeyAtom),
         checkedByKey: useAtomValue(checkedByKeyAtom),
@@ -106,9 +108,11 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
     };
     const [binError, setBinError] = useState<string | null>(null);
     const [cacheSize, setCacheSize] = useState('0.0MB');
-    const [diskCount, setDiskCount] = useState(0);
     const [manualMarks, setManualMarks] = useState<string[]>([]);
     const [versionOpen, setVersionOpen] = useState(false);
+    // 删除就地确认：记录处于确认态的结果 key，避免弹全局确认框打断列表
+    const [deleteConfirmKey, setDeleteConfirmKey] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     // ── 派生状态 ──
 
@@ -117,10 +121,22 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
     const currentKey = keyFor(mode, level);
     const groups = scanState.groupsByKey[currentKey] ?? [];
     const checked = new Set(scanState.checkedByKey[currentKey] ?? []);
+    // 试听队列 = 当前标签去重结果里的全部歌曲；仅轮内播放，不碰外部歌单
+    const previewTracks = groups.flatMap((g) => g.items);
+    const previewingKey = preview.state.current?.key ?? null;
+    // 当前 tab 处于删除确认态且有选中项时才显示内联确认条
+    const isDeleteConfirming = deleteConfirmKey === currentKey && checked.size > 0;
+    // 音纹对比阶段：结果区显示"发现即展示"的提示，而不是"暂无重复"
+    const isAudioComparing =
+        mode === 'audio' && scanState.scanning[currentKey]?.phase === 'compare';
 
     const audioRun = findAudioRun();
-    const mainProg = mode === 'audio' ? audioRun?.prog : scanState.scanning[currentKey];
+    // 当前 tab 对应的任务 key（音纹 tab 优先跟随音纹任务）
     const mainProgKey = mode === 'audio' ? audioRun?.key : currentKey;
+    // 所有进行中的任务放在同一区域展示：统一按启动先后排序，最新启动的追加在最下面
+    const runningTasks = Object.entries(scanState.scanning).sort(
+        ([, a], [, b]) => (a.startedAt ?? 0) - (b.startedAt ?? 0),
+    );
 
     // 版本组拆分（仅音纹模式）：手动标记优先，其次恰好 2 首命中自动规则
     const manualSet = new Set(manualMarks);
@@ -145,7 +161,6 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
             const info = await audioFingerprint.getCacheInfo();
             const totalBytes = (info.sizeBytes ?? 0) + (info.marksSizeBytes ?? 0);
             setCacheSize(totalBytes ? formatFileSize(totalBytes) : '0.0MB');
-            setDiskCount(info.count ?? 0);
         } catch {
             // 大小读不到只影响展示
         }
@@ -163,10 +178,16 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
 
     const unseenTabs = useAtomValue(unseenTabsAtom);
 
-    // 看到哪个 tab 就清掉它的红点
+    // 看到哪个 tab 就清掉它的红点；切换 tab 时退出删除确认态
     useEffect(() => {
         clearTabUnseen(mode);
+        setDeleteConfirmKey(null);
     }, [mode]);
+
+    // 当前结果列表切换（标签或音纹阈值）时清空本轮试听歌单
+    useEffect(() => {
+        preview.stop();
+    }, [currentKey, preview.stop]);
 
     const saveManualMarks = async (marks: string[]) => {
         setManualMarks(marks);
@@ -175,6 +196,12 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
         } catch {
             // 写失败下次重进恢复旧值
         }
+    };
+
+    // ── 试听：使用去重列表自己的播放队列，不读写外部歌单 ──
+
+    const previewMusic = (item: ScanItem) => {
+        preview.play(item, previewTracks);
     };
 
     // ── 非音频模式：纯对比 ──
@@ -210,9 +237,9 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
         }
     };
 
-    // ── 音频模式：计算音纹与对比 ──
+    // ── 音频模式：计算音纹并直接对比出结果 ──
 
-    const startAudioTask = async (kind: 'compare' | 'compute-new' | 'compute-all') => {
+    const startAudioTask = async () => {
         const running = findAudioRun();
         if (running) {
             showToast(
@@ -233,31 +260,22 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
         const list = toScanItems(allSongs);
         const before =
             (await audioFingerprint.getCacheInfo().catch(() => ({ count: 0 }))).count ?? 0;
-        let removed = 0;
-        if (kind === 'compute-all') {
-            await audioFingerprint.clearCache();
-            clearScanResults();
-            setManualMarks([]);
-        }
-        if (kind === 'compute-new') {
-            // 先清理库里已没有的失效条目，再只算新增
-            removed =
-                (
-                    await audioFingerprint
-                        .pruneCache(list.map((it) => it.localPath))
-                        .catch(() => ({ removed: 0 }))
-                ).removed ?? 0;
-        } else if (kind === 'compute-all') {
-            removed = before;
-        }
-        const runKey = kind === 'compare' ? currentKey : 'audio-compute';
+        // 先清理库里已没有的失效条目，再只算新增
+        const removed =
+            (
+                await audioFingerprint
+                    .pruneCache(list.map((it) => it.localPath))
+                    .catch(() => ({ removed: 0 }))
+            ).removed ?? 0;
+        const runKey = currentKey;
         clearScanCancelled(runKey);
         setScanProgress(runKey, {
             done: 0,
             total: list.length,
             mode: 'audio',
-            phase: kind === 'compare' ? 'compare' : 'compute',
+            phase: 'compute',
         });
+        let discovered: DuplicateGroup[] = [];
         try {
             const { groups: g, stats } = await runDuplicateScan(
                 list,
@@ -268,27 +286,55 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                         done,
                         total,
                         mode: 'audio',
-                        phase: kind === 'compare' ? 'compare' : 'compute',
+                        phase: 'compute',
                     });
                 },
                 () => isScanCancelled(runKey),
+                {
+                    onCompareStart: (total) => {
+                        // 进入对比阶段：清掉上一轮结果，随后每发现一组追加一组
+                        discovered = [];
+                        setScanGroups(runKey, []);
+                        setScanProgress(runKey, {
+                            done: 0,
+                            total,
+                            mode: 'audio',
+                            phase: 'compare',
+                        });
+                    },
+                    onCompareProgress: (done, total) => {
+                        setScanProgress(runKey, {
+                            done,
+                            total,
+                            mode: 'audio',
+                            phase: 'compare',
+                        });
+                    },
+                    onGroup: (indices) => {
+                        discovered = [
+                            ...discovered,
+                            {
+                                ids: indices.map((k) => list[k].key),
+                                items: indices.map((k) => list[k]),
+                            },
+                        ];
+                        setScanGroups(runKey, discovered);
+                    },
+                },
             );
             if (isScanCancelled(runKey)) return;
-            if (kind === 'compare') {
-                setScanGroups(runKey, g);
-                if (getScanUi().mode !== 'audio') markTabUnseen('audio');
-            } else {
-                const after =
-                    (await audioFingerprint.getCacheInfo().catch(() => ({ count: 0 }))).count ?? 0;
-                showToast(
-                    t('local_music.duplicate_compute_report', {
-                        computed: stats.computed,
-                        hit: stats.hit,
-                        added: Math.max(0, after - (before - removed)),
-                        removed,
-                    }),
-                );
-            }
+            setScanGroups(runKey, g);
+            if (getScanUi().mode !== 'audio') markTabUnseen('audio');
+            const after =
+                (await audioFingerprint.getCacheInfo().catch(() => ({ count: 0 }))).count ?? 0;
+            showToast(
+                t('local_music.duplicate_compute_report', {
+                    computed: stats.computed,
+                    hit: stats.hit,
+                    added: Math.max(0, after - (before - removed)),
+                    removed,
+                }),
+            );
         } finally {
             clearScanCancelled(runKey);
             setScanProgress(runKey, null);
@@ -310,58 +356,59 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
         await audioFingerprint.clearCache();
         clearScanResults();
         setManualMarks([]);
+        setDeleteConfirmKey(null);
+        preview.stop();
         await refreshCacheSize();
         showToast(t('local_music.duplicate_cache_cleared'));
     };
 
-    // ── 删除（移至回收站） ──
+    // ── 删除（移至回收站）：列表内两步确认，不弹全局弹窗 ──
 
-    const handleDelete = (targets: { platform: string; id: string; key: string }[]) => {
-        if (!targets.length) return;
-        const preview = targets
-            .slice(0, 5)
-            .map((it) => {
-                const found = groups.flatMap((g) => g.items).find((x) => x.key === it.key);
-                return found ? formatFileName(found.localPath) : it.key;
-            })
-            .join('、');
-        showModal('ConfirmModal', {
-            title: t('local_music.confirm_delete_title'),
-            message: t('local_music.confirm_trash_batch_message', { count: targets.length }),
-            description: `${preview}${targets.length > 5 ? `…${t('local_music.duplicate_preview_etc', { count: targets.length - 5 })}` : ''}`,
-            confirmDanger: true,
-            onConfirm: async () => {
-                try {
-                    await localMusic.deleteItems(targets);
-                } catch {
-                    showToast(t('local_music.duplicate_delete_failed'), { type: 'warn' });
-                    return;
-                }
-                const gone = new Set(targets.map((it) => it.key));
-                const prev = groups;
-                setScanGroups(
-                    currentKey,
-                    prev
-                        .map((g) => ({
-                            ...g,
-                            ids: g.items.filter((it) => !gone.has(it.key)).map((it) => it.key),
-                            items: g.items.filter((it) => !gone.has(it.key)),
-                        }))
-                        .filter((g) => g.items.length > 1),
-                );
-                setScanChecked(currentKey, []);
-                // 顺手清理指纹缓存里的失效条目
-                try {
-                    const remaining = (await localMusic.getAllMusicItems()).map((m) => {
-                        const rec = m as unknown as Record<string, unknown>;
-                        return typeof rec.localPath === 'string' ? rec.localPath : '';
-                    });
-                    await audioFingerprint.pruneCache(remaining);
-                } catch {
-                    // 缓存清理失败不阻塞删除结果
-                }
-            },
+    const handleDeleteSelected = async () => {
+        if (deleting) return;
+        const targetKeys = [...checked];
+        if (!targetKeys.length) return;
+        const runKey = currentKey;
+        const prevGroups = groups;
+        const targets = targetKeys.map((key) => {
+            const [platform, ...rest] = key.split('+');
+            return { platform, id: rest.join('+'), key };
         });
+        setDeleting(true);
+        try {
+            await localMusic.deleteItems(targets);
+        } catch {
+            showToast(t('local_music.duplicate_delete_failed'), { type: 'warn' });
+            return;
+        } finally {
+            setDeleting(false);
+        }
+        // 原地更新当前列表：只移除已删除项，不重新渲染整个结果
+        const gone = new Set(targetKeys);
+        setScanGroups(
+            runKey,
+            prevGroups
+                .map((g) => ({
+                    ...g,
+                    ids: g.items.filter((it) => !gone.has(it.key)).map((it) => it.key),
+                    items: g.items.filter((it) => !gone.has(it.key)),
+                }))
+                .filter((g) => g.items.length > 1),
+        );
+        setScanChecked(runKey, []);
+        setDeleteConfirmKey(null);
+        // 删除可能破坏了试听队列，直接结束本轮试听
+        if (preview.state.current) preview.stop();
+        // 顺手清理指纹缓存里的失效条目
+        try {
+            const remaining = (await localMusic.getAllMusicItems()).map((m) => {
+                const rec = m as unknown as Record<string, unknown>;
+                return typeof rec.localPath === 'string' ? rec.localPath : '';
+            });
+            await audioFingerprint.pruneCache(remaining);
+        } catch {
+            // 缓存清理失败不阻塞删除结果
+        }
     };
 
     // ── 渲染 ──
@@ -395,11 +442,46 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                         onChange={(k) => setUi({ ...ui, mode: k as ScanMode })}
                     />
                 </div>
+                {/* 进行中的任务：固定在 Tab 行下方，切换 tab 位置完全不变 */}
+                {runningTasks.length > 0 && (
+                    <div className="duplicate-music-modal__tasks">
+                        {runningTasks.map(([key, prog]) => (
+                            <div
+                                key={key}
+                                className={`duplicate-music-modal__progress${
+                                    key === mainProgKey ? '' : ' is-background'
+                                }`}
+                            >
+                                <span className="duplicate-music-modal__progress-label">
+                                    {t(`local_music.${MODE_LABEL_KEYS[prog.mode]}`)}
+                                    {t(
+                                        `local_music.${prog.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
+                                    )}{' '}
+                                    {prog.done}/{prog.total}
+                                </span>
+                                <div className="duplicate-music-modal__progress-bar">
+                                    <span
+                                        style={{
+                                            width: `${prog.total ? Math.round((prog.done / prog.total) * 100) : 0}%`,
+                                        }}
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    className="duplicate-music-modal__cancel"
+                                    onClick={() => cancelScan(key)}
+                                >
+                                    {t('common.cancel')}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
                 {mode !== 'audio' && (
                     <div className="duplicate-music-modal__action-row">
                         <Button
                             variant="primary"
-                            disabled={currentKey in scanState.scanning}
+                            disabled={currentKey in scanState.scanning || deleting}
                             onClick={startCompare}
                         >
                             {t(
@@ -410,62 +492,23 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                         </Button>
                     </div>
                 )}
-                {Object.entries(scanState.scanning)
-                    .filter(([key]) => key !== currentKey)
-                    .map(([key, prog]) => (
-                        <div key={key} className="duplicate-music-modal__bg-task">
-                            <span>
-                                {t(`local_music.${MODE_LABEL_KEYS[prog.mode]}`)}
-                                {t(
-                                    `local_music.${prog.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
-                                )}{' '}
-                                {prog.done}/{prog.total}
-                            </span>
-                            <div className="duplicate-music-modal__bg-bar">
-                                <span
-                                    style={{
-                                        width: `${prog.total ? Math.round((prog.done / prog.total) * 100) : 0}%`,
-                                    }}
-                                />
-                            </div>
-                            <button
-                                type="button"
-                                className="duplicate-music-modal__cancel"
-                                onClick={() => cancelScan(key)}
-                            >
-                                {t('common.cancel')}
-                            </button>
-                        </div>
-                    ))}
                 {mode === 'audio' && (
-                    <>
                     <div className="duplicate-music-modal__audio-row">
-                        {diskCount > 0 ? (
-                            <>
-                                <Button
-                                    variant="primary"
-                                    disabled={!!findAudioRun()}
-                                    onClick={() => startAudioTask('compute-new')}
-                                >
-                                    {t('local_music.duplicate_compute_new')}
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    disabled={!!findAudioRun()}
-                                    onClick={() => startAudioTask('compute-all')}
-                                >
-                                    {t('local_music.duplicate_compute_all')}
-                                </Button>
-                            </>
-                        ) : (
-                            <Button
-                                variant="primary"
-                                disabled={!!findAudioRun()}
-                                onClick={() => startAudioTask('compute-new')}
-                            >
-                                {t('local_music.duplicate_compute')}
-                            </Button>
-                        )}
+                        <Button
+                            variant="primary"
+                            disabled={!!findAudioRun() || deleting}
+                            onClick={() => startAudioTask()}
+                        >
+                            {t('local_music.duplicate_compute')}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={deleting}
+                            onClick={handleClearCache}
+                        >
+                            {t('local_music.duplicate_clear_cache')}
+                        </Button>
                         <span className="duplicate-music-modal__threshold-label">
                             {t('local_music.duplicate_threshold')}
                         </span>
@@ -479,113 +522,99 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                 }),
                             )}
                         />
-                        <Button
-                            variant="primary"
-                            disabled={!!findAudioRun()}
-                            onClick={() => startAudioTask('compare')}
-                        >
-                            {t(
-                                currentKey in scanState.groupsByKey
-                                    ? 'local_music.duplicate_recompare'
-                                    : 'local_music.duplicate_compare',
-                            )}
-                        </Button>
-                        <span className="duplicate-music-modal__cache-size">
+                    </div>
+                )}
+                {mode === 'audio' && (
+                    <div className="duplicate-music-modal__footnote">
+                        <span>
                             {t('local_music.duplicate_cache_size')}: {cacheSize}
                         </span>
-                        <Button variant="secondary" size="sm" onClick={handleClearCache}>
-                            {t('local_music.duplicate_clear_cache')}
-                        </Button>
+                        <span aria-hidden="true">·</span>
+                        <span>{t('local_music.duplicate_footnote')}</span>
                     </div>
-                    <div className="duplicate-music-modal__footnote">
-                        {t('local_music.duplicate_footnote')}
-                    </div>
-                    </>
                 )}
                 {binError && <div className="duplicate-music-modal__error">{binError}</div>}
-                {mainProg && (
-                    <div className="duplicate-music-modal__progress">
-                        <span className="duplicate-music-modal__progress-label">
-                            {t(`local_music.${MODE_LABEL_KEYS[mainProg.mode]}`)}
-                            {t(
-                                `local_music.${mainProg.phase === 'compute' ? 'duplicate_phase_compute' : 'duplicate_phase_compare'}`,
-                            )}{' '}
-                            {mainProg.done}/{mainProg.total}
+                {isDeleteConfirming ? (
+                    <div className="duplicate-music-modal__delete-confirm" role="alert">
+                        <span className="duplicate-music-modal__delete-confirm-text">
+                            {t('local_music.duplicate_delete_confirm_text', {
+                                count: checked.size,
+                            })}
                         </span>
-                        <div className="duplicate-music-modal__progress-bar">
-                            <span
-                                style={{
-                                    width: `${mainProg.total ? Math.round((mainProg.done / mainProg.total) * 100) : 0}%`,
-                                }}
-                            />
-                        </div>
-                        {mainProgKey && (
-                            <button
-                                type="button"
-                                className="duplicate-music-modal__cancel"
-                                onClick={() => cancelScan(mainProgKey)}
-                            >
-                                {t('common.cancel')}
-                            </button>
-                        )}
+                        <Button
+                            className="duplicate-music-modal__delete-confirm-btn"
+                            variant="secondary"
+                            size="sm"
+                            disabled={deleting}
+                            onClick={() => setDeleteConfirmKey(null)}
+                        >
+                            {t('common.cancel')}
+                        </Button>
+                        <Button
+                            className="duplicate-music-modal__delete-confirm-btn"
+                            variant="primary"
+                            size="sm"
+                            danger
+                            loading={deleting}
+                            disabled={currentKey in scanState.scanning}
+                            onClick={handleDeleteSelected}
+                        >
+                            {t('local_music.duplicate_delete_confirm_action')}
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="duplicate-music-modal__assist">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={normalGroups.length === 0}
+                            onClick={() => {
+                                const keep = new Set(normalGroups.map((g) => g.ids[0]));
+                                const next: string[] = [];
+                                normalGroups.forEach((g) => {
+                                    g.ids.forEach((id) => {
+                                        if (!keep.has(id)) next.push(id);
+                                    });
+                                });
+                                setScanChecked(currentKey, next);
+                            }}
+                        >
+                            {t('local_music.duplicate_keep_first')}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={normalGroups.length === 0}
+                            onClick={() => {
+                                setScanChecked(
+                                    currentKey,
+                                    normalGroups.flatMap((g) => g.ids),
+                                );
+                            }}
+                        >
+                            {t('local_music.duplicate_select_all')}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={checked.size === 0}
+                            onClick={() => setScanChecked(currentKey, [])}
+                        >
+                            {t('local_music.duplicate_clear_selection')}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            danger
+                            disabled={
+                                checked.size === 0 || currentKey in scanState.scanning || deleting
+                            }
+                            onClick={() => setDeleteConfirmKey(currentKey)}
+                        >
+                            {t('local_music.duplicate_delete')}
+                        </Button>
                     </div>
                 )}
-                <div className="duplicate-music-modal__assist">
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        disabled={normalGroups.length === 0}
-                        onClick={() => {
-                            const keep = new Set(normalGroups.map((g) => g.ids[0]));
-                            const next: string[] = [];
-                            normalGroups.forEach((g) => {
-                                g.ids.forEach((id) => {
-                                    if (!keep.has(id)) next.push(id);
-                                });
-                            });
-                            setScanChecked(currentKey, next);
-                        }}
-                    >
-                        {t('local_music.duplicate_keep_first')}
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        disabled={normalGroups.length === 0}
-                        onClick={() => {
-                            setScanChecked(
-                                currentKey,
-                                normalGroups.flatMap((g) => g.ids),
-                            );
-                        }}
-                    >
-                        {t('local_music.duplicate_select_all')}
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        disabled={checked.size === 0}
-                        onClick={() => setScanChecked(currentKey, [])}
-                    >
-                        {t('local_music.duplicate_clear_selection')}
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        danger
-                        disabled={checked.size === 0 || currentKey in scanState.scanning}
-                        onClick={() =>
-                            handleDelete(
-                                [...checked].map((key) => {
-                                    const [platform, ...rest] = key.split('+');
-                                    return { platform, id: rest.join('+'), key };
-                                }),
-                            )
-                        }
-                    >
-                        {t('local_music.duplicate_delete')}
-                    </Button>
-                </div>
                 <div className="duplicate-music-modal__results">
                     <div className="duplicate-music-modal__groups">
                         <div className="duplicate-music-modal__groups-header">
@@ -594,15 +623,21 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                             })}
                         </div>
                         {normalGroups.length === 0 ? (
-                            <StatusPlaceholder
-                                status={RequestStatus.Done}
-                                isEmpty
-                                emptyTitle={t('local_music.duplicate_empty_title')}
-                                emptyDescription={t('local_music.duplicate_empty_desc')}
-                            />
+                            isAudioComparing ? (
+                                <div className="duplicate-music-modal__compare-hint">
+                                    {t('local_music.duplicate_compare_hint')}
+                                </div>
+                            ) : (
+                                <StatusPlaceholder
+                                    status={RequestStatus.Done}
+                                    isEmpty
+                                    emptyTitle={t('local_music.duplicate_empty_title')}
+                                    emptyDescription={t('local_music.duplicate_empty_desc')}
+                                />
+                            )
                         ) : (
                             normalGroups.map((g, gi) => (
-                                <div key={gi} className="duplicate-music-modal__group">
+                                <div key={g.ids.join('|')} className="duplicate-music-modal__group">
                                     <div className="duplicate-music-modal__group-header">
                                         <span>
                                             {t('local_music.duplicate_group_item', {
@@ -627,8 +662,15 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                         <div
                                             key={it.key}
                                             role="button"
-                                            className={`duplicate-music-modal__row${checked.has(it.key) ? ' is-selected' : ''}`}
+                                            className={`duplicate-music-modal__row${checked.has(it.key) ? ' is-selected' : ''}${
+                                                isDeleteConfirming && checked.has(it.key)
+                                                    ? ' is-pending-delete'
+                                                    : ''
+                                            }${previewingKey === it.key ? ' is-previewing' : ''}`}
                                             onClick={() => {
+                                                if (deleting) return;
+                                                // 确认态下改动勾选即退出确认，避免误删目标变化
+                                                if (isDeleteConfirming) setDeleteConfirmKey(null);
                                                 const next = new Set(checked);
                                                 if (next.has(it.key)) next.delete(it.key);
                                                 else next.add(it.key);
@@ -640,8 +682,12 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                                 role="checkbox"
                                                 aria-checked={checked.has(it.key)}
                                                 className="duplicate-music-modal__checkbox"
+                                                disabled={deleting}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
+                                                    if (deleting) return;
+                                                    if (isDeleteConfirming)
+                                                        setDeleteConfirmKey(null);
                                                     const next = new Set(checked);
                                                     if (next.has(it.key)) next.delete(it.key);
                                                     else next.add(it.key);
@@ -675,12 +721,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                                 className="duplicate-music-modal__action"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    trackPlayer.playMusic({
-                                                        platform: it.key.split('+')[0],
-                                                        id: it.key.split('+').slice(1).join('+'),
-                                                        title: it.title,
-                                                        artist: it.artist,
-                                                    } as IMusic.IMusicItem);
+                                                    previewMusic(it);
                                                 }}
                                             >
                                                 {t('local_music.duplicate_preview')}
@@ -742,7 +783,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                             {g.items.map((it) => (
                                                 <div
                                                     key={it.key}
-                                                    className="duplicate-music-modal__row"
+                                                    className={`duplicate-music-modal__row${previewingKey === it.key ? ' is-previewing' : ''}`}
                                                 >
                                                     <span className="duplicate-music-modal__titles">
                                                         <span className="duplicate-music-modal__title-row">
@@ -768,15 +809,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                                         type="button"
                                                         className="duplicate-music-modal__action"
                                                         onClick={() => {
-                                                            trackPlayer.playMusic({
-                                                                platform: it.key.split('+')[0],
-                                                                id: it.key
-                                                                    .split('+')
-                                                                    .slice(1)
-                                                                    .join('+'),
-                                                                title: it.title,
-                                                                artist: it.artist,
-                                                            } as IMusic.IMusicItem);
+                                                            previewMusic(it);
                                                         }}
                                                     >
                                                         {t('local_music.duplicate_preview')}
@@ -794,12 +827,12 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                             <button
                                                 type="button"
                                                 className="duplicate-music-modal__link-btn"
-                                            onClick={() => {
-                                                const sig = buildVersionSignature(g.ids);
-                                                saveManualMarks(
-                                                    manualMarks.filter((s) => s !== sig),
-                                                );
-                                            }}
+                                                onClick={() => {
+                                                    const sig = buildVersionSignature(g.ids);
+                                                    saveManualMarks(
+                                                        manualMarks.filter((s) => s !== sig),
+                                                    );
+                                                }}
                                             >
                                                 {t('local_music.duplicate_unmark_version')}
                                             </button>
@@ -807,7 +840,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                         {g.items.map((it) => (
                                             <div
                                                 key={it.key}
-                                                className="duplicate-music-modal__row"
+                                                className={`duplicate-music-modal__row${previewingKey === it.key ? ' is-previewing' : ''}`}
                                             >
                                                 <span className="duplicate-music-modal__titles">
                                                     <span className="duplicate-music-modal__title-row">
@@ -833,15 +866,7 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                                     type="button"
                                                     className="duplicate-music-modal__action"
                                                     onClick={() => {
-                                                        trackPlayer.playMusic({
-                                                            platform: it.key.split('+')[0],
-                                                            id: it.key
-                                                                .split('+')
-                                                                .slice(1)
-                                                                .join('+'),
-                                                            title: it.title,
-                                                            artist: it.artist,
-                                                        } as IMusic.IMusicItem);
+                                                        previewMusic(it);
                                                     }}
                                                 >
                                                     {t('local_music.duplicate_preview')}
@@ -853,6 +878,12 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                         </div>
                     )}
                 </div>
+                <DuplicateMiniPlayer
+                    state={preview.state}
+                    onToggle={preview.toggle}
+                    onNext={preview.next}
+                    onSeek={preview.seekTo}
+                />
             </div>
         </Modal>
     );

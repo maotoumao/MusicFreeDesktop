@@ -38,15 +38,17 @@
         color: var(--color-text-secondary);
     }
 
-    &__cache-size {
-        font-size: var(--text-caption-size);
-        color: var(--color-text-muted);
-    }
-
     // ── 错误 ──
     &__error {
         font-size: var(--text-body-size);
         color: var(--color-danger, #fc5f5f);
+    }
+
+    // ── 进行中的扫描任务（固定在 Tab 行下方，切换 tab 位置不变） ──
+    &__tasks {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1-5);
     }
 
     // ── 进度条 ──
@@ -54,8 +56,13 @@
         display: flex;
         align-items: center;
         gap: var(--space-3);
-        min-height: 40px;
+        min-height: 28px;
         box-sizing: border-box;
+
+        // 非当前 tab 的任务：行高不变，仅淡化
+        &.is-background {
+            opacity: 0.6;
+        }
     }
 
     &__progress-label {
@@ -101,6 +108,32 @@
         gap: var(--space-2);
     }
 
+    // ── 删除就地确认条：替换助手下，高度与助手行一致，列表不跳动 ──
+    &__delete-confirm {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        min-height: var(--size-control-sm);
+        padding: 0 var(--space-3);
+        border-radius: var(--radius-control);
+        background: var(--color-status-danger-bg);
+        box-shadow: inset 0 0 0 1px var(--color-status-danger-border);
+
+        // 确认条内按钮比 sm 再小一号，避免撑满整条
+        .duplicate-music-modal__delete-confirm-btn {
+            height: calc(var(--size-control-sm) - var(--space-1));
+            padding: 0 var(--space-2);
+        }
+    }
+
+    &__delete-confirm-text {
+        flex: 1;
+        min-width: 220px;
+        font-size: var(--text-caption-size);
+        color: var(--color-status-danger-text);
+    }
+
     // ── 结果区（列表 + 版本专区）：定死高度，单滚动条 ──
     &__results {
         flex: 0 1 360px;
@@ -109,6 +142,124 @@
         border: 1px solid var(--color-border-subtle);
         border-radius: var(--radius-card);
         overflow-y: auto;
+    }
+
+    // ── 弹窗内独立试听条：只显示去重列表自己的试听队列 ──
+    &__mini-player {
+        position: sticky;
+        bottom: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2) var(--space-3);
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-card);
+        background: var(--color-bg-modal);
+    }
+
+    &__mini-cover {
+        flex-shrink: 0;
+    }
+
+    &__mini-body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+
+    &__mini-title-row {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-2);
+        min-width: 0;
+    }
+
+    &__mini-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: var(--text-label-size);
+        color: var(--color-text-primary);
+    }
+
+    &__mini-artist {
+        flex-shrink: 0;
+        max-width: 40%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+    }
+
+    &__mini-tag {
+        flex-shrink: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-brand);
+
+        &.is-error {
+            color: var(--color-status-warn-text);
+        }
+    }
+
+    &__mini-progress-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    &__mini-progress {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__mini-time {
+        flex-shrink: 0;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__mini-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        flex-shrink: 0;
+    }
+
+    &__mini-ctrl {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            background: var(--color-fill-subtle);
+            color: var(--color-text-primary);
+        }
+
+        &:disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+    }
+
+    &__mini-warn {
+        flex-basis: 100%;
+        font-size: var(--text-caption-size);
+        color: var(--color-status-warn-text);
     }
 
     &__groups-header {
@@ -120,6 +271,14 @@
         font-size: var(--text-caption-size);
         font-weight: 600;
         color: var(--color-text-brand);
+    }
+
+    // ── 对比中且暂无结果：替换空态，避免显示"暂无重复" ──
+    &__compare-hint {
+        padding: var(--space-10) var(--space-3);
+        text-align: center;
+        font-size: var(--text-caption-size);
+        color: var(--color-text-muted);
     }
 
     &__group-header {
@@ -159,6 +318,18 @@
 
         &.is-selected {
             background: var(--color-fill-neutral);
+        }
+
+        // 当前实际播放的歌曲（迷你播放条同步）
+        &.is-previewing {
+            background: var(--color-fill-subtle);
+            box-shadow: inset 2px 0 0 var(--color-text-brand);
+        }
+
+        // 删除确认态下的待删除行：浅红底 + 左侧红条
+        &.is-pending-delete {
+            background: var(--color-status-danger-bg);
+            box-shadow: inset 2px 0 0 var(--color-status-danger-fill);
         }
     }
 
@@ -266,34 +437,12 @@
         gap: var(--space-2);
     }
 
-    // ── 后台任务条（非当前 tab 的进行中任务） ──
-    &__bg-task {
+    // ── 计算区下方说明：缓存占用 + 指纹复用说明合成一排 ──
+    &__footnote {
         display: flex;
         align-items: center;
-        gap: var(--space-3);
-        padding: 6px 0;
-        font-size: var(--text-caption-size);
-        color: var(--color-text-secondary);
-    }
-
-    &__bg-bar {
-        flex: 1;
-        height: 4px;
-        border-radius: 2px;
-        background-color: var(--color-border-subtle);
-        overflow: hidden;
-
-        span {
-            display: block;
-            height: 100%;
-            background-color: var(--color-fill-brand);
-            opacity: 0.6;
-            transition: width 0.2s ease;
-        }
-    }
-
-    // ── 计算区下方说明 ──
-    &__footnote {
+        flex-wrap: wrap;
+        gap: var(--space-1);
         font-size: var(--text-caption-size);
         color: var(--color-text-muted);
     }

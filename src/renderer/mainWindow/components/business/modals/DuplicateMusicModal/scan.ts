@@ -13,7 +13,7 @@ import {
     decodeFingerprint,
     fileBaseKey,
     groupByKey,
-    groupBySimilarity,
+    hammingSimilarity,
 } from '@infra/audioFingerprint/common/fingerprint';
 import audioFingerprint from '@infra/audioFingerprint/renderer';
 
@@ -50,6 +50,16 @@ export interface ScanStats {
 
 const emptyStats = (): ScanStats => ({ hit: 0, computed: 0, skipped: 0 });
 
+/** 音纹对比阶段的渐进回调：计算阶段不产出组，进入对比后逐组上报 */
+export interface AudioScanHooks {
+    /** 指纹计算完毕、开始两两对比时触发，参数为参与对比的条目数 */
+    onCompareStart?: (total: number) => void;
+    /** 对比进度：已处理的种子数 / 参与对比的条目数 */
+    onCompareProgress?: (done: number, total: number) => void;
+    /** 每发现一组立即回调，组顺序与最终结果一致（值为 items 下标） */
+    onGroup?: (indices: number[]) => void;
+}
+
 /** 本地库条目转扫描条目：没有本地路径的（在线歌曲）直接丢弃 */
 export function toScanItems(items: IMusic.IMusicItem[]): ScanItem[] {
     const out: ScanItem[] = [];
@@ -76,6 +86,7 @@ export async function runDuplicateScan(
     threshold: number,
     onProgress: (done: number, total: number) => void,
     shouldCancel: () => boolean,
+    hooks?: AudioScanHooks,
 ): Promise<{
     groups: DuplicateGroup[];
     skipped: Array<{ path: string; message: string }>;
@@ -149,7 +160,12 @@ export async function runDuplicateScan(
         fingerprint: number[];
         duration: number;
     }>;
-    const idxGroups = groupBySimilarity(valid, threshold);
+    hooks?.onCompareStart?.(valid.length);
+    const idxGroups = await groupBySimilarityIncremental(valid, threshold, {
+        shouldCancel,
+        onProgress: hooks?.onCompareProgress,
+        onGroup: hooks?.onGroup,
+    });
     return {
         groups: idxGroups.map((idxs) => ({
             ids: idxs.map((k) => items[k].key),
@@ -158,6 +174,61 @@ export async function runDuplicateScan(
         skipped,
         stats,
     };
+}
+
+/**
+ * 与公共 groupBySimilarity 相同的贪心分组，但分批让出主线程：
+ * 每发现一组立即回调，便于 UI 边对比边展示；期间可取消。
+ * 组一旦形成即为最终结果，不会在后续比较中被合并，因此可安全增量展示。
+ */
+async function groupBySimilarityIncremental(
+    items: Array<{ index: number; fingerprint: number[]; duration: number }>,
+    threshold: number,
+    options: {
+        shouldCancel: () => boolean;
+        onProgress?: (done: number, total: number) => void;
+        onGroup?: (indices: number[]) => void;
+    },
+): Promise<number[][]> {
+    const groups: number[][] = [];
+    const used = new Set<number>();
+    const total = items.length;
+    const reportEvery = Math.max(1, Math.floor(total / 100));
+    let lastYield = Date.now();
+
+    for (let i = 0; i < total; i++) {
+        if (options.shouldCancel()) break;
+        if (!used.has(items[i].index)) {
+            const group = [items[i].index];
+            used.add(items[i].index);
+            for (let j = i + 1; j < total; j++) {
+                if (used.has(items[j].index)) continue;
+                if (Math.abs(items[i].duration - items[j].duration) > 15) continue;
+                const similarity = hammingSimilarity(
+                    items[i].fingerprint,
+                    items[j].fingerprint,
+                    threshold,
+                );
+                if (similarity >= threshold) {
+                    group.push(items[j].index);
+                    used.add(items[j].index);
+                }
+            }
+            if (group.length > 1) {
+                groups.push(group);
+                options.onGroup?.(group);
+            }
+        }
+        if ((i + 1) % reportEvery === 0 || i === total - 1) {
+            options.onProgress?.(i + 1, total);
+        }
+        // 约每 16ms 让出一次主线程，让进度条和已发现的组即时渲染
+        if (Date.now() - lastYield >= 16) {
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            lastYield = Date.now();
+        }
+    }
+    return groups;
 }
 
 function toGroups(items: ScanItem[], m: Map<string, number[]>): DuplicateGroup[] {
