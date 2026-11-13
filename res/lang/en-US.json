@@ -601,6 +601,7 @@
         "duplicate_audio_busy_compare": "Audio comparison in progress, please wait",
         "duplicate_audio_busy_compute": "Audio fingerprint computation in progress, please wait",
         "duplicate_clear_cache": "Clear Fingerprint Cache",
+        "duplicate_cache_size": "Fingerprint cache size",
         "duplicate_cache_cleared": "Fingerprint cache cleared",
         "duplicate_phase_compute": "Computing fingerprints",
         "duplicate_phase_compare": "Comparing",
@@ -625,7 +626,8 @@
         "duplicate_empty_desc": "Try another mode or lower the similarity threshold",
         "duplicate_delete_failed": "Delete failed, please retry",
         "duplicate_expand": "Expand",
-        "duplicate_collapse": "Collapse"
+        "duplicate_collapse": "Collapse",
+        "duplicate_footnote": "Fingerprints are computed once and reused"
     },
     "quality": {
         "switch": "Change Quality",

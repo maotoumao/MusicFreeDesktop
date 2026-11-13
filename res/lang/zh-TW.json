@@ -601,6 +601,7 @@
         "duplicate_audio_busy_compare": "音紋比對進行中，請稍候",
         "duplicate_audio_busy_compute": "音紋計算進行中，請稍候",
         "duplicate_clear_cache": "清除指紋快取",
+        "duplicate_cache_size": "指紋快取大小",
         "duplicate_cache_cleared": "指紋快取已清除",
         "duplicate_phase_compute": "計算指紋",
         "duplicate_phase_compare": "比對",
@@ -625,7 +626,8 @@
         "duplicate_empty_desc": "試試其他模式或放寬相似度閾值",
         "duplicate_delete_failed": "刪除失敗，請重試",
         "duplicate_expand": "展開",
-        "duplicate_collapse": "摺疊"
+        "duplicate_collapse": "摺疊",
+        "duplicate_footnote": "指紋只需計算一次，再次比對將直接重用"
     },
     "quality": {
         "switch": "選擇音樂音質",
