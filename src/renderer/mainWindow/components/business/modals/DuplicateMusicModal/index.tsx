@@ -836,6 +836,17 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                                     >
                                                         {t('local_music.duplicate_preview')}
                                                     </button>
+                                                    <button
+                                                        type="button"
+                                                        className="duplicate-music-modal__action"
+                                                        onClick={() => {
+                                                            systemUtil.showItemInFolder(
+                                                                it.localPath,
+                                                            );
+                                                        }}
+                                                    >
+                                                        {t('local_music.reveal_in_explorer')}
+                                                    </button>
                                                 </div>
                                             ))}
                                         </div>
@@ -892,6 +903,15 @@ export default function DuplicateMusicModal({ close }: DuplicateMusicModalProps)
                                                     }}
                                                 >
                                                     {t('local_music.duplicate_preview')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="duplicate-music-modal__action"
+                                                    onClick={() => {
+                                                        systemUtil.showItemInFolder(it.localPath);
+                                                    }}
+                                                >
+                                                    {t('local_music.reveal_in_explorer')}
                                                 </button>
                                             </div>
                                         ))}
