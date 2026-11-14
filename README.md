@@ -165,6 +165,17 @@ npm start
 npm run package
 ```
 
+### 发布新版本
+
+本仓库用 GitHub Actions 自动发版，推 tag 即可：
+
+1. 改 `package.json` 里的 `version`（如 `0.0.9`），提交并推送；
+2. 打同名 tag 并推送：`git tag v0.0.9 && git push origin v0.0.9`。
+
+工作流会校验 tag 与 `package.json` 版本一致、构建 Windows 便携版、创建 GitHub Release
+（资产名 `MusicFree-<版本>-win32-x64-portable.zip`），并自动更新 `release/version.json` —— 
+应用内「检查更新」读的就是这个文件。
+
 ## 支持这个项目
 
 如果你喜欢这个项目，或者希望我可以持续维护下去，你可以通过以下任何一种方式支持我;)

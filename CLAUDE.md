@@ -40,6 +40,27 @@ robocopy out\MusicFree-win32-x64 "D:\work\OneDrive\Desktop\projects\MusicFree" /
 
 **robocopy 绝不能加 `/MIR`** —— 会删掉 `portable/` 里的用户数据（插件、设置、歌单数据库）。
 
+### 发版（GitHub Actions 自动）
+
+改 `package.json` 的 version → 提交 → 打同名 tag 推送：
+
+```bash
+git tag v0.0.9
+git push origin v0.0.9
+```
+
+`.github/workflows/release.yml` 会依次：校验 tag 与 `package.json` 版本一致 → 构建 Windows 便携版 →
+创建 GitHub Release → 更新 `release/version.json` 并回写 master。
+
+改这个 workflow 时有三个约束别破坏：
+
+- **资产名必须匹配 `-win32-x64-portable.zip`**：`src/main/updater/parse.ts` 的 `assetKindPriority`
+  按文件名里的 `-<平台token>-<类型>` 匹配资产，名字对不上，应用内就找不到可安装包。
+- **`release/version.json` 必须跟着发版更新**：应用内「检查更新」读的是 master 分支上的 raw 文件
+  （见 `appUpdateSources`），不同步的话更新检查永远停在旧版本。workflow 已自动处理。
+- **只发便携版，不发 setup.exe**：安装版要 Inno Setup 的 AppId（上游的 secret，fork 里没有），
+  而且 `canAutoInstall()` 本来就只对「打包 + Windows + 便携版」放行。
+
 ### 调试
 
 ```bash

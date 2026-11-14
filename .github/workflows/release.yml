@@ -1,0 +1,123 @@
+name: 发布 Release
+
+# 推 tag 即发布：先改 package.json 的 version 并提交，再打同名 tag 推送。
+# 手动触发时在输入框填 tag（同样要与 package.json 的 version 对应）。
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要发布的 tag，须与 package.json 的 version 对应（如 v0.0.9）"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: 构建 Windows 便携版
+    runs-on: windows-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 读取版本号并校验与 tag 一致
+        id: meta
+        shell: bash
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          if [ "${TAG#v}" != "$VERSION" ]; then
+            echo "::error::tag ($TAG) 与 package.json 的 version ($VERSION) 不一致，请先改 package.json 再打 tag"
+            exit 1
+          fi
+
+      - run: npm install
+      - run: npm run package
+
+      # 应用内更新器（src/main/updater）只认 `MusicFree-<版本>-win32-x64-portable.zip`
+      # 这种命名，资产名变了就找不到可安装包。
+      - name: 准备便携目录
+        shell: bash
+        run: mkdir -p ./out/MusicFree-win32-x64/portable
+
+      - uses: vimtor/action-zip@v1.1
+        with:
+          files: ./out/MusicFree-win32-x64
+          dest: MusicFree-${{ steps.meta.outputs.version }}-win32-x64-portable.zip
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable
+          path: ./MusicFree-${{ steps.meta.outputs.version }}-win32-x64-portable.zip
+
+  publish:
+    name: 创建 GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: portable
+          path: ./dist
+
+      # 只发布便携版：安装版需要 Inno Setup 的 AppId（上游的 secret，fork 里没有），
+      # 而且应用内的自动安装本来就只对便携版生效。
+      - name: 创建 Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.build.outputs.tag }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG 已存在，覆盖资产"
+            gh release upload "$TAG" ./dist/*.zip --clobber
+          else
+            gh release create "$TAG" ./dist/*.zip \
+              --title "MusicFree $VERSION" \
+              --generate-notes \
+              --verify-tag
+          fi
+
+      # version.json 是应用内「检查更新」读的文件（master 分支上的 raw 地址）。
+      # 版本号和下载地址必须跟着 Release 一起更新，否则更新检查永远停在旧版本。
+      - name: 更新 release/version.json 并回写 master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.build.outputs.tag }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          BODY=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG" --jq '.body // ""')
+          jq -n \
+            --arg v "$VERSION" \
+            --arg u "https://github.com/${{ github.repository }}/releases/tag/$TAG" \
+            --arg b "$BODY" \
+            '{version: $v, changeLog: ($b | split("\n") | map(select(length > 0)) | .[:5]), download: [$u]}' \
+            > release/version.json
+          cat release/version.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release/version.json
+          if git diff --staged --quiet; then
+            echo "version.json 无变化，跳过提交"
+          else
+            git commit -m "chore(release): 版本信息更新到 $VERSION"
+            git push origin HEAD:master
+          fi
