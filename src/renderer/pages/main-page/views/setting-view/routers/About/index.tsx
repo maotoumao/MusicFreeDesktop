@@ -45,9 +45,8 @@ export default function About() {
                     i18nKey="settings.about.open_source_declaration"
                     components={{
                         Github: (
-                            <A href="https://github.com/maotoumao/MusicFreeDesktop"></A>
+                            <A href="https://github.com/acientemple/ElegantMusicFreeDesktop"></A>
                         ),
-                        Gitee: <A href="https://gitee.com/maotoumao/MusicFreeDesktop"></A>,
                     }}
                 ></Trans>
             </div>

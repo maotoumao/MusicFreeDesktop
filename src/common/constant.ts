@@ -142,14 +142,13 @@ export const themePackStoreBaseUrl = [
 ];
 
 export const appUpdateSources = [
-    "https://gitee.com/maotoumao/MusicFreeDesktop/raw/master/release/version.json",
-    "https://raw.githubusercontent.com/maotoumao/MusicFreeDesktop/master/release/version.json",
-    "https://cdn.jsdelivr.net/gh/maotoumao/MusicFreeDesktop@master/release/version.json",
+    "https://raw.githubusercontent.com/acientemple/ElegantMusicFreeDesktop/master/release/version.json",
+    "https://cdn.jsdelivr.net/gh/acientemple/ElegantMusicFreeDesktop@master/release/version.json",
 ];
 
 /** GitHub Releases 接口：能拿到 1.0.0-beta 这类 version.json 里没有的版本 */
 export const githubReleaseApiBase =
-    "https://api.github.com/repos/maotoumao/MusicFreeDesktop/releases";
+    "https://api.github.com/repos/acientemple/ElegantMusicFreeDesktop/releases";
 
 /** GitHub API 要求带 User-Agent，否则返回 403 */
 export const githubRequestHeaders = {

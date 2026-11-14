@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 这个仓库是什么
 
 MusicFree Desktop 的**源码仓库**（Electron + React 18 + TypeScript）。
-fork 自上游 `maotoumao/MusicFreeDesktop` v0.0.8，`origin` 指向 `acientemple/MusicFreeDesktop`，
+fork 自上游 `maotoumao/MusicFreeDesktop` v0.0.8，`origin` 指向 `acientemple/ElegantMusicFreeDesktop`，
 `upstream` 指向上游原始仓库。在上游基础上加了 MV 播放/搜索、唱卡拉OK、歌曲信息编辑与时长校正、
 播放队列定位到歌单、窗口置顶、窗口自由缩放等本地定制功能。
 

@@ -1,5 +1,8 @@
 # MusicFree 桌面版
 
+> 本仓库是上游 [maotoumao/MusicFreeDesktop](https://github.com/maotoumao/MusicFreeDesktop) 的**本地定制版**，
+> 遵循同样的 AGPL 3.0 协议。仓库地址：https://github.com/acientemple/ElegantMusicFreeDesktop
+
 ## 项目使用约定：
 本项目基于 AGPL 3.0 协议开源，使用此项目时请遵守开源协议。  
 除此外，希望你在使用代码时已经了解以下额外说明：
@@ -19,7 +22,8 @@
 
 ### 下载地址
 
-[飞书云文档](https://r0rvr854dd1.feishu.cn/drive/folder/IrVEfD67KlWZGkdqwjecLHFNnBb?from=from_copylink)
+- **上游版本**（不含本地定制）：[飞书云文档](https://r0rvr854dd1.feishu.cn/drive/folder/IrVEfD67KlWZGkdqwjecLHFNnBb?from=from_copylink)
+- **本定制版**：暂未发布 Release，请按下方「启动项目」自行构建，或联系仓库维护者获取构建产物。
 
 ## 特性
 
@@ -32,6 +36,19 @@
 - 无广告：基于 AGPL3.0 协议开源，将会保持免费。
 
 - 隐私：软件所有数据存储在本地，本软件不会上传你的个人信息。
+
+## 本地定制功能
+
+在上游基础上增加了：
+
+- **MV 播放与搜索**：搜索并播放歌曲对应的 MV，支持自定义检索词、MV 窗口内播放控制与视频下载；
+- **唱卡拉OK**：逐字歌词扫光、跟唱打分（节奏 / 完整度 / 音高连贯性）、人声与伴奏双轨混音，伴奏候选可自行挑选；
+- **歌曲信息编辑与时长校正**：以音频文件真实长度为准自动校正时长，偏差超过 2 秒即记录，重启后依然有效；
+- **播放队列定位到歌单**：在播放队列中单击歌曲，自动跳到它在所属歌单中的位置；
+- **窗口置顶与自由缩放**：主窗口可始终置顶；无边框窗口自绘 8 条缩放感应条，四边四角均可拖拽；
+- **桌面歌词与迷你模式**：独立的桌面歌词窗口与迷你播放窗口。
+
+开发相关的约定、架构说明与构建发布流程见仓库里的 [`CLAUDE.md`](./CLAUDE.md)。
 
 ## 插件
 
@@ -136,8 +153,16 @@ config.json 是一个配置文件。
 下载仓库代码之后，在根目录下执行：
 
 ```bash
+git clone https://github.com/acientemple/ElegantMusicFreeDesktop.git
+cd ElegantMusicFreeDesktop
 npm install
 npm start
+```
+
+构建 Windows 发行包（产物在 `out/MusicFree-win32-x64`）：
+
+```bash
+npm run package
 ```
 
 ## 支持这个项目

@@ -21,8 +21,7 @@ export default function Sparkles() {
                     </div>
                     <p>
                         本软件完全免费，并基于GPL协议开源，仅供学习参考使用，不可用于商业目的。代码地址：
-                        <A href="https://github.com/maotoumao/MusicFreeDesktop">Github</A>{" "}
-                        <A href="https://gitee.com/maotoumao/MusicFreeDesktop">Gitee</A>。
+                        <A href="https://github.com/acientemple/ElegantMusicFreeDesktop">Github</A>。
                     </p>
                     <p>
                         本软件仅仅是一个本地播放器，也可以通过插件扩展第三方源，插件可以完成包括播放、搜索在内的大部分功能；如果你是从第三方下载的插件，请一定谨慎识别这些插件的安全性，保护好自己。（注意：插件以及插件可能产生的数据与本软件无关，请使用者合理合法使用。）
