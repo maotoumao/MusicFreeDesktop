@@ -415,7 +415,10 @@ export default function Karaoke() {
                     </span>
                 </div>
                 <div className="karaoke-mixer-row">
-                    <span className="karaoke-mixer-label">
+                    <span
+                        className="karaoke-mixer-label"
+                        title={t("modal.karaoke_accompaniment_boost_hint")}
+                    >
                         {t("modal.karaoke_accompaniment")}
                     </span>
                     <div className="karaoke-mixer-slider">

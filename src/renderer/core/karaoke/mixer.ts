@@ -22,6 +22,13 @@ const MAX_DRIFT = 0.4;
 /** 对齐检查间隔（毫秒） */
 const SYNC_INTERVAL = 500;
 
+/**
+ * 伴奏轨的响度补偿倍数。
+ * 伴奏素材本身比原唱轻，不给余量的话伴奏推子拉满也只有原唱那么响，
+ * 唱卡拉OK 时伴奏被原唱压着听不见。
+ */
+const ACCOMPANIMENT_BOOST = 2;
+
 class KaraokeMixer {
     /** 伴奏轨的 audio 元素，懒创建 */
     private audio: HTMLAudioElement | null = null;
@@ -198,23 +205,29 @@ class KaraokeMixer {
         return !!this.candidate && !!this.sourceUrl;
     }
 
-    /** 伴奏轨音量 = 全局音量 × 伴奏推子，这样两个推子都在全局音量之下 */
+    /**
+     * 伴奏轨音量 = 全局音量 × 伴奏推子 × 伴奏补偿。
+     *
+     * 补偿是必要的：伴奏素材本身的响度天然比原唱低一截，
+     * 不给余量的话伴奏推子拉满也只有「原唱轨」那么响，
+     * 唱卡拉OK 时伴奏被原唱压着，几乎听不见。
+     * 有了余量，伴奏推子拉满能到原唱轨的两倍，跟唱时伴奏才是主角。
+     */
     private getEffectiveVolume(): number {
         const globalVolume = trackPlayer.volume;
         const base = isFinite(globalVolume) ? globalVolume : 1;
-        return Math.min(1, Math.max(0, base * this.gain));
+        return Math.min(1, Math.max(0, base * this.gain * ACCOMPANIMENT_BOOST));
     }
 
     private applyGain() {
         if (!this.audio) {
             return;
         }
-        this.audio.volume = this.getEffectiveVolume();
-    }
-
-    /** 主播放器的全局音量变了，伴奏轨要跟着变 */
-    public syncGlobalVolume() {
-        this.applyGain();
+        const volume = this.getEffectiveVolume();
+        if (Math.abs(this.audio.volume - volume) < 0.001) {
+            return;
+        }
+        this.audio.volume = volume;
     }
 
     private startSync() {
@@ -253,6 +266,9 @@ class KaraokeMixer {
         if (Math.abs(audio.playbackRate - speed) > 0.01) {
             audio.playbackRate = speed;
         }
+
+        // 全局音量改了，伴奏轨要跟着重新算（伴奏轨的电平依赖全局音量）
+        this.applyGain();
 
         if (audio.readyState < 1 || audio.seeking) {
             return;

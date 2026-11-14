@@ -334,6 +334,7 @@
     "karaoke_stop_instrumental": "Stop Accompaniment",
     "karaoke_vocal": "Vocals",
     "karaoke_accompaniment": "Accompaniment",
+    "karaoke_accompaniment_boost_hint": "The accompaniment is boosted, so a full fader is louder than the vocal track",
     "karaoke_preset_original": "Original",
     "karaoke_preset_karaoke": "Karaoke",
     "karaoke_preset_instrumental": "Instrumental",

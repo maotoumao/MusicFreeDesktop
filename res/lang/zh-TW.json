@@ -334,6 +334,7 @@
     "karaoke_stop_instrumental": "停止伴奏",
     "karaoke_vocal": "人聲",
     "karaoke_accompaniment": "伴奏",
+    "karaoke_accompaniment_boost_hint": "伴奏已做響度補償，推子拉滿比原唱軌更響",
     "karaoke_preset_original": "原唱",
     "karaoke_preset_karaoke": "卡拉OK",
     "karaoke_preset_instrumental": "純伴奏",
