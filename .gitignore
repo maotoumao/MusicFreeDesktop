@@ -100,3 +100,6 @@ plugins
 .idea/
 
 undefinedelectron-log-preload.js
+
+# Claude Code 本地目录（worktree、设置等）
+.claude/
