@@ -14,17 +14,23 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
     name: 构建 Windows 便携版
     runs-on: windows-latest
+    # 构建阶段只需要读代码：npm install 会执行依赖的安装脚本，
+    # 不该给它往仓库推送的权限。
+    permissions:
+      contents: read
     outputs:
       tag: ${{ steps.meta.outputs.tag }}
       version: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -69,7 +75,11 @@ jobs:
     name: 创建 GitHub Release
     needs: build
     runs-on: ubuntu-latest
+    # 只有这个 job 需要写权限：创建 Release、回写 master 的 version.json。
+    permissions:
+      contents: write
     steps:
+      # 这里要 git push 回 master，所以保留默认的凭证持久化。
       - uses: actions/checkout@v4
         with:
           ref: master
