@@ -52,7 +52,9 @@ jobs:
         shell: bash
         run: mkdir -p ./out/MusicFree-win32-x64/portable
 
-      - uses: vimtor/action-zip@v1.1
+      # 第三方 action 固定到 commit SHA：tag/branch 是可移动的引用，
+      # 固定后 tag 被重新指向也不会换掉代码。升级时手动改这里的 SHA。
+      - uses: vimtor/action-zip@26a249fb00d43ca98dad77a4b3838025fc226aa1 # v1.1
         with:
           files: ./out/MusicFree-win32-x64
           dest: MusicFree-${{ steps.meta.outputs.version }}-win32-x64-portable.zip

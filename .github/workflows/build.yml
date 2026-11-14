@@ -12,7 +12,7 @@ jobs:
             - run: echo (node -p -e '`VERSION=${require("./package.json").version}`') >> $Env:GITHUB_ENV
             - run: npm install
             - run: npm run package            
-            - uses: maotoumao/inno-setup-action-cli@main
+            - uses: maotoumao/inno-setup-action-cli@0759e0e3308a8613a081d2024430ffd736e5e4a0 # main
               with: 
                   filepath: ./release/build-windows.iss
                   variables: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=${{ secrets.MYAPPID }}
@@ -25,7 +25,7 @@ jobs:
                   path: ./out/MusicFree-${{ env.VERSION }}-win32-x64-setup.exe
             - name: Generate Portable
               run: mkdir ./out/MusicFree-win32-x64/portable
-            - uses: vimtor/action-zip@v1.1
+            - uses: vimtor/action-zip@26a249fb00d43ca98dad77a4b3838025fc226aa1 # v1.1
               with:
                 files: ./out/MusicFree-win32-x64
                 dest: MusicFree-${{ env.VERSION }}-win32-x64-portable.zip
@@ -46,7 +46,7 @@ jobs:
             - run: npm install
             - run: npm install electron@22
             - run: npm run package            
-            - uses: maotoumao/inno-setup-action-cli@main
+            - uses: maotoumao/inno-setup-action-cli@0759e0e3308a8613a081d2024430ffd736e5e4a0 # main
               with: 
                   filepath: ./release/build-windows.iss
                   variables: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=${{ secrets.MYAPPID }}
@@ -59,7 +59,7 @@ jobs:
                   path: ./out/MusicFree-${{ env.VERSION }}-win32-x64-legacy-setup.exe
             - name: Generate Portable
               run: mkdir ./out/MusicFree-win32-x64/portable
-            - uses: vimtor/action-zip@v1.1
+            - uses: vimtor/action-zip@26a249fb00d43ca98dad77a4b3838025fc226aa1 # v1.1
               with:
                 files: ./out/MusicFree-win32-x64
                 dest: MusicFree-${{ env.VERSION }}-win32-x64-legacy-portable.zip
