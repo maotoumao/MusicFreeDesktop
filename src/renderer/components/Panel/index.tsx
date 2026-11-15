@@ -1,6 +1,7 @@
 import Store from "@/common/store";
 import templates from "./templates";
 import { useMemo } from "react";
+import { createPortal } from "react-dom";
 
 type ITemplate = typeof templates;
 type IPanelType = keyof ITemplate;
@@ -21,7 +22,16 @@ export default function PanelComponent() {
     return useMemo(() => {
         if (modalState.type) {
             const Component = templates[modalState.type];
-            return <Component {...(modalState.payload ?? {})}></Component>;
+            /**
+             * 渲染到 body 下：
+             * .body-container 会被主题包设置 z-index（如 1）从而形成独立的层叠上下文，
+             * 若面板留在其中，其 z-index 无法与根层级的弹窗（Modal）比较。
+             * 挂到 body 下后，面板与弹窗处于同一层级，可以正常比较 z-index。
+             */
+            return createPortal(
+                <Component {...(modalState.payload ?? {})}></Component>,
+                document.body,
+            );
         }
         return null;
     }, [modalState]);
