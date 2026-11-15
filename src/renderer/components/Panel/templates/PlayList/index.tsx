@@ -8,7 +8,7 @@ import MusicFavorite from "@/renderer/components/MusicFavorite";
 import Tag from "@/renderer/components/Tag";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import useVirtualList from "@/hooks/useVirtualList";
-import { localPluginName, rem, timeStampSymbol } from "@/common/constant";
+import { localPluginName, rem, timeStampSymbol, zIndexLevels } from "@/common/constant";
 import { showMusicContextMenu } from "@/renderer/components/MusicList";
 import MusicDownloaded from "@/renderer/components/MusicDownloaded";
 import Base from "../Base";
@@ -152,7 +152,13 @@ export default function PlayList(props: IProps) {
     );
 
     return (
-        <Base width={"460px"} scrollable={false} coverHeader={coverHeader}>
+        <Base
+            width={"460px"}
+            scrollable={false}
+            coverHeader={coverHeader}
+            /** 播放列表优先显示：置于所有操作界面（弹窗）之上 */
+            zIndex={zIndexLevels.playListPanel}
+        >
             <div className="playlist--header">
                 <div className="playlist--title">
                     <Trans

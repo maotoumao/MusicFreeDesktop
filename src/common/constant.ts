@@ -205,3 +205,24 @@ export const CommonConst = {
     /** 新建歌单名称长度限制 */
     NEW_SHEET_NAME_LENGTH_LIMIT: 120,
 };
+
+/**
+ * 浮层层级（数值越大越靠上）
+ * 与各组件 scss 中的 z-index 保持一致，修改时两边都要同步
+ */
+export const zIndexLevels = {
+    /** 顶部标题栏 */
+    header: 2000,
+    /** 歌曲详情浮层 */
+    musicDetail: 3000,
+    /** 底部播放条 */
+    musicBar: 4000,
+    /** 侧滑面板（Panel） */
+    panel: 10000,
+    /** 操作弹窗（Modal） */
+    modal: 10010,
+    /** 播放队列面板：点击播放列表时优先显示，置于所有操作界面之上 */
+    playListPanel: 10020,
+    /** 右键菜单 */
+    contextMenu: 999999,
+};

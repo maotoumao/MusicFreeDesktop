@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useRef } from "react";
 import "./index.scss";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { hidePanel } from "../..";
+import { zIndexLevels } from "@/common/constant";
 
 interface IBaseModalProps {
     // 默认区域
@@ -18,6 +19,8 @@ interface IBaseModalProps {
     scrollable?: boolean;
     children: ReactNode;
     coverHeader?: boolean;
+    /** 面板层级，默认低于操作弹窗 */
+    zIndex?: number;
 }
 
 const baseId = "components--panel-base-container";
@@ -32,6 +35,7 @@ function Base(props: IBaseModalProps) {
         width,
         scrollable = true,
         coverHeader = false,
+        zIndex = zIndexLevels.panel,
     } = props;
 
     const trapCloseRef = useRef(false);
@@ -45,6 +49,7 @@ function Base(props: IBaseModalProps) {
             data-cover-header={coverHeader}
             style={{
                 backgroundColor: maskColor,
+                zIndex: zIndex,
             }}
             role="button"
             onMouseDown={(e) => {
