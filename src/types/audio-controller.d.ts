@@ -5,6 +5,12 @@ export interface IAudioController {
     // 是否有音源
     hasSource: boolean;
 
+    /**
+     * 实际播放的 audio 元素（只读）。
+     * 可视化分析用；调用方不得改动 src / crossOrigin / volume。
+     */
+    mediaElement: HTMLAudioElement;
+
     playerState: PlayerState;
 
     musicItem: IMusic.IMusicItem | null;

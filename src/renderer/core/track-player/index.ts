@@ -142,6 +142,14 @@ class TrackPlayer {
 
     private audioController: IAudioController;
 
+    /**
+     * 播放用的 audio 元素，供可视化分析用（只读）。
+     * 调用方不得改动它的 src / crossOrigin / volume。
+     */
+    get mediaElement(): HTMLAudioElement {
+        return this.audioController.mediaElement;
+    }
+
     /** 最近一次使用的音源 */
     private lastMediaSource: IPlugin.IMediaSourceResult | null = null;
 

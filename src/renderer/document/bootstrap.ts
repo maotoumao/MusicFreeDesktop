@@ -20,6 +20,7 @@ import shortCut from "@shared/short-cut/renderer";
 import { setupMusicMeta } from "@renderer/core/music-meta";
 import { setupMusicMv } from "@renderer/core/music-mv";
 import { setupMusicDuration } from "@renderer/core/music-duration";
+import { startVisualizationService } from "@renderer/core/visualization";
 
 
 setAutoFreeze(false);
@@ -47,6 +48,9 @@ export default async function () {
     setupRecentlyPlaylist();
     // 本地服务
     ServiceManager.setup();
+
+    // 可视化：把播放中的音频接上分析链路（不介入播放本身）
+    startVisualizationService();
 
     // 自动更新插件
     if (AppConfig.getConfig("plugin.autoUpdatePlugin")) {
