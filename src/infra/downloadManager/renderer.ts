@@ -188,8 +188,8 @@ class DownloadManagerRenderer {
                 }
             }
 
-            // 清理已完成/已删除任务的进度缓存
-            if (event.type === 'completed' || event.type === 'removed') {
+            // 终止任务的进度由任务记录提供，不再保留实时进度缓存。
+            if (event.type === 'completed' || event.type === 'removed' || event.type === 'error') {
                 this.progressMap.delete(event.task.id);
             }
 
