@@ -61,9 +61,22 @@ WMP 官方把可视化分成三组，本设计照搬这个分类：
 
 | 方案 | 做法 | 取舍 |
 | --- | --- | --- |
-| **A. captureStream（选定）** | `audio.captureStream()` → 独立 `AudioContext.createMediaStreamSource()` → `AnalyserNode` | **不碰主播放器的音频链路**：跨域不静音、现有音量模型零影响、分析用的 AudioContext 不接 `destination`。代价：`captureStream()` 在个别场景可能返回空音轨，需兜底（无数据时效果静默降级） |
-| B. createMediaElementSource | 把 audio 元素接进 WebAudio 图 | 标准做法，但普通跨域 url 会**整个播放器静音**——不可接受 |
+| **A. captureStream（首选）** | `audio.captureStream()` → 独立 `AudioContext.createMediaStreamSource()` → `AnalyserNode` | **不碰主播放器的音频链路**：跨域不静音、现有音量模型零影响、分析用的 AudioContext 不接 `destination` |
+| B. createMediaElementSource（仅在 A 不可用时回退） | 把 audio 元素接进 WebAudio 图 | 对**普通跨域 url** 会让整个播放器静音——但对 blob URL（headers 路径与 HLS/MSE 路径）**同源、安全**。代价：一旦调用就永久改变该元素的音频路径，必须 `connect(destination)` 保证出声 |
 | C. 可视化窗口自己拉流 | 窗口内 fetch + decode 音频 | 重复下载整首歌、跨域、延迟——排除 |
+
+**为什么 A 是首选、B 只作回退**：
+
+- A 完全不介入主播放器的音频路径，对「全局音量 × 本地增益」模型零影响，是最干净的方案。
+- B 有个致命约束：`createMediaElementSource` 对**跨域**音频会让元素静音。
+  MusicFree 的三条音源路径里，**headers 路径和 HLS 路径都是 blob URL（同源，安全）**，
+  只有「普通 url 且无 header」那条可能跨域。所以 B 不能无差别使用。
+- **但 B 在 MSE/HLS 场景反而是安全且必要的**：Chromium 历史上对 MediaSource 场景的
+  `captureStream()` 有过限制（crbug 141906 / wpt#15816 讨论过 MSE 下 `addtrack` 的问题），
+  而 MSE 的 blob URL 必定同源。因此当 A 在 HLS 音源上取不到音轨时，回退到 B 是安全的。
+
+**结论**：实现时按 A →（失败时）B 的顺序尝试，两者都以「不产生静音」为硬约束。
+具体分支与判定条件见 §8.1 与 §9。
 
 ### 6.2 数据传输
 
@@ -115,12 +128,24 @@ WMP 官方把可视化分成三组，本设计照搬这个分类：
 新建 `src/renderer/core/visualization/`：
 
 - **`analyzer.ts`** — 单例 `AudioAnalyzer`
-  - `attach(mediaElement: HTMLMediaElement)`：`captureStream()` → `new AudioContext()` →
-    `createMediaStreamSource(stream)` → `AnalyserNode`（`fftSize = 2048`，
-    `smoothingTimeConstant = 0.75`）。
-  - **`AudioContext` 不接 `destination`**：只做分析，绝不影响出声。
-  - `start()` / `stop()`：随播放状态启停；`captureStream` 在暂停时仍可用，但要防止分析器在换歌时残留旧流——
-    换歌时 `stop()` → `attach()` 重新绑定。
+  - `attach(mediaElement: HTMLMediaElement)`：**按 A → B 顺序尝试**，成功即锁定该策略：
+    1. **A（首选）**：`captureStream()` → 检查 `getAudioTracks().length > 0` →
+       `new AudioContext()` → `createMediaStreamSource(stream)` → `AnalyserNode`
+       （`fftSize = 2048`，`smoothingTimeConstant = 0.75`）。
+       **该 AudioContext 不接 `destination`**：只做分析，绝不影响出声。
+    2. **B（回退）**：A 取不到音轨时，判断该元素是否同源 blob URL
+       （`audio.src.startsWith("blob:")`）——**只有同源才允许回退**，
+       因为跨域走 `createMediaElementSource` 会静音整个播放器。
+       同源时：`createMediaElementSource(audio)` → `AnalyserNode` →
+       **必须 `connect(destination)`**（否则播放器静音）→ 再从 analyser 单独引一路做分析。
+    3. 两者都不可用 → 进入"无数据"状态（`level = 0`），效果静默降级，**不报错、不卡界面**。
+  - **策略在 attach 时一次性决定并记录**，不在每帧反复尝试。
+  - **必须 `audioContext.resume()`**：Chrome 的自动播放策略会让新建的 `AudioContext`
+    初始处于 `suspended`，此时 `AnalyserNode` 不产出任何数据（`level` 恒为 0，
+    看起来就是"可视化没反应"）。attach 后立即 `resume()`，并监听 `statechange`；
+    若仍停在 `suspended`，说明自动播放策略挡住了——此时降级为"无数据"并记日志。
+  - `start()` / `stop()`：随播放状态启停；换歌时 `stop()` → `attach()` 重新绑定，
+    防止分析器残留上一首的流。
   - `readFrame(): IAudioFrame` — 每帧产出：
     ```ts
     interface IAudioFrame {
@@ -135,8 +160,7 @@ WMP 官方把可视化分成三组，本设计照搬这个分类：
   - **节拍检测**：取最低 ~8 个 bin 的能量，做滑动平均（约 43 帧 ≈ 0.7s）；
     当瞬时能量 > 均值 × 1.35 时判定一拍，`beat` 输出一个指数衰减的包络（1 → 0，约 0.3s）。
   - **BPM 估算**：记录连续拍点间隔，取最近 8 个间隔的中位数倒数。
-  - **兜底**：`captureStream()` 拿不到音轨时（`getAudioTracks().length === 0`），
-    analyzer 进入"无数据"状态，帧里 `level=0`，效果静默降级（不报错、不卡界面）。
+  - **兜底**：任何一步失败都只降级，不抛错、不中断播放。
 
 - **`index.ts`** — 对外入口，负责：
   - 在 `track-player` 播放/暂停/换歌时调用 analyzer 的启停与重绑；
@@ -178,7 +202,8 @@ get mediaElement() { return this.audio; }
 - `WindowDrag.setWindowDraggable(visualizationWindow, {...})`（复用现有拖动）。
 - 位置/尺寸存 `AppConfig`（`private.visualizationWindowPosition` /
   `private.visualizationWindowSize`），与歌词窗口同一套约定。
-- 窗口开关走 `ipcMain.handle("@shared/visualization/toggle")`，主窗口的按钮调用它。
+- 窗口开关走 `appWindowUtil.setVisualizationWindow(enabled)`，
+  与 `setLyricWindow` 同一套 IPC 模式。
 
 **新增 renderer entry**：
 - 目录 `src/renderer-visualization/`，结构照 `src/renderer-lrc/`：
@@ -240,30 +265,44 @@ interface IThemeColors {
 
 ### 8.6 设置与 UI
 
-- **主窗口 MusicBar 加一个按钮**（频谱图标），点击 → IPC 开关可视化窗口。
-- **设置页新增「可视化」分区**：
+- **开关按钮放在 `src/renderer/components/MusicBar/widgets/Extra/index.tsx`**：
+  那里已经住着 `LyricBtn`（桌面歌词开关）和 `KaraokeBtn`（本地定制），可视化开关与它们同级最自然。
+  照 `LyricBtn` 的写法：读 `useAppConfig("visualization.enabled")` → 点击调
+  `appWindowUtil.setVisualizationWindow(!enabled)` → 用 `SvgAsset` 取图标，
+  `highlight` 类表示开启状态。
+- **`appWindowUtil` 新增 `setVisualizationWindow(enabled: boolean)`**
+  （`src/shared/utils/renderer.ts` 与 `src/shared/utils/main.ts` 两处同步加，
+  照 `setLyricWindow` 的实现）。
+- **设置页新增「可视化」分区**
+  （`src/renderer/pages/main-page/views/setting-view/routers/` 下新增 router）：
   - 效果选择：8 个效果 + 「随机轮换」
   - 随机轮换时：每首歌切换一次效果
-  - 窗口开关状态
-- 文案补 `res/lang/{zh-CN,en-US,zh-TW}.json` 三个文件。
+- 文案补 `res/lang/{zh-CN,en-US,zh-TW}.json` 三个文件，
+  键名建议 `music_bar.visualization` 与 `settings.visualization.*`。
 
 ### 8.7 配置项（`config.json` 顶层扁平键）
+
+类型声明在 `src/types/app-config.d.ts`（`_IAppConfig`），默认值在
+`src/shared/app-config/default-app-config.ts`。
 
 | 键 | 类型 | 默认 | 说明 |
 | --- | --- | --- | --- |
 | `visualization.enabled` | boolean | false | 可视化窗口是否打开 |
 | `visualization.effect` | string | `"random"` | 效果 id 或 `"random"` |
-| `private.visualizationWindowPosition` | {x,y} | — | 窗口位置 |
-| `private.visualizationWindowSize` | {width,height} | 480×300 | 窗口尺寸 |
+| `private.visualizationWindowPosition` | `ICommon.IPoint` | — | 窗口位置 |
+| `private.visualizationWindowSize` | `ICommon.ISize` | 480×300 | 窗口尺寸 |
 
-（`private.` 前缀沿用歌词窗口的既有约定。）
+（`private.` 前缀沿用歌词窗口的既有约定：`private.lyricWindowPosition` /
+`private.lyricWindowSize`，见 `src/types/app-config.d.ts:108-116`。）
 
 ## 9. 风险与规避
 
 | 风险 | 规避 |
 | --- | --- |
-| `captureStream()` 在某些音源下拿不到音轨 | 检查 `getAudioTracks().length`，为空则静默降级（效果静止），并在日志里记录一次 |
+| **`captureStream()` 在 MSE/HLS 音源下取不到音轨**（Chromium 对 MediaSource 场景的历史限制） | attach 时按 A→B 顺序尝试；B 只在同源 blob URL 时才允许（否则会静音整个播放器）。两者都失败则静默降级 |
+| **回退到 B 时把播放器搞静音** | `createMediaElementSource` 必须 `connect(destination)`；且只对 `blob:` 开头的 src 启用 B。**这条是硬约束，宁可视化不可用也不能静音** |
 | 分析器泄漏（换歌后旧流仍在跑） | 换歌时 `stop()` 并重新 `attach()`；`AudioContext` 在 `stop()` 时 `close()` |
+| **`AudioContext` 停在 `suspended` 导致永远无数据** | attach 后立即 `resume()` + 监听 `statechange`；这是"可视化完全没反应"最常见的原因 |
 | 60fps 推送拖慢主窗口 | 仅在播放时推；帧数据 512B + 256B，实测约 46KB/s；主窗口只做 FFT（廉价） |
 | 主题色在独立窗口取不到 | 由主窗口读 CSS 变量后经 appState 同步（§8.5） |
 | 效果切换残留状态 | 引擎在切换时调 `reset()` |
@@ -280,10 +319,12 @@ interface IThemeColors {
   1. 播放时效果随音乐变化（对比频谱与实际音乐，低音重时低频柱明显更高）；
   2. 暂停后画面静止、无报错；
   3. 切歌后效果跟随新歌（不能残留上一首的频谱）；
-  4. 切换主题后可视化配色跟着变；
-  5. 拖动窗口、置顶、关闭重开位置保持；
-  6. 主界面播放不卡顿、音量正常；
-  7. 换到跨域音源（如需要 header 的平台）验证**没有静音**。
+  4. **HLS 音源（m3u8）下可视化有反应**——这是 captureStream 最可能失效的场景，
+     必须用真实的 m3u8 歌曲验证；若无声，转而验证回退策略 B 是否生效（§8.1）；
+  5. 切换主题后可视化配色跟着变；
+  6. 拖动窗口、置顶、关闭重开位置保持；
+  7. 主界面播放不卡顿、音量正常；
+  8. 换到跨域音源（如需要 header 的平台）验证**没有静音**。
 
 ## 11. 验收标准
 
