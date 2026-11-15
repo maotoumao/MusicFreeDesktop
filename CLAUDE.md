@@ -229,9 +229,20 @@ cheerio、crypto-js、axios、dayjs、big-integer、qs、he、webdav，外加 `m
   公开接口目前基本不给真逐字（网易云 klyric、QQ qrc 要登录，酷狗 KRC 是加密格式），所以伪逐字是常态。
 - **伴奏候选靠挨个问插件**：伴奏本身是另一首歌，KTV 界面挨个问支持 `getMusicInstrumentals` 的插件，
   合并去重后让人挑；候选带 `isKaraoke`（伴唱轨）与 `hasMv`（带画面）两个标记，排序时优先。
+- **浮层别只调 z-index，先看层叠上下文**：主题包会给 `.body-container` 设 `z-index`
+  （自建的 `wmp-metal` / `itunes-aqua` / `midnight-vinyl` 都是 `z-index: 1`），
+  这会让它形成**独立的层叠上下文**，里面的 `z-index` 只在内部比较——
+  跟根层级的弹窗（`Modal`，挂在 `#root` 下）根本不在一个坐标系里，光调数值永远压不过弹窗。
+  侧滑面板（`src/renderer/components/Panel`）因此统一用 React portal 挂到 `document.body`，
+  再用 `position: fixed` + `top: var(--appHeaderHeight)` / `bottom: var(--appMusicBarHeight)`
+  复刻原来相对 `.body-container` 的遮罩范围（标题栏与底部播放条保持可见可用）。
+  改面板的渲染位置时务必保留这个 portal。
 
 ## 约定
 
+- 浮层层级数值集中在 `src/common/constant.ts` 的 `zIndexLevels`，与各组件 SCSS 里的 `z-index` 要两边同步。
+- 播放队列面板（`Panel/templates/PlayList`）的层级**高于所有操作弹窗**：点击播放列表时它优先显示，
+  背景弹窗保留（不自动关闭）。
 - 新增文案要同时补 `res/lang/zh-CN.json`、`en-US.json`、`zh-TW.json` 三个文件。
 - 配置项键名**扁平**：`normal.alwaysOnTop` 这种写法直接写在 `config.json` 顶层，不要嵌套。
 - 仓库里的 `plugins/` 只是副本，运行时用的是便携版的 `portable/userData/musicfree-plugins/`，
