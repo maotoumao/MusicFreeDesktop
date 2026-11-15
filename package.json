@@ -13,6 +13,7 @@
     "lint": "eslint ./src --fix",
     "lint-staged": "lint-staged",
     "test": "node --test --no-warnings=MODULE_TYPELESS_PACKAGE_JSON \"src/**/*.test.ts\"",
+    "verify:capture": "electron scripts/verify-visualization-capture.js",
     "prepare": "husky install"
   },
   "keywords": [],

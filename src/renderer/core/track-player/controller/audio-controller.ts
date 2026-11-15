@@ -58,6 +58,15 @@ class AudioController extends ControllerBase implements IAudioController {
         return !!this.audio.src;
     }
 
+    /**
+     * 暴露音频元素给可视化分析用。
+     * 只读——调用方不得改动 src / crossOrigin / volume，
+     * 否则会影响播放。
+     */
+    get mediaElement() {
+        return this.audio;
+    }
+
     constructor() {
         super();
         this.audio = new Audio();
