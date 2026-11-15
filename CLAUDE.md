@@ -145,6 +145,28 @@ cheerio、crypto-js、axios、dayjs、big-integer、qs、he、webdav，外加 `m
 **加插件方法要同时改三处**：`src/types/plugin.d.ts`、`plugin-methods.ts`、插件自身。
 主进程包装层 `plugin-methods.ts` 的参数是**按位置透传**的，加参数时注意对应关系。
 
+### 主题包（themepack）
+
+界面的视觉层由**主题包**负责，不是插件（插件只取音乐数据）。主题包 = 一层 CSS 覆盖 + 可选 iframe 动态背景。
+
+仓库里现成三套：`themepacks/wmp-metal`（WMP 深色金属 + 琥珀橙）、
+`themepacks/itunes-aqua`（iTunes 浅色银白 + 蓝）、`themepacks/midnight-vinyl`（近黑 + 暖金）。
+完整说明见 `themepacks/README.md`（变量清单、打包方法、三个必踩的坑）。
+
+- 源码在 `themepacks/`，运行时在 `portable/userData/musicfree-themepacks/<名字>/`，**两边要手动同步**。
+- **本版本的变量体系是 camelCase**（`--primaryColor` / `--backgroundColor` / `--listHoverColor` …，共 20 个，
+  见 `src/renderer/document/styles/variables.scss`），**不是**社区新版主题市场那套 `--color-bg-base` kebab-case，
+  照抄社区主题会一条都不生效。
+- 主题 CSS 注入到 `<head>` 里的 `<style id="themepack-node">`（`src/shared/themepack/preload.ts`），
+  而 webpack 样式是运行时注入的、**顺序更靠后** —— 所以变量层必须写 `html:root`（特异性 (0,1,1)）
+  而不是 `:root`（(0,1,0)），否则会被应用自己的 `:root` 覆盖回去。
+- 应用有一条全局 `iframe { position: absolute; top: 0; ... }`，iframe 定位时**必须显式写 `top: auto`**，
+  否则 `top` 和 `bottom` 同时存在会让元素跑到容器顶部。
+- 打包版**没有主题热重载**，改完 `index.css` / iframe 必须重启应用。
+- `.mftheme` 就是 zip，根目录直接放 `config.json` + `index.css`（多一层目录会认不出来）。
+- 主题包里的频谱是**假波形**（正弦叠加驱动，不接真实音频）；真实音频可视化是另一套方案，
+  见 `docs/superpowers/specs/2026-11-15-visualization-design.md`。
+
 ### 持久化：两处活的，一处是死的
 
 | 层 | 位置 | 归属 | 内容 |
@@ -214,6 +236,8 @@ cheerio、crypto-js、axios、dayjs、big-integer、qs、he、webdav，外加 `m
 - 配置项键名**扁平**：`normal.alwaysOnTop` 这种写法直接写在 `config.json` 顶层，不要嵌套。
 - 仓库里的 `plugins/` 只是副本，运行时用的是便携版的 `portable/userData/musicfree-plugins/`，
   **改插件时两边同步**。
+- 仓库里的 `themepacks/` 同样只是副本，运行时是便携版的 `portable/userData/musicfree-themepacks/`，
+  **改主题时两边同步**（改完还要重启应用）。
 - 插件文件在运行时会热重载（仅开发模式），改完刷新页面即可生效。
 - 便携版的 `portable/userData` 在 OneDrive 同步目录下，直接改里面的 JSON 偶发读不出来（占位文件状态），
   要改先 hydrate 到本地再编辑。
