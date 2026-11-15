@@ -1,0 +1,11 @@
+{
+    "name": "WMP Metal",
+    "preview": "@/imgs/preview.svg",
+    "description": "Windows Media Player 风格的深色金属主题：深灰蓝渐变标题栏、银灰面板、琥珀橙强调色，播放条上方带实时频谱柱可视化。",
+    "author": "MusicFree",
+    "version": "0.1.0",
+    "tags": ["暗色", "动态"],
+    "iframe": {
+        "app": "@/iframes/spectrum-bg.html"
+    }
+}

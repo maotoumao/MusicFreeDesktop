@@ -1,0 +1,11 @@
+{
+    "name": "iTunes Aqua",
+    "preview": "@/imgs/preview.svg",
+    "description": "iTunes 12 经典浅色风格：银白渐变标题栏、纯白列表区、iTunes 蓝高亮，底部带蓝色频谱可视化。",
+    "author": "MusicFree",
+    "version": "0.1.0",
+    "tags": ["亮色", "动态"],
+    "iframe": {
+        "app": "@/iframes/spectrum-bg.html"
+    }
+}

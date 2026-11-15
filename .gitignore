@@ -103,3 +103,6 @@ undefinedelectron-log-preload.js
 
 # Claude Code 本地目录（worktree、设置等）
 .claude/
+
+# 主题包打包产物（构建输出，不入库）
+*.mftheme

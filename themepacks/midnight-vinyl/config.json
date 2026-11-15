@@ -1,0 +1,11 @@
+{
+    "name": "Midnight Vinyl",
+    "preview": "@/imgs/preview.svg",
+    "description": "黑胶爵士风近黑主题：暖金强调色、深邃黑底与微弱晕染，底部带金色频谱可视化。",
+    "author": "MusicFree",
+    "version": "0.1.0",
+    "tags": ["暗色", "动态"],
+    "iframe": {
+        "app": "@/iframes/spectrum-bg.html"
+    }
+}

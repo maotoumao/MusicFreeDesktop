@@ -1,0 +1,204 @@
+/*
+ * iTunes Aqua
+ * iTunes 12 经典浅色风格：银白金属标题栏 + 纯白列表 + iTunes 蓝高亮
+ */
+
+/* ============================================================
+ * 1. 变量层
+ * ========================================================== */
+
+/*
+ * 用 html:root 而不是 :root —— 应用自身的 :root 规则由 webpack 在运行时注入，
+ * 加载顺序晚于主题包，会把同名的 :root 变量覆盖回去。
+ * html:root 的特异性 (0,1,1) 高于 :root 的 (0,1,0)，可以稳定压住它。
+ */
+html:root {
+    /* ── 品牌 / 强调色 ── */
+    --primaryColor: #0a84ff; /* iTunes 蓝：进度条、播放按钮、选中下划线 */
+    --linkColor: #0a6cff;
+    --successColor: #1f9d4d;
+    --dangerColor: #e03131;
+    --infoColor: #0a84ff;
+
+    /* ── 背景层级 ── */
+    --backgroundColor: #f7f7f9; /* 页面主底色 */
+    --backdropColor: #ffffff; /* 弹窗、输入框等浮层 */
+    --placeholderColor: #ececf0; /* 封面 / 头像占位 */
+
+    /* ── 文本层级 ── */
+    --textColor: #1f1f24;
+    --headerTextColor: #2b2b31;
+    --musicBarTextColor: #2b2b31;
+
+    /* ── 列表交互 ── */
+    --dividerColor: rgba(0, 0, 0, 0.1);
+    --listEvenColor: rgba(0, 0, 0, 0.025);
+    --listHoverColor: rgba(10, 132, 255, 0.07);
+    --listActiveColor: rgba(10, 132, 255, 0.16);
+
+    /* ── 遮罩 / 阴影 ── */
+    --maskColor: rgba(40, 44, 52, 0.35);
+    --shadowColor: rgba(0, 0, 0, 0.18);
+    --headerPlaceholderColor: rgba(0, 0, 0, 0.06);
+
+    /* ── 滚动条 ── */
+    --scrollbarWidth: 10px;
+}
+
+/* ============================================================
+ * 2. 标题栏 —— 银白金属渐变
+ * ========================================================== */
+
+.header-container.header-container {
+    background: linear-gradient(
+        180deg,
+        #f6f6f8 0%,
+        #ebebef 48%,
+        #e0e0e5 100%
+    ) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* 搜索框：浅色内嵌 */
+.header-container .header-search {
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.header-container .header-search:focus-within {
+    border-color: rgba(10, 132, 255, 0.55);
+    box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, 0.05),
+        0 0 0 3px rgba(10, 132, 255, 0.12);
+}
+
+/* ============================================================
+ * 3. 侧边栏
+ * ========================================================== */
+
+.side-bar-container.side-bar-container {
+    background: linear-gradient(180deg, #efeff3 0%, #e6e6ec 100%);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================================
+ * 4. 播放条
+ * ========================================================== */
+
+.music-bar-container.music-bar-container {
+    background: linear-gradient(180deg, #fbfbfc 0%, #ebebef 100%);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+    color: var(--musicBarTextColor);
+}
+
+/* 进度条底槽 */
+.music-bar-container .music-bar--slider-container .bar {
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+/* 播放 / 暂停主按钮 */
+.music-bar-container .music-controller .primary-btn {
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.7),
+        0 2px 8px rgba(10, 132, 255, 0.35);
+}
+
+/* 上一首 / 下一首 */
+.music-bar-container .music-controller .skip {
+    color: rgba(31, 31, 36, 0.7);
+    transition:
+        color 0.18s ease,
+        background-color 0.18s ease;
+}
+
+.music-bar-container .music-controller .skip:hover {
+    color: #0a84ff;
+    background-color: rgba(10, 132, 255, 0.1);
+}
+
+/* 封面缩略图 */
+.music-bar-container .music-info-container .music-cover {
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+/* ============================================================
+ * 5. 队列抽屉 / 弹窗浮层
+ * ========================================================== */
+
+.components--panel-base-content.components--panel-base-content {
+    background-color: #fbfbfc;
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: -6px 0 24px rgba(0, 0, 0, 0.14);
+}
+
+/* ============================================================
+ * 6. 滚动条
+ * ========================================================== */
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.16) 0%,
+        rgba(0, 0, 0, 0.26) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.26) 0%,
+        rgba(0, 0, 0, 0.36) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.36) 0%,
+        rgba(0, 0, 0, 0.46) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+/* ============================================================
+ * 7. 频谱可视化 iframe 的定位
+ * ========================================================== */
+
+/*
+ * 应用自身有一条全局 `iframe { top: 0; left: 0; ... }` 规则，
+ * 这里必须显式写 top: auto，否则 top 与 bottom 同时存在会按 top 定位。
+ */
+.app-container > iframe {
+    position: absolute;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: var(--appMusicBarHeight);
+    width: 100%;
+    height: 20%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 让内容压在背景频谱之上，避免柱子盖住文字 */
+.app-container > .body-container {
+    position: relative;
+    z-index: 1;
+}

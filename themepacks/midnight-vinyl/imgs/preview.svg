@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+    <defs>
+        <linearGradient id="header" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#17171c" />
+            <stop offset="55%" stop-color="#101014" />
+            <stop offset="100%" stop-color="#0a0a0d" />
+        </linearGradient>
+        <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#16161b" />
+            <stop offset="100%" stop-color="#08080a" />
+        </linearGradient>
+        <linearGradient id="side" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#121216" />
+            <stop offset="100%" stop-color="#0c0c0f" />
+        </linearGradient>
+        <linearGradient id="spectrum" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#d4a24c" stop-opacity="0.7" />
+            <stop offset="100%" stop-color="#f0d6a0" stop-opacity="0.05" />
+        </linearGradient>
+        <radialGradient id="glow" cx="15%" cy="0%" r="60%">
+            <stop offset="0%" stop-color="#d4a24c" stop-opacity="0.14" />
+            <stop offset="100%" stop-color="#d4a24c" stop-opacity="0" />
+        </radialGradient>
+    </defs>
+
+    <rect width="640" height="360" fill="#0e0e11" />
+    <rect width="640" height="360" fill="url(#glow)" />
+
+    <!-- 标题栏 -->
+    <rect width="640" height="46" fill="url(#header)" />
+    <rect y="45" width="640" height="1" fill="#d4a24c" opacity="0.28" />
+    <rect x="20" y="16" width="84" height="14" rx="3" fill="#f2eee6" opacity="0.8" />
+    <rect x="120" y="12" width="150" height="22" rx="4" fill="#000000" opacity="0.42" stroke="#d4a24c" stroke-opacity="0.16" />
+    <circle cx="596" cy="23" r="6" fill="#f2eee6" opacity="0.35" />
+
+    <!-- 侧栏 -->
+    <rect y="46" width="140" height="268" fill="url(#side)" />
+    <rect x="139" y="46" width="1" height="268" fill="#d4a24c" opacity="0.12" />
+    <rect x="14" y="64" width="96" height="9" rx="4" fill="#e8e4dc" opacity="0.5" />
+    <rect x="14" y="86" width="80" height="9" rx="4" fill="#e8e4dc" opacity="0.26" />
+    <rect x="8" y="122" width="124" height="22" rx="4" fill="#d4a24c" opacity="0.14" />
+    <rect x="14" y="128" width="76" height="9" rx="4" fill="#d4a24c" opacity="0.9" />
+    <rect x="14" y="152" width="88" height="9" rx="4" fill="#e8e4dc" opacity="0.26" />
+
+    <!-- 列表 -->
+    <rect x="156" y="70" width="330" height="8" rx="4" fill="#e8e4dc" opacity="0.42" />
+    <rect x="156" y="92" width="250" height="8" rx="4" fill="#e8e4dc" opacity="0.2" />
+    <rect x="150" y="106" width="490" height="26" rx="3" fill="#d4a24c" opacity="0.14" />
+    <rect x="156" y="114" width="268" height="8" rx="4" fill="#d4a24c" opacity="0.75" />
+    <rect x="156" y="142" width="300" height="8" rx="4" fill="#e8e4dc" opacity="0.2" />
+    <rect x="156" y="164" width="240" height="8" rx="4" fill="#e8e4dc" opacity="0.2" />
+
+    <!-- 频谱 -->
+    <g opacity="0.45">
+        <rect x="150" y="256" width="7" height="56" rx="2" fill="url(#spectrum)" />
+        <rect x="163" y="238" width="7" height="74" rx="2" fill="url(#spectrum)" />
+        <rect x="176" y="250" width="7" height="62" rx="2" fill="url(#spectrum)" />
+        <rect x="189" y="226" width="7" height="86" rx="2" fill="url(#spectrum)" />
+        <rect x="202" y="244" width="7" height="68" rx="2" fill="url(#spectrum)" />
+        <rect x="215" y="214" width="7" height="98" rx="2" fill="url(#spectrum)" />
+        <rect x="228" y="234" width="7" height="78" rx="2" fill="url(#spectrum)" />
+        <rect x="241" y="252" width="7" height="60" rx="2" fill="url(#spectrum)" />
+        <rect x="254" y="240" width="7" height="72" rx="2" fill="url(#spectrum)" />
+        <rect x="267" y="258" width="7" height="54" rx="2" fill="url(#spectrum)" />
+        <rect x="280" y="246" width="7" height="66" rx="2" fill="url(#spectrum)" />
+        <rect x="293" y="260" width="7" height="52" rx="2" fill="url(#spectrum)" />
+        <rect x="306" y="250" width="7" height="62" rx="2" fill="url(#spectrum)" />
+        <rect x="319" y="258" width="7" height="54" rx="2" fill="url(#spectrum)" />
+    </g>
+
+    <!-- 播放条 -->
+    <rect y="314" width="640" height="46" fill="url(#bar)" />
+    <rect y="314" width="640" height="1" fill="#d4a24c" opacity="0.22" />
+    <rect x="16" y="326" width="24" height="24" rx="2" fill="#2a2a31" />
+    <rect x="48" y="331" width="96" height="6" rx="3" fill="#e8e4dc" opacity="0.55" />
+    <rect x="48" y="343" width="58" height="5" rx="2" fill="#e8e4dc" opacity="0.3" />
+    <circle cx="268" cy="337" r="14" fill="#d4a24c" />
+    <path d="M264 330 L264 344 L274 337 Z" fill="#0e0e11" />
+    <rect x="300" y="335" width="300" height="4" rx="2" fill="#ffffff" opacity="0.1" />
+    <rect x="300" y="335" width="128" height="4" rx="2" fill="#d4a24c" />
+</svg>

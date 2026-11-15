@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background: transparent;
+            }
+
+            canvas {
+                display: block;
+                width: 100%;
+                height: 100%;
+                opacity: 0.26;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="spectrum"></canvas>
+        <script>
+            (function () {
+                var canvas = document.getElementById("spectrum");
+                var ctx = canvas.getContext("2d");
+
+                var BARS = 72;
+                var values = new Float32Array(BARS);
+                var weights = new Float32Array(BARS);
+
+                // 低频柱更高、更高频柱更矮 —— 接近真实频谱的能量分布
+                for (var i = 0; i < BARS; i++) {
+                    var f = i / (BARS - 1);
+                    weights[i] = Math.pow(1 - f, 1.35) * 0.55 + 0.45;
+                }
+
+                var dpr = window.devicePixelRatio || 1;
+                var W = 0;
+                var H = 0;
+
+                function resize() {
+                    dpr = window.devicePixelRatio || 1;
+                    W = canvas.clientWidth;
+                    H = canvas.clientHeight;
+                    canvas.width = Math.max(1, Math.floor(W * dpr));
+                    canvas.height = Math.max(1, Math.floor(H * dpr));
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                }
+
+                window.addEventListener("resize", resize);
+                resize();
+
+                var last = performance.now();
+                var t = 0;
+
+                function frame(now) {
+                    var dt = Math.min(0.05, (now - last) / 1000);
+                    last = now;
+                    t += dt;
+
+                    // 鼓点包络：尖锐的周期性冲击
+                    var beatPhase = (t % 1.6) / 1.6;
+                    var beat = Math.pow(Math.max(0, Math.sin(beatPhase * Math.PI)), 12);
+
+                    ctx.clearRect(0, 0, W, H);
+
+                    var slot = W / BARS;
+                    var barWidth = Math.max(2, slot * 0.62);
+                    var radius = Math.min(barWidth / 2, 2);
+
+                    for (var i = 0; i < BARS; i++) {
+                        var w = weights[i];
+
+                        // 两组不同频率的正弦叠加，得到不重复的流动波形
+                        var n1 = 0.5 + 0.5 * Math.sin(t * (1.1 + i * 0.07) + i * 0.85);
+                        var n2 = 0.5 + 0.5 * Math.sin(t * (0.41 + i * 0.013) * 2.3 + i * 2.1);
+                        var n3 = 0.5 + 0.5 * Math.sin(t * 0.23 + i * 0.31);
+
+                        var target =
+                            w * (0.14 + 0.44 * n1 * n2 + 0.22 * n3 + 0.42 * beat);
+
+                        // 上升快、回落慢，接近真实频谱的包络
+                        var k = target > values[i] ? 0.34 : 0.09;
+                        values[i] += (target - values[i]) * k;
+
+                        var h = Math.max(1, values[i] * H);
+                        var x = i * slot + (slot - barWidth) / 2;
+                        var y = H - h;
+
+                        var grad = ctx.createLinearGradient(0, y, 0, H);
+                        grad.addColorStop(0, "rgba(255, 209, 102, 0.75)");
+                        grad.addColorStop(0.45, "rgba(240, 160, 32, 0.42)");
+                        grad.addColorStop(1, "rgba(240, 160, 32, 0.02)");
+
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        if (ctx.roundRect) {
+                            ctx.roundRect(x, y, barWidth, h, radius);
+                        } else {
+                            ctx.rect(x, y, barWidth, h);
+                        }
+                        ctx.fill();
+                    }
+
+                    requestAnimationFrame(frame);
+                }
+
+                requestAnimationFrame(frame);
+            })();
+        </script>
+    </body>
+</html>

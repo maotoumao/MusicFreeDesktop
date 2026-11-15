@@ -1,0 +1,221 @@
+/*
+ * Midnight Vinyl
+ * 黑胶爵士风：近黑底 + 暖金强调 + 微弱环境晕染
+ */
+
+/* ============================================================
+ * 1. 变量层
+ * ========================================================== */
+
+/*
+ * 用 html:root 而不是 :root —— 应用自身的 :root 规则由 webpack 在运行时注入，
+ * 加载顺序晚于主题包，会把同名的 :root 变量覆盖回去。
+ * html:root 的特异性 (0,1,1) 高于 :root 的 (0,1,0)，可以稳定压住它。
+ */
+html:root {
+    /* ── 品牌 / 强调色 ── */
+    --primaryColor: #d4a24c; /* 暖金：进度条、播放按钮、选中下划线 */
+    --linkColor: #d9b45b;
+    --successColor: #6fbf73;
+    --dangerColor: #d05a52;
+    --infoColor: #c9a227;
+
+    /* ── 背景层级 ── */
+    --backgroundColor: #0e0e11; /* 页面主底色 */
+    --backdropColor: #17171c; /* 弹窗、输入框等浮层 */
+    --placeholderColor: #1b1b21; /* 封面 / 头像占位 */
+
+    /* ── 文本层级 ── */
+    --textColor: #e8e4dc; /* 暖白，不是纯白 */
+    --headerTextColor: #f2eee6;
+    --musicBarTextColor: #ddd8cf;
+
+    /* ── 列表交互 ── */
+    --dividerColor: rgba(212, 162, 76, 0.14);
+    --listEvenColor: rgba(255, 255, 255, 0.018);
+    --listHoverColor: rgba(212, 162, 76, 0.07);
+    --listActiveColor: rgba(212, 162, 76, 0.14);
+
+    /* ── 遮罩 / 阴影 ── */
+    --maskColor: rgba(0, 0, 0, 0.72);
+    --shadowColor: rgba(0, 0, 0, 0.7);
+    --headerPlaceholderColor: rgba(255, 255, 255, 0.05);
+
+    /* ── 滚动条 ── */
+    --scrollbarWidth: 10px;
+}
+
+/* ============================================================
+ * 2. 环境晕染 —— 暖金 + 一点冷紫，避免整屏死黑
+ * ========================================================== */
+
+body {
+    background-image:
+        radial-gradient(
+            at 15% 0%,
+            rgba(212, 162, 76, 0.09) 0px,
+            transparent 45%
+        ),
+        radial-gradient(
+            at 100% 100%,
+            rgba(110, 90, 200, 0.07) 0px,
+            transparent 45%
+        );
+    background-attachment: fixed;
+}
+
+/* ============================================================
+ * 3. 标题栏 —— 纯黑 + 金色下边线
+ * ========================================================== */
+
+.header-container.header-container {
+    background: linear-gradient(
+        180deg,
+        #17171c 0%,
+        #101014 55%,
+        #0a0a0d 100%
+    ) !important;
+    border-bottom: 1px solid rgba(212, 162, 76, 0.28);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* 搜索框 */
+.header-container .header-search {
+    background-color: rgba(0, 0, 0, 0.42);
+    border: 1px solid rgba(212, 162, 76, 0.16);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.header-container .header-search:focus-within {
+    border-color: rgba(212, 162, 76, 0.5);
+}
+
+/* ============================================================
+ * 4. 侧边栏
+ * ========================================================== */
+
+.side-bar-container.side-bar-container {
+    background: linear-gradient(180deg, #121216 0%, #0c0c0f 100%);
+    border-right: 1px solid rgba(212, 162, 76, 0.12);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================================
+ * 5. 播放条
+ * ========================================================== */
+
+.music-bar-container.music-bar-container {
+    background: linear-gradient(180deg, #16161b 0%, #08080a 100%);
+    border-top: 1px solid rgba(212, 162, 76, 0.22);
+    box-shadow: 0 -3px 16px rgba(0, 0, 0, 0.7);
+    color: var(--musicBarTextColor);
+}
+
+/* 进度条底槽 */
+.music-bar-container .music-bar--slider-container .bar {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 播放 / 暂停主按钮：金属质感 */
+.music-bar-container .music-controller .primary-btn {
+    background: linear-gradient(180deg, #e0b25c 0%, #c08f38 100%);
+    box-shadow:
+        0 0 0 1px rgba(255, 232, 190, 0.35),
+        0 2px 14px rgba(212, 162, 76, 0.35);
+}
+
+/* 上一首 / 下一首 */
+.music-bar-container .music-controller .skip {
+    color: rgba(232, 228, 220, 0.65);
+    transition:
+        color 0.18s ease,
+        background-color 0.18s ease;
+}
+
+.music-bar-container .music-controller .skip:hover {
+    color: #f0d9a8;
+    background-color: rgba(212, 162, 76, 0.12);
+}
+
+/* 封面缩略图 */
+.music-bar-container .music-info-container .music-cover {
+    border-radius: 2px;
+    border: 1px solid rgba(212, 162, 76, 0.25);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+ * 6. 队列抽屉 / 弹窗浮层
+ * ========================================================== */
+
+.components--panel-base-content.components--panel-base-content {
+    background-color: #121216;
+    border-left: 1px solid rgba(212, 162, 76, 0.14);
+    box-shadow: -6px 0 26px rgba(0, 0, 0, 0.7);
+}
+
+/* ============================================================
+ * 7. 滚动条
+ * ========================================================== */
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        135deg,
+        rgba(212, 162, 76, 0.18) 0%,
+        rgba(212, 162, 76, 0.28) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(212, 162, 76, 0.3) 0%,
+        rgba(212, 162, 76, 0.4) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(
+        135deg,
+        rgba(212, 162, 76, 0.4) 0%,
+        rgba(212, 162, 76, 0.5) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+/* ============================================================
+ * 8. 频谱可视化 iframe 的定位
+ * ========================================================== */
+
+/*
+ * 应用自身有一条全局 `iframe { top: 0; left: 0; ... }` 规则，
+ * 这里必须显式写 top: auto，否则 top 与 bottom 同时存在会按 top 定位。
+ */
+.app-container > iframe {
+    position: absolute;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: var(--appMusicBarHeight);
+    width: 100%;
+    height: 20%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 让内容压在背景频谱之上，避免柱子盖住文字 */
+.app-container > .body-container {
+    position: relative;
+    z-index: 1;
+}

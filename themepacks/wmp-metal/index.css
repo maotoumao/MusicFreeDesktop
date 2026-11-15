@@ -1,0 +1,216 @@
+/*
+ * WMP Metal
+ * Windows Media Player 风格的深色金属主题
+ *
+ * 说明：本主题针对 MusicFree 桌面版 0.0.8 的变量体系编写，
+ * 覆盖的是 --primaryColor / --backgroundColor 这一组 camelCase 变量，
+ * 而不是社区新版主题包的 --color-bg-base 体系。
+ */
+
+/* ============================================================
+ * 1. 变量层
+ * ========================================================== */
+
+/*
+ * 用 html:root 而不是 :root —— 应用自身的 :root 规则由 webpack 在运行时注入，
+ * 加载顺序晚于主题包，会把同名的 :root 变量覆盖回去。
+ * html:root 的特异性 (0,1,1) 高于 :root 的 (0,1,0)，可以稳定压住它。
+ */
+html:root {
+    /* ── 品牌 / 强调色 ── */
+    --primaryColor: #f0a020; /* 琥珀橙：进度条、播放按钮、选中态下划线 */
+    --linkColor: #4aa3ff; /* 链接沿用 iTunes 的亮蓝 */
+    --successColor: #37c26a;
+    --dangerColor: #e5544b;
+    --infoColor: #3fa9f5;
+
+    /* ── 背景层级 ── */
+    --backgroundColor: #232c36; /* 页面主底色 */
+    --backdropColor: #2a343f; /* 弹窗、输入框等浮层 */
+    --placeholderColor: #2a343f; /* 封面 / 头像占位 */
+
+    /* ── 文本层级 ── */
+    --textColor: #e2e8ef;
+    --headerTextColor: #e6edf5;
+    --musicBarTextColor: #dbe3ec;
+
+    /* ── 列表交互 ── */
+    --dividerColor: rgba(255, 255, 255, 0.08);
+    --listEvenColor: rgba(255, 255, 255, 0.025);
+    --listHoverColor: rgba(255, 255, 255, 0.07);
+    --listActiveColor: rgba(245, 165, 35, 0.2); /* 选中行：橙色弱化 */
+
+    /* ── 遮罩 / 阴影 ── */
+    --maskColor: rgba(8, 12, 16, 0.72);
+    --shadowColor: rgba(0, 0, 0, 0.55);
+    --headerPlaceholderColor: rgba(0, 0, 0, 0.32);
+
+    /* ── 滚动条 ── */
+    --scrollbarWidth: 10px;
+}
+
+/* ============================================================
+ * 2. 标题栏 —— 深灰蓝金属渐变
+ * ========================================================== */
+
+/*
+ * 组件默认背景是 var(--primaryColor)，这里用更高特异性抢回来，
+ * 让琥珀橙只留给进度条和按钮，而不是染满整个标题栏。
+ */
+.header-container.header-container {
+    background: linear-gradient(
+        180deg,
+        #33445a 0%,
+        #26323f 52%,
+        #1b2530 100%
+    ) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.55);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* 搜索框：内嵌的深色玻璃感 */
+.header-container .header-search {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.header-container .header-search:focus-within {
+    border-color: rgba(240, 160, 32, 0.45);
+}
+
+/* ============================================================
+ * 3. 侧边栏
+ * ========================================================== */
+
+.side-bar-container.side-bar-container {
+    background: linear-gradient(180deg, #202b36 0%, #1a232d 100%);
+    border-right: 1px solid rgba(0, 0, 0, 0.45);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ============================================================
+ * 4. 播放条
+ * ========================================================== */
+
+/*
+ * .music-bar-container 上挂着 .background-color 工具类（背景取 --backgroundColor），
+ * 这里用双类名提高特异性，确保渐变生效。
+ */
+.music-bar-container.music-bar-container {
+    background: linear-gradient(180deg, #223040 0%, #16202a 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 -3px 14px rgba(0, 0, 0, 0.5);
+    color: var(--musicBarTextColor);
+}
+
+/* 进度条底槽：源码里硬编码 #d8d8d8，暗色下太扎眼 */
+.music-bar-container .music-bar--slider-container .bar {
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+/* 播放 / 暂停主按钮：琥珀橙 + 轻微辉光 */
+.music-bar-container .music-controller .primary-btn {
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.14),
+        0 2px 12px rgba(240, 160, 32, 0.35);
+}
+
+/* 上一首 / 下一首：半透明圆形按钮，hover 时点亮 */
+.music-bar-container .music-controller .skip {
+    color: rgba(226, 232, 239, 0.75);
+    transition:
+        color 0.18s ease,
+        background-color 0.18s ease;
+}
+
+.music-bar-container .music-controller .skip:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* 封面缩略图：金属边框 */
+.music-bar-container .music-info-container .music-cover {
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+ * 5. 队列抽屉 / 弹窗浮层
+ * ========================================================== */
+
+.components--panel-base-content.components--panel-base-content {
+    background-color: #1f2833;
+    border-left: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: -6px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================
+ * 6. 滚动条（深色环境下）
+ * ========================================================== */
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.2) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.3) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.3) 0%,
+        rgba(255, 255, 255, 0.4) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+/* ============================================================
+ * 7. 频谱可视化 iframe 的定位
+ * ========================================================== */
+
+/*
+ * 背景频谱：贴在播放条正上方的一带，压在内容之下。
+ *
+ * 注意：应用自身有一条全局 `iframe { top: 0; left: 0; ... }` 规则，
+ * 这里必须显式写 top: auto，否则 top 与 bottom 同时存在会按 top 定位，
+ * 频谱会被顶到页面顶部。
+ */
+.app-container > iframe {
+    position: absolute;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: var(--appMusicBarHeight);
+    width: 100%;
+    height: 20%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 让内容压在背景频谱之上，避免柱子盖住文字 */
+.app-container > .body-container {
+    position: relative;
+    z-index: 1;
+}
