@@ -5,6 +5,8 @@ import { getGlobalContext } from "@shared/global-context/preload";
 
 const extPorts = new Map<number, MessagePort>();
 const subscribedAppStates = new Map<string | number, Array<keyof IAppState>>();
+/** 订阅了频谱帧的扩展窗口 id（可视化窗口） */
+const visualizationSubscribers = new Set<number>();
 
 const mainProcessSubscribedKeys: Array<keyof IAppState> = [
     "lyricText",
@@ -70,9 +72,39 @@ function handleMessage(data: IPortMessage, from: number | null) {
     } else if (type === "subscribeAppState" && from !== null) {
     // @ts-ignore
         subscribedAppStates.set(from, payload);
+    } else if (
+        type === "command" &&
+        (payload as { command: keyof ICommand }).command ===
+            "SubscribeVisualization" &&
+        from !== null
+    ) {
+        visualizationSubscribers.add(from);
+    } else if (type === "requestFrame" && from !== null) {
+        // preload 在隔离世界，不能直接调主世界的函数（analyser 在主世界），
+        // 用 ipcRenderer 把请求转给主世界，由主世界取帧后再回帧
+        ipcRenderer.send("@shared/visualization/frame-request", from);
     } else if (type === "command") {
         ee.emit("command", payload, from);
     }
+}
+
+/**
+ * 把一帧音频分析数据回给订阅了频谱的扩展窗口。
+ *
+ * 由主世界在拿到取帧请求后调用（见 @shared/visualization/frame-request）。
+ */
+function pushVisualizationFrame(frame: IVisualization.IAudioFrame) {
+    visualizationSubscribers.forEach((id) => {
+        const expPort = extPorts.get(id);
+        if (!expPort) {
+            return;
+        }
+        expPort.postMessage({
+            type: "visualizationFrame",
+            payload: frame,
+            timestamp: Date.now(),
+        });
+    });
 }
 
 function onCommand<K extends keyof ICommand>(
@@ -155,6 +187,7 @@ const mod = {
     syncAppState,
     onCommand,
     sendCommand,
+    pushVisualizationFrame,
 };
 
 contextBridge.exposeInMainWorld("@shared/message-bus/main", mod);

@@ -10,6 +10,8 @@ export interface IAppState {
   fullLyric?: IParsedLrcItem[] | null;
   progress?: number;
   duration?: number;
+  /** 主题配色（跟随主题包），可视化窗口用它给效果上色 */
+  themeColors?: IVisualization.IThemeColors;
 }
 
 export interface ICommand {
@@ -39,6 +41,11 @@ export interface ICommand {
   OpenMusicDetailPage: void;
   /** 切换主窗口显示 */
   ToggleMainWindowVisible: void;
+  /**
+   * 订阅频谱帧。
+   * 可视化窗口用它登记订阅，之后才能收到 visualizationFrame 消息。
+   */
+  SubscribeVisualization: void;
 }
 
 // 内部使用的消息
@@ -55,6 +62,16 @@ export interface IPortMessagePayload<
   };
   subscribeAppState: StateKey[];
   ping: undefined;
+  /**
+   * 可视化窗口请求一帧音频数据（扩展窗口 → 主窗口）。
+   *
+   * 采用 **pull 模型**：由可见的可视化窗口用 rAF 拉帧，而不是主窗口推帧——
+   * 主窗口最小化/隐藏时它的 rAF 会被节流到约 1fps，推帧恰好会在用户最想看
+   * 可视化的时候冻住；反过来 IPC 回调不受节流影响。
+   */
+  requestFrame: undefined;
+  /** 主窗口回的一帧音频分析数据（主窗口 → 扩展窗口） */
+  visualizationFrame: IVisualization.IAudioFrame;
 }
 
 export interface IPortMessage<

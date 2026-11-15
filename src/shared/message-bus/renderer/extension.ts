@@ -14,6 +14,9 @@ interface IMod {
     offStateChange: (
         cb: (appState: IAppState, changedAppState: IAppState) => void
     ) => void;
+    requestFrame: () => void;
+    onVisualizationFrame: (cb: (frame: IVisualization.IAudioFrame) => void) => void;
+    offVisualizationFrame: (cb: (frame: IVisualization.IAudioFrame) => void) => void;
 }
 
 const mod = window["@shared/message-bus/extension" as any] as unknown as IMod;
@@ -58,6 +61,9 @@ const messageBus = {
     subscribeAppState: mod.subscribeAppState,
     onStateChange: mod.onStateChange,
     offStateChange: mod.offStateChange,
+    requestFrame: mod.requestFrame,
+    onVisualizationFrame: mod.onVisualizationFrame,
+    offVisualizationFrame: mod.offVisualizationFrame,
 };
 
 export default messageBus;

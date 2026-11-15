@@ -6,6 +6,7 @@ let extPort: MessagePort = null;
 let appState: IAppState = {};
 const ee = new EventEmitter<{
     stateChanged: [IAppState, IAppState];
+    visualizationFrame: [IVisualization.IAudioFrame];
 }>();
 
 // 初始化
@@ -33,6 +34,8 @@ ipcRenderer.on("port", (e) => {
                 ...(data.payload || {}),
             };
             ee.emit("stateChanged", appState, data.payload || {});
+        } else if (data.type === "visualizationFrame") {
+            ee.emit("visualizationFrame", data.payload);
         } else if (data.type === "ping") {
             connected = true;
             clearInterval(pingTimer);
@@ -94,12 +97,43 @@ function offStateChange(
     ee.off("stateChanged", cb);
 }
 
+/**
+ * 向主窗口请求一帧音频分析数据（pull 模型）。
+ *
+ * 由可视化窗口在自己的 rAF 里每帧调一次——主窗口最小化时它的 rAF 会被节流，
+ * 但 IPC 回调不受影响，所以「可见窗口拉、隐藏窗口应」是唯一两边都不受影响的组合。
+ */
+function requestFrame() {
+    const message: IPortMessage = {
+        type: "requestFrame",
+        payload: undefined,
+        timestamp: Date.now(),
+    };
+
+    if (!extPort || !connected) {
+        cachedMessages.push(message);
+        return;
+    }
+    extPort.postMessage(message);
+}
+
+function onVisualizationFrame(cb: (frame: IVisualization.IAudioFrame) => void) {
+    ee.on("visualizationFrame", cb);
+}
+
+function offVisualizationFrame(cb: (frame: IVisualization.IAudioFrame) => void) {
+    ee.off("visualizationFrame", cb);
+}
+
 const mod = {
     getAppState,
     subscribeAppState,
     sendCommand,
     onStateChange,
     offStateChange,
+    requestFrame,
+    onVisualizationFrame,
+    offVisualizationFrame,
 };
 
 contextBridge.exposeInMainWorld("@shared/message-bus/extension", mod);
