@@ -107,6 +107,9 @@ class TrackPlayer {
     private audioController!: IAudioController;
     private playQueue!: PlayQueue;
     private lyricManager!: LyricManager;
+    private playbackRequestId = 0;
+    /** 用户的播放意图独立于音源是否已就绪；暂停不取消仍可挂载的当前源。 */
+    private playRequested = false;
 
     // 进度持久化节流
     private lastProgressWriteTime = 0;
@@ -127,6 +130,7 @@ class TrackPlayer {
     // ─── 启动恢复 ───
 
     async setup(): Promise<void> {
+        this.playRequested = false;
         // 1. 创建子模块
         this.audioController = createAudioController('web-audio');
         this.playQueue = new PlayQueue();
@@ -161,6 +165,7 @@ class TrackPlayer {
 
         // 4. 恢复当前歌曲
         if (savedMusic) {
+            const requestId = this.playbackRequestId;
             store.set(currentMusicAtom, musicItemToSlim(savedMusic));
 
             // 获取完整数据并加载音源（不自动播放）
@@ -171,7 +176,11 @@ class TrackPlayer {
                 // 优先使用已下载的本地文件，否则调用插件获取
                 const result = await this.resolveSource(musicItem, validQuality);
 
-                if (result?.url && this.isCurrentMusic(savedMusic)) {
+                if (
+                    result?.url &&
+                    requestId === this.playbackRequestId &&
+                    this.isCurrentMusic(savedMusic)
+                ) {
                     this.audioController.setTrackSource(result, musicItem);
                     this.audioController.seekTo(savedProgress);
                     store.set(qualityAtom, result.quality!);
@@ -245,6 +254,7 @@ class TrackPlayer {
         options: IPlayOptions = { restartOnSameMedia: true },
     ): Promise<void> {
         if (this.playQueue.isEmpty) return;
+        this.playRequested = true;
 
         const queue = this.playQueue.queue;
         index = ((index % queue.length) + queue.length) % queue.length;
@@ -252,18 +262,23 @@ class TrackPlayer {
         const targetSlim = queue[index];
 
         // 相同歌曲处理
-        if (this.playQueue.getCurrentIndex() === index && this.isCurrentMusic(targetSlim)) {
+        if (
+            this.playQueue.getCurrentIndex() === index &&
+            this.isCurrentMusic(targetSlim) &&
+            this.audioController.hasSource
+        ) {
             if (options.restartOnSameMedia) this.audioController.seekTo(0);
             this.audioController.play();
             return;
         }
 
         // 切歌
+        const requestId = ++this.playbackRequestId;
         this.playQueue.setCurrentIndex(index);
         this.setCurrentMusic(targetSlim);
+        this.audioController.prepareTrack(targetSlim);
 
         store.set(playerStateAtom, PlayerState.Buffering);
-        this.audioController.prepareTrack(targetSlim);
         this.resetProgress();
 
         try {
@@ -271,17 +286,19 @@ class TrackPlayer {
             const fullItem = await musicSheet.getRawMusicItem(targetSlim.platform, targetSlim.id);
             const musicItem: IMusic.IMusicItem = fullItem ?? (targetSlim as IMusic.IMusicItem);
 
+            if (requestId !== this.playbackRequestId) return;
             // 获取音源：优先使用已下载的本地文件
             const quality = store.get(qualityAtom);
             const result = await this.resolveSource(musicItem, quality);
 
             if (!result?.url) throw new Error('No media source');
-            if (!this.isCurrentMusic(targetSlim)) return; // 切歌了
+            if (requestId !== this.playbackRequestId) return;
 
             // 播放
             store.set(qualityAtom, result.quality ?? quality);
             this.audioController.setTrackSource(result, musicItem);
-            this.audioController.play();
+            if (this.playRequested) this.audioController.play();
+            else this.audioController.pause();
             this.consecutiveErrors = 0; // 播放成功，重置错误计数
 
             syncKV.set('player.currentQuality', result.quality!);
@@ -297,7 +314,7 @@ class TrackPlayer {
                     args: [musicItem],
                 })
                 .then((info) => {
-                    if (info && typeof info === 'object' && this.isCurrentMusic(targetSlim)) {
+                    if (info && typeof info === 'object' && requestId === this.playbackRequestId) {
                         const enriched = {
                             ...musicItem,
                             ...info,
@@ -309,6 +326,7 @@ class TrackPlayer {
                 })
                 .catch(() => {});
         } catch (e) {
+            if (requestId !== this.playbackRequestId) return;
             this.audioController.reset();
             await this.handlePlayError(targetSlim, e);
         }
@@ -390,10 +408,12 @@ class TrackPlayer {
     }
 
     pause(): void {
+        this.playRequested = false;
         this.audioController.pause();
     }
 
     resume(): void {
+        this.playRequested = true;
         if (!this.audioController.hasSource) {
             // 无音源（如恢复失败），尝试重新加载当前曲目
             const idx = this.playQueue.getCurrentIndex();
@@ -406,7 +426,7 @@ class TrackPlayer {
     }
 
     togglePlayPause(): void {
-        if (this.audioController.playerState === PlayerState.Playing) {
+        if (this.playRequested || this.audioController.playerState === PlayerState.Playing) {
             this.pause();
         } else {
             this.resume();
@@ -445,13 +465,13 @@ class TrackPlayer {
         const prevQuality = store.get(qualityAtom);
         if (!current || quality === prevQuality) return true;
 
-        const currentTime = store.get(progressAtom).currentTime;
-        const wasPlaying = this.audioController.playerState === PlayerState.Playing;
+        const requestId = ++this.playbackRequestId;
 
         try {
             store.set(playerStateAtom, PlayerState.Buffering);
 
             const fullItem = await musicSheet.getRawMusicItem(current.platform, current.id);
+            if (requestId !== this.playbackRequestId) return false;
             const musicItem = fullItem ?? (current as IMusic.IMusicItem);
 
             // 切换音质：仅在音质匹配时使用本地文件
@@ -459,23 +479,34 @@ class TrackPlayer {
                 requireQualityMatch: true,
             });
 
+            if (requestId !== this.playbackRequestId) return false;
             if (result?.url && this.isCurrentMusic(current)) {
+                // 解析期间用户可能 seek/pause；提交时读取最新位置和播放意图。
+                const currentTime = store.get(progressAtom).currentTime;
                 this.audioController.setTrackSource(result, musicItem);
                 this.audioController.seekTo(currentTime);
-                if (wasPlaying) this.audioController.play();
+                if (this.playRequested) this.audioController.play();
+                else this.audioController.pause();
                 store.set(qualityAtom, result.quality!);
                 syncKV.set('player.currentQuality', result.quality!);
                 return result.quality === quality;
             } else {
                 // 切歌了或无结果，恢复原状态
                 store.set(qualityAtom, prevQuality);
-                store.set(playerStateAtom, wasPlaying ? PlayerState.Playing : PlayerState.Paused);
+                store.set(
+                    playerStateAtom,
+                    this.playRequested ? PlayerState.Playing : PlayerState.Paused,
+                );
                 return false;
             }
         } catch {
+            if (requestId !== this.playbackRequestId) return false;
             // 切换失败，恢复原音质标记
             store.set(qualityAtom, prevQuality);
-            store.set(playerStateAtom, wasPlaying ? PlayerState.Playing : PlayerState.Paused);
+            store.set(
+                playerStateAtom,
+                this.playRequested ? PlayerState.Playing : PlayerState.Paused,
+            );
             return false;
         }
     }
@@ -623,6 +654,7 @@ class TrackPlayer {
     // ─── 错误处理 ───
 
     private async handlePlayError(musicItem: IMusicItemSlim | null, _error?: any): Promise<void> {
+        const requestId = this.playbackRequestId;
         this.resetProgress();
         this.consecutiveErrors++;
 
@@ -633,21 +665,29 @@ class TrackPlayer {
         const behavior = appConfig.getConfigByKey('playMusic.playError') ?? 'skip';
 
         if (
+            this.playRequested &&
             behavior === 'skip' &&
             this.playQueue.queue.length > 1 &&
             this.consecutiveErrors < this.MAX_CONSECUTIVE_ERRORS
         ) {
             // 主路径：跳到下一首
             await delay(500);
-            if (musicItem && this.isCurrentMusic(musicItem)) {
+            if (
+                this.playRequested &&
+                requestId === this.playbackRequestId &&
+                musicItem &&
+                this.isCurrentMusic(musicItem)
+            ) {
                 await this.skipToNext();
             }
         } else if (this.consecutiveErrors >= this.MAX_CONSECUTIVE_ERRORS) {
             // 安全兜底：连续多次失败，停止播放避免无限循环
+            this.pause();
             store.set(playerStateAtom, PlayerState.Paused);
             this.consecutiveErrors = 0;
         } else {
             // 单曲队列 / 非 skip 配置，暂停
+            this.pause();
             store.set(playerStateAtom, PlayerState.Paused);
         }
     }
@@ -657,6 +697,7 @@ class TrackPlayer {
      * 同时作为流截断无法续播时的安全归宿，保证播放始终向前推进。
      */
     private async advanceAfterCompletion(): Promise<void> {
+        if (!this.playRequested) return;
         this.truncationRetries = 0;
         this.resetProgress();
         const repeatMode = store.get(repeatModeAtom);
@@ -677,21 +718,25 @@ class TrackPlayer {
      */
     private async resumeFromTruncation(seekTime: number): Promise<void> {
         const target = this.playQueue.getCurrentMusic();
-        if (!target) return;
+        if (!target || !this.playRequested) return;
 
+        const requestId = ++this.playbackRequestId;
         store.set(playerStateAtom, PlayerState.Buffering);
         try {
             const fullItem = await musicSheet.getRawMusicItem(target.platform, target.id);
+            if (requestId !== this.playbackRequestId) return;
             const musicItem = fullItem ?? (target as IMusic.IMusicItem);
             const result = await this.resolveSource(musicItem, store.get(qualityAtom));
 
             if (!result?.url) throw new Error('No media source');
-            if (!this.isCurrentMusic(target)) return; // 续播期间被切歌，放弃
+            if (requestId !== this.playbackRequestId) return;
 
             this.audioController.setTrackSource(result, musicItem);
             this.audioController.seekTo(seekTime);
-            this.audioController.play();
+            if (this.playRequested) this.audioController.play();
+            else this.audioController.pause();
         } catch (e) {
+            if (requestId !== this.playbackRequestId) return;
             await this.handlePlayError(target, e);
         }
     }
@@ -715,6 +760,8 @@ class TrackPlayer {
 
     /** 清空播放状态（空队列等场景） */
     private clearPlayback(): void {
+        this.playRequested = false;
+        ++this.playbackRequestId;
         this.audioController.reset();
         this.lyricManager.reset();
         store.set(currentMusicAtom, null);
