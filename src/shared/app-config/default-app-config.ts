@@ -33,6 +33,8 @@ const _defaultAppConfig: IAppConfig =  {
     "normal.musicListColumnsShown": [],
     "backup.resumeBehavior": "append",
     "normal.language": "zh-CN",
+    "visualization.enabled": false,
+    "visualization.effect": "random",
 };
 
 

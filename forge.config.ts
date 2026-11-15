@@ -77,6 +77,14 @@ const config: ForgeConfig = {
               js: "./src/preload/extension.ts",
             },
           },
+          {
+            html: "./src/renderer-visualization/document/index.html",
+            js: "./src/renderer-visualization/document/index.tsx",
+            name: "visualization_window",
+            preload: {
+              js: "./src/preload/visualization.ts",
+            },
+          },
           /** webworkers */
           {
             js: "./src/webworkers/downloader.ts",

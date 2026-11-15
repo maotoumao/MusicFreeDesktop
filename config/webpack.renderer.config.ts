@@ -55,6 +55,8 @@ export const rendererConfig: Configuration = {
       "@": path.join(__dirname, "../src"),
       "@renderer": path.join(__dirname, "../src/renderer"),
       "@renderer-lrc": path.join(__dirname, "../src/renderer-lrc"),
+      "@renderer-minimode": path.join(__dirname, "../src/renderer-minimode"),
+      "@renderer-visualization": path.join(__dirname, "../src/renderer-visualization"),
       "@shared": path.join(__dirname, "../src/shared")
     },
   },

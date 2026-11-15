@@ -115,6 +115,14 @@ interface _IAppConfig {
 
     "private.minimode": boolean;
 
+    /** 可视化窗口位置（尺寸固定 480×300，不存） */
+    "private.visualizationWindowPosition": ICommon.IPoint;
+
+    /** 可视化窗口是否开启 */
+    "visualization.enabled": boolean;
+    /** 可视化效果 id，或 "random" 表示每首歌随机切换 */
+    "visualization.effect": string;
+
 }
 
 type PartialOrNull<T> = { [P in keyof T]?: T[P] | null };

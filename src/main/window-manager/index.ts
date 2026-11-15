@@ -22,12 +22,15 @@ declare const LRC_WINDOW_WEBPACK_ENTRY: string;
 declare const LRC_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 declare const MINIMODE_WINDOW_WEBPACK_ENTRY: string;
 declare const MINIMODE_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+declare const VISUALIZATION_WINDOW_WEBPACK_ENTRY: string;
+declare const VISUALIZATION_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 
 class WindowManager implements IWindowManager {
     private static mainWindow: BrowserWindow | null = null;
     private static lrcWindow: BrowserWindow | null = null;
     private static miniModeWindow: BrowserWindow | null = null;
+    private static visualizationWindow: BrowserWindow | null = null;
 
     private ee: EventEmitter = new EventEmitter();
 
@@ -47,6 +50,10 @@ class WindowManager implements IWindowManager {
         return WindowManager.miniModeWindow;
     }
 
+    get visualizationWindow() {
+        return WindowManager.visualizationWindow;
+    }
+
     getExtensionWindows(): BrowserWindow[] {
         const extWindows = [];
         if (WindowManager.lrcWindow) {
@@ -54,6 +61,9 @@ class WindowManager implements IWindowManager {
         }
         if (WindowManager.miniModeWindow) {
             extWindows.push(WindowManager.miniModeWindow);
+        }
+        if (WindowManager.visualizationWindow) {
+            extWindows.push(WindowManager.visualizationWindow);
         }
         return extWindows;
     }
@@ -68,6 +78,9 @@ class WindowManager implements IWindowManager {
         }
         if (WindowManager.miniModeWindow) {
             windows.push(WindowManager.miniModeWindow);
+        }
+        if (WindowManager.visualizationWindow) {
+            windows.push(WindowManager.visualizationWindow);
         }
         return windows;
     }
@@ -501,6 +514,118 @@ class WindowManager implements IWindowManager {
         WindowManager.miniModeWindow = null;
         AppConfig.setConfig({
             "private.minimode": false,
+        });
+    }
+
+    /**************************** Visualization Window ***************************/
+    /**
+     * 可视化窗口：无边框、透明、置顶、固定尺寸。
+     *
+     * 尺寸固定 480×300（用户未选自由缩放），只存位置不存尺寸。
+     * 窗口是**纯被动**的：内容只有一块 canvas，没有任何交互控件——
+     * 无边框窗口的拖拽是全窗口生效的，常驻控件会和拖拽抢鼠标事件。
+     */
+    private createVisualizationWindow() {
+        const width = 480;
+        const height = 300;
+        const initPosition = AppConfig.getConfig("private.visualizationWindowPosition");
+
+        const visualizationWindow = new BrowserWindow({
+            width,
+            height,
+            x: initPosition?.x,
+            y: initPosition?.y,
+            transparent: true,
+            frame: false,
+            resizable: false,
+            alwaysOnTop: true,
+            skipTaskbar: true,
+            show: false,
+            webPreferences: {
+                preload: VISUALIZATION_WINDOW_PRELOAD_WEBPACK_ENTRY,
+                // 这个窗口只需要一块 canvas + 精简 preload 暴露的 API，
+                // 不需要 Node 集成，因此可以跑在完整沙箱里——
+                // 比主窗口和歌词窗口（nodeIntegration: true）更严格。
+                nodeIntegration: false,
+                contextIsolation: true,
+                sandbox: true,
+            },
+            icon: nativeImage.createFromPath(getResourcePath(ResourceName.LOGO_IMAGE)),
+        });
+
+        visualizationWindow.loadURL(VISUALIZATION_WINDOW_WEBPACK_ENTRY);
+
+        // 复用现有的窗口拖拽实现
+        WindowDrag.setWindowDraggable(visualizationWindow, {
+            width,
+            height,
+            getWindowSize() {
+                return { width, height };
+            },
+            onDragEnd(point) {
+                AppConfig.setConfig({
+                    "private.visualizationWindowPosition": point,
+                });
+            },
+        });
+
+        visualizationWindow.once("ready-to-show", () => {
+            const position = AppConfig.getConfig("private.visualizationWindowPosition");
+            if (position) {
+                this.normalizeWindowPosition(
+                    visualizationWindow,
+                    position,
+                    async (normalized) => {
+                        AppConfig.setConfig({
+                            "private.visualizationWindowPosition": normalized,
+                        });
+                    },
+                );
+            }
+            // 不抢焦点
+            visualizationWindow.showInactive();
+        });
+
+        // 用户直接关掉窗口时，配置与实际状态会脱节 —— 回写
+        visualizationWindow.on("closed", () => {
+            WindowManager.visualizationWindow = null;
+            AppConfig.setConfig({
+                "visualization.enabled": false,
+            });
+        });
+
+        WindowManager.visualizationWindow = visualizationWindow;
+        this.emit("WindowCreated", {
+            windowName: "visualization",
+            browserWindow: visualizationWindow,
+        });
+    }
+
+    public showVisualizationWindow() {
+        if (!WindowManager.visualizationWindow) {
+            this.createVisualizationWindow();
+        }
+        const visualizationWindow = WindowManager.visualizationWindow;
+        if (!visualizationWindow) {
+            return;
+        }
+        if (visualizationWindow.isMinimized()) {
+            visualizationWindow.restore();
+        }
+        if (!visualizationWindow.isVisible()) {
+            visualizationWindow.showInactive();
+        }
+        visualizationWindow.moveTop();
+        AppConfig.setConfig({
+            "visualization.enabled": true,
+        });
+    }
+
+    public closeVisualizationWindow() {
+        WindowManager.visualizationWindow?.close();
+        WindowManager.visualizationWindow = null;
+        AppConfig.setConfig({
+            "visualization.enabled": false,
         });
     }
 

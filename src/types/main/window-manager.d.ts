@@ -1,6 +1,6 @@
 import { BrowserWindow } from "electron";
 
-export type IWindowNames = "main" | "lyric" | "minimode";
+export type IWindowNames = "main" | "lyric" | "minimode" | "visualization";
 
 export interface IWindowEvents {
     "WindowCreated": {
@@ -14,6 +14,7 @@ export interface IWindowManager {
     mainWindow: BrowserWindow | null;
     lyricWindow: BrowserWindow | null;
     miniModeWindow: BrowserWindow | null;
+    visualizationWindow: BrowserWindow | null;
 
     /**
      * 获取主窗口的引用
@@ -67,4 +68,14 @@ export interface IWindowManager {
      * 关闭迷你模式窗口
      */
     closeMiniModeWindow(): void;
+
+    /**
+     * 显示可视化窗口（不存在则创建）
+     */
+    showVisualizationWindow(): void;
+
+    /**
+     * 关闭可视化窗口
+     */
+    closeVisualizationWindow(): void;
 }

@@ -21,7 +21,9 @@
       "@shared/*": ["src/shared/*"],
       "@native/*": ["src/main/native_modules/*"],
       "@renderer/*": ["src/renderer/*"],
-      "@renderer-lrc/*": ["src/renderer-lrc/*"]
+      "@renderer-lrc/*": ["src/renderer-lrc/*"],
+      "@renderer-minimode/*": ["src/renderer-minimode/*"],
+      "@renderer-visualization/*": ["src/renderer-visualization/*"]
     }
   },
   "include": ["src/**/*"]
