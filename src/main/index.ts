@@ -28,6 +28,12 @@ import { LOCAL_PLUGIN_HASH } from '@common/constant';
 import fs from 'fs';
 import path from 'path';
 
+// Windows 任务栏/媒体会话身份，与 release/build-windows.iss 的快捷方式保持一致。
+// 便携版仅设置进程身份，不创建快捷方式或写入注册表。
+if (process.platform === 'win32') {
+    app.setAppUserModelId('fun.upup.musicfree');
+}
+
 // ─── Phase 0: Portable 模式检测（仅 Windows） ───
 // 若 exe 同级目录下存在 portable/ 文件夹，则将 appData/userData 重定向至该目录，
 // 实现免安装便携运行，所有用户数据随 exe 移动。

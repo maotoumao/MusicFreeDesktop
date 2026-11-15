@@ -8,6 +8,8 @@
 #define MyAppPublisher "maotoumao"
 #define MyAppURL "https://musicfree.catcat.work"
 #define MyAppExeName "MusicFree.exe"
+; Keep in sync with app.setAppUserModelId in src/main/index.ts.
+#define MyAppUserModelId "fun.upup.musicfree"
 #ifndef MyAppId
 #define MyAppId
 #endif
@@ -49,8 +51,8 @@ Source: "..\out\MusicFree-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion r
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; AppUserModelID: "{#MyAppUserModelId}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; AppUserModelID: "{#MyAppUserModelId}"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
