@@ -208,6 +208,14 @@ class DatabaseInfra implements IDatabaseProvider {
                         ON local_music(platform, music_id);
                 `);
             },
+            // ─── v5 → v6: 按需补齐音频格式，不触发旧库全量解析 ───
+            (db) => {
+                db.exec(`
+                    ALTER TABLE local_music ADD COLUMN audio_format TEXT;
+                    ALTER TABLE local_music ADD COLUMN audio_format_size INTEGER;
+                    ALTER TABLE local_music ADD COLUMN audio_format_mtime REAL;
+                `);
+            },
         ];
 
         if (currentVersion < migrations.length) {

@@ -12,6 +12,8 @@ import { IPC, CONTEXT_BRIDGE_KEY } from './common/constant';
 const mod = {
     // ─── 全量歌曲（异步 IPC） ───
     getAllMusicItems: () => ipcRenderer.invoke(IPC.GET_ALL_MUSIC_ITEMS),
+    getAudioInfo: (filePath: string) => ipcRenderer.invoke(IPC.GET_AUDIO_INFO, filePath),
+    getMetadata: (filePath: string) => ipcRenderer.invoke(IPC.GET_METADATA, filePath),
 
     // ─── 扫描文件夹管理（异步 IPC） ───
     getScanFolders: () => ipcRenderer.invoke(IPC.GET_SCAN_FOLDERS),

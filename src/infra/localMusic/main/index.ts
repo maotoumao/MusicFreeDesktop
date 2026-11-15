@@ -12,6 +12,7 @@
 import { ipcMain, shell } from 'electron';
 import { nanoid } from 'nanoid';
 import path from 'path';
+import fsp from 'fs/promises';
 import type Database from 'better-sqlite3';
 import type { IWindowManager } from '@appTypes/main/windowManager';
 import type { IDatabaseProvider } from '@appTypes/infra/database';
@@ -21,6 +22,9 @@ import type {
     IScanFolder,
     IScanProgress,
     IScanResult,
+    IScanFailure,
+    IAudioFormat,
+    ILocalMusicMetadata,
 } from '@appTypes/infra/localMusic';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 import { LOCAL_PLUGIN_NAME, INTERNAL_SLIM_KEY } from '@common/constant';
@@ -29,6 +33,14 @@ import { IPC, SCAN_BATCH_SIZE } from '../common/constant';
 import { discoverAudioFiles, diffWithDb } from './scanner';
 import { parseFileMetadata } from './metadataParser';
 import { canWriteTags, writeFileTags } from './metadataWriter';
+import { parseAudioMeta } from '../common/parseAudioMeta';
+
+function metadataFilePath(value: unknown): string {
+    if (typeof value !== 'string' || value.includes('\0') || !path.isAbsolute(value)) {
+        throw new Error('音频文件路径必须是有效的绝对路径');
+    }
+    return path.normalize(value);
+}
 
 // ─── Prepared Statements ───
 
@@ -49,6 +61,8 @@ interface ILocalMusicQueries {
 
     /** 更新本地歌曲的标题/艺术家/专辑 */
     updateMusicMeta: Database.Statement;
+    getFileMetadata: Database.Statement;
+    updateAudioFormat: Database.Statement;
 }
 
 function createQueries(db: Database.Database): ILocalMusicQueries {
@@ -69,10 +83,12 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
         upsertLocalMusic: db.prepare(`
             INSERT INTO local_music
                 (file_path, platform, music_id, title, artist, album, duration, artwork,
-                 folder, file_size, file_mtime, scan_folder_id, created_at)
+                 folder, file_size, file_mtime, scan_folder_id, created_at,
+                 audio_format, audio_format_size, audio_format_mtime)
             VALUES
                 (@filePath, @platform, @id, @title, @artist, @album, @duration, @artwork,
-                 @folder, @fileSize, @fileMtime, @scanFolderId, @createdAt)
+                 @folder, @fileSize, @fileMtime, @scanFolderId, @createdAt,
+                 @audioFormat, @fileSize, @formatFileMtime)
             ON CONFLICT(file_path) DO UPDATE SET
                 platform = excluded.platform,
                 music_id = excluded.music_id,
@@ -84,7 +100,10 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
                 folder = excluded.folder,
                 file_size = excluded.file_size,
                 file_mtime = excluded.file_mtime,
-                scan_folder_id = excluded.scan_folder_id
+                scan_folder_id = excluded.scan_folder_id,
+                audio_format = excluded.audio_format,
+                audio_format_size = excluded.audio_format_size,
+                audio_format_mtime = excluded.audio_format_mtime
         `),
         deleteLocalMusic: db.prepare('DELETE FROM local_music WHERE file_path = ?'),
         deleteLocalMusicByScanFolder: db.prepare(
@@ -110,7 +129,18 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
 
         // ─── 更新元数据 ───
         updateMusicMeta: db.prepare(`
-            UPDATE local_music SET title = @title, artist = @artist, album = @album
+            UPDATE local_music SET title = @title, artist = @artist, album = @album,
+                audio_format = NULL, audio_format_size = NULL, audio_format_mtime = NULL
+            WHERE file_path = @filePath
+        `),
+        getFileMetadata: db.prepare(`
+            SELECT title, artist, album, audio_format AS audioFormat,
+                   audio_format_size AS formatSize, audio_format_mtime AS formatMtime
+            FROM local_music WHERE file_path = ?
+        `),
+        updateAudioFormat: db.prepare(`
+            UPDATE local_music SET audio_format = @audioFormat,
+                audio_format_size = @fileSize, audio_format_mtime = @fileMtime
             WHERE file_path = @filePath
         `),
     };
@@ -162,6 +192,88 @@ class LocalMusicManager {
     }
 
     private registerIpcHandlers() {
+        ipcMain.handle(IPC.GET_AUDIO_INFO, async (_evt, input: unknown): Promise<IAudioFormat> => {
+            const filePath = metadataFilePath(input);
+            const stat = await fsp.stat(filePath);
+            const row = this.queries.getFileMetadata.get(filePath) as
+                | {
+                      audioFormat: string | null;
+                      formatSize: number | null;
+                      formatMtime: number | null;
+                  }
+                | undefined;
+            if (
+                row?.audioFormat &&
+                row.formatSize === stat.size &&
+                row.formatMtime === stat.mtimeMs
+            ) {
+                return JSON.parse(row.audioFormat) as IAudioFormat;
+            }
+            const meta = await parseAudioMeta(filePath, {
+                skipCovers: true,
+                skipLyrics: true,
+                fileInfo: { size: stat.size, mtime: stat.mtimeMs },
+            });
+            this.queries.updateAudioFormat.run({
+                filePath,
+                audioFormat: JSON.stringify(meta.format),
+                fileSize: meta.fileSize,
+                fileMtime: meta.fileMtime,
+            });
+            return meta.format;
+        });
+
+        ipcMain.handle(
+            IPC.GET_METADATA,
+            async (_evt, input: unknown): Promise<ILocalMusicMetadata> => {
+                const filePath = metadataFilePath(input);
+                const meta = await parseAudioMeta(filePath, { includeDetails: true });
+                const row = this.queries.getFileMetadata.get(filePath) as
+                    | {
+                          title: string;
+                          artist: string;
+                          album: string;
+                          audioFormat: string | null;
+                          formatSize: number | null;
+                          formatMtime: number | null;
+                      }
+                    | undefined;
+                let format = meta.format;
+                if (
+                    row?.audioFormat &&
+                    row.formatSize === meta.fileSize &&
+                    row.formatMtime === meta.fileMtime
+                ) {
+                    // 详情不补算时长，保留同一文件此前由扫描读出的已知字段。
+                    const stored = JSON.parse(row.audioFormat) as IAudioFormat;
+                    format = {
+                        ...stored,
+                        ...Object.fromEntries(
+                            Object.entries(meta.format).filter(([, value]) => value !== undefined),
+                        ),
+                    };
+                }
+                this.queries.updateAudioFormat.run({
+                    filePath,
+                    audioFormat: JSON.stringify(format),
+                    fileSize: meta.fileSize,
+                    fileMtime: meta.fileMtime,
+                });
+                return {
+                    filePath,
+                    fileSize: meta.fileSize,
+                    fileMtime: meta.fileMtime,
+                    format,
+                    common: meta.common,
+                    native: meta.native,
+                    artwork: meta.artwork,
+                    libraryTags: row
+                        ? { title: row.title, artist: row.artist, album: row.album }
+                        : undefined,
+                };
+            },
+        );
+
         // ─── 扫描文件夹管理 ───
 
         ipcMain.handle(IPC.GET_SCAN_FOLDERS, (): IScanFolder[] => {
@@ -213,6 +325,8 @@ class LocalMusicManager {
                                 removed: 0,
                                 unchanged: 0,
                                 elapsed: 0,
+                                failed: 0,
+                                failures: [],
                             };
                             removed.callbacks.forEach((cb) => cb.resolve(cancelResult));
                         } else {
@@ -240,19 +354,33 @@ class LocalMusicManager {
                     removed: 0,
                     unchanged: 0,
                     elapsed: 0,
+                    failed: 0,
+                    failures: [],
                 };
 
                 for (const folder of finalFolders) {
-                    const result = await this.enqueueScan(folder.id, folder.folderPath);
-                    totalResult.added += result.added;
-                    totalResult.updated += result.updated;
-                    totalResult.removed += result.removed;
-                    totalResult.unchanged += result.unchanged;
-                    totalResult.elapsed += result.elapsed;
-                    this.queries.updateScanFolderLastScan.run({
-                        id: folder.id,
-                        lastScanAt: Date.now(),
-                    });
+                    try {
+                        const result = await this.enqueueScan(folder.id, folder.folderPath);
+                        totalResult.added += result.added;
+                        totalResult.updated += result.updated;
+                        totalResult.removed += result.removed;
+                        totalResult.unchanged += result.unchanged;
+                        totalResult.elapsed += result.elapsed;
+                        totalResult.failed += result.failed;
+                        totalResult.failures.push(...result.failures);
+                        if (result.failed === 0) {
+                            this.queries.updateScanFolderLastScan.run({
+                                id: folder.id,
+                                lastScanAt: Date.now(),
+                            });
+                        }
+                    } catch (error) {
+                        totalResult.failed++;
+                        totalResult.failures.push({
+                            filePath: folder.folderPath,
+                            reason: error instanceof Error ? error.message : String(error),
+                        });
+                    }
                 }
 
                 this.broadcastLibraryChanged();
@@ -306,15 +434,16 @@ class LocalMusicManager {
                 meta: { title: string; artist: string; album: string },
             ): Promise<{ fileTagWritten: boolean; tagWarning: string | null }> => {
                 // 1. 写入文件标签（支持格式才实际写入）
-                const tagWarning = canWriteTags(filePath);
+                let tagWarning = canWriteTags(filePath);
                 let fileTagWritten = false;
 
                 if (tagWarning === null) {
                     try {
                         await writeFileTags(filePath, meta);
                         fileTagWritten = true;
-                    } catch {
-                        // 文件写入失败不阻塞 DB 更新
+                    } catch (error) {
+                        // 保留 DB 展示标签降级，同时把文件写入失败原因返回给编辑界面。
+                        tagWarning = error instanceof Error ? error.message : String(error);
                     }
                 }
 
@@ -356,16 +485,36 @@ class LocalMusicManager {
 
     private drainQueue() {
         if (this.isScanning || this.scanQueue.length === 0) {
-            if (!this.isScanning && this.scanQueue.length === 0) {
-                this.broadcastProgress({ phase: 'done', scanned: 0, total: 0 });
-            }
             return;
         }
         const next = this.scanQueue.shift()!;
         this.scanFolder(next.scanFolderId, next.folderPath)
             .then(
-                (result) => next.callbacks.forEach((cb) => cb.resolve(result)),
-                (error) => next.callbacks.forEach((cb) => cb.reject(error)),
+                (result) => {
+                    next.callbacks.forEach((cb) => cb.resolve(result));
+                    this.broadcastProgress({
+                        phase: 'done',
+                        scanned: 0,
+                        total: 0,
+                        failed: result.failed,
+                        failures: result.failures,
+                    });
+                },
+                (error) => {
+                    next.callbacks.forEach((cb) => cb.reject(error));
+                    this.broadcastProgress({
+                        phase: 'done',
+                        scanned: 0,
+                        total: 0,
+                        failed: 1,
+                        failures: [
+                            {
+                                filePath: next.folderPath,
+                                reason: error instanceof Error ? error.message : String(error),
+                            },
+                        ],
+                    });
+                },
             )
             .finally(() => {
                 this.drainQueue();
@@ -405,6 +554,11 @@ class LocalMusicManager {
             // Phase 3: 解析新增/变更文件的 metadata
             const toProcess = [...diff.added, ...diff.changed];
             const db = this.db.getDatabase();
+            const failures: IScanFailure[] = [];
+            const addedPaths = new Set(diff.added.map((file) => file.filePath));
+            let added = 0;
+            let updated = 0;
+            let removed = 0;
 
             for (let i = 0; i < toProcess.length; i += SCAN_BATCH_SIZE) {
                 const batch = toProcess.slice(i, i + SCAN_BATCH_SIZE);
@@ -420,8 +574,11 @@ class LocalMusicManager {
                             this.mediaMeta,
                         );
                         items.push(item);
-                    } catch {
-                        /* 跳过解析失败的文件 */
+                    } catch (error) {
+                        failures.push({
+                            filePath: file.filePath,
+                            reason: error instanceof Error ? error.message : String(error),
+                        });
                     }
                 }
 
@@ -443,9 +600,15 @@ class LocalMusicManager {
                                 fileMtime: item.fileMtime,
                                 scanFolderId: item.scanFolderId,
                                 createdAt: item.createdAt,
+                                audioFormat: item.format ? JSON.stringify(item.format) : null,
+                                formatFileMtime: item.formatFileMtime ?? null,
                             });
                         }
                     })();
+                    for (const item of items) {
+                        if (addedPaths.has(item.filePath)) added++;
+                        else updated++;
+                    }
                 }
 
                 this.broadcastProgress({
@@ -453,6 +616,7 @@ class LocalMusicManager {
                     scanned: Math.min(i + SCAN_BATCH_SIZE, toProcess.length),
                     total: toProcess.length,
                     current: batch[batch.length - 1]?.filePath,
+                    failed: failures.length,
                 });
 
                 // 让出事件循环
@@ -466,14 +630,17 @@ class LocalMusicManager {
                         this.queries.deleteLocalMusic.run(fp);
                     }
                 })();
+                removed = diff.removed.length;
             }
 
             return {
-                added: diff.added.length,
-                updated: diff.changed.length,
-                removed: diff.removed.length,
+                added,
+                updated,
+                removed,
                 unchanged: diff.unchanged,
                 elapsed: Date.now() - startTime,
+                failed: failures.length,
+                failures,
             };
         } finally {
             this.isScanning = false;
@@ -541,6 +708,7 @@ class LocalMusicManager {
         for (const folder of folders) {
             try {
                 const result = await this.enqueueScan(folder.id, folder.folderPath);
+                if (result.failed > 0) console.warn('[localMusic] 扫描部分失败', result.failures);
                 if (result.added > 0 || result.updated > 0 || result.removed > 0) {
                     this.queries.updateScanFolderLastScan.run({
                         id: folder.id,
@@ -548,8 +716,8 @@ class LocalMusicManager {
                     });
                     hasChanges = true;
                 }
-            } catch {
-                /* 静默扫描失败不影响正常使用 */
+            } catch (error) {
+                console.error('[localMusic] 扫描失败', folder.folderPath, error);
             }
         }
         if (hasChanges) {

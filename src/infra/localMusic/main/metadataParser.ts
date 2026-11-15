@@ -46,7 +46,12 @@ export async function parseFileMetadata(
     }
 
     // ─── 2. 解析文件元数据 ───
-    const meta = await parseAudioMeta(filePath, { skipCovers: true, skipLyrics: true });
+    const meta = await parseAudioMeta(filePath, {
+        skipCovers: true,
+        skipLyrics: true,
+        duration: true,
+        fileInfo: { size: fileSize, mtime: fileMtime },
+    });
 
     return {
         filePath,
@@ -56,6 +61,8 @@ export async function parseFileMetadata(
         artist: meta.artist ?? '',
         album: meta.album ?? '',
         duration: meta.duration ?? null,
+        format: meta.format,
+        formatFileMtime: meta.fileMtime,
         artwork: null,
         folder,
         fileSize,
