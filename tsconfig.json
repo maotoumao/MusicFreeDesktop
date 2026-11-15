@@ -5,6 +5,8 @@
     "allowJs": true,
     "module": "commonjs",
     "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "sourceMap": true,

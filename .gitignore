@@ -106,3 +106,6 @@ undefinedelectron-log-preload.js
 
 # 主题包打包产物（构建输出，不入库）
 *.mftheme
+
+# SDD 执行账本（scratch）
+.superpowers/

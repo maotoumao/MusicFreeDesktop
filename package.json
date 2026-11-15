@@ -12,6 +12,7 @@
     "publish": "electron-forge publish",
     "lint": "eslint ./src --fix",
     "lint-staged": "lint-staged",
+    "test": "node --test --no-warnings=MODULE_TYPELESS_PACKAGE_JSON \"src/**/*.test.ts\"",
     "prepare": "husky install"
   },
   "keywords": [],
@@ -47,6 +48,7 @@
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.shuffle": "^4.2.9",
     "@types/lodash.throttle": "^4.1.9",
+    "@types/node": "^20.5.9",
     "@types/object-path": "^0.11.4",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
