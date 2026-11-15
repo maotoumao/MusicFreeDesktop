@@ -51,24 +51,42 @@ WMP 官方把可视化分成三组，本设计照搬这个分类：
 | 音量模型是「全局音量 × 本地增益」，写在 `audio.volume` 上 | `audio-controller.ts:333` `applyEffectiveVolume` | 分析链路不能干扰这个模型 |
 | 扩展窗口已有成熟范式：`transparent` + `frame:false` + `WindowDrag.setWindowDraggable` + `AppConfig` 存位置 | `src/main/window-manager/index.ts:263` `createLyricWindow` | 可视化窗口照抄，不另造轮子 |
 | message-bus 的 MessagePort 是**主窗口↔扩展窗口直连** | `src/shared/message-bus/preload/main.ts` `extPorts` | 频谱帧一跳可传，不必经主进程中转 |
-| 主题包 CSS 变量只注入**主窗口 DOM**（preload 里 `themepack-node`） | `src/shared/themepack/preload.ts:56` | 独立窗口**没有**主题变量，必须由主窗口传过去 |
+| 主题色拿不到：app 的默认 `:root` 变量在 `src/renderer/app.scss`（**只在主窗口 bundle 里**）；主题包的覆盖则由 preload 写进 `<style id="themepack-node">` | `src/renderer/app.scss:84-115`、`src/shared/themepack/preload.ts:56` | 独立窗口的 bundle 里两样都没有 → 颜色必须由主窗口算好后传过去（可视化窗口自己去读主题包虽然理论可行，但会与主窗口失同步） |
 | forge 支持多 entry point，各自独立 bundle + preload | `forge.config.ts` `entryPoints` | 新增 `visualization_window` 入口 |
 | 项目无测试框架 | — | 验证靠手动 + 截图 |
 
-### 5.1 已实测的事实（一次性 spike，脚本 `tmp/viz-spike.js`）
+### 5.1 已实测的事实（一次性 spike，脚本在 `tmp/viz-spike*.js`）
 
-在项目自带的 Electron 25 上实测 `captureStream` + `AnalyserNode`（blob URL 的 440Hz 正弦）：
+在项目自带的 Electron 25 上实测 `captureStream` + `AnalyserNode`（440Hz 正弦）：
 
 | 项 | 实测值 | 结论 |
 | --- | --- | --- |
-| `captureStream()` 的 audio track 数 | **1** | 方案 A 在 blob URL 下成立 |
+| `captureStream()` 的 audio track 数 | **1** | blob URL 下成立 |
 | `AudioContext` 初始 `state` | **`running`** | Electron 放宽了自动播放策略，`resume()` 仍保留但通常不需要 |
 | 440Hz 对应 bin 的值 | **241，且是全谱最大值** | FFT 分析准确，频率→bin 映射正确 |
 | 非零 bin 数 | 11 | 单音信号，符合预期 |
 | `AudioContext.sampleRate` | **48000**（不是源文件的 44100） | **bin 宽度必须用 `actx.sampleRate` 算，不能硬编码 44100** |
 
-结论：方案 A 的核心链路已在真实 Electron 环境验证通过；
-**未验证的是 MSE/HLS 场景**（见 §8.1 的 A→B 回退分支与 §10 第 4 条验证项）。
+**三条音源路径的 captureStream 可用性（决定功能覆盖面）**：
+
+| 音源路径 | 元素上的 URL | captureStream | 实测依据 |
+| --- | --- | --- | --- |
+| 带 header 的音源（fetch→blob） | `blob:` | **✓ 可用**，440Hz 能量 241 | spike #1 |
+| HLS / m3u8（hls.js → MSE） | `blob:` (MediaSource) | **✓ 可用**，440Hz 能量 241 | spike #2（用 MediaRecorder 造 opus 片段喂 SourceBuffer 模拟 MSE） |
+| 普通跨域直链（无 header） | `http(s):` 跨域 | **✗ 抛 SecurityError** | spike #3：`Cannot capture from element with cross-origin data` |
+| 本地音乐 | `file:` | 推测同源可用 | 未实测（§10 补验） |
+
+**三个必须记住的推论**：
+
+1. **跨域元素即使服务器发了 CORS 头也 capture 不了**——因为元素没有设
+   `crossOrigin = "anonymous"`，是以 opaque origin 加载的。
+2. **绝不能为了可视化给主播放器加 `crossOrigin = "anonymous"`**：
+   那会让大量没有 CORS 头的音源**直接播不出来**，是严重回归。
+   可视化不能反过来伤害播放。
+3. **跨域直链场景两条路都不通**：captureStream 抛 SecurityError，
+   而回退方案 B（`createMediaElementSource`）对跨域会让播放器静音。
+   所以跨域只能**明确降级**：窗口显示「此音源无法可视化」，
+   而不是静默冻结让人以为功能坏了。
 
 ## 6. 方案对比
 
@@ -154,13 +172,25 @@ WMP 官方把可视化分成三组，本设计照搬这个分类：
        同源时：`createMediaElementSource(audio)` → `AnalyserNode` →
        **必须 `connect(destination)`**（否则播放器静音）→ 再从 analyser 单独引一路做分析。
     3. 两者都不可用 → 进入"无数据"状态（`level = 0`），效果静默降级，**不报错、不卡界面**。
+       并且**明确告知用户**：窗口内显示一行提示「此音源无法可视化」
+       （静默冻结与「功能坏了」在用户眼里没有区别，必须说出来）。
+       典型的触发场景就是跨域直链（§5.1）。
   - **策略在 attach 时一次性决定并记录**，不在每帧反复尝试。
-  - **必须 `audioContext.resume()`**：Chrome 的自动播放策略会让新建的 `AudioContext`
-    初始处于 `suspended`，此时 `AnalyserNode` 不产出任何数据（`level` 恒为 0，
-    看起来就是"可视化没反应"）。attach 后立即 `resume()`，并监听 `statechange`；
-    若仍停在 `suspended`，说明自动播放策略挡住了——此时降级为"无数据"并记日志。
-  - `start()` / `stop()`：随播放状态启停；换歌时 `stop()` → `attach()` 重新绑定，
-    防止分析器残留上一首的流。
+  - **`AudioContext` 全局复用一个**，不随换歌重建（重建要 ~50-100ms 且会多出上下文）；
+    换歌只重建 `MediaStreamAudioSourceNode` 与 `AnalyserNode` 的连接。
+  - **必须 `audioContext.resume()`**：新建的 `AudioContext` 可能停在 `suspended`，
+    此时 `AnalyserNode` 不产出数据（`level` 恒为 0，看起来就是"可视化没反应"）。
+    attach 后立即 `resume()` 并监听 `statechange`。
+    （实测 Electron 25 里新建即 `running`，但保留 resume 无害且防其他环境。）
+  - **attach 时机：跟着元素走，不跟播放器事件走**。
+    `PlayerEvents.MusicChanged` 是在 `setCurrentMusic()` 里发的，
+    **早于** `setTrack()` → `audioController.setTrackSource()` 赋新 `src`——
+    那一刻元素上还没有资源，capture 不到东西。
+    可靠做法：监听元素自身的 `playing` 事件（开始出声），
+    并监听 `src` 变化——**换源会让旧的 capture track 结束，必须重新 capture**。
+  - **静音时可视化同步静止（实测）**：capture 捕获的是元素**音量之后**的信号
+    （`audio.volume = 0` 时频谱实测全零，详见 §5.1）。
+    这正是"所见即所听"的期望行为，**不需要**额外做音量映射。
   - `readFrame(): IAudioFrame` — 每帧产出：
     ```ts
     interface IAudioFrame {
@@ -181,35 +211,63 @@ WMP 官方把可视化分成三组，本设计照搬这个分类：
   - **兜底**：任何一步失败都只降级，不抛错、不中断播放。
 
 - **`index.ts`** — 对外入口，负责：
-  - 在 `track-player` 播放/暂停/换歌时调用 analyzer 的启停与重绑；
-  - 用 `requestAnimationFrame`（或 16ms `setInterval`）驱动 `readFrame()`，
-    把帧推给 message-bus。
+  - 订阅元素的 `playing` / `src` 变化，驱动 analyzer 重新绑定（见上面的「attach 时机」）；
+  - **响应可视化窗口的取帧请求**（pull 模型，见 §8.2），在消息回调里同步 `readFrame()` 并回帧。
 
 **`audio-controller.ts` 改动**：新增只读 getter 暴露 audio 元素
 ```ts
 get mediaElement() { return this.audio; }
 ```
-不改动任何现有音量逻辑。
+不改动任何现有音量逻辑（`applyEffectiveVolume` 在 `:343`，是音量模型的落点，别碰）。
 
 ### 8.2 数据传输（message-bus 扩展）
 
-改动三处：
+**采用 pull 模型：可视化窗口拉帧，而不是主窗口推帧。**
+
+理由：音频元素只存在于主窗口的渲染进程，而**主窗口在可视化真正有用的场景下是隐藏的**
+（最小化到托盘、`closeBehavior: minimize`）。Electron 的 `backgroundThrottling` 默认开启
+（本仓库没有设置过它），隐藏/最小化的窗口其 `requestAnimationFrame` 与定时器会被节流到
+约 1fps，5 分钟后还会进入「 intensive throttling」。若由主窗口用 rAF 驱动推帧，
+**可视化恰好会在用户最想看它的时候冻住**——而且开发时窗口可见，测不出来。
+
+反过来：可视化窗口是**可见**的，它的 rAF 不被节流；主窗口虽然被节流，但
+**IPC 消息回调不受节流影响**，`AnalyserNode` 在页面隐藏时也照常工作
+（分析用的 `AudioContext` 没有接 `destination`，Chrome 不会因此挂起它）。
+所以「可见窗口拉、隐藏窗口应」是唯一两边都不受影响的组合。
+
+> 备选方案 `backgroundThrottling: false` 被否：那是改整个 app 的空闲行为，
+> 会让隐藏的主窗口一直满载，代价远大于收益。
+
+改动四处：
 
 1. **`src/shared/message-bus/type.d.ts`**
-   - `IPortMessage` 增加消息类型 `"visualizationFrame"`（payload 为 `IAudioFrame`）。
+   - `IPortMessage` 增加消息类型 `"requestFrame"`（扩展→主）与
+     `"visualizationFrame"`（主→扩展，payload 为 `IAudioFrame`）。
    - `IAppState` 增加 `themeColors?: IThemeColors`（供可视化窗口读主题色）。
-2. **`src/shared/message-bus/preload/main.ts`**
-   - 暴露 `pushVisualizationFrame(frame)`：只发给**已订阅**的扩展窗口。
-   - 扩展窗口订阅机制：新增 `"subscribeVisualization"` 消息，主窗口侧记下订阅者集合。
-   - 暴露 `pushThemeColors(colors)`：走既有的 `syncAppState` 通道（新增 key）。
-3. **`src/shared/message-bus/preload/extension.ts`**
-   - 暴露 `onVisualizationFrame(cb)` / `offVisualizationFrame(cb)`，用 EventEmitter 派发。
+2. **`src/shared/message-bus/preload/extension.ts`**
+   - 扩展窗口侧：暴露 `requestFrame()`（发 `"requestFrame"`）与
+     `onVisualizationFrame(cb)` / `offVisualizationFrame(cb)`（EventEmitter 派发）。
+3. **`src/shared/message-bus/preload/main.ts`**
+   - 暴露 `pushVisualizationFrame(frame)`：回给请求方窗口。
+   - `handleMessage` 里加 `"requestFrame"` 分支：**preload 在隔离世界，
+     不能直接调主世界的函数**，要用 `ipcRenderer.send("@shared/visualization/frame-request")`
+     把请求转给主世界；主世界同步 `readFrame()` 后再调用 preload 暴露的
+     `pushVisualizationFrame()` 回帧。
+   - 注意 `subscribedAppStates.set(from, payload)` 是**整体替换**该窗口的订阅键集合，
+     `themeColors` 与 `musicItem` 必须在同一次 `subscribeAppState` 调用里一起订阅。
+4. **主窗口侧**（`src/renderer/core/visualization/index.ts`）
+   - 监听 `@shared/visualization/frame-request` → 同步取帧 → 回帧。
+   - 主题色：启动时读一次，之后用 **`MutationObserver` 观察
+     `document.querySelector("#themepack-node")`** 的 `childList`/`characterData` 变化，
+     变了就重读并同步。
+     （不新增 themepack 的对外 API——preload 里 `themeNode.innerHTML = ...` 的写入
+     会触发 observer；app 默认的 `:root` 变量本来就常驻，重读即可拿到最终值。
+     注意主题包用 `html:root` 提高特异性，`getComputedStyle` 取到的就是最终值。）
 
-**主窗口侧驱动**（`src/renderer/core/visualization/index.ts`）：
-- 主题色在启动时和主题切换时各读一次
-  （`getComputedStyle(document.documentElement).getPropertyValue('--primaryColor')` 等，
-  注意主题包用的是 `html:root` 提升特异性，计算样式能取到最终值）。
-- 采集到的帧以 60fps 推送。**只在有播放时推**，暂停时不推（省带宽）。
+**帧率与流量**：可视化窗口用自己的 rAF 按 60fps 发请求，主窗口每请求回一帧
+（512B 频域 + 256B 时域 ≈ 0.8KB/帧，约 46KB/s）。
+窗口不可见（`document.hidden`）时停止请求；暂停播放时主窗口照常回帧，
+但帧里 `playing: false`、`level: 0`，效果静止而不报错。
 
 ### 8.3 可视化窗口
 
@@ -224,12 +282,28 @@ get mediaElement() { return this.audio; }
   与 `setLyricWindow` 同一套 IPC 模式。
 
 **新增 renderer entry**：
-- 目录 `src/renderer-visualization/`，结构照 `src/renderer-lrc/`：
-  `document/{index.html,index.tsx,bootstrap.ts}`、`pages/`、`core/`。
+- 目录 `src/renderer-visualization/`。参照 `src/renderer-lrc/` 的两层结构
+  （`document/` + `pages/`），本功能多一层 `core/` 放引擎与效果——`src/renderer-lrc/` 本身**没有** core 目录。
 - `forge.config.ts` 增加 entryPoint `visualization_window`，
   preload 用 `src/preload/extension.ts`（已含 `common-preload` + message-bus extension）。
-- `config/webpack.renderer.config.ts` 增加 alias `@renderer-visualization`。
-- 窗口默认尺寸 480×300。
+- **别名要加两处**，漏一处 `npx tsc --noEmit` 就失败（它是验收项）：
+  - `config/webpack.renderer.config.ts` 的 `resolve.alias` → `@renderer-visualization`
+  - `tsconfig.json` 的 `paths`（现已有 `@renderer-lrc/*` 等）→ `@renderer-visualization/*`
+- 窗口默认尺寸 480×300，`resizable: false`（用户未选自由缩放）——
+  因此**不设** `private.visualizationWindowSize`，固定尺寸即可，只存位置。
+
+**窗口的接入点清单（漏一处窗口就会「创建了但没反应」）**：
+
+| 文件 | 必须做的事 |
+| --- | --- |
+| `src/types/main/window-manager.d.ts` | `IWindowNames` 加 `"visualization"`；`IWindowManager` 加 `showVisualizationWindow()` / `closeVisualizationWindow()` |
+| `src/main/window-manager/index.ts` | 加 `declare const VISUALIZATION_WINDOW_WEBPACK_ENTRY` / `…PRELOAD_WEBPACK_ENTRY`（forge 按 entry 生成） |
+| 同上 | **加入 `getExtensionWindows()`** —— message-bus 只给这个列表里的扩展窗口建 MessagePort，不加就没有数据通道 |
+| 同上 | **加入 `getAllWindows()`** —— AppConfig 变更只广播给这个列表里的窗口（`src/shared/app-config/main.ts:219`），不加就收不到设置变化 |
+| `src/shared/message-bus/preload/extension.ts` | `extPort.onmessage` 里加 `visualizationFrame` 分支（现在只处理 `syncAppState` 与 `ping`） |
+| `src/shared/message-bus/preload/main.ts` | 加 `subscribeVisualization` 分支与 `pushVisualizationFrame()`；注意 `subscribedAppStates.set(from, payload)` 是**整体替换**该窗口的订阅键集合，`themeColors` 与 `musicItem` 必须在同一次调用里一起订阅 |
+| `src/types/app-config.d.ts` | `_IAppConfig` 新增 §8.7 的键 |
+| `src/shared/app-config/default-app-config.ts` | 同上的默认值 |
 
 ### 8.4 效果引擎
 
@@ -278,19 +352,31 @@ interface IThemeColors {
   background: string; // --backgroundColor
 }
 ```
-主窗口读取后经 appState 的新 key `themeColors` 同步；可视化窗口订阅。
-主题切换时主窗口重读并再次同步。
+主窗口读取后经 appState 的新 key `themeColors` 同步；可视化窗口订阅（与 `musicItem` 一起订阅）。
+主题变化由主窗口用 `MutationObserver` 观察 `#themepack-node` 感知，变了就重读并再次同步（§8.2）。
 
 ### 8.6 设置与 UI
+
+**效果的归属（已定）**：
+- 用户的选择存在 **AppConfig**（`visualization.effect` = 效果 id 或 `"random"`），
+  不是 appState。理由：这是**用户的持久偏好**，该进 config.json；
+  appState 是易失的运行状态。
+- **随机轮换由可视化窗口自己做**：它订阅 appState 的 `musicItem`，
+  发现换歌就换一个效果。效果注册表只在可视化窗口的 bundle 里，
+  轮换逻辑也在那儿，**不需要把注册表共享给主窗口**。
+- 因此：主窗口只负责「同步设置 + 转发帧 + 同步主题色」，
+  效果的选择与轮换全部在可视化窗口内闭环。
 
 - **开关按钮放在 `src/renderer/components/MusicBar/widgets/Extra/index.tsx`**：
   那里已经住着 `LyricBtn`（桌面歌词开关）和 `KaraokeBtn`（本地定制），可视化开关与它们同级最自然。
   照 `LyricBtn` 的写法：读 `useAppConfig("visualization.enabled")` → 点击调
   `appWindowUtil.setVisualizationWindow(!enabled)` → 用 `SvgAsset` 取图标，
   `highlight` 类表示开启状态。
-- **`appWindowUtil` 新增 `setVisualizationWindow(enabled: boolean)`**
-  （`src/shared/utils/renderer.ts` 与 `src/shared/utils/main.ts` 两处同步加，
-  照 `setLyricWindow` 的实现）。
+- **`appWindowUtil` 新增 `setVisualizationWindow(enabled: boolean)`**：
+  走**仓库既有的 IPC 约定**——`ipcRenderer.send("@shared/utils/set-visualization-window", enabled)`
+  → `ipcMain.on` 于 `src/shared/utils/main.ts` → 在 `src/shared/utils/preload.ts` 暴露。
+  **不要**新造 `ipcMain.handle("@shared/visualization/toggle")` 这条 `invoke` 路径——
+  仓库里没有对应的封装，会平白多出一套 preload 管道。
 - **设置页新增「可视化」分区**
   （`src/renderer/pages/main-page/views/setting-view/routers/` 下新增 router）：
   - 效果选择：8 个效果 + 「随机轮换」
@@ -317,8 +403,10 @@ interface IThemeColors {
 
 | 风险 | 规避 |
 | --- | --- |
-| **`captureStream()` 在 MSE/HLS 音源下取不到音轨**（Chromium 对 MediaSource 场景的历史限制） | attach 时按 A→B 顺序尝试；B 只在同源 blob URL 时才允许（否则会静音整个播放器）。两者都失败则静默降级 |
+| **`captureStream()` 在 MSE/HLS 音源下取不到音轨** | **已实测：MSE 场景完全可用**（§5.1）。代码仍保留 A→B 顺序尝试作为兜底 |
+| **跨域直链无法可视化**（`SecurityError: Cannot capture from element with cross-origin data`） | **已实测且无法绕过**：除非给元素设 `crossOrigin="anonymous"`，但那会让无 CORS 头的音源播不出来。**只能明确降级并提示用户**（§8.1） |
 | **回退到 B 时把播放器搞静音** | `createMediaElementSource` 必须 `connect(destination)`；且只对 `blob:` 开头的 src 启用 B。**这条是硬约束，宁可视化不可用也不能静音** |
+| **主窗口隐藏时可视化冻结** | 用 pull 模型（§8.2）：由可见的可视化窗口用 rAF 拉帧，隐藏主窗口的 rAF 被节流但 IPC 回调不受影响 |
 | 分析器泄漏（换歌后旧流仍在跑） | 换歌时 `stop()` 并重新 `attach()`；`AudioContext` 在 `stop()` 时 `close()` |
 | **`AudioContext` 停在 `suspended` 导致永远无数据** | attach 后立即 `resume()` + 监听 `statechange`；这是"可视化完全没反应"最常见的原因 |
 | 60fps 推送拖慢主窗口 | 仅在播放时推；帧数据 512B + 256B，实测约 46KB/s；主窗口只做 FFT（廉价） |
@@ -337,12 +425,14 @@ interface IThemeColors {
   1. 播放时效果随音乐变化（对比频谱与实际音乐，低音重时低频柱明显更高）；
   2. 暂停后画面静止、无报错；
   3. 切歌后效果跟随新歌（不能残留上一首的频谱）；
-  4. **HLS 音源（m3u8）下可视化有反应**——这是 captureStream 最可能失效的场景，
-     必须用真实的 m3u8 歌曲验证；若无声，转而验证回退策略 B 是否生效（§8.1）；
-  5. 切换主题后可视化配色跟着变；
-  6. 拖动窗口、置顶、关闭重开位置保持；
-  7. 主界面播放不卡顿、音量正常；
-  8. 换到跨域音源（如需要 header 的平台）验证**没有静音**。
+  4. **主窗口最小化/隐藏时可视化仍在动**（验证 pull 模型，这是最容易被忽略的失败模式）；
+  5. **HLS 音源（m3u8）下可视化有反应**（spike #2 已验证 MSE 可行，此处用真实歌曲复验）；
+  6. **本地音乐（file://）下可视化有反应**（唯一未实测的路径）；
+  7. **跨域直链下窗口显示「此音源无法可视化」而不是静默冻结**；
+  8. 切换主题后可视化配色跟着变；
+  9. 拖动窗口、置顶、关闭重开位置保持；
+  10. 主界面播放不卡顿、音量正常；
+  11. 换到跨域音源验证**没有静音**（可视化绝不能伤害播放）。
 
 ## 11. 验收标准
 
