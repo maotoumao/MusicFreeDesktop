@@ -180,7 +180,8 @@
     "desktop_lyric": "桌面歌词",
     "play": "播放",
     "pause": "暂停",
-    "karaoke": "唱卡拉OK"
+    "karaoke": "唱卡拉OK",
+    "visualization": "可视化"
   },
   "music_detail": {
     "search_lyric": "搜索歌词",
@@ -367,6 +368,7 @@
       "short_cut": "快捷键",
       "network": "网络",
       "backup": "备份与恢复",
+      "visualization": "可视化",
       "about": "关于 MusicFree"
     },
     "normal": {
@@ -478,6 +480,21 @@
       "open_source_declaration": "源代码: 软件基于 AGPL3.0 协议开源.  <Github>Github地址</Github>",
       "official_site": "软件官网",
       "mobile_version": "移动版"
+    },
+    "visualization": {
+      "enable": "启用可视化窗口",
+      "effect": {
+        "random": "随机轮换",
+        "bars": "条形频谱",
+        "oscilloscope": "示波器",
+        "spectrum": "频谱山脊",
+        "particle": "粒子",
+        "geometry": "几何",
+        "fluid": "流体",
+        "battery": "电池",
+        "fireworks": "烟花"
+      },
+      "unavailable": "此音源无法可视化"
     }
   },
   "main": {

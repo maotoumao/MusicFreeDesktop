@@ -96,6 +96,10 @@ function setMinimodeWindow(enabled: boolean) {
     ipcRenderer.send("@shared/utils/set-minimode-window", enabled);
 }
 
+function setVisualizationWindow(enabled: boolean) {
+    ipcRenderer.send("@shared/utils/set-visualization-window", enabled);
+}
+
 function ignoreMouseEvent(ignore: boolean) {
     ipcRenderer.send("@shared/utils/ignore-mouse-event", ignore);
 }
@@ -113,6 +117,7 @@ const appWindow = {
     showMainWindow,
     setLyricWindow,
     setMinimodeWindow,
+    setVisualizationWindow,
     ignoreMouseEvent,
     toggleMainWindowVisible,
     toggleMainWindowMaximize,

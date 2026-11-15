@@ -73,6 +73,14 @@ class Utils {
             }
         });
 
+        ipcMain.on("@shared/utils/set-visualization-window", (_, enabled) => {
+            if (enabled) {
+                this.windowManager.showVisualizationWindow();
+            } else {
+                this.windowManager.closeVisualizationWindow();
+            }
+        });
+
 
         ipcMain.on("@shared/utils/ignore-mouse-event", (evt, ignore) => {
             const targetWindow = BrowserWindow.fromWebContents(evt.sender);

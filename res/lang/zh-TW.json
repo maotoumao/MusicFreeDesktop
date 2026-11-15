@@ -180,7 +180,8 @@
     "desktop_lyric": "桌面歌詞",
     "play": "播放",
     "pause": "暫停",
-    "karaoke": "唱卡拉OK"
+    "karaoke": "唱卡拉OK",
+    "visualization": "可視化"
   },
   "music_detail": {
     "search_lyric": "搜尋歌詞",
@@ -367,6 +368,7 @@
       "short_cut": "快捷鍵",
       "network": "網絡",
       "backup": "備份與恢復",
+      "visualization": "可視化",
       "about": "關於 MusicFree"
     },
     "normal": {
@@ -478,6 +480,21 @@
       "open_source_declaration": "源碼：軟件是基於 AGPL3.0 授權的開源軟件。<Github>Github 地址</Github>",
       "official_site": "官方網站",
       "mobile_version": "移動版"
+    },
+    "visualization": {
+      "enable": "啟用可視化視窗",
+      "effect": {
+        "random": "隨機輪替",
+        "bars": "條形頻譜",
+        "oscilloscope": "示波器",
+        "spectrum": "頻譜山脊",
+        "particle": "粒子",
+        "geometry": "幾何",
+        "fluid": "流體",
+        "battery": "電池",
+        "fireworks": "煙火"
+      },
+      "unavailable": "此音源無法可視化"
     }
   },
   "main": {

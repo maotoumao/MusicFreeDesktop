@@ -8,6 +8,7 @@ import Normal from "./Normal";
 import PlayMusic from "./PlayMusic";
 import Plugin from "./Plugin";
 import ShortCut from "./ShortCut";
+import Visualization from "./Visualization";
 
 export default [
     {
@@ -41,6 +42,10 @@ export default [
     {
         id: "backup",
         component: Backup,
+    },
+    {
+        id: "visualization",
+        component: Visualization,
     },
     {
         id: "about",

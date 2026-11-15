@@ -22,6 +22,7 @@ interface IMod {
         showMainWindow: () => void;
         setLyricWindow: (enabled: boolean) => void;
         setMinimodeWindow: (enabled: boolean) => void;
+        setVisualizationWindow: (enabled: boolean) => void;
         setLyricWindowLock: (lockState: boolean) => void;
         ignoreMouseEvent: (ignore: boolean) => void;
         toggleMainWindowVisible: () => void;

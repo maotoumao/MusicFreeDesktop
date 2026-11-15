@@ -180,7 +180,8 @@
     "desktop_lyric": "Desktop Lyric",
     "play": "Play",
     "pause": "Pause",
-    "karaoke": "Karaoke"
+    "karaoke": "Karaoke",
+    "visualization": "Visualization"
   },
   "music_detail": {
     "search_lyric": "Search Lyric",
@@ -367,6 +368,7 @@
       "short_cut": "Shortcuts",
       "network": "Network",
       "backup": "Backup & Restore",
+      "visualization": "Visualization",
       "about": "About MusicFree"
     },
     "normal": {
@@ -478,6 +480,21 @@
       "open_source_declaration": "Source Code: Software is open-source under AGPL3.0 license. <Github>Github Link</Github>",
       "official_site": "Official Website",
       "mobile_version": "Mobile Version"
+    },
+    "visualization": {
+      "enable": "Enable visualization window",
+      "effect": {
+        "random": "Random rotation",
+        "bars": "Bars",
+        "oscilloscope": "Oscilloscope",
+        "spectrum": "Spectrum ridge",
+        "particle": "Particles",
+        "geometry": "Geometry",
+        "fluid": "Fluid",
+        "battery": "Battery",
+        "fireworks": "Fireworks"
+      },
+      "unavailable": "This source cannot be visualized"
     }
   },
   "main": {

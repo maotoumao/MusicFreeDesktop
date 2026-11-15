@@ -28,6 +28,7 @@ export default function Extra() {
             <VolumeBtn></VolumeBtn>
             <LyricBtn></LyricBtn>
             <KaraokeBtn></KaraokeBtn>
+            <VisualizationBtn></VisualizationBtn>
             <div
                 className="extra-btn"
                 onClick={() => {
@@ -303,6 +304,27 @@ function LyricBtn() {
                 iconName={isCN() ? "lyric" : "lyric-en"}
                 title={t("music_bar.desktop_lyric")}
             ></SvgAsset>
+        </div>
+    );
+}
+
+function VisualizationBtn() {
+    const enabled = useAppConfig("visualization.enabled");
+    const { t } = useTranslation();
+
+    return (
+        <div
+            className={classNames({
+                "extra-btn": true,
+                highlight: enabled,
+            })}
+            role="button"
+            title={t("music_bar.visualization")}
+            onClick={() => {
+                appWindowUtil.setVisualizationWindow(!enabled);
+            }}
+        >
+            <SvgAsset iconName="dashboard-speed"></SvgAsset>
         </div>
     );
 }
