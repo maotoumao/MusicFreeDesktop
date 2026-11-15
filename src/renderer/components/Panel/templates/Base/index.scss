@@ -1,5 +1,7 @@
 .components--panel-base {
   position: absolute;
+  // 与 src/common/constant.ts 的 zIndexLevels.panel 保持一致
+  // 播放队列面板会在运行时用内联样式提到 zIndexLevels.playListPanel
   z-index: 10000;
   top: 0;
   left: 0;
