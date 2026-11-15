@@ -69,6 +69,10 @@ export interface IEngine {
     setEffect(id: string): void;
     /** 通知引擎「换歌了」——随机模式下会换一个效果 */
     notifyMusicChanged(): void;
+    /** 暂停绘制（此音源无法可视化时用） */
+    pause(): void;
+    /** 恢复绘制 */
+    resume(): void;
     /** 停止 rAF 循环 */
     destroy(): void;
 }
@@ -90,6 +94,7 @@ export function createEngine(
     let currentEffectId = "";
     let rafId = 0;
     let destroyed = false;
+    let paused = false;
 
     const applyCanvasSize = () => {
         size = {
@@ -137,6 +142,11 @@ export function createEngine(
         if (typeof document !== "undefined" && document.hidden) {
             return;
         }
+        // 此音源无法可视化时停画，让界面显示提示而不是一片死画面
+        if (paused) {
+            ctx.clearRect(0, 0, size.width, size.height);
+            return;
+        }
 
         ctx.clearRect(0, 0, size.width, size.height);
         currentEffect?.render(ctx, size, options.getFrame(), options.getColors());
@@ -158,6 +168,12 @@ export function createEngine(
             setEffect(
                 pickNextEffectId(currentEffectId, mode, options.getAllIds()),
             );
+        },
+        pause() {
+            paused = true;
+        },
+        resume() {
+            paused = false;
         },
         destroy() {
             destroyed = true;

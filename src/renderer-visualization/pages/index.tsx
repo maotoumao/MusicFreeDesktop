@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./index.scss";
+import { useTranslation } from "react-i18next";
 
 import useAppConfig from "@/hooks/useAppConfig";
 import messageBus, {
@@ -30,8 +31,11 @@ const emptyFrame: IVisualization.IAudioFrame = {
  * 没有任何交互控件——开关与效果选择都在主窗口里做。
  */
 export default function VisualizationPage() {
+    const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const engineRef = useRef<IEngine | null>(null);
+    /** 此音源无法可视化（跨域等） */
+    const [unavailable, setUnavailable] = useState(false);
 
     // 引擎每帧要读这些值，放 ref 里避免每帧重建闭包
     const frameRef = useRef<IVisualization.IAudioFrame>(emptyFrame);
@@ -64,6 +68,15 @@ export default function VisualizationPage() {
 
         const onFrame = (frame: IVisualization.IAudioFrame) => {
             frameRef.current = frame;
+            // 跨域音源会一直回 available=false 的帧——此时停画并明确告知用户，
+            // 而不是让画面静默冻结（静默冻结和「功能坏了」在用户眼里没区别）
+            const isUnavailable = !frame.available;
+            setUnavailable(isUnavailable);
+            if (isUnavailable) {
+                engineRef.current?.pause();
+            } else {
+                engineRef.current?.resume();
+            }
         };
         messageBus.onVisualizationFrame(onFrame);
 
@@ -100,6 +113,11 @@ export default function VisualizationPage() {
     return (
         <div className="visualization-page">
             <canvas ref={canvasRef} className="visualization-canvas"></canvas>
+            {unavailable && (
+                <div className="visualization-unavailable">
+                    {t("settings.visualization.unavailable")}
+                </div>
+            )}
         </div>
     );
 }
