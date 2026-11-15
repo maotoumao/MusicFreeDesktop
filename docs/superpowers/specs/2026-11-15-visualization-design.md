@@ -55,6 +55,21 @@ WMP 官方把可视化分成三组，本设计照搬这个分类：
 | forge 支持多 entry point，各自独立 bundle + preload | `forge.config.ts` `entryPoints` | 新增 `visualization_window` 入口 |
 | 项目无测试框架 | — | 验证靠手动 + 截图 |
 
+### 5.1 已实测的事实（一次性 spike，脚本 `tmp/viz-spike.js`）
+
+在项目自带的 Electron 25 上实测 `captureStream` + `AnalyserNode`（blob URL 的 440Hz 正弦）：
+
+| 项 | 实测值 | 结论 |
+| --- | --- | --- |
+| `captureStream()` 的 audio track 数 | **1** | 方案 A 在 blob URL 下成立 |
+| `AudioContext` 初始 `state` | **`running`** | Electron 放宽了自动播放策略，`resume()` 仍保留但通常不需要 |
+| 440Hz 对应 bin 的值 | **241，且是全谱最大值** | FFT 分析准确，频率→bin 映射正确 |
+| 非零 bin 数 | 11 | 单音信号，符合预期 |
+| `AudioContext.sampleRate` | **48000**（不是源文件的 44100） | **bin 宽度必须用 `actx.sampleRate` 算，不能硬编码 44100** |
+
+结论：方案 A 的核心链路已在真实 Electron 环境验证通过；
+**未验证的是 MSE/HLS 场景**（见 §8.1 的 A→B 回退分支与 §10 第 4 条验证项）。
+
 ## 6. 方案对比
 
 ### 6.1 音频数据来源
@@ -160,6 +175,9 @@ WMP 官方把可视化分成三组，本设计照搬这个分类：
   - **节拍检测**：取最低 ~8 个 bin 的能量，做滑动平均（约 43 帧 ≈ 0.7s）；
     当瞬时能量 > 均值 × 1.35 时判定一拍，`beat` 输出一个指数衰减的包络（1 → 0，约 0.3s）。
   - **BPM 估算**：记录连续拍点间隔，取最近 8 个间隔的中位数倒数。
+  - **bin 宽度按 `actx.sampleRate` 计算**：`binHz = sampleRate / fftSize`。
+    实测 `sampleRate` 是 **48000**（跟随系统，不是源文件的 44100），硬编码 44100 会让
+    频率映射整体偏移（详见 §5.1）。
   - **兜底**：任何一步失败都只降级，不抛错、不中断播放。
 
 - **`index.ts`** — 对外入口，负责：
