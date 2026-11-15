@@ -1,6 +1,9 @@
 import type { IVisualizationEffect } from "../types.ts";
 import { createBarsEffect } from "./bars.ts";
 import { createOscilloscopeEffect } from "./oscilloscope.ts";
+import { createSpectrumEffect } from "./spectrum.ts";
+import { createParticleEffect } from "./particle.ts";
+import { createGeometryEffect } from "./geometry.ts";
 
 /**
  * 效果注册表：id → 工厂函数。
@@ -10,6 +13,9 @@ import { createOscilloscopeEffect } from "./oscilloscope.ts";
 export const effectRegistry: Record<string, () => IVisualizationEffect> = {
     bars: createBarsEffect,
     oscilloscope: createOscilloscopeEffect,
+    spectrum: createSpectrumEffect,
+    particle: createParticleEffect,
+    geometry: createGeometryEffect,
 };
 
 /** 所有效果的 id（顺序即设置页里的展示顺序） */
