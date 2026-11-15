@@ -1,9 +1,9 @@
+// 这里用相对路径而不是 @/common/ 别名：本文件会被 node --test 直接加载，
+// Node 不认 webpack 的别名，换成别名会解析不到（测试会挂）。
+import { defaultVisualizationThemeColors } from "../../../common/visualization-constant.ts";
+
 /** 主窗口读不到主题色时的兜底配色（与 WMP Metal 主题一致） */
-export const defaultThemeColors: IVisualization.IThemeColors = {
-    primary: "#f0a020",
-    text: "#ffffff",
-    background: "#232c36",
-};
+export const defaultThemeColors = defaultVisualizationThemeColors;
 
 /**
  * 从 CSS 变量原始值里解析主题色，缺失或空白则回落到默认色。
