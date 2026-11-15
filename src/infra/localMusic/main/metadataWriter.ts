@@ -7,6 +7,7 @@
 
 import NodeID3 from 'node-id3';
 import path from 'path';
+import { invalidateAudioMeta } from '../common/parseAudioMeta';
 
 /** 支持嵌入式标签写入的文件扩展名 */
 const TAGGABLE_EXTS = new Set(['.mp3']);
@@ -65,6 +66,8 @@ export async function writeFileTags(filePath: string, meta: IMetadataToWrite): P
 
     return new Promise((resolve, reject) => {
         NodeID3.write(tags, filePath, (err) => {
+            // 写失败也可能已经部分改动文件，下一次读取必须重新解析。
+            invalidateAudioMeta(filePath);
             if (err) reject(new Error(`写入文件标签失败: ${err.message}`));
             else resolve();
         });

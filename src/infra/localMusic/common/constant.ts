@@ -12,6 +12,8 @@ export const IPC = {
 
     // ─── 获取全量歌曲列表 ───
     GET_ALL_MUSIC_ITEMS: '@infra/local-music/get-all-music-items',
+    GET_AUDIO_INFO: '@infra/local-music/get-audio-info',
+    GET_METADATA: '@infra/local-music/get-metadata',
 
     // ─── 删除 ───
     DELETE_ITEMS: '@infra/local-music/delete-items',

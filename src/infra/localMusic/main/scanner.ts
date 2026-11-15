@@ -39,12 +39,8 @@ export async function discoverAudioFiles(
 async function discoverRecursive(dir: string, normalizedExcluded: string[]): Promise<IFileInfo[]> {
     const results: IFileInfo[] = [];
 
-    let entries;
-    try {
-        entries = await fsp.readdir(dir, { withFileTypes: true });
-    } catch {
-        return results;
-    }
+    // 发现阶段失败须中止 diff，不能把不可访问的目录误认为空目录并删除库记录。
+    const entries = await fsp.readdir(dir, { withFileTypes: true });
 
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
@@ -55,16 +51,12 @@ async function discoverRecursive(dir: string, normalizedExcluded: string[]): Pro
                 results.push(item);
             }
         } else if (SUPPORTED_AUDIO_EXTS.has(path.extname(entry.name).toLowerCase())) {
-            try {
-                const stat = await fsp.stat(fullPath);
-                results.push({
-                    filePath: fullPath,
-                    size: stat.size,
-                    mtime: stat.mtimeMs,
-                });
-            } catch {
-                /* 跳过不可访问的文件 */
-            }
+            const stat = await fsp.stat(fullPath);
+            results.push({
+                filePath: fullPath,
+                size: stat.size,
+                mtime: stat.mtimeMs,
+            });
         }
     }
     return results;

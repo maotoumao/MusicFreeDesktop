@@ -8,12 +8,20 @@
  */
 
 import { CONTEXT_BRIDGE_KEY } from './common/constant';
-import type { IScanFolder, IScanProgress, IScanResult } from '@appTypes/infra/localMusic';
+import type {
+    IAudioFormat,
+    ILocalMusicMetadata,
+    IScanFolder,
+    IScanProgress,
+    IScanResult,
+} from '@appTypes/infra/localMusic';
 
 // ─── Preload Bridge ───
 
 interface IMod {
     getAllMusicItems(): Promise<IMusic.IMusicItem[]>;
+    getAudioInfo(filePath: string): Promise<IAudioFormat>;
+    getMetadata(filePath: string): Promise<ILocalMusicMetadata>;
 
     getScanFolders(): Promise<IScanFolder[]>;
     syncScanFolders(folderPaths: string[]): Promise<IScanResult>;
@@ -34,6 +42,14 @@ const mod = window[CONTEXT_BRIDGE_KEY as any] as unknown as IMod;
 // ─── LocalMusicRenderer ───
 
 class LocalMusicRenderer {
+    public getAudioInfo(filePath: string): Promise<IAudioFormat> {
+        return mod.getAudioInfo(filePath);
+    }
+
+    public getMetadata(filePath: string): Promise<ILocalMusicMetadata> {
+        return mod.getMetadata(filePath);
+    }
+
     /** No-op：保持 bootstrap 调用兼容 */
     async setup() {}
 

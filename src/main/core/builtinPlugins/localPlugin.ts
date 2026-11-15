@@ -15,7 +15,7 @@ function addFileScheme(filePath: string): string {
  */
 async function parseLocalMusicItem(filePath: string): Promise<IMusic.IMusicItem> {
     const id = createHash('md5').update(filePath).digest('hex');
-    const meta = await parseAudioMeta(filePath);
+    const meta = await parseAudioMeta(filePath, { duration: true });
 
     return {
         id,
@@ -32,26 +32,20 @@ async function parseLocalMusicItem(filePath: string): Promise<IMusic.IMusicItem>
 }
 
 /**
- * 解析文件夹中所有支持格式的本地音乐文件（并发限制为 8）
+ * 解析文件夹中所有支持格式的本地音乐文件（并发限制为 10）
  */
 async function parseLocalMusicItemFolder(folderPath: string): Promise<IMusic.IMusicItem[]> {
-    try {
-        const stat = await fsp.stat(folderPath);
-        if (!stat.isDirectory()) return [];
+    const stat = await fsp.stat(folderPath);
+    if (!stat.isDirectory()) throw new Error(`不是文件夹: ${folderPath}`);
 
-        const files = await fsp.readdir(folderPath);
-        const musicFiles = files.filter((f) =>
-            SUPPORTED_AUDIO_EXTS.has(path.extname(f).toLowerCase()),
-        );
+    const files = await fsp.readdir(folderPath);
+    const musicFiles = files.filter((f) => SUPPORTED_AUDIO_EXTS.has(path.extname(f).toLowerCase()));
 
-        const { default: PQueue } = await import('p-queue');
-        const queue = new PQueue({ concurrency: 10 });
-        return queue.addAll(
-            musicFiles.map((f) => () => parseLocalMusicItem(path.resolve(folderPath, f))),
-        );
-    } catch {
-        return [];
-    }
+    const { default: PQueue } = await import('p-queue');
+    const queue = new PQueue({ concurrency: 10 });
+    return queue.addAll(
+        musicFiles.map((f) => () => parseLocalMusicItem(path.resolve(folderPath, f))),
+    );
 }
 
 const localPluginDefine: IPlugin.IPluginInstance = {
@@ -68,10 +62,8 @@ const localPluginDefine: IPlugin.IPluginInstance = {
                 rawLrc: musicItem.rawLrc,
             };
         } else {
-            const meta = await parseAudioMeta(musicItem.localPath!, {
-                skipCovers: true,
-                skipLyrics: false,
-            });
+            // 封面和歌词使用同一读取能力，共享解析及 inflight 结果。
+            const meta = await parseAudioMeta(musicItem.localPath!);
             if (meta.rawLrc) {
                 return {
                     rawLrc: meta.rawLrc,
@@ -87,10 +79,7 @@ const localPluginDefine: IPlugin.IPluginInstance = {
     },
     async getMusicInfo(musicItem) {
         if (!musicItem.artwork) {
-            const meta = await parseAudioMeta(musicItem.localPath!, {
-                skipCovers: false,
-                skipLyrics: true,
-            });
+            const meta = await parseAudioMeta(musicItem.localPath!);
             if (meta.artwork) {
                 return {
                     artwork: meta.artwork,
