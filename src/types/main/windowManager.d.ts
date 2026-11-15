@@ -40,9 +40,14 @@ export interface IWindowManager {
     showWindow: (windowName: WindowType) => void;
 
     /**
-     * 隐藏指定窗口。
+     * 隐藏指定窗口；Windows 主窗口最小化并移出任务栏。
      */
     hideWindow: (windowName: WindowType) => void;
+
+    /**
+     * 最小化指定窗口；skipTaskBar 为 true 时收起到托盘。
+     */
+    minimizeWindow: (windowName: WindowType, skipTaskBar?: boolean) => void;
 
     /**
      * 切换指定窗口的显示状态（显示/隐藏）。
@@ -68,6 +73,11 @@ export interface IWindowManager {
      * 查询当前是否处于迷你模式。
      */
     isMinimode: () => boolean;
+
+    /**
+     * 根据 IPC 发送方的 webContents ID 查询已管理的窗口类型。
+     */
+    getWindowType: (webContentsId: number) => WindowType | undefined;
 
     /**
      * 获取指定类型窗口的原始 BrowserWindow 实例。

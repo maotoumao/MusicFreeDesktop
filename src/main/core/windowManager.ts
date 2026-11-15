@@ -154,21 +154,42 @@ class WindowManager implements IWindowManager {
             return;
         }
 
-        if (win.isMinimized()) {
-            win.restore();
-        } else if (win.isVisible()) {
-            win.focus();
-        } else {
-            win.show();
-        }
-        win.moveTop();
-
         if (windowType === 'main') {
             win.setSkipTaskbar(false);
+        }
+        if (win.isMinimized()) {
+            win.restore();
+        }
+        if (!win.isVisible()) {
+            win.show();
+        }
+        win.focus();
+        win.moveTop();
+    }
+
+    public minimizeWindow(windowType: WindowType, skipTaskBar = false): void {
+        const win = this.windows.get(windowType);
+        if (!win || win.isDestroyed()) return;
+
+        if (skipTaskBar) {
+            // Windows 主窗口保留 minimized 状态，避开 hide 后恢复空白的问题 (#412)。
+            if (windowType === 'main' && process.platform === 'win32') {
+                if (!win.isMinimized()) win.minimize();
+            } else {
+                win.hide();
+            }
+            win.setSkipTaskbar(true);
+        } else {
+            if (windowType === 'main') win.setSkipTaskbar(false);
+            win.minimize();
         }
     }
 
     public hideWindow(windowType: WindowType): void {
+        if (windowType === 'main') {
+            this.minimizeWindow(windowType, true);
+            return;
+        }
         const win = this.windows.get(windowType);
         if (!win || win.isDestroyed()) return;
         win.hide();
@@ -180,7 +201,7 @@ class WindowManager implements IWindowManager {
             this.showWindow(windowType);
             return;
         }
-        if (win.isVisible()) {
+        if (win.isVisible() && !win.isMinimized()) {
             this.hideWindow(windowType);
         } else {
             this.showWindow(windowType);
@@ -191,6 +212,10 @@ class WindowManager implements IWindowManager {
         const win = this.windows.get(windowType);
         if (!win || win.isDestroyed()) return;
 
+        if (windowType === 'main') {
+            this.showWindow(windowType);
+            return;
+        }
         if (win.isMinimized()) {
             win.restore();
         }
@@ -199,6 +224,15 @@ class WindowManager implements IWindowManager {
     }
 
     // ─── IWindowManager: 窗口状态查询 ───
+
+    public getWindowType(webContentsId: number): WindowType | undefined {
+        for (const [windowType, win] of this.windows) {
+            if (!win.isDestroyed() && win.webContents.id === webContentsId) {
+                return windowType;
+            }
+        }
+        return undefined;
+    }
 
     public __getWindowUnsafe(windowType: WindowType): BrowserWindow | null {
         const win = this.windows.get(windowType);
@@ -372,6 +406,9 @@ class WindowManager implements IWindowManager {
         }, 300);
         mainWindow.on('resize', updateWindowSize);
 
+        // 系统触发的恢复也应重新显示任务栏入口。
+        mainWindow.on('restore', () => mainWindow.setSkipTaskbar(false));
+
         // 加载主界面（首屏路由由 renderer 侧 React Router index route 处理）
         mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
@@ -418,20 +455,7 @@ class WindowManager implements IWindowManager {
             ) {
                 e.preventDefault();
 
-                // https://github.com/maotoumao/MusicFreeDesktop/issues/412
-                // [Windows] 不用 hide() —— 在 Windows 上 hide() 一个 minimized 窗口会
-                // 让 Chromium GPU compositor surface 被释放，restore() 时无法重建，
-                // 表现为窗口框正常但内容空白（典型路径：最小化 → 缩略图 X → 托盘恢复）。
-                // 改为 minimize()+setSkipTaskbar(true)，让窗口始终停留在 minimized
-                // 状态，restore() 能正确从 minimized 恢复。
-                if (process.platform === 'win32') {
-                    if (!mainWindow.isMinimized()) {
-                        mainWindow.minimize();
-                    }
-                    mainWindow.setSkipTaskbar(true);
-                } else {
-                    mainWindow.hide();
-                }
+                this.hideWindow('main');
             }
         });
 

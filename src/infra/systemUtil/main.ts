@@ -63,15 +63,9 @@ class SystemUtil {
 
     private setupWindowHandlers() {
         ipcMain.on(IPC.MINIMIZE_WINDOW, (evt, { skipTaskBar }) => {
-            const win = BrowserWindow.fromWebContents(evt.sender);
-            if (!win) return;
-
-            if (skipTaskBar) {
-                win.hide();
-                win.setSkipTaskbar(true);
-            } else {
-                win.minimize();
-            }
+            const windowType = this.windowManager.getWindowType(evt.sender.id);
+            if (!windowType) return;
+            this.windowManager.minimizeWindow(windowType, skipTaskBar);
         });
 
         ipcMain.on(IPC.SHOW_MAIN_WINDOW, () => {
@@ -90,15 +84,9 @@ class SystemUtil {
         });
 
         ipcMain.on(IPC.TOGGLE_VISIBLE, (evt) => {
-            const win = BrowserWindow.fromWebContents(evt.sender);
-            if (!win) return;
-
-            if (win.isMinimized() || !win.isVisible()) {
-                win.show();
-            } else {
-                win.hide();
-                win.setSkipTaskbar(true);
-            }
+            const windowType = this.windowManager.getWindowType(evt.sender.id);
+            if (!windowType) return;
+            this.windowManager.toggleWindow(windowType);
         });
 
         ipcMain.on(IPC.IGNORE_MOUSE_EVENT, (evt, ignore: boolean) => {
