@@ -1,5 +1,8 @@
+import { ipcRenderer } from "electron";
 import trackPlayer from "@renderer/core/track-player";
+import messageBus from "@shared/message-bus/renderer/main";
 import { audioAnalyzer } from "./analyzer.ts";
+import { observeThemeChanges } from "./theme-colors.ts";
 
 let started = false;
 
@@ -45,6 +48,21 @@ export function startVisualizationService(): void {
     if (element.src && !element.paused) {
         audioAnalyzer.attach(element);
     }
+
+    // 应答可视化窗口的取帧请求（pull 模型）
+    //
+    // preload 在隔离世界不能直接调主世界的函数，所以请求经 ipcRenderer
+    // 转发到这里。IPC 回调不受窗口隐藏时的 rAF 节流影响——这正是
+    // 「可见窗口拉、隐藏窗口应」成立的前提。
+    ipcRenderer.on("@shared/visualization/frame-request", () => {
+        const frame = audioAnalyzer.readFrame();
+        messageBus.pushVisualizationFrame(frame);
+    });
+
+    // 主题色同步：主题包切换时变化，重读并同步给可视化窗口
+    observeThemeChanges((colors) => {
+        messageBus.syncAppState({ themeColors: colors });
+    });
 }
 
 export { audioAnalyzer };
