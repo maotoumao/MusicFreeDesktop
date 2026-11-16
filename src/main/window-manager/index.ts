@@ -547,9 +547,12 @@ class WindowManager implements IWindowManager {
                 // 不需要 Node 集成。
                 nodeIntegration: false,
                 contextIsolation: true,
-                // sandbox 必须关：webpack 打包出来的 preload 用了 __dirname，
-                // 沙箱化的 preload 里没有它，preload 会直接加载失败
-                //（表现为窗口白屏、contextBridge 一个都没暴露）。
+                // sandbox 只能关：preload bundle 里被 @vercel/webpack-asset-relocator-loader
+                // 注入了 `__dirname + "/native_modules/"`，沙箱化的 preload 没有 __dirname，
+                // 会直接加载失败（窗口白屏、contextBridge 全空、控制台才看得到错误）。
+                // 试过用 DefinePlugin 替换 __dirname，但它不作用于该 loader 注入的代码；
+                // 真正修它要在 webpack.rules 里把 .js 排除出 asset-relocator，
+                // 那会影响 better-sqlite3 / sharp 这类原生模块的加载，代价更大。
                 sandbox: false,
             },
             icon: nativeImage.createFromPath(getResourcePath(ResourceName.LOGO_IMAGE)),
