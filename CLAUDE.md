@@ -167,6 +167,35 @@ cheerio、crypto-js、axios、dayjs、big-integer、qs、he、webdav，外加 `m
 - 主题包里的频谱是**假波形**（正弦叠加驱动，不接真实音频）；真实音频可视化是另一套方案，
   见 `docs/superpowers/specs/2026-11-15-visualization-design.md`。
 
+### 可视化（Visualizations）
+
+跟随音乐真实起伏的可视化效果，WMP 官方那三组：条形与波浪（bars / oscilloscope / spectrum）、
+魔幻（particle / geometry / fluid）、其他（battery / fireworks）。
+
+- **独立窗口承载**：新增 renderer entry `visualization_window`（`src/renderer-visualization/`），
+  无边框、透明、置顶、固定 480×300，**纯被动**——只有一块 canvas，没有任何交互控件
+  （无边框窗口的拖拽是全窗口生效的，常驻控件会和拖拽抢鼠标事件）。
+- **音频采集在主窗口**：`audio.captureStream()` → `AudioContext` → `AnalyserNode`。
+  采集策略 A→B：A 是 captureStream（不介入播放链路）；B 只在元素是同源 `blob:` 时才用
+  `createMediaElementSource`，**跨域走 B 会让整个播放器静音**，所以非 blob 直接判定不可用。
+  分析用的 `AudioContext` 不接 `destination`（只做分析，不影响出声）。
+- **绝不碰主播放器的音频路径**：不给 `<audio>` 加 `crossOrigin` 属性、不动
+  `applyEffectiveVolume` 的「全局音量 × 本地增益」模型。跨域直链只能明确降级
+  （窗口显示「此音源无法可视化」），不能为了可视化让音源播不出来。
+- **pull 模型传帧**：可视化窗口用自己的 rAF 每帧向主窗口要数据（message-bus 的 MessagePort
+  直连）。主窗口最小化时它的 rAF 会被节流到约 1fps，但 IPC 回调不受影响——
+  若由主窗口推帧，恰好会在用户最想看可视化的时候冻住。
+- **配色跟随主题**：主窗口读 CSS 变量（`--primaryColor` 等）后经 appState 的 `themeColors`
+  同步给可视化窗口；主题切换由 `MutationObserver` 观察 `#themepack-node` 感知。
+- **8 个效果共用同一套引擎与同一份 `IAudioFrame`**（`src/renderer-visualization/core/`），
+  新增第 9 个效果只能改一个效果文件 + `effects/index.ts` 一行。
+- 窗口的渲染进程比主窗口更严格：`nodeIntegration: false` + `contextIsolation: true` +
+  `sandbox: true`，为此单独写了 `src/preload/visualization.ts`（不含需要 Node 文件系统的模块）。
+- 配置项：`visualization.enabled`（开关）、`visualization.effect`（效果 id 或 `random`）。
+  随机轮换在可视化窗口内闭环（它订阅 `musicItem` 自行换效果），不与主窗口共享注册表。
+- 验证：`npm run verify:capture` 实测三条音源路径的 captureStream 行为；
+  `npm test` 跑对数频谱映射、节拍检测、分析器策略、主题色解析的单测。
+
 ### 持久化：两处活的，一处是死的
 
 | 层 | 位置 | 归属 | 内容 |

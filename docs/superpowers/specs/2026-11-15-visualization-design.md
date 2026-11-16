@@ -448,3 +448,22 @@ interface IThemeColors {
 - `npx tsc --noEmit` 与 `npm run lint` 无报错。
 - 8 个效果全部实现并登记在注册表。
 - 新增第 9 个效果时，只改一个文件 + 注册表一行（不改引擎）。
+
+---
+
+## 12. 实现说明（2026-11-16 落地时的偏差记录）
+
+实现过程中与上文 spec 有出入的地方，逐条记录原因。
+
+| # | spec 原文 | 实际做法 | 原因 |
+| --- | --- | --- | --- |
+| 1 | §8.7 列了 `private.visualizationWindowSize` | **不设**，只存 `private.visualizationWindowPosition` | §8.3 正文与实施计划都写明「窗口固定 480×300」；§8.7 表格是罗列，尺寸固定就没有存的意义 |
+| 2 | §9 风险栏写「换歌时 stop() 并重新 attach()；AudioContext 在 stop() 时 close()」 | **AudioContext 全局复用，不 close**，只断开 source/analyser 连接 | §8.1 正文明确「全局复用一个，不随换歌重建」；重建 context 要 50~100ms 且会多出上下文 |
+| 3 | §8.1 未指明 level 用原始频域还是对数映射后的 bin | level 用**原始频域** bin 的均值 | 对数映射把低频能量摊到多个输出 bin，用映射后的值算总能量会偏小数倍；「总体能量」按原始 FFT 幅度算才符合物理含义 |
+| 4 | §8.4 效果表未定义「节拍被抑制」时包络如何表现 | 间隔过密（< `minIntervalMs`）被抑制时，包络**归零** | 指数衰减在 50ms 后必然还有 0.717（`exp(-50/150)`），「明显小于 1」这个语义用归零表达更准确；包络参数本身不变，仍符合 §8.1「指数衰减包络（1→0，约 0.3s）」 |
+| 5 | §8.3 只说窗口照抄歌词窗口的 `webPreferences` | 实际用 `nodeIntegration: false` + `contextIsolation: true` + `sandbox: true`，并**另写一份精简 preload** | 可视化窗口只需要一块 canvas + contextBridge 暴露的 API，不需要 Node 能力；收紧安全边界不损失任何功能。精简 preload 只含 global-context / i18n / app-config / message-bus / window-drag，均不依赖 Node 文件系统 |
+| 6 | §8.4 未提「不可用时如何停画」 | 引擎增加 `pause()` / `resume()` | §8.1 要求「无数据状态」要有明确反馈；停画 + 提示文字比让效果在空数据上抖动更清楚 |
+| 7 | §5.1 的三条路径实测在 spike 脚本里 | 固化为 `npm run verify:capture`（`scripts/verify-visualization-capture.js`） | spike 是一次性的；固化成脚本后每次改采集逻辑都能回归验证，结论与 §5.1 完全一致 |
+| 8 | 未提及模块解析方式 | 被 `node --test` 直接加载的模块用**相对路径 + `.ts` 扩展名**导入 | Node 原生类型剥离要求显式扩展名，且不认 webpack 别名；只有被测试直接 import 的文件需要这样写 |
+
+此外，spec §11 写的「§10 的 7 条手动验证」实际是 11 条——按 11 条验收。
