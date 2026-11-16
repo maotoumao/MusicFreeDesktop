@@ -4,7 +4,9 @@ import { encodeUrlHeaders } from "@/common/normalize-util";
 import throttle from "lodash.throttle";
 import { DownloadState as DownloadState } from "@/common/constant";
 import {
+    fetchExpectedSize,
     getTempFilePath,
+    IDownloadFailReason,
     removeFile,
     saveResponseToFile,
 } from "./download-core";
@@ -14,10 +16,14 @@ type IOnStateChangeFunc = (data: {
     downloaded?: number;
     total?: number;
     msg?: string;
+    reason?: IDownloadFailReason;
 }) => void;
 
 /** 拼出带请求头的请求地址 */
-async function requestSource(mediaSource: IMusic.IMusicSource) {
+async function requestSource(
+    mediaSource: IMusic.IMusicSource,
+    method = "GET",
+) {
     const headers: Record<string, string> = {
         ...(mediaSource.headers ?? {}),
         "user-agent": mediaSource.userAgent,
@@ -31,9 +37,21 @@ async function requestSource(mediaSource: IMusic.IMusicSource) {
         )}`;
         urlObj.username = "";
         urlObj.password = "";
-        return fetch(urlObj.toString(), { headers });
+        return fetch(urlObj.toString(), { headers, method });
     }
-    return fetch(encodeUrlHeaders(mediaSource.url, headers));
+    return fetch(encodeUrlHeaders(mediaSource.url, headers), { method });
+}
+
+/**
+ * 发起下载前先弄清楚这个资源应该有多大。
+ *
+ * 响应是 chunked（没有 content-length）时，光看收到了多少字节没法判断
+ * 有没有下全 —— 先问一次总大小，拿到就用它当校验基准。
+ */
+async function resolveExpectedTotal(
+    mediaSource: IMusic.IMusicSource,
+): Promise<number> {
+    return fetchExpectedSize(() => requestSource(mediaSource, "HEAD"));
 }
 
 async function downloadFile(
@@ -55,7 +73,11 @@ async function downloadFile(
     } catch (e) {}
     try {
         const res = await requestSource(mediaSource);
-        const totalSize = Number(res.headers.get("content-length")) || 0;
+        let totalSize = Number(res.headers.get("content-length")) || 0;
+        if (!totalSize) {
+            // chunked 响应没有 content-length，先问一次总大小，用来校验有没有下全
+            totalSize = await resolveExpectedTotal(mediaSource);
+        }
         onStateChange({
             state,
             downloaded: 0,
@@ -72,6 +94,7 @@ async function downloadFile(
         }, 64, { leading: true, trailing: true });
 
         const result = await saveResponseToFile(res, filePath, {
+            expectedTotal: totalSize,
             onProgress: ({ downloaded, total }) => notify(downloaded, total),
         });
 
@@ -80,6 +103,7 @@ async function downloadFile(
             onStateChange({
                 state,
                 msg: result.error?.message,
+                reason: result.reason,
             });
             return;
         }
@@ -123,13 +147,17 @@ async function downloadFileNew(
 
     try {
         const res = await requestSource(mediaSource);
-        const totalSize = Number(res.headers.get("content-length")) || 0;
+        let totalSize = Number(res.headers.get("content-length")) || 0;
+        if (!totalSize) {
+            totalSize = await resolveExpectedTotal(mediaSource);
+        }
         onProgressCallback?.({
             currentSize: 0,
             totalSize: totalSize,
         });
 
         const result = await saveResponseToFile(res, filePath, {
+            expectedTotal: totalSize,
             onProgress: ({ downloaded, total }) => {
                 onProgressCallback?.({
                     currentSize: downloaded,

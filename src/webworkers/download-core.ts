@@ -15,11 +15,15 @@ export interface IDownloadProgress {
     total: number;
 }
 
+/** 下载失败的原因，界面据此给出对应的提示 */
+export type IDownloadFailReason = "incomplete" | "timeout";
+
 export interface IDownloadResult {
     ok: boolean;
     downloaded: number;
     total: number;
     error?: Error;
+    reason?: IDownloadFailReason;
 }
 
 /** 下载中的临时文件名：只有确认完整之后才改成正式文件名 */
@@ -43,6 +47,33 @@ export function isDownloadComplete(
         return true;
     }
     return downloaded === total;
+}
+
+/**
+ * 问清楚这个资源总共有多大。
+ *
+ * 有些服务器的 GET 响应是 chunked 的（不带 content-length），
+ * 光看收到了多少字节无从判断有没有下全 —— 服务端提前断开时，
+ * 响应体是「正常结束」的，看起来和一个完整文件一模一样。
+ * 这时先发一个 HEAD 请求问清楚文件到底多大，拿到就拿来当校验基准。
+ *
+ * 问不到（比如服务器不支持 HEAD）就返回 0，表示「没法校验」，
+ * 调用方按老规矩处理。
+ */
+export async function fetchExpectedSize(
+    request: () => Promise<Response>,
+): Promise<number> {
+    try {
+        const res = await request();
+        const size = Number(res.headers.get("content-length")) || 0;
+        // HEAD 一般没有响应体，保险起见消费掉，别让连接吊着
+        try {
+            await res.arrayBuffer();
+        } catch {}
+        return size > 0 ? size : 0;
+    } catch {
+        return 0;
+    }
 }
 
 export async function removeFile(filePath: string) {
@@ -137,9 +168,16 @@ export async function saveResponseToFile(
         onError?: (e: Error) => void;
         /** 空闲超时，默认 30 秒 */
         idleTimeout?: number;
+        /**
+         * 期望的文件总大小。
+         * 响应本身没有 content-length 时（chunked），由调用方另外问出来，
+         * 用来判断到底有没有下全。
+         */
+        expectedTotal?: number;
     },
 ): Promise<IDownloadResult> {
-    const total = Number(response.headers.get("content-length")) || 0;
+    const headerTotal = Number(response.headers.get("content-length")) || 0;
+    const total = headerTotal || options?.expectedTotal || 0;
     const tempPath = getTempFilePath(filePath);
     let downloaded = 0;
     let streamError: Error | null = null;
@@ -181,6 +219,9 @@ export async function saveResponseToFile(
             downloaded: written,
             total,
             error: streamError,
+            reason: /超时|timeout/i.test(streamError.message)
+                ? "timeout"
+                : undefined,
         };
     }
 
@@ -193,6 +234,7 @@ export async function saveResponseToFile(
             error: new Error(
                 `下载不完整（${written}/${total} 字节），已丢弃，请重试`,
             ),
+            reason: "incomplete",
         };
     }
 

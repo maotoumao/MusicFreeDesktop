@@ -73,7 +73,9 @@
   },
   "download_page": {
     "waiting": "等待中...",
-    "failed": "下载失败"
+    "failed": "下载失败",
+    "incomplete_file": "下载的文件不完整，已丢弃，请重试",
+    "download_timeout": "下载超时，已断开"
   },
   "plugin_management_page": {
     "plugin_management": "插件管理",

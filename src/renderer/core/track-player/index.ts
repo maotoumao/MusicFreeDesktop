@@ -897,16 +897,16 @@ class TrackPlayer {
             "downloadData",
         );
         if (preferLocal && downloadedData) {
-            const { quality, path: _path } = downloadedData;
-            if (await fsUtil.isFile(_path)) {
+            const { quality, path: _path, incomplete } = downloadedData;
+            // 下载时就知道文件没下全的（时长明显短于标称时长），
+            // 这种文件播到断点就没声音了，直接改用在线音源
+            if (!incomplete && (await fsUtil.isFile(_path))) {
                 return {
                     quality,
                     mediaSource: {
                         url: fsUtil.addFileScheme(_path),
                     },
                 };
-            } else {
-                // TODO 删除
             }
         }
 

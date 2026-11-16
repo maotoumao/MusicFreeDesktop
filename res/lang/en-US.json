@@ -73,7 +73,9 @@
   },
   "download_page": {
     "waiting": "Waiting...",
-    "failed": "Download Failed"
+    "failed": "Download Failed",
+    "incomplete_file": "The downloaded file was incomplete and has been discarded. Please try again.",
+    "download_timeout": "Download timed out and was disconnected"
   },
   "plugin_management_page": {
     "plugin_management": "Plugin Management",
