@@ -8,6 +8,7 @@
 import fs from "fs";
 import fsPromises from "fs/promises";
 import { Readable } from "stream";
+import { pipeline } from "stream/promises";
 
 export interface IDownloadProgress {
     downloaded: number;
@@ -150,24 +151,20 @@ export async function saveResponseToFile(
             options?.onProgress?.({ downloaded: size, total });
         },
         onError(e) {
+            // 流上的错误先记下来，pipeline 会把同一个错误再抛一次
             streamError = e;
-            options?.onError?.(e);
         },
     });
-    const stm = rs.pipe(fs.createWriteStream(tempPath));
 
-    await new Promise<void>((resolve) => {
-        let settled = false;
-        const done = () => {
-            if (!settled) {
-                settled = true;
-                resolve();
-            }
-        };
-        stm.on("finish", done);
-        stm.on("error", done);
-        stm.on("close", done);
-    });
+    try {
+        // 用 pipeline 而不是手动 pipe：源流出错时 pipeline 会连目标流一起销毁。
+        // 手动 pipe 的话源流的 error 不会传给目标流，写文件那一步会永远挂着，
+        // 下载任务既不报错也不结束。
+        await pipeline(rs, fs.createWriteStream(tempPath));
+    } catch (e) {
+        streamError = e as Error;
+        options?.onError?.(streamError);
+    }
 
     // 以磁盘上实际写了多少字节为准，不依赖回调里的计数
     let written = 0;
