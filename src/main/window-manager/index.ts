@@ -544,11 +544,13 @@ class WindowManager implements IWindowManager {
             webPreferences: {
                 preload: VISUALIZATION_WINDOW_PRELOAD_WEBPACK_ENTRY,
                 // 这个窗口只需要一块 canvas + 精简 preload 暴露的 API，
-                // 不需要 Node 集成，因此可以跑在完整沙箱里——
-                // 比主窗口和歌词窗口（nodeIntegration: true）更严格。
+                // 不需要 Node 集成。
                 nodeIntegration: false,
                 contextIsolation: true,
-                sandbox: true,
+                // sandbox 必须关：webpack 打包出来的 preload 用了 __dirname，
+                // 沙箱化的 preload 里没有它，preload 会直接加载失败
+                //（表现为窗口白屏、contextBridge 一个都没暴露）。
+                sandbox: false,
             },
             icon: nativeImage.createFromPath(getResourcePath(ResourceName.LOGO_IMAGE)),
         });
