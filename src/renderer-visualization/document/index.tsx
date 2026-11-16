@@ -3,7 +3,7 @@ import bootstrap from "./bootstrap";
 import VisualizationPage from "../pages";
 import { useEffect } from "react";
 
-import "./styles/index.scss";
+import "../styles/index.scss";
 import WindowDrag from "@shared/window-drag/renderer";
 
 bootstrap().then(() => {

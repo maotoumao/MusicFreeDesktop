@@ -15,13 +15,14 @@ import { defaultVisualizationThemeColors } from "@/common/visualization-constant
 
 /** 还没有收到任何帧时的占位帧 */
 const emptyFrame: IVisualization.IAudioFrame = {
-    frequency: new Uint8Array(512),
+    frequency: new Uint8Array(256),
     waveform: new Uint8Array(256),
     level: 0,
     beat: 0,
     bpm: 0,
     playing: false,
     available: false,
+    state: "idle",
 };
 
 /**
@@ -43,12 +44,17 @@ export default function VisualizationPage() {
         defaultVisualizationThemeColors,
     );
     const modeRef = useRef<string>("random");
+    /** 不可可视化时不再取帧——那些帧永远用不上，只会白耗主窗口的 FFT */
+    const pausedRef = useRef(false);
 
     const effect = useAppConfig("visualization.effect");
     const themeColors = useAppStatePartial("themeColors");
     const musicItem = useAppStatePartial("musicItem");
 
-    modeRef.current = effect;
+    useEffect(() => {
+        modeRef.current = effect;
+    }, [effect]);
+
     colorsRef.current = themeColors ?? defaultVisualizationThemeColors;
 
     useEffect(() => {
@@ -68,9 +74,10 @@ export default function VisualizationPage() {
 
         const onFrame = (frame: IVisualization.IAudioFrame) => {
             frameRef.current = frame;
-            // 跨域音源会一直回 available=false 的帧——此时停画并明确告知用户，
-            // 而不是让画面静默冻结（静默冻结和「功能坏了」在用户眼里没区别）
-            const isUnavailable = !frame.available;
+            // 只有 truly 不支持（跨域）才提示；「还没开始播 / 换歌中」是 idle，
+            // 不该弹「此音源无法可视化」——那会让每首歌加载时都闪一次错误。
+            const isUnavailable = frame.state === "unsupported";
+            pausedRef.current = isUnavailable;
             setUnavailable(isUnavailable);
             if (isUnavailable) {
                 engineRef.current?.pause();
@@ -86,7 +93,7 @@ export default function VisualizationPage() {
         let rafId = 0;
         const tick = () => {
             rafId = requestAnimationFrame(tick);
-            if (!document.hidden) {
+            if (!document.hidden && !pausedRef.current) {
                 messageBus.requestFrame();
             }
         };

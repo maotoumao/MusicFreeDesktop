@@ -21,6 +21,7 @@ import { setupMusicMeta } from "@renderer/core/music-meta";
 import { setupMusicMv } from "@renderer/core/music-mv";
 import { setupMusicDuration } from "@renderer/core/music-duration";
 import { startVisualizationService } from "@renderer/core/visualization";
+import { readThemeColors } from "@renderer/core/visualization/theme-colors";
 
 
 setAutoFreeze(false);
@@ -206,6 +207,10 @@ function setupCommandAndEvents() {
             fullLyric: trackPlayer.lyric?.parser?.getLyricItems() || [],
             progress: trackPlayer.progress?.currentTime || 0,
             duration: trackPlayer.progress?.duration || 0,
+            // 可视化窗口是**按需创建**的，它挂载时主窗口早已启动完毕——
+            // 若这里不带主题色，它首次打开只会拿到默认配色，
+            // 要等用户切一次主题才会跟上。
+            themeColors: readThemeColors(),
         };
 
         messageBus.syncAppState(appState, from);

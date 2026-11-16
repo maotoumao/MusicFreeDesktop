@@ -23,9 +23,13 @@ export function mapToLogBins(
     outputCount: number,
     options: ILogBinsOptions,
 ): Uint8Array {
+    if (outputCount <= 0) {
+        return new Uint8Array(0);
+    }
+
     const output = new Uint8Array(outputCount);
 
-    if (outputCount <= 0 || data.length === 0) {
+    if (data.length === 0) {
         return output;
     }
 

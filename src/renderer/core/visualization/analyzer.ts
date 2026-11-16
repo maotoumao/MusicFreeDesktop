@@ -1,8 +1,22 @@
 import { mapToLogBins } from "./analysis/log-bins.ts";
 import { BeatDetector } from "./analysis/beat-detector.ts";
 
-/** 频域 bin 数（对数分布后） */
-const FREQUENCY_BIN_COUNT = 512;
+/**
+ * 分析器状态。
+ *
+ * 必须区分「暂时没有数据」和「这个音源没法分析」——两者在用户眼里完全不同：
+ * 前者等一下就好，后者该给提示。
+ */
+export type IAnalyzerState = "idle" | "ok" | "unsupported";
+
+/**
+ * 频域 bin 数（对数分布后）。
+ *
+ * 不要调大：40Hz–16kHz 在 fftSize=4096 / 48kHz 下只对应约 1360 个输入 bin，
+ * 输出 bin 超过这个量级，低频区就会出现大量重复值（多个输出 bin 映射到
+ * 同一个输入 bin），柱状图会糊成一整块。
+ */
+const FREQUENCY_BIN_COUNT = 256;
 /** 时域采样点数 */
 const WAVEFORM_SAMPLE_COUNT = 256;
 /** 用于节拍检测的低频 bin 数 */
@@ -61,21 +75,35 @@ export class AudioAnalyzer {
     private context: AudioContext | null = null;
     private analyser: AnalyserNode | null = null;
     private sourceNode: MediaStreamAudioSourceNode | null = null;
+    /**
+     * 元素源节点（策略 B）。
+     *
+     * createMediaElementSource 对同一元素**只能调用一次**，且调用后元素的音频
+     * 只能经由它到达扬声器——所以它必须活到元素生命周期结束，解绑时绝不能断开
+     * （断了播放器就永久静音）。
+     */
     private mediaElementSource: MediaElementAudioSourceNode | null = null;
+    /** mediaElementSource 是为哪个元素创建的 */
+    private mediaElementSourceOwner: HTMLMediaElement | null = null;
 
     private element: HTMLMediaElement | null = null;
-    private available = false;
+    private state: IAnalyzerState = "idle";
 
     /** 复用的缓冲区，避免每帧分配 */
-    private readonly frequencyBuffer = new Uint8Array(1024);
-    private readonly timeDomainBuffer = new Uint8Array(2048);
+    private readonly frequencyBuffer = new Uint8Array(2048);
+    private readonly timeDomainBuffer = new Uint8Array(4096);
 
     constructor(env: IAudioEnvironment = defaultAudioEnvironment) {
         this.env = env;
     }
 
     get isAvailable(): boolean {
-        return this.available;
+        return this.state === "ok";
+    }
+
+    /** 当前状态：idle（暂时没数据）/ ok（正在分析）/ unsupported（此音源无法分析） */
+    get status(): IAnalyzerState {
+        return this.state;
     }
 
     /**
@@ -105,13 +133,13 @@ export class AudioAnalyzer {
                 const ctx = this.ensureContext();
                 const source = this.env.createMediaStreamSource(ctx, stream);
                 const analyser = this.env.createAnalyser(ctx);
-                analyser.fftSize = 2048;
+                analyser.fftSize = 4096;
                 analyser.smoothingTimeConstant = 0.75;
                 source.connect(analyser);
                 // 分析用的 context **不接 destination**：只做分析，绝不影响出声
                 this.sourceNode = source;
                 this.analyser = analyser;
-                this.available = true;
+                this.state = "ok";
                 this.beatDetector.reset();
                 return;
             }
@@ -125,16 +153,30 @@ export class AudioAnalyzer {
         if (isBlob) {
             try {
                 const ctx = this.ensureContext();
-                const source = this.env.createMediaElementSource(ctx, mediaElement);
+                let source: MediaElementAudioSourceNode;
+                if (
+                    this.mediaElementSource &&
+                    this.mediaElementSourceOwner === mediaElement
+                ) {
+                    // 复用：createMediaElementSource 对同一元素只能调一次，
+                    // 第二次会抛 InvalidStateError
+                    source = this.mediaElementSource;
+                } else {
+                    source = this.env.createMediaElementSource(
+                        ctx,
+                        mediaElement,
+                    );
+                    this.mediaElementSource = source;
+                    this.mediaElementSourceOwner = mediaElement;
+                    // 必须接回 destination，否则播放器会静音
+                    source.connect(ctx.destination);
+                }
                 const analyser = this.env.createAnalyser(ctx);
-                analyser.fftSize = 2048;
+                analyser.fftSize = 4096;
                 analyser.smoothingTimeConstant = 0.75;
                 source.connect(analyser);
-                // 必须接回 destination，否则播放器会静音
-                source.connect(ctx.destination);
-                this.mediaElementSource = source;
                 this.analyser = analyser;
-                this.available = true;
+                this.state = "ok";
                 this.beatDetector.reset();
                 return;
             } catch {
@@ -142,18 +184,19 @@ export class AudioAnalyzer {
             }
         }
 
-        this.available = false;
+        this.state = "unsupported";
     }
 
-    /** 解绑当前元素（不关闭 AudioContext——上下文是复用的） */
+    /**
+     * 解绑当前元素（不关闭 AudioContext——上下文是复用的）。
+     *
+     * **不会断开 mediaElementSource**：它连着 destination，断开等于让播放器
+     * 永久静音（元素的音频只能经由它到达扬声器）。这里只断开 captureStream
+     * 的源节点与分析分支。
+     */
     detach(): void {
         try {
             this.sourceNode?.disconnect();
-        } catch {
-            // 已经断开
-        }
-        try {
-            this.mediaElementSource?.disconnect();
         } catch {
             // 已经断开
         }
@@ -163,10 +206,10 @@ export class AudioAnalyzer {
             // 已经断开
         }
         this.sourceNode = null;
-        this.mediaElementSource = null;
         this.analyser = null;
         this.element = null;
-        this.available = false;
+        // idle 不是 unsupported：换歌期间只是暂时没有数据，不该提示用户
+        this.state = "idle";
         this.beatDetector.reset();
     }
 
@@ -179,7 +222,7 @@ export class AudioAnalyzer {
         const frequency = new Uint8Array(FREQUENCY_BIN_COUNT);
         const waveform = new Uint8Array(WAVEFORM_SAMPLE_COUNT);
 
-        if (!this.available || !this.analyser || !this.element) {
+        if (!this.isAvailable || !this.analyser || !this.element) {
             return {
                 frequency,
                 waveform,
@@ -188,6 +231,7 @@ export class AudioAnalyzer {
                 bpm: 0,
                 playing: false,
                 available: false,
+                state: this.state,
             };
         }
 
@@ -210,14 +254,6 @@ export class AudioAnalyzer {
             );
             frequency.set(mapped);
 
-            // level 用**原始**频域算：对数映射会重新分配能量，低频被放大，
-            // 用映射后的值算总能量会偏小。
-            let sum = 0;
-            for (let i = 0; i < raw.length; i++) {
-                sum += raw[i];
-            }
-            const level = raw.length > 0 ? sum / raw.length / 255 : 0;
-
             // 时域：抽稀到 256 点
             const timeLength = Math.min(
                 this.timeDomainBuffer.length,
@@ -230,6 +266,20 @@ export class AudioAnalyzer {
                 const index = Math.min(timeLength - 1, i * step);
                 waveform[i] = timeDomain[index];
             }
+
+            // level 用**时域 RMS**。
+            //
+            // 不能用频域均值：getByteFrequencyData 把 -100..-30dB 映射到 0..255，
+            // 真实音乐里绝大部分 bin 是 0，均值被稀释到 0.02~0.06——
+            // 而效果（粒子发射率、流体注入、电池充电）都按 0..1 设计，
+            // 用频域均值会让它们几乎不动。
+            let sumSquares = 0;
+            for (let i = 0; i < timeLength; i++) {
+                const value = (timeDomain[i] - 128) / 128;
+                sumSquares += value * value;
+            }
+            const level =
+                timeLength > 0 ? Math.sqrt(sumSquares / timeLength) : 0;
 
             // 低频能量喂节拍检测
             let lowSum = 0;
@@ -248,6 +298,7 @@ export class AudioAnalyzer {
                 bpm: beatResult.bpm,
                 playing: !this.element.paused,
                 available: true,
+                state: this.state,
             };
         } catch {
             return {
@@ -258,6 +309,7 @@ export class AudioAnalyzer {
                 bpm: 0,
                 playing: false,
                 available: false,
+                state: "idle",
             };
         }
     }

@@ -110,8 +110,9 @@ function requestFrame() {
         timestamp: Date.now(),
     };
 
+    // 丢帧而不是缓存：requestFrame 每一帧都会调一次，
+    // 进缓存会在连接建立时一口气灌进几十个请求，主窗口要连着做几十次 FFT
     if (!extPort || !connected) {
-        cachedMessages.push(message);
         return;
     }
     extPort.postMessage(message);

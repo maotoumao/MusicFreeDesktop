@@ -80,9 +80,9 @@ function handleMessage(data: IPortMessage, from: number | null) {
     ) {
         visualizationSubscribers.add(from);
     } else if (type === "requestFrame" && from !== null) {
-        // preload 在隔离世界，不能直接调主世界的函数（analyser 在主世界），
-        // 用 ipcRenderer 把请求转给主世界，由主世界取帧后再回帧
-        ipcRenderer.send("@shared/visualization/frame-request", from);
+        // 在 preload 内部闭环：直接调用主世界注册的回调。
+        // 不能走 ipcRenderer.send——那是发往主进程的，主世界收不到。
+        frameProvider?.(from);
     } else if (type === "command") {
         ee.emit("command", payload, from);
     }
@@ -91,10 +91,17 @@ function handleMessage(data: IPortMessage, from: number | null) {
 /**
  * 把一帧音频分析数据回给订阅了频谱的扩展窗口。
  *
- * 由主世界在拿到取帧请求后调用（见 @shared/visualization/frame-request）。
+ * `to` 指定只回给发起请求的那个窗口；不传则广播给所有订阅者。
  */
-function pushVisualizationFrame(frame: IVisualization.IAudioFrame) {
-    visualizationSubscribers.forEach((id) => {
+function pushVisualizationFrame(
+    frame: IVisualization.IAudioFrame,
+    to?: number,
+) {
+    const targets = to !== undefined ? [to] : Array.from(visualizationSubscribers);
+    targets.forEach((id) => {
+        if (!visualizationSubscribers.has(id)) {
+            return;
+        }
         const expPort = extPorts.get(id);
         if (!expPort) {
             return;
@@ -105,6 +112,22 @@ function pushVisualizationFrame(frame: IVisualization.IAudioFrame) {
             timestamp: Date.now(),
         });
     });
+}
+
+/**
+ * 主世界注册的取帧回调。
+ *
+ * renderer 的 webpack target 是 web，**不能 import electron**（仓库约定），
+ * 所以主世界与 preload 之间靠 contextBridge 传函数：主世界把回调注册进来，
+ * preload 收到取帧请求时直接调用它——函数体仍在主世界执行（analyser 在那边）。
+ *
+ * 注意**不能**用 ipcRenderer.send 转一手：那是发往**主进程**的，
+ * 同一渲染进程的主世界根本收不到，帧通道会整条断掉。
+ */
+let frameProvider: ((from: number) => void) | null = null;
+
+function setFrameProvider(provider: (from: number) => void) {
+    frameProvider = provider;
 }
 
 function onCommand<K extends keyof ICommand>(
@@ -188,6 +211,7 @@ const mod = {
     onCommand,
     sendCommand,
     pushVisualizationFrame,
+    setFrameProvider,
 };
 
 contextBridge.exposeInMainWorld("@shared/message-bus/main", mod);
