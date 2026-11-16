@@ -58,6 +58,8 @@ const localPluginDefine: IPlugin.IPluginInstance = {
     platform: LOCAL_PLUGIN_NAME,
     _path: '', // 内建插件不从磁盘加载，无需路径
     async getMediaSource(musicItem) {
+        // 播放链路应传入完整 item；缺失 url 时直接返回 null，避免 startsWith 崩溃
+        if (!musicItem.url) return null;
         return {
             url: addFileScheme(musicItem.url),
         };

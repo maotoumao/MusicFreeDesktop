@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useDeferredValue, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai/react';
-import { FolderSearch, Search, RefreshCw } from 'lucide-react';
+import { FolderSearch, Search, RefreshCw, Copy } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import { TabBar, type TabItem } from '../../components/ui/TabBar';
 import { Button } from '../../components/ui/Button';
@@ -19,6 +19,7 @@ import {
     scanningAtom,
     ensureLocalMusicStore,
 } from './store';
+import { scanningAtom as duplicateScanningAtom } from '../../components/business/modals/DuplicateMusicModal/store';
 import { ArtistsTab } from './components/ArtistsTab';
 import { AlbumsTab } from './components/AlbumsTab';
 import { FoldersTab } from './components/FoldersTab';
@@ -77,6 +78,18 @@ export default function LocalMusicPage() {
     const albumList = useAtomValue(albumListAtom);
     const scanning = useAtomValue(scanningAtom);
 
+    // ── 去重扫描进度（弹窗内任务的聚合展示） ──
+    const duplicateScanning = useAtomValue(duplicateScanningAtom);
+    const duplicateRuns = Object.values(duplicateScanning);
+    const duplicateActive = duplicateRuns.length > 0;
+    const duplicatePct = duplicateActive
+        ? Math.round(
+              (duplicateRuns.reduce((sum, r) => sum + (r.total ? r.done / r.total : 0), 0) /
+                  duplicateRuns.length) *
+                  100,
+          )
+        : 0;
+
     // ── Tab 项（带计数） ──
     const tabItems = useMemo<TabItem[]>(() => {
         const tabLabels: Record<LocalMusicTab, string> = {
@@ -133,14 +146,29 @@ export default function LocalMusicPage() {
                     <h2 className="p-local-music__title">{t('local_music.title')}</h2>
                     {scanning && <RefreshCw size={20} className="p-local-music__scan-indicator" />}
                 </div>
-                <Button
-                    variant="secondary"
-                    size="md"
-                    icon={<FolderSearch size={16} />}
-                    onClick={handleScanFolder}
-                >
-                    {t('local_music.scan_folder')}
-                </Button>
+                <div className="p-local-music__header-actions">
+                    <Button
+                        variant="secondary"
+                        size="md"
+                        icon={<FolderSearch size={16} />}
+                        onClick={handleScanFolder}
+                    >
+                        {t('local_music.scan_folder')}
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="md"
+                        icon={<Copy size={16} />}
+                        onClick={() => showModal('DuplicateMusicModal')}
+                    >
+                        {t('local_music.duplicate_songs')}
+                    </Button>
+                    {duplicateActive && (
+                        <span className="p-local-music__dedup-status">
+                            {t('local_music.duplicate_scanning', { pct: duplicatePct })}
+                        </span>
+                    )}
+                </div>
             </div>
 
             {/* ── TabBar + 搜索框 ── */}

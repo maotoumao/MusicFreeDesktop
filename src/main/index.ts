@@ -17,6 +17,7 @@ import musicSheet from '@infra/musicSheet/main';
 import mediaMeta from '@infra/mediaMeta/main';
 import downloadManager from '@infra/downloadManager/main';
 import localMusic from '@infra/localMusic/main';
+import audioFingerprint from '@infra/audioFingerprint/main';
 import backup from '@infra/backup/main';
 import appTray from '@main/core/appTray';
 import appThumbar from '@main/core/appThumbar';
@@ -139,6 +140,8 @@ async function bootstrapInfra(windowManager: IWindowManager) {
         appConfig,
         mediaMeta: mediaMetaProvider,
     });
+
+    audioFingerprint.setup({ appConfig });
 
     backup.setup({
         windowManager,

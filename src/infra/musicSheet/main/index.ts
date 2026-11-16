@@ -9,6 +9,8 @@
  */
 import { ipcMain } from 'electron';
 import { nanoid } from 'nanoid';
+import { pathToFileURL } from 'url';
+import type Database from 'better-sqlite3';
 import i18n from '@infra/i18n/main';
 import type { IWindowManager } from '@appTypes/main/windowManager';
 import type { IDatabaseProvider } from '@appTypes/infra/database';
@@ -29,7 +31,7 @@ import {
     type IMusicSheetEvent,
 } from '../common/constant';
 import { createQueries, type IMusicSheetQueries } from './queries';
-import { INTERNAL_SLIM_KEY } from '@common/constant';
+import { INTERNAL_SLIM_KEY, LOCAL_PLUGIN_NAME } from '@common/constant';
 import { safeStringify, safeParse } from '@common/safeSerialize';
 import type { IBackupProvider, IBackupSheet, RestoreMode } from '@appTypes/infra/backup';
 
@@ -39,6 +41,8 @@ class MusicSheetManager {
     private queries!: IMusicSheetQueries;
     private windowManager!: IWindowManager;
     private orphanCleanupTimer: ReturnType<typeof setTimeout> | null = null;
+    /** 纯本地歌曲没有歌单记录时，从 local_music 补出完整数据 */
+    private localMusicItemQuery!: Database.Statement;
 
     public setup(deps: { db: IDatabaseProvider; windowManager: IWindowManager }) {
         if (this.isSetup) return;
@@ -46,6 +50,12 @@ class MusicSheetManager {
         this.db = deps.db;
         const db = deps.db.getDatabase();
         this.queries = createQueries(db);
+        this.localMusicItemQuery = db.prepare(`
+            SELECT file_path AS filePath, platform, music_id AS id, title, artist, album,
+                   duration, artwork, file_size AS fileSize
+            FROM local_music
+            WHERE platform = ? AND music_id = ?
+        `);
         this.windowManager = deps.windowManager;
 
         this.ensureDefaultSheet();
@@ -135,12 +145,8 @@ class MusicSheetManager {
      */
     public getMusicItemProvider() {
         return {
-            getRawMusicItem: (platform: string, id: string): IMusic.IMusicItem | null => {
-                const row = this.queries.getMusicItemRaw.get(platform, id) as
-                    | { raw: string | null }
-                    | undefined;
-                return row?.raw ? safeParse<IMusic.IMusicItem>(row.raw) : null;
-            },
+            getRawMusicItem: (platform: string, id: string): IMusic.IMusicItem | null =>
+                this.resolveRawMusicItem(platform, id),
         };
     }
 
@@ -252,6 +258,47 @@ class MusicSheetManager {
         };
     }
 
+    /**
+     * 获取歌曲完整数据：优先 music_items.raw；
+     * 纯本地歌曲（platform = '本地'）可能只存在于 local_music，没有歌单记录，
+     * 此时回退查 local_music 并补出 file url，避免播放链路拿到无 url 的 slim。
+     */
+    private resolveRawMusicItem(platform: string, id: string): IMusic.IMusicItem | null {
+        const row = this.queries.getMusicItemRaw.get(platform, id) as
+            { raw: string | null } | undefined;
+        if (row?.raw) return safeParse<IMusic.IMusicItem>(row.raw);
+
+        if (platform !== LOCAL_PLUGIN_NAME) return null;
+
+        const local = this.localMusicItemQuery.get(platform, String(id)) as
+            | {
+                  filePath: string;
+                  platform: string;
+                  id: string;
+                  title: string;
+                  artist: string;
+                  album: string;
+                  duration: number | null;
+                  artwork: string | null;
+                  fileSize: number | null;
+              }
+            | undefined;
+        if (!local?.filePath) return null;
+
+        return {
+            platform: local.platform,
+            id: local.id,
+            title: local.title,
+            artist: local.artist,
+            album: local.album,
+            duration: local.duration ?? undefined,
+            artwork: local.artwork ?? undefined,
+            url: pathToFileURL(local.filePath).toString(),
+            localPath: local.filePath,
+            fileSize: local.fileSize ?? undefined,
+        } as IMusic.IMusicItem;
+    }
+
     private registerIpcHandlers() {
         // ─── 歌单 CRUD ────────────────────────
 
@@ -301,8 +348,7 @@ class MusicSheetManager {
 
         ipcMain.handle(IPC.UPDATE_SHEET, (_evt, params: IUpdateSheetParams) => {
             const existing = this.queries.getSheetById.get(params.id) as
-                | Record<string, unknown>
-                | undefined;
+                Record<string, unknown> | undefined;
             if (!existing) return;
 
             this.queries.updateSheet.run({
@@ -430,12 +476,8 @@ class MusicSheetManager {
 
         ipcMain.handle(
             IPC.GET_RAW_MUSIC_ITEM,
-            (_evt, platform: string, id: string): IMusic.IMusicItem | null => {
-                const row = this.queries.getMusicItemRaw.get(platform, id) as
-                    | { raw: string }
-                    | undefined;
-                return row ? JSON.parse(row.raw) : null;
-            },
+            (_evt, platform: string, id: string): IMusic.IMusicItem | null =>
+                this.resolveRawMusicItem(platform, String(id)),
         );
 
         ipcMain.handle(
@@ -443,12 +485,8 @@ class MusicSheetManager {
             (_evt, keys: IMedia.IMediaBase[]): IMusic.IMusicItem[] => {
                 const results: IMusic.IMusicItem[] = [];
                 for (const k of keys) {
-                    const row = this.queries.getMusicItemRaw.get(k.platform, k.id) as
-                        | { raw: string }
-                        | undefined;
-                    if (row) {
-                        results.push(JSON.parse(row.raw));
-                    }
+                    const item = this.resolveRawMusicItem(k.platform, String(k.id));
+                    if (item) results.push(item);
                 }
                 return results;
             },

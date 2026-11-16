@@ -308,6 +308,15 @@
         white-space: nowrap;
     }
 
+    &__path-display--clickable {
+        cursor: pointer;
+
+        &:hover {
+            color: var(--color-text-primary);
+            border-color: var(--color-border-strong);
+        }
+    }
+
     // ── 颜色选择�?──
 
     &__color-picker {

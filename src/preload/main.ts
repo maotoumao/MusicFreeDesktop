@@ -14,4 +14,5 @@ import '@infra/musicSheet/preload';
 import '@infra/mediaMeta/preload';
 import '@infra/downloadManager/preload';
 import '@infra/localMusic/preload';
+import '@infra/audioFingerprint/preload';
 import '@infra/backup/preload';

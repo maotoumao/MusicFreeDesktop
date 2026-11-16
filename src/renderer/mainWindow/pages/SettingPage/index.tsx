@@ -4,6 +4,7 @@ import {
     SlidersHorizontal,
     PlayCircle,
     Download,
+    Copy,
     Mic2,
     Blocks,
     Keyboard,
@@ -15,6 +16,7 @@ import { TabBar, type TabItem } from '@renderer/mainWindow/components/ui/TabBar'
 import { GeneralSection } from './sections/GeneralSection';
 import { PlaybackSection } from './sections/PlaybackSection';
 import { DownloadSection } from './sections/DownloadSection';
+import { DeduplicateSection } from './sections/DeduplicateSection';
 import { LyricSection } from './sections/LyricSection';
 import { PluginSection } from './sections/PluginSection';
 import { ShortcutSection } from './sections/ShortcutSection';
@@ -29,6 +31,7 @@ const SECTION_MAP: Record<string, () => ReactNode> = {
     general: () => <GeneralSection />,
     playback: () => <PlaybackSection />,
     download: () => <DownloadSection />,
+    deduplicate: () => <DeduplicateSection />,
     lyrics: () => <LyricSection />,
     plugins: () => <PluginSection />,
     shortcuts: () => <ShortcutSection />,
@@ -63,6 +66,11 @@ export default function SettingPage() {
                 key: 'download',
                 label: t('settings.section_name.download'),
                 icon: <Download width={16} height={16} />,
+            },
+            {
+                key: 'deduplicate',
+                label: t('settings.section_name.deduplicate'),
+                icon: <Copy width={16} height={16} />,
             },
             {
                 key: 'lyrics',
