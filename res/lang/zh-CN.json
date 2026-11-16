@@ -213,6 +213,10 @@
   "empty": {
     "hint_empty": "什么都没有呀~~~"
   },
+  "playback": {
+    "source_recovered": "音源中断，已自动换源继续播放",
+    "play_failed": "播放失败"
+  },
   "modal": {
     "add_to_my_sheets": "添加到歌单",
     "total_music_num": "共 {{number}} 首",

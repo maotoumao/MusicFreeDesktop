@@ -213,6 +213,10 @@
   "empty": {
     "hint_empty": "Nothing here~~~"
   },
+  "playback": {
+    "source_recovered": "Playback was interrupted, switched to another source and continued",
+    "play_failed": "Playback failed"
+  },
   "modal": {
     "add_to_my_sheets": "Add to Playlist",
     "total_music_num": "Total {{number}} songs",

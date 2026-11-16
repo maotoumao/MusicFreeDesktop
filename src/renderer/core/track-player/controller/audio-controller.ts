@@ -20,6 +20,25 @@ class AudioController extends ControllerBase implements IAudioController {
     private audio: HTMLAudioElement;
     private hls: Hls;
 
+    /**
+     * 播放中进度多久没推进就认为音源断了（毫秒）。
+     * 数据提前耗尽时音频元素不会报错，只是停在原地不动，
+     * 只能靠「进度不前进」来判断。
+     */
+    private static readonly STALL_TIMEOUT = 8000;
+    /** 检查间隔 */
+    private static readonly STALL_CHECK_INTERVAL = 1000;
+    /** 本地文件明显短于标称时长的比例阈值 */
+    private static readonly INCOMPLETE_RATIO = 0.9;
+
+    private stallTimer: ReturnType<typeof setInterval> | null = null;
+    /** 上一次进度推进的时间戳 */
+    private lastProgressAt = Date.now();
+    /** 上一次记录的播放位置 */
+    private lastPosition = 0;
+    /** 本次播放是否已经上报过中断 */
+    private stallReported = false;
+
     private _playerState: PlayerState = PlayerState.None;
     get playerState() {
         return this._playerState;
@@ -104,6 +123,7 @@ class AudioController extends ControllerBase implements IAudioController {
         // 刚换完音源时元数据才到货，这时候补上之前记下的跳转
         this.audio.onloadedmetadata = () => {
             this.applyPendingSeek();
+            this.checkLocalSourceComplete();
         };
 
         this.audio.onvolumechange = () => {
@@ -124,6 +144,64 @@ class AudioController extends ControllerBase implements IAudioController {
 
         // @ts-ignore  isDev
         window.ad = this.audio;
+
+        // 盯着播放进度：数据提前耗尽时音频元素不会报错，只是停在原地
+        this.stallTimer = setInterval(
+            () => this.checkStall(),
+            AudioController.STALL_CHECK_INTERVAL,
+        );
+    }
+
+    /**
+     * 播放中断检测。
+     *
+     * 音源（网络流或没下全的本地文件）中途断掉时，音频元素不一定报错，
+     * 只是进度不再前进、声音也没了。这里用「进度多久没动」来判断，
+     * 一旦确认中断就通知上层换源续播。
+     */
+    private checkStall() {
+        const audio = this.audio;
+        if (!audio || !this.hasSource || audio.paused || audio.ended) {
+            this.lastPosition = audio?.currentTime ?? 0;
+            this.lastProgressAt = Date.now();
+            this.stallReported = false;
+            return;
+        }
+        if (audio.currentTime > this.lastPosition + 0.01) {
+            this.lastPosition = audio.currentTime;
+            this.lastProgressAt = Date.now();
+            this.stallReported = false;
+            return;
+        }
+        if (this.stallReported) {
+            return;
+        }
+        if (Date.now() - this.lastProgressAt < AudioController.STALL_TIMEOUT) {
+            return;
+        }
+        this.stallReported = true;
+        this.onStalled?.();
+    }
+
+    /**
+     * 本地文件明显短于标称时长 → 文件没下全。
+     *
+     * 下载中断会留下半截文件（见 webworkers/downloader.ts 的完整性校验），
+     * 这种文件播到断点就没声音了。在线音源比标称短是正常的（试听片段），不处理。
+     */
+    private checkLocalSourceComplete() {
+        const declared = Number(this.musicItem?.duration) || 0;
+        const actual = this.audio.duration;
+        if (!declared || !isFinite(actual) || actual <= 0) {
+            return;
+        }
+        if (actual >= declared * AudioController.INCOMPLETE_RATIO) {
+            return;
+        }
+        if (!this.audio.src.startsWith("file:")) {
+            return;
+        }
+        this.onSourceIncomplete?.(actual, declared);
     }
 
     private initHls(config?: Partial<HlsConfig>) {
@@ -146,6 +224,10 @@ class AudioController extends ControllerBase implements IAudioController {
     }
 
     destroy(): void {
+        if (this.stallTimer) {
+            clearInterval(this.stallTimer);
+            this.stallTimer = null;
+        }
         this.destroyHls();
         this.reset();
     }
@@ -168,6 +250,14 @@ class AudioController extends ControllerBase implements IAudioController {
         this.audio.removeAttribute("src");
         navigator.mediaSession.metadata = null;
         navigator.mediaSession.playbackState = "none";
+        this.resetStallWatch();
+    }
+
+    /** 换歌/换源之后重新开始盯进度 */
+    private resetStallWatch() {
+        this.lastPosition = 0;
+        this.lastProgressAt = Date.now();
+        this.stallReported = false;
     }
 
     seekTo(seconds: number): void {
@@ -207,6 +297,7 @@ class AudioController extends ControllerBase implements IAudioController {
 
     prepareTrack(musicItem: IMusic.IMusicItem) {
         this.musicItem = { ...musicItem };
+        this.resetStallWatch();
 
         // 1. update metadata
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -229,6 +320,7 @@ class AudioController extends ControllerBase implements IAudioController {
 
     setTrackSource(trackSource: IMusic.IMusicSource, musicItem: IMusic.IMusicItem): void {
         this.musicItem = { ...musicItem };
+        this.resetStallWatch();
 
         // 1. update metadata
         navigator.mediaSession.metadata = new MediaMetadata({
