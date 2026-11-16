@@ -73,7 +73,9 @@
   },
   "download_page": {
     "waiting": "Waiting...",
-    "failed": "Download Failed"
+    "failed": "Download Failed",
+    "incomplete_file": "The downloaded file was incomplete and has been discarded. Please try again.",
+    "download_timeout": "Download timed out and was disconnected"
   },
   "plugin_management_page": {
     "plugin_management": "Plugin Management",
@@ -213,6 +215,10 @@
   },
   "empty": {
     "hint_empty": "Nothing here~~~"
+  },
+  "playback": {
+    "source_recovered": "Playback was interrupted, switched to another source and continued",
+    "play_failed": "Playback failed"
   },
   "modal": {
     "add_to_my_sheets": "Add to Playlist",

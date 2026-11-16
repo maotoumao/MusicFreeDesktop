@@ -1,60 +1,58 @@
 import * as Comlink from "comlink";
 import fs from "fs";
-import fsPromises from "fs/promises";
-import { Readable } from "stream";
 import { encodeUrlHeaders } from "@/common/normalize-util";
 import throttle from "lodash.throttle";
 import { DownloadState as DownloadState } from "@/common/constant";
-import { rimraf } from "rimraf";
-
-async function cleanFile(filePath: string) {
-    try {
-        if ((await fsPromises.stat(filePath)).isFile()) {
-            await rimraf(filePath);
-        }
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-const responseToReadable = (
-    response: Response,
-    options?: {
-        onRead?: (size: number) => void;
-        onDone?: () => void;
-        onError?: (e: Error) => void;
-    },
-) => {
-    const reader = response.body.getReader();
-    const rs = new Readable();
-    let size = 0;
-    const tOnRead = throttle(options?.onRead, 64, {
-        leading: true,
-        trailing: true,
-    });
-    rs._read = async () => {
-        const result = await reader.read();
-        if (!result.done) {
-            rs.push(Buffer.from(result.value));
-            size += result.value.byteLength;
-            tOnRead?.(size);
-        } else {
-            rs.push(null);
-            options?.onDone?.();
-            return;
-        }
-    };
-    rs.on("error", options?.onError);
-    return rs;
-};
+import {
+    fetchExpectedSize,
+    getTempFilePath,
+    IDownloadFailReason,
+    removeFile,
+    saveResponseToFile,
+} from "./download-core";
 
 type IOnStateChangeFunc = (data: {
     state: DownloadState;
     downloaded?: number;
     total?: number;
     msg?: string;
+    reason?: IDownloadFailReason;
 }) => void;
+
+/** 拼出带请求头的请求地址 */
+async function requestSource(
+    mediaSource: IMusic.IMusicSource,
+    method = "GET",
+) {
+    const headers: Record<string, string> = {
+        ...(mediaSource.headers ?? {}),
+        "user-agent": mediaSource.userAgent,
+    };
+    const urlObj = new URL(mediaSource.url);
+    if (urlObj.username && urlObj.password) {
+        headers["Authorization"] = `Basic ${btoa(
+            `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
+                urlObj.password,
+            )}`,
+        )}`;
+        urlObj.username = "";
+        urlObj.password = "";
+        return fetch(urlObj.toString(), { headers, method });
+    }
+    return fetch(encodeUrlHeaders(mediaSource.url, headers), { method });
+}
+
+/**
+ * 发起下载前先弄清楚这个资源应该有多大。
+ *
+ * 响应是 chunked（没有 content-length）时，光看收到了多少字节没法判断
+ * 有没有下全 —— 先问一次总大小，拿到就用它当校验基准。
+ */
+async function resolveExpectedTotal(
+    mediaSource: IMusic.IMusicSource,
+): Promise<number> {
+    return fetchExpectedSize(() => requestSource(mediaSource, "HEAD"));
+}
 
 async function downloadFile(
     mediaSource: IMusic.IMusicSource,
@@ -64,14 +62,6 @@ async function downloadFile(
     let state = DownloadState.DOWNLOADING;
     try {
         const stat = fs.statSync(filePath);
-        // if (stat.isFile()) {
-        //   state = DownloadState.ERROR;
-        //   onStateChange?.({
-        //     state,
-        //     msg: "File Exist",
-        //   });
-        //   return;
-        // }
         if (stat.isDirectory()) {
             state = DownloadState.ERROR;
             onStateChange?.({
@@ -81,67 +71,46 @@ async function downloadFile(
             return;
         }
     } catch (e) {}
-    const _headers: Record<string, string> = {
-        ...(mediaSource.headers ?? {}),
-        "user-agent": mediaSource.userAgent,
-    };
-
     try {
-        const urlObj = new URL(mediaSource.url);
-        let res: Response;
-        if (urlObj.username && urlObj.password) {
-            _headers["Authorization"] = `Basic ${btoa(
-                `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
-                    urlObj.password,
-                )}`,
-            )}`;
-            urlObj.username = "";
-            urlObj.password = "";
-            res = await fetch(urlObj.toString(), {
-                headers: _headers,
-            });
-        } else {
-            res = await fetch(encodeUrlHeaders(mediaSource.url, _headers));
+        const res = await requestSource(mediaSource);
+        let totalSize = Number(res.headers.get("content-length")) || 0;
+        if (!totalSize) {
+            // chunked 响应没有 content-length，先问一次总大小，用来校验有没有下全
+            totalSize = await resolveExpectedTotal(mediaSource);
         }
-
-        const totalSize = +res.headers.get("content-length");
         onStateChange({
             state,
             downloaded: 0,
             total: totalSize,
         });
-        const stm = responseToReadable(res, {
-            onRead(size) {
-                if (state !== DownloadState.DOWNLOADING) {
-                    return;
-                }
-                state = DownloadState.DOWNLOADING;
-                console.log(state, size, totalSize);
-                onStateChange({
-                    state,
-                    downloaded: size,
-                    total: totalSize,
-                });
-            },
-            onError: (e) => {
-                state = DownloadState.ERROR;
-                onStateChange({
-                    state,
-                    msg: e?.message,
-                });
-            },
-        }).pipe(fs.createWriteStream(filePath));
 
-        stm.on("close", () => {
-            state = DownloadState.DONE;
+        // 进度上报做节流，但完整性校验要用真实字节数，不能用节流后的计数
+        const notify = throttle((downloaded: number, total: number) => {
             onStateChange({
-                state,
+                state: DownloadState.DOWNLOADING,
+                downloaded,
+                total,
             });
+        }, 64, { leading: true, trailing: true });
+
+        const result = await saveResponseToFile(res, filePath, {
+            expectedTotal: totalSize,
+            onProgress: ({ downloaded, total }) => notify(downloaded, total),
         });
 
-        stm.on("error", () => {
-            // 清理文件
-            cleanFile(filePath);
+        if (!result.ok) {
+            state = DownloadState.ERROR;
+            onStateChange({
+                state,
+                msg: result.error?.message,
+                reason: result.reason,
+            });
+            return;
+        }
+
+        state = DownloadState.DONE;
+        onStateChange({
+            state,
         });
     } catch (e) {
         state = DownloadState.ERROR;
@@ -149,7 +118,7 @@ async function downloadFile(
             state,
             msg: e?.message,
         });
-        cleanFile(filePath);
+        await removeFile(getTempFilePath(filePath));
     }
 }
 
@@ -164,13 +133,11 @@ async function downloadFileNew(
     filePath: string,
     options?: IOptions,
 ) {
-    let hasError = false;
     const { onProgress: onProgressCallback, onEnded: onEndedCallback, onError: onErrorCallback } = options ?? {};
     try {
         const stat = fs.statSync(filePath);
 
         if (stat.isDirectory()) {
-            hasError = true;
             onErrorCallback?.(new Error("Filepath is a directory"));
             return;
         }
@@ -178,73 +145,36 @@ async function downloadFileNew(
     // pass
     }
 
-    const headers: Record<string, string> = {
-        ...(mediaSource.headers ?? {}),
-        "user-agent": mediaSource.userAgent,
-    };
-
     try {
-        const urlObj = new URL(mediaSource.url);
-        let res: Response;
-        if (urlObj.username && urlObj.password) {
-            headers["Authorization"] = `Basic ${btoa(
-                `${decodeURIComponent(urlObj.username)}:${decodeURIComponent(
-                    urlObj.password,
-                )}`,
-            )}`;
-            urlObj.username = "";
-            urlObj.password = "";
-            res = await fetch(urlObj.toString(), {
-                headers: headers,
-            });
-        } else {
-            res = await fetch(encodeUrlHeaders(mediaSource.url, headers));
+        const res = await requestSource(mediaSource);
+        let totalSize = Number(res.headers.get("content-length")) || 0;
+        if (!totalSize) {
+            totalSize = await resolveExpectedTotal(mediaSource);
         }
-
-        const totalSize = +res.headers.get("content-length");
         onProgressCallback?.({
             currentSize: 0,
             totalSize: totalSize,
         });
 
-
-        const stm = responseToReadable(res, {
-            onRead(size) {
-                if (hasError) {
-                    // todo abort
-                    return;
-                }
+        const result = await saveResponseToFile(res, filePath, {
+            expectedTotal: totalSize,
+            onProgress: ({ downloaded, total }) => {
                 onProgressCallback?.({
-                    currentSize: size,
-                    totalSize: totalSize,
+                    currentSize: downloaded,
+                    totalSize: total,
                 });
             },
-            onError: (e) => {
-                if (!hasError) {
-                    hasError = true;
-                    onErrorCallback?.(e);
-                }
-            },
-        }).pipe(fs.createWriteStream(filePath));
-
-        stm.on("close", () => {
-            onEndedCallback?.();
         });
 
-        stm.on("error", (e) => {
-            if (!hasError) {
-                hasError = true;
-                onErrorCallback?.(e);
-            }
-            // 清理文件
-            cleanFile(filePath);
-        });
-    } catch (e) {
-        if (!hasError) {
-            hasError = true;
-            onErrorCallback?.(e);
+        if (!result.ok) {
+            onErrorCallback?.(result.error ?? new Error("下载失败"));
+            return;
         }
-        cleanFile(filePath);
+
+        onEndedCallback?.();
+    } catch (e) {
+        onErrorCallback?.(e);
+        await removeFile(getTempFilePath(filePath));
     }
 }
 

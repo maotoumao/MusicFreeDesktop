@@ -89,6 +89,12 @@ declare namespace IMusic {
     downloadData?: {
       path: string;
       quality: IQualityKey;
+      /**
+       * 下载下来的文件明显不完整（时长远短于标称时长）。
+       * 这种文件不能拿去播 —— 播到断点就没声音了，
+       * 播放时会改用在线音源。
+       */
+      incomplete?: boolean;
     };
   }
 

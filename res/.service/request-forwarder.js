@@ -35,6 +35,19 @@ function forwardRequest(clientRes, url, method, headers) {
         targetRes.pipe(clientRes, {
             end: true,
         });
+
+        // 上游中途断开时，pipe 不会把错误传给客户端响应，
+        // 客户端就会一直挂着等一个永远不来的结尾（body 少了 content-length 那么多字节）。
+        // 这里主动断开，让客户端立刻看到「传输中断」而不是无声卡住。
+        targetRes.on("error", (error) => {
+            console.error("Error forwarding response:", error);
+            clientRes.destroy();
+        });
+
+        // 客户端先走了就把上游也断掉，避免白流一整首
+        clientRes.on("close", () => {
+            targetRes.destroy();
+        });
     });
 
     req.on("error", (error) => {

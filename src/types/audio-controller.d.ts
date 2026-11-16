@@ -59,6 +59,10 @@ export interface IAudioController {
     onProgressUpdate?: (progress: CurrentTime) => void;
     // 出错
     onError?: (type: ErrorReason, error?: any) => void;
+    // 播放中断：进度长时间不推进，音源大概率已经断了
+    onStalled?: () => void;
+    // 本地音源不完整：实际时长明显短于标称时长
+    onSourceIncomplete?: (actualDuration: number, declaredDuration: number) => void;
     // 播放结束
     onEnded?: () => void;
     // 音量改变

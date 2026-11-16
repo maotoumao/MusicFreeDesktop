@@ -73,7 +73,9 @@
   },
   "download_page": {
     "waiting": "等待中...",
-    "failed": "下载失败"
+    "failed": "下载失败",
+    "incomplete_file": "下载的文件不完整，已丢弃，请重试",
+    "download_timeout": "下载超时，已断开"
   },
   "plugin_management_page": {
     "plugin_management": "插件管理",
@@ -213,6 +215,10 @@
   },
   "empty": {
     "hint_empty": "什么都没有呀~~~"
+  },
+  "playback": {
+    "source_recovered": "音源中断，已自动换源继续播放",
+    "play_failed": "播放失败"
   },
   "modal": {
     "add_to_my_sheets": "添加到歌单",

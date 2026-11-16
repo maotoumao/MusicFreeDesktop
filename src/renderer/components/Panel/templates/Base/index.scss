@@ -1,10 +1,14 @@
 .components--panel-base {
-  position: absolute;
+  // 面板通过 portal 渲染在 body 下，因此用 fixed 定位
+  // 上下边界避开标题栏与底部播放条，保持与原来（相对 .body-container）一致的遮罩范围
+  position: fixed;
+  // 与 src/common/constant.ts 的 zIndexLevels.panel 保持一致
+  // 播放队列面板会在运行时用内联样式提到 zIndexLevels.playListPanel
   z-index: 10000;
-  top: 0;
+  top: var(--appHeaderHeight);
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: var(--appMusicBarHeight);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -12,7 +16,7 @@
   cursor: default !important;
 
   &[data-cover-header=true] {
-    top: calc(-1 * var(--appHeaderHeight));
+    top: 0;
   }
 
   & .components--panel-base-content {

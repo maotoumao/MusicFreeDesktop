@@ -21,6 +21,8 @@ import { useEffect, useState } from "react";
 import { DownloadEvts, ee } from "./ee";
 import AppConfig from "@shared/app-config/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
+import { verifyDownloadedFile } from "./verify";
+import { i18n } from "@/shared/i18n/renderer";
 
 
 export interface IDownloadStatus {
@@ -28,6 +30,8 @@ export interface IDownloadStatus {
     downloaded?: number;
     total?: number;
     msg?: string;
+    /** 失败原因，界面据此给出对应的提示 */
+    reason?: string;
 }
 
 const downloadingMusicStore = new Store<Array<IMusic.IMusicItem>>([]);
@@ -168,9 +172,29 @@ async function downloadMusicImpl(
             downloaderWorker.downloadFile(
                 mediaSource,
                 downloadPath,
-                Comlink.proxy((dataState) => {
-                    onStateChange(dataState);
+                Comlink.proxy(async (dataState) => {
+                    if (dataState.state === DownloadState.ERROR && dataState.reason) {
+                        // worker 那边只认得字节数，翻译成人话交给界面
+                        onStateChange({
+                            ...dataState,
+                            msg: i18n.t(
+                                dataState.reason === "timeout"
+                                    ? "download_page.download_timeout"
+                                    : "download_page.incomplete_file",
+                            ),
+                        });
+                        return;
+                    }
                     if (dataState.state === DownloadState.DONE) {
+                        // 服务器可能只给一小段，字节数还完全对得上 ——
+                        // 量一下实际时长，明显短于标称时长就说明没下全。
+                        // 这不算下载失败（有些音源本来就只给试听片段），
+                        // 但这个文件不能拿去播，播放时会改用在线音源。
+                        const complete = await verifyDownloadedFile(
+                            downloadPath,
+                            musicItem.duration,
+                        );
+                        onStateChange(dataState);
                         addDownloadedMusicToList(
                             setInternalData<IMusic.IMusicItemInternalData>(
                                 musicItem as any,
@@ -178,11 +202,14 @@ async function downloadMusicImpl(
                                 {
                                     path: downloadPath,
                                     quality: realQuality,
+                                    incomplete: complete ? undefined : true,
                                 },
                                 true,
                             ) as IMusic.IMusicItem,
                         );
+                        return;
                     }
+                    onStateChange(dataState);
                 }),
             );
         } else {

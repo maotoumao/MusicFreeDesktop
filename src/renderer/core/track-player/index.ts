@@ -40,6 +40,8 @@ import { isEmptyLyricSource } from "@/common/lyric-util";
 import { fsUtil } from "@shared/utils/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
 import { correctDurationByMeasured } from "@renderer/core/music-duration";
+import { i18n } from "@/shared/i18n/renderer";
+import { toast } from "react-toastify";
 
 const {
     musicQueueStore,
@@ -156,6 +158,11 @@ class TrackPlayer {
     /** 最近一次测到的音频时长，用来判断是不是变了 */
     private lastMeasuredDuration = 0;
 
+    /** 当前歌曲已经因为「音源中断」换过几次源了，防止无限重试 */
+    private sourceRecoveryCount = 0;
+    /** 换源次数上限 */
+    private static readonly MAX_SOURCE_RECOVERY = 2;
+
     private ee: EventEmitter<InternalPlayerEvents>;
 
     constructor() {
@@ -176,6 +183,10 @@ class TrackPlayer {
         this.ee.on(PlayerEvents.Error, async (errorMusicItem) => {
             // config
             const needSkip = AppConfig.getConfig("playMusic.playError") === "skip";
+
+            // 以前这里只把进度清零，界面上看不出发生了什么，
+            // 用户只看到「歌曲自己停了」。给个提示。
+            toast.error(i18n.t("playback.play_failed"));
 
             this.resetProgress();
             if (this.musicQueue.length > 1 && needSkip) {
@@ -247,6 +258,15 @@ class TrackPlayer {
 
         audioController.onError = async (type, reason) => {
             this.ee.emit(PlayerEvents.Error, audioController.musicItem, reason);
+        };
+
+        // 音源中途断了：重新取一次源，从当前位置接着播
+        audioController.onStalled = () => {
+            this.recoverFromBrokenSource();
+        };
+        // 本地文件没下全：改用在线音源
+        audioController.onSourceIncomplete = () => {
+            this.recoverFromBrokenSource();
         };
 
 
@@ -864,7 +884,11 @@ class TrackPlayer {
     }
 
 
-    private async fetchMediaSource(musicItem: IMusic.IMusicItem, quality?: IMusic.IQualityKey) {
+    private async fetchMediaSource(
+        musicItem: IMusic.IMusicItem,
+        quality?: IMusic.IQualityKey,
+        options?: { preferLocal?: boolean },
+    ) {
         const defaultQuality = AppConfig.getConfig("playMusic.defaultQuality");
         const whenQualityMissing = AppConfig.getConfig("playMusic.whenQualityMissing");
 
@@ -874,21 +898,23 @@ class TrackPlayer {
         let realQuality: IMusic.IQualityKey = qualityOrder[0];
 
         // 1. 判断是否已下载
+        //    换源重试时不走本地文件 —— 本地文件没下全正是最常见的断流原因
+        const preferLocal = options?.preferLocal ?? true;
         const downloadedData = getInternalData<IMusic.IMusicItemInternalData>(
             musicItem,
             "downloadData",
         );
-        if (downloadedData) {
-            const { quality, path: _path } = downloadedData;
-            if (await fsUtil.isFile(_path)) {
+        if (preferLocal && downloadedData) {
+            const { quality, path: _path, incomplete } = downloadedData;
+            // 下载时就知道文件没下全的（时长明显短于标称时长），
+            // 这种文件播到断点就没声音了，直接改用在线音源
+            if (!incomplete && (await fsUtil.isFile(_path))) {
                 return {
                     quality,
                     mediaSource: {
                         url: fsUtil.addFileScheme(_path),
                     },
                 };
-            } else {
-                // TODO 删除
             }
         }
 
@@ -919,6 +945,51 @@ class TrackPlayer {
     }
 
 
+    /**
+     * 音源中途断了，换一次源接着播。
+     *
+     * 断流有两种常见来源：
+     *   1. 本地下载的文件没下全（下载中断留下的半截文件）——改用在线音源；
+     *   2. 网络流被切断（连接提前结束、地址过期）——重新取一个新地址。
+     * 两种都用在线音源重试，重试次数用完就按播放失败处理。
+     */
+    private async recoverFromBrokenSource() {
+        const musicItem = this.currentMusic;
+        if (!musicItem) {
+            return;
+        }
+        if (this.sourceRecoveryCount >= TrackPlayer.MAX_SOURCE_RECOVERY) {
+            // 换了这么多次还是断，只能按播放失败处理（按配置跳过或停下）
+            this.ee.emit(
+                PlayerEvents.Error,
+                musicItem,
+                new Error("音源中断"),
+            );
+            return;
+        }
+        this.sourceRecoveryCount++;
+        // 从断掉的地方接着播
+        const position = this.progress.currentTime || 0;
+        try {
+            const { mediaSource, quality } = await this.fetchMediaSource(
+                musicItem,
+                this.currentQuality,
+                { preferLocal: false },
+            );
+            if (!mediaSource?.url || !this.isCurrentMusic(musicItem)) {
+                return;
+            }
+            this.setCurrentQuality(quality);
+            this.setTrack(mediaSource, musicItem, {
+                seekTo: position,
+                autoPlay: true,
+            });
+            toast.info(i18n.t("playback.source_recovered"));
+        } catch (e) {
+            this.ee.emit(PlayerEvents.Error, musicItem, e);
+        }
+    }
+
     // 只读数据的设置
     private setCurrentMusic(musicItem: IMusic.IMusicItem | null) {
         if (!this.isCurrentMusic(musicItem)) {
@@ -926,6 +997,8 @@ class TrackPlayer {
             this.ee.emit(PlayerEvents.MusicChanged, musicItem);
             this.fetchCurrentLyric();
             this.setCurrentLyric(null);
+            // 换歌了，之前的中断计数作废
+            this.sourceRecoveryCount = 0;
 
             if (musicItem) {
                 setUserPreference("currentMusic", musicItem);
