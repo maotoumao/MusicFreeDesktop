@@ -8,7 +8,7 @@ import MusicFavorite from "@/renderer/components/MusicFavorite";
 import Tag from "@/renderer/components/Tag";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import useVirtualList from "@/hooks/useVirtualList";
-import { localPluginName, rem, timeStampSymbol, zIndexLevels } from "@/common/constant";
+import { rem, zIndexLevels } from "@/common/constant";
 import { showMusicContextMenu } from "@/renderer/components/MusicList";
 import MusicDownloaded from "@/renderer/components/MusicDownloaded";
 import Base from "../Base";
@@ -21,12 +21,8 @@ import {
     useMusicMeta,
 } from "@/renderer/core/music-meta";
 import { usePluginDisplayName } from "@shared/plugin-manager/renderer";
-import { requestLocateMusic } from "@renderer/core/music-locate";
-import { useNavigate } from "react-router-dom";
-import MusicSheet from "@renderer/core/music-sheet";
-import { getRecentlyPlaylist } from "@renderer/core/recently-playlist";
+import { useLocateMusicInSheet } from "@renderer/core/music-locate/use-locate-music-in-sheet";
 import { hidePanel } from "@/renderer/components/Panel";
-import { toast } from "react-toastify";
 
 const estimateItemHeight = 2.6 * rem;
 const DRAG_TAG = "Playlist";
@@ -109,46 +105,14 @@ export default function PlayList(props: IProps) {
      * 在播放队列里点一首歌时，找到它所在的歌单跳过去，
      * 歌单列表会自动滚到那首歌并选中它。
      */
-    const navigate = useNavigate();
+    const locate = useLocateMusicInSheet();
     const locateMusicInSheet = useCallback(
         (musicItem: IMusic.IMusicItem) => {
-            const key = getMediaPrimaryKey(musicItem);
-            // 本地歌单：同一首歌可能在多个歌单里，取最近加入的那个
-            let targetSheet: { id: string; time: number } | null = null;
-            MusicSheet.frontend.getAllSheets().forEach((sheet) => {
-                const ref = (sheet.musicList ?? []).find(
-                    (it) => getMediaPrimaryKey(it) === key,
-                );
-                if (!ref) {
-                    return;
-                }
-                const time = ref[timeStampSymbol] ?? 0;
-                if (!targetSheet || time > targetSheet.time) {
-                    targetSheet = { id: sheet.id, time };
-                }
-            });
-            if (targetSheet) {
-                requestLocateMusic(musicItem, targetSheet.id);
-                navigate(
-                    `/main/musicsheet/${encodeURIComponent(
-                        localPluginName,
-                    )}/${encodeURIComponent(targetSheet.id)}`,
-                );
+            if (locate(musicItem)) {
                 hidePanel();
-                return;
             }
-            // 不在任何歌单里的话，看看最近播放里有没有
-            if (
-                getRecentlyPlaylist().some((it) => isSameMedia(it, musicItem))
-            ) {
-                requestLocateMusic(musicItem, "recently-play");
-                navigate("/main/recently_play");
-                hidePanel();
-                return;
-            }
-            toast.info(t("panel.play_list_locate_not_found"));
         },
-        [navigate, t],
+        [locate],
     );
 
     return (
