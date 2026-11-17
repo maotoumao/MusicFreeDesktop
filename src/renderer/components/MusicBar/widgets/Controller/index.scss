@@ -6,6 +6,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  // 空白处可点击：跳到当前歌曲所在的歌单
+  cursor: pointer;
 
   & .controller-btn {
     cursor: pointer;
