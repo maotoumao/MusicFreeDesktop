@@ -56,19 +56,23 @@ interface _IAppConfig {
     /** 是否启用全局快捷键 */
     "shortCut.enableGlobal": boolean;
     /** 快捷键映射 */
-    "shortCut.shortcuts": Record<
-        | "play/pause"
-        | "skip-previous"
-        | "skip-next"
-        | "toggle-desktop-lyric"
-        | "volume-up"
-        | "volume-down"
-        | "like/dislike",
-        | "toggle-main-window-visible",
-        {
-            local?: string[] | null;
-            global?: string[] | null;
-        }
+    "shortCut.shortcuts": Partial<
+        Record<
+            | "play/pause"
+            | "skip-previous"
+            | "skip-next"
+            | "seek-backward"
+            | "seek-forward"
+            | "toggle-desktop-lyric"
+            | "volume-up"
+            | "volume-down"
+            | "like/dislike"
+            | "toggle-main-window-visible",
+            {
+                local?: string[] | null;
+                global?: string[] | null;
+            }
+        >
     >;
 
     /** 下载路径 */

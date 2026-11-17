@@ -443,6 +443,8 @@
       "play/pause": "播放/暂停",
       "skip-next": "播放下一首",
       "skip-previous": "播放上一首",
+      "seek-backward": "快退 5 秒",
+      "seek-forward": "快进 5 秒",
       "volume-up": "增加音量",
       "volume-down": "降低音量",
       "toggle-desktop-lyric": "打开/关闭桌面歌词",

@@ -443,6 +443,8 @@
       "play/pause": "Play/Pause",
       "skip-next": "Play Next",
       "skip-previous": "Play Previous",
+      "seek-backward": "Seek Backward 5s",
+      "seek-forward": "Seek Forward 5s",
       "volume-up": "Volume Up",
       "volume-down": "Volume Down",
       "toggle-desktop-lyric": "Toggle Desktop Lyric",

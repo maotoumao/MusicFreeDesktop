@@ -29,6 +29,12 @@ const _defaultAppConfig: IAppConfig =  {
     "lyric.recognition.token": "",
     "shortCut.enableLocal": true,
     "shortCut.enableGlobal": false,
+    "shortCut.shortcuts": {
+        "skip-previous": { local: ["Up"], global: null },
+        "skip-next": { local: ["Down"], global: null },
+        "seek-backward": { local: ["Left"], global: null },
+        "seek-forward": { local: ["Right"], global: null },
+    },
     "download.concurrency": 5,
     "normal.musicListColumnsShown": [],
     "backup.resumeBehavior": "append",

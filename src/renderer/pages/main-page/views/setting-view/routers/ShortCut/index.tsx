@@ -51,7 +51,7 @@ function ShortCutTable() {
                     {t("settings.short_cut.enable_global")}
                 </div>
             </div>
-            {shortCutKeys.map((it: string) => (
+            {shortCutKeys.map((it: IShortCutKeys) => (
                 <div className="setting-view--short-cut-table-row" key={it}>
                     <div className="short-cut-cell">{t(`settings.short_cut.${it}`)}</div>
                     <div className="short-cut-cell">
