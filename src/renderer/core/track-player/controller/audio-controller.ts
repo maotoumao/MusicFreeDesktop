@@ -257,6 +257,8 @@ class AudioController extends ControllerBase implements IAudioController {
         this.playerState = PlayerState.None;
         this.audio.src = "";
         this.audio.removeAttribute("src");
+        // 残留的跳转请求属于上一首歌，留着会被下一首的 loadedmetadata 套用
+        this.pendingSeek = null;
         navigator.mediaSession.metadata = null;
         navigator.mediaSession.playbackState = "none";
         this.resetStallWatch();
@@ -324,6 +326,9 @@ class AudioController extends ControllerBase implements IAudioController {
         this.playerState = PlayerState.None;
         this.audio.src = "";
         this.audio.removeAttribute("src");
+        // 换歌了，上一首遗留的跳转不能带到新歌上
+        // （本首歌自己的续播位置由 setTrack 在设好音源后再 seekTo）
+        this.pendingSeek = null;
         navigator.mediaSession.playbackState = "none";
     }
 

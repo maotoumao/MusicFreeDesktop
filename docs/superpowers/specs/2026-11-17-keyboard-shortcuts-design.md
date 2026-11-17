@@ -48,9 +48,16 @@
 ## 取舍与已知限制
 
 - `loadConfig` 是浅合并：若用户 config.json 里已存在 `shortCut.shortcuts` 对象，
-  新的默认键位不会生效（本机便携版的 config.json 里没有该键，不受影响）。
-  用户之后在设置页改任一快捷键时，会把合并后的完整对象写回文件，默认值随之固化。
+  新的默认键位不会生效。**注意**：`shortCut.setup()` 走的是 `registerLocalShortCut`，
+  它在末尾无条件 `AppConfig.setConfig`，所以首次启动就会把这四条默认键位写进
+  config.json，此后调整默认键位不再生效（而且每次启动会重复写盘）。
 - 快捷键录制输入框里按方向键时，录制和播放动作可能同时触发（既有机制的通病，
-  所有已绑定快捷键都一样），不专门处理。
+  所有已绑定快捷键都一样），不专门处理；副作用是给其它功能录一个方向键后，
+  该键会同时绑两个动作。
+- 切歌后音源还在取的窗口里、以及播放失败被重置之后，`progress` 反映的是上一首或空值；
+  这两个状态下快进/快退直接忽略（见 `bootstrap.ts` 的 `seekBy`），
+  同时 `AudioController.reset()` / `prepareTrack()` 会清掉 `pendingSeek`，
+  避免跳转位置被带到下一首歌。
 - 打包版无热重载，需重新打包并覆盖便携版后生效。
-- 未做单元测试；验证靠 `npx tsc --noEmit` + 实机按键。
+- 快进/快退的边界计算由 `src/renderer/core/track-player/seek.test.ts` 覆盖
+  （6 条用例，`npm test`）；命令接线、输入框里不误触发等行为靠实机验证。

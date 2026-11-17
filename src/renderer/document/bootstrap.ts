@@ -158,7 +158,16 @@ function setupCommandAndEvents() {
         if (!trackPlayer.currentMusic) {
             return;
         }
+        // 切歌后音源还在取，progress 仍是上一首的；此时记下的跳转会被
+        // 下一首的 loadedmetadata 套用（pendingSeek），所以直接忽略
+        if (trackPlayer.playerState === PlayerState.Buffering) {
+            return;
+        }
         const { currentTime, duration } = trackPlayer.progress;
+        // duration 非有限说明当前没有可用音源（例如播放失败后被重置）
+        if (!isFinite(duration)) {
+            return;
+        }
         trackPlayer.seekTo(getSeekTarget(currentTime, duration, delta));
     };
     messageBus.onCommand("SeekForward", () => {
