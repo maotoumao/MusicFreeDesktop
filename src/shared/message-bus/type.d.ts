@@ -21,6 +21,10 @@ export interface ICommand {
   SkipToPrevious: void;
   /** 切换下一首歌 */
   SkipToNext: void;
+  /** 快退 5 秒 */
+  SeekBackward: void;
+  /** 快进 5 秒 */
+  SeekForward: void;
   /** 设置循环模式 */
   SetRepeatMode: RepeatMode;
   /** 播放音乐 */

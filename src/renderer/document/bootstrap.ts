@@ -10,6 +10,7 @@ import ThemePack from "@/shared/themepack/renderer";
 import { addToRecentlyPlaylist, setupRecentlyPlaylist } from "../core/recently-playlist";
 import ServiceManager from "@shared/service-manager/renderer";
 import { CurrentTime, PlayerEvents } from "@renderer/core/track-player/enum";
+import { getSeekTarget } from "@renderer/core/track-player/seek";
 import { appWindowUtil, fsUtil } from "@shared/utils/renderer";
 import PluginManager from "@shared/plugin-manager/renderer";
 import messageBus from "@shared/message-bus/renderer/main";
@@ -152,6 +153,19 @@ function setupCommandAndEvents() {
     });
     messageBus.onCommand("SkipToPrevious", () => {
         trackPlayer.skipToPrev();
+    });
+    const seekBy = (delta: number) => {
+        if (!trackPlayer.currentMusic) {
+            return;
+        }
+        const { currentTime, duration } = trackPlayer.progress;
+        trackPlayer.seekTo(getSeekTarget(currentTime, duration, delta));
+    };
+    messageBus.onCommand("SeekForward", () => {
+        seekBy(5);
+    });
+    messageBus.onCommand("SeekBackward", () => {
+        seekBy(-5);
     });
     messageBus.onCommand("TogglePlayerState", () => {
         if (trackPlayer.playerState === PlayerState.Playing) {
