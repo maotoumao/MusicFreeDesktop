@@ -6,7 +6,22 @@ import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import { localPluginName, timeStampSymbol } from "@/common/constant";
 import MusicSheet from "@renderer/core/music-sheet";
 import { getRecentlyPlaylist } from "@renderer/core/recently-playlist";
+import { musicDetailShownStore } from "@renderer/components/MusicDetail/store";
+import mvPlayerStore, {
+    hideMVPlayer,
+} from "@renderer/components/Modal/templates/MVPlayer/store";
 import { requestLocateMusic } from "./index";
+
+/**
+ * 歌词详情层和 MV 播放器都是盖在页面上的全屏覆盖层，
+ * 定位要露出歌单页，所以跳转前先把它们收掉。
+ */
+function closeCoveringLayers() {
+    if (mvPlayerStore.getValue()?.visible) {
+        hideMVPlayer();
+    }
+    musicDetailShownStore.setValue(false);
+}
 
 /**
  * 定位某首歌所在的歌单：跳过去，歌单列表会自动滚到那首歌并选中它。
@@ -38,6 +53,7 @@ export function useLocateMusicInSheet() {
                 }
             });
             if (targetSheet) {
+                closeCoveringLayers();
                 requestLocateMusic(musicItem, targetSheet.id);
                 navigate(
                     `/main/musicsheet/${encodeURIComponent(
@@ -50,6 +66,7 @@ export function useLocateMusicInSheet() {
             if (
                 getRecentlyPlaylist().some((it) => isSameMedia(it, musicItem))
             ) {
+                closeCoveringLayers();
                 requestLocateMusic(musicItem, "recently-play");
                 navigate("/main/recently_play");
                 return true;

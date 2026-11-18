@@ -51,3 +51,16 @@
 - 定位会离开当前页面（和队列面板里的行为一致），是否关闭已打开的弹窗不做特殊处理。
 - 没有正在播放的歌时点击无反应。
 - 打包版无热重载，需重新打包覆盖便携版。
+
+## 追加（2026-11-18）：定位时收起歌词详情与 MV 覆盖层
+
+歌词详情页（`musicDetailShownStore`）和 MV 播放器（`mvPlayerStore`）都是全屏/窗口覆盖层，
+z-index 低于播放条，所以定位点击能触发，但跳转后覆盖层仍盖在歌单页前面。
+
+修复：`useLocateMusicInSheet` 在两个成功分支（找到歌单 / 找到最近播放）里先调用
+`closeCoveringLayers()` —— MV 打开时 `hideMVPlayer()`，并 `musicDetailShownStore.setValue(false)`，
+再 `navigate`。找不到歌单（只弹提示）时不关闭任何界面。
+
+侧边栏联动：`MySheets` 订阅 `useLocateTarget`，定位到本地歌单时自动展开「我的歌单」折叠区
+（Headless UI v1 的 `Disclosure` 不支持受控 `open`，已改为自管理状态）并把目标项
+`scrollIntoView({ block: "nearest" })`；`ListItem` 为此改成 `forwardRef`。
