@@ -1,0 +1,16 @@
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+/*! https://mths.be/base64 v1.0.0 by @mathias | MIT license */
+
+/**
+* @license nested-property https://github.com/cosmosio/nested-property
+*
+* The MIT License (MIT)
+*
+* Copyright (c) 2014-2020 Olivier Scherrer <pode.fr@gmail.com>
+*/

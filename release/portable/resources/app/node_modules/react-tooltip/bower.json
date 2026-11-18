@@ -1,0 +1,26 @@
+{
+  "name": "react-tooltip",
+  "description": "react tooltip component",
+  "main": "standalone/react-tooltip.js",
+  "moduleType": ["globals", "amd", "node"],
+  "license": "MIT",
+  "ignore": ["bin", "example"],
+  "keywords": ["react", "react-component", "tooltip", "react-tooltip"],
+  "authors": [
+    "wwayne",
+    "danielbarion",
+    "alexgurr",
+    "aronhelser",
+    "roggervalf",
+    "huumanoid"
+  ],
+  "homepage": "https://github.com/wwayne/react-tooltip",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wwayne/react-tooltip"
+  },
+  "dependencies": {
+    "react": ">=0.14",
+    "react-dom": ">=0.14"
+  }
+}

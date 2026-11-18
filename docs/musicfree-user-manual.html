@@ -1,0 +1,1115 @@
+<title>MusicFree 使用说明书</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* ---------- 设计令牌 ---------- */
+/* 布局：左侧固定目录 + 右侧手册正文；配色取自播放器界面的冷灰底与青绿强调色 */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-soft: #eef1f5;
+  --fg: #1b2028;
+  --muted: #5c6675;
+  --border: #dfe4ec;
+  --accent: #0f766e;
+  --accent-strong: #0b5f59;
+  --accent-soft: #e3f2ef;
+  --warn: #9a5b12;
+  --warn-soft: #fdf3e2;
+  --danger: #a83232;
+  --danger-soft: #fdecec;
+  --code-bg: #eef1f5;
+  --shadow: 0 1px 2px rgba(20, 28, 40, 0.06), 0 8px 24px rgba(20, 28, 40, 0.06);
+  --font-body: "Inter", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-display: "Space Grotesk", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116;
+    --surface: #161b22;
+    --surface-soft: #1d232c;
+    --fg: #e6ebf2;
+    --muted: #98a3b3;
+    --border: #262e39;
+    --accent: #2dd4bf;
+    --accent-strong: #5eead4;
+    --accent-soft: #102a28;
+    --warn: #e3a75f;
+    --warn-soft: #2a2115;
+    --danger: #f08a8a;
+    --danger-soft: #2c1919;
+    --code-bg: #1d232c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e1116;
+  --surface: #161b22;
+  --surface-soft: #1d232c;
+  --fg: #e6ebf2;
+  --muted: #98a3b3;
+  --border: #262e39;
+  --accent: #2dd4bf;
+  --accent-strong: #5eead4;
+  --accent-soft: #102a28;
+  --warn: #e3a75f;
+  --warn-soft: #2a2115;
+  --danger: #f08a8a;
+  --danger-soft: #2c1919;
+  --code-bg: #1d232c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- 布局 ---------- */
+.shell { max-width: 1180px; margin: 0 auto; padding-block: 0 72px; }
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-block: 28px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.masthead .brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+}
+.masthead .brand span { color: var(--accent); }
+.masthead .meta {
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.layout { display: flex; gap: 56px; align-items: flex-start; }
+
+.toc {
+  width: 212px;
+  flex: 0 0 212px;
+  position: sticky;
+  top: 24px;
+  padding-top: 40px;
+  font-size: 13.5px;
+}
+.toc .toc-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.toc li a {
+  display: block;
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+.toc li a:hover {
+  color: var(--fg);
+  background: var(--surface-soft);
+  text-decoration: none;
+}
+.toc li a .num {
+  display: inline-block;
+  width: 22px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+main { flex: 1 1 auto; min-width: 0; padding-top: 40px; }
+
+/* ---------- 首屏 ---------- */
+.hero { padding-bottom: 34px; }
+.hero .eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4.4vw, 42px);
+  line-height: 1.2;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.hero p {
+  max-width: 60ch;
+  color: var(--muted);
+  margin: 0;
+  font-size: 16px;
+}
+
+/* ---------- 章节 ---------- */
+section { padding-block: 30px; border-top: 1px solid var(--border); scroll-margin-top: 20px; }
+section h2 {
+  font-family: var(--font-display);
+  font-size: 23px;
+  line-height: 1.3;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  text-wrap: balance;
+}
+section h2 .sec-num {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+section h3 {
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  margin: 30px 0 8px;
+}
+section p { max-width: 68ch; }
+section ul, section ol { max-width: 70ch; padding-left: 22px; }
+section li { margin-block: 4px; }
+section li > ul, section li > ol { margin-block: 2px; }
+
+.lede { color: var(--muted); margin-top: 0; }
+
+h3 + p, h3 + ul, h3 + ol, h3 + .callout, h3 + .table-wrap { margin-top: 8px; }
+
+/* ---------- 代码 / 路径 ---------- */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ---------- 键帽 ---------- */
+.kbd {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+/* ---------- 表格 ---------- */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  margin-block: 18px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 460px; }
+th, td { text-align: left; padding: 10px 14px; vertical-align: top; }
+thead th {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr + tr td { border-top: 1px solid var(--border); }
+tbody td:first-child { color: var(--fg); font-weight: 500; white-space: nowrap; }
+
+/* ---------- 提示块 ---------- */
+.callout {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-block: 16px;
+  max-width: 72ch;
+  font-size: 14px;
+}
+.callout .tag {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-top: 3px;
+}
+.callout p { margin: 0; max-width: none; }
+.callout p + p { margin-top: 6px; }
+.callout.tip { background: var(--accent-soft); border-color: transparent; }
+.callout.tip .tag { color: var(--accent-strong); }
+.callout.note { background: var(--surface-soft); }
+.callout.note .tag { color: var(--muted); }
+.callout.warn { background: var(--warn-soft); border-color: transparent; }
+.callout.warn .tag { color: var(--warn); }
+.callout.danger { background: var(--danger-soft); border-color: transparent; }
+.callout.danger .tag { color: var(--danger); }
+
+/* ---------- 步骤 ---------- */
+.steps { list-style: none; padding: 0; margin: 18px 0 0; max-width: 72ch; counter-reset: step; display: flex; flex-direction: column; gap: 10px; }
+.steps li {
+  counter-increment: step;
+  display: flex;
+  gap: 14px;
+  padding: 13px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 0;
+}
+.steps li::before {
+  content: counter(step);
+  flex: 0 0 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+.steps li strong { font-weight: 600; }
+.steps li p { margin: 2px 0 0; color: var(--muted); font-size: 14px; max-width: none; }
+
+/* ---------- 界面示意 ---------- */
+.ui-map {
+  margin-block: 22px;
+  max-width: 760px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  font-size: 12.5px;
+}
+.ui-map .ui-row { display: flex; }
+.ui-map .ui-top {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+  background: var(--surface-soft);
+}
+.ui-map .ui-top .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+.ui-map .ui-top .search {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  background: var(--surface);
+  color: var(--muted);
+}
+.ui-map .ui-main { display: flex; min-height: 180px; }
+.ui-map .ui-side {
+  width: 150px;
+  flex: 0 0 150px;
+  border-right: 1px solid var(--border);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ui-map .ui-side .item { padding: 3px 8px; border-radius: 5px; color: var(--muted); }
+.ui-map .ui-side .item.active { background: var(--accent-soft); color: var(--accent-strong); font-weight: 500; }
+.ui-map .ui-side .divider { height: 1px; background: var(--border); margin: 6px 4px; }
+.ui-map .ui-content {
+  flex: 1;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--muted);
+}
+.ui-map .ui-content .line { height: 9px; border-radius: 4px; background: var(--surface-soft); }
+.ui-map .ui-content .line.w60 { width: 60%; }
+.ui-map .ui-content .line.w40 { width: 40%; }
+.ui-map .ui-content .line.w80 { width: 80%; }
+.ui-map .ui-bottom {
+  border-top: 1px solid var(--border);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+.ui-map .ui-bottom .jacket { width: 26px; height: 26px; border-radius: 5px; background: var(--border); flex: 0 0 auto; }
+.ui-map .ui-bottom .ctrl {
+  margin: 0 auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.ui-map .ui-bottom .btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
+  font-size: 10px;
+}
+.ui-map .ui-bottom .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.ui-map .ui-bottom .hint {
+  font-size: 11px;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.caption { font-size: 12.5px; color: var(--muted); margin-top: -12px; max-width: 760px; }
+
+/* ---------- 功能卡片（新功能） ---------- */
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-block: 18px; }
+.feature-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 16px 18px;
+}
+.feature-card h4 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+.feature-card p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: none; }
+.feature-card .pill {
+  display: inline-block;
+  font-size: 11px;
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 1px 9px;
+  margin-bottom: 8px;
+}
+
+/* ---------- 页脚 ---------- */
+.footer {
+  margin-top: 46px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ---------- 移动端 ---------- */
+.toc-mobile { display: none; }
+
+@media (max-width: 900px) {
+  .layout { flex-direction: column; gap: 0; }
+  .toc { display: none; }
+  .toc-mobile {
+    display: block;
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 12px 16px;
+  }
+  .toc-mobile summary {
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .toc-mobile ol { margin: 10px 0 0; padding-left: 20px; font-size: 14px; }
+  .toc-mobile li { margin-block: 3px; }
+  main { padding-top: 26px; }
+  .ui-map .ui-side { width: 110px; flex-basis: 110px; }
+  .ui-map { font-size: 11.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+}
+
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="shell">
+  <header class="masthead">
+    <div class="brand">MusicFree<span> ·</span> 桌面版</div>
+    <div class="meta">便携定制版 0.0.8 · 使用说明书</div>
+  </header>
+
+  <div class="layout">
+    <aside class="toc">
+      <div class="toc-label">目录</div>
+      <ol>
+        <li><a href="#quickstart"><span class="num">1</span>快速上手</a></li>
+        <li><a href="#plugin-source"><span class="num">2</span>推荐插件源</a></li>
+        <li><a href="#layout"><span class="num">3</span>界面导览</a></li>
+        <li><a href="#search"><span class="num">4</span>搜索与播放</a></li>
+        <li><a href="#sheets"><span class="num">5</span>我的歌单</a></li>
+        <li><a href="#player"><span class="num">6</span>播放控制</a></li>
+        <li><a href="#locate"><span class="num">7</span>定位当前歌曲</a></li>
+        <li><a href="#dblclick"><span class="num">8</span>双击歌单跳首尾</a></li>
+        <li><a href="#lyric"><span class="num">9</span>歌词与歌曲详情</a></li>
+        <li><a href="#extras"><span class="num">10</span>卡拉 OK、MV 与可视化</a></li>
+        <li><a href="#local"><span class="num">11</span>本地音乐与下载</a></li>
+        <li><a href="#theme"><span class="num">12</span>主题</a></li>
+        <li><a href="#shortcut"><span class="num">13</span>快捷键</a></li>
+        <li><a href="#settings"><span class="num">14</span>设置项</a></li>
+        <li><a href="#backup"><span class="num">15</span>备份与恢复</a></li>
+        <li><a href="#faq"><span class="num">16</span>常见问题</a></li>
+        <li><a href="#files"><span class="num">17</span>数据与文件位置</a></li>
+      </ol>
+    </aside>
+
+    <main>
+      <div class="hero">
+        <div class="eyebrow">User Manual</div>
+        <h1>MusicFree 使用说明书</h1>
+        <p>从安装插件、搜索播放，到歌单管理、歌词、主题与快捷键，一份覆盖全部功能的完整说明。内容对应本机部署的便携定制版。</p>
+      </div>
+
+      <details class="toc-mobile">
+        <summary>目录</summary>
+        <ol>
+          <li><a href="#quickstart">快速上手</a></li>
+          <li><a href="#plugin-source">推荐插件源</a></li>
+          <li><a href="#layout">界面导览</a></li>
+          <li><a href="#search">搜索与播放</a></li>
+          <li><a href="#sheets">我的歌单</a></li>
+          <li><a href="#player">播放控制</a></li>
+          <li><a href="#locate">定位当前歌曲</a></li>
+          <li><a href="#dblclick">双击歌单跳首尾</a></li>
+          <li><a href="#lyric">歌词与歌曲详情</a></li>
+          <li><a href="#extras">卡拉 OK、MV 与可视化</a></li>
+          <li><a href="#local">本地音乐与下载</a></li>
+          <li><a href="#theme">主题</a></li>
+          <li><a href="#shortcut">快捷键</a></li>
+          <li><a href="#settings">设置项</a></li>
+          <li><a href="#backup">备份与恢复</a></li>
+          <li><a href="#faq">常见问题</a></li>
+          <li><a href="#files">数据与文件位置</a></li>
+        </ol>
+      </details>
+
+      <!-- ============ 1. 快速上手 ============ -->
+      <section id="quickstart">
+        <h2><span class="sec-num">01</span>快速上手</h2>
+        <p class="lede">第一次使用只需要四步：启动、装插件、搜索、播放。</p>
+
+        <ol class="steps">
+          <li>
+            <div>
+              <strong>双击 <code>MusicFree.exe</code> 启动</strong>
+              <p>这是便携版，所有配置和歌单数据都保存在程序目录的 <code>portable/userData</code> 下，不写系统用户目录，整个文件夹拷走即可迁移。</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>安装至少一个插件</strong>
+              <p>左侧栏点「插件管理」→「从网络安装」，粘贴以 <code>.js</code> 或 <code>.json</code> 结尾的插件地址；也可以在「订阅设置」里填插件订阅链接批量更新。插件负责取歌、取歌词、取 MV，不装插件搜索不到任何内容。<strong>推荐直接使用第 2 节的清雅音乐插件源。</strong></p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>在顶部搜索框搜索</strong>
+              <p>输入歌名、歌手或关键词后回车。点输入框会显示历史搜索，最多保留 30 条（条数可在设置里改）。</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>双击歌曲播放</strong>
+              <p>双击列表中的歌曲即可播放。默认行为是「用当前列表替换播放队列」，可在 设置 → 播放 中改为追加到队列。</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="callout tip">
+          <div class="tag">提示</div>
+          <p>插件提供音乐数据，主题包负责界面外观，两者互不替代。歌曲能不能播、歌词有没有，取决于插件覆盖的平台与音源质量。</p>
+        </div>
+      </section>
+
+      <!-- ============ 2. 推荐插件源 ============ -->
+      <section id="plugin-source">
+        <h2><span class="sec-num">02</span>推荐插件源：清雅音乐</h2>
+        <p class="lede">本机使用的插件仓库，也是插件更新的唯一来源。</p>
+
+        <p>ElegantMusic（清雅音乐）是 MusicFree 桌面版的插件开发仓库，收录了针对桌面版增强的一整套插件。除了基础搜索与播放，还补上了逐字歌词、卡拉 OK 伴奏候选、完整版替换和 MV 搜索。仓库地址：<a href="https://github.com/acientemple/ElegantMusic" target="_blank" rel="noreferrer">github.com/acientemple/ElegantMusic</a></p>
+
+        <h3>包含的插件</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>插件文件</th><th>功能</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>qq-music.js</td><td>QQ 音乐：搜索、播放、伴奏候选、完整版查找</td></tr>
+              <tr><td>kugou-music.js</td><td>酷狗音乐：搜索、播放、伴奏候选、完整版查找</td></tr>
+              <tr><td>bilibili-music.js</td><td>哔哩哔哩音乐：搜索与播放</td></tr>
+              <tr><td>bilibili-mv.js</td><td>B 站 MV：官方 MV 与卡拉 OK 伴奏候选</td></tr>
+              <tr><td>full-track.js</td><td>完整版搜索：为只能试听的歌曲找可完整播放的版本</td></tr>
+              <tr><td>lyric-source.js</td><td>歌词增强：网易云 / QQ / 酷狗多源歌词，支持逐字歌词</td></tr>
+              <tr><td>music-chart.js</td><td>排行榜</td></tr>
+              <tr><td>hot-sheets.js</td><td>热门歌单</td></tr>
+              <tr><td>free-music.js</td><td>免费音乐聚合：Jamendo、Free Music Archive、ccMixter、Freesound、Mixkit</td></tr>
+              <tr><td>third-party/PlaylistOut</td><td>第三方歌单导入导出插件（按需安装）</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>安装方法</h3>
+        <ol class="steps">
+          <li>
+            <div>
+              <strong>打开「插件管理 → 从网络安装」</strong>
+              <p>插件地址需要以 <code>.js</code> 或 <code>.json</code> 结尾。</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>粘贴插件链接</strong>
+              <p>格式为 <code>https://raw.githubusercontent.com/acientemple/ElegantMusic/master/plugins/&lt;插件文件名&gt;</code>，例如 <code>.../plugins/qq-music.js</code>。按需逐个安装。</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>确认插件出现在列表中</strong>
+              <p>安装成功后即可使用；若界面暂时没有生效，重启一次应用。</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="callout tip">
+          <div class="tag">提示</div>
+          <p>到 设置 → 插件 打开「打开软件时自动更新插件」，以后每次启动都会检查这些插件的更新。</p>
+        </div>
+
+        <div class="callout note">
+          <div class="tag">说明</div>
+          <p>这套插件和本说明书描述的功能互相配合：逐字歌词用于卡拉 OK 扫光，伴奏候选用于切换原唱与伴奏，完整版搜索用于替换只能试听的音源，MV 候选带有官方与伴奏标记。</p>
+        </div>
+      </section>
+
+      <!-- ============ 3. 界面导览 ============ -->
+      <section id="layout">
+        <h2><span class="sec-num">03</span>界面导览</h2>
+        <p class="lede">主窗口分成四块：顶部工具栏、左侧边栏、中间内容区、底部播放条。</p>
+
+        <div class="ui-map" role="img" aria-label="MusicFree 主界面结构示意图">
+          <div class="ui-top">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <div class="search">在这里输入搜索内容</div>
+            <span>设置 · 主题 · 迷你模式</span>
+          </div>
+          <div class="ui-main">
+            <div class="ui-side">
+              <div class="item">排行榜</div>
+              <div class="item">热门歌单</div>
+              <div class="item">下载管理</div>
+              <div class="item">本地音乐</div>
+              <div class="item">插件管理</div>
+              <div class="item">最近播放</div>
+              <div class="divider"></div>
+              <div class="item active">我的歌单</div>
+              <div class="item">我的收藏</div>
+            </div>
+            <div class="ui-content">
+              <div class="line w40"></div>
+              <div class="line w80"></div>
+              <div class="line w60"></div>
+              <div class="line w80"></div>
+              <div class="line w60"></div>
+              <div class="line w80"></div>
+            </div>
+          </div>
+          <div class="ui-bottom">
+            <div class="jacket"></div>
+            <div>歌名 · 歌手</div>
+            <div class="ctrl">
+              <div class="btn">◀</div>
+              <div class="btn primary">▶</div>
+              <div class="btn">▶</div>
+              <span class="hint">点空白处定位当前歌曲</span>
+            </div>
+            <div>音质 · 倍速 · 音量 · 队列</div>
+          </div>
+        </div>
+        <p class="caption">界面结构示意：从上到下依次为工具栏、侧边栏 + 内容区、播放条。</p>
+
+        <h3>顶部工具栏</h3>
+        <ul>
+          <li><strong>后退 / 前进</strong>：在页面之间导航。</li>
+          <li><strong>搜索框</strong>：全局搜索，点击显示搜索历史。</li>
+          <li><strong>设置</strong>：打开设置页（十组设置项，见第 14 节）。</li>
+          <li><strong>主题</strong>：打开主题页，切换本地主题或逛主题市场。</li>
+          <li><strong>最小化</strong> 与 <strong>迷你模式</strong>：迷你模式会收起为主窗口的小型形态。</li>
+          <li><strong>退出</strong>：按设置里的「单击退出按钮时」行为执行（退出应用或最小化到托盘）。</li>
+        </ul>
+
+        <h3>左侧边栏</h3>
+        <ul>
+          <li><strong>排行榜</strong>：来自插件的榜单列表。</li>
+          <li><strong>热门歌单</strong>：插件提供的推荐歌单。</li>
+          <li><strong>下载管理</strong>：下载队列与历史。</li>
+          <li><strong>本地音乐</strong>：扫描到的本地文件，支持列表、作者、专辑、文件夹四种视图。</li>
+          <li><strong>插件管理</strong>：安装、更新、卸载插件，管理订阅与用户变量。</li>
+          <li><strong>最近播放</strong>：自动记录的播放历史，可从这里定位歌曲。</li>
+          <li><strong>我的歌单</strong>：本地歌单列表，标题右侧有三个按钮：导入歌单、导出全部歌单、新建歌单。</li>
+          <li><strong>我的收藏</strong>：收藏的外部歌单（收藏按钮在歌单页右上角）。</li>
+        </ul>
+
+        <h3>底部播放条</h3>
+        <ul>
+          <li><strong>进度条</strong>：拖动调整播放位置。</li>
+          <li><strong>左侧歌曲信息</strong>：封面、歌名、歌手，点歌名区域打开歌曲详情页（歌词页）。</li>
+          <li><strong>中间控制区</strong>：上一首、播放 / 暂停、下一首；<strong>点按钮之外的空白处</strong>会定位当前歌曲（第 7 节）。</li>
+          <li><strong>右侧按钮</strong>：音质、倍速、音量、桌面歌词、卡拉 OK、可视化、循环模式、播放列表。</li>
+        </ul>
+      </section>
+
+      <!-- ============ 4. 搜索与播放 ============ -->
+      <section id="search">
+        <h2><span class="sec-num">04</span>搜索与播放</h2>
+
+        <h3>搜索</h3>
+        <p>顶部搜索框内输入关键词回车。搜索会同时询问所有已安装的插件，结果页按「单曲 / 歌单」分类展示。搜索历史保存在本地，可在输入框下拉中查看或清除。</p>
+
+        <h3>开始播放</h3>
+        <ul>
+          <li>双击歌曲行播放；双击行为可在 设置 → 播放 改为「追加到播放队列」。</li>
+          <li>歌单页顶部有「播放」「添加」「收藏」按钮，可一键把整个歌单加入队列。</li>
+          <li>播放失败时按 设置 → 播放 → 「播放失败时」的策略处理：暂停或自动播放下一首。</li>
+          <li>播放中途音源中断时，播放器会尝试自动换源继续播放，并提示「音源中断，已自动换源继续播放」。</li>
+        </ul>
+
+        <h3>歌曲右键菜单</h3>
+        <p>在任意歌曲列表上右键，可执行：下一首播放、搜索歌曲、搜索 MV、编辑歌曲信息、添加到歌单、从歌单内删除、删除本地下载、打开歌曲所在文件夹、校正时长。</p>
+
+        <div class="callout note">
+          <div class="tag">说明</div>
+          <p>「搜索歌曲」会在所有支持该能力的插件里查找同一首歌的其他版本，用来替换只能试听的半截音源；「校正时长」在时长显示错误时使用，播放一次也会自动校正。</p>
+        </div>
+      </section>
+
+      <!-- ============ 5. 我的歌单 ============ -->
+      <section id="sheets">
+        <h2><span class="sec-num">05</span>我的歌单</h2>
+        <p class="lede">本地歌单与你的播放数据都保存在应用数据库里，随应用目录迁移。</p>
+
+        <h3>新建与管理</h3>
+        <ul>
+          <li><strong>新建歌单</strong>：点「我的歌单」标题旁的 + 按钮，输入名称。</li>
+          <li><strong>重命名 / 删除</strong>：在歌单上右键，选「重命名歌单」或「删除歌单」。默认的「我喜欢」歌单不能重命名或删除。</li>
+          <li><strong>导出歌单</strong>：右键单个歌单选「导出歌单」，或点标题旁的导出按钮导出全部，生成 JSON 备份文件。</li>
+          <li><strong>导入歌单</strong>：点标题旁的导入按钮，选择插件并粘贴歌单链接；也支持导入 MusicFree 导出的 JSON 备份。</li>
+        </ul>
+
+        <h3>把歌加进歌单</h3>
+        <ul>
+          <li>列表里右键歌曲 →「添加到歌单」，选择目标歌单。</li>
+          <li>点击歌曲行首的心形按钮，收藏到「我喜欢」。</li>
+          <li>在歌单内可直接拖动歌曲调整顺序。</li>
+        </ul>
+
+        <h3>收藏外部歌单</h3>
+        <p>打开任意在线歌单，点歌单页操作区的「收藏」按钮即可加入「我的收藏」；再次点击可取消收藏。</p>
+
+        <div class="callout tip">
+          <div class="tag">新功能</div>
+          <p>在侧边栏双击任意歌单，可让歌单页在「第一页」和「最后一页」之间切换，长歌单里快速回到顶部或跳到底部。详见第 8 节。</p>
+        </div>
+      </section>
+
+      <!-- ============ 6. 播放控制 ============ -->
+      <section id="player">
+        <h2><span class="sec-num">06</span>播放控制</h2>
+
+        <h3>基本控制</h3>
+        <ul>
+          <li>播放 / 暂停、上一首、下一首位于播放条中间。</li>
+          <li>进度条可拖动；右侧循环按钮在三种模式间切换：列表循环 → 单曲循环 → 随机播放。</li>
+          <li>音量按钮点开可拖动滑块，点击喇叭图标静音 / 恢复。</li>
+        </ul>
+
+        <h3>音质与倍速</h3>
+        <ul>
+          <li><strong>音质</strong>：点右侧音质按钮切换标准 / 高 / 超高等等级；菜单里可选择「仅设置当前歌曲」，否则作为默认音质。</li>
+          <li><strong>倍速</strong>：点右侧倍速按钮选择播放速度。</li>
+        </ul>
+
+        <h3>播放队列</h3>
+        <p>点播放条最右侧的播放列表按钮打开队列面板。面板会盖在界面最上层，点面板外区域关闭。队列中可拖动排序、右键移除、点击定位到歌曲所在歌单。</p>
+
+        <div class="callout note">
+          <div class="tag">说明</div>
+          <p>播放队列和「我的歌单」是两个概念：队列是当前播放顺序的临时列表，歌单是持久保存的收藏。双击歌曲默认会替换队列。</p>
+        </div>
+      </section>
+
+      <!-- ============ 7. 定位当前歌曲 ============ -->
+      <section id="locate">
+        <h2><span class="sec-num">07</span>定位当前歌曲</h2>
+        <p class="lede">播放一首歌时，想知道它在哪个歌单里、快速跳过去，用这个功能。</p>
+
+        <h3>怎么用</h3>
+        <ol class="steps">
+          <li>
+            <div>
+              <strong>点播放条中间的空白处</strong>
+              <p>三个控制按钮之外、播放条中间区域的空白处都可以点。鼠标悬停时会出现「定位到当前歌曲所在的歌单」提示。</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>自动跳转到歌单</strong>
+              <p>应用会在本地歌单里查找包含这首歌的歌单；同时出现在多个歌单时，跳到最近加入的那个。跳转后列表自动滚到该歌曲并选中。</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>侧边栏同步展开</strong>
+              <p>「我的歌单」折叠区会自动展开，并把目标歌单滚动到侧边栏可见范围，高亮当前歌单。</p>
+            </div>
+          </li>
+        </ol>
+
+        <h3>细节</h3>
+        <ul>
+          <li>如果歌曲不在任何歌单里，但出现在「最近播放」中，会跳到最近播放页。</li>
+          <li>两者都找不到时，提示「这首歌还不在任何歌单里，先收藏到歌单里就能定位了」。</li>
+          <li>定位时会自动关闭盖在上面的歌词详情页和 MV 窗口，保证你能看到歌单页。</li>
+          <li>没有正在播放的歌曲时，点空白处没有反应。</li>
+          <li>播放列表面板里的歌曲也支持定位，行为一致。</li>
+        </ul>
+      </section>
+
+      <!-- ============ 8. 双击歌单 ============ -->
+      <section id="dblclick">
+        <h2><span class="sec-num">08</span>双击歌单跳首尾</h2>
+        <p class="lede">长歌单里来回滚很费劲时，双击侧边栏的歌单名即可在首尾之间切换。</p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <span class="pill">第一次双击</span>
+            <h4>回到第一页</h4>
+            <p>歌单内容区平滑滚动到顶部，也就是列表的第一页。</p>
+          </div>
+          <div class="feature-card">
+            <span class="pill">再次双击</span>
+            <h4>跳到最后一页</h4>
+            <p>滚动到列表最底部，查看最后一批歌曲。</p>
+          </div>
+          <div class="feature-card">
+            <span class="pill">循环</span>
+            <h4>交替切换</h4>
+            <p>之后每次双击都在顶部和底部之间来回切换。</p>
+          </div>
+        </div>
+
+        <div class="callout note">
+          <div class="tag">说明</div>
+          <p>双击的不是当前歌单时，会先切换到这个歌单（新页面本来就在顶部），下一次双击再滚到底部。单击行为不变，仍然是切换歌单。</p>
+        </div>
+      </section>
+
+      <!-- ============ 9. 歌词与详情 ============ -->
+      <section id="lyric">
+        <h2><span class="sec-num">09</span>歌词与歌曲详情</h2>
+
+        <h3>打开详情页</h3>
+        <p>点播放条左侧的歌名区域或封面旁的展开按钮，打开全屏歌曲详情页。页面上有歌词、封面和歌曲操作按钮；按 <span class="kbd">Esc</span> 或点关闭按钮退出。</p>
+
+        <h3>歌词</h3>
+        <ul>
+          <li><strong>搜索歌词</strong>：手动选择插件搜索并关联歌词。</li>
+          <li><strong>智能匹配歌词</strong>：按歌名与歌手在各插件中搜索候选，按匹配度排序。设置里可调整「自动应用的匹配度」阈值（默认 0.8）。</li>
+          <li><strong>声音识别歌词</strong>：录制当前播放音频，用 audd.io 识别真实歌名后再搜歌词。需要在设置里填入 audd.io 的免费 Token。</li>
+          <li><strong>翻译</strong>：有翻译歌词时显示「显示翻译 / 隐藏翻译」。</li>
+          <li><strong>关联 / 取消关联歌词</strong>：歌词区域右键操作。</li>
+          <li><strong>下载歌词</strong>：右键歌词可导出 <code>.lrc</code> 或 <code>.txt</code> 文件。</li>
+        </ul>
+
+        <h3>歌曲操作按钮</h3>
+        <ul>
+          <li><strong>搜索歌曲</strong>：在其他插件中查找同一首歌的可完整播放版本，可直接替换当前音源。</li>
+          <li><strong>搜索 MV</strong>：搜索这首歌的 MV 候选；<strong>观看 MV</strong>：已有绑定 MV 时直接播放。</li>
+          <li><strong>歌曲信息</strong>：编辑歌名、歌手、专辑，可恢复默认。本地音乐不支持编辑。</li>
+        </ul>
+
+        <h3>桌面歌词</h3>
+        <p>点播放条右侧的歌词按钮打开桌面歌词窗口。可在设置里调整字体、字号、颜色、描边色；窗口可锁定位置，锁定后不能拖动。全局快捷键也可绑定桌面歌词开关（第 13 节）。</p>
+      </section>
+
+      <!-- ============ 10. 卡拉OK / MV / 可视化 ============ -->
+      <section id="extras">
+        <h2><span class="sec-num">10</span>卡拉 OK、MV 与可视化</h2>
+
+        <h3>卡拉 OK</h3>
+        <p>播放条右侧的麦克风按钮打开卡拉 OK 窗口。对着麦克风跟唱，结束后给出节奏、完整度、音高三项评分。窗口内可以切换原唱 / 伴奏、显示或隐藏翻译；伴奏版本来自支持该能力的插件。</p>
+
+        <h3>MV 播放器</h3>
+        <p>从歌曲详情页点「观看 MV」或「搜索 MV」选中候选后，MV 会以独立窗口播放，支持最大化、最小化、下载视频。窗口位置可拖动。</p>
+
+        <h3>可视化</h3>
+        <p>播放条右侧的频谱按钮打开可视化窗口，内置八种效果：条形频谱、示波器、频谱山脊、粒子、几何、流体、电池、烟花。默认随机轮换，也可在 设置 → 可视化 中固定效果。</p>
+
+        <div class="callout warn">
+          <div class="tag">注意</div>
+          <p>部分在线音源跨域限制音频数据读取，可视化会提示「此音源无法可视化」。这是浏览器安全策略，不是故障。</p>
+        </div>
+      </section>
+
+      <!-- ============ 11. 本地音乐与下载 ============ -->
+      <section id="local">
+        <h2><span class="sec-num">11</span>本地音乐与下载</h2>
+
+        <h3>本地音乐</h3>
+        <ul>
+          <li>首次进入时点「添加文件夹」，选择要扫描的目录；文件增删会实时同步。</li>
+          <li>提供列表、作者、专辑、文件夹四种视图，支持站内搜索。</li>
+          <li>右键本地歌曲可「打开歌曲所在文件夹」、「删除本地下载」。</li>
+        </ul>
+
+        <h3>下载管理</h3>
+        <ul>
+          <li>歌曲右键或详情页可下载到本地，下载目录默认是系统「下载」文件夹，可在 设置 → 下载 中修改。</li>
+          <li>可设置默认下载音质、音质缺失时的策略、最多同时下载数（默认 5 个）。</li>
+          <li>下载失败或超时会重试；下载不完整的文件会被自动丢弃，避免出现能播放但截断的音频。</li>
+        </ul>
+      </section>
+
+      <!-- ============ 12. 主题 ============ -->
+      <section id="theme">
+        <h2><span class="sec-num">12</span>主题</h2>
+        <p class="lede">界面外观由主题包决定，和插件是两套独立的东西。</p>
+
+        <ul>
+          <li>点顶部「主题」按钮进入主题页，分「本地主题」和「主题市场」两个标签。</li>
+          <li>本地主题：已安装的主题，点「使用主题」立即切换；可卸载。</li>
+          <li>主题市场：浏览在线主题，点「下载并使用」安装。</li>
+          <li>手动安装：把主题文件夹放到程序目录的 <code>portable/userData/musicfree-themepacks/</code>，重启应用后在本地主题中出现。</li>
+        </ul>
+
+        <div class="callout note">
+          <div class="tag">说明</div>
+          <p>本机内置 Windows Media Player 风格、iTunes 风格等深色 / 浅色主题，部分主题带频谱柱可视化。切换主题不会影响歌单、插件和设置数据。</p>
+        </div>
+      </section>
+
+      <!-- ============ 13. 快捷键 ============ -->
+      <section id="shortcut">
+        <h2><span class="sec-num">13</span>快捷键</h2>
+        <p class="lede">快捷键分为「软件内快捷键」和「全局快捷键」两类，都可自由绑定。</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>功能</th><th>默认软件内快捷键</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>播放上一首</td><td><span class="kbd">↑</span></td><td>可在设置中改键</td></tr>
+              <tr><td>播放下一首</td><td><span class="kbd">↓</span></td><td>可在设置中改键</td></tr>
+              <tr><td>快退 5 秒</td><td><span class="kbd">←</span></td><td>可在设置中改键</td></tr>
+              <tr><td>快进 5 秒</td><td><span class="kbd">→</span></td><td>可在设置中改键</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>可绑定的功能</h3>
+        <ul>
+          <li>播放 / 暂停</li>
+          <li>播放上一首 / 下一首</li>
+          <li>快退 5 秒 / 快进 5 秒</li>
+          <li>增加音量 / 降低音量</li>
+          <li>打开 / 关闭桌面歌词</li>
+          <li>喜欢 / 不喜欢当前歌曲</li>
+          <li>显示 / 隐藏主窗口（仅全局快捷键可用）</li>
+        </ul>
+
+        <h3>两类快捷键的区别</h3>
+        <ul>
+          <li><strong>软件内快捷键</strong>：默认启用，只在主窗口聚焦时生效。</li>
+          <li><strong>全局快捷键</strong>：默认关闭，开启后在任意应用下都能响应，适合切歌、显示主窗口。</li>
+        </ul>
+
+        <div class="callout tip">
+          <div class="tag">提示</div>
+          <p>如果某个键与其他软件冲突，到 设置 → 快捷键 里点击重新绑定。绑定为空表示不使用该键。</p>
+        </div>
+      </section>
+
+      <!-- ============ 14. 设置项 ============ -->
+      <section id="settings">
+        <h2><span class="sec-num">14</span>设置项</h2>
+        <p class="lede">设置页分十组，下面按组说明常用项。</p>
+
+        <h3>常规</h3>
+        <ul>
+          <li>启动时检查更新、检查预发布版本。</li>
+          <li>单击退出按钮时：退出应用或最小化到托盘。</li>
+          <li>任务栏缩略图样式（当前播放歌曲封面或主窗口界面）。</li>
+          <li>搜索历史最多保存条数、歌曲列表隐藏列。</li>
+          <li>界面语言（简体中文 / 繁体中文 / English）、主窗口始终置顶。</li>
+        </ul>
+
+        <h3>播放</h3>
+        <ul>
+          <li>默认播放音质、音质缺失时的策略（更低 / 更高 / 不找替代）。</li>
+          <li>播放失败时：暂停或自动下一首。</li>
+          <li>双击音乐列表时：替换播放队列或追加到队列。</li>
+          <li>歌单内搜索是否区分大小写。</li>
+          <li>音频输出设备选择、设备移除时继续播放或暂停。</li>
+        </ul>
+
+        <h3>下载</h3>
+        <ul>
+          <li>下载目录、默认下载音质、音质缺失策略、最多同时下载数。</li>
+        </ul>
+
+        <h3>歌词</h3>
+        <ul>
+          <li>桌面歌词开关与锁定、字体、字号、字体颜色、描边颜色。</li>
+          <li>歌词缺失时智能匹配，及自动应用的匹配度阈值。</li>
+          <li>声音识别 Token（audd.io）。</li>
+        </ul>
+
+        <h3>插件</h3>
+        <ul>
+          <li>打开软件时自动更新插件。</li>
+          <li>安装插件时不校验版本（仅在明确知道后果时开启）。</li>
+        </ul>
+
+        <h3>快捷键 / 网络 / 可视化 / 关于</h3>
+        <ul>
+          <li><strong>快捷键</strong>：见第 13 节。</li>
+          <li><strong>网络</strong>：启用网络代理（主机、端口、账号、密码）；查看并清空本地缓存。</li>
+          <li><strong>可视化</strong>：启用可视化窗口、固定效果或随机轮换。</li>
+          <li><strong>关于</strong>：当前版本、检查更新、开源协议与官网入口。</li>
+        </ul>
+      </section>
+
+      <!-- ============ 15. 备份与恢复 ============ -->
+      <section id="backup">
+        <h2><span class="sec-num">15</span>备份与恢复</h2>
+
+        <h3>文件备份</h3>
+        <p>设置 → 备份与恢复 → 文件备份，可把歌单备份到本地或从备份文件恢复。恢复时可选「追加到已有歌单末尾」或「覆盖已有歌单」。</p>
+
+        <h3>WebDAV 备份</h3>
+        <p>填写 WebDAV 服务的 URL、账号、密码后即可远程备份与恢复歌单，适合在多台设备间同步。</p>
+
+        <div class="callout warn">
+          <div class="tag">注意</div>
+          <p>备份包含的是歌单数据，不包含插件文件、主题包和设置。换机器时请同时拷贝整个 <code>portable/userData</code> 目录。</p>
+        </div>
+      </section>
+
+      <!-- ============ 16. 常见问题 ============ -->
+      <section id="faq">
+        <h2><span class="sec-num">16</span>常见问题</h2>
+
+        <h3>搜不到任何歌曲</h3>
+        <p>先确认已安装插件且插件处于可用状态。插件可能临时限流或接口失效，可到插件管理里检查更新，或更换插件。</p>
+
+        <h3>歌曲播放失败</h3>
+        <p>多数是音源失效或该音质不可用。到 设置 → 播放 调整音质缺失策略；也可以右键歌曲用「搜索歌曲」换一个可播放的版本。</p>
+
+        <h3>下载的文件不完整</h3>
+        <p>播放器会检测文件完整性并丢弃截断的文件，提示后重试即可。</p>
+
+        <h3>桌面歌词不显示</h3>
+        <p>确认已开启桌面歌词（播放条右侧按钮或设置项），并检查是否被其他窗口遮挡。锁定状态下窗口不可拖动。</p>
+
+        <h3>可视化提示「此音源无法可视化」</h3>
+        <p>在线音源存在跨域限制，浏览器不允许读取音频数据。换用本地音乐或其他音源即可。</p>
+
+        <h3>更新后插件或数据异常</h3>
+        <p>大版本更新可能重置插件排序与插件内填写的用户变量（如 Cookie），旧数据库会备份到应用目录的 <code>backups</code> 文件夹。更新前请确认提示内容。</p>
+
+        <h3>点击定位没反应</h3>
+        <p>确认当前有正在播放的歌曲；另外歌曲需要先加入某个歌单或出现在最近播放中才能定位。</p>
+      </section>
+
+      <!-- ============ 16. 数据与文件 ============ -->
+      <section id="files">
+        <h2><span class="sec-num">17</span>数据与文件位置</h2>
+        <p class="lede">便携版的所有用户数据都在程序目录内，整个文件夹可以整体备份或迁移。</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>路径</th><th>内容</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>portable/userData/config.json</code></td><td>应用设置（扁平键名，如 <code>normal.alwaysOnTop</code>）</td></tr>
+              <tr><td><code>portable/userData/musicfree-plugins/</code></td><td>已安装的插件文件</td></tr>
+              <tr><td><code>portable/userData/musicfree-themepacks/</code></td><td>已安装的主题包</td></tr>
+              <tr><td><code>portable/userData/IndexedDB/</code></td><td>歌单、收藏等数据库</td></tr>
+              <tr><td><code>portable/userData/Cache/</code></td><td>缓存，可在设置 → 网络 中清空</td></tr>
+              <tr><td><code>portable/userData/backups/</code></td><td>更新前的自动备份</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout danger">
+          <div class="tag">重要</div>
+          <p>覆盖安装新版本时不要删除或覆盖 <code>portable/userData</code> 目录，否则插件、歌单与设置都会丢失。</p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div>MusicFree 桌面版 · 便携定制版说明书</div>
+        <div>基于 AGPL 3.0 开源协议</div>
+      </footer>
+    </main>
+  </div>
+</div>

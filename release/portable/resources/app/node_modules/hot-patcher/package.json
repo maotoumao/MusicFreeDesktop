@@ -1,0 +1,60 @@
+{
+  "name": "hot-patcher",
+  "version": "2.0.1",
+  "description": "Hot method patching framework for handling environmental method differences",
+  "exports": "./dist/index.js",
+  "react-native": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
+    "format": "prettier --write '{source,test}/**/*.js'",
+    "prepublishOnly": "npm run build",
+    "test": "run-s test:specs test:format",
+    "test:format": "prettier --check '{source,test}/**/*.js'",
+    "test:specs": "npm run build && c8 --check-coverage --100 mocha 'test/**/*.spec.js'"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "lint-staged": {
+    "{source,test}/**/*.js": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perry-mitchell/hot-patcher.git"
+  },
+  "keywords": [
+    "patch",
+    "override",
+    "hot",
+    "patch"
+  ],
+  "author": "Perry Mitchell <perry@perrymitchell.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/perry-mitchell/hot-patcher/issues"
+  },
+  "homepage": "https://github.com/perry-mitchell/hot-patcher#readme",
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "c8": "^7.12.0",
+    "chai": "^4.3.7",
+    "husky": "^4.3.8",
+    "lint-staged": "^13.0.3",
+    "mocha": "^10.1.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.7.1",
+    "rimraf": "^3.0.2",
+    "sinon": "^14.0.2",
+    "typescript": "^4.9.3"
+  }
+}

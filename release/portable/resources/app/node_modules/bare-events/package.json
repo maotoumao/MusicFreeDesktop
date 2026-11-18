@@ -1,0 +1,27 @@
+{
+  "name": "bare-events",
+  "version": "2.2.2",
+  "description": "Event emitters for JavaScript",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "scripts": {
+    "test": "standard && bare test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/holepunchto/bare-events.git"
+  },
+  "author": "Holepunch",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/holepunchto/bare-events/issues"
+  },
+  "homepage": "https://github.com/holepunchto/bare-events#readme",
+  "devDependencies": {
+    "brittle": "^3.3.2",
+    "standard": "^17.0.0"
+  }
+}

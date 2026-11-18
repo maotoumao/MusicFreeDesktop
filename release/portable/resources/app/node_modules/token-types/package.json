@@ -1,0 +1,87 @@
+{
+  "name": "token-types",
+  "version": "5.0.1",
+  "description": "Common token types for decoding and encoding numeric and string values",
+  "author": {
+    "name": "Borewit",
+    "url": "https://github.com/Borewit"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/Borewit"
+  },
+  "scripts": {
+    "clean": "del-cli lib/**/*.js lib/***.js.map *.d.ts test/**/*.d.ts test/**/*.js test/**/*.js.map .nyc_output",
+    "build": "npm run compile",
+    "compile-src": "tsc --p lib",
+    "compile-test": "tsc --p test",
+    "compile": "npm run compile-src && npm run compile-test",
+    "eslint": "eslint lib test --ext .ts --ignore-pattern *.d.ts",
+    "lint-ts": "tslint lib/index.ts --exclude '*.d.ts' 'test/**/*.ts' --exclude 'test/**/*.d.ts'",
+    "lint-md": "remark -u preset-lint-recommended .",
+    "lint": "npm run lint-md && npm run eslint",
+    "test": "mocha",
+    "test-coverage": "c8 npm run test",
+    "send-codacy": "c8 report --reports-dir=./.coverage --reporter=text-lcov | codacy-coverage"
+  },
+  "engines": {
+    "node": ">=14.16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Borewit/token-types"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/index.d.ts"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "exports": "./lib/index.js",
+  "types": "lib/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/Borewit/token-types/issues"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.1",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^18.6.3",
+    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/parser": "^5.32.0",
+    "c8": "^7.12.0",
+    "chai": "^4.3.6",
+    "del-cli": "^5.0.0",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^3.4.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsdoc": "^39.3.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-unicorn": "^43.0.2",
+    "mocha": "^10.0.0",
+    "remark-cli": "^11.0.0",
+    "remark-preset-lint-recommended": "^6.1.2",
+    "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@tokenizer/token": "^0.3.0",
+    "ieee754": "^1.2.1"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "preset-lint-recommended"
+    ]
+  },
+  "keywords": [
+    "token",
+    "integer",
+    "unsigned",
+    "numeric",
+    "float",
+    "IEEE",
+    "754",
+    "strtok3"
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "name": "i18next",
+  "version": "22.5.1",
+  "description": "i18next internationalization framework",
+  "main": "./dist/cjs/i18next.js",
+  "module": "./dist/esm/i18next.js",
+  "types": "./index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/esm/i18next.js",
+      "require": "./dist/cjs/i18next.js"
+    }
+  },
+  "keywords": [
+    "i18next",
+    "internationalization",
+    "i18n",
+    "translation",
+    "localization",
+    "l10n",
+    "globalization",
+    "gettext"
+  ],
+  "homepage": "https://www.i18next.com",
+  "bugs": "https://github.com/i18next/i18next/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/i18next/i18next.git"
+  },
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://locize.com"
+    },
+    {
+      "type": "individual",
+      "url": "https://locize.com/i18next.html"
+    },
+    {
+      "type": "individual",
+      "url": "https://www.i18next.com/how-to/faq#i18next-is-awesome.-how-can-i-support-the-project"
+    }
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.20.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.5",
+    "@babel/plugin-proposal-async-generator-functions": "^7.20.1",
+    "@babel/plugin-transform-modules-commonjs": "^7.19.6",
+    "@babel/plugin-transform-runtime": "^7.19.6",
+    "@babel/polyfill": "^7.2.5",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/register": "^7.18.9",
+    "@rollup/plugin-babel": "^5.2.2",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@babel/eslint-parser": "^7.19.1",
+    "babelify": "^10.0.0",
+    "browserify": "17.0.0",
+    "browserify-istanbul": "3.0.1",
+    "chai": "4.3.7",
+    "coveralls": "3.1.1",
+    "cpy-cli": "^4.2.0",
+    "dtslint": "^0.4.2",
+    "eslint": "8.32.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-jsx-a11y": "6.7.1",
+    "eslint-plugin-react": "7.32.1",
+    "gh-release": "6.0.4",
+    "husky": "^7.0.2",
+    "i18next-browser-languagedetector": "7.0.1",
+    "i18next-fs-backend": "2.1.0",
+    "i18next-http-backend": "2.1.0",
+    "i18next-localstorage-cache": "1.1.1",
+    "i18next-sprintf-postprocessor": "0.2.2",
+    "karma": "6.4.1",
+    "karma-browserify": "8.1.0",
+    "karma-chai": "0.1.0",
+    "karma-chrome-launcher": "3.1.1",
+    "karma-cli": "2.0.0",
+    "karma-coverage": "2.2.0",
+    "karma-coveralls": "2.1.0",
+    "karma-mocha": "2.0.1",
+    "karma-rollup-preprocessor": "7.0.8",
+    "karma-sinon": "1.0.5",
+    "karma-spec-reporter": "0.0.34",
+    "lint-staged": "^11.1.2",
+    "mocha": "10.1.0",
+    "nyc": "^15.1.0",
+    "prettier": "^2.8.0",
+    "rimraf": "3.0.2",
+    "rollup": "^2.79.1",
+    "rollup-plugin-terser": "^5.3.0",
+    "sinon": "11.1.2",
+    "tslint": "^5.20.1",
+    "typescript": "^4.9.3",
+    "watchify": "4.0.0"
+  },
+  "scripts": {
+    "pretest": "npm run test:typescript && npm run test:typescript:customtypes && npm run test:typescript:noninterop",
+    "lint": "eslint src",
+    "test": "npm run lint && npm run test:new && npm run test:compat",
+    "test:new": "karma start karma.conf.js --singleRun",
+    "test:compat": "karma start karma.backward.conf.js --singleRun",
+    "test:typescript": "tslint --project tsconfig.json",
+    "test:typescript:customtypes": "tslint --project test/typescript/custom-types/tsconfig.json",
+    "test:typescript:noninterop": "tslint --project tsconfig.nonEsModuleInterop.json",
+    "tdd": "karma start karma.conf.js",
+    "tdd:compat": "karma start karma.backward.conf.js",
+    "build": "rimraf dist && rollup -c && echo '{\"type\":\"module\"}' > dist/esm/package.json && cpy \"./dist/umd/*.js\" ./",
+    "fix_dist_package": "node -e 'console.log(`{\"type\":\"module\",\"version\":\"${process.env.npm_package_version}\"}`)' > dist/esm/package.json",
+    "preversion": "npm run test && npm run build && git push",
+    "postversion": "npm run fix_dist_package && git push && git push --tags && npm run release",
+    "prettier": "prettier --write \"{,**/}*.{ts,tsx,js,json,md}\"",
+    "prepare": "husky install",
+    "release": "gh-release"
+  },
+  "author": "Jan Mühlemann <jan.muehlemann@gmail.com> (https://github.com/jamuhl)",
+  "license": "MIT",
+  "lint-staged": {
+    "*.{ts,tsx,js,json,md}": "prettier --write"
+  }
+}

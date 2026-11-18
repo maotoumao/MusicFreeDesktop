@@ -109,3 +109,11 @@ undefinedelectron-log-preload.js
 
 # SDD 执行账本（scratch）
 .superpowers/
+
+# 发布用精简便携版：构建产物故意入库（node_modules/.webpack 需要例外）
+!release/portable/
+!release/portable/**
+!release/portable/resources/app/node_modules/
+!release/portable/resources/app/node_modules/**
+!release/portable/resources/app/.webpack/
+!release/portable/resources/app/.webpack/**

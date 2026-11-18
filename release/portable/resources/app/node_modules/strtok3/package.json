@@ -1,0 +1,94 @@
+{
+  "name": "strtok3",
+  "version": "7.0.0",
+  "description": "A promise based streaming tokenizer",
+  "author": {
+    "name": "Borewit",
+    "url": "https://github.com/Borewit"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/Borewit"
+  },
+  "scripts": {
+    "clean": "del-cli lib/**/*.js lib/**/*.js.map lib/**/*.d.ts test/**/*.js test/**/*.js.map",
+    "compile-src": "tsc -p lib",
+    "compile-test": "tsc -p test",
+    "compile": "npm run compile-src && npm run compile-test",
+    "build": "npm run clean && npm run compile",
+    "eslint": "eslint lib test --ext .ts --ignore-pattern *.d.ts",
+    "lint-md": "remark -u preset-lint-recommended .",
+    "lint": "npm run lint-md && npm run eslint",
+    "fix": "eslint lib test --ext .ts --ignore-pattern *.d.ts --fix",
+    "test": "mocha",
+    "test-coverage": "c8 npm run test",
+    "send-codacy": "c8 report --reporter=text-lcov | codacy-coverage",
+    "start": "npm run compile && npm run lint && npm run cover-test"
+  },
+  "engines": {
+    "node": ">=14.16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Borewit/strtok3.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "node": "./lib/index.js",
+      "default": "./lib/core.js"
+    },
+    "./core": "./lib/core.js"
+  },
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
+  "bugs": {
+    "url": "https://github.com/Borewit/strtok3/issues"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.1",
+    "@types/debug": "^4.1.7",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^18.6.3",
+    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/parser": "^5.32.0",
+    "c8": "^7.12.0",
+    "chai": "^4.3.6",
+    "del-cli": "^5.0.0",
+    "eslint": "^8.21.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^3.4.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsdoc": "^39.3.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-unicorn": "^43.0.2",
+    "mocha": "^10.0.0",
+    "remark-cli": "^11.0.0",
+    "remark-preset-lint-recommended": "^6.1.2",
+    "token-types": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@tokenizer/token": "^0.3.0",
+    "peek-readable": "^5.0.0"
+  },
+  "keywords": [
+    "tokenizer",
+    "reader",
+    "token",
+    "async",
+    "promise",
+    "parser",
+    "decoder",
+    "binary",
+    "endian",
+    "uint",
+    "stream",
+    "streaming"
+  ]
+}

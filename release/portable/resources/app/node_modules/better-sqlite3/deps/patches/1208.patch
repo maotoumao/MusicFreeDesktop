@@ -1,0 +1,15 @@
+diff --git a/deps/sqlite3/sqlite3.c b/deps/sqlite3/sqlite3.c
+index b1a807f..38bd1e6 100644
+--- a/deps/sqlite3/sqlite3.c
++++ b/deps/sqlite3/sqlite3.c
+@@ -24887,8 +24887,8 @@ static const struct {
+   /* 1 */ { 6, "minute",   7.7379e+12,        60.0  },
+   /* 2 */ { 4, "hour",     1.2897e+11,      3600.0  },
+   /* 3 */ { 3, "day",      5373485.0,      86400.0  },
+-  /* 4 */ { 5, "month",    176546.0,  30.0*86400.0  },
+-  /* 5 */ { 4, "year",     14713.0,  365.0*86400.0  },
++  /* 4 */ { 5, "month",    176546.0,     2592000.0  },
++  /* 5 */ { 4, "year",     14713.0,     31536000.0  },
+ };
+ 
+ /*

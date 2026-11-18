@@ -1,0 +1,95 @@
+{
+  "extends": [
+    "eslint-config-airbnb",
+    "plugin:import/typescript",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+    "plugin:prettier/recommended"
+  ],
+  "env": {
+    "browser": true,
+    "jest": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["react", "react-hooks", "prettier", "@typescript-eslint"],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "moduleDirectory": ["node_modules", "src/"]
+      }
+    }
+  },
+  "rules": {
+    "operator-linebreak": [
+      2,
+      "after",
+      {
+        "overrides": {
+          "?": "before",
+          ":": "before"
+        }
+      }
+    ],
+    "object-curly-newline": 0,
+    "implicit-arrow-linebreak": 0,
+    "semi": ["error", "never"],
+    "quotes": [
+      "error",
+      "single",
+      {
+        "allowTemplateLiterals": true,
+        "avoidEscape": true
+      }
+    ],
+    "max-len": [
+      "error",
+      {
+        "code": 100,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true
+      }
+    ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true
+      }
+    ],
+    "import/no-unresolved": [
+      "error",
+      {
+        "commonjs": true,
+        "amd": true
+      }
+    ],
+    "react/jsx-filename-extension": ["off"],
+    "react/prop-types": ["warn"],
+    "react/button-has-type": 0,
+    "jsx-a11y/href-no-hash": "off",
+    "jsx-a11y/label-has-for": [
+      "error",
+      {
+        "allowChildren": true
+      }
+    ],
+    "jsx-a11y/anchor-is-valid": [
+      "error",
+      {
+        "specialLink": ["to"]
+      }
+    ],
+    "react/jsx-props-no-spreading": 0,
+    "react/react-in-jsx-scope": "off",
+    "prettier/prettier": "error",
+    "import/extensions": 0,
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "import/prefer-default-export": "off",
+    "react/function-component-definition": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "dot-notation": "off",
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": "error"
+  }
+}

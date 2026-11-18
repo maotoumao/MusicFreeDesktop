@@ -1,0 +1,81 @@
+name: Publish to npm
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'npm version to publish'
+        type: choice
+        required: true
+        options:
+          # these are defined in ${{vars.versions}}, but ghw doesn't support yet the use of expressions in inputs.
+          - 'patch (x.y.z+1, bug fixes)'
+          - 'minor (x.y+1.0, new functionality)'
+          - 'major (x+1.0.0, api breaking changes)'
+      dry_run:
+        description: 'Dry run (perform all steps except git push & npm publish)'
+        type: boolean
+        default: true
+        required: true
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  publish-npm:
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - name: Setup versions in ${{'${{env}}'}}
+        run: |
+          # git tag -d v3.2.0 || true
+          # git push --delete origin v3.2.0 || true # for testing purposes only
+          # It sounds like a joke, but npm version doesn't have a way to print the version of the current package.
+          # Using python here instead of nodejs because it's too convoluted to just read the whole stdin.
+          CURRENT_PKG_VERSION="$(npm version --json | python3 -c 'import json; import sys; print(json.loads(sys.stdin.read()).get("jschardet"))')"
+          CURRENT_TAG_VERSION="$(git tag --list 'v*' --sort='-version:refname' | head -1)"
+          CURRENT_PUBLISHED_VERSION="$(npm view jschardet version)"
+          echo "CURRENT_TAG_VERSION=$CURRENT_TAG_VERSION"
+          echo "CURRENT_PKG_VERSION=$CURRENT_PKG_VERSION"
+          echo "CURRENT_PUBLISHED_VERSION=$CURRENT_PUBLISHED_VERSION"
+          if [ "$CURRENT_PKG_VERSION" != "$CURRENT_PUBLISHED_VERSION" ]; then
+            echo "::warning::Current package version doesn't match current published version ($CURRENT_PKG_VERSION ≠ $CURRENT_PUBLISHED_VERSION)"
+          fi
+          if [ "$CURRENT_TAG_VERSION" != "v$CURRENT_PKG_VERSION" ]; then
+            echo "::warning::Current tag version doesn't match current package version ($CURRENT_TAG_VERSION ≠ $CURRENT_PKG_VERSION)"
+          fi
+          echo "CURRENT_PKG_VERSION=$CURRENT_PKG_VERSION" >> "$GITHUB_ENV"
+          echo "CURRENT_TAG_VERSION=$CURRENT_TAG_VERSION" >> "$GITHUB_ENV"
+          echo "CURRENT_PUBLISHED_VERSION=$CURRENT_PUBLISHED_VERSION" >> "$GITHUB_ENV"
+          echo "SEMVER_UPDATE=${{fromJSON(vars.versions).values[inputs.version]}}" >> "$GITHUB_ENV"
+      - name: Version package
+        run: |
+          npm version ${{env.SEMVER_UPDATE}}
+          echo "VERSION=$(git show -s --format=%s)" >> "$GITHUB_ENV"
+      - name: Amend with changelog
+        run: |
+          CHANGELOG="${{runner.temp}}/changelog.txt"
+          echo -e "Version ${{env.VERSION}} (${{env.SEMVER_UPDATE}} update)\n" >> "$CHANGELOG"
+          echo -e "Changes since ${{env.CURRENT_PKG_VERSION}}:" >> "$CHANGELOG"
+          git log --pretty='format:%h %s' ${{env.CURRENT_TAG_VERSION}}..HEAD~1 | grep -v '.yml' | grep -v '\[devop\]' >> "$CHANGELOG"
+          echo "" >> "$CHANGELOG"
+          BASE_PKG_VERSION="$CURRENT_PUBLISHED_VERSION" ./scripts/show-size-changes.sh dist/* | tee -a "$CHANGELOG"
+          git commit --amend -F "$CHANGELOG"
+          # Move the version tag to the new amended commit.
+          git tag -f -m '${{env.VERSION}}' 'v${{env.VERSION}}'
+          git show -s --format=%B
+      - name: Push new version
+        if: inputs.dry_run == false
+        run: git push --atomic origin ${{github.ref_name}} $(git tag --points-at HEAD)
+      - name: Publish to npm
+        if: inputs.dry_run == false
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}

@@ -1,0 +1,23 @@
+name: Build
+on:
+  workflow_dispatch:
+  workflow_call:
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist
+      - run: COMMIT_URL=${{github.server_url}}/${{github.repository}}/commit/${{github.sha}}
+      - name: Check if the dist files match the source code at the commit
+        run: >-
+          git diff --stat --no-color --exit-code
+          || (echo "dist files at commit ${{github.workflow_sha}} ($COMMIT_URL) do not match the source code.
+          Please run 'npm run dist' and commit before trying to publish again." && $(exit 1))
+        env:
+          COMMIT_URL: ${{github.server_url}}/${{github.repository}}/commit/${{github.workflow_sha}}

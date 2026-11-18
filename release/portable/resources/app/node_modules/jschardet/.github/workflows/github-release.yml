@@ -1,0 +1,38 @@
+name: Create GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish'
+        type: string
+        required: true
+      draft:
+        description: 'Draft'
+        type: boolean
+        default: true
+        required: true
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{inputs.tag}}
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          DRAFT: ${{ inputs.draft && '--draft' }}
+        run: |
+          git show -s --format=%B | \
+          gh release create "$RELEASE_TAG" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="Version ${RELEASE_TAG#v}" \
+              --verify-tag \
+              "$DRAFT" \
+              -F -

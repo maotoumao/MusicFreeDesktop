@@ -1,0 +1,54 @@
+{
+  "name": "byte-length",
+  "description": "Get the real byte length of a string.",
+  "version": "1.0.2",
+  "author": "Dylan Piercey <pierceydylan@gmail.com>",
+  "bugs": "https://github.com/DylanPiercey/byte-length/issues",
+  "devDependencies": {
+    "@types/mocha": "^2.2.43",
+    "@types/node": "^8.0.34",
+    "coveralls": "^3.0.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.2.3",
+    "mocha": "^4.0.1",
+    "nyc": "^11.2.1",
+    "prettier": "^1.7.4",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.7.0",
+    "tslint-config-prettier": "^1.5.0",
+    "typescript": "^2.5.3"
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/DylanPiercey/byte-length",
+  "keywords": [
+    "bytes",
+    "content-length",
+    "length",
+    "string"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "tslint -t codeFrame -c tslint.json",
+      "git add"
+    ]
+  },
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DylanPiercey/byte-length"
+  },
+  "scripts": {
+    "build": "tsc",
+    "coveralls": "cat coverage/lcov.info | coveralls",
+    "format-all": "find {src,test} -name '*.ts' | xargs prettier --write",
+    "mocha": "mocha -r ts-node/register ./test/**/*.test.ts",
+    "precommit": "lint-staged && npm test && npm run build",
+    "test": "nyc --extension=.ts --include=src/**/*.ts --reporter=lcov --reporter=text-summary npm run mocha",
+    "test-ci": "nyc --extension=.ts --include=src/**/*.ts --reporter=lcovonly --reporter=text npm run mocha"
+  },
+  "types": "dist/index.d.ts"
+}
