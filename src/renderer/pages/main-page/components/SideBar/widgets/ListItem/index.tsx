@@ -5,6 +5,7 @@ import "./index.scss";
 interface IProps {
     selected?: boolean;
     onClick?: () => void;
+    onDoubleClick?: () => void;
     onContextMenu?: (...args: any) => void;
     iconName?: SvgAssetIconNames;
     title?: string;
@@ -18,11 +19,19 @@ const ListItem = forwardRef<HTMLDivElement, IProps>(function ListItem(
     props,
     ref,
 ) {
-    const { selected, onClick, iconName, title, onContextMenu } = props ?? {};
+    const {
+        selected,
+        onClick,
+        onDoubleClick,
+        iconName,
+        title,
+        onContextMenu,
+    } = props ?? {};
     return (
         <div
             ref={ref}
             onClick={onClick}
+            onDoubleClick={onDoubleClick}
             onContextMenu={onContextMenu}
             title={title}
             role="button"

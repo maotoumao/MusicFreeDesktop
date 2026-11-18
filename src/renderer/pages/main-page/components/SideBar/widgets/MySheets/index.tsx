@@ -52,6 +52,42 @@ export default function MySheets() {
         return () => window.clearTimeout(timer);
     }, [locateTarget?.nonce]);
 
+    /**
+     * 双击歌单项：在歌单页的顶部（第一页）和底部（最后一页）之间切换。
+     * 双击的不是当前歌单时先切过去，新页面本来就在顶部。
+     */
+    const lastDoubleClickRef = useRef<{
+        sheetId: string;
+        direction: "top" | "bottom";
+    } | null>(null);
+
+    const onSheetDoubleClick = (sheetId: string) => {
+        if (currentSheetId !== sheetId) {
+            navigate(
+                `/main/musicsheet/${encodeURIComponent(
+                    localPluginName,
+                )}/${encodeURIComponent(sheetId)}`,
+            );
+            lastDoubleClickRef.current = { sheetId, direction: "top" };
+            return;
+        }
+        const previous = lastDoubleClickRef.current;
+        const direction =
+            previous?.sheetId === sheetId && previous.direction === "top"
+                ? "bottom"
+                : "top";
+        lastDoubleClickRef.current = { sheetId, direction };
+        const container =
+            document.querySelector<HTMLElement>("#page-container");
+        if (!container) {
+            return;
+        }
+        container.scrollTo({
+            top: direction === "top" ? 0 : container.scrollHeight,
+            behavior: "smooth",
+        });
+    };
+
     const importablePlugins = useSupportedPlugin("importMusicSheet");
 
     async function writeExportFile(sheets: any[], fileName: string) {
@@ -192,6 +228,7 @@ export default function MySheets() {
                                     navigate(`/main/musicsheet/${encodeURIComponent(localPluginName)}/${encodeURIComponent(item.id)}`);
                                 }
                             }}
+                            onDoubleClick={() => onSheetDoubleClick(item.id)}
                             onContextMenu={(e) => {
                                 showContextMenu({
                                     x: e.clientX,
