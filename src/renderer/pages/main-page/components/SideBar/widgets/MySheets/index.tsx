@@ -1,7 +1,7 @@
 import "./index.scss";
+import { useEffect, useRef, useState } from "react";
 import ListItem from "../ListItem";
 import { useMatch, useNavigate } from "react-router-dom";
-import { Disclosure } from "@headlessui/react";
 import MusicSheet, { defaultSheet } from "@/renderer/core/music-sheet";
 import SvgAsset from "@/renderer/components/SvgAsset";
 import { hideModal, showModal } from "@/renderer/components/Modal";
@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useSupportedPlugin } from "@shared/plugin-manager/renderer";
 import { toast } from "react-toastify";
 import { dialogUtil, fsUtil } from "@shared/utils/renderer";
+import { useLocateTarget } from "@/renderer/core/music-locate";
 import {
     buildExportFileName,
     buildSheetBackupJson,
@@ -25,6 +26,31 @@ export default function MySheets() {
     const musicSheets = MusicSheet.frontend.useAllSheets();
     const navigate = useNavigate();
     const { t } = useTranslation();
+
+    // 定位当前歌曲时（底栏空白处 / 播放列表面板），自动展开「我的歌单」
+    // 并把目标歌单滚到侧边栏可见范围内
+    const locateTarget = useLocateTarget();
+    const [disclosureOpen, setDisclosureOpen] = useState(true);
+    const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+    useEffect(() => {
+        const targetSheetId = locateTarget?.sheetId;
+        if (
+            !targetSheetId ||
+            !musicSheets.some((item) => item.id === targetSheetId)
+        ) {
+            return;
+        }
+        setDisclosureOpen(true);
+        // 展开是异步渲染，等面板挂载后再滚；nonce 每次定位都会变
+        const timer = window.setTimeout(() => {
+            itemRefs.current[targetSheetId]?.scrollIntoView({
+                block: "nearest",
+                behavior: "smooth",
+            });
+        }, 100);
+        return () => window.clearTimeout(timer);
+    }, [locateTarget?.nonce]);
 
     const importablePlugins = useSupportedPlugin("importMusicSheet");
 
@@ -104,49 +130,60 @@ export default function MySheets() {
     return (
         <div className="side-bar-container--my-sheets">
             <div className="divider"></div>
-            <Disclosure defaultOpen>
-                <Disclosure.Button className="title" as="div" role="button">
-                    <div className="my-sheets">{t("side_bar.my_sheets")}</div>
-                    <div
-                        role="button"
-                        className="option-btn"
-                        title={t("plugin.method_import_music_sheet")}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            showModal("ImportMusicSheet", {
-                                plugins: importablePlugins,
-                            });
-                        }}
-                    >
-                        <SvgAsset iconName="arrow-left-end-on-rectangle"></SvgAsset>
-                    </div>
-                    <div
-                        role="button"
-                        className="option-btn"
-                        title={t("side_bar.export_all_sheets")}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onExportAllSheets();
-                        }}
-                    >
-                        <SvgAsset iconName="array-download-tray"></SvgAsset>
-                    </div>
-                    <div
-                        role="button"
-                        className="option-btn"
-                        title={t("side_bar.create_local_sheet")}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            showModal("AddNewSheet");
-                        }}
-                    >
-                        <SvgAsset iconName="plus"></SvgAsset>
-                    </div>
-                </Disclosure.Button>
-                <Disclosure.Panel>
+            {/* Headless UI v1 的 Disclosure 不支持受控展开，而定位当前歌曲时
+                需要程序化展开，所以这里自己做折叠状态。data-headlessui-state
+                保留下来给样式里的箭头旋转用。 */}
+            <div
+                className="title"
+                role="button"
+                data-headlessui-state={disclosureOpen ? "open" : undefined}
+                onClick={() => setDisclosureOpen((value) => !value)}
+            >
+                <div className="my-sheets">{t("side_bar.my_sheets")}</div>
+                <div
+                    role="button"
+                    className="option-btn"
+                    title={t("plugin.method_import_music_sheet")}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        showModal("ImportMusicSheet", {
+                            plugins: importablePlugins,
+                        });
+                    }}
+                >
+                    <SvgAsset iconName="arrow-left-end-on-rectangle"></SvgAsset>
+                </div>
+                <div
+                    role="button"
+                    className="option-btn"
+                    title={t("side_bar.export_all_sheets")}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onExportAllSheets();
+                    }}
+                >
+                    <SvgAsset iconName="array-download-tray"></SvgAsset>
+                </div>
+                <div
+                    role="button"
+                    className="option-btn"
+                    title={t("side_bar.create_local_sheet")}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        showModal("AddNewSheet");
+                    }}
+                >
+                    <SvgAsset iconName="plus"></SvgAsset>
+                </div>
+            </div>
+            {disclosureOpen ? (
+                <div>
                     {musicSheets.map((item) => (
                         <ListItem
                             key={item.id}
+                            ref={(el) => {
+                                itemRefs.current[item.id] = el;
+                            }}
                             iconName={
                                 item.id === defaultSheet.id ? "heart-outline" : "musical-note"
                             }
@@ -221,8 +258,8 @@ export default function MySheets() {
                             }
                         ></ListItem>
                     ))}
-                </Disclosure.Panel>
-            </Disclosure>
+                </div>
+            ) : null}
         </div>
     );
 }

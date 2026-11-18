@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import SvgAsset, { SvgAssetIconNames } from "@/renderer/components/SvgAsset";
 import "./index.scss";
 
@@ -9,10 +10,18 @@ interface IProps {
     title?: string;
 }
 
-export default function ListItem(props: IProps) {
+/**
+ * ref 转发出去了：侧边栏「我的歌单」在定位当前歌曲时需要拿到目标项
+ * 的 DOM 来做 scrollIntoView。
+ */
+const ListItem = forwardRef<HTMLDivElement, IProps>(function ListItem(
+    props,
+    ref,
+) {
     const { selected, onClick, iconName, title, onContextMenu } = props ?? {};
     return (
         <div
+            ref={ref}
             onClick={onClick}
             onContextMenu={onContextMenu}
             title={title}
@@ -24,4 +33,6 @@ export default function ListItem(props: IProps) {
             <span>{title ?? ""}</span>
         </div>
     );
-}
+});
+
+export default ListItem;
