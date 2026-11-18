@@ -121,7 +121,7 @@
   },
   "music_list_context_menu": {
     "next_play": "Play Next",
-    "search_full_version": "Search Full-Playable Versions",
+    "search_full_version": "Search Song",
     "search_mv": "Search MV",
     "edit_music_meta": "Edit Song Info",
     "add_to_my_sheets": "Add to Playlist",
@@ -205,9 +205,9 @@
     "audio_recognition": "Recognize by Audio",
     "hide_translation": "Hide Translation",
     "watch_mv": "Watch MV",
-    "search_full_version": "Find Full Version",
+    "search_full_version": "Search Song",
     "search_mv": "Search MV",
-    "edit_music_meta": "Edit Song Info"
+    "edit_music_meta": "Song Info"
   },
   "bottom_loading_state": {
     "reached_end": "~~~ End ~~~",

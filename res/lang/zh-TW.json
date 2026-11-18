@@ -121,7 +121,7 @@
   },
   "music_list_context_menu": {
     "next_play": "下一首播放",
-    "search_full_version": "搜尋完整播放版本",
+    "search_full_version": "搜尋歌曲",
     "search_mv": "搜尋 MV",
     "edit_music_meta": "編輯歌曲資訊",
     "add_to_my_sheets": "添加到我的歌單",
@@ -205,9 +205,9 @@
     "audio_recognition": "聲音辨識歌詞",
     "hide_translation": "隱藏翻譯",
     "watch_mv": "觀看 MV",
-    "search_full_version": "找完整版",
+    "search_full_version": "搜尋歌曲",
     "search_mv": "搜尋 MV",
-    "edit_music_meta": "編輯歌曲資訊"
+    "edit_music_meta": "歌曲資訊"
   },
   "bottom_loading_state": {
     "reached_end": "~~~ 沒有更多了 ~~~",

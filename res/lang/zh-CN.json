@@ -121,7 +121,7 @@
   },
   "music_list_context_menu": {
     "next_play": "下一首播放",
-    "search_full_version": "搜索完整播放版本",
+    "search_full_version": "搜索歌曲",
     "search_mv": "搜索 MV",
     "edit_music_meta": "编辑歌曲信息",
     "add_to_my_sheets": "添加到歌单",
@@ -205,9 +205,9 @@
     "audio_recognition": "声音识别歌词",
     "hide_translation": "隐藏翻译",
     "watch_mv": "观看 MV",
-    "search_full_version": "找完整版",
+    "search_full_version": "搜索歌曲",
     "search_mv": "搜索 MV",
-    "edit_music_meta": "编辑歌曲信息"
+    "edit_music_meta": "歌曲信息"
   },
   "bottom_loading_state": {
     "reached_end": "~~~ 到底啦 ~~~",
