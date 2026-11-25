@@ -39,6 +39,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复切换音质过程中暂停后，新音源就绪时又自动播放的问题；本地媒体代理不可用、音源仍在下载时切换音质，不再丢失播放和定位。
 - 修复播放队列中所有歌曲都无法播放时，「出错时跳过」会无限循环切歌的问题：现在连续 3 首失败后停止。
 - 修复从播放队列播放本地歌曲（包括重启后继续播放）时，内嵌歌词不显示的问题。
+- 修复 Apple 芯片 Mac 上下载的安装包提示「已损坏，无法打开」的问题（应用签名在打包过程中失效）。
 
 ### Added
 
@@ -67,6 +68,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix playback resuming by itself after pausing during a quality switch, and switching quality while a source is still downloading (local media proxy unavailable) no longer drops playback and the seek position.
 - Fix "skip on error" cycling through the queue endlessly when every track fails to play; playback now stops after 3 consecutive failures.
 - Fix embedded lyrics not showing for local songs played from the play queue, including after a restart.
+- Fix downloaded builds on Apple silicon Macs reporting "is damaged and can't be opened" (the app signature was invalidated during packaging).
 
 ---
 

@@ -6,6 +6,8 @@ import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-nati
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import { execFileSync } from 'child_process';
+import fs from 'fs';
 import path from 'path';
 
 import { mainConfig } from './config/webpack.main.config';
@@ -29,6 +31,27 @@ const config: ForgeConfig = {
         ],
     },
     rebuildConfig: {},
+    hooks: {
+        /**
+         * macOS：fuses 插件在打包器写入应用 Info.plist 之前就做了 ad-hoc 签名，
+         * 最终 .app 的签名因此失效，arm64 上下载后会被系统判定为「已损坏」。
+         * 打包完成后重新 ad-hoc 签名；配置了正式签名（osxSign）时不处理。
+         */
+        postPackage: async (forgeConfig, { platform, outputPaths }) => {
+            if (platform !== 'darwin' || forgeConfig.packagerConfig.osxSign) return;
+            for (const dir of outputPaths) {
+                for (const name of fs.readdirSync(dir).filter((n) => n.endsWith('.app'))) {
+                    execFileSync('codesign', [
+                        '--force',
+                        '--deep',
+                        '--sign',
+                        '-',
+                        path.join(dir, name),
+                    ]);
+                }
+            }
+        },
+    },
     makers: [
         new MakerDMG({
             format: 'ULFO',
