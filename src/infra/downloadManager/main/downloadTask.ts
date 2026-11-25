@@ -163,10 +163,15 @@ export class DownloadTask {
                 .trim()
                 .toLowerCase();
             const ext = (await detectAudioExt(this.task.tempPath!)) ?? MIME_TO_EXT[mime] ?? '.mp3';
-            const finalPath = await this.resolveFinalPath(ext);
+            const finalPath = await this.claimFinalPath(ext);
 
-            // 8. 下载完成 → rename 临时文件
-            await fsp.rename(this.task.tempPath!, finalPath);
+            // 8. 下载完成 → rename 临时文件（覆盖本任务占位的空文件）
+            try {
+                await fsp.rename(this.task.tempPath!, finalPath);
+            } catch (err) {
+                await fsp.unlink(finalPath).catch(() => {});
+                throw err;
+            }
             this.task.filePath = finalPath;
 
             onCompleted();
@@ -192,27 +197,19 @@ export class DownloadTask {
     }
 
     /**
-     * filePath 不含扩展名（由 buildFileName 生成），此处追加扩展名。
-     * 若目标路径已存在文件，自动追加数字后缀避免覆盖。
+     * filePath 不含扩展名（由 buildFileName 生成），此处追加扩展名，并以独占方式创建空文件占住该路径。
+     * 目标已存在（含其他任务刚占住的同名路径）时追加数字后缀，同名下载并行完成也不会互相覆盖。
      */
-    private async resolveFinalPath(ext: string): Promise<string> {
+    private async claimFinalPath(ext: string): Promise<string> {
         const base = this.task.filePath!;
-        let candidate = base + ext;
-
-        // 避免覆盖已有文件
-        let suffix = 1;
-        while (true) {
+        for (let suffix = 0; ; suffix++) {
+            const candidate = suffix === 0 ? base + ext : `${base} (${suffix})${ext}`;
             try {
-                await fsp.access(candidate);
-                // 文件存在，尝试下一个后缀
-                candidate = `${base} (${suffix})${ext}`;
-                suffix++;
+                await (await fsp.open(candidate, 'wx')).close();
+                return candidate;
             } catch (err: any) {
-                if (err?.code === 'ENOENT') break;
-                throw err; // 权限不足等 I/O 错误向上抛出
+                if (err?.code !== 'EEXIST') throw err; // 权限不足等 I/O 错误向上抛出
             }
         }
-
-        return candidate;
     }
 }
