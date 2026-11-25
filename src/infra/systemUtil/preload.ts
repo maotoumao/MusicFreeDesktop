@@ -13,6 +13,10 @@ const mod = {
         getCacheSize: (): Promise<number> => ipcRenderer.invoke(IPC.GET_CACHE_SIZE),
         clearCache: () => ipcRenderer.send(IPC.CLEAR_CACHE),
         checkUpdate: (): Promise<unknown> => ipcRenderer.invoke(IPC.CHECK_UPDATE),
+        takeOpenedFiles: (): Promise<string[]> => ipcRenderer.invoke(IPC.TAKE_OPENED_FILES),
+        onOpenFiles: (callback: (paths: string[]) => void) => {
+            ipcRenderer.on(IPC.OPEN_FILES, (_evt, paths: string[]) => callback(paths));
+        },
     },
     window: {
         minimizeWindow: (skipTaskBar?: boolean) =>

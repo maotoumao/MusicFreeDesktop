@@ -4,6 +4,7 @@
  * 在主窗口 bootstrap 完成后执行的非阻塞后台任务：
  *   1. 自动更新插件（读取 plugin.autoUpdatePlugin 配置）
  *   2. 检查软件更新（读取 normal.checkUpdate 配置）
+ *   3. 播放通过系统「打开方式」打开的音频文件
  *
  * 所有任务 fire-and-forget，不阻塞 UI。
  */
@@ -14,11 +15,22 @@ import systemUtil from '@infra/systemUtil/renderer';
 import { syncKV } from '@renderer/common/kvStore';
 import { showModal } from '@renderer/mainWindow/components/ui/Modal/modalManager';
 import { checkLegacyMigration } from '@renderer/mainWindow/core/legacyMigration';
+import { playLocalFiles } from '@renderer/mainWindow/core/playLocalFiles';
 
 export function runPostBootstrapTasks(): void {
+    receiveOpenedFiles();
     autoUpdatePlugins();
     checkAppUpdate();
     checkLegacyMigration();
+}
+
+/** 播放通过系统「打开方式」打开的音频文件 */
+function receiveOpenedFiles(): void {
+    systemUtil.receiveOpenedFiles((paths) => {
+        playLocalFiles(paths).catch((err) => {
+            console.error('[PostBootstrap] Play opened files failed:', err);
+        });
+    });
 }
 
 /** 自动更新插件 */

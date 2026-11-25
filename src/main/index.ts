@@ -171,6 +171,13 @@ app.on('ready', async () => {
     if (launchUrl) {
         handleDeepLink(launchUrl);
     }
+    systemUtil.openFilesFromArgv(process.argv);
+});
+
+// macOS：通过「打开方式」打开音频文件（可能早于 ready 触发，systemUtil 会暂存）
+app.on('open-file', (event, filePath) => {
+    event.preventDefault();
+    systemUtil.openFiles([filePath]);
 });
 
 // 处理 macOS 上通过 open-url 事件传入的 deep link
@@ -188,6 +195,7 @@ app.on('second-instance', (_event, argv) => {
     if (url) {
         handleDeepLink(url);
     }
+    systemUtil.openFilesFromArgv(argv);
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

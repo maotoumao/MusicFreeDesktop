@@ -8,12 +8,16 @@
  *  4. 原生 Dialog（打开/保存文件对话框）
  */
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
+import fs from 'fs';
 import fsp from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import axios from 'axios';
 import { compare } from 'compare-versions';
 import type { IWindowManager } from '@appTypes/main/windowManager';
 import type { IAppConfigReader } from '@appTypes/infra/appConfig';
 import type { IUpdateInfo } from '@appTypes/infra/systemUtil';
+import { SUPPORTED_AUDIO_EXTS } from '@common/constant';
 import { IPC, UPDATE_SOURCES } from './common/constant';
 
 /** Windows 登录项启动参数，用于识别开机自启 */
@@ -22,6 +26,9 @@ const LAUNCHED_AT_LOGIN_ARG = '--launched-at-login';
 class SystemUtil {
     private windowManager!: IWindowManager;
     private isSetup = false;
+    /** 渲染进程就绪前通过系统「打开方式」传入的文件 */
+    private pendingOpenFiles: string[] = [];
+    private openFilesReceiverReady = false;
 
     public setup(windowManager: IWindowManager, appConfig: IAppConfigReader) {
         if (this.isSetup) return;
@@ -35,6 +42,40 @@ class SystemUtil {
         this.setupDialogHandlers();
 
         this.isSetup = true;
+    }
+
+    // ─── 系统「打开方式」传入的文件 ───
+
+    /** 交给主窗口播放；主窗口就绪前先暂存，可在 setup 之前调用 */
+    public openFiles(paths: string[]): void {
+        if (paths.length === 0) return;
+        if (this.openFilesReceiverReady) {
+            this.windowManager.showWindow('main');
+            this.windowManager.sendTo('main', IPC.OPEN_FILES, paths);
+        } else {
+            this.pendingOpenFiles.push(...paths);
+        }
+    }
+
+    /** 从命令行参数中取出音频文件（Windows / Linux 的「打开方式」通过参数传入路径或 file:// URL） */
+    public openFilesFromArgv(argv: string[]): void {
+        const paths = argv
+            .filter((arg) => !arg.startsWith('-'))
+            .map((arg) => {
+                if (!arg.startsWith('file://')) return arg;
+                try {
+                    return fileURLToPath(arg);
+                } catch {
+                    return '';
+                }
+            })
+            .filter(
+                (p) =>
+                    SUPPORTED_AUDIO_EXTS.has(path.extname(p).toLowerCase()) &&
+                    fs.existsSync(p) &&
+                    fs.statSync(p).isFile(),
+            );
+        this.openFiles(paths);
     }
 
     // ─── 开机自启 ───
@@ -69,6 +110,12 @@ class SystemUtil {
     // ─── App ───
 
     private setupAppHandlers() {
+        // 主窗口播放器就绪后取走暂存的文件，此后的文件直接推送
+        ipcMain.handle(IPC.TAKE_OPENED_FILES, () => {
+            this.openFilesReceiverReady = true;
+            return this.pendingOpenFiles.splice(0);
+        });
+
         ipcMain.on(IPC.EXIT_APP, () => {
             app.quit();
         });

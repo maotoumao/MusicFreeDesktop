@@ -5,6 +5,8 @@ export const IPC = {
     GET_CACHE_SIZE: '@infra/system-util/get-cache-size',
     CLEAR_CACHE: '@infra/system-util/clear-cache',
     CHECK_UPDATE: '@infra/system-util/check-update',
+    TAKE_OPENED_FILES: '@infra/system-util/take-opened-files',
+    OPEN_FILES: '@infra/system-util/open-files',
 
     // ─── Window ───
     MINIMIZE_WINDOW: '@infra/system-util/minimize-window',

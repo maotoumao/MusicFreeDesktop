@@ -18,6 +18,8 @@ interface IMod {
         getCacheSize(): Promise<number>;
         clearCache(): void;
         checkUpdate(): Promise<IUpdateInfo>;
+        takeOpenedFiles(): Promise<string[]>;
+        onOpenFiles(callback: (paths: string[]) => void): void;
     };
     window: {
         minimizeWindow(skipTaskBar?: boolean): void;
@@ -69,6 +71,14 @@ class SystemUtilRenderer {
     /** 检查应用更新 */
     public checkUpdate(): Promise<IUpdateInfo> {
         return mod.app.checkUpdate();
+    }
+
+    /** 订阅系统「打开方式」传入的文件，并取走订阅前暂存的文件 */
+    public receiveOpenedFiles(callback: (paths: string[]) => void): void {
+        mod.app.onOpenFiles(callback);
+        mod.app.takeOpenedFiles().then((paths) => {
+            if (paths.length > 0) callback(paths);
+        });
     }
 
     // ─── Window ───

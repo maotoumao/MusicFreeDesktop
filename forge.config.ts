@@ -29,6 +29,17 @@ const config: ForgeConfig = {
                 schemes: ['musicfree'],
             },
         ],
+        // macOS：出现在音频文件的「打开方式」中，不成为默认打开程序
+        extendInfo: {
+            CFBundleDocumentTypes: [
+                {
+                    CFBundleTypeName: 'Audio',
+                    CFBundleTypeRole: 'Viewer',
+                    LSHandlerRank: 'Alternate',
+                    LSItemContentTypes: ['public.audio'],
+                },
+            ],
+        },
     },
     rebuildConfig: {},
     hooks: {
@@ -59,7 +70,20 @@ const config: ForgeConfig = {
         new MakerDeb({
             options: {
                 bin: 'MusicFree',
-                mimeType: ['x-scheme-handler/musicfree'],
+                mimeType: [
+                    'x-scheme-handler/musicfree',
+                    'audio/mpeg',
+                    'audio/mp4',
+                    'audio/flac',
+                    'audio/x-flac',
+                    'audio/wav',
+                    'audio/x-wav',
+                    'audio/ogg',
+                    'audio/aac',
+                    'audio/x-ms-wma',
+                    'audio/x-ape',
+                    'audio/opus',
+                ],
             },
         }),
         new MakerRpm({
