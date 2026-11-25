@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复插件在线更新因网络错误或下载内容无法解析而失败时，仍提示「已是最新版本」的问题。
 - 修复下载的 FLAC 等无损或非 MP3 格式文件被保存为 .mp3 扩展名的问题：扩展名改为按文件内容识别。
 - 修复歌曲加载期间再次点击播放会重复加载、播放片刻后从头开始，以及上一首加载失败的结果晚到时打断当前歌曲或在重试成功后仍被跳过的问题。
+- 修复失败的下载任务点击重试后，进度条先显示失败前的旧进度和速度的问题。
 
 ### Added
 
@@ -51,6 +52,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix a plugin update that failed because of a network error or unparsable download still reporting "already up to date".
 - Fix downloaded FLAC and other non-MP3 files being saved with an .mp3 extension: the extension is now detected from the file content.
 - Fix pressing play while a track is loading reloading it and restarting playback, and a previous track's late load failure interrupting the current track or skipping a successfully retried one.
+- Fix a retried failed download briefly showing the progress and speed from before it failed.
 
 ---
 
