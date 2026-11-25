@@ -121,6 +121,7 @@
         "react-router": "^8.0.1",
         "react-virtuoso": "^4.18.7",
         "sharp": "^0.34.5",
+        "taglib-wasm": "2.5.1",
         "tinykeys": "^4.0.0",
         "webdav": "^5.10.0",
         "yauzl": "^3.4.0"

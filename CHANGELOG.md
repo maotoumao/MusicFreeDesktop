@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 本地音乐与已下载列表新增「音质」列：本地文件显示编码参数（如 FLAC 24bit/96kHz、MP3 320kbps），已下载歌曲显示下载音质；可在设置的「隐藏列」中关闭。升级后首次扫描会为已有本地歌曲补齐参数，不影响已修改过的标签。
 - 本地歌曲右键菜单新增「歌曲信息」，查看标签、文件路径与大小、编码、码率、采样率、位深和声道。
 - 新增 Linux ARM64 安装包（deb、rpm），可用于树莓派等 ARM 设备。
+- 下载完成后把歌曲的标题、歌手、专辑和封面写入文件标签（MP3、FLAC、M4A、OGG、Opus、WAV、WMA 等），其他播放器和手机也能显示歌曲信息；Win7 版不写入。
 
 ### 修复
 
@@ -81,6 +82,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Add a Quality column to the local music and downloaded lists: local files show their encoding (e.g. FLAC 24bit/96kHz, MP3 320kbps) and downloads show the downloaded quality; it can be hidden in settings. The first scan after upgrading fills this in for existing local songs without touching tags you have edited.
 - Add "Song info" to the local song context menu, showing tags, file path and size, codec, bitrate, sample rate, bit depth and channels.
 - Add Linux ARM64 packages (deb, rpm) for ARM devices such as the Raspberry Pi.
+- Downloaded songs now get their title, artist, album and cover written into the file's tags (MP3, FLAC, M4A, OGG, Opus, WAV, WMA and more), so other players and phones show the song info; the Win7 build skips this.
 
 ### Fixed
 

@@ -69,7 +69,7 @@ export class DownloadTask {
      */
     async execute(
         onProgress: (downloadedBytes: number, totalBytes: number, speed: number) => void,
-        onCompleted: () => void,
+        onCompleted: () => void | Promise<void>,
         onError: (err: Error) => void,
     ): Promise<void> {
         try {
@@ -174,7 +174,7 @@ export class DownloadTask {
             }
             this.task.filePath = finalPath;
 
-            onCompleted();
+            await onCompleted();
         } catch (err: any) {
             if (axios.isCancel(err)) return;
             onError(err);

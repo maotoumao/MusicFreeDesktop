@@ -5,6 +5,7 @@
  * - 下载任务的完整生命周期管理（创建、暂停、恢复、重试、删除）
  * - 并发控制（p-queue）+ 进度节流广播
  * - DB 持久化 + 启动恢复未完成任务
+ * - 下载完成后把歌曲信息和封面写入文件标签
  * - IPC 注册
  */
 import { ipcMain } from 'electron';
@@ -33,8 +34,10 @@ import type {
 } from '@appTypes/infra/downloadManager';
 import type { IMusicItemSlim, IMusicItemProvider } from '@appTypes/infra/musicSheet';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
+import type { IAudioTagWriter } from '@appTypes/infra/audioTag';
 import { FILE_NAME_TEMPLATES, IPC } from '../common/constant';
 import { DownloadTask } from './downloadTask';
+import { fetchCover } from './fetchCover';
 
 /** DB 行 snake_case → 业务对象 camelCase */
 function rowToTask(row: IDownloadTaskRow): IDownloadTask {
@@ -84,6 +87,7 @@ class DownloadManager {
     private mediaMeta!: IMediaMetaProvider;
     private downloadedSheet!: IDownloadedSheetProvider;
     private musicItemProvider!: IMusicItemProvider;
+    private audioTag!: IAudioTagWriter;
 
     /** 活跃的下载任务（仅 downloading 状态） */
     private activeTasks = new Map<string, DownloadTask>();
@@ -116,6 +120,7 @@ class DownloadManager {
         mediaMeta: IMediaMetaProvider;
         downloadedSheet: IDownloadedSheetProvider;
         musicItemProvider: IMusicItemProvider;
+        audioTag: IAudioTagWriter;
     }): void {
         if (this.isSetup) return;
 
@@ -126,6 +131,7 @@ class DownloadManager {
         this.mediaMeta = deps.mediaMeta;
         this.downloadedSheet = deps.downloadedSheet;
         this.musicItemProvider = deps.musicItemProvider;
+        this.audioTag = deps.audioTag;
 
         // 初始化预编译 SQL
         this.initQueries();
@@ -523,11 +529,14 @@ class DownloadManager {
                     this.broadcastProgress();
                 },
                 // onCompleted
-                () => {
+                async () => {
                     this.activeTasks.delete(task.id);
                     this.progressCache.delete(task.id);
 
-                    // 任务可能在 rename 间隙被 removeTask 删除
+                    const musicItem = safeParse<IMusic.IMusicItem>(task.musicItemRaw ?? '');
+                    if (musicItem) await this.writeTags(task.filePath!, musicItem);
+
+                    // 任务可能在 rename 或写标签期间被 removeTask 删除
                     const freshRow = this.queries.getTaskById.get(task.id);
                     if (!freshRow) return;
 
@@ -536,7 +545,6 @@ class DownloadManager {
                         task.updatedAt = Date.now();
 
                         // H1: 原子事务 — 写入歌单 + mediaMeta + 删除任务行
-                        const musicItem = safeParse<IMusic.IMusicItem>(task.musicItemRaw ?? '');
                         this.completeTransaction(task, musicItem);
 
                         this.windowManager.broadcast(IPC.TASK_EVENT, {
@@ -838,6 +846,22 @@ class DownloadManager {
             error: task.error,
             updatedAt: task.updatedAt,
         });
+    }
+
+    /** 把歌曲信息和封面写入下载的文件；失败只记录日志，不影响下载结果 */
+    private async writeTags(filePath: string, musicItem: IMusic.IMusicItem): Promise<void> {
+        if (!this.audioTag.canWrite(filePath)) return;
+        const cover = await fetchCover(musicItem.artwork).catch((): undefined => undefined);
+        try {
+            await this.audioTag.write(filePath, {
+                title: musicItem.title,
+                artist: musicItem.artist,
+                album: musicItem.album,
+                cover,
+            });
+        } catch (err) {
+            console.warn('[DownloadManager] Failed to write tags:', filePath, err);
+        }
     }
 
     /** 构建文件名（不含扩展名，由 downloadTask 下载完成后根据 Content-Type 推断） */

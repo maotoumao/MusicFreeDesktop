@@ -14,6 +14,27 @@ import { mainConfig } from './config/webpack.main.config';
 import { rendererConfig } from './config/webpack.renderer.config';
 import { preloadConfig } from './config/webpack.preload.config';
 
+/** webpack 不打包、运行时 require 的纯 JS 依赖（不能交给 externals 插件：它要解析 <包名>/package.json，被这些包的 exports 拒绝） */
+const RUNTIME_PACKAGES = ['taglib-wasm'];
+
+/** 把依赖包及其运行时依赖复制到打包目录的 node_modules；按入口文件向上找包根目录，不受 exports 限制 */
+function copyPackageWithDeps(name: string, fromDir: string, nodeModulesDir: string): void {
+    const dest = path.join(nodeModulesDir, name);
+    if (fs.existsSync(dest)) return;
+    let root = path.dirname(require.resolve(name, { paths: [fromDir] }));
+    const isRoot = (dir: string) => {
+        const pkgPath = path.join(dir, 'package.json');
+        return fs.existsSync(pkgPath) && JSON.parse(fs.readFileSync(pkgPath, 'utf8')).name === name;
+    };
+    while (!isRoot(root)) root = path.dirname(root);
+    root = fs.realpathSync(root);
+    fs.cpSync(root, dest, { recursive: true, dereference: true });
+    const { dependencies = {} } = JSON.parse(
+        fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
+    );
+    for (const dep of Object.keys(dependencies)) copyPackageWithDeps(dep, root, nodeModulesDir);
+}
+
 const config: ForgeConfig = {
     packagerConfig: {
         asar: {
@@ -43,6 +64,12 @@ const config: ForgeConfig = {
     },
     rebuildConfig: {},
     hooks: {
+        packageAfterCopy: async (_forgeConfig, buildPath) => {
+            const nodeModulesDir = path.join(buildPath, 'node_modules');
+            fs.mkdirSync(nodeModulesDir, { recursive: true });
+            for (const name of RUNTIME_PACKAGES)
+                copyPackageWithDeps(name, __dirname, nodeModulesDir);
+        },
         /**
          * macOS：fuses 插件在打包器写入应用 Info.plist 之前就做了 ad-hoc 签名，
          * 最终 .app 的签名因此失效，arm64 上下载后会被系统判定为「已损坏」。

@@ -21,7 +21,8 @@ export const mainConfig: Configuration = {
         rules,
     },
     plugins,
-    externals: ['sharp', 'better-sqlite3'],
+    // taglib-wasm 按相对自身的路径加载 .wasm：不打包，首次写标签时 require（Electron 40 支持 require ESM）
+    externals: ['sharp', 'better-sqlite3', 'taglib-wasm'],
     resolve: {
         extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json', '.node'],
         // music-metadata 等纯 ESM 包的 exports 只有 import 条件，

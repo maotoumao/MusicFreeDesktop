@@ -13,6 +13,7 @@ import themePack from '@infra/themepack/main';
 import systemUtil from '@infra/systemUtil/main';
 import logger from '@infra/logger/main';
 import database from '@infra/database/main';
+import audioTag from '@infra/audioTag/main';
 import musicSheet from '@infra/musicSheet/main';
 import mediaMeta from '@infra/mediaMeta/main';
 import downloadManager from '@infra/downloadManager/main';
@@ -131,6 +132,7 @@ async function bootstrapInfra(windowManager: IWindowManager) {
         mediaMeta: mediaMetaProvider,
         downloadedSheet: musicSheet.getDownloadedSheetProvider(),
         musicItemProvider,
+        audioTag,
     });
 
     localMusic.setup({
