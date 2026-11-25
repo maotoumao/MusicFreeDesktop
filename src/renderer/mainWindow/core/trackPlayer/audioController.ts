@@ -56,7 +56,8 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
     private audio: HTMLAudioElement;
     private hls: Hls | null = null;
     private _playerState: PlayerState = PlayerState.None;
-    private _sourceId = 0; // fetch 竞态守卫
+    /** 每次释放音源自增，异步返回的旧音源据此丢弃 */
+    private _sourceId = 0;
     private _currentBlobUrl: string | null = null; // 追踪 blob URL 防止内存泄漏
 
     get playerState(): PlayerState {
@@ -83,16 +84,14 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
             artwork: musicItem.artwork ? [{ src: musicItem.artwork }] : undefined,
         });
         this.setPlayerState(PlayerState.None);
-        this.audio.src = '';
-        this.audio.removeAttribute('src');
+        this.releaseSource();
         navigator.mediaSession.playbackState = 'none';
     }
 
     setTrackSource(source: IPlugin.IMediaSourceResult, _musicItem: IMusic.IMusicItem): void {
-        this.destroyHls();
-        this.revokeBlobUrl();
+        this.releaseSource();
         this.setPlayerState(PlayerState.None);
-        const sourceId = ++this._sourceId;
+        const sourceId = this._sourceId;
 
         // 从 URL 的 userinfo 部分提取 Basic Auth（如 http://user:pass@host/...）
         const { cleanUrl: url, authHeader } = this.extractBasicAuth(source.url!);
@@ -133,7 +132,6 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
             fetch(url, { method: 'GET', headers })
                 .then((res) => res.blob())
                 .then((blob) => {
-                    // 竞态守卫：fetch 期间可能已切歌
                     if (this._sourceId !== sourceId) return;
                     this._currentBlobUrl = URL.createObjectURL(blob);
                     this.audio.src = this._currentBlobUrl;
@@ -181,15 +179,12 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
 
     reset(): void {
         this.setPlayerState(PlayerState.None);
-        this.revokeBlobUrl();
-        this.audio.src = '';
-        this.audio.removeAttribute('src');
+        this.releaseSource();
         navigator.mediaSession.metadata = null;
         navigator.mediaSession.playbackState = 'none';
     }
 
     destroy(): void {
-        this.destroyHls();
         this.reset();
         this.removeAllListeners();
     }
@@ -234,6 +229,15 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
         this.audio.onratechange = () => {
             this.emit('speedChange', this.audio.playbackRate);
         };
+    }
+
+    /** 释放当前音源（含进行中的 fetch、HLS、Blob URL）并使其异步结果失效 */
+    private releaseSource(): void {
+        this._sourceId++;
+        this.destroyHls();
+        this.revokeBlobUrl();
+        this.audio.src = '';
+        this.audio.removeAttribute('src');
     }
 
     private setPlayerState(state: PlayerState): void {
