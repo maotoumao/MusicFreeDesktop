@@ -22,18 +22,25 @@ import { IPC, UPDATE_SOURCES } from './common/constant';
 
 /** Windows 登录项启动参数，用于识别开机自启 */
 const LAUNCHED_AT_LOGIN_ARG = '--launched-at-login';
+/** 多选文件「打开方式」时系统逐个传入，在此时间内到达的合并为一次播放 */
+const OPEN_FILES_BATCH_MS = 100;
 
 class SystemUtil {
     private windowManager!: IWindowManager;
     private isSetup = false;
-    /** 渲染进程就绪前通过系统「打开方式」传入的文件 */
+    /** 通过系统「打开方式」传入、尚未交给主窗口的文件 */
     private pendingOpenFiles: string[] = [];
-    private openFilesReceiverReady = false;
+    private openFilesTimer: ReturnType<typeof setTimeout> | null = null;
+    /** 主窗口渲染进程：starting 启动中（就绪后自行取走），ready 可直接推送，closed 已关闭（需重建） */
+    private openFilesReceiver: 'starting' | 'ready' | 'closed' = 'starting';
 
     public setup(windowManager: IWindowManager, appConfig: IAppConfigReader) {
         if (this.isSetup) return;
 
         this.windowManager = windowManager;
+        windowManager.on('close', ({ windowType }) => {
+            if (windowType === 'main') this.openFilesReceiver = 'closed';
+        });
 
         this.setupLoginItem(appConfig);
         this.setupAppHandlers();
@@ -49,12 +56,8 @@ class SystemUtil {
     /** 交给主窗口播放；主窗口就绪前先暂存，可在 setup 之前调用 */
     public openFiles(paths: string[]): void {
         if (paths.length === 0) return;
-        if (this.openFilesReceiverReady) {
-            this.windowManager.showWindow('main');
-            this.windowManager.sendTo('main', IPC.OPEN_FILES, paths);
-        } else {
-            this.pendingOpenFiles.push(...paths);
-        }
+        this.pendingOpenFiles.push(...paths);
+        this.openFilesTimer ??= setTimeout(() => this.deliverOpenFiles(), OPEN_FILES_BATCH_MS);
     }
 
     /** 从命令行参数中取出音频文件（Windows / Linux 的「打开方式」通过参数传入路径或 file:// URL） */
@@ -88,6 +91,16 @@ class SystemUtil {
         return process.argv.includes(LAUNCHED_AT_LOGIN_ARG);
     }
 
+    private deliverOpenFiles(): void {
+        this.openFilesTimer = null;
+        if (this.openFilesReceiver === 'starting' || this.pendingOpenFiles.length === 0) return;
+        // 主窗口已关闭时重建，新渲染进程就绪后取走暂存的文件
+        this.windowManager.showWindow('main');
+        if (this.openFilesReceiver === 'ready') {
+            this.windowManager.sendTo('main', IPC.OPEN_FILES, this.pendingOpenFiles.splice(0));
+        }
+    }
+
     /**
      * 使系统登录项与配置一致。仅 Windows / macOS 支持；
      * 开发模式不注册，否则会把开发用的 Electron 可执行文件加入登录项。
@@ -112,7 +125,7 @@ class SystemUtil {
     private setupAppHandlers() {
         // 主窗口播放器就绪后取走暂存的文件，此后的文件直接推送
         ipcMain.handle(IPC.TAKE_OPENED_FILES, () => {
-            this.openFilesReceiverReady = true;
+            this.openFilesReceiver = 'ready';
             return this.pendingOpenFiles.splice(0);
         });
 
