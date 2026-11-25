@@ -172,6 +172,8 @@ class ShortCutRenderer {
             }
 
             keyBindings[tinykeysCombination] = (event) => {
+                // 已被控件处理（如滑块用方向键调节）的按键不再触发快捷键
+                if (event.defaultPrevented) return;
                 // 当焦点在输入型元素时，不拦截快捷键，避免阻止正常输入（如空格）
                 const target = event.target as HTMLElement | null;
                 if (target) {
