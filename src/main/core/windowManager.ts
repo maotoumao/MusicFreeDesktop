@@ -171,7 +171,11 @@ class WindowManager implements IWindowManager {
     public hideWindow(windowType: WindowType): void {
         const win = this.windows.get(windowType);
         if (!win || win.isDestroyed()) return;
-        win.hide();
+        if (windowType === 'main') {
+            this.hideMainToTray(win);
+        } else {
+            win.hide();
+        }
     }
 
     public toggleWindow(windowType: WindowType): void {
@@ -273,6 +277,27 @@ class WindowManager implements IWindowManager {
     }
 
     // ─── 私有 ───
+
+    /**
+     * 主窗口收起到托盘。
+     * https://github.com/maotoumao/MusicFreeDesktop/issues/412
+     * [Windows] 不用 hide() —— 在 Windows 上 hide() 一个 minimized 窗口会
+     * 让 Chromium GPU compositor surface 被释放，restore() 时无法重建，
+     * 表现为窗口框正常但内容空白（典型路径：最小化 → 缩略图 X → 托盘恢复；
+     * 收起到托盘后从托盘进入迷你模式同理）。
+     * 改为 minimize()+setSkipTaskbar(true)，让窗口始终停留在 minimized
+     * 状态，restore() 能正确从 minimized 恢复。
+     */
+    private hideMainToTray(win: BrowserWindow): void {
+        if (process.platform === 'win32') {
+            if (!win.isMinimized()) {
+                win.minimize();
+            }
+            win.setSkipTaskbar(true);
+        } else {
+            win.hide();
+        }
+    }
 
     /** 确保窗口存在，已存在则聚焦，不存在则创建 */
     private ensureWindow(windowType: WindowType): void {
@@ -417,21 +442,7 @@ class WindowManager implements IWindowManager {
                 appConfig.getConfigByKey('normal.closeBehavior') === 'minimize'
             ) {
                 e.preventDefault();
-
-                // https://github.com/maotoumao/MusicFreeDesktop/issues/412
-                // [Windows] 不用 hide() —— 在 Windows 上 hide() 一个 minimized 窗口会
-                // 让 Chromium GPU compositor surface 被释放，restore() 时无法重建，
-                // 表现为窗口框正常但内容空白（典型路径：最小化 → 缩略图 X → 托盘恢复）。
-                // 改为 minimize()+setSkipTaskbar(true)，让窗口始终停留在 minimized
-                // 状态，restore() 能正确从 minimized 恢复。
-                if (process.platform === 'win32') {
-                    if (!mainWindow.isMinimized()) {
-                        mainWindow.minimize();
-                    }
-                    mainWindow.setSkipTaskbar(true);
-                } else {
-                    mainWindow.hide();
-                }
+                this.hideMainToTray(mainWindow);
             }
         });
 

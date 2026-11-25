@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复失败的下载任务点击重试后，进度条先显示失败前的旧进度和速度的问题。
 - 修复本地歌曲（如 FLAC）内嵌带时间轴的歌词丢失时间轴、歌词页一直停在最后一句且不随播放滚动的问题。
 - 修复部分本地 MP3 的 GB2312 编码标签（尤其是较短的歌名、歌手名）显示为乱码的问题。
+- 修复 Windows 上主窗口收起到托盘后，从托盘进入迷你模式再返回主窗口时界面白屏的问题。
 
 ### Added
 
@@ -57,6 +58,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix a retried failed download briefly showing the progress and speed from before it failed.
 - Fix timed lyrics embedded in local files (such as FLAC) losing their timestamps, which left the lyric view stuck on the last line instead of following playback.
 - Fix GB2312-encoded tags in some local MP3 files (especially short titles and artist names) showing as garbled text.
+- Fix the main window turning blank on Windows when entering mini mode from the tray after the window was closed to the tray, then returning to it.
 
 ---
 
