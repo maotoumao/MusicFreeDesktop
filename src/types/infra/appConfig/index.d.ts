@@ -54,6 +54,8 @@ interface _IAppConfig {
     'lyric.strokeColor': string;
     /** 桌面歌词显示翻译（有翻译时） */
     'lyric.showTranslation': boolean;
+    /** 桌面歌词双行显示（当前句与下一句） */
+    'lyric.doubleLine': boolean;
 
     /** 是否启用本地快捷键 */
     'shortCut.enableLocal': boolean;

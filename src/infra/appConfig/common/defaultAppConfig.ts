@@ -28,6 +28,7 @@ const defaultAppConfig: IAppConfig = {
     'lyric.strokeColor': '#f5c542',
     'lyric.fontSize': 48,
     'lyric.showTranslation': true,
+    'lyric.doubleLine': false,
     'shortCut.enableLocal': true,
     'shortCut.enableGlobal': false,
     // 按键格式与设置页录制的格式一致（空格存为 ' '）

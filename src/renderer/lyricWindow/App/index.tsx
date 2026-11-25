@@ -64,7 +64,13 @@ export default function App() {
 
     // 订阅应用状态
     useEffect(() => {
-        appSyncAuxiliary.subscribeAppState(['musicItem', 'playerState', 'currentLrc', 'progress']);
+        appSyncAuxiliary.subscribeAppState([
+            'musicItem',
+            'playerState',
+            'currentLrc',
+            'nextLrc',
+            'progress',
+        ]);
     }, []);
 
     return (

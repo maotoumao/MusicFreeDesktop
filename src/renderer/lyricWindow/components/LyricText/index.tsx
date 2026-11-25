@@ -15,13 +15,26 @@ import './index.scss';
 // ── 翻译行字号相对主句的比例（主句与翻译行合计不超过歌词窗口的文字区高度） ──
 const TRANSLATION_FONT_SCALE = 0.6;
 
+// ── 双行模式每行字号相对设置字号的比例（两行合计不超过歌词窗口的文字区高度） ──
+const DOUBLE_LINE_FONT_SCALE = 0.8;
+
 // ── 滚动平滑过渡时长（ms） ──
 const SCROLL_TRANSITION_MS = 900;
 
+// ── 没有下一句时（最后一句）用于估算滚动速度的时长（s） ──
+const FALLBACK_LINE_DURATION = 5;
+
 export default memo(function LyricText() {
+    const [doubleLine] = useConfigValue('lyric.doubleLine');
+    return doubleLine ? <DoubleLineLyric /> : <SingleLineLyric />;
+});
+
+/** 单行：当前句过长时随播放进度横向滚动，可在下方显示翻译 */
+function SingleLineLyric() {
     const { t } = useTranslation();
     const currentMusic = useAppStatePartial('musicItem');
     const currentLrc = useAppStatePartial('currentLrc');
+    const nextLrc = useAppStatePartial('nextLrc');
 
     const [fontData] = useConfigValue('lyric.fontData');
     const [fontSize] = useConfigValue('lyric.fontSize');
@@ -91,6 +104,8 @@ export default memo(function LyricText() {
     // 监听 progress 变化实现平滑滚动
     const currentLrcRef = useRef(currentLrc);
     currentLrcRef.current = currentLrc;
+    const nextLrcRef = useRef(nextLrc);
+    nextLrcRef.current = nextLrc;
 
     useEffect(() => {
         if (textWidth <= containerWidth) return;
@@ -101,10 +116,10 @@ export default memo(function LyricText() {
             if (!lrc || lrc.index < 0) return;
 
             const progress = changed.progress.currentTime;
-            // TODO: IAppState 尚未同步 fullLyric，无法获取下一行歌词时间，
-            //       暂用固定 5s 估算。待 IAppState 扩展后替换为实际差值。
-            const estimatedDuration = 5;
-            const virtualPointer = ((progress - lrc.time) / estimatedDuration) * textWidth;
+            const next = nextLrcRef.current;
+            const lineDuration =
+                next && next.time > lrc.time ? next.time - lrc.time : FALLBACK_LINE_DURATION;
+            const virtualPointer = ((progress - lrc.time) / lineDuration) * textWidth;
 
             if (virtualPointer > containerWidth * 0.5) {
                 setEnableTransition(true);
@@ -163,4 +178,58 @@ export default memo(function LyricText() {
             )}
         </div>
     );
-});
+}
+
+/**
+ * 双行：当前句与下一句交替占据上行（左对齐）和下行（右对齐），
+ * 当前句为偶数句时在上行，下一句在下行；过长时省略，不显示翻译。
+ */
+function DoubleLineLyric() {
+    const { t } = useTranslation();
+    const currentMusic = useAppStatePartial('musicItem');
+    const currentLrc = useAppStatePartial('currentLrc');
+    const nextLrc = useAppStatePartial('nextLrc');
+
+    const [fontData] = useConfigValue('lyric.fontData');
+    const [fontSize] = useConfigValue('lyric.fontSize');
+    const [fontColor] = useConfigValue('lyric.fontColor');
+    const [strokeColor] = useConfigValue('lyric.strokeColor');
+
+    const lineStyle = useMemo(
+        () => ({
+            color: fontColor ?? '#ffffff',
+            WebkitTextStrokeColor: strokeColor ?? '#f5c542',
+            fontSize: Math.round((fontSize ?? 54) * DOUBLE_LINE_FONT_SCALE),
+            fontFamily: fontData?.family || undefined,
+        }),
+        [fontColor, strokeColor, fontSize, fontData],
+    );
+
+    const isStateReady = currentMusic !== undefined;
+    const currentText = !isStateReady
+        ? ''
+        : (currentLrc?.lrc ??
+          (currentMusic
+              ? `${currentMusic.title} - ${currentMusic.artist ?? ''}`
+              : t('lyric.no_lyric')));
+    const nextText = nextLrc?.lrc ?? '';
+    const currentOnTop = (currentLrc?.index ?? 0) % 2 === 0;
+
+    return (
+        <div className="lyric-text lyric-text--double">
+            <div className={cn('lyric-text__line', currentOnTop && 'is-current')} style={lineStyle}>
+                {currentOnTop ? currentText : nextText}
+            </div>
+            <div
+                className={cn(
+                    'lyric-text__line',
+                    'lyric-text__line--end',
+                    !currentOnTop && 'is-current',
+                )}
+                style={lineStyle}
+            >
+                {currentOnTop ? nextText : currentText}
+            </div>
+        </div>
+    );
+}

@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 把音频文件或文件夹拖进窗口即可插入播放队列并播放（此前拖入文件会让整个窗口变成浏览器播放页）。
 - 支持从系统「打开方式」用 MusicFree 打开音频文件并直接播放（安装后出现在打开方式列表中，不会改变默认播放器）。
 - 桌面歌词工具栏新增「水平居中」，一键把歌词窗口移到所在屏幕的水平中央（保持高度位置）。
+- 桌面歌词新增「双行显示」：当前句与下一句交替显示在上下两行（可在桌面歌词工具栏开关）；单行模式下长歌词的滚动速度改为按实际时长计算。
 
 ### 修复
 
@@ -69,6 +70,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Drag audio files or folders into the window to add them to the queue and play (previously the whole window turned into a browser media page).
 - Open audio files with MusicFree from the system "Open with" menu to play them directly (listed as an option without becoming the default player).
 - Add "Center horizontally" to the desktop lyric toolbar to move the lyric window to the horizontal center of its screen, keeping its vertical position.
+- Add a two-line desktop lyric mode showing the current and next lines on alternating rows (toggle in the desktop lyric toolbar); long lines in single-line mode now scroll according to the actual line duration.
 
 ### Fixed
 

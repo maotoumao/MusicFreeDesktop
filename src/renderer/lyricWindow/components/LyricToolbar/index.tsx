@@ -16,6 +16,7 @@ import {
     AArrowDown,
     Languages,
     AlignHorizontalJustifyCenter,
+    Rows2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@common/cn';
@@ -80,6 +81,8 @@ function UnlockedToolbar({ visible }: { visible: boolean }) {
     const { t } = useTranslation();
     const [showTranslation] = useConfigValue('lyric.showTranslation');
     const isTranslationOn = showTranslation ?? true;
+    const [doubleLine] = useConfigValue('lyric.doubleLine');
+    const isDoubleLine = doubleLine ?? false;
 
     return (
         <div className={cn('lyric-toolbar', visible && 'is-visible')}>
@@ -133,6 +136,18 @@ function UnlockedToolbar({ visible }: { visible: boolean }) {
                 }}
             >
                 <AlignHorizontalJustifyCenter size={16} />
+            </button>
+
+            {/* ── 双行 ── */}
+            <button
+                className={cn('lyric-toolbar__btn', isDoubleLine && 'is-active')}
+                type="button"
+                title={t('lyric.double_line')}
+                onClick={() => {
+                    appConfig.setConfig({ 'lyric.doubleLine': !isDoubleLine });
+                }}
+            >
+                <Rows2 size={16} />
             </button>
 
             {/* ── 翻译 ── */}

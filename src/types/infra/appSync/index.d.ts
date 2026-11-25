@@ -32,6 +32,8 @@ export interface IAppState {
     playerState: PlayerState;
     repeatMode: RepeatMode;
     currentLrc: IParsedLrcItem | null;
+    /** 下一句歌词（当前句之后；尚未到第一句时为第一句） */
+    nextLrc: IParsedLrcItem | null;
     progress: { currentTime: number; duration: number };
     isFavorite: boolean;
 }

@@ -22,7 +22,7 @@ import { REPEAT_MODE_MAP } from '@renderer/common/repeatModeMap';
 import { type IAudioController, createAudioController } from './audioController';
 import PlayQueue from './playQueue';
 import LyricManager from './lyricManager';
-import type { IPlayOptions, IResolveSourceOptions } from './types';
+import type { ICurrentLyric, IPlayOptions, IResolveSourceOptions } from './types';
 import {
     store,
     currentMusicAtom,
@@ -36,6 +36,14 @@ import {
 } from './store';
 
 // ─── AppSync 桥接 ───
+
+/** 当前句之后的一句；尚未到第一句时返回第一句 */
+function getNextLrc(lyric: ICurrentLyric | null) {
+    const items = lyric?.parser?.getLyricItems();
+    if (!items) return null;
+    const current = lyric?.currentLrc;
+    return (current ? items[current.index + 1] : items[0]) ?? null;
+}
 
 /**
  * 订阅 store → appSync 桥接。
@@ -63,7 +71,10 @@ function setupAppSyncBridge(): void {
     });
     store.sub(currentLyricAtom, () => {
         const lyric = store.get(currentLyricAtom);
-        appSync.syncAppState({ currentLrc: lyric?.currentLrc ?? null });
+        appSync.syncAppState({
+            currentLrc: lyric?.currentLrc ?? null,
+            nextLrc: getNextLrc(lyric),
+        });
     });
 
     // 收藏状态变化时同步
@@ -89,6 +100,7 @@ function setupAppSyncBridge(): void {
         repeatMode: store.get(repeatModeAtom),
         progress: store.get(progressAtom),
         currentLrc: store.get(currentLyricAtom)?.currentLrc ?? null,
+        nextLrc: getNextLrc(store.get(currentLyricAtom)),
         isFavorite: getIsFavorite(),
     });
 
