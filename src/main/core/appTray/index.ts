@@ -385,6 +385,23 @@ class AppTray {
 
     // ─── macOS 应用菜单 ───
 
+    /** Cmd+W：与各窗口自身的关闭按钮一致，不直接销毁窗口 */
+    private closeFocusedWindow(): void {
+        const focused = BrowserWindow.getFocusedWindow();
+        if (!focused) return;
+        if (focused === this.windowManager.__getWindowUnsafe('main')) {
+            if (appConfig.getConfigByKey('normal.closeBehavior') === 'exit_app') {
+                app.quit();
+            } else {
+                this.windowManager.hideWindow('main');
+            }
+        } else if (focused === this.windowManager.__getWindowUnsafe('minimode')) {
+            this.windowManager.exitMinimode();
+        } else if (focused === this.windowManager.__getWindowUnsafe('lyric')) {
+            appConfig.setConfig({ 'lyric.enableDesktopLyric': false });
+        }
+    }
+
     private setupApplicationMenu(): void {
         if (process.platform === 'darwin') {
             Menu.setApplicationMenu(
@@ -450,7 +467,8 @@ class AppTray {
                             },
                             {
                                 label: i18n.t('common.close'),
-                                role: 'close',
+                                accelerator: 'Command+W',
+                                click: () => this.closeFocusedWindow(),
                             },
                         ],
                     },

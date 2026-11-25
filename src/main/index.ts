@@ -4,7 +4,7 @@ import requestForwarder from '@infra/requestForwarder/main';
 import appConfig from '@infra/appConfig/main';
 import shortCut from '@infra/shortCut/main';
 import pluginManager from '@infra/pluginManager/main';
-import { app, BrowserWindow } from 'electron';
+import { app } from 'electron';
 import windowManager from '@main/core/windowManager';
 import type { IWindowManager } from '@appTypes/main/windowManager';
 import appSync from '@infra/appSync/main';
@@ -229,9 +229,8 @@ app.on('will-quit', async (event) => {
 });
 
 app.on('activate', () => {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) {
+    // 点击 Dock 图标：主窗口和迷你模式都不可见时（已关闭、收起或开机自启）显示主窗口
+    if (!windowManager.isWindowVisible('main') && !windowManager.isMinimode()) {
         windowManager.showWindow('main');
     }
 });
