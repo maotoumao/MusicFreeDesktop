@@ -26,6 +26,8 @@ class RequestForwarder {
     private windowManager: IWindowManager | null = null;
     private worker: Electron.UtilityProcess | null = null;
     private port: number | null = null;
+    /** 本次会话最近一次成功监听的端口，worker 重启时优先沿用 */
+    private lastPort: number | null = null;
     private isSetup = false;
     private disposed = false;
     private restartCount = 0;
@@ -138,7 +140,7 @@ class RequestForwarder {
         const worker = this.worker;
         worker.once('spawn', () => {
             if (this.worker === worker) {
-                this.postToWorker({ type: 'init', token: this.token });
+                this.postToWorker({ type: 'init', token: this.token, port: this.lastPort });
             }
         });
 
@@ -147,6 +149,7 @@ class RequestForwarder {
             switch (message.type) {
                 case 'ready': {
                     this.port = message.port;
+                    this.lastPort = message.port;
                     this.restartCount = 0; // 成功启动，重置重试计数
 
                     console.log(`[RequestForwarder] Proxy server ready on port ${this.port}`);

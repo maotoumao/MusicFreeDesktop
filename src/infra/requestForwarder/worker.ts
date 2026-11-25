@@ -319,10 +319,10 @@ function postMessage(message: IWorkerMessage): void {
 
 /**
  * 启动代理服务器。
- * 端口交给系统分配：固定端口可能落在 Windows 保留端口段（WSL2/Hyper-V/Docker 常见），
- * listen 报 EACCES；token 每次启动都会变，固定端口本身也没有复用价值。
+ * 首次由系统分配端口：固定端口可能落在 Windows 保留端口段（WSL2/Hyper-V/Docker 常见），listen 报 EACCES。
+ * worker 重启时优先沿用上次的端口，使已挂到 <audio> 上的代理 URL 继续可用；该端口不可用时再由系统分配。
  */
-function startServer(): void {
+function startServer(preferredPort: number | null): void {
     server = http.createServer((req, res) => {
         // 解析查询参数
         const query = new URLSearchParams(req.url?.slice(1) ?? '');
@@ -361,13 +361,17 @@ function startServer(): void {
     });
 
     // 仅监听本地回环地址，防止外部访问
-    server.listen(0, '127.0.0.1', () => {
+    server.listen(preferredPort ?? 0, '127.0.0.1', () => {
         const port = (server!.address() as AddressInfo).port;
         console.log(`[RequestForwarder Worker] Proxy server running on http://127.0.0.1:${port}`);
         postMessage({ type: 'ready', port });
     });
 
     server.on('error', (err: NodeJS.ErrnoException) => {
+        if (preferredPort !== null) {
+            startServer(null);
+            return;
+        }
         console.error('[RequestForwarder Worker] Failed to start server:', err.message);
         postMessage({ type: 'error', error: err.message });
     });
@@ -381,7 +385,7 @@ process.parentPort?.on('message', (e: Electron.MessageEvent) => {
             // token 下发后才开始监听，保证服务器从第一个请求起就处于鉴权状态
             if (!tokenBuffer && data.token) {
                 tokenBuffer = Buffer.from(data.token);
-                startServer();
+                startServer(data.port);
             }
             break;
         }

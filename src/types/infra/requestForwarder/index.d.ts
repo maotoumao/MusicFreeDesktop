@@ -16,6 +16,6 @@ export type IWorkerMessage = { type: 'ready'; port: number } | { type: 'error'; 
 
 /** Main → Worker 消息 */
 export type IMainMessage =
-    | { type: 'init'; token: string }
+    | { type: 'init'; token: string; port: number | null }
     | { type: 'shutdown' }
     | { type: 'update-proxy'; proxyUrl: string | null };
