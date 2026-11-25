@@ -100,7 +100,7 @@ async function bootstrapInfra(windowManager: IWindowManager) {
         appSync,
     });
     themePack.setup(windowManager);
-    systemUtil.setup(windowManager);
+    systemUtil.setup(windowManager, appConfig);
     windowDrag.setup();
     await appTray.setup(windowManager);
     appThumbar.setup(windowManager);
@@ -159,7 +159,11 @@ function restoreWindowState() {
 
 app.on('ready', async () => {
     await bootstrapInfra(windowManager);
-    windowManager.showWindow('main');
+    if (systemUtil.wasLaunchedAtLogin()) {
+        windowManager.createHiddenMainWindow();
+    } else {
+        windowManager.showWindow('main');
+    }
     restoreWindowState();
 
     // 处理启动时传入的 deep link（Windows: 命令行参数）

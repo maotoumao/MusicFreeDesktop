@@ -18,6 +18,8 @@ interface _IAppConfig {
     /** [win10+] 使用自定义原生托盘菜单 */
     'normal.useCustomTrayMenu': boolean;
     'normal.language': string;
+    /** [win32/darwin] 开机自启（启动后收起到托盘） */
+    'normal.launchAtLogin': boolean;
 
     /** 歌单内搜索区分大小写 */
     'playMusic.caseSensitiveInSearch': boolean;

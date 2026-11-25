@@ -320,6 +320,8 @@
             "close_behavior_desc": "点击关闭时的操作方式",
             "exit_app": "退出应用",
             "minimize_to_tray": "最小化到托盘",
+            "launch_at_login_label": "开机自启",
+            "launch_at_login_desc": "开机后自动启动并收起到系统托盘",
             "language_label": "语言",
             "language_desc": "界面显示语言",
             "max_history_label": "搜索记录保留条数",

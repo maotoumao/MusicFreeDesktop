@@ -15,7 +15,7 @@ import { clearSearchHistory, truncateSearchHistory } from '../../../common/searc
 /**
  * 常规设置
  *
- * 配置项：checkUpdate、closeBehavior、language、maxHistoryLength、
+ * 配置项：checkUpdate、closeBehavior、launchAtLogin、language、maxHistoryLength、
  *         taskbarThumb、musicListHideColumns、缓存
  */
 export function GeneralSection() {
@@ -27,6 +27,9 @@ export function GeneralSection() {
     const [taskbarThumb, setTaskbarThumb] = useConfigValue('normal.taskbarThumb');
     const [columnsHidden, setColumnsHidden] = useConfigValue('normal.musicListHideColumns');
     const [useCustomTrayMenu, setUseCustomTrayMenu] = useConfigValue('normal.useCustomTrayMenu');
+    const [launchAtLogin, setLaunchAtLogin] = useConfigValue('normal.launchAtLogin');
+    const supportsLaunchAtLogin =
+        window.globalContext.platform === 'win32' || window.globalContext.platform === 'darwin';
 
     const langNames = useLangNames();
     const [cacheSize, setCacheSize] = useState('--');
@@ -83,6 +86,15 @@ export function GeneralSection() {
                     />
                 }
             />
+            {supportsLaunchAtLogin && (
+                <SettingRow
+                    label={t('settings.general.launch_at_login_label')}
+                    description={t('settings.general.launch_at_login_desc')}
+                    control={
+                        <Toggle checked={launchAtLogin ?? false} onChange={setLaunchAtLogin} />
+                    }
+                />
+            )}
             <SettingRow
                 label={t('settings.general.language_label')}
                 description={t('settings.general.language_desc')}

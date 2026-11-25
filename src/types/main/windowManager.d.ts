@@ -45,6 +45,11 @@ export interface IWindowManager {
     hideWindow: (windowName: WindowType) => void;
 
     /**
+     * 创建主窗口但不显示（开机自启时收起到托盘）；之后通过 showWindow('main') 显示。
+     */
+    createHiddenMainWindow: () => void;
+
+    /**
      * 切换指定窗口的显示状态（显示/隐藏）。
      */
     toggleWindow: (windowName: WindowType) => void;

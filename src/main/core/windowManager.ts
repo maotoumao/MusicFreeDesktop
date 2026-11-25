@@ -168,6 +168,11 @@ class WindowManager implements IWindowManager {
         }
     }
 
+    public createHiddenMainWindow(): void {
+        if (this.isWindowExist('main')) return;
+        this.createMainWindow(false);
+    }
+
     public hideWindow(windowType: WindowType): void {
         const win = this.windows.get(windowType);
         if (!win || win.isDestroyed()) return;
@@ -337,7 +342,7 @@ class WindowManager implements IWindowManager {
 
     /**************************** Main Window ***************************/
 
-    private createMainWindow(): void {
+    private createMainWindow(show = true): void {
         // 清理旧窗口
         const old = this.windows.get('main');
         if (old) {
@@ -356,6 +361,7 @@ class WindowManager implements IWindowManager {
             width: initSize?.width ?? 1290,
             minHeight: 760,
             minWidth: 1080,
+            show,
             webPreferences: {
                 preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
                 nodeIntegration: true,

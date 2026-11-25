@@ -320,6 +320,8 @@
             "close_behavior_desc": "點擊關閉時的操作方式",
             "exit_app": "退出應用",
             "minimize_to_tray": "最小化到系統列",
+            "launch_at_login_label": "開機自啟",
+            "launch_at_login_desc": "開機後自動啟動並收到系統列",
             "language_label": "語言",
             "language_desc": "介面顯示語言",
             "max_history_label": "搜尋記錄保留條數",

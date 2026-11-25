@@ -320,6 +320,8 @@
             "close_behavior_desc": "Action when clicking close button",
             "exit_app": "Exit application",
             "minimize_to_tray": "Minimize to tray",
+            "launch_at_login_label": "Launch at startup",
+            "launch_at_login_desc": "Start automatically when you sign in and stay in the system tray",
             "language_label": "Language",
             "language_desc": "Interface display language",
             "max_history_label": "Search history limit",

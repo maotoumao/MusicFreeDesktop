@@ -12,24 +12,58 @@ import fsp from 'fs/promises';
 import axios from 'axios';
 import { compare } from 'compare-versions';
 import type { IWindowManager } from '@appTypes/main/windowManager';
+import type { IAppConfigReader } from '@appTypes/infra/appConfig';
 import type { IUpdateInfo } from '@appTypes/infra/systemUtil';
 import { IPC, UPDATE_SOURCES } from './common/constant';
+
+/** Windows 登录项启动参数，用于识别开机自启 */
+const LAUNCHED_AT_LOGIN_ARG = '--launched-at-login';
 
 class SystemUtil {
     private windowManager!: IWindowManager;
     private isSetup = false;
 
-    public setup(windowManager: IWindowManager) {
+    public setup(windowManager: IWindowManager, appConfig: IAppConfigReader) {
         if (this.isSetup) return;
 
         this.windowManager = windowManager;
 
+        this.setupLoginItem(appConfig);
         this.setupAppHandlers();
         this.setupWindowHandlers();
         this.setupShellHandlers();
         this.setupDialogHandlers();
 
         this.isSetup = true;
+    }
+
+    // ─── 开机自启 ───
+
+    /** 本次是否由开机自启拉起 */
+    public wasLaunchedAtLogin(): boolean {
+        if (process.platform === 'darwin') {
+            return app.getLoginItemSettings().wasOpenedAtLogin;
+        }
+        return process.argv.includes(LAUNCHED_AT_LOGIN_ARG);
+    }
+
+    /**
+     * 使系统登录项与配置一致。仅 Windows / macOS 支持；
+     * 开发模式不注册，否则会把开发用的 Electron 可执行文件加入登录项。
+     */
+    private setupLoginItem(appConfig: IAppConfigReader) {
+        if (!app.isPackaged || (process.platform !== 'win32' && process.platform !== 'darwin')) {
+            return;
+        }
+        const apply = (openAtLogin: boolean) => {
+            app.setLoginItemSettings({ openAtLogin, args: [LAUNCHED_AT_LOGIN_ARG] });
+        };
+        apply(appConfig.getConfigByKey('normal.launchAtLogin') ?? false);
+        appConfig.onConfigUpdated((patch) => {
+            if ('normal.launchAtLogin' in patch) {
+                apply(patch['normal.launchAtLogin'] ?? false);
+            }
+        });
     }
 
     // ─── App ───
