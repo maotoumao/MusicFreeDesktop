@@ -11,6 +11,8 @@ export interface ICurrentLyric {
 
 export interface IPlayOptions {
     restartOnSameMedia?: boolean;
+    /** 调用方已持有的完整条目；入队写入尚未落库时代替数据库查询结果 */
+    musicItem?: IMusic.IMusicItem;
 }
 
 /** resolveSource 的可选行为 */

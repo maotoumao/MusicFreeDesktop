@@ -290,7 +290,12 @@ class TrackPlayer {
         try {
             // 从 SQLite 获取完整数据（一首，一次 IPC）
             const fullItem = await musicSheet.getRawMusicItem(targetSlim.platform, targetSlim.id);
-            const musicItem: IMusic.IMusicItem = fullItem ?? (targetSlim as IMusic.IMusicItem);
+            const knownItem =
+                options.musicItem && isSameMedia(options.musicItem, targetSlim)
+                    ? options.musicItem
+                    : null;
+            const musicItem: IMusic.IMusicItem =
+                fullItem ?? knownItem ?? (targetSlim as IMusic.IMusicItem);
 
             // 获取音源：优先使用已下载的本地文件
             const quality = this.getDefaultQuality();
@@ -337,12 +342,13 @@ class TrackPlayer {
 
     /** 播放单首歌曲（如不在队列则追加到队尾） */
     async playMusic(item: IMusic.IMusicItem): Promise<void> {
+        const options = { restartOnSameMedia: true, musicItem: item };
         const queueIndex = this.playQueue.findIndex(item);
         if (queueIndex !== -1) {
-            await this.playIndex(queueIndex);
+            await this.playIndex(queueIndex, options);
         } else {
             this.playQueue.append([item]);
-            await this.playIndex(this.playQueue.queue.length - 1);
+            await this.playIndex(this.playQueue.queue.length - 1, options);
         }
     }
 
