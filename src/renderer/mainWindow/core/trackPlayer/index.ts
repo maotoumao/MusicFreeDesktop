@@ -112,6 +112,11 @@ class TrackPlayer {
     private lastProgressWriteTime = 0;
     private readonly PROGRESS_WRITE_INTERVAL = 10_000; // 10s
 
+    /** 每次开始加载歌曲或清空播放时自增；异步结果（含失败）只在序号未变时生效 */
+    private loadSeq = 0;
+    /** 进行中的 playIndex 加载序号，0 表示没有 */
+    private loadingSeq = 0;
+
     // 连续播放错误计数
     private consecutiveErrors = 0;
     private readonly MAX_CONSECUTIVE_ERRORS = 3;
@@ -248,11 +253,11 @@ class TrackPlayer {
 
         const targetSlim = queue[index];
 
-        // 相同歌曲且音源可用时原地重播；无音源或音源已失效时走下方重新加载
+        // 相同歌曲且音源可用（或正在加载）时原地重播；无音源或音源已失效时走下方重新加载
         if (
             this.playQueue.getCurrentIndex() === index &&
             this.isCurrentMusic(targetSlim) &&
-            this.audioController.hasSource
+            (this.audioController.hasSource || this.loadingSeq !== 0)
         ) {
             if (options.restartOnSameMedia) this.audioController.seekTo(0);
             this.audioController.play();
@@ -267,6 +272,8 @@ class TrackPlayer {
         this.audioController.prepareTrack(targetSlim);
         this.resetProgress();
 
+        const seq = ++this.loadSeq;
+        this.loadingSeq = seq;
         try {
             // 从 SQLite 获取完整数据（一首，一次 IPC）
             const fullItem = await musicSheet.getRawMusicItem(targetSlim.platform, targetSlim.id);
@@ -276,8 +283,8 @@ class TrackPlayer {
             const quality = this.getDefaultQuality();
             const result = await this.resolveSource(musicItem, quality);
 
+            if (seq !== this.loadSeq) return; // 已切歌或重新加载
             if (!result?.url) throw new Error('No media source');
-            if (!this.isCurrentMusic(targetSlim)) return; // 切歌了
 
             // 播放
             store.set(qualityAtom, result.quality ?? quality);
@@ -308,8 +315,11 @@ class TrackPlayer {
                 })
                 .catch(() => {});
         } catch (e) {
+            if (seq !== this.loadSeq) return;
             this.audioController.reset();
             await this.handlePlayError(targetSlim, e);
+        } finally {
+            if (this.loadingSeq === seq) this.loadingSeq = 0;
         }
     }
 
@@ -446,6 +456,7 @@ class TrackPlayer {
 
         const currentTime = store.get(progressAtom).currentTime;
         const wasPlaying = this.audioController.playerState === PlayerState.Playing;
+        const seq = this.loadSeq;
 
         try {
             store.set(playerStateAtom, PlayerState.Buffering);
@@ -457,20 +468,22 @@ class TrackPlayer {
             const result = await this.resolveSource(musicItem, quality, {
                 requireQualityMatch: true,
             });
+            if (seq !== this.loadSeq) return false; // 期间已切歌
 
-            if (result?.url && this.isCurrentMusic(current)) {
+            if (result?.url) {
                 this.audioController.setTrackSource(result, musicItem);
                 this.audioController.seekTo(currentTime);
                 if (wasPlaying) this.audioController.play();
                 store.set(qualityAtom, result.quality!);
                 return result.quality === quality;
             } else {
-                // 切歌了或无结果，恢复原状态
+                // 无结果，恢复原状态
                 store.set(qualityAtom, prevQuality);
                 store.set(playerStateAtom, wasPlaying ? PlayerState.Playing : PlayerState.Paused);
                 return false;
             }
         } catch {
+            if (seq !== this.loadSeq) return false;
             // 切换失败，恢复原音质标记
             store.set(qualityAtom, prevQuality);
             store.set(playerStateAtom, wasPlaying ? PlayerState.Playing : PlayerState.Paused);
@@ -633,9 +646,10 @@ class TrackPlayer {
             this.playQueue.queue.length > 1 &&
             this.consecutiveErrors < this.MAX_CONSECUTIVE_ERRORS
         ) {
-            // 主路径：跳到下一首
+            // 主路径：跳到下一首（等待期间用户已切歌或重试则不跳）
+            const seq = this.loadSeq;
             await delay(500);
-            if (musicItem && this.isCurrentMusic(musicItem)) {
+            if (seq === this.loadSeq && musicItem && this.isCurrentMusic(musicItem)) {
                 await this.skipToNext();
             }
         } else if (this.consecutiveErrors >= this.MAX_CONSECUTIVE_ERRORS) {
@@ -676,18 +690,20 @@ class TrackPlayer {
         if (!target) return;
 
         store.set(playerStateAtom, PlayerState.Buffering);
+        const seq = this.loadSeq;
         try {
             const fullItem = await musicSheet.getRawMusicItem(target.platform, target.id);
             const musicItem = fullItem ?? (target as IMusic.IMusicItem);
             const result = await this.resolveSource(musicItem, store.get(qualityAtom));
 
+            if (seq !== this.loadSeq) return; // 续播期间被切歌，放弃
             if (!result?.url) throw new Error('No media source');
-            if (!this.isCurrentMusic(target)) return; // 续播期间被切歌，放弃
 
             this.audioController.setTrackSource(result, musicItem);
             this.audioController.seekTo(seekTime);
             this.audioController.play();
         } catch (e) {
+            if (seq !== this.loadSeq) return;
             await this.handlePlayError(target, e);
         }
     }
@@ -711,6 +727,8 @@ class TrackPlayer {
 
     /** 清空播放状态（空队列等场景） */
     private clearPlayback(): void {
+        this.loadSeq++;
+        this.loadingSeq = 0;
         this.audioController.reset();
         this.lyricManager.reset();
         store.set(currentMusicAtom, null);
