@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复部分在线音源（WebDAV 等需附加请求头的插件音源）播放时，歌曲未播完就跳到下一首、长时间播放后卡死或无限跳歌的问题。
 - 修复 Windows 上本地媒体代理端口落在系统保留端口段（常见于装有 WSL2、Hyper-V 或 Docker 的机器）时无法启动，导致需附加请求头的音源播完不切歌、切歌后无声的问题。
 - 修复切歌或停止播放后，上一首仍在加载的音源晚到时被挂到当前歌曲上，或误报播放错误导致跳歌的问题。
+- 修复本地媒体代理不可用、改为直接下载音源时，切歌后一直不出声，以及续播、切换音质后进度回到开头的问题。
 
 ### Added
 
@@ -33,6 +34,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix some streamed online sources (WebDAV and other plugin sources requiring custom request headers) skipping to the next track before finishing, and hanging or skipping endlessly after long playback sessions.
 - Fix the local media proxy failing to start on Windows when its port falls in a system-reserved range (common with WSL2, Hyper-V or Docker), which left sources requiring custom headers stuck after a track ended or silent after skipping.
 - Fix a previous track's still-loading source being attached to the current track after skipping or stopping, or reporting a spurious playback error that skipped the track.
+- Fix tracks staying silent after skipping, and resume or quality switching restarting from the beginning, when the local media proxy is unavailable and sources are downloaded directly.
 
 ---
 
