@@ -18,7 +18,11 @@ import { nanoid } from 'nanoid';
 import { compare } from 'compare-versions';
 import axios from 'axios';
 import type { IWindowManager } from '@appTypes/main/windowManager';
-import type { ICallPluginMethodParams, IPluginMetaAll } from '@appTypes/infra/pluginManager';
+import type {
+    ICallPluginMethodParams,
+    IPluginMetaAll,
+    IPluginUpdateResult,
+} from '@appTypes/infra/pluginManager';
 import {
     IPC_CALL_PLUGIN_METHOD,
     IPC_INSTALL_PLUGIN,
@@ -548,7 +552,7 @@ class PluginManager {
     }
 
     /** 更新单个插件：先下载验证新版本，成功后再替换旧版本 */
-    private async updatePlugin(hash: string): Promise<{ success: boolean; message?: string }> {
+    private async updatePlugin(hash: string): Promise<IPluginUpdateResult> {
         const loaded = this.plugins.get(hash);
         if (!loaded) {
             return { success: false, message: 'Plugin not found' };
@@ -569,7 +573,7 @@ class PluginManager {
             const newHash = computeHash(newCode);
 
             if (!newHash || newHash === hash) {
-                return { success: false, message: 'No update available' };
+                return { success: false, upToDate: true, message: 'No update available' };
             }
 
             const testInstance = executePluginCode(
@@ -594,6 +598,7 @@ class PluginManager {
             ) {
                 return {
                     success: false,
+                    upToDate: true,
                     message: `Current ${loaded.instance.version} >= new ${testInstance.version}`,
                 };
             }

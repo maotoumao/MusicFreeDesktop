@@ -208,12 +208,14 @@ const PluginItemActions = memo(function PluginItemActions({
             const result = await pluginManager.updatePlugin(plugin.hash);
             if (result.success) {
                 showToast(t('plugin.toast_plugin_updated', { plugin: plugin.platform }));
-            } else {
+            } else if (result.upToDate) {
                 showToast(
                     t('plugin.toast_plugin_already_latest', {
                         plugin: plugin.platform,
                     }),
                 );
+            } else {
+                showToast(t('plugin.update_failed'), { type: 'warn' });
             }
         } catch {
             showToast(t('plugin.update_failed'), { type: 'warn' });

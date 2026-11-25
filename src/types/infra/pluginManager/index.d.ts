@@ -54,5 +54,12 @@ export interface IPluginCacheData {
     plugins: IPlugin.IPluginDelegate[];
 }
 
+/** 单个插件更新结果；upToDate 表示没有可用的新版本，其余失败（下载、解析等）不带此标记 */
+export interface IPluginUpdateResult {
+    success: boolean;
+    upToDate?: boolean;
+    message?: string;
+}
+
 /** 插件元信息存储结构 */
 export type IPluginMetaAll = Record<string, IPlugin.IPluginMeta>;
