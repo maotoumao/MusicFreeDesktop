@@ -119,32 +119,28 @@ export function toElectronAccelerator(keys: string[]): string {
 }
 
 /**
- * 将 Electron Accelerator 格式的快捷键字符串转换为 tinykeys 格式。
+ * 将保存的按键数组转换为 tinykeys 格式。
+ * 直接处理数组而不是拼成 Accelerator 字符串再按 '+' 拆分，否则「+」键本身会被当作分隔符丢掉。
  *
- * @param accelerator Electron Accelerator 格式字符串，如 "CmdOrCtrl+Shift+P"
+ * @param keys 按键数组，如 ["CmdOrCtrl", "Shift", "P"]
  * @returns tinykeys 格式字符串，如 "$mod+Shift+p"
  *
  * @example
  * ```ts
- * electronAcceleratorToTinykeys("CmdOrCtrl+Shift+P")  // → "$mod+Shift+p"
- * electronAcceleratorToTinykeys("Alt+F4")             // → "Alt+F4"
- * electronAcceleratorToTinykeys("Ctrl+A")             // → "Control+a"
- * electronAcceleratorToTinykeys("MediaPlayPause")     // → "MediaPlayPause"
+ * electronAcceleratorToTinykeys(["CmdOrCtrl", "Shift", "P"])  // → "$mod+Shift+p"
+ * electronAcceleratorToTinykeys(["Alt", "F4"])                // → "Alt+F4"
+ * electronAcceleratorToTinykeys(["CmdOrCtrl", "+"])           // → "$mod++"
+ * electronAcceleratorToTinykeys(["MediaPlayPause"])           // → "MediaPlayPause"
  * ```
  */
-export function electronAcceleratorToTinykeys(accelerator: string): string {
-    // 兼容旧配置：空格键可能存储为 ' ' 而非 'Space'，
-    // split('+') + trim() 会丢失它。先统一替换为 'Space'。
-    const sanitized = accelerator.replace(/ /g, 'Space');
-    const parts = sanitized
-        .split('+')
-        .map((p) => p.trim())
-        .filter(Boolean);
-
+export function electronAcceleratorToTinykeys(keys: string[]): string {
     const modifiers: string[] = [];
     let key = '';
 
-    for (const part of parts) {
+    for (const raw of keys) {
+        // 旧配置中空格键可能存为 ' '
+        const part = raw === ' ' ? 'Space' : raw.trim();
+        if (!part) continue;
         const lower = part.toLowerCase();
         const modifier = MODIFIER_MAP[lower];
 

@@ -144,12 +144,11 @@ class ShortCutRenderer {
                 continue;
             }
 
-            const accelerator = binding.local.join('+');
-            if (!accelerator) {
+            const tinykeysCombination = electronAcceleratorToTinykeys(binding.local);
+            if (!tinykeysCombination) {
                 continue;
             }
 
-            const tinykeysCombination = electronAcceleratorToTinykeys(accelerator);
             keyBindings[tinykeysCombination] = (event) => {
                 // 当焦点在输入型元素时，不拦截快捷键，避免阻止正常输入（如空格）
                 const target = event.target as HTMLElement | null;

@@ -50,6 +50,7 @@ const KEY_DISPLAY_MAP: Record<string, string> = {
     Control: 'Ctrl',
     Meta: 'Win',
     ' ': 'Space',
+    '+': 'Plus',
     ArrowUp: '↑',
     ArrowDown: '↓',
     ArrowLeft: '←',
@@ -61,12 +62,8 @@ const KEY_DISPLAY_MAP: Record<string, string> = {
     Tab: 'Tab',
 };
 
-function formatKeyDisplay(accelerator: string): string {
-    if (!accelerator) return '';
-    return accelerator
-        .split('+')
-        .map((k) => KEY_DISPLAY_MAP[k] ?? k)
-        .join(' + ');
+function formatKeyDisplay(keys?: string[] | null): string {
+    return (keys ?? []).map((k) => KEY_DISPLAY_MAP[k] ?? k).join(' + ');
 }
 
 /**
@@ -102,8 +99,8 @@ export function ShortcutSection() {
             return {
                 action,
                 label: t(ACTION_LABEL_KEYS[action]),
-                local: formatKeyDisplay(binding?.local?.join('+') ?? ''),
-                global: formatKeyDisplay(binding?.global?.join('+') ?? ''),
+                local: formatKeyDisplay(binding?.local),
+                global: formatKeyDisplay(binding?.global),
             };
         });
     }, [shortcutsMap]);
