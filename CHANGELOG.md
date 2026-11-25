@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复本地媒体代理不可用、改为直接下载音源时，切歌后一直不出声，以及续播、切换音质后进度回到开头的问题。
 - 修复音源加载失败（或启动时恢复上次歌曲失败）后，再点播放没有任何反应、只能切歌或重启的问题。
 - 修复无法恢复手机端新版（1.0 起）导出到文件或 WebDAV 的备份、提示「不支持的备份文件格式」的问题；恢复时会跳过手机上的本地歌曲。
+- 修复扫描目录（或其子目录）暂时无法访问时（如移动硬盘未连接、网络盘断开、无权限），重新扫描会把该目录下的本地歌曲从库中全部删除的问题。
 
 ### Added
 
@@ -39,6 +40,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix tracks staying silent after skipping, and resume or quality switching restarting from the beginning, when the local media proxy is unavailable and sources are downloaded directly.
 - Fix pressing play doing nothing after a source failed to load (or the last track failed to restore at startup), which previously required skipping or restarting.
 - Fix backups exported by the mobile app (1.0 and later) to a file or WebDAV failing to restore with "Unsupported backup file format"; local songs from the phone are skipped.
+- Fix rescanning removing every local song under a scan folder (or subfolder) that was temporarily inaccessible, such as a disconnected external or network drive or a permission error.
 
 ---
 

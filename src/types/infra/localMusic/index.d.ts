@@ -54,6 +54,13 @@ export interface IFileInfo {
     mtime: number;
 }
 
+/** 目录发现结果 */
+export interface IDiscoverResult {
+    files: IFileInfo[];
+    /** 读取失败的目录（无权限、设备已断开等） */
+    unreadableDirs: string[];
+}
+
 /** 增量 diff 结果 */
 export interface IDiffResult {
     added: IFileInfo[];

@@ -387,7 +387,10 @@ class LocalMusicManager {
                 scanned: 0,
                 total: 0,
             });
-            const diskFiles = await discoverAudioFiles(folderPath, excludedPaths);
+            const { files: diskFiles, unreadableDirs } = await discoverAudioFiles(
+                folderPath,
+                excludedPaths,
+            );
 
             // Phase 2: 增量 diff
             this.broadcastProgress({
@@ -400,7 +403,7 @@ class LocalMusicManager {
                 file_size: number | null;
                 file_mtime: number | null;
             }>;
-            const diff = diffWithDb(diskFiles, dbRows);
+            const diff = diffWithDb(diskFiles, dbRows, unreadableDirs);
 
             // Phase 3: 解析新增/变更文件的 metadata
             const toProcess = [...diff.added, ...diff.changed];
