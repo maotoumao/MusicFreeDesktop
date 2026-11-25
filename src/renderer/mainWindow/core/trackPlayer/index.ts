@@ -454,8 +454,6 @@ class TrackPlayer {
         const prevQuality = store.get(qualityAtom);
         if (!current || quality === prevQuality) return true;
 
-        const currentTime = store.get(progressAtom).currentTime;
-        const wasPlaying = this.audioController.playerState === PlayerState.Playing;
         const seq = this.loadSeq;
 
         try {
@@ -471,22 +469,25 @@ class TrackPlayer {
             if (seq !== this.loadSeq) return false; // 期间已切歌
 
             if (result?.url) {
+                // 换源前读取：等待期间用户可能暂停、拖动进度，降级下载中的指令也在此读出
+                const position = this.audioController.position;
+                const shouldPlay = this.audioController.isPlayRequested;
                 this.audioController.setTrackSource(result, musicItem);
-                this.audioController.seekTo(currentTime);
-                if (wasPlaying) this.audioController.play();
+                this.audioController.seekTo(position);
+                if (shouldPlay) this.audioController.play();
                 store.set(qualityAtom, result.quality!);
                 return result.quality === quality;
             } else {
                 // 无结果，恢复原状态
                 store.set(qualityAtom, prevQuality);
-                store.set(playerStateAtom, wasPlaying ? PlayerState.Playing : PlayerState.Paused);
+                store.set(playerStateAtom, this.audioController.playerState);
                 return false;
             }
         } catch {
             if (seq !== this.loadSeq) return false;
             // 切换失败，恢复原音质标记
             store.set(qualityAtom, prevQuality);
-            store.set(playerStateAtom, wasPlaying ? PlayerState.Playing : PlayerState.Paused);
+            store.set(playerStateAtom, this.audioController.playerState);
             return false;
         }
     }

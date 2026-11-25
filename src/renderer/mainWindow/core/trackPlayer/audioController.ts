@@ -49,6 +49,10 @@ export interface IAudioController extends EventEmitter<IAudioControllerEvents> {
     readonly playerState: PlayerState;
     /** 有可用音源（已挂载或正在加载）；音源报错后为 false，需重新解析 */
     readonly hasSource: boolean;
+    /** 用户是否要求播放：音源加载中时为排队的播放指令，否则为是否正在播放 */
+    readonly isPlayRequested: boolean;
+    /** 当前播放位置（秒）：音源加载中时为排队的定位，没有则为 0 */
+    readonly position: number;
 }
 
 // ─── WebAudioController 实现 ───
@@ -75,6 +79,16 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
 
     get hasSource(): boolean {
         return !this._sourceFailed && (this._sourcePending || this.isAttached);
+    }
+
+    get isPlayRequested(): boolean {
+        return this._sourcePending
+            ? this._playWhenReady
+            : this._playerState === PlayerState.Playing;
+    }
+
+    get position(): number {
+        return this._sourcePending ? (this._seekWhenReady ?? 0) : this.audio.currentTime;
     }
 
     private get isAttached(): boolean {

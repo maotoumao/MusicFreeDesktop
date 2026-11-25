@@ -36,6 +36,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复部分本地 MP3 的 GB2312 编码标签（尤其是较短的歌名、歌手名）显示为乱码的问题。
 - 修复 Windows 上主窗口收起到托盘后，从托盘进入迷你模式再返回主窗口时界面白屏的问题。
 - 修复应用内快捷键绑定「+」键时失效的问题：Ctrl+Shift+「+」会在按下 Ctrl+Shift 时就误触发，Ctrl+小键盘「+」则从不触发；设置页也显示错乱。
+- 修复切换音质过程中暂停后，新音源就绪时又自动播放的问题；本地媒体代理不可用、音源仍在下载时切换音质，不再丢失播放和定位。
 
 ### Added
 
@@ -61,6 +62,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix GB2312-encoded tags in some local MP3 files (especially short titles and artist names) showing as garbled text.
 - Fix the main window turning blank on Windows when entering mini mode from the tray after the window was closed to the tray, then returning to it.
 - Fix in-app shortcuts bound to the "+" key: Ctrl+Shift+"+" fired as soon as Ctrl+Shift was pressed, Ctrl+numpad "+" never fired, and the settings page displayed them incorrectly.
+- Fix playback resuming by itself after pausing during a quality switch, and switching quality while a source is still downloading (local media proxy unavailable) no longer drops playback and the seek position.
 
 ---
 
