@@ -138,15 +138,12 @@ class TrackPlayer {
         const repeatMode = syncKV.get('player.repeatMode') ?? RepeatMode.Queue;
         const savedMusic = syncKV.get('player.currentMusic');
         const savedProgress = syncKV.get('player.currentProgress') ?? 0;
-        const savedQuality = syncKV.get('player.currentQuality') ?? 'standard';
-        const validQuality: IMusic.IQualityKey = QUALITY_KEYS.includes(savedQuality as any)
-            ? (savedQuality as IMusic.IQualityKey)
-            : 'standard';
+        const defaultQuality = this.getDefaultQuality();
 
         store.set(volumeAtom, volume);
         store.set(speedAtom, speed);
         store.set(repeatModeAtom, repeatMode);
-        store.set(qualityAtom, validQuality);
+        store.set(qualityAtom, defaultQuality);
 
         this.audioController.setVolume(volume);
         this.audioController.setSpeed(speed);
@@ -169,7 +166,7 @@ class TrackPlayer {
 
             try {
                 // 优先使用已下载的本地文件，否则调用插件获取
-                const result = await this.resolveSource(musicItem, validQuality);
+                const result = await this.resolveSource(musicItem, defaultQuality);
 
                 if (result?.url && this.isCurrentMusic(savedMusic)) {
                     this.audioController.setTrackSource(result, musicItem);
@@ -276,7 +273,7 @@ class TrackPlayer {
             const musicItem: IMusic.IMusicItem = fullItem ?? (targetSlim as IMusic.IMusicItem);
 
             // 获取音源：优先使用已下载的本地文件
-            const quality = store.get(qualityAtom);
+            const quality = this.getDefaultQuality();
             const result = await this.resolveSource(musicItem, quality);
 
             if (!result?.url) throw new Error('No media source');
@@ -287,8 +284,6 @@ class TrackPlayer {
             this.audioController.setTrackSource(result, musicItem);
             this.audioController.play();
             this.consecutiveErrors = 0; // 播放成功，重置错误计数
-
-            syncKV.set('player.currentQuality', result.quality!);
 
             // 记录到最近播放（异步，不阻塞播放）
             addToRecentlyPlayed(musicItem).catch(() => {});
@@ -468,7 +463,6 @@ class TrackPlayer {
                 this.audioController.seekTo(currentTime);
                 if (wasPlaying) this.audioController.play();
                 store.set(qualityAtom, result.quality!);
-                syncKV.set('player.currentQuality', result.quality!);
                 return result.quality === quality;
             } else {
                 // 切歌了或无结果，恢复原状态
@@ -630,9 +624,7 @@ class TrackPlayer {
         this.resetProgress();
         this.consecutiveErrors++;
 
-        // 播放出错时重置音质为默认，避免因高音质源不可用导致连续失败
-        store.set(qualityAtom, 'standard');
-        syncKV.set('player.currentQuality', 'standard');
+        store.set(qualityAtom, this.getDefaultQuality());
 
         const behavior = appConfig.getConfigByKey('playMusic.playError') ?? 'skip';
 
@@ -764,6 +756,11 @@ class TrackPlayer {
             url: fsUtil.addFileScheme(downloaded.path),
             quality: downloaded.quality,
         };
+    }
+
+    /** 新歌曲请求的音质：用户设置的默认播放音质（播放条切换音质时也会写入该设置） */
+    private getDefaultQuality(): IMusic.IQualityKey {
+        return appConfig.getConfigByKey('playMusic.defaultQuality') ?? 'standard';
     }
 
     /** 获取音质回退策略，'skip' 降级为 'lower' */

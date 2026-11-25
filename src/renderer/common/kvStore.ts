@@ -20,7 +20,6 @@ export interface ISyncKVSchema {
     'player.repeatMode': RepeatMode;
     'player.currentMusic': IMusic.IMusicItem | null;
     'player.currentProgress': number;
-    'player.currentQuality': IMusic.IQualityKey;
     'player.lyricFontScale': number;
     'player.showLyricTranslation': boolean;
     'search.history': string[];

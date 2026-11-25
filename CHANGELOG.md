@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复无法恢复手机端新版（1.0 起）导出到文件或 WebDAV 的备份、提示「不支持的备份文件格式」的问题；恢复时会跳过手机上的本地歌曲。
 - 修复扫描目录（或其子目录）暂时无法访问时（如移动硬盘未连接、网络盘断开、无权限），重新扫描会把该目录下的本地歌曲从库中全部删除的问题。
 - 修复全局快捷键绑定方向键、空格、加号或多媒体音量 / 切歌键时始终注册失败的问题（已保存的绑定无需重新设置）。
+- 修复「默认播放音质」设置不生效的问题：新歌曲改为按该设置请求音质，不再沿用上一首的实际音质，也不会在播放出错后被改回标准音质（重启后同样生效）。
 
 ### Added
 
@@ -43,6 +44,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix backups exported by the mobile app (1.0 and later) to a file or WebDAV failing to restore with "Unsupported backup file format"; local songs from the phone are skipped.
 - Fix rescanning removing every local song under a scan folder (or subfolder) that was temporarily inaccessible, such as a disconnected external or network drive or a permission error.
 - Fix global shortcuts bound to arrow keys, Space, Plus, or media volume / track keys always failing to register (existing bindings work without re-recording).
+- Fix the "Default playback quality" setting being ignored: new tracks now request that quality instead of inheriting the previous track's actual quality, and a playback error no longer resets it to standard (also after restart).
 
 ---
 
