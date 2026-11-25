@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 下载设置新增「下载间隔」与「随机抖动」：可设置两次下载任务启动之间的最小间隔（秒），并在其基础上叠加随机浮动，默认关闭。
 - 引入 Issue / PR 治理工作流：长期无活动且未被接受的 Issue 会被自动标记 `stale` 并关闭；PR 必须提交到 `dev` 分支并关联一个已被接受的 Issue。
 - 本地音乐列表会记住上次的排序方式，重新进入后保持。
-- 桌面歌词支持显示翻译（歌曲有翻译时显示在原文下方），可在桌面歌词工具栏开关。
+- 桌面歌词支持显示翻译（歌曲有翻译时显示在原文下方），可在桌面歌词工具栏或设置中开关。
 - 设置新增「开机自启」（Windows、macOS）：开机后自动启动并收起到系统托盘。
 - 新增默认应用内快捷键：空格播放 / 暂停，Ctrl（macOS 为 Cmd）+ ← / → 切换上一首 / 下一首；只对从未修改过快捷键的用户生效，在输入框中，或用键盘（Tab）把焦点移到按钮等控件上时，空格仍交给控件。
 - 插件管理新增「全部卸载」，一次卸载所有已安装插件（内置本地插件除外）。
@@ -27,7 +27,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 把音频文件或文件夹拖进窗口即可插入播放队列并播放（此前拖入文件会让整个窗口变成浏览器播放页）。
 - 支持从系统「打开方式」用 MusicFree 打开音频文件并直接播放（安装后出现在打开方式列表中，不会改变默认播放器）。
 - 桌面歌词工具栏新增「水平居中」，一键把歌词窗口移到所在屏幕的水平中央（保持高度位置）。
-- 桌面歌词新增「双行显示」：当前句与下一句交替显示在上下两行（可在桌面歌词工具栏开关）；单行模式下长歌词的滚动速度改为按实际时长计算。
+- 桌面歌词新增「双行显示」：当前句与下一句交替显示在上下两行（可在桌面歌词工具栏或设置中开关）；单行模式下长歌词的滚动速度改为按实际时长计算。
 - 本地音乐与已下载列表新增「音质」列：本地文件显示编码参数（如 FLAC 24bit/96kHz、MP3 320kbps），已下载歌曲显示下载音质；可在设置的「隐藏列」中关闭。升级后首次扫描会为已有本地歌曲补齐参数，不影响已修改过的标签。
 - 本地歌曲右键菜单新增「歌曲信息」，查看标签、文件路径与大小、编码、码率、采样率、位深和声道。
 - 新增 Linux ARM64 安装包（deb、rpm），可用于树莓派等 ARM 设备。
@@ -71,7 +71,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Add "Download interval" and "Random jitter" download settings: configure the minimum interval (seconds) between starting two download tasks, with an optional random variation on top. Disabled by default.
 - Add issue/PR governance workflows: inactive and unaccepted issues are automatically marked `stale` and closed; PRs must target the `dev` branch and link an accepted issue.
 - The local music list remembers its last sort order when you come back to it.
-- Desktop lyrics can show the translation below the original line when available, toggled from the desktop lyric toolbar.
+- Desktop lyrics can show the translation below the original line when available, toggled from the desktop lyric toolbar or in settings.
 - Add "Launch at startup" (Windows, macOS): start automatically on sign-in and stay in the system tray.
 - Add default in-app shortcuts: Space to play / pause, Ctrl (Cmd on macOS) + Left / Right for previous / next track; applies only if you have never changed your shortcuts, and Space still goes to an input you are typing in or to a button focused with the keyboard (Tab).
 - Add "Uninstall all" to plugin management, removing every installed plugin except the built-in local plugin.
@@ -81,7 +81,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Drag audio files or folders into the window to add them to the queue and play (previously the whole window turned into a browser media page).
 - Open audio files with MusicFree from the system "Open with" menu to play them directly (listed as an option without becoming the default player).
 - Add "Center horizontally" to the desktop lyric toolbar to move the lyric window to the horizontal center of its screen, keeping its vertical position.
-- Add a two-line desktop lyric mode showing the current and next lines on alternating rows (toggle in the desktop lyric toolbar); long lines in single-line mode now scroll according to the actual line duration.
+- Add a two-line desktop lyric mode showing the current and next lines on alternating rows (toggle in the desktop lyric toolbar or in settings); long lines in single-line mode now scroll according to the actual line duration.
 - Add a Quality column to the local music and downloaded lists: local files show their encoding (e.g. FLAC 24bit/96kHz, MP3 320kbps) and downloads show the downloaded quality; it can be hidden in settings. The first scan after upgrading fills this in for existing local songs without touching tags you have edited.
 - Add "Song info" to the local song context menu, showing tags, file path and size, codec, bitrate, sample rate, bit depth and channels.
 - Add Linux ARM64 packages (deb, rpm) for ARM devices such as the Raspberry Pi.

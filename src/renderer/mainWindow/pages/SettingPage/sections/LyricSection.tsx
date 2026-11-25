@@ -24,7 +24,7 @@ const FONT_SIZE_MAX = 80;
 /**
  * 歌词设置
  *
- * 配置项：enableDesktopLyric、alwaysOnTop、lockLyric、
+ * 配置项：enableDesktopLyric、alwaysOnTop、lockLyric、showTranslation、doubleLine、
  *         fontData、fontColor、strokeColor、fontSize
  */
 export function LyricSection() {
@@ -32,6 +32,8 @@ export function LyricSection() {
     const [enableDesktopLyric, setEnableDesktopLyric] = useConfigValue('lyric.enableDesktopLyric');
     const [alwaysOnTop, setAlwaysOnTop] = useConfigValue('lyric.alwaysOnTop');
     const [lockLyric, setLockLyric] = useConfigValue('lyric.lockLyric');
+    const [showTranslation, setShowTranslation] = useConfigValue('lyric.showTranslation');
+    const [doubleLine, setDoubleLine] = useConfigValue('lyric.doubleLine');
     const [fontData, setFontData] = useConfigValue('lyric.fontData');
     const [fontColor, setFontColor] = useConfigValue('lyric.fontColor');
     const [strokeColor, setStrokeColor] = useConfigValue('lyric.strokeColor');
@@ -155,6 +157,16 @@ export function LyricSection() {
                 label={t('settings.lyric.lock_label')}
                 description={t('settings.lyric.lock_desc')}
                 control={<Toggle checked={lockLyric ?? false} onChange={setLockLyric} />}
+            />
+            <SettingRow
+                label={t('settings.lyric.show_translation_label')}
+                description={t('settings.lyric.show_translation_desc')}
+                control={<Toggle checked={showTranslation ?? true} onChange={setShowTranslation} />}
+            />
+            <SettingRow
+                label={t('settings.lyric.double_line_label')}
+                description={t('settings.lyric.double_line_desc')}
+                control={<Toggle checked={doubleLine ?? false} onChange={setDoubleLine} />}
             />
             <SettingRow
                 label={t('settings.lyric.font_label')}
