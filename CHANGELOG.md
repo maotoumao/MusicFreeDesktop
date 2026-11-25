@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复歌曲加载期间再次点击播放会重复加载、播放片刻后从头开始，以及上一首加载失败的结果晚到时打断当前歌曲或在重试成功后仍被跳过的问题。
 - 修复失败的下载任务点击重试后，进度条先显示失败前的旧进度和速度的问题。
 - 修复本地歌曲（如 FLAC）内嵌带时间轴的歌词丢失时间轴、歌词页一直停在最后一句且不随播放滚动的问题。
+- 修复部分本地 MP3 的 GB2312 编码标签（尤其是较短的歌名、歌手名）显示为乱码的问题。
 
 ### Added
 
@@ -55,6 +56,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix pressing play while a track is loading reloading it and restarting playback, and a previous track's late load failure interrupting the current track or skipping a successfully retried one.
 - Fix a retried failed download briefly showing the progress and speed from before it failed.
 - Fix timed lyrics embedded in local files (such as FLAC) losing their timestamps, which left the lyric view stuck on the last line instead of following playback.
+- Fix GB2312-encoded tags in some local MP3 files (especially short titles and artist names) showing as garbled text.
 
 ---
 

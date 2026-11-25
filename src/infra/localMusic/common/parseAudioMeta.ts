@@ -32,33 +32,62 @@ function getB64Picture(picture: IPicture): string {
     return `data:${picture.format};base64,${Buffer.from(picture.data).toString('base64')}`;
 }
 
+/** GB2312 解码后允许出现的非 ASCII 字符：汉字与中文标点 */
+const GB2312_NON_ASCII_REG = /^[\u00b7\u2010-\u2027\u3000-\u303f\u4e00-\u9fff\uff00-\uffef]*$/;
+
+/**
+ * 按字节结构判断 latin1 字符串（即原始字节）是否为 GB2312 编码的中文：
+ * 高位字节必须两两成对且落在 GB2312 区段内。latin1 文本中的重音字母多为单个高位字节，不满足该结构。
+ */
+function hasGb2312Structure(value: string): boolean {
+    let hasHighByte = false;
+    for (let i = 0; i < value.length; i++) {
+        const lead = value.charCodeAt(i);
+        if (lead < 0x80) continue;
+        const trail = value.charCodeAt(i + 1);
+        if (lead < 0xa1 || lead > 0xf7 || trail < 0xa1 || trail > 0xfe) return false;
+        hasHighByte = true;
+        i++;
+    }
+    return hasHighByte;
+}
+
 /**
  * 检测并修正 CJK 元数据中的编码问题。
  * 部分音频文件的标签使用 GB2312 等编码写入，但 music-metadata 按 latin1 解析，
  * 导致标题/艺术家/专辑字段乱码，需要检测后重新解码。
+ * 单个字段太短时 jschardet 容易误判（如三个字的歌手名），因此合并检测；
+ * 仍未识别时按 GB2312 的字节结构判断，且解码结果必须全是汉字或中文标点。
  */
 async function fixCJKEncoding(common: ICommonTagsResult): Promise<void> {
-    const testFields = [common.title, common.artist, common.album];
-    if (testFields.every((f) => !f)) return;
+    const fields = [common.title, common.artist, common.album].filter((f): f is string => !!f);
+    if (fields.length === 0) return;
 
     const jschardet = await import('jschardet');
-    let bestEncoding: string | null = null;
-    let bestConfidence = 0;
+    const iconv = await import('iconv-lite');
+    const toBytes = (value: string) => Buffer.from(value, 'latin1');
 
-    for (const field of testFields) {
-        if (!field) continue;
-        const result = jschardet.detect(field, { minimumThreshold: 0.4 });
-        if (result.confidence > bestConfidence) {
-            bestConfidence = result.confidence;
-            bestEncoding = result.encoding;
-        }
-        if (bestConfidence > 0.9) break;
+    let bestEncoding: string | null = jschardet.detect(fields.join(' '), {
+        minimumThreshold: 0.4,
+    }).encoding;
+
+    if (!bestEncoding || !SPECIAL_ENCODINGS.has(bestEncoding)) {
+        const highByteFields = fields.filter((f) => /[\x80-\xff]/.test(f));
+        const isGb2312 =
+            highByteFields.length > 0 &&
+            highByteFields.every(
+                (f) =>
+                    hasGb2312Structure(f) &&
+                    GB2312_NON_ASCII_REG.test(
+                        iconv.decode(toBytes(f), 'GB2312').replace(/[\x20-\x7e]/g, ''),
+                    ),
+            );
+        if (!isGb2312) return;
+        bestEncoding = 'GB2312';
     }
 
-    if (!bestEncoding || !SPECIAL_ENCODINGS.has(bestEncoding)) return;
-
-    const iconv = await import('iconv-lite');
-    const decode = (value: string) => iconv.decode(Buffer.from(value, 'latin1'), bestEncoding!);
+    const encoding = bestEncoding;
+    const decode = (value: string) => iconv.decode(toBytes(value), encoding);
 
     if (common.title) common.title = decode(common.title);
     if (common.artist) common.artist = decode(common.artist);
