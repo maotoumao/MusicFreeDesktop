@@ -14,6 +14,7 @@ export const IPC_INSTALL_PLUGIN = '@infra/plugin-manager/install';
 
 /** 卸载插件 */
 export const IPC_UNINSTALL_PLUGIN = '@infra/plugin-manager/uninstall';
+export const IPC_UNINSTALL_ALL_PLUGINS = '@infra/plugin-manager/uninstall-all';
 
 /** 更新插件 */
 export const IPC_UPDATE_PLUGIN = '@infra/plugin-manager/update';

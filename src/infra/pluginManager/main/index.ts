@@ -27,6 +27,7 @@ import {
     IPC_CALL_PLUGIN_METHOD,
     IPC_INSTALL_PLUGIN,
     IPC_UNINSTALL_PLUGIN,
+    IPC_UNINSTALL_ALL_PLUGINS,
     IPC_UPDATE_PLUGIN,
     IPC_UPDATE_ALL_PLUGINS,
     IPC_GET_ALL_PLUGINS,
@@ -221,6 +222,12 @@ class PluginManager {
         ipcMain.handle(IPC_UNINSTALL_PLUGIN, async (_evt, hash: string) => {
             await this.pluginsReadyPromise;
             return this.uninstallPlugin(hash);
+        });
+
+        // 卸载全部非内建插件
+        ipcMain.handle(IPC_UNINSTALL_ALL_PLUGINS, async () => {
+            await this.pluginsReadyPromise;
+            return this.uninstallAllPlugins();
         });
 
         // 更新插件
@@ -534,21 +541,33 @@ class PluginManager {
             return { success: false, message: 'Plugin not found' };
         }
 
-        // 删除文件
-        this.removePluginFile(loaded);
-
-        // 清除存储
-        this.pluginStorage?.clearPlugin(hash);
-
-        // 清除 meta
-        delete this.pluginMeta[hash];
+        this.removePlugin(loaded);
         this.saveMeta();
-
-        // 移除记录
-        this.plugins.delete(hash);
-
         this.onPluginListChanged();
         return { success: true };
+    }
+
+    /** 卸载全部非内建插件，返回卸载数量；只在最后保存一次 meta、广播一次列表变化 */
+    private uninstallAllPlugins(): number {
+        const targets = [...this.plugins.values()].filter(
+            (loaded) => !this.builtinPlugins.has(loaded.instance.platform),
+        );
+        for (const loaded of targets) {
+            this.removePlugin(loaded);
+        }
+        if (targets.length > 0) {
+            this.saveMeta();
+            this.onPluginListChanged();
+        }
+        return targets.length;
+    }
+
+    /** 删除插件文件、存储、meta 和内存记录（不保存 meta、不广播） */
+    private removePlugin(loaded: ILoadedPlugin): void {
+        this.removePluginFile(loaded);
+        this.pluginStorage?.clearPlugin(loaded.hash);
+        delete this.pluginMeta[loaded.hash];
+        this.plugins.delete(loaded.hash);
     }
 
     /** 更新单个插件：先下载验证新版本，成功后再替换旧版本 */

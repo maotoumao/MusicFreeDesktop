@@ -23,6 +23,7 @@ import {
     IPC_UNINSTALL_PLUGIN,
     IPC_UPDATE_PLUGIN,
     IPC_UPDATE_ALL_PLUGINS,
+    IPC_UNINSTALL_ALL_PLUGINS,
     IPC_GET_ALL_PLUGINS,
     IPC_SET_PLUGIN_META,
     IPC_BATCH_SET_PLUGIN_META,
@@ -73,6 +74,10 @@ async function updatePlugin(hash: string): Promise<IPluginUpdateResult> {
 
 async function updateAllPlugins(): Promise<{ updated: number; failed: number }> {
     return ipcRenderer.invoke(IPC_UPDATE_ALL_PLUGINS);
+}
+
+async function uninstallAllPlugins(): Promise<number> {
+    return ipcRenderer.invoke(IPC_UNINSTALL_ALL_PLUGINS);
 }
 
 async function getAllPlugins(): Promise<IPlugin.IPluginDelegate[]> {
@@ -138,6 +143,7 @@ const mod = {
     uninstallPlugin,
     updatePlugin,
     updateAllPlugins,
+    uninstallAllPlugins,
     getAllPlugins,
     setPluginMeta,
     batchSetPluginMeta,

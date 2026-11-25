@@ -28,6 +28,7 @@ interface IMod {
     uninstallPlugin(hash: string): Promise<{ success: boolean; message?: string }>;
     updatePlugin(hash: string): Promise<IPluginUpdateResult>;
     updateAllPlugins(): Promise<{ updated: number; failed: number }>;
+    uninstallAllPlugins(): Promise<number>;
     getAllPlugins(): Promise<IPlugin.IPluginDelegate[]>;
     setPluginMeta(hash: string, meta: Partial<IPlugin.IPluginMeta>): Promise<void>;
     batchSetPluginMeta(
@@ -124,6 +125,11 @@ async function updatePlugin(hash: string): Promise<IPluginUpdateResult> {
 /** 批量更新全部插件 */
 async function updateAllPlugins(): Promise<{ updated: number; failed: number }> {
     return mod.updateAllPlugins();
+}
+
+/** 卸载全部非内建插件，返回卸载数量 */
+async function uninstallAllPlugins(): Promise<number> {
+    return mod.uninstallAllPlugins();
 }
 
 /** 设置插件 meta（排序、用户变量等） */
@@ -323,6 +329,7 @@ const pluginManager = {
     uninstallPlugin,
     updatePlugin,
     updateAllPlugins,
+    uninstallAllPlugins,
     setPluginMeta,
     batchSetPluginMeta,
     getPlugins,

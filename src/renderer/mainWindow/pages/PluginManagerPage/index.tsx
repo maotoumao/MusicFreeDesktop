@@ -1,9 +1,11 @@
-import { Rss, Plus } from 'lucide-react';
-import { useMemo } from 'react';
+import { Rss, Plus, Trash2 } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@renderer/mainWindow/components/ui/Button';
 import { showModal } from '@renderer/mainWindow/components/ui/Modal/modalManager';
 import { usePlugins } from '@infra/pluginManager/renderer/hooks';
+import pluginManager from '@infra/pluginManager/renderer';
+import { showToast } from '@renderer/mainWindow/components/ui/Toast';
 import { LOCAL_PLUGIN_HASH } from '@common/constant';
 import PluginList from './components/PluginList';
 import './index.scss';
@@ -22,6 +24,20 @@ export default function PluginManagerPage() {
         [plugins],
     );
 
+    const handleUninstallAll = useCallback(() => {
+        showModal('ConfirmModal', {
+            title: t('plugin.uninstall_all'),
+            message: t('plugin.uninstall_warning'),
+            description: t('plugin.confirm_text_uninstall_all', { count: pluginCount }),
+            confirmText: t('plugin.confirm_uninstall'),
+            confirmDanger: true,
+            onConfirm: async () => {
+                const count = await pluginManager.uninstallAllPlugins();
+                showToast(t('plugin.uninstall_all_success', { count }));
+            },
+        });
+    }, [pluginCount, t]);
+
     return (
         <div className="p-plugin-manager">
             {/* 头部：标题 + 操作按钮 */}
@@ -35,6 +51,16 @@ export default function PluginManagerPage() {
                     )}
                 </div>
                 <div className="p-plugin-manager__header-actions">
+                    {pluginCount > 0 && (
+                        <Button
+                            variant="secondary"
+                            size="md"
+                            icon={<Trash2 size={16} />}
+                            onClick={handleUninstallAll}
+                        >
+                            {t('plugin.uninstall_all')}
+                        </Button>
+                    )}
                     <Button
                         variant="secondary"
                         size="md"
