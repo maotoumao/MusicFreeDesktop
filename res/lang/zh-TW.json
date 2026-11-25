@@ -478,7 +478,8 @@
             "webdav_data_not_complete": "URL、用戶名和密碼不能為空",
             "webdav_backup_file_not_exist": "備份文件不存在",
             "overwrite_confirm": "覆蓋模式將清空所有現有歌單，替換為備份中的數據。此操作不可撤銷，是否繼續？",
-            "unsupported_backup_format": "不支援的備份文件格式"
+            "unsupported_backup_format": "不支援的備份文件格式",
+            "no_playlists_in_backup": "備份中沒有歌單"
         },
         "about": {
             "title": "關於 MusicFree",

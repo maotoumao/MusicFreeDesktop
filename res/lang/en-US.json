@@ -478,7 +478,8 @@
             "webdav_data_not_complete": "URL, username, and password cannot be empty",
             "webdav_backup_file_not_exist": "Backup file does not exist",
             "overwrite_confirm": "Overwrite mode will clear all existing playlists and replace with backup data. This action cannot be undone. Continue?",
-            "unsupported_backup_format": "Unsupported backup file format"
+            "unsupported_backup_format": "Unsupported backup file format",
+            "no_playlists_in_backup": "The backup contains no playlists"
         },
         "about": {
             "title": "About MusicFree",
