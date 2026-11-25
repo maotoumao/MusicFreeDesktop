@@ -290,7 +290,6 @@ class TrackPlayer {
             store.set(qualityAtom, result.quality ?? quality);
             this.audioController.setTrackSource(result, musicItem);
             this.audioController.play();
-            this.consecutiveErrors = 0; // 播放成功，重置错误计数
 
             // 记录到最近播放（异步，不阻塞播放）
             addToRecentlyPlayed(musicItem).catch(() => {});
@@ -536,7 +535,10 @@ class TrackPlayer {
     private bindAudioEvents(): void {
         this.audioController.on('stateChange', (state) => {
             store.set(playerStateAtom, state);
-            if (state === PlayerState.Paused) {
+            // 真正开始播放才算成功：音源报错是异步到达的，设置音源时清零会让计数永远到不了上限
+            if (state === PlayerState.Playing) {
+                this.consecutiveErrors = 0;
+            } else if (state === PlayerState.Paused) {
                 syncKV.set('player.currentProgress', store.get(progressAtom).currentTime);
             }
         });
