@@ -105,12 +105,20 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
     }
 
     setMetadata(musicItem: IMusicItemSlim | IMusic.IMusicItem): void {
-        navigator.mediaSession.metadata = new MediaMetadata({
+        const info = {
             title: musicItem.title,
             artist: musicItem.artist,
             album: musicItem.album ?? undefined,
-            artwork: musicItem.artwork ? [{ src: musicItem.artwork }] : undefined,
-        });
+        };
+        try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                ...info,
+                artwork: musicItem.artwork ? [{ src: musicItem.artwork }] : undefined,
+            });
+        } catch {
+            // 封面地址无法解析为 URL 时构造会抛错，退化为不带封面
+            navigator.mediaSession.metadata = new MediaMetadata(info);
+        }
     }
 
     prepareTrack(): void {
