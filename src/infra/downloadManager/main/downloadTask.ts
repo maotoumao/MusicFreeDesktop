@@ -3,7 +3,7 @@
  *
  * 职责：
  * - 单个文件的 HTTP 流式下载（支持断点续传）
- * - 从 Content-Type 推断文件扩展名
+ * - 推断文件扩展名（按文件内容识别，其次 Content-Type）
  * - 下载速度计算
  */
 import fs from 'fs';
@@ -28,6 +28,27 @@ const MIME_TO_EXT: Record<string, string> = {
     'audio/wav': '.wav',
     'audio/x-wav': '.wav',
 };
+
+/** 按文件内容识别音频格式对应的扩展名；无法识别时返回 null */
+async function detectAudioExt(filePath: string): Promise<string | null> {
+    try {
+        const { parseFile } = await import('music-metadata');
+        const { format } = await parseFile(filePath, { skipCovers: true, duration: false });
+        const container = format.container ?? '';
+        const codec = format.codec ?? '';
+        if (container === 'FLAC') return '.flac';
+        if (container === 'MPEG') return '.mp3';
+        if (container === 'WAVE') return '.wav';
+        if (container === 'Ogg') return codec === 'Opus' ? '.opus' : '.ogg';
+        if (container.startsWith('ADTS')) return '.aac';
+        if (container.startsWith('EBML')) return '.webm';
+        // MP4 的 container 是 ftyp 品牌列表（如 M4A/isom/iso2），按编码判断
+        if (codec.startsWith('MPEG-4/') || codec === 'ALAC') return '.m4a';
+    } catch {
+        /* 无法解析时交给 Content-Type 判断 */
+    }
+    return null;
+}
 
 export class DownloadTask {
     public task: IDownloadTask;
@@ -136,9 +157,13 @@ export class DownloadTask {
                 dataStream.on('error', reject);
             });
 
-            // 7. 推断文件扩展名（从 Content-Type，兜底 .mp3）
-            const contentType = String(response.headers['content-type'] ?? '');
-            const finalPath = await this.resolveFinalPath(contentType);
+            // 7. 推断文件扩展名：Content-Type 不可靠，优先按文件内容识别，兜底 .mp3
+            const mime = String(response.headers['content-type'] ?? '')
+                .split(';')[0]
+                .trim()
+                .toLowerCase();
+            const ext = (await detectAudioExt(this.task.tempPath!)) ?? MIME_TO_EXT[mime] ?? '.mp3';
+            const finalPath = await this.resolveFinalPath(ext);
 
             // 8. 下载完成 → rename 临时文件
             await fsp.rename(this.task.tempPath!, finalPath);
@@ -167,13 +192,10 @@ export class DownloadTask {
     }
 
     /**
-     * 从 Content-Type 推断文件扩展名，兜底 .mp3。
-     * filePath 不含扩展名（由 buildFileName 生成），此处追加推断的扩展名。
+     * filePath 不含扩展名（由 buildFileName 生成），此处追加扩展名。
      * 若目标路径已存在文件，自动追加数字后缀避免覆盖。
      */
-    private async resolveFinalPath(contentType: string): Promise<string> {
-        const mime = contentType.split(';')[0].trim().toLowerCase();
-        const ext = MIME_TO_EXT[mime] ?? '.mp3';
+    private async resolveFinalPath(ext: string): Promise<string> {
         const base = this.task.filePath!;
         let candidate = base + ext;
 

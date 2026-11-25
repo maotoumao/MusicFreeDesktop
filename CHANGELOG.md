@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复全局快捷键绑定方向键、空格、加号或多媒体音量 / 切歌键时始终注册失败的问题（已保存的绑定无需重新设置）。
 - 修复「默认播放音质」设置不生效的问题：新歌曲改为按该设置请求音质，不再沿用上一首的实际音质，也不会在播放出错后被改回标准音质（重启后同样生效）。
 - 修复插件在线更新因网络错误或下载内容无法解析而失败时，仍提示「已是最新版本」的问题。
+- 修复下载的 FLAC 等无损或非 MP3 格式文件被保存为 .mp3 扩展名的问题：扩展名改为按文件内容识别。
 
 ### Added
 
@@ -47,6 +48,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix global shortcuts bound to arrow keys, Space, Plus, or media volume / track keys always failing to register (existing bindings work without re-recording).
 - Fix the "Default playback quality" setting being ignored: new tracks now request that quality instead of inheriting the previous track's actual quality, and a playback error no longer resets it to standard (also after restart).
 - Fix a plugin update that failed because of a network error or unparsable download still reporting "already up to date".
+- Fix downloaded FLAC and other non-MP3 files being saved with an .mp3 extension: the extension is now detected from the file content.
 
 ---
 
