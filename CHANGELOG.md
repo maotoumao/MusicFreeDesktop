@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 下载设置新增「下载间隔」与「随机抖动」：可设置两次下载任务启动之间的最小间隔（秒），并在其基础上叠加随机浮动，默认关闭。
 - 引入 Issue / PR 治理工作流：长期无活动且未被接受的 Issue 会被自动标记 `stale` 并关闭；PR 必须提交到 `dev` 分支并关联一个已被接受的 Issue。
 - 本地音乐列表会记住上次的排序方式，重新进入后保持。
+- 桌面歌词支持显示翻译（歌曲有翻译时显示在原文下方），可在桌面歌词工具栏开关。
 
 ### 修复
 
@@ -49,6 +50,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Add "Download interval" and "Random jitter" download settings: configure the minimum interval (seconds) between starting two download tasks, with an optional random variation on top. Disabled by default.
 - Add issue/PR governance workflows: inactive and unaccepted issues are automatically marked `stale` and closed; PRs must target the `dev` branch and link an accepted issue.
 - The local music list remembers its last sort order when you come back to it.
+- Desktop lyrics can show the translation below the original line when available, toggled from the desktop lyric toolbar.
 
 ### Fixed
 

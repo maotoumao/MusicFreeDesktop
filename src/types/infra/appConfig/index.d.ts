@@ -50,6 +50,8 @@ interface _IAppConfig {
     'lyric.fontSize': number;
     /** 描边颜色 */
     'lyric.strokeColor': string;
+    /** 桌面歌词显示翻译（有翻译时） */
+    'lyric.showTranslation': boolean;
 
     /** 是否启用本地快捷键 */
     'shortCut.enableLocal': boolean;

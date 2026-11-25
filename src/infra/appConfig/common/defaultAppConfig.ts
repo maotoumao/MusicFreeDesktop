@@ -26,6 +26,7 @@ const defaultAppConfig: IAppConfig = {
     'lyric.fontColor': '#ffffff',
     'lyric.strokeColor': '#f5c542',
     'lyric.fontSize': 48,
+    'lyric.showTranslation': true,
     'shortCut.enableLocal': true,
     'shortCut.enableGlobal': false,
     'download.concurrency': 5,

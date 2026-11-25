@@ -14,7 +14,9 @@ import {
     PinOff,
     AArrowUp,
     AArrowDown,
+    Languages,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@common/cn';
 import { PlayerState } from '@common/constant';
 import appSyncAuxiliary, { useAppStatePartial } from '@infra/appSync/renderer/auxiliary';
@@ -74,6 +76,10 @@ function UnlockedToolbar({ visible }: { visible: boolean }) {
     const [fontSize] = useConfigValue('lyric.fontSize');
     const currentSize = fontSize ?? 54;
 
+    const { t } = useTranslation();
+    const [showTranslation] = useConfigValue('lyric.showTranslation');
+    const isTranslationOn = showTranslation ?? true;
+
     return (
         <div className={cn('lyric-toolbar', visible && 'is-visible')}>
             {/* ── 置顶 ── */}
@@ -111,6 +117,18 @@ function UnlockedToolbar({ visible }: { visible: boolean }) {
                 }}
             >
                 <AArrowUp size={16} />
+            </button>
+
+            {/* ── 翻译 ── */}
+            <button
+                className={cn('lyric-toolbar__btn', isTranslationOn && 'is-active')}
+                type="button"
+                title={t(isTranslationOn ? 'lyric.hide_translation' : 'lyric.show_translation')}
+                onClick={() => {
+                    appConfig.setConfig({ 'lyric.showTranslation': !isTranslationOn });
+                }}
+            >
+                <Languages size={16} />
             </button>
 
             <span className="lyric-toolbar__sep" />

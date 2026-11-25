@@ -12,6 +12,9 @@ import type { IAppState } from '@appTypes/infra/appSync';
 
 import './index.scss';
 
+// ── 翻译行字号相对主句的比例（主句与翻译行合计不超过歌词窗口的文字区高度） ──
+const TRANSLATION_FONT_SCALE = 0.6;
+
 // ── 滚动平滑过渡时长（ms） ──
 const SCROLL_TRANSITION_MS = 900;
 
@@ -24,6 +27,7 @@ export default memo(function LyricText() {
     const [fontSize] = useConfigValue('lyric.fontSize');
     const [fontColor] = useConfigValue('lyric.fontColor');
     const [strokeColor] = useConfigValue('lyric.strokeColor');
+    const [showTranslation] = useConfigValue('lyric.showTranslation');
 
     const fontFamily = fontData?.family || undefined;
     const resolvedFontSize = fontSize ?? 54;
@@ -77,7 +81,6 @@ export default memo(function LyricText() {
     // 歌词切换时重置滚动位置
     useLayoutEffect(() => {
         if (textWidth > containerWidth) {
-            console.log(textWidth, containerWidth);
             setEnableTransition(false);
             setLeft(0);
         } else {
@@ -136,12 +139,28 @@ export default memo(function LyricText() {
     );
 
     const needsScroll = textWidth > containerWidth;
+    const translation = (showTranslation ?? true) ? currentLrc?.translation : undefined;
+
+    const translationStyle = useMemo(
+        () => ({
+            color: fontColor ?? '#ffffff',
+            WebkitTextStrokeColor: strokeColor ?? '#f5c542',
+            fontSize: Math.round(resolvedFontSize * TRANSLATION_FONT_SCALE),
+            fontFamily,
+        }),
+        [fontColor, strokeColor, resolvedFontSize, fontFamily],
+    );
 
     return (
         <div ref={containerRef} className={cn('lyric-text', needsScroll && 'is-scrollable')}>
             <div ref={contentRef} className="lyric-text__content" style={contentStyle}>
                 {displayText}
             </div>
+            {translation && (
+                <div className="lyric-text__translation" style={translationStyle}>
+                    {translation}
+                </div>
+            )}
         </div>
     );
 });

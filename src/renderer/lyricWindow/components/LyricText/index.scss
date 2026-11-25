@@ -5,6 +5,7 @@
 .lyric-text {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
@@ -12,11 +13,24 @@
     min-height: 0;
 
     &.is-scrollable {
-        justify-content: flex-start;
+        align-items: flex-start;
     }
 
     &__content {
         white-space: nowrap;
+        user-select: none;
+        -webkit-text-stroke-width: 1px;
+        paint-order: stroke fill;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+    }
+
+    &__translation {
+        align-self: center;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
         user-select: none;
         -webkit-text-stroke-width: 1px;
         paint-order: stroke fill;
