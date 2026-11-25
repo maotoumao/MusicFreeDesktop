@@ -62,6 +62,7 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
     private _currentBlobUrl: string | null = null; // 追踪 blob URL 防止内存泄漏
     /** 降级 fetch 进行中：音源已确定，尚未挂到 audio 上 */
     private _sourcePending = false;
+    private _fetchAbort: AbortController | null = null;
     /** 音源挂载前收到的播放 / 定位指令，挂载后执行 */
     private _playWhenReady = false;
     private _seekWhenReady: number | null = null;
@@ -142,11 +143,13 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
             }
             // 代理不可用，降级到 fetch
             this._sourcePending = true;
-            fetch(url, { method: 'GET', headers })
+            this._fetchAbort = new AbortController();
+            fetch(url, { method: 'GET', headers, signal: this._fetchAbort.signal })
                 .then((res) => res.blob())
                 .then((blob) => {
                     if (this._sourceId !== sourceId) return;
                     this._sourcePending = false;
+                    this._fetchAbort = null;
                     this._currentBlobUrl = URL.createObjectURL(blob);
                     this.audio.src = this._currentBlobUrl;
                     if (this._seekWhenReady !== null) {
@@ -161,7 +164,7 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
                 .catch((err) => {
                     if (this._sourceId !== sourceId) return;
                     this._sourcePending = false;
-                    this._sourceFailed = true;
+                    this._fetchAbort = null;
                     this.emit('error', ErrorReason.EmptyResource, err);
                 });
             return;
@@ -263,9 +266,11 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
         };
     }
 
-    /** 释放当前音源（含进行中的 fetch、HLS、Blob URL）并使其异步结果失效 */
+    /** 释放当前音源（中止进行中的 fetch，销毁 HLS，回收 Blob URL）并使其异步结果失效 */
     private releaseSource(): void {
         this._sourceId++;
+        this._fetchAbort?.abort();
+        this._fetchAbort = null;
         this._sourcePending = false;
         this._playWhenReady = false;
         this._seekWhenReady = null;
