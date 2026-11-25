@@ -209,3 +209,45 @@ jobs:
                   name: MusicFree-${{ env.VERSION }}-linux-amd64-rpm
                   path: ./out/make/rpm/x64/MusicFree-${{ env.VERSION }}-linux-amd64.rpm
                   retention-days: 30
+
+    build-linux-arm64:
+        runs-on: ubuntu-24.04-arm
+        steps:
+            - uses: actions/checkout@v5
+            - name: Install system dependencies
+              run: sudo apt-get update && sudo apt-get install -y rpm
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9
+            - uses: actions/setup-node@v5
+              with:
+                  node-version: 22
+                  cache: pnpm
+            - run: pnpm install --frozen-lockfile
+            - name: Read version
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  echo "VERSION=$VERSION" >> $GITHUB_ENV
+            - run: pnpm run make
+            - name: Rename DEB
+              run: |
+                  DEB_FILE=$(find ./out/make/deb/arm64/ -name "*.deb" | head -1)
+                  if [ -n "$DEB_FILE" ]; then
+                    mv "$DEB_FILE" "./out/make/deb/arm64/MusicFree-${{ env.VERSION }}-linux-arm64.deb"
+                  fi
+            - name: Rename RPM
+              run: |
+                  RPM_FILE=$(find ./out/make/rpm/arm64/ -name "*.rpm" | head -1)
+                  if [ -n "$RPM_FILE" ]; then
+                    mv "$RPM_FILE" "./out/make/rpm/arm64/MusicFree-${{ env.VERSION }}-linux-arm64.rpm"
+                  fi
+            - uses: actions/upload-artifact@v6
+              with:
+                  name: MusicFree-${{ env.VERSION }}-linux-arm64-deb
+                  path: ./out/make/deb/arm64/MusicFree-${{ env.VERSION }}-linux-arm64.deb
+                  retention-days: 30
+            - uses: actions/upload-artifact@v6
+              with:
+                  name: MusicFree-${{ env.VERSION }}-linux-arm64-rpm
+                  path: ./out/make/rpm/arm64/MusicFree-${{ env.VERSION }}-linux-arm64.rpm
+                  retention-days: 30
