@@ -32,8 +32,10 @@ export interface IAudioControllerEvents {
 
 /** 音频控制器接口 — 所有实现必须遵守 */
 export interface IAudioController extends EventEmitter<IAudioControllerEvents> {
-    /** 预准备（设置 MediaSession metadata，清空旧音源） */
-    prepareTrack(musicItem: IMusicItemSlim): void;
+    /** 设置系统媒体信息（MediaSession metadata） */
+    setMetadata(musicItem: IMusicItemSlim | IMusic.IMusicItem): void;
+    /** 预准备（清空旧音源） */
+    prepareTrack(): void;
     /** 设置音源并可选自动播放 */
     setTrackSource(source: IPlugin.IMediaSourceResult, musicItem: IMusic.IMusicItem): void;
     play(): void;
@@ -103,13 +105,16 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
         this.bindEvents();
     }
 
-    prepareTrack(musicItem: IMusicItemSlim): void {
+    setMetadata(musicItem: IMusicItemSlim | IMusic.IMusicItem): void {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: musicItem.title,
             artist: musicItem.artist,
             album: musicItem.album ?? undefined,
             artwork: musicItem.artwork ? [{ src: musicItem.artwork }] : undefined,
         });
+    }
+
+    prepareTrack(): void {
         this.setPlayerState(PlayerState.None);
         this.releaseSource();
         navigator.mediaSession.playbackState = 'none';

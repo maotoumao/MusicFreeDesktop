@@ -164,6 +164,7 @@ class TrackPlayer {
         // 4. 恢复当前歌曲
         if (savedMusic) {
             store.set(currentMusicAtom, musicItemToSlim(savedMusic));
+            this.audioController.setMetadata(savedMusic);
 
             // 获取完整数据并加载音源（不自动播放）
             const fullItem = await musicSheet.getRawMusicItem(savedMusic.platform, savedMusic.id);
@@ -269,7 +270,7 @@ class TrackPlayer {
         this.setCurrentMusic(targetSlim);
 
         store.set(playerStateAtom, PlayerState.Buffering);
-        this.audioController.prepareTrack(targetSlim);
+        this.audioController.prepareTrack();
         this.resetProgress();
 
         const seq = ++this.loadSeq;
@@ -722,6 +723,7 @@ class TrackPlayer {
             this.lastTruncationTime = 0;
         }
         store.set(currentMusicAtom, musicItemToSlim(musicItem));
+        this.audioController.setMetadata(musicItem);
         syncKV.set('player.currentMusic', musicItem);
         if (fetchLyric) {
             this.lyricManager.fetchLyric(musicItem);
