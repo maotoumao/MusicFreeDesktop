@@ -7,7 +7,7 @@
  *  3. Shell 操作（打开 URL、打开路径、在文件管理器中定位）
  *  4. 原生 Dialog（打开/保存文件对话框）
  */
-import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, screen, shell } from 'electron';
 import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
@@ -157,6 +157,17 @@ class SystemUtil {
 
         ipcMain.on(IPC.SHOW_MAIN_WINDOW, () => {
             this.windowManager.showWindow('main');
+        });
+
+        // 在当前所在显示器的工作区内水平居中，保持垂直位置；返回新位置供调用方持久化
+        ipcMain.handle(IPC.CENTER_WINDOW_HORIZONTALLY, (evt) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (!win) return null;
+            const bounds = win.getBounds();
+            const { workArea } = screen.getDisplayMatching(bounds);
+            const x = workArea.x + Math.round((workArea.width - bounds.width) / 2);
+            win.setPosition(x, bounds.y);
+            return { x, y: bounds.y };
         });
 
         ipcMain.on(IPC.TOGGLE_MAXIMIZE, (evt) => {

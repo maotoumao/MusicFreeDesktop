@@ -17,6 +17,7 @@ export const IPC = {
     ENTER_MINIMODE: '@infra/system-util/enter-minimode',
     EXIT_MINIMODE: '@infra/system-util/exit-minimode',
     TOGGLE_MINIMODE: '@infra/system-util/toggle-minimode',
+    CENTER_WINDOW_HORIZONTALLY: '@infra/system-util/center-window-horizontally',
 
     // ─── Shell ───
     OPEN_EXTERNAL: '@infra/system-util/open-external',

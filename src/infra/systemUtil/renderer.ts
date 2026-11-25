@@ -30,6 +30,7 @@ interface IMod {
         enterMinimode(): void;
         exitMinimode(): void;
         toggleMinimode(): void;
+        centerWindowHorizontally(): Promise<{ x: number; y: number } | null>;
     };
     shell: {
         openExternal(url: string): void;
@@ -121,6 +122,11 @@ class SystemUtilRenderer {
     /** 切换迷你模式 */
     public toggleMinimode(): void {
         mod.window.toggleMinimode();
+    }
+
+    /** 当前窗口在所在显示器内水平居中，返回新位置 */
+    public centerWindowHorizontally(): Promise<{ x: number; y: number } | null> {
+        return mod.window.centerWindowHorizontally();
     }
 
     // ─── Shell ───

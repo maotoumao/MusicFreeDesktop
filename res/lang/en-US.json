@@ -155,6 +155,7 @@
         "translation": "Translation",
         "show_translation": "Show Translation",
         "hide_translation": "Hide Translation",
+        "center_horizontally": "Center horizontally",
         "settings": "Lyric Settings",
         "save_lyric": "Save Lyrics",
         "lrc_file": "LRC Lyric File",

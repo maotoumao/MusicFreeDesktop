@@ -28,6 +28,8 @@ const mod = {
         enterMinimode: () => ipcRenderer.send(IPC.ENTER_MINIMODE),
         exitMinimode: () => ipcRenderer.send(IPC.EXIT_MINIMODE),
         toggleMinimode: () => ipcRenderer.send(IPC.TOGGLE_MINIMODE),
+        centerWindowHorizontally: (): Promise<{ x: number; y: number } | null> =>
+            ipcRenderer.invoke(IPC.CENTER_WINDOW_HORIZONTALLY),
     },
     shell: {
         openExternal: (url: string) => ipcRenderer.send(IPC.OPEN_EXTERNAL, url),

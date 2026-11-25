@@ -15,6 +15,7 @@ import {
     AArrowUp,
     AArrowDown,
     Languages,
+    AlignHorizontalJustifyCenter,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@common/cn';
@@ -117,6 +118,21 @@ function UnlockedToolbar({ visible }: { visible: boolean }) {
                 }}
             >
                 <AArrowUp size={16} />
+            </button>
+
+            {/* ── 水平居中 ── */}
+            <button
+                className="lyric-toolbar__btn"
+                type="button"
+                title={t('lyric.center_horizontally')}
+                onClick={async () => {
+                    const position = await systemUtil.centerWindowHorizontally();
+                    if (position) {
+                        appConfig.setConfig({ 'private.lyricWindowPosition': position });
+                    }
+                }}
+            >
+                <AlignHorizontalJustifyCenter size={16} />
             </button>
 
             {/* ── 翻译 ── */}
