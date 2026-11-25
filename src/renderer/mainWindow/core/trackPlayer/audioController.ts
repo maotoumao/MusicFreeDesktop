@@ -83,10 +83,9 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
         return !this._sourceFailed && (this._sourcePending || this.isAttached);
     }
 
+    /** 是否要求播放：play() / pause() 调用后立即反映，不等播放事件（缓冲中也算要求播放） */
     get isPlayRequested(): boolean {
-        return this._sourcePending
-            ? this._playWhenReady
-            : this._playerState === PlayerState.Playing;
+        return this._sourcePending ? this._playWhenReady : !this.audio.paused;
     }
 
     get position(): number {

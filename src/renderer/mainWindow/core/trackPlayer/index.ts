@@ -498,6 +498,7 @@ class TrackPlayer {
                 this.audioController.setTrackSource(result, musicItem);
                 this.audioController.seekTo(position);
                 if (shouldPlay) this.audioController.play();
+                else store.set(playerStateAtom, this.audioController.playerState);
                 store.set(qualityAtom, result.quality!);
                 return result.quality === quality;
             } else {
