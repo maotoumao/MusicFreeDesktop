@@ -137,6 +137,17 @@ function formatLrcTime(ms: number): string {
     return `[${min}:${sec}]`;
 }
 
+/** 只解析编码参数：不读封面，不逐帧计算时长。解析失败时返回 undefined */
+export async function parseAudioFormat(filePath: string): Promise<IAudioFormat | undefined> {
+    try {
+        const { parseFile } = await import('music-metadata');
+        const metadata = await parseFile(filePath, { skipCovers: true });
+        return metadata.format ? getAudioFormat(metadata.format) : undefined;
+    } catch {
+        return undefined;
+    }
+}
+
 /**
  * 解析音频文件的元数据（标题、艺术家、专辑、时长、封面、歌词）。
  *

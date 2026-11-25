@@ -11,7 +11,7 @@ import { createHash } from 'crypto';
 import path from 'path';
 import { LOCAL_PLUGIN_NAME } from '@common/constant';
 import { parseAudioMeta } from '@infra/localMusic/common/parseAudioMeta';
-import type { ILocalMusicItem } from '@appTypes/infra/localMusic';
+import type { IAudioFormat, ILocalMusicItem } from '@appTypes/infra/localMusic';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 
 /**
@@ -62,11 +62,23 @@ export async function parseFileMetadata(
         fileMtime: Math.floor(fileMtime),
         scanFolderId,
         createdAt: Date.now(),
-        codec: meta.audio?.codec ?? null,
-        lossless: meta.audio?.lossless === undefined ? null : Number(meta.audio.lossless),
-        bitrate: meta.audio?.bitrate ?? null,
-        sampleRate: meta.audio?.sampleRate ?? null,
-        bitsPerSample: meta.audio?.bitsPerSample ?? null,
-        channels: meta.audio?.channels ?? null,
+        ...toAudioColumns(meta.audio),
+    };
+}
+
+/** 编码参数 → local_music 的编码列；未识别出编码时 codec 存空字符串，避免每次扫描重复补录 */
+export function toAudioColumns(
+    audio: IAudioFormat | undefined,
+): Pick<
+    ILocalMusicItem,
+    'codec' | 'lossless' | 'bitrate' | 'sampleRate' | 'bitsPerSample' | 'channels'
+> {
+    return {
+        codec: audio?.codec ?? '',
+        lossless: audio?.lossless === undefined ? null : Number(audio.lossless),
+        bitrate: audio?.bitrate ?? null,
+        sampleRate: audio?.sampleRate ?? null,
+        bitsPerSample: audio?.bitsPerSample ?? null,
+        channels: audio?.channels ?? null,
     };
 }

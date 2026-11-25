@@ -209,7 +209,7 @@ class DatabaseInfra implements IDatabaseProvider {
                 `);
             },
 
-            // ─── v5 → v6: local_music 增加编码参数；清空 file_mtime，下次扫描重新解析已有歌曲以补齐 ───
+            // ─── v5 → v6: local_music 增加编码参数；codec 为 NULL 的已有歌曲由扫描补录 ───
             (db) => {
                 db.exec(`
                     ALTER TABLE local_music ADD COLUMN codec TEXT;
@@ -218,7 +218,6 @@ class DatabaseInfra implements IDatabaseProvider {
                     ALTER TABLE local_music ADD COLUMN sample_rate INTEGER;
                     ALTER TABLE local_music ADD COLUMN bits_per_sample INTEGER;
                     ALTER TABLE local_music ADD COLUMN channels INTEGER;
-                    UPDATE local_music SET file_mtime = NULL;
                 `);
             },
         ];

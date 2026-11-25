@@ -33,6 +33,7 @@ export interface ILocalMusicItem extends IMusicItemSlim {
     scanFolderId: string;
     /** 入库时间 */
     createdAt: number;
+    /** 编码短名；NULL 表示尚未解析，空字符串表示已解析但未识别 */
     codec: string | null;
     lossless: number | null;
     bitrate: number | null;
@@ -86,4 +87,6 @@ export interface IDiffResult {
     changed: IFileInfo[];
     removed: string[];
     unchanged: number;
+    /** 未变更但尚未解析编码参数（codec 为 NULL）的文件路径 */
+    missingFormat: string[];
 }

@@ -28,7 +28,8 @@ import { LOCAL_PLUGIN_NAME, INTERNAL_SLIM_KEY } from '@common/constant';
 import { pathToFileURL } from 'url';
 import { IPC, SCAN_BATCH_SIZE } from '../common/constant';
 import { discoverAudioFiles, diffWithDb } from './scanner';
-import { parseFileMetadata } from './metadataParser';
+import { parseFileMetadata, toAudioColumns } from './metadataParser';
+import { parseAudioFormat } from '@infra/localMusic/common/parseAudioMeta';
 import { canWriteTags, writeFileTags } from './metadataWriter';
 
 // ─── Prepared Statements ───
@@ -50,6 +51,8 @@ interface ILocalMusicQueries {
 
     /** 更新本地歌曲的标题/艺术家/专辑 */
     updateMusicMeta: Database.Statement;
+    /** 只更新编码列（补录升级前入库的歌曲，不触碰用户编辑过的标签） */
+    updateAudioFormat: Database.Statement;
 }
 
 /** 数据库行 → 编码参数；尚未解析（升级后未重新扫描）时为 undefined */
@@ -119,7 +122,7 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
             'SELECT file_path AS filePath FROM local_music WHERE platform = ? AND music_id = ?',
         ),
         getLocalMusicByScanFolder: db.prepare(
-            'SELECT file_path, file_size, file_mtime FROM local_music WHERE scan_folder_id = ?',
+            'SELECT file_path, file_size, file_mtime, codec FROM local_music WHERE scan_folder_id = ?',
         ),
 
         // ─── 全量查歌曲列表 ───
@@ -135,6 +138,11 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
         // ─── 更新元数据 ───
         updateMusicMeta: db.prepare(`
             UPDATE local_music SET title = @title, artist = @artist, album = @album
+            WHERE file_path = @filePath
+        `),
+        updateAudioFormat: db.prepare(`
+            UPDATE local_music SET codec = @codec, lossless = @lossless, bitrate = @bitrate,
+                sample_rate = @sampleRate, bits_per_sample = @bitsPerSample, channels = @channels
             WHERE file_path = @filePath
         `),
     };
@@ -426,6 +434,7 @@ class LocalMusicManager {
                 file_path: string;
                 file_size: number | null;
                 file_mtime: number | null;
+                codec: string | null;
             }>;
             const diff = diffWithDb(diskFiles, dbRows, unreadableDirs);
 
@@ -489,6 +498,27 @@ class LocalMusicManager {
                 });
 
                 // 让出事件循环
+                await new Promise((resolve) => setImmediate(resolve));
+            }
+
+            // Phase 3b: 补录升级前入库歌曲的编码参数
+            for (let i = 0; i < diff.missingFormat.length; i += SCAN_BATCH_SIZE) {
+                if (this.cancelledFolderIds.has(scanFolderId)) break;
+                const batch = diff.missingFormat.slice(i, i + SCAN_BATCH_SIZE);
+                const rows: Array<ReturnType<typeof toAudioColumns> & { filePath: string }> = [];
+                for (const filePath of batch) {
+                    rows.push({ filePath, ...toAudioColumns(await parseAudioFormat(filePath)) });
+                }
+                db.transaction(() => {
+                    for (const row of rows) this.queries.updateAudioFormat.run(row);
+                })();
+
+                this.broadcastProgress({
+                    phase: 'parsing',
+                    scanned: Math.min(i + SCAN_BATCH_SIZE, diff.missingFormat.length),
+                    total: diff.missingFormat.length,
+                    current: batch[batch.length - 1],
+                });
                 await new Promise((resolve) => setImmediate(resolve));
             }
 

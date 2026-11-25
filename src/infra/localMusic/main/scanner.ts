@@ -78,7 +78,7 @@ async function discoverRecursive(
  * - added:     磁盘有，DB 无
  * - changed:   磁盘有，DB 有，但 mtime 或 size 不同
  * - removed:   DB 有，磁盘无（位于读取失败目录下的记录除外：无法确认文件已删除）
- * - unchanged: 都有且 mtime + size 一致
+ * - unchanged: 都有且 mtime + size 一致；其中 codec 为 NULL 的同时列入 missingFormat
  */
 export function diffWithDb(
     diskFiles: IFileInfo[],
@@ -86,6 +86,7 @@ export function diffWithDb(
         file_path: string;
         file_size: number | null;
         file_mtime: number | null;
+        codec: string | null;
     }>,
     unreadableDirs: string[] = [],
 ): IDiffResult {
@@ -94,6 +95,7 @@ export function diffWithDb(
 
     const added: IFileInfo[] = [];
     const changed: IFileInfo[] = [];
+    const missingFormat: string[] = [];
     let unchanged = 0;
 
     for (const file of diskFiles) {
@@ -107,6 +109,7 @@ export function diffWithDb(
             changed.push(file);
         } else {
             unchanged++;
+            if (existing.codec === null) missingFormat.push(file.filePath);
         }
     }
 
@@ -116,5 +119,5 @@ export function diffWithDb(
         .filter((r) => !diskSet.has(r.file_path) && !isUnderUnreadableDir(r.file_path))
         .map((r) => r.file_path);
 
-    return { added, changed, removed, unchanged };
+    return { added, changed, removed, unchanged, missingFormat };
 }
