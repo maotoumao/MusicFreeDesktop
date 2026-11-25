@@ -29,6 +29,17 @@ const defaultAppConfig: IAppConfig = {
     'lyric.showTranslation': true,
     'shortCut.enableLocal': true,
     'shortCut.enableGlobal': false,
+    // 按键格式与设置页录制的格式一致（空格存为 ' '）
+    'shortCut.shortcuts': {
+        'play/pause': { local: [' '] },
+        'skip-previous': { local: ['CmdOrCtrl', 'ArrowLeft'] },
+        'skip-next': { local: ['CmdOrCtrl', 'ArrowRight'] },
+        'toggle-desktop-lyric': {},
+        'volume-up': {},
+        'volume-down': {},
+        'like/dislike': {},
+        'toggle-minimode': {},
+    },
     'download.concurrency': 5,
     'download.interval': 0,
     'download.intervalJitter': 0,

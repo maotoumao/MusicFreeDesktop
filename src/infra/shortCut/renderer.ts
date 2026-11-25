@@ -21,6 +21,10 @@ import type {
     ShortCutAction,
 } from '@appTypes/infra/shortCut';
 import { electronAcceleratorToTinykeys } from './common/accelerator';
+
+/** 浏览器默认用空格激活的控件 */
+const SPACE_ACTIVATED_SELECTOR =
+    'button, a[href], summary, [role="button"], [role="checkbox"], [role="switch"], [role="slider"], [role="tab"], [role="menuitem"], [role="option"]';
 import { CONTEXT_BRIDGE_KEY } from './common/constant';
 
 // ─── Preload Bridge ───
@@ -160,6 +164,10 @@ class ShortCutRenderer {
                         tagName === 'SELECT' ||
                         target.isContentEditable
                     ) {
+                        return;
+                    }
+                    // 焦点在按钮等本身响应空格的控件上时让给控件，否则一次按键会触发两次操作
+                    if (event.key === ' ' && target.closest(SPACE_ACTIVATED_SELECTOR)) {
                         return;
                     }
                 }
