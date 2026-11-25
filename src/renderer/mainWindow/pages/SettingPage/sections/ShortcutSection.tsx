@@ -45,10 +45,14 @@ const ACTIONS: ShortCutAction[] = [
     'toggle-minimode',
 ];
 
+const IS_MAC = window.globalContext.platform === 'darwin';
+
 const KEY_DISPLAY_MAP: Record<string, string> = {
-    CmdOrCtrl: 'Ctrl',
+    // macOS 上 CmdOrCtrl 对应 Cmd，Alt 键名为 Option
+    CmdOrCtrl: IS_MAC ? 'Cmd' : 'Ctrl',
     Control: 'Ctrl',
-    Meta: 'Win',
+    Meta: IS_MAC ? 'Cmd' : 'Win',
+    Alt: IS_MAC ? 'Option' : 'Alt',
     ' ': 'Space',
     '+': 'Plus',
     ArrowUp: '↑',
