@@ -63,6 +63,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复同时下载多首同名歌曲（如文件名格式选「标题」）时，下载完成的文件互相覆盖的问题。
 - 修复插件更新尚未完成时卸载该插件（或全部卸载），更新完成后插件又被装回的问题。
 - 修复从文件夹导入本地歌单（或拖入大量本地歌曲）时，因每首歌的封面都随歌曲数据传递和保存，导致内存暴涨、界面卡顿的问题：本地歌曲的封面改为播放时读取，导入的歌单仍以第一首的封面作为默认封面。
+- 修复切歌后新歌词加载出来之前，桌面歌词和歌词页按新歌的进度显示上一首歌词的问题。
 
 ### Added
 
@@ -115,6 +116,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix songs with the same name (for example with the Title file name format) overwriting each other when their downloads finish at the same time.
 - Fix a plugin coming back after being uninstalled (alone or with Uninstall all) while its update was still downloading.
 - Fix memory spikes and freezes when importing a local folder as a playlist (or dropping many local songs) caused by every song carrying its embedded cover; local covers are now read when the song plays, and imported playlists still use the first song's cover.
+- Fix the desktop lyrics and the lyrics page showing the previous song's lyrics, following the new song's progress, until the new lyrics finished loading.
 
 ---
 

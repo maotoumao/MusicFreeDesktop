@@ -27,6 +27,11 @@ class LyricManager {
     /** 获取并解析歌词 */
     async fetchLyric(musicItem: IMusic.IMusicItem): Promise<void> {
         const key = compositeKey(musicItem.platform, musicItem.id);
+        // 换歌时先清掉上一首的歌词，新歌词取回前不再按新歌进度显示旧内容
+        if (this.currentMusicKey !== key) {
+            this.parser = null;
+            store.set(currentLyricAtom, null);
+        }
         this.currentMusicKey = key;
         this.currentPlatform = musicItem.platform;
         this.currentMusicId = String(musicItem.id);
