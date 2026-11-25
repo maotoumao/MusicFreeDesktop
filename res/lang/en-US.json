@@ -30,6 +30,7 @@
         "open": "Open",
         "status": "Status",
         "close": "Close",
+        "window": "Window",
         "search": "Search",
         "retry": "Retry",
         "select_hint": "Select",
