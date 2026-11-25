@@ -47,26 +47,12 @@ function isFile(filePath: string): boolean {
  *
  * 依次尝试：
  * 1. mediaMeta 中的 downloadData.path（已下载歌曲）
- * 2. musicItem.localPath（本地扫描歌曲，完整对象时可用）
- * 3. 从 musicSheet DB 查 raw JSON 取 localPath（slim fallback）
+ * 2. musicItem.localPath（本地扫描歌曲）
  */
-function getLocalPath(
-    musicItem: IMusic.IMusicItem,
-    mediaMeta: IMediaMetaProvider,
-    musicItemProvider: IMusicItemProvider,
-): string | null {
-    // 1. 已下载歌曲：从 mediaMeta 查
+function getLocalPath(musicItem: IMusic.IMusicItem, mediaMeta: IMediaMetaProvider): string | null {
     const downloadData = mediaMeta.getDownloadData(musicItem.platform, String(musicItem.id));
     if (downloadData?.path) return downloadData.path;
-
-    // 2. 本地音乐：直接读 localPath（完整对象时存在）
-    if (musicItem.localPath) return musicItem.localPath;
-
-    // 3. slim fallback：从 musicSheet DB 查 raw JSON
-    const rawItem = musicItemProvider.getRawMusicItem(musicItem.platform, String(musicItem.id));
-    if (rawItem?.localPath) return rawItem.localPath;
-
-    return null;
+    return musicItem.localPath ?? null;
 }
 
 /**
@@ -85,7 +71,13 @@ export async function getLyricAdapter(
     mediaMeta: IMediaMetaProvider,
     musicItemProvider: IMusicItemProvider,
 ): Promise<ILyric.ILyricSource | null> {
-    const { musicItem } = params;
+    // 播放队列等处传入的多是只含展示字段的精简条目，插件 getLyric 可能依赖其余字段
+    // （如本地插件读内嵌歌词需要 localPath），用 DB 中的完整数据补全，调用方传入的字段优先
+    const raw = musicItemProvider.getRawMusicItem(
+        params.musicItem.platform,
+        String(params.musicItem.id),
+    );
+    const musicItem = raw ? { ...raw, ...params.musicItem } : params.musicItem;
 
     let rawLrc = musicItem.rawLrc;
     let lrcUrl = musicItem.lrc;
@@ -147,7 +139,7 @@ export async function getLyricAdapter(
     }
 
     // ─── Step 2: 读取本地同名 .lrc 文件 ───
-    const localPath = getLocalPath(musicItem, mediaMeta, musicItemProvider);
+    const localPath = getLocalPath(musicItem, mediaMeta);
     if (localPath) {
         const fileName = path.parse(localPath).name;
         const lrcPathWithoutExt = path.resolve(localPath, `../${fileName}`);

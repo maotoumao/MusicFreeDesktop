@@ -38,6 +38,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复应用内快捷键绑定「+」键时失效的问题：Ctrl+Shift+「+」会在按下 Ctrl+Shift 时就误触发，Ctrl+小键盘「+」则从不触发；设置页也显示错乱。
 - 修复切换音质过程中暂停后，新音源就绪时又自动播放的问题；本地媒体代理不可用、音源仍在下载时切换音质，不再丢失播放和定位。
 - 修复播放队列中所有歌曲都无法播放时，「出错时跳过」会无限循环切歌的问题：现在连续 3 首失败后停止。
+- 修复从播放队列播放本地歌曲（包括重启后继续播放）时，内嵌歌词不显示的问题。
 
 ### Added
 
@@ -65,6 +66,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix in-app shortcuts bound to the "+" key: Ctrl+Shift+"+" fired as soon as Ctrl+Shift was pressed, Ctrl+numpad "+" never fired, and the settings page displayed them incorrectly.
 - Fix playback resuming by itself after pausing during a quality switch, and switching quality while a source is still downloading (local media proxy unavailable) no longer drops playback and the seek position.
 - Fix "skip on error" cycling through the queue endlessly when every track fails to play; playback now stops after 3 consecutive failures.
+- Fix embedded lyrics not showing for local songs played from the play queue, including after a restart.
 
 ---
 
