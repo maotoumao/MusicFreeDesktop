@@ -19,6 +19,7 @@ import { fullscreenPlayerOpenAtom, closeFullscreenPlayer } from './fullscreenPla
 import LyricPanel from './LyricPanel';
 import LyricSettingsPopover from './LyricSettingsPopover';
 import PlaybackControls from './PlaybackControls';
+import { WindowControls } from '../WindowControls';
 import './index.scss';
 
 // ─── 动画配置 ───
@@ -145,6 +146,7 @@ const FullscreenPlayer = memo(function FullscreenPlayer() {
                         >
                             <ChevronDown size={32} />
                         </button>
+                        <WindowControls />
                     </div>
 
                     {/* ── Body — 左封面 + 右歌词 ── */}
