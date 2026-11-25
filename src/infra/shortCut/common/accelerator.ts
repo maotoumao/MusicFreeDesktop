@@ -89,6 +89,36 @@ const KEY_MAP: Record<string, string> = {
 };
 
 /**
+ * KeyboardEvent.key → Electron Accelerator 键名。
+ * 录制快捷键时保存的是 KeyboardEvent.key，以下名称 globalShortcut 无法识别（register 直接抛错）。
+ */
+const DOM_KEY_TO_ELECTRON: Record<string, string> = {
+    ArrowUp: 'Up',
+    ArrowDown: 'Down',
+    ArrowLeft: 'Left',
+    ArrowRight: 'Right',
+    ' ': 'Space',
+    '+': 'Plus',
+    AudioVolumeUp: 'VolumeUp',
+    AudioVolumeDown: 'VolumeDown',
+    AudioVolumeMute: 'VolumeMute',
+    MediaTrackNext: 'MediaNextTrack',
+    MediaTrackPrevious: 'MediaPreviousTrack',
+};
+
+/**
+ * 将保存的按键数组拼成 globalShortcut 可识别的 Accelerator 字符串。
+ *
+ * @example
+ * ```ts
+ * toElectronAccelerator(["CmdOrCtrl", "ArrowUp"])  // → "CmdOrCtrl+Up"
+ * ```
+ */
+export function toElectronAccelerator(keys: string[]): string {
+    return keys.map((key) => DOM_KEY_TO_ELECTRON[key] ?? key).join('+');
+}
+
+/**
  * 将 Electron Accelerator 格式的快捷键字符串转换为 tinykeys 格式。
  *
  * @param accelerator Electron Accelerator 格式字符串，如 "CmdOrCtrl+Shift+P"

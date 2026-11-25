@@ -16,6 +16,7 @@ import type {
 } from '@appTypes/infra/shortCut';
 import type { ICommandSender } from '@appTypes/infra/appSync';
 import type { IWindowManager } from '@appTypes/main/windowManager';
+import { toElectronAccelerator } from './common/accelerator';
 import { IPC } from './common/constant';
 
 class ShortCut {
@@ -105,7 +106,7 @@ class ShortCut {
                 continue;
             }
 
-            const accelerator = binding.global.join('+');
+            const accelerator = toElectronAccelerator(binding.global);
             if (!accelerator) {
                 continue;
             }
