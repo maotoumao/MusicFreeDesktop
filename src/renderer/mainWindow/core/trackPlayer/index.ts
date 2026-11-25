@@ -251,8 +251,12 @@ class TrackPlayer {
 
         const targetSlim = queue[index];
 
-        // 相同歌曲处理
-        if (this.playQueue.getCurrentIndex() === index && this.isCurrentMusic(targetSlim)) {
+        // 相同歌曲且音源可用时原地重播；无音源或音源已失效时走下方重新加载
+        if (
+            this.playQueue.getCurrentIndex() === index &&
+            this.isCurrentMusic(targetSlim) &&
+            this.audioController.hasSource
+        ) {
             if (options.restartOnSameMedia) this.audioController.seekTo(0);
             this.audioController.play();
             return;

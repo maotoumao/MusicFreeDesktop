@@ -47,6 +47,7 @@ export interface IAudioController extends EventEmitter<IAudioControllerEvents> {
     setSinkId(deviceId: string): Promise<void>;
 
     readonly playerState: PlayerState;
+    /** 有可用音源（已挂载或正在加载）；音源报错后为 false，需重新解析 */
     readonly hasSource: boolean;
 }
 
@@ -64,13 +65,15 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
     /** 音源挂载前收到的播放 / 定位指令，挂载后执行 */
     private _playWhenReady = false;
     private _seekWhenReady: number | null = null;
+    /** 当前音源已报错，不可复用 */
+    private _sourceFailed = false;
 
     get playerState(): PlayerState {
         return this._playerState;
     }
 
     get hasSource(): boolean {
-        return this._sourcePending || this.isAttached;
+        return !this._sourceFailed && (this._sourcePending || this.isAttached);
     }
 
     private get isAttached(): boolean {
@@ -158,6 +161,7 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
                 .catch((err) => {
                     if (this._sourceId !== sourceId) return;
                     this._sourcePending = false;
+                    this._sourceFailed = true;
                     this.emit('error', ErrorReason.EmptyResource, err);
                 });
             return;
@@ -230,6 +234,7 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
         };
 
         this.audio.onerror = (event) => {
+            this._sourceFailed = true;
             this.setPlayerState(PlayerState.Paused);
             this.emit('error', ErrorReason.EmptyResource, event);
         };
@@ -264,6 +269,7 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
         this._sourcePending = false;
         this._playWhenReady = false;
         this._seekWhenReady = null;
+        this._sourceFailed = false;
         this.destroyHls();
         this.revokeBlobUrl();
         this.audio.src = '';
@@ -286,6 +292,7 @@ class WebAudioController extends EventEmitter<IAudioControllerEvents> implements
 
         this.hls.on(Hls.Events.ERROR, (_event: any, data: any) => {
             if (data.fatal) {
+                this._sourceFailed = true;
                 this.emit('error', ErrorReason.EmptyResource, data);
             }
         });
