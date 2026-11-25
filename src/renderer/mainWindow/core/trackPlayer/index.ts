@@ -128,6 +128,8 @@ class TrackPlayer {
     private loadSeq = 0;
     /** 进行中的 playIndex 加载序号，0 表示没有 */
     private loadingSeq = 0;
+    /** 每次切换音质自增；只有最后一次选择生效 */
+    private qualitySeq = 0;
 
     // 连续播放错误计数
     private consecutiveErrors = 0;
@@ -467,12 +469,15 @@ class TrackPlayer {
         this.audioController.setSpeed(speed);
     }
 
-    async setQuality(quality: IMusic.IQualityKey): Promise<boolean> {
+    /** 切换当前歌曲的音质；返回是否切到了所选音质，被切歌或更晚的选择取代时返回 null */
+    async setQuality(quality: IMusic.IQualityKey): Promise<boolean | null> {
         const current = this.playQueue.getCurrentMusic();
         const prevQuality = store.get(qualityAtom);
         if (!current || quality === prevQuality) return true;
 
         const seq = this.loadSeq;
+        const qSeq = ++this.qualitySeq;
+        const superseded = () => seq !== this.loadSeq || qSeq !== this.qualitySeq;
 
         try {
             store.set(playerStateAtom, PlayerState.Buffering);
@@ -484,7 +489,7 @@ class TrackPlayer {
             const result = await this.resolveSource(musicItem, quality, {
                 requireQualityMatch: true,
             });
-            if (seq !== this.loadSeq) return false; // 期间已切歌
+            if (superseded()) return null;
 
             if (result?.url) {
                 // 换源前读取：等待期间用户可能暂停、拖动进度，降级下载中的指令也在此读出
@@ -502,7 +507,7 @@ class TrackPlayer {
                 return false;
             }
         } catch {
-            if (seq !== this.loadSeq) return false;
+            if (superseded()) return null;
             // 切换失败，恢复原音质标记
             store.set(qualityAtom, prevQuality);
             store.set(playerStateAtom, this.audioController.playerState);

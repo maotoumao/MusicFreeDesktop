@@ -56,6 +56,7 @@ const QualityPopover = memo(function QualityPopover() {
         async (q: IMusic.IQualityKey) => {
             const success = await trackPlayer.setQuality(q);
             console.log('切换音质结果', { success, quality: q });
+            if (success === null) return;
             if (success) {
                 appConfig.setConfig({ 'playMusic.defaultQuality': q });
             } else {
