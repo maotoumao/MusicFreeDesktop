@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProgress } from '@renderer/mainWindow/core/trackPlayer/hooks';
 import { ProgressBar as UIProgressBar } from '../../ui/ProgressBar';
 import { useProgressDrag } from '@renderer/mainWindow/hooks/useProgressDrag';
@@ -15,9 +16,17 @@ import formatDuration from '@common/formatDuration';
  * 避免每秒多次触发整个 PlayerBar 重渲染。
  */
 const ProgressBar = memo(function ProgressBar() {
+    const { t } = useTranslation();
     const progress = useProgress();
-    const { displayValue, handleChange, handleDragStart, handleDragEnd } =
-        useProgressDrag(progress);
+    const {
+        displayValue,
+        keyboardStep,
+        keyboardLargeStep,
+        valueText,
+        handleChange,
+        handleDragStart,
+        handleDragEnd,
+    } = useProgressDrag(progress);
 
     return (
         <UIProgressBar
@@ -25,6 +34,10 @@ const ProgressBar = memo(function ProgressBar() {
             value={displayValue}
             variant="slim"
             interactive
+            aria-label={t('playback.progress')}
+            step={keyboardStep}
+            largeStep={keyboardLargeStep}
+            valueText={valueText}
             onChange={handleChange}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Volume2, Volume1, VolumeX } from 'lucide-react';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import { useVolume } from '@renderer/mainWindow/core/trackPlayer/hooks';
+import { getSliderKeyValue } from '@renderer/common/sliderKeyboard';
 
 /** 根据音量值选择图标 */
 function getVolumeIcon(volume: number) {
@@ -20,6 +21,9 @@ function getVolumeIcon(volume: number) {
 
 /** 每次滚轮步进 */
 const WHEEL_STEP = 0.02;
+/** 键盘方向键 / PageUp、PageDown 步进 */
+const KEYBOARD_STEP = 0.05;
+const KEYBOARD_LARGE_STEP = 0.2;
 
 /**
  * VolumePopover
@@ -116,6 +120,10 @@ const VolumePopover = memo(function VolumePopover() {
             className="l-player-bar__popover-anchor"
             onMouseEnter={show}
             onMouseLeave={hide}
+            onFocus={show}
+            onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null)) hide();
+            }}
         >
             {/* 触发按钮 */}
             <button
@@ -145,7 +153,19 @@ const VolumePopover = memo(function VolumePopover() {
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={volumePct}
+                    aria-valuetext={`${volumePct}%`}
                     tabIndex={0}
+                    onKeyDown={(e) => {
+                        const next = getSliderKeyValue(e, volume, {
+                            min: 0,
+                            max: 1,
+                            step: KEYBOARD_STEP,
+                            largeStep: KEYBOARD_LARGE_STEP,
+                        });
+                        if (next === null) return;
+                        e.preventDefault();
+                        trackPlayer.setVolume(next);
+                    }}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}

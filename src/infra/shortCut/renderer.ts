@@ -21,11 +21,11 @@ import type {
     ShortCutAction,
 } from '@appTypes/infra/shortCut';
 import { electronAcceleratorToTinykeys } from './common/accelerator';
+import { CONTEXT_BRIDGE_KEY } from './common/constant';
 
 /** 浏览器默认用空格激活的控件 */
 const SPACE_ACTIVATED_SELECTOR =
-    'button, a[href], summary, [role="button"], [role="checkbox"], [role="switch"], [role="slider"], [role="tab"], [role="menuitem"], [role="option"]';
-import { CONTEXT_BRIDGE_KEY } from './common/constant';
+    'button, a[href], summary, [role="button"], [role="checkbox"], [role="switch"], [role="tab"], [role="menuitem"], [role="option"]';
 
 // ─── Preload Bridge ───
 

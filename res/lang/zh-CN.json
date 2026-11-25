@@ -123,6 +123,7 @@
         "show_queue": "播放列表",
         "volume": "音量",
         "volume_percent": "音量: {{volume}}%",
+        "progress": "播放进度",
         "speed_title": "倍速 {{speed}}",
         "speed": "播放倍速",
         "repeat_queue": "顺序播放",

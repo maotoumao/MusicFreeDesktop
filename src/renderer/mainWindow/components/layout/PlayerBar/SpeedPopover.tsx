@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Gauge } from 'lucide-react';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import { useSpeed } from '@renderer/mainWindow/core/trackPlayer/hooks';
+import { getSliderKeyValue } from '@renderer/common/sliderKeyboard';
 
 /** 倍速范围 */
 const SPEED_MIN = 0.25;
@@ -18,6 +19,9 @@ const SPEED_RANGE = SPEED_MAX - SPEED_MIN; // 2.75
 
 /** 每次滚轮步进 */
 const WHEEL_STEP = 0.25;
+/** 键盘方向键 / PageUp、PageDown 步进 */
+const KEYBOARD_STEP = 0.05;
+const KEYBOARD_LARGE_STEP = 0.25;
 
 /** 倍速值 → 百分比 (0~100) */
 function speedToPct(speed: number): number {
@@ -133,6 +137,10 @@ const SpeedPopover = memo(function SpeedPopover() {
             className="l-player-bar__popover-anchor"
             onMouseEnter={show}
             onMouseLeave={hide}
+            onFocus={show}
+            onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null)) hide();
+            }}
         >
             {/* 触发按钮 */}
             <button
@@ -166,6 +174,17 @@ const SpeedPopover = memo(function SpeedPopover() {
                     aria-valuenow={speed}
                     aria-valuetext={formatSpeed(speed)}
                     tabIndex={0}
+                    onKeyDown={(e) => {
+                        const next = getSliderKeyValue(e, speed, {
+                            min: SPEED_MIN,
+                            max: SPEED_MAX,
+                            step: KEYBOARD_STEP,
+                            largeStep: KEYBOARD_LARGE_STEP,
+                        });
+                        if (next === null) return;
+                        e.preventDefault();
+                        trackPlayer.setSpeed(Math.round(next * 20) / 20);
+                    }}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}

@@ -123,6 +123,7 @@
         "show_queue": "Play Queue",
         "volume": "Volume",
         "volume_percent": "Volume: {{volume}}%",
+        "progress": "Playback progress",
         "speed_title": "Speed {{speed}}",
         "speed": "Playback Speed",
         "repeat_queue": "Sequential",

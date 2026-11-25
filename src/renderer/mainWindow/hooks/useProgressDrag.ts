@@ -1,5 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
+import formatDuration from '@common/formatDuration';
+
+/** 键盘调节进度的步长（秒） */
+const KEYBOARD_STEP_SECONDS = 5;
+const KEYBOARD_LARGE_STEP_SECONDS = 30;
 
 interface ProgressData {
     currentTime: number;
@@ -47,13 +52,21 @@ export function useProgressDrag(progress: ProgressData) {
         }, 200);
     }, []);
 
-    const displayTime = isDragging
-        ? (dragValue / 100) * progress.duration
-        : progress.currentTime;
+    const displayTime = isDragging ? (dragValue / 100) * progress.duration : progress.currentTime;
+
+    const hasDuration = isFinite(progress.duration) && progress.duration > 0;
+    const keyboardStep = hasDuration ? (KEYBOARD_STEP_SECONDS / progress.duration) * 100 : 1;
+    const keyboardLargeStep = hasDuration
+        ? (KEYBOARD_LARGE_STEP_SECONDS / progress.duration) * 100
+        : 10;
+    const valueText = `${formatDuration(displayTime)} / ${formatDuration(progress.duration)}`;
 
     return {
         displayValue,
         displayTime,
+        keyboardStep,
+        keyboardLargeStep,
+        valueText,
         handleChange,
         handleDragStart,
         handleDragEnd,

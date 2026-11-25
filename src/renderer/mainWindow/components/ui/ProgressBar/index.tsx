@@ -1,5 +1,13 @@
-import { forwardRef, useCallback, useRef, type HTMLAttributes, type MouseEvent } from 'react';
+import {
+    forwardRef,
+    useCallback,
+    useRef,
+    type HTMLAttributes,
+    type KeyboardEvent,
+    type MouseEvent,
+} from 'react';
 import { cn } from '@common/cn';
+import { getSliderKeyValue } from '@renderer/common/sliderKeyboard';
 import './index.scss';
 
 export type ProgressBarVariant = 'slim' | 'thick' | 'labeled';
@@ -22,6 +30,12 @@ export interface ProgressBarProps extends Omit<
     onDragStart?: () => void;
     /** 拖拽结束 */
     onDragEnd?: (value: number) => void;
+    /** 键盘方向键步长（0–100） @default 1 */
+    step?: number;
+    /** 键盘 PageUp / PageDown 步长（0–100） @default 10 */
+    largeStep?: number;
+    /** 读屏软件朗读的当前值文本 */
+    valueText?: string;
 }
 
 /**
@@ -42,6 +56,9 @@ const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
             onChange,
             onDragStart,
             onDragEnd,
+            step = 1,
+            largeStep = 10,
+            valueText,
             className,
             ...rest
         },
@@ -91,6 +108,32 @@ const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
             [interactive, onChange, onDragStart, onDragEnd, getValueFromEvent],
         );
 
+        // 每次按键视为一次完整拖拽（开始 → 变化 → 结束）
+        const handleKeyDown = useCallback(
+            (e: KeyboardEvent) => {
+                if (!interactive) return;
+                const next = getSliderKeyValue(e, safeValue, { min: 0, max: 100, step, largeStep });
+                if (next === null) return;
+                e.preventDefault();
+                onDragStart?.();
+                onChange?.(next);
+                onDragEnd?.(next);
+            },
+            [interactive, safeValue, step, largeStep, onChange, onDragStart, onDragEnd],
+        );
+
+        const sliderProps = interactive
+            ? {
+                  role: 'slider',
+                  tabIndex: 0,
+                  'aria-valuemin': 0,
+                  'aria-valuemax': 100,
+                  'aria-valuenow': Math.round(safeValue),
+                  'aria-valuetext': valueText,
+                  onKeyDown: handleKeyDown,
+              }
+            : {};
+
         const wrapperClassNames = cn(
             'progress-bar',
             `progress-bar--${variant}`,
@@ -99,7 +142,7 @@ const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
         );
 
         return (
-            <div ref={ref} className={wrapperClassNames} {...rest}>
+            <div ref={ref} className={wrapperClassNames} {...sliderProps} {...rest}>
                 <div ref={trackRef} className="progress-bar__track" onMouseDown={handleMouseDown}>
                     {/* 缓冲条（仅 slim） */}
                     {variant === 'slim' && safeBuffered > 0 && (

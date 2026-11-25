@@ -28,9 +28,18 @@ import { useProgressDrag } from '@renderer/mainWindow/hooks/useProgressDrag';
 // ─── FullscreenProgressBar — 隔离高频 progressAtom 更新 ───
 
 const FullscreenProgressBar = memo(function FullscreenProgressBar() {
+    const { t } = useTranslation();
     const progress = useProgress();
-    const { displayValue, displayTime, handleChange, handleDragStart, handleDragEnd } =
-        useProgressDrag(progress);
+    const {
+        displayValue,
+        displayTime,
+        keyboardStep,
+        keyboardLargeStep,
+        valueText,
+        handleChange,
+        handleDragStart,
+        handleDragEnd,
+    } = useProgressDrag(progress);
 
     return (
         <div className="l-fullscreen-player__progress">
@@ -39,6 +48,10 @@ const FullscreenProgressBar = memo(function FullscreenProgressBar() {
                 value={displayValue}
                 variant="slim"
                 interactive
+                aria-label={t('playback.progress')}
+                step={keyboardStep}
+                largeStep={keyboardLargeStep}
+                valueText={valueText}
                 onChange={handleChange}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
