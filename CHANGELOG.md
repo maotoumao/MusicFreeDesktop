@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 本地音乐列表会记住上次的排序方式，重新进入后保持。
 - 桌面歌词支持显示翻译（歌曲有翻译时显示在原文下方），可在桌面歌词工具栏开关。
 - 设置新增「开机自启」（Windows、macOS）：开机后自动启动并收起到系统托盘。
-- 新增默认应用内快捷键：空格播放 / 暂停，Ctrl（macOS 为 Cmd）+ ← / → 切换上一首 / 下一首；只对从未修改过快捷键的用户生效，焦点在按钮、输入框等控件上时空格仍交给控件。
+- 新增默认应用内快捷键：空格播放 / 暂停，Ctrl（macOS 为 Cmd）+ ← / → 切换上一首 / 下一首；只对从未修改过快捷键的用户生效，在输入框中，或用键盘（Tab）把焦点移到按钮等控件上时，空格仍交给控件。
 - 插件管理新增「全部卸载」，一次卸载所有已安装插件（内置本地插件除外）。
 - 无障碍：播放进度、音量、倍速支持键盘操作（Tab 聚焦后用方向键、PageUp / PageDown、Home / End 调节），读屏软件可朗读当前值。
 - 歌词页（全屏播放）新增窗口最小化 / 最大化 / 关闭按钮。
@@ -68,7 +68,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - The local music list remembers its last sort order when you come back to it.
 - Desktop lyrics can show the translation below the original line when available, toggled from the desktop lyric toolbar.
 - Add "Launch at startup" (Windows, macOS): start automatically on sign-in and stay in the system tray.
-- Add default in-app shortcuts: Space to play / pause, Ctrl (Cmd on macOS) + Left / Right for previous / next track; applies only if you have never changed your shortcuts, and Space still goes to a focused button or input.
+- Add default in-app shortcuts: Space to play / pause, Ctrl (Cmd on macOS) + Left / Right for previous / next track; applies only if you have never changed your shortcuts, and Space still goes to an input you are typing in or to a button focused with the keyboard (Tab).
 - Add "Uninstall all" to plugin management, removing every installed plugin except the built-in local plugin.
 - Accessibility: playback progress, volume and speed can be adjusted from the keyboard (Tab to focus, then arrow keys, Page Up / Page Down, Home / End), and screen readers announce the current value.
 - The lyrics page (fullscreen player) now has window minimize / maximize / close buttons.

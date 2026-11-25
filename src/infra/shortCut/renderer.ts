@@ -25,7 +25,7 @@ import { CONTEXT_BRIDGE_KEY } from './common/constant';
 
 /** 浏览器默认用空格激活的控件 */
 const SPACE_ACTIVATED_SELECTOR =
-    'button, a[href], summary, [role="button"], [role="checkbox"], [role="switch"], [role="tab"], [role="menuitem"], [role="option"]';
+    'button, summary, [role="button"], [role="checkbox"], [role="switch"], [role="tab"], [role="menuitem"], [role="option"]';
 
 // ─── Preload Bridge ───
 
@@ -47,6 +47,9 @@ class ShortCutRenderer {
     /** tinykeys 返回的取消绑定函数 */
     private unsubscribeLocal: (() => void) | null = null;
 
+    /** 当前焦点是否由鼠标 / 触摸点击产生 */
+    private focusedByPointer = false;
+
     /** 全局快捷键注册状态缓存 */
     private globalStatus: IGlobalShortCutRegistration[] = [];
 
@@ -67,6 +70,8 @@ class ShortCutRenderer {
 
         this.appConfig = deps.appConfig;
         this.appSync = deps.appSync;
+
+        this.trackFocusSource();
 
         // 初次绑定 local 快捷键
         this.applyLocalShortcuts();
@@ -108,6 +113,19 @@ class ShortCutRenderer {
     }
 
     // ─── 内部逻辑 ───
+
+    /** 记录当前焦点是否由鼠标 / 触摸点击产生（Chromium 点击按钮会让按钮获得焦点） */
+    private trackFocusSource() {
+        let lastInputIsPointer = false;
+        const capture = { capture: true };
+        window.addEventListener('pointerdown', () => (lastInputIsPointer = true), capture);
+        window.addEventListener('keydown', () => (lastInputIsPointer = false), capture);
+        window.addEventListener(
+            'focusin',
+            () => (this.focusedByPointer = lastInputIsPointer),
+            capture,
+        );
+    }
 
     private handleConfigUpdated = (patch: IAppConfig) => {
         const relevantKeys: string[] = ['shortCut.enableLocal', 'shortCut.shortcuts'];
@@ -166,8 +184,13 @@ class ShortCutRenderer {
                     ) {
                         return;
                     }
-                    // 焦点在按钮等本身响应空格的控件上时让给控件，否则一次按键会触发两次操作
-                    if (event.key === ' ' && target.closest(SPACE_ACTIVATED_SELECTOR)) {
+                    // 用键盘把焦点移到按钮等响应空格的控件上时让给控件；鼠标点击留下的焦点不算，
+                    // 下方 preventDefault 同时阻止该控件被空格激活
+                    if (
+                        event.key === ' ' &&
+                        !this.focusedByPointer &&
+                        target.closest(SPACE_ACTIVATED_SELECTOR)
+                    ) {
                         return;
                     }
                 }
