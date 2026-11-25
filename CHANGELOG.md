@@ -57,6 +57,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复 Apple 芯片 Mac 上下载的安装包提示「已损坏，无法打开」的问题（应用签名在打包过程中失效）。
 - 修复 macOS 上 Cmd+Q 无法退出、Cmd+W / Cmd+M 无法关闭或最小化窗口的问题，应用菜单新增「窗口」菜单。
 - 修复系统媒体控件（Windows 媒体浮层、macOS 正在播放）在启动恢复上一首后没有歌曲信息、本地歌曲不显示封面的问题。
+- 修复低分辨率或高缩放屏幕（如 1366×768、1080p 开 150% 缩放）上主窗口超出屏幕、底部播放栏显示不全的问题：最小高度从 760 降到 600，初始尺寸不超过屏幕可用区域。
 
 ### Added
 
@@ -103,6 +104,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix downloaded builds on Apple silicon Macs reporting "is damaged and can't be opened" (the app signature was invalidated during packaging).
 - Fix Cmd+Q not quitting and Cmd+W / Cmd+M not closing or minimizing the window on macOS; the app menu now has a Window menu.
 - Fix the system media controls (Windows media overlay, macOS Now Playing) showing no track info after restoring the last track at startup, and no cover for local songs.
+- Fix the main window extending past the screen and cutting off the player bar on low-resolution or high-scaling displays (e.g. 1366×768, 1080p at 150%): the minimum height drops from 760 to 600 and the initial size stays within the available screen area.
 
 ---
 

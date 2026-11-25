@@ -83,6 +83,12 @@ function normalizeWindowPosition(win: BrowserWindow, position: { x: number; y: n
     return needCorrection;
 }
 
+// ─── 主窗口尺寸常量 ───
+
+/** 主窗口最小尺寸：宽度受播放栏控件限制，低于 1080 时右侧按钮被挤出 */
+const MAIN_MIN_WIDTH = 1080;
+const MAIN_MIN_HEIGHT = 600;
+
 // ─── 歌词窗口尺寸常量（与旧版保持一致） ───
 
 const LYRIC_MIN_WIDTH = 920;
@@ -355,12 +361,14 @@ class WindowManager implements IWindowManager {
         }
 
         const initSize = appConfig.getConfigByKey('private.mainWindowSize');
+        // 不超过主显示器工作区：小屏或高缩放下（如 1366×768、1080p@150%）默认尺寸会超出屏幕
+        const { workAreaSize } = screen.getPrimaryDisplay();
 
         const mainWindow = new BrowserWindow({
-            height: initSize?.height ?? 860,
-            width: initSize?.width ?? 1290,
-            minHeight: 760,
-            minWidth: 1080,
+            height: Math.min(initSize?.height ?? 860, workAreaSize.height),
+            width: Math.min(initSize?.width ?? 1290, workAreaSize.width),
+            minHeight: MAIN_MIN_HEIGHT,
+            minWidth: MAIN_MIN_WIDTH,
             show,
             webPreferences: {
                 preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
