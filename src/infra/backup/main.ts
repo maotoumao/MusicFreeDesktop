@@ -234,6 +234,8 @@ class BackupManager {
 
 /** 手机端 1.0 起的备份信封标识 */
 const BACKUP_ENVELOPE_FORMAT = 'musicfree-backup';
+/** 「我喜欢」歌单 id：跨端备份协议冻结的 wire 值 */
+const FAVORITE_SHEET_ID = 'favorite';
 
 /** 解析备份数据（兼容旧版无 version 字段的格式与手机端 v2 信封） */
 function parseBackupData(raw: string): IBackupData {
@@ -252,7 +254,12 @@ function parseBackupData(raw: string): IBackupData {
         return data as IBackupData;
     }
 
-    if (data.format === BACKUP_ENVELOPE_FORMAT && data.version === 2) {
+    // 更高版本按跨端备份协议尽力读取已知段
+    if (
+        data.format === BACKUP_ENVELOPE_FORMAT &&
+        Number.isInteger(data.version) &&
+        data.version >= 2
+    ) {
         return parseEnvelopeV2(data);
     }
 
@@ -260,16 +267,19 @@ function parseBackupData(raw: string): IBackupData {
 }
 
 /**
- * 手机端 v2 备份：桌面端只恢复 sections.musicSheets。
- * 缺少歌单段时报错而不是按空歌单导入，否则覆盖模式会清空现有歌单。
- * 非桌面端产出的备份剔除本地歌曲：文件路径属于原设备，导入后无法播放（与手机端跨设备恢复一致）。
+ * 手机端 v2 备份（规则见手机端仓库 docs/跨端备份协议.md），桌面端只恢复 sections.musicSheets：
+ * - 歌单段须恰有一个「我喜欢」，否则按缺段处理；缺段时报错而不是按空歌单导入，否则覆盖模式会清空现有歌单
+ * - 曲目缺 platform / id 时丢弃，缺标题补空串
+ * - 剔除本地歌曲：文件路径属于原设备，导入后无法播放
  */
 function parseEnvelopeV2(data: any): IBackupData {
     const sheets = data.sections?.musicSheets;
-    if (!Array.isArray(sheets)) {
+    if (
+        !Array.isArray(sheets) ||
+        sheets.filter((sheet) => sheet?.id === FAVORITE_SHEET_ID).length !== 1
+    ) {
         throw new Error('no_playlists_in_backup');
     }
-    const keepLocalMusic = data.origin?.platform === 'desktop';
 
     return {
         version: 1,
@@ -279,13 +289,23 @@ function parseEnvelopeV2(data: any): IBackupData {
             .map((sheet) => ({
                 id: sheet.id,
                 title: typeof sheet.title === 'string' ? sheet.title : '',
-                musicList: keepLocalMusic
-                    ? sheet.musicList
-                    : sheet.musicList.filter(
-                          (item: IMusic.IMusicItem) => item?.platform !== LOCAL_PLUGIN_NAME,
-                      ),
+                musicList: sheet.musicList.filter(isImportableMusicItem).map((item: any) => ({
+                    ...item,
+                    id: String(item.id),
+                    title: typeof item.title === 'string' ? item.title : '',
+                })),
             })),
     };
+}
+
+function isImportableMusicItem(item: any): boolean {
+    const hasId = (typeof item?.id === 'string' && item.id !== '') || Number.isFinite(item?.id);
+    return (
+        typeof item?.platform === 'string' &&
+        item.platform !== '' &&
+        item.platform !== LOCAL_PLUGIN_NAME &&
+        hasId
+    );
 }
 
 const backup = new BackupManager();
