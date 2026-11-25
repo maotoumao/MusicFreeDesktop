@@ -2,11 +2,11 @@
  * EditMusicMetaModal — 编辑本地歌曲元数据弹窗
  *
  * 允许用户修改本地歌曲的标题、艺术家、专辑字段。
- * 修改后通过 IPC 写入音频文件标签（MP3 支持写入嵌入式标签），
+ * 修改后通过 IPC 写入音频文件标签（格式不支持时只更新数据库），
  * 并更新 local_music 数据库记录，触发 LIBRARY_CHANGED 广播刷新 UI。
  */
 
-import { useState, useRef, useCallback, useMemo, type KeyboardEvent } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@renderer/mainWindow/components/ui/Modal';
 import { Button } from '@renderer/mainWindow/components/ui/Button';
@@ -17,9 +17,6 @@ import './index.scss';
 
 /** 各字段最大长度 */
 const FIELD_MAX_LENGTH = 200;
-
-/** 支持写入嵌入式标签的格式 */
-const TAGGABLE_EXTS = new Set(['.mp3']);
 
 /** 从文件路径中提取扩展名 */
 function getFileExt(filePath: string): string {
@@ -57,7 +54,17 @@ export default function EditMusicMetaModal({
     const submittingRef = useRef(false);
 
     const fileExt = useMemo(() => getFileExt(filePath), [filePath]);
-    const isTagWritable = TAGGABLE_EXTS.has(fileExt);
+    // 查询完成前按可写入处理，避免提示闪现
+    const [isTagWritable, setIsTagWritable] = useState(true);
+    useEffect(() => {
+        let alive = true;
+        localMusic.canWriteTags(filePath).then((writable) => {
+            if (alive) setIsTagWritable(writable);
+        });
+        return () => {
+            alive = false;
+        };
+    }, [filePath]);
 
     const trimmed = {
         title: title.trim(),
@@ -84,13 +91,9 @@ export default function EditMusicMetaModal({
                 album: trimmed.album,
             });
 
-            if (result.fileTagWritten) {
-                showToast(t('local_music.metadata_saved_to_file'));
-            } else if (result.tagWarning) {
-                showToast(`${t('common.saved')}（${result.tagWarning}）`);
-            } else {
-                showToast(t('common.saved'));
-            }
+            showToast(
+                result.fileTagWritten ? t('local_music.metadata_saved_to_file') : t('common.saved'),
+            );
 
             close();
         } catch {
@@ -139,9 +142,7 @@ export default function EditMusicMetaModal({
             )}
 
             <div className="edit-music-meta-modal__field">
-                <label className="edit-music-meta-modal__label">
-                    {t('media.title')}
-                </label>
+                <label className="edit-music-meta-modal__label">{t('media.title')}</label>
                 <Input
                     className="edit-music-meta-modal__input"
                     value={title}
@@ -154,9 +155,7 @@ export default function EditMusicMetaModal({
             </div>
 
             <div className="edit-music-meta-modal__field">
-                <label className="edit-music-meta-modal__label">
-                    {t('media.artist')}
-                </label>
+                <label className="edit-music-meta-modal__label">{t('media.artist')}</label>
                 <Input
                     className="edit-music-meta-modal__input"
                     value={artist}
@@ -168,9 +167,7 @@ export default function EditMusicMetaModal({
             </div>
 
             <div className="edit-music-meta-modal__field">
-                <label className="edit-music-meta-modal__label">
-                    {t('media.album')}
-                </label>
+                <label className="edit-music-meta-modal__label">{t('media.album')}</label>
                 <Input
                     className="edit-music-meta-modal__input"
                     value={album}

@@ -109,7 +109,6 @@
         "jotai": "^2.20.1",
         "jschardet": "^3.1.4",
         "lucide-react": "^1.21.0",
-        "node-id3": "^0.2.9",
         "marked": "^18.0.5",
         "music-metadata": "^11.13.0",
         "nanoid": "^5.1.14",

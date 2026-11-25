@@ -43,8 +43,10 @@ const mod = {
     updateMusicItemMetadata: (
         filePath: string,
         meta: { title: string; artist: string; album: string },
-    ): Promise<{ fileTagWritten: boolean; tagWarning: string | null }> =>
+    ): Promise<{ fileTagWritten: boolean }> =>
         ipcRenderer.invoke(IPC.UPDATE_MUSIC_ITEM, filePath, meta),
+    canWriteTags: (filePath: string): Promise<boolean> =>
+        ipcRenderer.invoke(IPC.CAN_WRITE_TAGS, filePath),
 };
 
 contextBridge.exposeInMainWorld(CONTEXT_BRIDGE_KEY, mod);

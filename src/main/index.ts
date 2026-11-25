@@ -140,6 +140,7 @@ async function bootstrapInfra(windowManager: IWindowManager) {
         windowManager,
         appConfig,
         mediaMeta: mediaMetaProvider,
+        audioTag,
     });
 
     backup.setup({

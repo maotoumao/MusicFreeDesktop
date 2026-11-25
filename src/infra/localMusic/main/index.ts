@@ -24,13 +24,13 @@ import type {
     IScanResult,
 } from '@appTypes/infra/localMusic';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
+import type { IAudioTagWriter } from '@appTypes/infra/audioTag';
 import { LOCAL_PLUGIN_NAME, INTERNAL_SLIM_KEY } from '@common/constant';
 import { pathToFileURL } from 'url';
 import { IPC, SCAN_BATCH_SIZE } from '../common/constant';
 import { discoverAudioFiles, diffWithDb } from './scanner';
 import { parseFileMetadata, toAudioColumns } from './metadataParser';
 import { parseAudioFormat } from '@infra/localMusic/common/parseAudioMeta';
-import { canWriteTags, writeFileTags } from './metadataWriter';
 
 // ─── Prepared Statements ───
 
@@ -156,6 +156,7 @@ class LocalMusicManager {
     private windowManager!: IWindowManager;
     private appConfig!: IAppConfigReader;
     private mediaMeta!: IMediaMetaProvider;
+    private audioTag!: IAudioTagWriter;
     private queries!: ILocalMusicQueries;
     private isScanning = false;
     private cancelledFolderIds = new Set<string>();
@@ -173,12 +174,14 @@ class LocalMusicManager {
         windowManager: IWindowManager;
         appConfig: IAppConfigReader;
         mediaMeta: IMediaMetaProvider;
+        audioTag: IAudioTagWriter;
     }) {
         if (this.isSetup) return;
         this.db = deps.db;
         this.windowManager = deps.windowManager;
         this.appConfig = deps.appConfig;
         this.mediaMeta = deps.mediaMeta;
+        this.audioTag = deps.audioTag;
 
         const db = deps.db.getDatabase();
         this.queries = createQueries(db);
@@ -336,14 +339,12 @@ class LocalMusicManager {
                 _evt,
                 filePath: string,
                 meta: { title: string; artist: string; album: string },
-            ): Promise<{ fileTagWritten: boolean; tagWarning: string | null }> => {
+            ): Promise<{ fileTagWritten: boolean }> => {
                 // 1. 写入文件标签（支持格式才实际写入）
-                const tagWarning = canWriteTags(filePath);
                 let fileTagWritten = false;
-
-                if (tagWarning === null) {
+                if (this.audioTag.canWrite(filePath)) {
                     try {
-                        await writeFileTags(filePath, meta);
+                        await this.audioTag.write(filePath, meta);
                         fileTagWritten = true;
                     } catch {
                         // 文件写入失败不阻塞 DB 更新
@@ -359,8 +360,12 @@ class LocalMusicManager {
                 });
 
                 this.broadcastLibraryChanged();
-                return { fileTagWritten, tagWarning };
+                return { fileTagWritten };
             },
+        );
+
+        ipcMain.handle(IPC.CAN_WRITE_TAGS, (_evt, filePath: string) =>
+            this.audioTag.canWrite(filePath),
         );
     }
 

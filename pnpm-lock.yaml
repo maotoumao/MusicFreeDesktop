@@ -91,9 +91,6 @@ importers:
             nanoid:
                 specifier: ^5.1.14
                 version: 5.1.14
-            node-id3:
-                specifier: ^0.2.9
-                version: 0.2.9
             p-queue:
                 specifier: ^9.3.0
                 version: 9.3.0
@@ -5571,13 +5568,6 @@ packages:
             }
         engines: { node: '>=0.10.0' }
 
-    iconv-lite@0.6.2:
-        resolution:
-            {
-                integrity: sha512-2y91h5OpQlolefMPmUlivelittSWy0rP+oYVpn6A7GwVHNE8AWzoYOBNmlwks3LobaJxgHCYZAnyNo2GgpNRNQ==,
-            }
-        engines: { node: '>=0.10.0' }
-
     iconv-lite@0.6.3:
         resolution:
             {
@@ -6863,12 +6853,6 @@ packages:
                 integrity: sha512-rLvcdSyRCyouf6jcOIPe/BgwG/d7hKjzMKOas33/pHEr6gbq18IK9zV7DiPvzsz0oBJPme6qr6H6kGZuI9/DZg==,
             }
         engines: { node: '>= 6.13.0' }
-
-    node-id3@0.2.9:
-        resolution:
-            {
-                integrity: sha512-dSxhuxrkkGVRgUhDHFxdY0pilzOREcodO01HcZWfaRkCaPWGmo0dOgD8ygyL6ln4Iv4cmfRxAWn1WD9bIB9Bhw==,
-            }
 
     node-loader@2.1.0:
         resolution:
@@ -13391,10 +13375,6 @@ snapshots:
         dependencies:
             safer-buffer: 2.1.2
 
-    iconv-lite@0.6.2:
-        dependencies:
-            safer-buffer: 2.1.2
-
     iconv-lite@0.6.3:
         dependencies:
             safer-buffer: 2.1.2
@@ -14059,10 +14039,6 @@ snapshots:
             formdata-polyfill: 4.0.10
 
     node-forge@1.3.3: {}
-
-    node-id3@0.2.9:
-        dependencies:
-            iconv-lite: 0.6.2
 
     node-loader@2.1.0(webpack@5.105.1):
         dependencies:

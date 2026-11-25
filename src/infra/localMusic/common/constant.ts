@@ -18,6 +18,7 @@ export const IPC = {
 
     // ─── 编辑元数据 ───
     UPDATE_MUSIC_ITEM: '@infra/local-music/update-music-item',
+    CAN_WRITE_TAGS: '@infra/local-music/can-write-tags',
 
     // ─── 广播 ───
     SCAN_PROGRESS: '@infra/local-music/scan-progress',

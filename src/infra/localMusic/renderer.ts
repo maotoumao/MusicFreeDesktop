@@ -26,7 +26,8 @@ interface IMod {
     updateMusicItemMetadata(
         filePath: string,
         meta: { title: string; artist: string; album: string },
-    ): Promise<{ fileTagWritten: boolean; tagWarning: string | null }>;
+    ): Promise<{ fileTagWritten: boolean }>;
+    canWriteTags(filePath: string): Promise<boolean>;
 }
 
 const mod = window[CONTEXT_BRIDGE_KEY as any] as unknown as IMod;
@@ -71,13 +72,17 @@ class LocalMusicRenderer {
      * 修改后会触发 LIBRARY_CHANGED 广播，UI 自动刷新。
      *
      * @returns fileTagWritten — 是否成功写入了文件标签
-     * @returns tagWarning — 文件格式不支持写入标签时的提示信息
      */
     public updateMusicItemMetadata(
         filePath: string,
         meta: { title: string; artist: string; album: string },
-    ): Promise<{ fileTagWritten: boolean; tagWarning: string | null }> {
+    ): Promise<{ fileTagWritten: boolean }> {
         return mod.updateMusicItemMetadata(filePath, meta);
+    }
+
+    /** 该文件能否写入标签（不能时修改只保存到数据库） */
+    public canWriteTags(filePath: string): Promise<boolean> {
+        return mod.canWriteTags(filePath);
     }
 
     // ─── 扫描文件夹管理 ───
