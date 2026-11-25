@@ -11,11 +11,16 @@ function addFileScheme(filePath: string): string {
 }
 
 /**
- * 解析单个本地音乐文件的元数据
+ * 解析单个本地音乐文件的元数据。
+ * 默认不带封面：封面转成 data URL 后会随条目经 IPC 传递并写入播放队列和歌单，
+ * 播放时由 getMusicInfo 按需补上。
  */
-async function parseLocalMusicItem(filePath: string): Promise<IMusic.IMusicItem> {
+async function parseLocalMusicItem(
+    filePath: string,
+    withCover = false,
+): Promise<IMusic.IMusicItem> {
     const id = createHash('md5').update(filePath).digest('hex');
-    const meta = await parseAudioMeta(filePath);
+    const meta = await parseAudioMeta(filePath, { skipCovers: !withCover });
 
     return {
         id,
@@ -32,7 +37,8 @@ async function parseLocalMusicItem(filePath: string): Promise<IMusic.IMusicItem>
 }
 
 /**
- * 解析文件夹中所有支持格式的本地音乐文件（并发限制为 8）
+ * 解析文件夹中所有支持格式的本地音乐文件（并发限制为 10）。
+ * 只读取第一首的封面，作为导入歌单的默认封面。
  */
 async function parseLocalMusicItemFolder(folderPath: string): Promise<IMusic.IMusicItem[]> {
     try {
@@ -47,7 +53,9 @@ async function parseLocalMusicItemFolder(folderPath: string): Promise<IMusic.IMu
         const { default: PQueue } = await import('p-queue');
         const queue = new PQueue({ concurrency: 10 });
         return queue.addAll(
-            musicFiles.map((f) => () => parseLocalMusicItem(path.resolve(folderPath, f))),
+            musicFiles.map(
+                (f, i) => () => parseLocalMusicItem(path.resolve(folderPath, f), i === 0),
+            ),
         );
     } catch {
         return [];

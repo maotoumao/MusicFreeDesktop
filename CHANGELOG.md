@@ -60,6 +60,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复低分辨率或高缩放屏幕（如 1366×768、1080p 开 150% 缩放）上主窗口超出屏幕、底部播放栏显示不全的问题：最小高度从 760 降到 600，初始尺寸不超过屏幕可用区域。
 - 修复同时下载多首同名歌曲（如文件名格式选「标题」）时，下载完成的文件互相覆盖的问题。
 - 修复插件更新尚未完成时卸载该插件（或全部卸载），更新完成后插件又被装回的问题。
+- 修复从文件夹导入本地歌单（或拖入大量本地歌曲）时，因每首歌的封面都随歌曲数据传递和保存，导致内存暴涨、界面卡顿的问题：本地歌曲的封面改为播放时读取，导入的歌单仍以第一首的封面作为默认封面。
 
 ### Added
 
@@ -109,6 +110,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix the main window extending past the screen and cutting off the player bar on low-resolution or high-scaling displays (e.g. 1366×768, 1080p at 150%): the minimum height drops from 760 to 600 and the initial size stays within the available screen area.
 - Fix songs with the same name (for example with the Title file name format) overwriting each other when their downloads finish at the same time.
 - Fix a plugin coming back after being uninstalled (alone or with Uninstall all) while its update was still downloading.
+- Fix memory spikes and freezes when importing a local folder as a playlist (or dropping many local songs) caused by every song carrying its embedded cover; local covers are now read when the song plays, and imported playlists still use the first song's cover.
 
 ---
 
