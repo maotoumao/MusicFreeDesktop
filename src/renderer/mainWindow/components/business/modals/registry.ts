@@ -26,6 +26,7 @@ import UpdateModal from './UpdateModal';
 import BackupProgressModal from './BackupProgressModal';
 import LegacyMigrationModal from './LegacyMigrationModal';
 import EditMusicMetaModal from './EditMusicMetaModal';
+import MusicInfoModal from './MusicInfoModal';
 
 export const modalRegistry = {
     ExampleModal,
@@ -47,4 +48,5 @@ export const modalRegistry = {
     BackupProgressModal,
     LegacyMigrationModal,
     EditMusicMetaModal,
+    MusicInfoModal,
 } as const;

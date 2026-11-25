@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 桌面歌词工具栏新增「水平居中」，一键把歌词窗口移到所在屏幕的水平中央（保持高度位置）。
 - 桌面歌词新增「双行显示」：当前句与下一句交替显示在上下两行（可在桌面歌词工具栏开关）；单行模式下长歌词的滚动速度改为按实际时长计算。
 - 本地音乐与已下载列表新增「音质」列：本地文件显示编码参数（如 FLAC 24bit/96kHz、MP3 320kbps），已下载歌曲显示下载音质；可在设置的「隐藏列」中关闭。升级后首次扫描会重新读取已有本地歌曲以补齐参数。
+- 本地歌曲右键菜单新增「歌曲信息」，查看标签、文件路径与大小、编码、码率、采样率、位深和声道。
 
 ### 修复
 
@@ -73,6 +74,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Add "Center horizontally" to the desktop lyric toolbar to move the lyric window to the horizontal center of its screen, keeping its vertical position.
 - Add a two-line desktop lyric mode showing the current and next lines on alternating rows (toggle in the desktop lyric toolbar); long lines in single-line mode now scroll according to the actual line duration.
 - Add a Quality column to the local music and downloaded lists: local files show their encoding (e.g. FLAC 24bit/96kHz, MP3 320kbps) and downloads show the downloaded quality; it can be hidden in settings. The first scan after upgrading re-reads existing local songs to fill this in.
+- Add "Song info" to the local song context menu, showing tags, file path and size, codec, bitrate, sample rate, bit depth and channels.
 
 ### Fixed
 

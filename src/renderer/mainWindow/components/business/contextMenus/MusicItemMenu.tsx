@@ -25,6 +25,7 @@ import {
     Download,
     FolderOpen,
     PenLine,
+    Info,
 } from 'lucide-react';
 
 export interface MusicItemMenuContext {
@@ -229,6 +230,14 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
                             artist: singleItem.artist ?? '',
                             album: singleItem.album ?? '',
                         });
+                    },
+                });
+                entries.push({
+                    id: 'music-info',
+                    icon: <Info />,
+                    label: i18n.t('local_music.music_info'),
+                    onClick: () => {
+                        showModal('MusicInfoModal', { musicItem: singleItem });
                     },
                 });
             }
