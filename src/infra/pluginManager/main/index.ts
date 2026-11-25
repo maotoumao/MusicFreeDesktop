@@ -622,6 +622,11 @@ class PluginManager {
                 };
             }
 
+            // 下载期间插件可能已被卸载或被另一次更新替换
+            if (this.plugins.get(hash) !== loaded) {
+                return { success: false, message: 'Plugin not found' };
+            }
+
             // 新版本验证通过，写入文件
             const fileName = `${nanoid()}.js`;
             const filePath = path.join(this.pluginBasePath, fileName);

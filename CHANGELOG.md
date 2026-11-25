@@ -59,6 +59,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复系统媒体控件（Windows 媒体浮层、macOS 正在播放）在启动恢复上一首后没有歌曲信息、本地歌曲不显示封面的问题。
 - 修复低分辨率或高缩放屏幕（如 1366×768、1080p 开 150% 缩放）上主窗口超出屏幕、底部播放栏显示不全的问题：最小高度从 760 降到 600，初始尺寸不超过屏幕可用区域。
 - 修复同时下载多首同名歌曲（如文件名格式选「标题」）时，下载完成的文件互相覆盖的问题。
+- 修复插件更新尚未完成时卸载该插件（或全部卸载），更新完成后插件又被装回的问题。
 
 ### Added
 
@@ -107,6 +108,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix the system media controls (Windows media overlay, macOS Now Playing) showing no track info after restoring the last track at startup, and no cover for local songs.
 - Fix the main window extending past the screen and cutting off the player bar on low-resolution or high-scaling displays (e.g. 1366×768, 1080p at 150%): the minimum height drops from 760 to 600 and the initial size stays within the available screen area.
 - Fix songs with the same name (for example with the Title file name format) overwriting each other when their downloads finish at the same time.
+- Fix a plugin coming back after being uninstalled (alone or with Uninstall all) while its update was still downloading.
 
 ---
 
