@@ -579,6 +579,7 @@
         "scan_folder_parent_overlap": "該路徑與已有資料夾「{{child}}」存在包含關係",
         "scan_failed": "掃描失敗，請重試",
         "filter_short_audio": "過濾時長小於 1 分鐘的音頻",
+        "no_playable_files": "沒有可播放的音頻文件",
         "metadata_saved_to_file": "中繼資料已儲存至音訊檔案",
         "metadata_format_hint": "{{ext}} 格式不支援寫入嵌入式標籤，修改僅儲存至資料庫"
     },

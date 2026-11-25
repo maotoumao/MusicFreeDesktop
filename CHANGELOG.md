@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 无障碍：播放进度、音量、倍速支持键盘操作（Tab 聚焦后用方向键、PageUp / PageDown、Home / End 调节），读屏软件可朗读当前值。
 - 歌词页（全屏播放）新增窗口最小化 / 最大化 / 关闭按钮。
 - 下载设置新增「文件名格式」，可选「歌手 - 标题」「标题 - 歌手」「标题」「歌手 - 专辑 - 标题」。
+- 把音频文件或文件夹拖进窗口即可插入播放队列并播放（此前拖入文件会让整个窗口变成浏览器播放页）。
 
 ### 修复
 
@@ -63,6 +64,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Accessibility: playback progress, volume and speed can be adjusted from the keyboard (Tab to focus, then arrow keys, Page Up / Page Down, Home / End), and screen readers announce the current value.
 - The lyrics page (fullscreen player) now has window minimize / maximize / close buttons.
 - Add a "File name format" download setting: Artist - Title, Title - Artist, Title, or Artist - Album - Title.
+- Drag audio files or folders into the window to add them to the queue and play (previously the whole window turned into a browser media page).
 
 ### Fixed
 

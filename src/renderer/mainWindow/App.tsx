@@ -22,6 +22,7 @@ import FullscreenPlayer from './components/layout/FullscreenPlayer';
 import { ToastContainer } from './components/ui/Toast';
 import { ModalContainer } from './components/ui/Modal/ModalContainer';
 import { ContextMenuContainer } from './components/ui/ContextMenu/ContextMenuContainer';
+import { useFileDrop } from './hooks/useFileDrop';
 
 // 注册业务弹窗 & 右键菜单模板
 import './components/business/modals';
@@ -30,6 +31,8 @@ import './components/business/contextMenus';
 import './App.scss';
 
 export default function App() {
+    useFileDrop();
+
     return (
         <div className="l-app-shell">
             <Sidebar />

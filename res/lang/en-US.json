@@ -579,6 +579,7 @@
         "scan_folder_parent_overlap": "This path overlaps with existing folder \"{{child}}\"",
         "scan_failed": "Scan failed, please try again",
         "filter_short_audio": "Filter audio shorter than 1 minute",
+        "no_playable_files": "No playable audio files",
         "metadata_saved_to_file": "Metadata saved to audio file",
         "metadata_format_hint": "{{ext}} format does not support embedded tags. Changes are only saved to the database"
     },
