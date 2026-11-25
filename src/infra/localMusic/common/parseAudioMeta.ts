@@ -5,7 +5,7 @@
  * 供 localPlugin（导入）和 metadataParser（扫描）共同使用。
  */
 
-import type { ICommonTagsResult, IPicture } from 'music-metadata';
+import type { ICommonTagsResult, ILyricsTag, IPicture } from 'music-metadata';
 
 /** 需要特殊处理的编码 */
 const SPECIAL_ENCODINGS = new Set(['GB2312', 'GB18030', 'GBK', 'Big5']);
@@ -66,8 +66,18 @@ async function fixCJKEncoding(common: ICommonTagsResult): Promise<void> {
     if (common.lyrics) {
         for (const lyric of common.lyrics) {
             if (lyric.text) lyric.text = decode(lyric.text);
+            for (const line of lyric.syncText ?? []) {
+                line.text = decode(line.text);
+            }
         }
     }
+}
+
+/** 毫秒 → [mm:ss.xxx] */
+function formatLrcTime(ms: number): string {
+    const min = String(Math.floor(ms / 60000)).padStart(2, '0');
+    const sec = ((ms % 60000) / 1000).toFixed(3).padStart(6, '0');
+    return `[${min}:${sec}]`;
 }
 
 /**
@@ -82,7 +92,7 @@ export async function parseAudioMeta(
     const { skipCovers = false, skipLyrics = false } = options ?? {};
 
     try {
-        const { parseFile } = await import('music-metadata');
+        const { parseFile, TimestampFormat } = await import('music-metadata');
         const metadata = await parseFile(filePath, {
             duration: true,
             skipCovers,
@@ -104,7 +114,16 @@ export async function parseAudioMeta(
         }
 
         if (!skipLyrics && common.lyrics?.length) {
-            const lrc = common.lyrics.map((l) => l.text ?? '').join('');
+            // music-metadata 会把 LRC 格式的歌词标签解析为 syncText，并去掉 text 中的时间戳
+            const toLrc = (lyric: ILyricsTag) =>
+                lyric.timeStampFormat === TimestampFormat.milliseconds &&
+                lyric.syncText?.length &&
+                lyric.syncText.every((line) => line.timestamp !== undefined)
+                    ? lyric.syncText
+                          .map((line) => `${formatLrcTime(line.timestamp!)}${line.text}`)
+                          .join('\n')
+                    : (lyric.text ?? '');
+            const lrc = common.lyrics.map(toLrc).join('');
             if (lrc) result.rawLrc = lrc;
         }
 

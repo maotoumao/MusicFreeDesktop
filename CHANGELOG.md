@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复下载的 FLAC 等无损或非 MP3 格式文件被保存为 .mp3 扩展名的问题：扩展名改为按文件内容识别。
 - 修复歌曲加载期间再次点击播放会重复加载、播放片刻后从头开始，以及上一首加载失败的结果晚到时打断当前歌曲或在重试成功后仍被跳过的问题。
 - 修复失败的下载任务点击重试后，进度条先显示失败前的旧进度和速度的问题。
+- 修复本地歌曲（如 FLAC）内嵌带时间轴的歌词丢失时间轴、歌词页一直停在最后一句且不随播放滚动的问题。
 
 ### Added
 
@@ -53,6 +54,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix downloaded FLAC and other non-MP3 files being saved with an .mp3 extension: the extension is now detected from the file content.
 - Fix pressing play while a track is loading reloading it and restarting playback, and a previous track's late load failure interrupting the current track or skipping a successfully retried one.
 - Fix a retried failed download briefly showing the progress and speed from before it failed.
+- Fix timed lyrics embedded in local files (such as FLAC) losing their timestamps, which left the lyric view stuck on the last line instead of following playback.
 
 ---
 
