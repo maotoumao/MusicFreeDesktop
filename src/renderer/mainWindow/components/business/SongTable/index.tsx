@@ -24,7 +24,10 @@ import { tinykeys } from 'tinykeys';
 import { useTranslation } from 'react-i18next';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@common/cn';
-import { RequestStatus } from '@common/constant';
+import { QUALITY_I18N_KEYS, RequestStatus } from '@common/constant';
+import formatAudioFormat from '@common/formatAudioFormat';
+import type { IAudioFormat } from '@appTypes/infra/localMusic';
+import downloadManager from '@infra/downloadManager/renderer';
 import { useCurrentMusic } from '../../../core/trackPlayer/hooks';
 import { ListFooter } from '../../ui/ListFooter';
 import { StatusPlaceholder } from '../../ui/StatusPlaceholder';
@@ -40,7 +43,7 @@ import { syncKV } from '@renderer/common/kvStore';
 // ────────────────────────────────────────────────────────────────────────────
 
 /** 可通过 hideColumns 隐藏的列 key */
-export type HideableColumn = 'index' | 'artist' | 'album' | 'platform' | 'duration';
+export type HideableColumn = 'index' | 'artist' | 'album' | 'platform' | 'duration' | 'quality';
 
 /** 可排序的列 key */
 export type SortableColumn = 'title' | 'artist' | 'album' | 'duration';
@@ -146,6 +149,9 @@ export interface SongTableProps {
 
     /** 需要隐藏的列（标题列不可隐藏） */
     hideColumns?: HideableColumn[];
+
+    /** 显示音质列（本地歌显示编码参数，已下载歌显示下载音质） @default false */
+    showQuality?: boolean;
 
     // ── 列排序 ──
     /** 是否启用点击列标题排序 @default false */
@@ -336,6 +342,7 @@ export function SongTable({
     hideColumns = appConfig.getConfigByKey('normal.musicListHideColumns'),
     enableSort = false,
     sortStorageKey,
+    showQuality = false,
     scrollParent: externalScrollParent,
     className,
 }: SongTableProps) {
@@ -457,6 +464,23 @@ export function SongTable({
             });
         }
 
+        if (showQuality && !hideSet.has('quality')) {
+            cols.push({
+                id: 'quality',
+                header: t('media.quality'),
+                width: 150,
+                cellClassName: 'song-table__cell--quality',
+                render: (item) => {
+                    const format = (item as IMusic.IMusicItem).audioFormat as
+                        | IAudioFormat
+                        | undefined;
+                    if (format) return formatAudioFormat(format);
+                    const downloaded = downloadManager.isDownloaded(item);
+                    return downloaded ? t(QUALITY_I18N_KEYS[downloaded.quality]) : '-';
+                },
+            });
+        }
+
         if (!hideSet.has('platform')) {
             cols.push({
                 id: 'platform',
@@ -469,7 +493,7 @@ export function SongTable({
         }
 
         return cols;
-    }, [hideSet, t, enableSort]);
+    }, [hideSet, t, enableSort, showQuality]);
 
     // ── 列排序状态 ──
     const [sortState, setSortState] = useState<{

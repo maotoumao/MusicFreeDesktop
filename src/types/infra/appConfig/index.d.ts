@@ -14,7 +14,7 @@ interface _IAppConfig {
     'normal.maxHistoryLength': number;
     'normal.checkUpdate': boolean;
     'normal.taskbarThumb': 'window' | 'artwork';
-    'normal.musicListHideColumns': Array<'duration' | 'platform'>;
+    'normal.musicListHideColumns': Array<'duration' | 'platform' | 'quality'>;
     /** [win10+] 使用自定义原生托盘菜单 */
     'normal.useCustomTrayMenu': boolean;
     'normal.language': string;

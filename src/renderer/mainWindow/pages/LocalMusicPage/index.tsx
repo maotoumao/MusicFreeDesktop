@@ -180,6 +180,7 @@ export default function LocalMusicPage() {
                             hideColumns={HIDE_COLUMNS}
                             enableSort
                             sortStorageKey="localMusic.sort"
+                            showQuality
                             {...selectionProps}
                         />
                     ))}

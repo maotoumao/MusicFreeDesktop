@@ -9,19 +9,11 @@ import { useCallback, useRef, memo } from 'react';
 import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@common/cn';
-import { QUALITY_KEYS } from '@common/constant';
+import { QUALITY_I18N_KEYS, QUALITY_KEYS } from '@common/constant';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import { useQuality } from '@renderer/mainWindow/core/trackPlayer/hooks';
 import appConfig from '@infra/appConfig/renderer';
 import { showToast } from '../../ui/Toast';
-
-/** 音质 key → i18n key */
-const QUALITY_I18N_KEYS: Record<IMusic.IQualityKey, string> = {
-    low: 'quality.low',
-    standard: 'quality.standard',
-    high: 'quality.high',
-    super: 'quality.super',
-};
 
 /** 从高到低排列，面板自上而下为高 → 低 */
 const QUALITY_OPTIONS = [...QUALITY_KEYS].reverse();

@@ -183,6 +183,7 @@ export function GeneralSection() {
                         options={[
                             { value: 'duration', label: t('settings.general.col_duration') },
                             { value: 'platform', label: t('settings.general.col_platform') },
+                            { value: 'quality', label: t('settings.general.col_quality') },
                         ]}
                         onChange={setColumnsHidden}
                     />

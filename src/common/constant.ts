@@ -5,6 +5,14 @@
 /** 音质键名，从低到高排列 */
 export const QUALITY_KEYS: IMusic.IQualityKey[] = ['low', 'standard', 'high', 'super'];
 
+/** 音质 key → i18n key */
+export const QUALITY_I18N_KEYS: Record<IMusic.IQualityKey, string> = {
+    low: 'quality.low',
+    standard: 'quality.standard',
+    high: 'quality.high',
+    super: 'quality.super',
+};
+
 /** 播放器状态 */
 export enum PlayerState {
     /** 无音频 */

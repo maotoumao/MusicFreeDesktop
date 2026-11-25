@@ -157,6 +157,7 @@ export function CompletedTab() {
                         </>
                     )}
                     onRowDoubleClick={handleRowDoubleClick}
+                    showQuality
                     onRowContextMenu={handleRowContextMenu}
                 />
             )}
