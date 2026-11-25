@@ -1,5 +1,18 @@
 import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
 
+/** 本地音频文件的编码参数（缺失项表示未知） */
+export interface IAudioFormat {
+    /** 编码短名，如 FLAC、MP3、AAC、ALAC */
+    codec?: string;
+    lossless?: boolean;
+    /** 码率（bps） */
+    bitrate?: number;
+    /** 采样率（Hz） */
+    sampleRate?: number;
+    bitsPerSample?: number;
+    channels?: number;
+}
+
 /**
  *
  * 继承 IMusicItemSlim 的 7 个字段（platform, id, title, artist, album, duration, artwork），
@@ -20,6 +33,12 @@ export interface ILocalMusicItem extends IMusicItemSlim {
     scanFolderId: string;
     /** 入库时间 */
     createdAt: number;
+    codec: string | null;
+    lossless: number | null;
+    bitrate: number | null;
+    sampleRate: number | null;
+    bitsPerSample: number | null;
+    channels: number | null;
 }
 
 /** 扫描文件夹 */

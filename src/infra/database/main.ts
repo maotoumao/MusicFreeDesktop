@@ -208,6 +208,19 @@ class DatabaseInfra implements IDatabaseProvider {
                         ON local_music(platform, music_id);
                 `);
             },
+
+            // ─── v5 → v6: local_music 增加编码参数；清空 file_mtime，下次扫描重新解析已有歌曲以补齐 ───
+            (db) => {
+                db.exec(`
+                    ALTER TABLE local_music ADD COLUMN codec TEXT;
+                    ALTER TABLE local_music ADD COLUMN lossless INTEGER;
+                    ALTER TABLE local_music ADD COLUMN bitrate INTEGER;
+                    ALTER TABLE local_music ADD COLUMN sample_rate INTEGER;
+                    ALTER TABLE local_music ADD COLUMN bits_per_sample INTEGER;
+                    ALTER TABLE local_music ADD COLUMN channels INTEGER;
+                    UPDATE local_music SET file_mtime = NULL;
+                `);
+            },
         ];
 
         if (currentVersion < migrations.length) {

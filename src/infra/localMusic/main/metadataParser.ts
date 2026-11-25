@@ -62,5 +62,11 @@ export async function parseFileMetadata(
         fileMtime: Math.floor(fileMtime),
         scanFolderId,
         createdAt: Date.now(),
+        codec: meta.audio?.codec ?? null,
+        lossless: meta.audio?.lossless === undefined ? null : Number(meta.audio.lossless),
+        bitrate: meta.audio?.bitrate ?? null,
+        sampleRate: meta.audio?.sampleRate ?? null,
+        bitsPerSample: meta.audio?.bitsPerSample ?? null,
+        channels: meta.audio?.channels ?? null,
     };
 }

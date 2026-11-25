@@ -5,7 +5,8 @@
  * 供 localPlugin（导入）和 metadataParser（扫描）共同使用。
  */
 
-import type { ICommonTagsResult, ILyricsTag, IPicture } from 'music-metadata';
+import type { ICommonTagsResult, IFormat, ILyricsTag, IPicture } from 'music-metadata';
+import type { IAudioFormat } from '@appTypes/infra/localMusic';
 
 /** 需要特殊处理的编码 */
 const SPECIAL_ENCODINGS = new Set(['GB2312', 'GB18030', 'GBK', 'Big5']);
@@ -26,6 +27,33 @@ export interface ParsedAudioMeta {
     artwork?: string;
     /** 原始歌词文本，仅在 skipLyrics 为 false 时可能有值 */
     rawLrc?: string;
+    /** 编码参数 */
+    audio?: IAudioFormat;
+}
+
+/** 编码短名：MP4 的 container 是 ftyp 品牌列表（如 M4A/isom/iso2），按编码区分 AAC / ALAC */
+function getCodecName({ container = '', codec = '' }: IFormat): string | undefined {
+    if (container === 'FLAC') return 'FLAC';
+    if (container === 'MPEG') return 'MP3';
+    if (container === 'WAVE') return 'WAV';
+    if (container === 'Ogg') return codec === 'Opus' ? 'Opus' : 'Vorbis';
+    if (container.startsWith('ADTS')) return 'AAC';
+    if (container === 'ASF/audio') return 'WMA';
+    if (container.startsWith("Monkey's Audio")) return 'APE';
+    if (codec === 'ALAC') return 'ALAC';
+    if (codec.startsWith('MPEG-4/')) return 'AAC';
+    return codec || container || undefined;
+}
+
+function getAudioFormat(format: IFormat): IAudioFormat {
+    return {
+        codec: getCodecName(format),
+        lossless: format.lossless,
+        bitrate: format.bitrate ? Math.round(format.bitrate) : undefined,
+        sampleRate: format.sampleRate,
+        bitsPerSample: format.bitsPerSample,
+        channels: format.numberOfChannels,
+    };
 }
 
 function getB64Picture(picture: IPicture): string {
@@ -137,6 +165,7 @@ export async function parseAudioMeta(
         if (common.artist) result.artist = common.artist;
         if (common.album) result.album = common.album;
         if (metadata.format?.duration) result.duration = metadata.format.duration;
+        if (metadata.format) result.audio = getAudioFormat(metadata.format);
 
         if (!skipCovers && common.picture?.[0]) {
             result.artwork = getB64Picture(common.picture[0]);

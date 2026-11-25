@@ -17,6 +17,7 @@ import type { IWindowManager } from '@appTypes/main/windowManager';
 import type { IDatabaseProvider } from '@appTypes/infra/database';
 import type { IAppConfigReader } from '@appTypes/infra/appConfig';
 import type {
+    IAudioFormat,
     ILocalMusicItem,
     IScanFolder,
     IScanProgress,
@@ -51,6 +52,19 @@ interface ILocalMusicQueries {
     updateMusicMeta: Database.Statement;
 }
 
+/** 数据库行 → 编码参数；尚未解析（升级后未重新扫描）时为 undefined */
+function toAudioFormat(row: ILocalMusicItem): IAudioFormat | undefined {
+    if (!row.codec) return undefined;
+    return {
+        codec: row.codec,
+        lossless: row.lossless === null ? undefined : row.lossless === 1,
+        bitrate: row.bitrate ?? undefined,
+        sampleRate: row.sampleRate ?? undefined,
+        bitsPerSample: row.bitsPerSample ?? undefined,
+        channels: row.channels ?? undefined,
+    };
+}
+
 function createQueries(db: Database.Database): ILocalMusicQueries {
     return {
         // ─── scan_folders ───
@@ -69,10 +83,12 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
         upsertLocalMusic: db.prepare(`
             INSERT INTO local_music
                 (file_path, platform, music_id, title, artist, album, duration, artwork,
-                 folder, file_size, file_mtime, scan_folder_id, created_at)
+                 folder, file_size, file_mtime, scan_folder_id, created_at,
+                 codec, lossless, bitrate, sample_rate, bits_per_sample, channels)
             VALUES
                 (@filePath, @platform, @id, @title, @artist, @album, @duration, @artwork,
-                 @folder, @fileSize, @fileMtime, @scanFolderId, @createdAt)
+                 @folder, @fileSize, @fileMtime, @scanFolderId, @createdAt,
+                 @codec, @lossless, @bitrate, @sampleRate, @bitsPerSample, @channels)
             ON CONFLICT(file_path) DO UPDATE SET
                 platform = excluded.platform,
                 music_id = excluded.music_id,
@@ -84,7 +100,13 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
                 folder = excluded.folder,
                 file_size = excluded.file_size,
                 file_mtime = excluded.file_mtime,
-                scan_folder_id = excluded.scan_folder_id
+                scan_folder_id = excluded.scan_folder_id,
+                codec = excluded.codec,
+                lossless = excluded.lossless,
+                bitrate = excluded.bitrate,
+                sample_rate = excluded.sample_rate,
+                bits_per_sample = excluded.bits_per_sample,
+                channels = excluded.channels
         `),
         deleteLocalMusic: db.prepare('DELETE FROM local_music WHERE file_path = ?'),
         deleteLocalMusicByScanFolder: db.prepare(
@@ -104,7 +126,9 @@ function createQueries(db: Database.Database): ILocalMusicQueries {
         getAllMusic: db.prepare(`
             SELECT file_path AS filePath, platform, music_id AS id, title, artist, album,
                    duration, artwork, folder, file_size AS fileSize, file_mtime AS fileMtime,
-                   scan_folder_id AS scanFolderId, created_at AS createdAt
+                   scan_folder_id AS scanFolderId, created_at AS createdAt,
+                   codec, lossless, bitrate, sample_rate AS sampleRate,
+                   bits_per_sample AS bitsPerSample, channels
             FROM local_music ORDER BY title
         `),
 
@@ -446,6 +470,12 @@ class LocalMusicManager {
                                 fileMtime: item.fileMtime,
                                 scanFolderId: item.scanFolderId,
                                 createdAt: item.createdAt,
+                                codec: item.codec,
+                                lossless: item.lossless,
+                                bitrate: item.bitrate,
+                                sampleRate: item.sampleRate,
+                                bitsPerSample: item.bitsPerSample,
+                                channels: item.channels,
                             });
                         }
                     })();
@@ -509,6 +539,8 @@ class LocalMusicManager {
                 url: pathToFileURL(row.filePath).toString(),
                 localPath: row.filePath,
                 folder: row.folder,
+                fileSize: row.fileSize,
+                audioFormat: toAudioFormat(row),
             } as IMusic.IMusicItem;
         }
         return {
@@ -522,6 +554,8 @@ class LocalMusicManager {
             [INTERNAL_SLIM_KEY]: true,
             folder: row.folder,
             localPath: row.filePath,
+            fileSize: row.fileSize,
+            audioFormat: toAudioFormat(row),
         } as IMusic.IMusicItem;
     }
 
