@@ -13,6 +13,12 @@ import type { RepeatMode } from '@common/constant';
 // Schema 定义
 // ═══════════════════════════════════════════════════════
 
+/** 歌曲列表排序状态（列名由 SongTable 读取时校验） */
+export interface ISongTableSort {
+    column: string | null;
+    direction: 'asc' | 'desc';
+}
+
 /** 同步 KV Schema（localStorage） */
 export interface ISyncKVSchema {
     'player.volume': number;
@@ -23,6 +29,8 @@ export interface ISyncKVSchema {
     'player.lyricFontScale': number;
     'player.showLyricTranslation': boolean;
     'search.history': string[];
+    /** 本地音乐列表的排序状态 */
+    'localMusic.sort': ISongTableSort;
     /** 用户选择跳过的软件更新版本号 */
     'update.skipVersion': string;
     /** 旧版数据迁移是否已完成（无论用户选择迁移或跳过，均标记为 true） */

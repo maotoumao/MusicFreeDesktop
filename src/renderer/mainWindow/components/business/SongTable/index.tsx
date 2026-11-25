@@ -33,6 +33,7 @@ import { isSameMedia } from '@common/mediaKey';
 import formatDuration from '@common/formatDuration';
 import appConfig from '@infra/appConfig/renderer';
 import trackPlayer from '../../../core/trackPlayer';
+import { syncKV } from '@renderer/common/kvStore';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -46,6 +47,18 @@ export type SortableColumn = 'title' | 'artist' | 'album' | 'duration';
 
 /** 排序方向 */
 export type SortDirection = 'asc' | 'desc';
+
+const SORTABLE_COLUMNS: readonly SortableColumn[] = ['title', 'artist', 'album', 'duration'];
+
+/** 读取持久化的排序状态，列名不合法时视为未排序 */
+function readSortState(key?: 'localMusic.sort'): {
+    column: SortableColumn | null;
+    direction: SortDirection;
+} {
+    const saved = key ? syncKV.get(key) : null;
+    const column = SORTABLE_COLUMNS.find((c) => c === saved?.column) ?? null;
+    return { column, direction: saved?.direction === 'desc' ? 'desc' : 'asc' };
+}
 
 /** 行交互事件的上下文信息 */
 export interface RowInteractionDetail {
@@ -137,6 +150,8 @@ export interface SongTableProps {
     // ── 列排序 ──
     /** 是否启用点击列标题排序 @default false */
     enableSort?: boolean;
+    /** 传入时持久化排序状态，重新进入页面后保持 */
+    sortStorageKey?: 'localMusic.sort';
 
     /** 外部滚动容器元素（不传则自动查找 .l-app-shell__content 或回退到 window） */
     scrollParent?: HTMLElement;
@@ -320,6 +335,7 @@ export function SongTable({
     showActiveIndicator = true,
     hideColumns = appConfig.getConfigByKey('normal.musicListHideColumns'),
     enableSort = false,
+    sortStorageKey,
     scrollParent: externalScrollParent,
     className,
 }: SongTableProps) {
@@ -459,7 +475,10 @@ export function SongTable({
     const [sortState, setSortState] = useState<{
         column: SortableColumn | null;
         direction: SortDirection;
-    }>({ column: null, direction: 'asc' });
+    }>(() => readSortState(sortStorageKey));
+    useEffect(() => {
+        if (sortStorageKey) syncKV.set(sortStorageKey, sortState);
+    }, [sortStorageKey, sortState]);
     const sortColumn = sortState.column;
     const sortDirection = sortState.direction;
     const sortColumnRef = useRef(sortColumn);

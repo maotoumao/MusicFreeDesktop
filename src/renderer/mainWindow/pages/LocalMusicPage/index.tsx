@@ -179,6 +179,7 @@ export default function LocalMusicPage() {
                             statusColumn={statusColumn}
                             hideColumns={HIDE_COLUMNS}
                             enableSort
+                            sortStorageKey="localMusic.sort"
                             {...selectionProps}
                         />
                     ))}
