@@ -388,6 +388,8 @@
             "default_quality_desc": "下载时优先选择的音质",
             "when_quality_missing_label": "音质缺失时",
             "when_quality_missing_desc": "下载所选音质不可用时的行为",
+            "file_name_label": "文件名格式",
+            "file_name_desc": "下载歌曲保存时使用的文件名",
             "download_lower": "下载更低音质",
             "download_higher": "下载更高音质",
             "concurrency_label": "同时下载数量",

@@ -68,6 +68,8 @@ interface _IAppConfig {
     'download.defaultQuality': IMusic.IQualityKey;
     /** 默认下载音质缺失时 */
     'download.whenQualityMissing': 'higher' | 'lower';
+    /** 下载文件名模板，占位符：{title} {artist} {album} */
+    'download.fileNameTemplate': string;
     /** 最多同时下载 */
     'download.concurrency': number;
     /** 下载启动间隔（秒），两次任务启动之间的最小间隔，0 表示关闭 */

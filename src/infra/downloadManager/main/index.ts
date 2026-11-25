@@ -33,7 +33,7 @@ import type {
 } from '@appTypes/infra/downloadManager';
 import type { IMusicItemSlim, IMusicItemProvider } from '@appTypes/infra/musicSheet';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
-import { IPC } from '../common/constant';
+import { FILE_NAME_TEMPLATES, IPC } from '../common/constant';
 import { DownloadTask } from './downloadTask';
 
 /** DB 行 snake_case → 业务对象 camelCase */
@@ -842,9 +842,15 @@ class DownloadManager {
 
     /** 构建文件名（不含扩展名，由 downloadTask 下载完成后根据 Content-Type 推断） */
     private buildFileName(musicItem: IMusic.IMusicItem): string {
-        const artist = musicItem.artist || 'Unknown';
-        const title = musicItem.title || 'Unknown';
-        return sanitizeFileName(`${artist} - ${title}`, 170);
+        const template =
+            this.appConfig.getConfigByKey('download.fileNameTemplate') || FILE_NAME_TEMPLATES[0];
+        const fields: Record<string, string> = {
+            title: musicItem.title || 'Unknown',
+            artist: musicItem.artist || 'Unknown',
+            album: musicItem.album || 'Unknown',
+        };
+        const name = template.replace(/\{(title|artist|album)\}/g, (_, key) => fields[key]);
+        return sanitizeFileName(name, 170);
     }
 
     /** 应用启动时，将所有 downloading/pending 状态恢复为 paused */

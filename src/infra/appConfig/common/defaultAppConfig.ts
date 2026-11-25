@@ -19,6 +19,7 @@ const defaultAppConfig: IAppConfig = {
     'normal.maxHistoryLength': 30,
     'download.defaultQuality': 'standard',
     'download.whenQualityMissing': 'lower',
+    'download.fileNameTemplate': '{artist} - {title}',
     'lyric.enableDesktopLyric': false,
     'lyric.alwaysOnTop': true,
     'lyric.lockLyric': false,

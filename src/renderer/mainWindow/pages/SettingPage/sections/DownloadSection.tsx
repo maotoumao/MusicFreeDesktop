@@ -8,6 +8,7 @@ import { Input } from '@renderer/mainWindow/components/ui/Input';
 import { Button } from '@renderer/mainWindow/components/ui/Button';
 import { useConfigValue } from '@renderer/common/hooks/useConfigValue';
 import systemUtil from '@infra/systemUtil/renderer';
+import { FILE_NAME_TEMPLATES } from '@infra/downloadManager/common/constant';
 
 /**
  * 下载设置
@@ -23,6 +24,16 @@ export function DownloadSection() {
         'download.whenQualityMissing',
     );
     const [concurrency, setConcurrency] = useConfigValue('download.concurrency');
+    const [fileNameTemplate, setFileNameTemplate] = useConfigValue('download.fileNameTemplate');
+    const fieldNames: Record<string, string> = {
+        title: t('media.title'),
+        artist: t('media.artist'),
+        album: t('media.album'),
+    };
+    const fileNameOptions = FILE_NAME_TEMPLATES.map((template) => ({
+        value: template,
+        label: template.replace(/\{(title|artist|album)\}/g, (_, key) => fieldNames[key]),
+    }));
     const [interval, setInterval] = useConfigValue('download.interval');
     const [intervalJitter, setIntervalJitter] = useConfigValue('download.intervalJitter');
 
@@ -126,6 +137,17 @@ export function DownloadSection() {
                             { value: 'lower', label: t('settings.download.download_lower') },
                             { value: 'higher', label: t('settings.download.download_higher') },
                         ]}
+                    />
+                }
+            />
+            <SettingRow
+                label={t('settings.download.file_name_label')}
+                description={t('settings.download.file_name_desc')}
+                control={
+                    <Select
+                        value={fileNameTemplate ?? FILE_NAME_TEMPLATES[0]}
+                        onChange={setFileNameTemplate}
+                        options={fileNameOptions}
                     />
                 }
             />

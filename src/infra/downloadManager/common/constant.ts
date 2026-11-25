@@ -1,3 +1,11 @@
+/** 下载文件名模板预设，占位符：{title} {artist} {album}；第一项为默认值 */
+export const FILE_NAME_TEMPLATES = [
+    '{artist} - {title}',
+    '{title} - {artist}',
+    '{title}',
+    '{artist} - {album} - {title}',
+] as const;
+
 /** contextBridge key */
 export const CONTEXT_BRIDGE_KEY = '@infra/download-manager';
 

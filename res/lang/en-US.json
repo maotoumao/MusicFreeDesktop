@@ -388,6 +388,8 @@
             "default_quality_desc": "Preferred quality when downloading",
             "when_quality_missing_label": "When quality unavailable",
             "when_quality_missing_desc": "Behavior when download quality is unavailable",
+            "file_name_label": "File name format",
+            "file_name_desc": "File name used when saving downloaded songs",
             "download_lower": "Download lower quality",
             "download_higher": "Download higher quality",
             "concurrency_label": "Concurrent downloads",
