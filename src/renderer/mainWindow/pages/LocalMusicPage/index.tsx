@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai/react';
 import { FolderSearch, Search, RefreshCw } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
+import { useConfigValue } from '@renderer/common/hooks/useConfigValue';
 import { TabBar, type TabItem } from '../../components/ui/TabBar';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -24,10 +25,6 @@ import { AlbumsTab } from './components/AlbumsTab';
 import { FoldersTab } from './components/FoldersTab';
 import type { HideableColumn } from '../../components/business/SongTable';
 import './index.scss';
-
-// ─── Constants ───
-
-const HIDE_COLUMNS: HideableColumn[] = ['platform'];
 
 // ─── Tab 定义 ───
 
@@ -61,6 +58,13 @@ export default function LocalMusicPage() {
     useEffect(() => {
         ensureLocalMusicStore();
     }, []);
+
+    // 本地歌曲都来自本地插件，来源列始终隐藏；其余按设置中的「隐藏列」
+    const [userHideColumns] = useConfigValue('normal.musicListHideColumns');
+    const hideColumns = useMemo<HideableColumn[]>(
+        () => [...(userHideColumns ?? []), 'platform'],
+        [userHideColumns],
+    );
 
     // ── Tab 状态 ──
     const [activeTab, setActiveTab] = useState<LocalMusicTab>('songs');
@@ -177,7 +181,7 @@ export default function LocalMusicPage() {
                             requestStatus={RequestStatus.Done}
                             onRowContextMenu={handleRowContextMenu}
                             statusColumn={statusColumn}
-                            hideColumns={HIDE_COLUMNS}
+                            hideColumns={hideColumns}
                             enableSort
                             sortStorageKey="localMusic.sort"
                             showQuality
