@@ -36,7 +36,7 @@ function getCodecName({ container = '', codec = '' }: IFormat): string | undefin
     if (container === 'FLAC') return 'FLAC';
     if (container === 'MPEG') return 'MP3';
     if (container === 'WAVE') return 'WAV';
-    if (container === 'Ogg') return codec === 'Opus' ? 'Opus' : 'Vorbis';
+    if (codec.startsWith('Vorbis')) return 'Vorbis';
     if (container.startsWith('ADTS')) return 'AAC';
     if (container === 'ASF/audio') return 'WMA';
     if (container.startsWith("Monkey's Audio")) return 'APE';
