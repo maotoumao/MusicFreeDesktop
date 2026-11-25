@@ -306,7 +306,6 @@
         "resume": "Resume",
         "retry": "Retry",
         "reveal_in_explorer": "Show in File Explorer",
-        "music_info": "Song info",
         "remove_record": "Remove Download Record",
         "failed_retry": "Download failed, click to retry",
         "already_downloaded": "This song is already downloaded",
@@ -592,7 +591,8 @@
         "filter_short_audio": "Filter audio shorter than 1 minute",
         "no_playable_files": "No playable audio files",
         "metadata_saved_to_file": "Metadata saved to audio file",
-        "metadata_format_hint": "{{ext}} format does not support embedded tags. Changes are only saved to the database"
+        "metadata_format_hint": "{{ext}} format does not support embedded tags. Changes are only saved to the database",
+        "music_info": "Song info"
     },
     "quality": {
         "switch": "Change Quality",

@@ -306,7 +306,6 @@
         "resume": "继续",
         "retry": "重试",
         "reveal_in_explorer": "在文件夹中显示",
-        "music_info": "歌曲信息",
         "remove_record": "删除下载记录",
         "failed_retry": "下载失败，点击重试",
         "already_downloaded": "该歌曲已下载",
@@ -592,7 +591,8 @@
         "filter_short_audio": "过滤时长小于 1 分钟的音频",
         "no_playable_files": "没有可播放的音频文件",
         "metadata_saved_to_file": "元数据已保存至音频文件",
-        "metadata_format_hint": "{{ext}} 格式不支持写入嵌入式标签，修改仅保存至数据库"
+        "metadata_format_hint": "{{ext}} 格式不支持写入嵌入式标签，修改仅保存至数据库",
+        "music_info": "歌曲信息"
     },
     "quality": {
         "switch": "切换音质",

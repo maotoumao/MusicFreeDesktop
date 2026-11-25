@@ -306,7 +306,6 @@
         "resume": "繼續",
         "retry": "重試",
         "reveal_in_explorer": "在資料夾中顯示",
-        "music_info": "歌曲資訊",
         "remove_record": "刪除下載記錄",
         "failed_retry": "下載失敗，點擊重試",
         "already_downloaded": "該歌曲已下載",
@@ -592,7 +591,8 @@
         "filter_short_audio": "過濾時長小於 1 分鐘的音頻",
         "no_playable_files": "沒有可播放的音頻文件",
         "metadata_saved_to_file": "中繼資料已儲存至音訊檔案",
-        "metadata_format_hint": "{{ext}} 格式不支援寫入嵌入式標籤，修改僅儲存至資料庫"
+        "metadata_format_hint": "{{ext}} 格式不支援寫入嵌入式標籤，修改僅儲存至資料庫",
+        "music_info": "歌曲資訊"
     },
     "quality": {
         "switch": "選擇音樂音質",
