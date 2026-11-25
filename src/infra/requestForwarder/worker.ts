@@ -15,6 +15,7 @@
  */
 
 import http from 'http';
+import type { AddressInfo } from 'net';
 import https from 'https';
 import crypto from 'crypto';
 import { pipeline } from 'stream';
@@ -23,9 +24,6 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import type { IWorkerMessage, IMainMessage } from '@appTypes/infra/requestForwarder';
 import { safeParse } from '@common/safeSerialize';
 import { TOKEN_PARAM } from './common/constant';
-
-const DEFAULT_PORT = 52735;
-const MAX_PORT_RETRIES = 20;
 
 /**
  * 逐跳（hop-by-hop）头：仅描述「单段连接」，由代理这一跳消费，
@@ -68,7 +66,6 @@ const CROSS_ORIGIN_ALLOWED_HEADERS = new Set([
     'accept-language',
 ]);
 
-let retryCount = 0;
 let server: http.Server | null = null;
 
 /** 访问令牌（由主进程通过 init 消息下发，收到后才启动服务器） */
@@ -320,8 +317,12 @@ function postMessage(message: IWorkerMessage): void {
     process.parentPort?.postMessage(message);
 }
 
-/** 启动代理服务器 */
-function startServer(port: number): void {
+/**
+ * 启动代理服务器。
+ * 端口交给系统分配：固定端口可能落在 Windows 保留端口段（WSL2/Hyper-V/Docker 常见），
+ * listen 报 EACCES；token 每次启动都会变，固定端口本身也没有复用价值。
+ */
+function startServer(): void {
     server = http.createServer((req, res) => {
         // 解析查询参数
         const query = new URLSearchParams(req.url?.slice(1) ?? '');
@@ -360,27 +361,15 @@ function startServer(port: number): void {
     });
 
     // 仅监听本地回环地址，防止外部访问
-    server.listen(port, '127.0.0.1', () => {
+    server.listen(0, '127.0.0.1', () => {
+        const port = (server!.address() as AddressInfo).port;
         console.log(`[RequestForwarder Worker] Proxy server running on http://127.0.0.1:${port}`);
         postMessage({ type: 'ready', port });
     });
 
     server.on('error', (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EADDRINUSE' && retryCount < MAX_PORT_RETRIES) {
-            retryCount++;
-            const nextPort = port + 1;
-            console.log(
-                `[RequestForwarder Worker] Port ${port} in use, trying ${nextPort} (attempt ${retryCount}/${MAX_PORT_RETRIES})`,
-            );
-            startServer(nextPort);
-        } else {
-            const errorMsg =
-                err.code === 'EADDRINUSE'
-                    ? `All ports ${DEFAULT_PORT}-${port} are in use`
-                    : err.message;
-            console.error('[RequestForwarder Worker] Failed to start server:', errorMsg);
-            postMessage({ type: 'error', error: errorMsg });
-        }
+        console.error('[RequestForwarder Worker] Failed to start server:', err.message);
+        postMessage({ type: 'error', error: err.message });
     });
 }
 
@@ -392,7 +381,7 @@ process.parentPort?.on('message', (e: Electron.MessageEvent) => {
             // token 下发后才开始监听，保证服务器从第一个请求起就处于鉴权状态
             if (!tokenBuffer && data.token) {
                 tokenBuffer = Buffer.from(data.token);
-                startServer(DEFAULT_PORT);
+                startServer();
             }
             break;
         }
