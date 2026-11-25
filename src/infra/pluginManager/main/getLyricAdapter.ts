@@ -71,14 +71,7 @@ export async function getLyricAdapter(
     mediaMeta: IMediaMetaProvider,
     musicItemProvider: IMusicItemProvider,
 ): Promise<ILyric.ILyricSource | null> {
-    // 播放队列等处传入的多是只含展示字段的精简条目，插件 getLyric 可能依赖其余字段
-    // （如本地插件读内嵌歌词需要 localPath），用 DB 中的完整数据补全，调用方传入的字段优先
-    const raw = musicItemProvider.getRawMusicItem(
-        params.musicItem.platform,
-        String(params.musicItem.id),
-    );
-    const musicItem = raw ? { ...raw, ...params.musicItem } : params.musicItem;
-
+    let musicItem = params.musicItem;
     let rawLrc = musicItem.rawLrc;
     let lrcUrl = musicItem.lrc;
     let translation: string | undefined;
@@ -137,6 +130,11 @@ export async function getLyricAdapter(
             lrc: lrcUrl,
         };
     }
+
+    // 播放队列等处传入的多是只含展示字段的精简条目，同名歌词文件和插件 getLyric 可能依赖其余字段
+    // （如 localPath），用 DB 中的完整数据补全，调用方传入的字段优先
+    const raw = musicItemProvider.getRawMusicItem(musicItem.platform, String(musicItem.id));
+    if (raw) musicItem = { ...raw, ...musicItem };
 
     // ─── Step 2: 读取本地同名 .lrc 文件 ───
     const localPath = getLocalPath(musicItem, mediaMeta);
