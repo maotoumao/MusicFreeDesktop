@@ -14,21 +14,35 @@ import { mainConfig } from './config/webpack.main.config';
 import { rendererConfig } from './config/webpack.renderer.config';
 import { preloadConfig } from './config/webpack.preload.config';
 
-/** webpack 不打包、运行时 require 的纯 JS 依赖（不能交给 externals 插件：它要解析 <包名>/package.json，被这些包的 exports 拒绝） */
-const RUNTIME_PACKAGES = ['taglib-wasm'];
+/** webpack 不打包、运行时 require 的依赖（不能交给 externals 插件：它要解析 <包名>/package.json，被这些包的 exports 拒绝） */
+const RUNTIME_PACKAGES = ['taglib-wasm', 'sharp'];
 
-/** 把依赖包及其运行时依赖复制到打包目录的 node_modules；按入口文件向上找包根目录，不受 exports 限制 */
-function copyPackageWithDeps(name: string, fromDir: string, nodeModulesDir: string): void {
-    let root = path.dirname(require.resolve(name, { paths: [fromDir] }));
-    const isRoot = (dir: string) => {
-        const pkgPath = path.join(dir, 'package.json');
-        return fs.existsSync(pkgPath) && JSON.parse(fs.readFileSync(pkgPath, 'utf8')).name === name;
-    };
-    while (!isRoot(root)) root = path.dirname(root);
-    root = fs.realpathSync(root);
-    const { version, dependencies = {} } = JSON.parse(
-        fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
-    );
+/** 按 Node 的 node_modules 查找顺序找包根目录，不经过 exports（部分包的 exports 不含 "." 或 package.json） */
+function findPackageRoot(name: string, fromDir: string): string | null {
+    for (let dir = fromDir; ; dir = path.dirname(dir)) {
+        const candidate = path.join(dir, 'node_modules', name);
+        if (fs.existsSync(path.join(candidate, 'package.json'))) return fs.realpathSync(candidate);
+        if (path.dirname(dir) === dir) return null;
+    }
+}
+
+/** 把依赖包及其运行时依赖复制到打包目录的 node_modules；可选依赖只复制当前平台已安装的 */
+function copyPackageWithDeps(
+    name: string,
+    fromDir: string,
+    nodeModulesDir: string,
+    optional = false,
+): void {
+    const root = findPackageRoot(name, fromDir);
+    if (!root) {
+        if (optional) return;
+        throw new Error(`Cannot find package ${name} from ${fromDir}`);
+    }
+    const {
+        version,
+        dependencies = {},
+        optionalDependencies = {},
+    } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
     const dest = path.join(nodeModulesDir, name);
     const destPackageJson = path.join(dest, 'package.json');
     if (fs.existsSync(destPackageJson)) {
@@ -42,6 +56,8 @@ function copyPackageWithDeps(name: string, fromDir: string, nodeModulesDir: stri
     fs.rmSync(dest, { recursive: true, force: true });
     fs.cpSync(root, dest, { recursive: true, dereference: true });
     for (const dep of Object.keys(dependencies)) copyPackageWithDeps(dep, root, nodeModulesDir);
+    for (const dep of Object.keys(optionalDependencies))
+        copyPackageWithDeps(dep, root, nodeModulesDir, true);
 }
 
 const config: ForgeConfig = {
@@ -172,7 +188,7 @@ const config: ForgeConfig = {
         {
             name: '@timfish/forge-externals-plugin',
             config: {
-                externals: ['sharp', 'better-sqlite3'],
+                externals: ['better-sqlite3'],
                 includeDeps: true,
             },
         },

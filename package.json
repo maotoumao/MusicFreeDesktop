@@ -118,7 +118,7 @@
         "react-i18next": "^18.0.3",
         "react-router": "^8.5.3",
         "react-virtuoso": "^4.18.24",
-        "sharp": "^0.34.5",
+        "sharp": "^0.35.5",
         "taglib-wasm": "2.5.1",
         "tinykeys": "^4.0.1",
         "webdav": "^5.10.0",
