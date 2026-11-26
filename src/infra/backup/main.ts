@@ -204,7 +204,7 @@ class BackupManager {
             musicSheets: sheets.map((sheet) => ({
                 id: sheet.id,
                 title: sheet.title,
-                musicList: this.backupProvider.getSheetMusicRaw(sheet.id),
+                musicList: this.backupProvider.getSheetMusicRaw(sheet.id).map(withoutEmbeddedCover),
             })),
         };
     }
@@ -230,6 +230,22 @@ class BackupManager {
     private sendProgress(progress: IBackupProgress) {
         this.windowManager.sendTo('main', IPC.PROGRESS, progress);
     }
+}
+
+/**
+ * 去掉本地歌曲内嵌的 data URL 封面：播放时会从文件重新读取，留在备份里只会让文件变大。
+ * 在线歌曲的字段（含插件给的 data URL 封面）原样保留。
+ */
+function withoutEmbeddedCover(item: IMusic.IMusicItem): IMusic.IMusicItem {
+    if (
+        item.platform !== LOCAL_PLUGIN_NAME ||
+        typeof item.artwork !== 'string' ||
+        !item.artwork.startsWith('data:')
+    ) {
+        return item;
+    }
+    const { artwork: _artwork, ...rest } = item;
+    return rest as IMusic.IMusicItem;
 }
 
 /** 手机端 1.0 起的备份信封标识 */

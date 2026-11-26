@@ -46,6 +46,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### 修复
 
+- 修复备份文件过大的问题：本地歌曲内嵌的封面图片不再写入备份（播放时仍会从文件读取），在线歌曲不受影响。
 - 修复备份时漏掉部分歌曲的问题：歌单里缺少完整数据的歌（例如从「本地音乐」页加入、库里没有完整数据的已下载歌曲）不再被跳过，改为按歌名、歌手等展示信息导出。
 - 修复部分在线音源（WebDAV 等需附加请求头的插件音源）播放时，歌曲未播完就跳到下一首、长时间播放后卡死或无限跳歌的问题。
 - 修复 Windows 上本地媒体代理端口落在系统保留端口段（常见于装有 WSL2、Hyper-V 或 Docker 的机器）时无法启动，导致需附加请求头的音源播完不切歌、切歌后无声的问题。
@@ -112,6 +113,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Fixed
 
+- Fix oversized backups: covers embedded in local songs are no longer written into the backup (they are still read from the file when playing); online songs are unaffected.
 - Fix backups silently skipping songs that have no full data in the library (e.g. downloaded songs added from Local Music whose full data was never stored); they are now exported with their title, artist and other display fields.
 - Fix some streamed online sources (WebDAV and other plugin sources requiring custom request headers) skipping to the next track before finishing, and hanging or skipping endlessly after long playback sessions.
 - Fix the local media proxy failing to start on Windows when its port falls in a system-reserved range (common with WSL2, Hyper-V or Docker), which left sources requiring custom headers stuck after a track ended or silent after skipping.
