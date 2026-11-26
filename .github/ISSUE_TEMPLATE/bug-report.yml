@@ -9,9 +9,9 @@ body:
 
               Thank you for submitting a bug report! Please fill in the following information as thoroughly as possible to help us locate and fix the issue faster.
 
-              > **注意**：插件相关的问题请勿在此提交，本项目仅是播放器，不提供音源。Issue 默认保持开放，被标记为 `accepted` 后才会进入排期；长期未被 `accepted` 且无活动的 Issue 会被自动标记 `stale` 并关闭。本项目目前不接受 Pull Request，问题由维护者修复。
+              > **注意**：插件相关的问题请勿在此提交，本项目仅是播放器，不提供音源。长期无活动的 Issue 会被自动标记 `stale` 并关闭。本项目目前不接受 Pull Request，问题由维护者修复。
               >
-              > **Note**: Please do not submit plugin-related issues here. This project is a player only and does not provide music sources. Issues stay open by default and only get scheduled once marked `accepted`. Issues left without `accepted` and with no activity are eventually marked `stale` and closed. Pull requests are not accepted at the moment; bugs are fixed by the maintainer.
+              > **Note**: Please do not submit plugin-related issues here. This project is a player only and does not provide music sources. Issues with no activity for a long time are marked `stale` and closed automatically. Pull requests are not accepted at the moment; bugs are fixed by the maintainer.
 
     - type: checkboxes
       id: checklist

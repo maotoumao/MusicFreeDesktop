@@ -20,27 +20,26 @@ jobs:
                   days-before-stale: 60
                   days-before-close: 14
 
-                  # 只清理「未被 accepted」的 issue | Only clean up issues without `accepted`
+                  # 已有 accepted 标签的 issue 继续豁免 | Issues already labelled `accepted` stay exempt
                   exempt-issue-labels: 'accepted,pinned,roadmap,security'
-                  # PR 不走 accepted 体系，仅长期无活动才标记 | PRs only get stale by inactivity
                   exempt-pr-labels: 'pinned,security'
 
                   stale-issue-label: 'stale'
                   stale-pr-label: 'stale'
 
                   stale-issue-message: |
-                      此 Issue 已 60 天没有活动，被自动标记为 `stale`。若仍然有效，请在 14 天内补充信息或回复，否则将被自动关闭。被维护者标记 `accepted` 的 Issue 不受此影响。
+                      此 Issue 已 60 天没有活动，被自动标记为 `stale`。若仍然有效，请在 14 天内补充信息或回复，否则将被自动关闭。
 
                       ---
 
-                      This issue has had no activity for 60 days and has been marked as `stale`. If it is still relevant, please add details or comment within 14 days, otherwise it will be closed automatically. Issues marked `accepted` by a maintainer are exempt.
+                      This issue has had no activity for 60 days and has been marked as `stale`. If it is still relevant, please add details or comment within 14 days, otherwise it will be closed automatically.
 
                   close-issue-message: |
-                      此 Issue 因长期无活动且未被维护者标记 `accepted` 而被自动关闭。如有需要，欢迎补充信息后重新打开。
+                      此 Issue 因长期无活动而被自动关闭。如有需要，欢迎补充信息后重新打开。
 
                       ---
 
-                      This issue was closed automatically due to prolonged inactivity and not being marked `accepted` by a maintainer. Feel free to reopen with more details if needed.
+                      This issue was closed automatically due to prolonged inactivity. Feel free to reopen with more details if needed.
 
                   stale-pr-message: |
                       此 PR 已 60 天没有活动，被自动标记为 `stale`，请在 14 天内更新，否则将被自动关闭。

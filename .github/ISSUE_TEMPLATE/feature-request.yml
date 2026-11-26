@@ -9,9 +9,9 @@ body:
 
               Thank you for your feature suggestion! Please describe your use case as clearly as possible to help us better understand and evaluate the request.
 
-              > **注意**：插件相关的功能请求请勿在此提交。并非所有功能请求都会被实现。Issue 默认保持开放，被标记为 `accepted` 后才会进入排期；长期未被 `accepted` 且无活动的 Issue 会被自动标记 `stale` 并关闭。本项目目前不接受 Pull Request，功能由维护者实现。
+              > **注意**：插件相关的功能请求请勿在此提交。并非所有功能请求都会被实现。长期无活动的 Issue 会被自动标记 `stale` 并关闭。本项目目前不接受 Pull Request，功能由维护者实现。
               >
-              > **Note**: Please do not submit plugin-related feature requests here. Not every feature request will be implemented. Issues stay open by default and only get scheduled once marked `accepted`. Issues left without `accepted` and with no activity are eventually marked `stale` and closed. Pull requests are not accepted at the moment; features are implemented by the maintainer.
+              > **Note**: Please do not submit plugin-related feature requests here. Not every feature request will be implemented. Issues with no activity for a long time are marked `stale` and closed automatically. Pull requests are not accepted at the moment; features are implemented by the maintainer.
 
     - type: checkboxes
       id: checklist
