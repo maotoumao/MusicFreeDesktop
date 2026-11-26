@@ -19,8 +19,6 @@ const RUNTIME_PACKAGES = ['taglib-wasm'];
 
 /** 把依赖包及其运行时依赖复制到打包目录的 node_modules；按入口文件向上找包根目录，不受 exports 限制 */
 function copyPackageWithDeps(name: string, fromDir: string, nodeModulesDir: string): void {
-    const dest = path.join(nodeModulesDir, name);
-    if (fs.existsSync(dest)) return;
     let root = path.dirname(require.resolve(name, { paths: [fromDir] }));
     const isRoot = (dir: string) => {
         const pkgPath = path.join(dir, 'package.json');
@@ -28,10 +26,21 @@ function copyPackageWithDeps(name: string, fromDir: string, nodeModulesDir: stri
     };
     while (!isRoot(root)) root = path.dirname(root);
     root = fs.realpathSync(root);
-    fs.cpSync(root, dest, { recursive: true, dereference: true });
-    const { dependencies = {} } = JSON.parse(
+    const { version, dependencies = {} } = JSON.parse(
         fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
     );
+    const dest = path.join(nodeModulesDir, name);
+    const destPackageJson = path.join(dest, 'package.json');
+    if (fs.existsSync(destPackageJson)) {
+        const existing = JSON.parse(fs.readFileSync(destPackageJson, 'utf8')).version;
+        if (existing === version) return;
+        throw new Error(
+            `${name}@${existing} is already in the package, but ${version} is required`,
+        );
+    }
+    // 打包器的过滤会留下不含文件的空目录
+    fs.rmSync(dest, { recursive: true, force: true });
+    fs.cpSync(root, dest, { recursive: true, dereference: true });
     for (const dep of Object.keys(dependencies)) copyPackageWithDeps(dep, root, nodeModulesDir);
 }
 
