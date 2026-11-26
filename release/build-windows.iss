@@ -35,11 +35,18 @@ SetupIconFile=..\res\logo.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+; Setup picks the size closest to the system DPI
+WizardImageFile=windows\wizard-image-*.bmp
+WizardSmallImageFile=windows\wizard-small-*.bmp
+; Only ask for a language when none matches the Windows UI language
+ShowLanguageDialog=auto
 ChangesAssociations=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+; From Inno Setup 6.2.2 sources, Files/Languages/Unofficial
+Name: "chinesetraditional"; MessagesFile: "windows\ChineseTraditional.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
