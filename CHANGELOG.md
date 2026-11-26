@@ -38,6 +38,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 - Electron 升级到 45。macOS 版最低需要 macOS 13 Ventura（不再支持 macOS 12）。
 - 文件选择 / 保存对话框在本次运行中从上次选择的目录打开；启动后第一次打开时默认位于「下载」文件夹。
+- 应用图标换成与手机版一致的新图标，并补齐高分辨率尺寸，在 Retina 屏和 Windows 大图标下不再模糊。
 
 ### 修复
 
@@ -98,6 +99,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 - Upgrade Electron to 45. The macOS build now requires macOS 13 Ventura or later (macOS 12 is no longer supported).
 - File open / save dialogs open in the folder you last picked during the current session; the first one after launch starts in the Downloads folder.
+- The app icon now matches the mobile app and ships in high resolutions, so it is no longer blurry on Retina screens or in large Windows icon views.
 
 ### Fixed
 
