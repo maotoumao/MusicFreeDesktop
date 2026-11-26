@@ -6,21 +6,20 @@
         "module": "esnext",
         "skipLibCheck": true,
         "esModuleInterop": true,
+        "strict": false,
         "noImplicitAny": true,
         "sourceMap": true,
-        "baseUrl": ".",
-        "outDir": "dist",
         "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "experimentalDecorators": true,
         "paths": {
-            "@common/*": ["src/common/*"],
-            "@main/*": ["src/main/*"],
-            "@renderer/*": ["src/renderer/*"],
-            "@preload/*": ["src/preload/*"],
-            "@assets/*": ["src/assets/*"],
-            "@appTypes/*": ["src/types/*"],
-            "@infra/*": ["src/infra/*"]
+            "@common/*": ["./src/common/*"],
+            "@main/*": ["./src/main/*"],
+            "@renderer/*": ["./src/renderer/*"],
+            "@preload/*": ["./src/preload/*"],
+            "@assets/*": ["./src/assets/*"],
+            "@appTypes/*": ["./src/types/*"],
+            "@infra/*": ["./src/infra/*"]
         }
     },
     "include": ["src/**/*"]
