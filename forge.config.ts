@@ -177,8 +177,16 @@ const config: ForgeConfig = {
         },
     },
     makers: [
+        // 窗口大小取背景图（1x）尺寸，图标位置与背景上的箭头对齐
         new MakerDMG({
             format: 'ULFO',
+            background: path.resolve(__dirname, 'release/dmg/background.png'),
+            icon: path.resolve(__dirname, 'res/logo.icns'),
+            iconSize: 128,
+            contents: ({ appPath }) => [
+                { x: 180, y: 205, type: 'file', path: appPath },
+                { x: 480, y: 205, type: 'link', path: '/Applications' },
+            ],
         }),
         new MakerDeb({ options: { ...LINUX_PACKAGE_OPTIONS, section: 'sound' } }),
         new MakerRpm({ options: { ...LINUX_PACKAGE_OPTIONS, group: 'Applications/Multimedia' } }),
