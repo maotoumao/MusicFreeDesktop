@@ -62,10 +62,10 @@ jobs:
                       await github.rest.issues.createComment({
                           owner, repo, issue_number,
                           body: [
-                              '✅ 此 Issue 已被维护者标记为 `accepted`，将进入排期。关联此 Issue 的 PR 可以提交（请提交到 `dev` 分支，并在描述中使用 `Closes #' + issue_number + '` 关联）。',
+                              '✅ 此 Issue 已被维护者标记为 `accepted`，将进入排期。',
                               '',
                               '---',
                               '',
-                              '✅ This issue has been marked `accepted` by a maintainer and is now eligible for work. A PR linking this issue may be submitted (target the `dev` branch and reference it with `Closes #' + issue_number + '` in the description).',
+                              '✅ This issue has been marked `accepted` by a maintainer and has been added to the plan.',
                           ].join('\n'),
                       });
