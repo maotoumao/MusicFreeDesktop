@@ -34,6 +34,11 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 下载完成后把歌曲的标题、歌手、专辑和封面写入文件标签（MP3、FLAC、M4A、OGG、Opus、WAV、WMA 等），其他播放器和手机也能显示歌曲信息；Win7 版不写入。
 - 本地音乐「编辑歌曲信息」现在可以把修改写入 FLAC、M4A、OGG、Opus、WAV、WMA 等格式的文件标签（此前只支持 MP3，其他格式只改数据库）；Win7 版仍只保存到数据库。
 
+### 变更
+
+- Electron 升级到 45。macOS 版最低需要 macOS 13 Ventura（不再支持 macOS 12）。
+- 文件选择 / 保存对话框在本次运行中从上次选择的目录打开；启动后第一次打开时默认位于「下载」文件夹。
+
 ### 修复
 
 - 修复部分在线音源（WebDAV 等需附加请求头的插件音源）播放时，歌曲未播完就跳到下一首、长时间播放后卡死或无限跳歌的问题。
@@ -88,6 +93,11 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Add Linux ARM64 packages (deb, rpm) for ARM devices such as the Raspberry Pi.
 - Downloaded songs now get their title, artist, album and cover written into the file's tags (MP3, FLAC, M4A, OGG, Opus, WAV, WMA and more), so other players and phones show the song info; the Win7 build skips this.
 - Editing a local song's info now writes the changes into FLAC, M4A, OGG, Opus, WAV, WMA and other files (previously only MP3; other formats only changed the database); the Win7 build still saves to the database only.
+
+### Changed
+
+- Upgrade Electron to 45. The macOS build now requires macOS 13 Ventura or later (macOS 12 is no longer supported).
+- File open / save dialogs open in the folder you last picked during the current session; the first one after launch starts in the Downloads folder.
 
 ### Fixed
 

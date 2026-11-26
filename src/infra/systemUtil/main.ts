@@ -33,6 +33,8 @@ class SystemUtil {
     private openFilesTimer: ReturnType<typeof setTimeout> | null = null;
     /** 主窗口渲染进程：starting 启动中（就绪后自行取走），ready 可直接推送，closed 已关闭（需重建） */
     private openFilesReceiver: 'starting' | 'ready' | 'closed' = 'starting';
+    /** 本次运行中文件对话框最近一次选择的目录 */
+    private lastDialogDir: string | null = null;
 
     public setup(windowManager: IWindowManager, appConfig: IAppConfigReader) {
         if (this.isSetup) return;
@@ -260,7 +262,11 @@ class SystemUtil {
             if (!win) {
                 throw new Error('No window available');
             }
-            return dialog.showOpenDialog(win, options);
+            const result = await dialog.showOpenDialog(win, this.withLastDialogDir(options));
+            if (!result.canceled && result.filePaths.length > 0) {
+                this.lastDialogDir = path.dirname(result.filePaths[0]);
+            }
+            return result;
         });
 
         ipcMain.handle(IPC.SHOW_SAVE_DIALOG, async (evt, options: Electron.SaveDialogOptions) => {
@@ -268,8 +274,22 @@ class SystemUtil {
             if (!win) {
                 throw new Error('No window available');
             }
-            return dialog.showSaveDialog(win, options);
+            const result = await dialog.showSaveDialog(win, this.withLastDialogDir(options));
+            if (!result.canceled && result.filePath) {
+                this.lastDialogDir = path.dirname(result.filePath);
+            }
+            return result;
         });
+    }
+
+    /** 未指定目录时从上次选择的目录打开（Electron 43 起默认打开「下载」，系统也不再记住上次位置） */
+    private withLastDialogDir<T extends { defaultPath?: string }>(options: T): T {
+        if (!this.lastDialogDir) return options;
+        if (!options.defaultPath) return { ...options, defaultPath: this.lastDialogDir };
+        if (!path.isAbsolute(options.defaultPath)) {
+            return { ...options, defaultPath: path.join(this.lastDialogDir, options.defaultPath) };
+        }
+        return options;
     }
 
     // ─── 内部方法 ───

@@ -83,6 +83,9 @@ function normalizeWindowPosition(win: BrowserWindow, position: { x: number; y: n
     return needCorrection;
 }
 
+/** Linux 上无边框窗口保持直角（Electron 43 起 Linux 也默认圆角）；其余平台沿用默认值 */
+const FRAMELESS_ROUNDED_CORNERS = process.platform !== 'linux';
+
 // ─── 主窗口尺寸常量 ───
 
 /** 主窗口最小尺寸：宽度受播放栏控件限制，低于 1080 时右侧按钮被挤出 */
@@ -379,6 +382,7 @@ class WindowManager implements IWindowManager {
                 webviewTag: true,
             },
             frame: false,
+            roundedCorners: FRAMELESS_ROUNDED_CORNERS,
             icon: nativeImage.createFromPath(getLogoPath()),
         });
 
@@ -485,6 +489,7 @@ class WindowManager implements IWindowManager {
             maxHeight: LYRIC_MAX_HEIGHT,
             resizable: true,
             frame: false,
+            roundedCorners: FRAMELESS_ROUNDED_CORNERS,
             thickFrame: true,
             skipTaskbar: true,
             alwaysOnTop: appConfig.getConfigByKey('lyric.alwaysOnTop') ?? true,
@@ -625,6 +630,7 @@ class WindowManager implements IWindowManager {
             transparent: true,
             resizable: false,
             frame: false,
+            roundedCorners: FRAMELESS_ROUNDED_CORNERS,
             skipTaskbar: true,
             alwaysOnTop: true,
             icon: nativeImage.createFromPath(getLogoPath()),
