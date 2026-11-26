@@ -186,7 +186,7 @@ pnpm run dev
 
 ## 🤝 参与贡献
 
-欢迎参与贡献！请阅读 [贡献指南](./CONTRIBUTING.md) 了解开发规范与提交流程。
+本项目目前不接受 Pull Request，欢迎通过 Issue 反馈问题和建议。参与方式请阅读 [贡献指南](./CONTRIBUTING.md)。
 
 ---
 

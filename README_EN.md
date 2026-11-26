@@ -184,7 +184,7 @@ pnpm run dev
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read the [Contributing Guide](./CONTRIBUTING.md) for development guidelines and submission process.
+Pull requests are not accepted at the moment, but bug reports and suggestions via issues are very welcome. See the [Contributing Guide](./CONTRIBUTING.md) for how to take part.
 
 ---
 

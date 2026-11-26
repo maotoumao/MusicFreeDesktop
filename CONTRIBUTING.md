@@ -1,16 +1,16 @@
 # 贡献指南 | Contributing Guide
 
-感谢你有兴趣为 MusicFree 贡献代码！以下是参与贡献的流程和规范。
+感谢你对 MusicFree 的关注！在参与之前，请先了解下面的说明。
 
-Thank you for your interest in contributing to MusicFree! Below are the guidelines and workflow for contributing.
+Thank you for your interest in MusicFree! Please read the notes below before getting involved.
 
 ---
 
 ## 📋 目录 | Table of Contents
 
 - [行为准则 | Code of Conduct](#-行为准则--code-of-conduct)
+- [参与方式 | How to Participate](#-参与方式--how-to-participate)
 - [开发环境 | Development Setup](#-开发环境--development-setup)
-- [提交流程 | Contribution Workflow](#-提交流程--contribution-workflow)
 - [代码规范 | Code Style](#-代码规范--code-style)
 - [提交规范 | Commit Convention](#-提交规范--commit-convention)
 - [项目架构 | Project Architecture](#-项目架构--project-architecture)
@@ -20,14 +20,40 @@ Thank you for your interest in contributing to MusicFree! Below are the guidelin
 ## 📝 行为准则 | Code of Conduct
 
 - 尊重所有参与者，保持友善和建设性的讨论
-- 不要提交包含具体音源的代码——MusicFree 仅是播放器，音源通过插件提供
+- MusicFree 仅是播放器，不包含任何具体音源，音源通过插件提供
 - 遵守 AGPL 3.0 协议
 
-> Be respectful to all participants. Do not submit code containing specific music sources — MusicFree is a player only; sources are provided via plugins. Follow the AGPL 3.0 license.
+> Be respectful to all participants. MusicFree is a player only and contains no music sources; sources are provided via plugins. Follow the AGPL 3.0 license.
+
+---
+
+## 🤝 参与方式 | How to Participate
+
+**本项目目前不接受 Pull Request。** 为了保持整体设计和代码风格的一致，代码改动都由维护者完成，收到的 PR 会被关闭，还请见谅。
+
+这并不意味着你的想法不重要，非常欢迎通过以下方式参与：
+
+- **反馈问题**：提交 [Bug 报告](https://github.com/maotoumao/MusicFreeDesktop/issues/new/choose)，附上复现步骤和日志会很有帮助
+- **提出建议**：提交 [功能建议](https://github.com/maotoumao/MusicFreeDesktop/issues/new/choose)，说明使用场景和期望的效果
+- **交流讨论**：前往 [Discussions](https://github.com/maotoumao/MusicFreeDesktop/discussions) 提问或分享使用经验
+- **分享思路**：如果你已经在自己的 fork 里实现了某个改动，欢迎在 Issue 里描述思路并附上链接，维护者可能会参考它来实现
+
+> **Pull requests are not accepted at the moment.** To keep the overall design and code style consistent, all code changes are made by the maintainer, and pull requests will be closed — thank you for understanding.
+>
+> Your ideas still matter, and you are very welcome to take part by:
+>
+> - **Reporting bugs** via a [bug report](https://github.com/maotoumao/MusicFreeDesktop/issues/new/choose); steps to reproduce and logs help a lot
+> - **Suggesting features** via a [feature request](https://github.com/maotoumao/MusicFreeDesktop/issues/new/choose), describing the use case and the expected result
+> - **Joining the conversation** in [Discussions](https://github.com/maotoumao/MusicFreeDesktop/discussions)
+> - **Sharing your approach**: if you have already implemented a change in your own fork, describe it in an issue with a link; the maintainer may use it as a reference
 
 ---
 
 ## 🛠️ 开发环境 | Development Setup
+
+以下内容供自行构建或在 fork 中开发时参考。
+
+> The following is for reference when building locally or developing in your own fork.
 
 ### 环境要求 | Prerequisites
 
@@ -45,56 +71,6 @@ cd MusicFreeDesktop
 pnpm install
 pnpm run dev
 ```
-
----
-
-## 🔄 提交流程 | Contribution Workflow
-
-```
-1. Fork ──→ 2. Branch ──→ 3. Develop ──→ 4. Lint & Test ──→ 5. PR
-```
-
-### 详细步骤 | Steps
-
-**1. Fork 并克隆 | Fork & Clone**
-
-```bash
-# Fork 仓库后克隆你的 fork
-git clone https://github.com/<your-username>/MusicFreeDesktop.git
-cd MusicFreeDesktop
-pnpm install
-```
-
-**2. 创建分支 | Create a Branch**
-
-```bash
-git checkout -b feat/your-feature-name
-# 或 / or
-git checkout -b fix/your-bug-fix
-```
-
-**3. 开发 | Develop**
-
-- 遵循下方的代码规范
-- 确保你的改动范围尽量精简，每个 PR 专注于一个功能或修复
-
-> Keep changes focused — one feature or fix per PR.
-
-**4. 提交前检查 | Pre-commit Check**
-
-```bash
-pnpm run lint        # 检查代码规范
-pnpm run format      # 格式化代码
-```
-
-> 项目配置了 Husky + lint-staged，提交时会自动运行 Prettier 和 ESLint。
->
-> Husky + lint-staged are configured — Prettier and ESLint run automatically on commit.
-
-**5. 提交 PR | Create a Pull Request**
-
-- 填写清晰的 PR 描述，说明改动内容和原因
-- 关联相关 Issue（如有）
 
 ---
 
@@ -181,6 +157,6 @@ src/
 
 ---
 
-感谢你的贡献！🎉
+感谢你的支持！🎉
 
-Thank you for contributing! 🎉
+Thank you for your support! 🎉
