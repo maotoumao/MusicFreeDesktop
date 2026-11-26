@@ -14,8 +14,15 @@ import { mainConfig } from './config/webpack.main.config';
 import { rendererConfig } from './config/webpack.renderer.config';
 import { preloadConfig } from './config/webpack.preload.config';
 
-/** webpack 不打包、运行时 require 的依赖（不能交给 externals 插件：它要解析 <包名>/package.json，被这些包的 exports 拒绝） */
-const RUNTIME_PACKAGES = ['taglib-wasm', 'sharp'];
+/**
+ * webpack 不打包、运行时 require 的依赖（不能交给 externals 插件：它要解析 <包名>/package.json，被这些包的 exports 拒绝）。
+ * platforms 为空表示所有平台都需要。
+ */
+const RUNTIME_PACKAGES: { name: string; platforms?: string[] }[] = [
+    { name: 'taglib-wasm' },
+    // 只有 Windows 的任务栏缩略图和原生托盘菜单用到
+    { name: 'sharp', platforms: ['win32'] },
+];
 
 /** 按 Node 的 node_modules 查找顺序找包根目录，不经过 exports（部分包的 exports 不含 "." 或 package.json） */
 function findPackageRoot(name: string, fromDir: string): string | null {
@@ -89,11 +96,13 @@ const config: ForgeConfig = {
     },
     rebuildConfig: {},
     hooks: {
-        packageAfterCopy: async (_forgeConfig, buildPath) => {
+        packageAfterCopy: async (_forgeConfig, buildPath, _electronVersion, platform) => {
             const nodeModulesDir = path.join(buildPath, 'node_modules');
             fs.mkdirSync(nodeModulesDir, { recursive: true });
-            for (const name of RUNTIME_PACKAGES)
+            for (const { name, platforms } of RUNTIME_PACKAGES) {
+                if (platforms && !platforms.includes(platform)) continue;
                 copyPackageWithDeps(name, __dirname, nodeModulesDir);
+            }
         },
         /** better-sqlite3 自带全部平台的预编译二进制，只保留目标平台的（Linux 另留 musl 版） */
         packageAfterPrune: async (_forgeConfig, buildPath, _electronVersion, platform, arch) => {
