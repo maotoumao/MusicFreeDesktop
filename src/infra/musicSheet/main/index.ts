@@ -156,11 +156,15 @@ class MusicSheetManager {
                 );
             },
 
-            /** 获取指定歌单内全量 raw 数据 */
+            /** 获取指定歌单内全量数据；没有完整数据的 slim 条目用展示字段导出，不丢歌 */
             getSheetMusicRaw: (sheetId: string): IMusic.IMusicItem[] => {
-                return (this.queries.getSheetMusicRaw.all(sheetId) as { raw: string }[]).map(
-                    (row) => safeParse<IMusic.IMusicItem>(row.raw)!,
-                );
+                const rows = this.queries.getSheetMusicRaw.all(sheetId) as Array<
+                    IMusicItemSlim & { raw: string | null }
+                >;
+                return rows.map(({ raw, ...slim }) => {
+                    const full = raw ? safeParse<IMusic.IMusicItem>(raw) : null;
+                    return full ?? slimToMusicItem(slim);
+                });
             },
 
             /**
@@ -692,6 +696,16 @@ class MusicSheetManager {
             this.orphanCleanupTimer = null;
         }, 5000);
     }
+}
+
+/** slim 展示列 → 歌曲条目（空值字段省略） */
+function slimToMusicItem(slim: IMusicItemSlim): IMusic.IMusicItem {
+    const { duration, artwork, ...rest } = slim;
+    return {
+        ...rest,
+        ...(duration != null ? { duration } : {}),
+        ...(artwork != null ? { artwork } : {}),
+    } as IMusic.IMusicItem;
 }
 
 const musicSheet = new MusicSheetManager();

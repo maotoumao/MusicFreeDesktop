@@ -138,12 +138,13 @@ export function createQueries(db: Database.Database) {
 
         // ─── 导出 ────────────────────────────
 
-        /** 某歌单内全量 raw（导出用） */
+        /** 某歌单内全量歌曲（导出用）：raw 为空的 slim 条目带上展示列，由调用方补全 */
         getSheetMusicRaw: db.prepare(`
-            SELECT m.raw
+            SELECT m.raw, m.platform, CAST(m.id AS TEXT) AS id, m.title, m.artist, m.album,
+                   m.duration, m.artwork
             FROM music_items m
             JOIN sheet_music_relation r ON m.platform = r.platform AND m.id = r.music_id
-            WHERE r.sheet_id = ? AND m.raw IS NOT NULL
+            WHERE r.sheet_id = ?
             ORDER BY r.sort_order ASC
         `),
 
