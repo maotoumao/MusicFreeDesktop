@@ -11,6 +11,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Plus, Folder } from 'lucide-react';
 import Modal from '@renderer/mainWindow/components/ui/Modal';
 import { Button } from '@renderer/mainWindow/components/ui/Button';
@@ -39,11 +40,7 @@ function normalizeForCompare(folderPath: string): string {
  * 检查路径列表中是否存在父子路径重叠。
  * 返回冲突描述文本，无冲突返回 null。
  */
-function checkPathOverlap(
-    newPath: string,
-    existingPaths: string[],
-    t: (key: string, opts?: Record<string, string>) => string,
-): string | null {
+function checkPathOverlap(newPath: string, existingPaths: string[], t: TFunction): string | null {
     const sep = fsUtil.pathSep;
     const newNorm = normalizeForCompare(newPath);
     for (const ep of existingPaths) {

@@ -65,8 +65,8 @@ importers:
                 specifier: ^9.1.0
                 version: 9.1.0
             i18next:
-                specifier: ^26.3.1
-                version: 26.3.1(typescript@5.9.3)
+                specifier: ^27.2.9
+                version: 27.2.9(typescript@5.9.3)
             iconv-lite:
                 specifier: ^0.7.3
                 version: 0.7.3
@@ -101,8 +101,8 @@ importers:
                 specifier: ^19.3.1
                 version: 19.3.1(react@19.3.1)
             react-i18next:
-                specifier: ^17.0.8
-                version: 17.0.8(i18next@26.3.1(typescript@5.9.3))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@5.9.3)
+                specifier: ^18.0.3
+                version: 18.0.3(@types/react@19.3.3)(i18next@27.2.9(typescript@5.9.3))(react@19.3.1)(typescript@5.9.3)
             react-router:
                 specifier: ^8.5.3
                 version: 8.5.3(@types/react-dom@19.3.0(@types/react@19.3.3))(@types/react@19.3.3)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -1061,13 +1061,6 @@ packages:
         engines: { node: '>=6.9.0' }
         peerDependencies:
             '@babel/core': ^7.0.0-0
-
-    '@babel/runtime@7.29.7':
-        resolution:
-            {
-                integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==,
-            }
-        engines: { node: '>=6.9.0' }
 
     '@babel/template@7.28.6':
         resolution:
@@ -5389,10 +5382,10 @@ packages:
         engines: { node: '>=12' }
         hasBin: true
 
-    html-parse-stringify@3.0.1:
+    html-parse-stringify@4.0.1:
         resolution:
             {
-                integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==,
+                integrity: sha512-0zHsZJrK7S3K2aucXWL6ycoYJ/iNtIcFHC/nYQgFklPtrv5LpJctIiSCroWZWeuoXvuyFdzp6KzjJQ+OT5MfFw==,
             }
 
     html-webpack-plugin@5.6.6:
@@ -5529,13 +5522,14 @@ packages:
         engines: { node: '>=18' }
         hasBin: true
 
-    i18next@26.3.1:
+    i18next@27.2.9:
         resolution:
             {
-                integrity: sha512-txQqd5EULsqEh9OJqRH15aCaOuy/nLJyhw5EHCSKLKJE1aBbb3Zve2+uQIxgWhPm1QqUQoWyQBm2kfmmIrzkcQ==,
+                integrity: sha512-GOWWofCGYPSPEzUKJnRLJSoHrSUDa/NzYWqAOJJDZUaM7faLPd9VABlbHDZ+jv8uadu/fq1wsHFfZP6+0tFPkg==,
             }
+        engines: { node: '>=22' }
         peerDependencies:
-            typescript: ^5 || ^6
+            typescript: ^5 || ^6 || ^7
         peerDependenciesMeta:
             typescript:
                 optional: true
@@ -7555,21 +7549,19 @@ packages:
         peerDependencies:
             react: ^19.3.1
 
-    react-i18next@17.0.8:
+    react-i18next@18.0.3:
         resolution:
             {
-                integrity: sha512-0ooKbGLU8JXhe1zwpQUWIeXSgLPOfwJmgheWRIUpcoA0CpyabpGhayjdG+/eA5esC1AQ8h2jWpXjJfzQzeDOCw==,
+                integrity: sha512-S84rtVuaKuiRtoCOspbGEaDlFjka+KvK/A5YCOr4LQ41XF3iJOrJ5rqQTD/jJHFVUf6X1i4ZMN5PGGgpz8NN6g==,
             }
+        engines: { node: '>=22' }
         peerDependencies:
-            i18next: '>= 26.2.0'
-            react: '>= 16.8.0'
-            react-dom: '*'
-            react-native: '*'
-            typescript: ^5 || ^6
+            '@types/react': '*'
+            i18next: '>= 27.0.1'
+            react: '>= 18.0.0'
+            typescript: ^5 || ^6 || ^7
         peerDependenciesMeta:
-            react-dom:
-                optional: true
-            react-native:
+            '@types/react':
                 optional: true
             typescript:
                 optional: true
@@ -8951,14 +8943,6 @@ packages:
                 integrity: sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==,
             }
 
-    use-sync-external-store@1.6.0:
-        resolution:
-            {
-                integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==,
-            }
-        peerDependencies:
-            react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
     username@5.1.0:
         resolution:
             {
@@ -9005,13 +8989,6 @@ packages:
                 integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==,
             }
         engines: { node: '>= 0.8' }
-
-    void-elements@3.1.0:
-        resolution:
-            {
-                integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==,
-            }
-        engines: { node: '>=0.10.0' }
 
     watchpack@2.5.1:
         resolution:
@@ -10107,8 +10084,6 @@ snapshots:
             '@babel/plugin-transform-typescript': 7.28.6(@babel/core@7.29.0)
         transitivePeerDependencies:
             - supports-color
-
-    '@babel/runtime@7.29.7': {}
 
     '@babel/template@7.28.6':
         dependencies:
@@ -13244,9 +13219,7 @@ snapshots:
             relateurl: 0.2.7
             terser: 5.46.0
 
-    html-parse-stringify@3.0.1:
-        dependencies:
-            void-elements: 3.1.0
+    html-parse-stringify@4.0.1: {}
 
     html-webpack-plugin@5.6.6(webpack@5.105.1):
         dependencies:
@@ -13360,7 +13333,7 @@ snapshots:
 
     husky@9.1.7: {}
 
-    i18next@26.3.1(typescript@5.9.3):
+    i18next@27.2.9(typescript@5.9.3):
         optionalDependencies:
             typescript: 5.9.3
 
@@ -14429,15 +14402,13 @@ snapshots:
             react: 19.3.1
             scheduler: 0.28.0
 
-    react-i18next@17.0.8(i18next@26.3.1(typescript@5.9.3))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@5.9.3):
+    react-i18next@18.0.3(@types/react@19.3.3)(i18next@27.2.9(typescript@5.9.3))(react@19.3.1)(typescript@5.9.3):
         dependencies:
-            '@babel/runtime': 7.29.7
-            html-parse-stringify: 3.0.1
-            i18next: 26.3.1(typescript@5.9.3)
+            html-parse-stringify: 4.0.1
+            i18next: 27.2.9(typescript@5.9.3)
             react: 19.3.1
-            use-sync-external-store: 1.6.0(react@19.3.1)
         optionalDependencies:
-            react-dom: 19.3.1(react@19.3.1)
+            '@types/react': 19.3.3
             typescript: 5.9.3
 
     react-router@8.5.3(@types/react-dom@19.3.0(@types/react@19.3.3))(@types/react@19.3.3)(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
@@ -15362,10 +15333,6 @@ snapshots:
             querystringify: 2.2.0
             requires-port: 1.0.0
 
-    use-sync-external-store@1.6.0(react@19.3.1):
-        dependencies:
-            react: 19.3.1
-
     username@5.1.0:
         dependencies:
             execa: 1.0.0
@@ -15385,8 +15352,6 @@ snapshots:
             spdx-expression-parse: 3.0.1
 
     vary@1.1.2: {}
-
-    void-elements@3.1.0: {}
 
     watchpack@2.5.1:
         dependencies:

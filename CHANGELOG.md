@@ -65,6 +65,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复从文件夹导入本地歌单（或拖入大量本地歌曲）时，因每首歌的封面都随歌曲数据传递和保存，导致内存暴涨、界面卡顿的问题：本地歌曲的封面改为播放时读取，导入的歌单仍以第一首的封面作为默认封面。
 - 修复切歌后新歌词加载出来之前，桌面歌词和歌词页按新歌的进度显示上一首歌词的问题。
 - 修复 macOS 上设置页把 Cmd 组合键显示成 Ctrl 的问题（实际生效的是 Cmd），用户照着按 Ctrl 无效；Option 键也不再显示成 Alt。
+- 修复提示文字中路径、网址里的「/」显示成 `&#x2F;` 的问题（例如添加扫描文件夹时的路径重叠提示）。
 
 ### Added
 
@@ -119,6 +120,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix memory spikes and freezes when importing a local folder as a playlist (or dropping many local songs) caused by every song carrying its embedded cover; local covers are now read when the song plays, and imported playlists still use the first song's cover.
 - Fix the desktop lyrics and the lyrics page showing the previous song's lyrics, following the new song's progress, until the new lyrics finished loading.
 - Fix the settings page on macOS showing Cmd shortcuts as Ctrl (Cmd is what actually works), so pressing Ctrl as shown did nothing; the Option key is no longer shown as Alt either.
+- Fix `/` in paths and URLs showing up as `&#x2F;` in messages (for example the overlap warning when adding a scan folder).
 
 ---
 
