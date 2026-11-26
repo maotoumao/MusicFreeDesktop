@@ -95,6 +95,16 @@ const config: ForgeConfig = {
             for (const name of RUNTIME_PACKAGES)
                 copyPackageWithDeps(name, __dirname, nodeModulesDir);
         },
+        /** better-sqlite3 自带全部平台的预编译二进制，只保留目标平台的（Linux 另留 musl 版） */
+        packageAfterPrune: async (_forgeConfig, buildPath, _electronVersion, platform, arch) => {
+            const dir = path.join(buildPath, 'node_modules', 'better-sqlite3', 'prebuilds');
+            if (!fs.existsSync(dir)) return;
+            const keep = new Set([`${platform}-${arch}.node`]);
+            if (platform === 'linux') keep.add(`linuxmusl-${arch}.node`);
+            for (const name of fs.readdirSync(dir)) {
+                if (!keep.has(name)) fs.rmSync(path.join(dir, name));
+            }
+        },
         /**
          * macOS：fuses 插件在打包器写入应用 Info.plist 之前就做了 ad-hoc 签名，
          * 最终 .app 的签名因此失效，arm64 上下载后会被系统判定为「已损坏」。
