@@ -67,6 +67,32 @@ function copyPackageWithDeps(
         copyPackageWithDeps(dep, root, nodeModulesDir, true);
 }
 
+/** deb / rpm 共用的包信息与桌面启动项 */
+const LINUX_PACKAGE_OPTIONS = {
+    bin: 'MusicFree',
+    genericName: 'Music Player',
+    description: 'A plugin-based music player',
+    productDescription: 'MusicFree 是一个插件化的音乐播放器。A plugin-based music player.',
+    categories: ['AudioVideo', 'Audio'] as ('AudioVideo' | 'Audio')[],
+    mimeType: [
+        'x-scheme-handler/musicfree',
+        'audio/mpeg',
+        'audio/mp4',
+        'audio/flac',
+        'audio/x-flac',
+        'audio/wav',
+        'audio/x-wav',
+        'audio/ogg',
+        'audio/aac',
+        'audio/x-ms-wma',
+        'audio/x-ape',
+        'audio/opus',
+    ],
+    desktopTemplate: path.resolve(__dirname, 'release/linux/desktop.ejs'),
+    icon: path.resolve(__dirname, 'release/linux/icon.png'),
+    homepage: 'https://musicfree.catcat.work',
+};
+
 /** 删除目录下所有不满足 keep 的文件，以及删完后变空的目录（含 dir 本身） */
 function removeAllExcept(dir: string, keep: (file: string) => boolean): void {
     if (!fs.existsSync(dir)) return;
@@ -154,30 +180,8 @@ const config: ForgeConfig = {
         new MakerDMG({
             format: 'ULFO',
         }),
-        new MakerDeb({
-            options: {
-                bin: 'MusicFree',
-                mimeType: [
-                    'x-scheme-handler/musicfree',
-                    'audio/mpeg',
-                    'audio/mp4',
-                    'audio/flac',
-                    'audio/x-flac',
-                    'audio/wav',
-                    'audio/x-wav',
-                    'audio/ogg',
-                    'audio/aac',
-                    'audio/x-ms-wma',
-                    'audio/x-ape',
-                    'audio/opus',
-                ],
-            },
-        }),
-        new MakerRpm({
-            options: {
-                bin: 'MusicFree',
-            },
-        }),
+        new MakerDeb({ options: { ...LINUX_PACKAGE_OPTIONS, section: 'sound' } }),
+        new MakerRpm({ options: { ...LINUX_PACKAGE_OPTIONS, group: 'Applications/Multimedia' } }),
     ],
     plugins: [
         new AutoUnpackNativesPlugin({}),
