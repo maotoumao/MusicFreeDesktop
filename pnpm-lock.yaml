@@ -183,8 +183,8 @@ importers:
                 specifier: ^10.1.0
                 version: 10.1.0
             css-loader:
-                specifier: ^6.11.0
-                version: 6.11.0(webpack@5.105.1)
+                specifier: ^7.1.5
+                version: 7.1.5(webpack@5.105.1)
             electron:
                 specifier: 40.4.0
                 version: 40.4.0
@@ -216,14 +216,14 @@ importers:
                 specifier: ^3.8.4
                 version: 3.8.4
             sass:
-                specifier: ^1.101.0
-                version: 1.101.0
+                specifier: ^1.108.2
+                version: 1.108.2
             sass-loader:
-                specifier: ^16.0.7
-                version: 16.0.7(sass@1.101.0)(webpack@5.105.1)
+                specifier: ^17.1.1
+                version: 17.1.1(sass@1.108.2)(webpack@5.105.1)
             style-loader:
-                specifier: ^3.3.4
-                version: 3.3.4(webpack@5.105.1)
+                specifier: ^4.0.0
+                version: 4.0.0(webpack@5.105.1)
             ts-loader:
                 specifier: ^9.6.2
                 version: 9.6.2(loader-utils@2.0.4)(typescript@6.0.3)(webpack@5.105.1)
@@ -3861,15 +3861,15 @@ packages:
             }
         deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
 
-    css-loader@6.11.0:
+    css-loader@7.1.5:
         resolution:
             {
-                integrity: sha512-CTJ+AEQJjq5NzLga5pE39qdiSV56F8ywCIsqNIRF0r7BDgWsN25aazToqAFg7ZrtA/U016xudB3ffgweORxX7g==,
+                integrity: sha512-Q7iAfQkU2twNBryKX/vGAlE+GAmkF7quhSzAGNK8fBimxk3+tqg245rH52UPb9dioBolBc8rP0ihmHBaDTJQBA==,
             }
-        engines: { node: '>= 12.13.0' }
+        engines: { node: '>= 18.12.0' }
         peerDependencies:
-            '@rspack/core': 0.x || 1.x
-            webpack: ^5.0.0
+            '@rspack/core': 0.x || ^1.0.0 || ^2.0.0-0
+            webpack: ^5.27.0
         peerDependenciesMeta:
             '@rspack/core':
                 optional: true
@@ -7938,22 +7938,19 @@ packages:
                 integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==,
             }
 
-    sass-loader@16.0.7:
+    sass-loader@17.1.1:
         resolution:
             {
-                integrity: sha512-w6q+fRHourZ+e+xA1kcsF27iGM6jdB8teexYCfdUw0sYgcDNeZESnDNT9sUmmPm3ooziwUJXGwZJSTF3kOdBfA==,
+                integrity: sha512-/0DqgO+5tTsXYdbnErt5XzPbRQqD+49brZ8+vKnzOTIRbrgPlPJGghGVFq6xgAjv9pf2TLHvLdrgEYYPEKGtGQ==,
             }
-        engines: { node: '>= 18.12.0' }
+        engines: { node: '>= 22.11.0' }
         peerDependencies:
             '@rspack/core': 0.x || ^1.0.0 || ^2.0.0-0
-            node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
             sass: ^1.3.0
             sass-embedded: '*'
             webpack: ^5.0.0
         peerDependenciesMeta:
             '@rspack/core':
-                optional: true
-            node-sass:
                 optional: true
             sass:
                 optional: true
@@ -7962,10 +7959,10 @@ packages:
             webpack:
                 optional: true
 
-    sass@1.101.0:
+    sass@1.108.2:
         resolution:
             {
-                integrity: sha512-OL3GoQyoUdDt843DpVmDO6y2k1sc5IhUDSpu8XucEI+35neq5QivZ1iuegnpraEVTJXlQGK1gl27zKcTLEPbQw==,
+                integrity: sha512-kugK8djotnG9HQRPTOf36asKYlxg8rWWsNLYHOgWDIVOiZQqlRfKBgF4XXM6kfw146kIDMvm57B4GIkvDSyTzA==,
             }
         engines: { node: '>=20.19.0' }
         hasBin: true
@@ -8027,14 +8024,6 @@ packages:
             {
                 integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==,
             }
-        hasBin: true
-
-    semver@7.7.4:
-        resolution:
-            {
-                integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==,
-            }
-        engines: { node: '>=10' }
         hasBin: true
 
     semver@7.8.5:
@@ -8526,14 +8515,14 @@ packages:
             }
         engines: { node: '>=18' }
 
-    style-loader@3.3.4:
+    style-loader@4.0.0:
         resolution:
             {
-                integrity: sha512-0WqXzrsMTyb8yjZJHDqwmnwRJvhALK9LfRtRc6B4UTWe8AijYLZYZ9thuJTZc2VfQWINADW/j+LiJnfy2RoC1w==,
+                integrity: sha512-1V4WqhhZZgjVAVJyt7TdDPZoPBPNHbekX4fWnCJL1yQukhCeZhJySUL+gL9y6sNdN95uEOS83Y55SqHcP7MzLA==,
             }
-        engines: { node: '>= 12.13.0' }
+        engines: { node: '>= 18.12.0' }
         peerDependencies:
-            webpack: ^5.0.0
+            webpack: ^5.27.0
 
     sumchecker@3.0.1:
         resolution:
@@ -10527,7 +10516,7 @@ snapshots:
             make-fetch-happen: 10.2.1
             nopt: 6.0.0
             proc-log: 2.0.1
-            semver: 7.8.5
+            semver: 7.8.6
             tar: 6.2.1
             which: 2.0.2
         transitivePeerDependencies:
@@ -10960,7 +10949,7 @@ snapshots:
     '@npmcli/fs@2.1.2':
         dependencies:
             '@gar/promisify': 1.1.3
-            semver: 7.8.5
+            semver: 7.8.6
 
     '@npmcli/move-file@2.0.1':
         dependencies:
@@ -12194,7 +12183,7 @@ snapshots:
 
     crypto-js@4.2.0: {}
 
-    css-loader@6.11.0(webpack@5.105.1):
+    css-loader@7.1.5(webpack@5.105.1):
         dependencies:
             icss-utils: 5.1.0(postcss@8.5.6)
             postcss: 8.5.6
@@ -12203,7 +12192,7 @@ snapshots:
             postcss-modules-scope: 3.2.1(postcss@8.5.6)
             postcss-modules-values: 4.0.0(postcss@8.5.6)
             postcss-value-parser: 4.2.0
-            semver: 7.7.4
+            semver: 7.8.6
         optionalDependencies:
             webpack: 5.105.1
 
@@ -14073,7 +14062,7 @@ snapshots:
 
     node-abi@3.92.0:
         dependencies:
-            semver: 7.8.5
+            semver: 7.8.6
 
     node-abort-controller@3.1.1: {}
 
@@ -14082,7 +14071,7 @@ snapshots:
 
     node-api-version@0.2.1:
         dependencies:
-            semver: 7.8.5
+            semver: 7.8.6
 
     node-domexception@1.0.0: {}
 
@@ -14713,14 +14702,12 @@ snapshots:
 
     safer-buffer@2.1.2: {}
 
-    sass-loader@16.0.7(sass@1.101.0)(webpack@5.105.1):
-        dependencies:
-            neo-async: 2.6.2
+    sass-loader@17.1.1(sass@1.108.2)(webpack@5.105.1):
         optionalDependencies:
-            sass: 1.101.0
+            sass: 1.108.2
             webpack: 5.105.1
 
-    sass@1.101.0:
+    sass@1.108.2:
         dependencies:
             chokidar: 5.0.0
             immutable: 5.1.6
@@ -14759,8 +14746,6 @@ snapshots:
     semver@5.7.2: {}
 
     semver@6.3.1: {}
-
-    semver@7.7.4: {}
 
     semver@7.8.5: {}
 
@@ -15127,7 +15112,7 @@ snapshots:
         dependencies:
             '@tokenizer/token': 0.3.0
 
-    style-loader@3.3.4(webpack@5.105.1):
+    style-loader@4.0.0(webpack@5.105.1):
         dependencies:
             webpack: 5.105.1
 
