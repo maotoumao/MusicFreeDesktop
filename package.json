@@ -71,17 +71,17 @@
         "eslint-import-resolver-typescript": "^4.4.5",
         "eslint-plugin-import": "^2.32.0",
         "fork-ts-checker-webpack-plugin": "^9.2.0",
-        "globals": "^17.6.0",
+        "globals": "^17.14.0",
         "husky": "9.1.7",
-        "lint-staged": "16.2.7",
+        "lint-staged": "17.6.2",
         "node-loader": "^2.1.0",
-        "prettier": "^3.8.4",
+        "prettier": "^3.10.1",
         "sass": "^1.108.2",
         "sass-loader": "^17.1.1",
         "style-loader": "^4.0.0",
         "ts-loader": "^9.6.2",
         "typescript": "~6.0.3",
-        "typescript-eslint": "^8.61.1"
+        "typescript-eslint": "^8.74.0"
     },
     "dependencies": {
         "@dnd-kit/core": "^6.3.1",

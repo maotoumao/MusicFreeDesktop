@@ -162,8 +162,7 @@ class MediaMetaManager {
         filePath: string,
     ): { platform: string; musicId: string; meta: IMediaMeta } | null {
         const row = this.queries.getMetaByDownloadPath.get(filePath) as
-            | { platform: string; music_id: string; data: string }
-            | undefined;
+            { platform: string; music_id: string; data: string } | undefined;
         if (!row) return null;
         return {
             platform: row.platform,

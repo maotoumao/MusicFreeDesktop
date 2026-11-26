@@ -472,8 +472,7 @@ export function SongTable({
                 cellClassName: 'song-table__cell--quality',
                 render: (item) => {
                     const format = (item as IMusic.IMusicItem).audioFormat as
-                        | IAudioFormat
-                        | undefined;
+                        IAudioFormat | undefined;
                     if (format) return formatAudioFormat(format);
                     const downloaded = downloadManager.isDownloaded(item);
                     return downloaded ? t(QUALITY_I18N_KEYS[downloaded.quality]) : '-';

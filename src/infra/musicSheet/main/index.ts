@@ -137,8 +137,7 @@ class MusicSheetManager {
         return {
             getRawMusicItem: (platform: string, id: string): IMusic.IMusicItem | null => {
                 const row = this.queries.getMusicItemRaw.get(platform, id) as
-                    | { raw: string | null }
-                    | undefined;
+                    { raw: string | null } | undefined;
                 return row?.raw ? safeParse<IMusic.IMusicItem>(row.raw) : null;
             },
         };
@@ -301,8 +300,7 @@ class MusicSheetManager {
 
         ipcMain.handle(IPC.UPDATE_SHEET, (_evt, params: IUpdateSheetParams) => {
             const existing = this.queries.getSheetById.get(params.id) as
-                | Record<string, unknown>
-                | undefined;
+                Record<string, unknown> | undefined;
             if (!existing) return;
 
             this.queries.updateSheet.run({
@@ -432,8 +430,7 @@ class MusicSheetManager {
             IPC.GET_RAW_MUSIC_ITEM,
             (_evt, platform: string, id: string): IMusic.IMusicItem | null => {
                 const row = this.queries.getMusicItemRaw.get(platform, id) as
-                    | { raw: string }
-                    | undefined;
+                    { raw: string } | undefined;
                 return row ? JSON.parse(row.raw) : null;
             },
         );
@@ -444,8 +441,7 @@ class MusicSheetManager {
                 const results: IMusic.IMusicItem[] = [];
                 for (const k of keys) {
                     const row = this.queries.getMusicItemRaw.get(k.platform, k.id) as
-                        | { raw: string }
-                        | undefined;
+                        { raw: string } | undefined;
                     if (row) {
                         results.push(JSON.parse(row.raw));
                     }

@@ -338,8 +338,7 @@ class DownloadManager {
 
         // M1: 先检查是否存在活跃（pending/downloading/paused/error）的任务
         const existingActive = this.queries.findExistingActive.get(platform, musicId) as
-            | IDownloadTaskRow
-            | undefined;
+            IDownloadTaskRow | undefined;
         if (existingActive) return rowToTask(existingActive);
 
         // C1: 再检查是否已下载（通过 mediaMeta）
@@ -379,8 +378,7 @@ class DownloadManager {
         if (!this.persistTask(task)) {
             // UNIQUE 冲突 → 同一首歌已在任务表中，返回已有记录
             const existing = this.queries.findExistingActive.get(platform, musicId) as
-                | IDownloadTaskRow
-                | undefined;
+                IDownloadTaskRow | undefined;
             if (existing) return rowToTask(existing);
             throw new Error(i18n.t('download.already_in_queue'));
         }

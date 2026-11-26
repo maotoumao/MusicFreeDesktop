@@ -52,8 +52,7 @@ class AppThumbar {
     private artworkInitialized = false;
     private defaultAlbumCoverCache: Buffer | null = null;
     private ttmCache:
-        | typeof import('@main/native_modules/TaskbarManager/TaskbarManager.node')
-        | null = null;
+        typeof import('@main/native_modules/TaskbarManager/TaskbarManager.node') | null = null;
 
     // ─── 公共接口 ───
 
