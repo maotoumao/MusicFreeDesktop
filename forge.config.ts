@@ -67,6 +67,17 @@ function copyPackageWithDeps(
         copyPackageWithDeps(dep, root, nodeModulesDir, true);
 }
 
+/** 删除目录下所有不满足 keep 的文件，以及删完后变空的目录（含 dir 本身） */
+function removeAllExcept(dir: string, keep: (file: string) => boolean): void {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) removeAllExcept(full, keep);
+        else if (!keep(full)) fs.rmSync(full);
+    }
+    if (fs.readdirSync(dir).length === 0) fs.rmdirSync(dir);
+}
+
 const config: ForgeConfig = {
     packagerConfig: {
         asar: {
@@ -104,15 +115,20 @@ const config: ForgeConfig = {
                 copyPackageWithDeps(name, __dirname, nodeModulesDir);
             }
         },
-        /** better-sqlite3 自带全部平台的预编译二进制，只保留目标平台的（Linux 另留 musl 版） */
         packageAfterPrune: async (_forgeConfig, buildPath, _electronVersion, platform, arch) => {
-            const dir = path.join(buildPath, 'node_modules', 'better-sqlite3', 'prebuilds');
-            if (!fs.existsSync(dir)) return;
+            const sqliteDir = path.join(buildPath, 'node_modules', 'better-sqlite3');
+            if (!fs.existsSync(sqliteDir)) return;
+            // 运行时只加载 lib 和编译好的 .node，SQLite 源码与编译配置不需要
+            for (const name of ['deps', 'src', 'binding.gyp']) {
+                fs.rmSync(path.join(sqliteDir, name), { recursive: true, force: true });
+            }
+            // build 里只保留编译出的 .node（Win7 版用的 12.x 从 build/Release 加载）
+            removeAllExcept(path.join(sqliteDir, 'build'), (file) => file.endsWith('.node'));
+            // 自带全部平台的预编译二进制，只保留目标平台的（Linux 另留 musl 版）
+            const prebuilds = path.join(sqliteDir, 'prebuilds');
             const keep = new Set([`${platform}-${arch}.node`]);
             if (platform === 'linux') keep.add(`linuxmusl-${arch}.node`);
-            for (const name of fs.readdirSync(dir)) {
-                if (!keep.has(name)) fs.rmSync(path.join(dir, name));
-            }
+            removeAllExcept(prebuilds, (file) => keep.has(path.basename(file)));
         },
         /**
          * macOS：fuses 插件在打包器写入应用 Info.plist 之前就做了 ad-hoc 签名，
