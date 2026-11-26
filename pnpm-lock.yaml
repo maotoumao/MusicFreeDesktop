@@ -19,9 +19,6 @@ importers:
             '@dnd-kit/utilities':
                 specifier: ^3.2.2
                 version: 3.2.2(react@19.3.1)
-            '@emotion/is-prop-valid':
-                specifier: ^1.4.0
-                version: 1.4.0
             axios:
                 specifier: ^1.21.1
                 version: 1.21.1
@@ -53,8 +50,8 @@ importers:
                 specifier: ^5.0.4
                 version: 5.0.4
             framer-motion:
-                specifier: ^12.40.0
-                version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+                specifier: ^14.14.0
+                version: 14.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
             he:
                 specifier: ^1.2.0
                 version: 1.2.0
@@ -1391,18 +1388,6 @@ packages:
         resolution:
             {
                 integrity: sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ==,
-            }
-
-    '@emotion/is-prop-valid@1.4.0':
-        resolution:
-            {
-                integrity: sha512-QgD4fyscGcbbKwJmqNvUMSE02OsHUa+lAWKdEUIJKgqe5IwRSKd7+KhibEWdaKwgjLj0DRSHA9biAIqGBk05lw==,
-            }
-
-    '@emotion/memoize@0.9.0':
-        resolution:
-            {
-                integrity: sha512-30FAj7/EoJ5mwVPOWhAyCX+FPfMDrVecJAM+Iw9NRoSl4BBAQeqj4cApHHUXOVvIPgLVDsCFoz/hGD+5QQD1GQ==,
             }
 
     '@epic-web/invariant@1.0.0':
@@ -4961,21 +4946,21 @@ packages:
             }
         engines: { node: '>= 0.6' }
 
-    framer-motion@12.40.0:
+    framer-motion@14.14.0:
         resolution:
             {
-                integrity: sha512-uaBd3qC1v3KQqBEjwTUd183K6PbS+j0yR9w9VmEOLWA/tnUcSn8Xa3uck7t4dgpDoUss8xQTcj8W2L07lrnLFg==,
+                integrity: sha512-fidRX0VzkZdA9OovFiBSzJtt9/jLcJpna78Z+KCqQQZIWoIpN3tOhEXAhhAw/FObUUh+o3Y18yx1F4BP0mVJ8Q==,
             }
         peerDependencies:
-            '@emotion/is-prop-valid': '*'
             react: ^18.0.0 || ^19.0.0
             react-dom: ^18.0.0 || ^19.0.0
+            remix: ^3.1.0
         peerDependenciesMeta:
-            '@emotion/is-prop-valid':
-                optional: true
             react:
                 optional: true
             react-dom:
+                optional: true
+            remix:
                 optional: true
 
     fresh@0.5.2:
@@ -6649,16 +6634,16 @@ packages:
         engines: { node: '>=10' }
         hasBin: true
 
-    motion-dom@12.40.0:
+    motion-dom@14.14.0:
         resolution:
             {
-                integrity: sha512-HxU3ZaBwNPVQUBQf1xxgq+7JrPNZvjLVxgbpEZL7RrWJnsxOf0/OM+yrHG9ogLQ31Do/r57Oz2gQWPK+6q62mg==,
+                integrity: sha512-IAxcKhYkuQA2W0Tlx1AvVgImfqEoF3/t3IovbPQJlYkefmGsmrXjn967lMII5VmFmLpQEab4+ZkHo/ijJ4Esig==,
             }
 
-    motion-utils@12.39.0:
+    motion-utils@14.7.0:
         resolution:
             {
-                integrity: sha512-8nadJAJjTtqRkmRF36FoJTrywK9nnFmnPwnSMyxaOCU7GDjN9RTMJIxx9De8ErM+vpPhMccr/6fo5WciyQLnMQ==,
+                integrity: sha512-woO0/Nb7ys75f94fjvQi/6leiHGvZUYkeHUPEZ3vxsV+9OpEVhkxp01x8MlRwX0zt31EqgXsKDAoBoJLC148Tw==,
             }
 
     ms@2.0.0:
@@ -10608,12 +10593,6 @@ snapshots:
             tslib: 2.8.1
         optional: true
 
-    '@emotion/is-prop-valid@1.4.0':
-        dependencies:
-            '@emotion/memoize': 0.9.0
-
-    '@emotion/memoize@0.9.0': {}
-
     '@epic-web/invariant@1.0.0': {}
 
     '@eslint-community/eslint-utils@4.9.1(eslint@9.39.2(jiti@2.6.1))':
@@ -12982,13 +12961,12 @@ snapshots:
 
     forwarded@0.2.0: {}
 
-    framer-motion@12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+    framer-motion@14.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
         dependencies:
-            motion-dom: 12.40.0
-            motion-utils: 12.39.0
+            motion-dom: 14.14.0
+            motion-utils: 14.7.0
             tslib: 2.8.1
         optionalDependencies:
-            '@emotion/is-prop-valid': 1.4.0
             react: 19.3.1
             react-dom: 19.3.1(react@19.3.1)
 
@@ -13957,11 +13935,11 @@ snapshots:
 
     mkdirp@1.0.4: {}
 
-    motion-dom@12.40.0:
+    motion-dom@14.14.0:
         dependencies:
-            motion-utils: 12.39.0
+            motion-utils: 14.7.0
 
-    motion-utils@12.39.0: {}
+    motion-utils@14.7.0: {}
 
     ms@2.0.0: {}
 
