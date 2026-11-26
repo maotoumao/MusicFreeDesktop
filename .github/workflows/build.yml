@@ -134,7 +134,7 @@ jobs:
                   echo "VERSION=$VERSION" >> $GITHUB_ENV
             - run: pnpm run make
             - name: Rename DMG
-              run: mv "./out/make/MusicFree-${{ env.VERSION }}-x64.dmg" "./out/make/MusicFree-${{ env.VERSION }}-darwin-x64.dmg"
+              run: mv "./out/make/dmg/x64/MusicFree-${{ env.VERSION }}-x64.dmg" "./out/make/MusicFree-${{ env.VERSION }}-darwin-x64.dmg"
             - uses: actions/upload-artifact@v6
               with:
                   name: MusicFree-${{ env.VERSION }}-darwin-x64
@@ -161,7 +161,7 @@ jobs:
                   echo "VERSION=$VERSION" >> $GITHUB_ENV
             - run: pnpm run make -- --arch=arm64
             - name: Rename DMG
-              run: mv "./out/make/MusicFree-${{ env.VERSION }}-arm64.dmg" "./out/make/MusicFree-${{ env.VERSION }}-darwin-arm64.dmg"
+              run: mv "./out/make/dmg/arm64/MusicFree-${{ env.VERSION }}-arm64.dmg" "./out/make/MusicFree-${{ env.VERSION }}-darwin-arm64.dmg"
             - uses: actions/upload-artifact@v6
               with:
                   name: MusicFree-${{ env.VERSION }}-darwin-arm64
