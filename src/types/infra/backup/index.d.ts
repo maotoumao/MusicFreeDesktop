@@ -2,7 +2,18 @@
 export interface IBackupData {
     version: 1;
     createdAt: number;
+    /** 产出端信息（跨端备份协议 origin 字段）；旧备份没有 */
+    origin?: IBackupOrigin;
     musicSheets: IBackupSheet[];
+}
+
+/** 备份产出端信息 */
+export interface IBackupOrigin {
+    /** 'android' | 'ios' | 'desktop' */
+    platform?: string;
+    appVersion?: string;
+    /** 产出端的安装标识，用于判断本地歌曲能否在本机恢复 */
+    installationId?: string;
 }
 
 /** 备份中的单个歌单 */
@@ -31,6 +42,8 @@ export interface IBackupResult {
     error?: string;
     sheetsCount?: number;
     songsCount?: number;
+    /** 恢复时跳过的本地歌曲数（来自其他安装，或文件在本机不存在） */
+    localIgnored?: number;
 }
 
 /**

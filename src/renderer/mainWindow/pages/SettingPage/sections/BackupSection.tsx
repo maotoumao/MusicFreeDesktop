@@ -35,7 +35,14 @@ export function BackupSection() {
         (result: IBackupResult) => {
             closeModal('BackupProgressModal');
             if (result.success) {
-                showToast(t('settings.backup.resume_success'), { type: 'info' });
+                showToast(
+                    result.localIgnored
+                        ? t('settings.backup.resume_success_local_ignored', {
+                              count: result.localIgnored,
+                          })
+                        : t('settings.backup.resume_success'),
+                    { type: 'info' },
+                );
             } else if (result.error) {
                 showToast(
                     t('settings.backup.resume_fail', {

@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Linux 安装包（deb、rpm）在应用菜单中显示 MusicFree 图标并归入「影音」分类，名称和说明支持中文；rpm 版也能关联音频文件和 musicfree:// 链接。
 - macOS 安装镜像（DMG）换成 MusicFree 的背景、提示文字和卷图标，不再显示 Electron 的默认样式。
 - Windows 安装程序使用 MusicFree 的向导配图，新增繁体中文界面；系统语言能匹配时不再先弹出语言选择框。
+- 备份文件会记录本机的安装标识。恢复时，来自其他电脑或手机的本地歌曲会被跳过并提示数量；没有标识的旧备份按文件在本机是否存在判断。
 - 安装包去掉了运行时用不到的文件（macOS 和 Linux 版不再带 Windows 专用的图片处理库，各平台都不再带 SQLite 源码），macOS 版安装后约小 29 MB。
 
 ### 修复
@@ -109,6 +110,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - The Linux packages (deb, rpm) now show the MusicFree icon in the app menu under Audio/Video, with localized name and description; the rpm package also registers audio files and musicfree:// links.
 - The macOS disk image (DMG) now has a MusicFree background, install hint and volume icon instead of Electron's defaults.
 - The Windows installer uses MusicFree wizard artwork and adds Traditional Chinese; it no longer asks for a language first when one matches the system language.
+- Backups now record this installation's ID. When restoring, local songs from another computer or phone are skipped and counted; older backups without an ID keep a local song only if its file exists on this computer.
 - Files the app never uses at runtime are no longer packaged (the Windows-only image library on macOS and Linux, and SQLite sources on every platform); the installed macOS app is about 29 MB smaller.
 
 ### Fixed

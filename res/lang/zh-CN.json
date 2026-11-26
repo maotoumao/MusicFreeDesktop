@@ -489,6 +489,7 @@
             "backup_success": "备份成功~",
             "backup_fail": "备份失败：{{reason}}",
             "resume_success": "恢复成功~",
+            "resume_success_local_ignored": "恢复成功~ 已跳过 {{count}} 首本地歌曲（来自其他设备，或文件在本机已不存在）",
             "resume_fail": "恢复失败：{{reason}}",
             "backup_music_sheet": "备份歌单",
             "resume_music_sheet": "恢复歌单",

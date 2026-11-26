@@ -489,6 +489,7 @@
             "backup_success": "Backup Successful~",
             "backup_fail": "Backup Failed: {{reason}}",
             "resume_success": "Restore Successful~",
+            "resume_success_local_ignored": "Restore Successful~ Skipped {{count}} local songs (from another device, or the files no longer exist on this computer)",
             "resume_fail": "Restore Failed: {{reason}}",
             "backup_music_sheet": "Backup Playlist",
             "resume_music_sheet": "Restore Playlist",
