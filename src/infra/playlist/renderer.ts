@@ -146,12 +146,17 @@ function applyToList(list: IMusicItemSlim[], op: IListOp): IMusicItemSlim[] {
                 fresh.push(incoming.get(k)!);
             }
             // 已在歌单里的歌保持原位，展示资料按主进程 upsert 更新
-            const base = overlaps
-                ? list.map((m) => {
-                      const next = incoming.get(keyOf(m));
-                      return next ? mergeDisplayFields(m, next) : m;
-                  })
-                : list;
+            let base = list;
+            if (overlaps) {
+                let changed = false;
+                const merged = list.map((m) => {
+                    const next = incoming.get(keyOf(m));
+                    const out = next ? mergeDisplayFields(m, next) : m;
+                    if (out !== m) changed = true;
+                    return out;
+                });
+                if (changed) base = merged;
+            }
             return fresh.length > 0 ? [...fresh, ...base] : base;
         }
         case 'remove': {
