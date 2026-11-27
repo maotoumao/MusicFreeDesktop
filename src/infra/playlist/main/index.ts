@@ -353,10 +353,9 @@ class PlaylistManager {
                 const currentCount = (this.queries.getPlaylistMusicCount.get(playlistId) as any)
                     .count;
                 const remaining = MAX_MUSIC_PER_PLAYLIST - currentCount;
+                // 歌单已满：一首都不写入，由调用方按 truncated 提示
                 if (remaining <= 0) {
-                    throw new Error(
-                        i18n.t('playlist.limit_reached', { count: MAX_MUSIC_PER_PLAYLIST }),
-                    );
+                    return { added: 0, truncated: musicItems.length };
                 }
                 const toAdd = musicItems.slice(0, remaining);
 

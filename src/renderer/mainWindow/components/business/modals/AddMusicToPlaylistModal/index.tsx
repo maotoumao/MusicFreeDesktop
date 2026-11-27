@@ -33,20 +33,14 @@ export default function AddMusicToPlaylistModal({
     const playlists = usePlaylistList();
 
     const handleSelectPlaylist = useCallback(
-        (playlistId: string, playlistTitle: string, worksNum: number) => {
+        (playlistId: string, playlistTitle: string) => {
             close();
-            const limitReached = () =>
-                showToast(t('playlist.limit_reached', { count: MAX_MUSIC_PER_PLAYLIST }), {
-                    type: 'warn',
-                });
-            if (worksNum >= MAX_MUSIC_PER_PLAYLIST) {
-                limitReached();
-                return;
-            }
             playlistManager.addMusicToPlaylist(musicItems, playlistId).then(
                 ({ truncated }) => {
                     if (truncated > 0) {
-                        limitReached();
+                        showToast(t('playlist.limit_reached', { count: MAX_MUSIC_PER_PLAYLIST }), {
+                            type: 'warn',
+                        });
                     } else {
                         showToast(t('playlist.added_to_sheet', { sheet: playlistTitle }), {
                             type: 'success',
@@ -100,13 +94,7 @@ export default function AddMusicToPlaylistModal({
                                 key={playlist.id}
                                 type="button"
                                 className="add-music-to-sheet-modal__item"
-                                onClick={() =>
-                                    handleSelectPlaylist(
-                                        playlist.id,
-                                        displayTitle,
-                                        playlist.worksNum ?? 0,
-                                    )
-                                }
+                                onClick={() => handleSelectPlaylist(playlist.id, displayTitle)}
                             >
                                 <Artwork
                                     className="add-music-to-sheet-modal__item-artwork"

@@ -208,7 +208,7 @@ class PlaylistRenderer {
 
     // ─── 歌曲操作（乐观更新 + 队列写入） ───
 
-    /** 返回写入结果；超出歌单上限的部分不会写入（truncated），写入失败时 reject */
+    /** 返回写入结果；超出歌单上限的末尾 truncated 首不会写入，写入失败时 reject */
     addMusicToPlaylist(
         musicItems: IMusic.IMusicItem | IMusicItemSlim | Array<IMusic.IMusicItem | IMusicItemSlim>,
         playlistId: string,
@@ -217,6 +217,7 @@ class PlaylistRenderer {
         const slimItems = items.map(musicItemToSlim);
 
         // 乐观更新：本地数组
+        const insertedToList = new Set<string>();
         if (this.currentPlaylistId === playlistId) {
             const list = store.get(musicListAtom);
             const existingKeys = new Set(list.map((m) => compositeKey(m.platform, m.id)));
@@ -224,23 +225,42 @@ class PlaylistRenderer {
                 (m) => !existingKeys.has(compositeKey(m.platform, m.id)),
             );
             if (newSlims.length > 0) {
+                for (const m of newSlims) insertedToList.add(compositeKey(m.platform, m.id));
                 store.set(musicListAtom, [...newSlims, ...list]);
             }
         }
 
         // 乐观更新：favorite Set
+        const insertedToFavorite = new Set<string>();
         if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             for (const m of slimItems) {
-                this.favoriteIdSet.add(compositeKey(m.platform, m.id));
+                const key = compositeKey(m.platform, m.id);
+                if (!this.favoriteIdSet.has(key)) insertedToFavorite.add(key);
+                this.favoriteIdSet.add(key);
             }
             this.events.emit('favoriteChange');
         }
 
         const result = this.mutationQueue.enqueue(() => mod.addMusic(playlistId, items));
-        // 超出上限的歌曲没有写入，撤回乐观更新
+        // 超出上限、没有写入的末尾几首：撤回这次乐观加入的部分
         result.then(
             ({ truncated }) => {
-                if (truncated > 0) void this.reloadState();
+                if (truncated <= 0) return;
+                const dropped = new Set(
+                    slimItems.slice(-truncated).map((m) => compositeKey(m.platform, m.id)),
+                );
+                const fromList = [...dropped].filter((k) => insertedToList.has(k));
+                if (fromList.length > 0 && this.currentPlaylistId === playlistId) {
+                    const drop = new Set(fromList);
+                    store.set(musicListAtom, (list) =>
+                        list.filter((m) => !drop.has(compositeKey(m.platform, m.id))),
+                    );
+                }
+                const fromFavorite = [...dropped].filter((k) => insertedToFavorite.has(k));
+                if (fromFavorite.length > 0) {
+                    for (const k of fromFavorite) this.favoriteIdSet.delete(k);
+                    this.events.emit('favoriteChange');
+                }
             },
             () => {},
         );
