@@ -676,7 +676,12 @@ class PlaylistRenderer {
         }
         return store.get(musicListAtom).some((m) => {
             const artwork = kept.get(keyOf(m));
-            return artwork !== undefined && m.artwork !== artwork && !overridden.has(keyOf(m));
+            // null 与空串都显示为没有封面
+            return (
+                artwork !== undefined &&
+                (m.artwork || '') !== (artwork || '') &&
+                !overridden.has(keyOf(m))
+            );
         });
     }
 

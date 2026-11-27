@@ -363,7 +363,7 @@ class PlaylistManager {
                 const toAdd = musicItems.slice(0, remaining);
 
                 const db = this.db.getDatabase();
-                // 同一批里没有任何一条带封面的歌：upsert 不覆盖封面，库里可能保留着封面，写完后查出来告诉渲染层
+                // 同一批里没有任何一条带封面的歌：封面为 null 时 upsert 保留库里的值，写完后查出来告诉渲染层
                 const keyOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
                     `${item.platform}\0${String(item.id)}`;
                 const artworkCandidates = new Map<string, { platform: string; id: string }>();
@@ -411,8 +411,10 @@ class PlaylistManager {
                         for (const { platform, id } of artworkCandidates.values()) {
                             const row = this.queries.getMusicItemArtwork.get(platform, id) as
                                 { artwork: string | null } | undefined;
-                            if (row?.artwork)
+                            // 空串也是库里的值（upsert 只在 null 时保留原值），同样返回
+                            if (row && row.artwork !== null) {
                                 keptArtworks.push({ platform, id, artwork: row.artwork });
+                            }
                         }
                     },
                 );
