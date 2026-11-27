@@ -361,6 +361,17 @@ class PlaylistManager {
                 const toAdd = musicItems.slice(0, remaining);
 
                 const db = this.db.getDatabase();
+                // 每首歌：同一批里是否有一条带封面、写入后的封面、是否新加进了这个歌单
+                const artworkState = new Map<
+                    string,
+                    {
+                        platform: string;
+                        id: string;
+                        given: boolean;
+                        stored: string | null;
+                        inserted: boolean;
+                    }
+                >();
                 const addMany = db.transaction(
                     (items: Array<IMusic.IMusicItem | IMusicItemSlim>) => {
                         const minOrder = (this.queries.getMinSortOrder.get(playlistId) as any)
@@ -370,7 +381,7 @@ class PlaylistManager {
                         for (let i = 0; i < items.length; i++) {
                             const item = items[i];
                             const sid = String(item.id);
-                            this.queries.upsertMusicItem.run({
+                            const row = this.queries.upsertMusicItemReturningArtwork.get({
                                 platform: item.platform,
                                 id: sid,
                                 title: item.title,
@@ -379,35 +390,40 @@ class PlaylistManager {
                                 duration: item.duration ?? null,
                                 artwork: item.artwork ?? null,
                                 raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
-                            });
-                            this.queries.insertRelation.run({
+                            }) as { artwork: string | null } | undefined;
+                            const { changes } = this.queries.insertRelation.run({
                                 sheetId: playlistId,
                                 platform: item.platform,
                                 musicId: sid,
                                 sortOrder: startOrder + i,
                                 addedAt: now,
                             });
+                            const key = `${item.platform}\0${sid}`;
+                            const state = artworkState.get(key) ?? {
+                                platform: item.platform,
+                                id: sid,
+                                given: false,
+                                stored: null,
+                                inserted: false,
+                            };
+                            state.given ||= !!item.artwork;
+                            state.stored = row?.artwork ?? null;
+                            state.inserted ||= changes > 0;
+                            artworkState.set(key, state);
                         }
                     },
                 );
                 addMany(toAdd);
                 this.broadcastPlaylistEvent({ origin: 'user', sheetId: playlistId });
 
-                // 传入时没有封面的歌，库里可能保留了原封面，返回给渲染层显示
+                // 新加进歌单、同一批里都没带封面、库里却保留了封面的歌：渲染层只知道传入的空封面，需要告诉它
                 const keptArtworks: NonNullable<IAddMusicResult['keptArtworks']> = [];
-                const checked = new Set<string>();
-                for (const item of toAdd) {
-                    const sid = String(item.id);
-                    const key = `${item.platform}\0${sid}`;
-                    if (item.artwork || checked.has(key)) continue;
-                    checked.add(key);
-                    const row = this.queries.getMusicItemArtwork.get(item.platform, sid) as
-                        { artwork: string | null } | undefined;
-                    if (row?.artwork) {
+                for (const state of artworkState.values()) {
+                    if (state.inserted && !state.given && state.stored) {
                         keptArtworks.push({
-                            platform: item.platform,
-                            id: sid,
-                            artwork: row.artwork,
+                            platform: state.platform,
+                            id: state.id,
+                            artwork: state.stored,
                         });
                     }
                 }
