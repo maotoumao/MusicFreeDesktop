@@ -814,8 +814,8 @@ function toMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim) {
 
 /**
  * 下载完成登记时写库的一行：库里已有的内容都保留，只用传入的快照补缺。
- * 展示列为空（文本为空串且完整数据里没有该字段、时长或封面为 NULL）时取快照；完整数据逐字段补，已有的字段（含空值）不动，
- * 缺少的标题、歌手、专辑、时长、封面取补缺后的展示列，与列表显示一致（展示列的空串只表示没有，不写入），其余取快照。
+ * 展示列为空（文本为空串且完整数据里没有该字段、时长或封面为 NULL）时取快照；完整数据逐字段补，已有的字段（含空串）不动，
+ * 缺少的标题、歌手、专辑和缺少或为 null 的时长、封面取补缺后的展示列，与列表显示一致（展示列的空串只表示没有，不写入），其余取快照。
  */
 function fillMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim, existing?: IStoredMusicRow) {
     const row = toMusicItemRow(item);
@@ -836,7 +836,9 @@ function fillMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim, existing?: I
     const merged: Record<string, unknown> = { ...parseRaw(row.raw), ...base };
     for (const key of ['title', 'artist', 'album', 'duration', 'artwork'] as const) {
         const value = filled[key];
-        if (!(key in base) && value !== null && value !== '') merged[key] = value;
+        const missing =
+            key === 'duration' || key === 'artwork' ? base[key] == null : !(key in base);
+        if (missing && value !== null && value !== '') merged[key] = value;
     }
     return { ...filled, raw: safeStringify(merged) };
 }
