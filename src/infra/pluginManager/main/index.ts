@@ -434,7 +434,8 @@ class PluginManager {
 
             const jsonData = JSON.parse(jsonText);
             // 网络上的插件列表只能指向网络地址，不能借它读取本机文件
-            const pluginUrls: string[] = (jsonData?.plugins ?? [])
+            const entries: unknown[] = jsonData?.plugins ?? [];
+            const pluginUrls: string[] = entries
                 .map((p: any) => p?.url)
                 .filter(
                     (url: unknown): url is string =>
@@ -458,11 +459,13 @@ class PluginManager {
                 }
             }
 
+            // 地址为空或不允许的条目没有安装，也算失败
+            const skipped = entries.length - pluginUrls.length;
             return {
                 success: installed > 0,
-                upToDate: upToDate === pluginUrls.length,
-                failed: failed - upToDate,
-                message: `Installed: ${installed}, Failed: ${failed}`,
+                upToDate: skipped === 0 && upToDate === pluginUrls.length,
+                failed: failed - upToDate + skipped,
+                message: `Installed: ${installed}, Failed: ${failed + skipped}`,
             };
         } catch (err: any) {
             return { success: false, message: err?.message ?? 'Failed to parse JSON' };
