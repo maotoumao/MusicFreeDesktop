@@ -398,9 +398,9 @@ class TrackPlayer {
         await this.playIndex(this.playQueue.getPrevIndex());
     }
 
-    /** 下一首播放：将歌曲插入当前播放曲目之后 */
-    addNext(items: (IMusic.IMusicItem | IMusicItemSlim)[]): void {
-        this.playQueue.addNext(items);
+    /** 下一首播放：将歌曲插入当前播放曲目之后；返回是否插入了歌曲 */
+    addNext(items: (IMusic.IMusicItem | IMusicItemSlim)[]): boolean {
+        return this.playQueue.addNext(items);
     }
 
     /** 从队列中移除歌曲。若移除了当前正在播放的曲目，自动切到下一首或清空 */

@@ -99,8 +99,9 @@ class PlayQueue {
      * 下一首播放。
      * 将指定歌曲移到当前歌曲之后（已存在则先移除再插入）。
      * Shuffle 模式下同时更新 shuffle 导航，确保新歌曲在随机序列的下一位。
+     * 返回是否插入了歌曲（只选中正在播放的歌曲时不插入）。
      */
-    addNext(items: (IMusic.IMusicItem | IMusicItemSlim)[]): void {
+    addNext(items: (IMusic.IMusicItem | IMusicItemSlim)[]): boolean {
         const slims = items.map(musicItemToSlim);
         const currentMusic = this.getCurrentMusic();
         const currentKey = currentMusic ? this.keyOf(currentMusic) : null;
@@ -114,7 +115,7 @@ class PlayQueue {
             filteredItems.push(items[i] as IMusic.IMusicItem);
         }
 
-        if (filteredSlims.length === 0) return;
+        if (filteredSlims.length === 0) return false;
 
         // 去重：从队列中移除即将插入的歌曲
         const removeSet = new Set(filteredSlims.map((s) => this.keyOf(s)));
@@ -143,6 +144,7 @@ class PlayQueue {
 
         this.syncAtom();
         this.mutationQueue.enqueue(() => playQueueBridge.add(filteredItems, insertPos));
+        return true;
     }
 
     /** 追加到队尾 */

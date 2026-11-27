@@ -104,8 +104,9 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
         icon: <ListEnd />,
         label: i18n.t('playback.next_play'),
         onClick: () => {
-            trackPlayer.addNext(items);
-            showToast(i18n.t('playback.added_to_next'), { type: 'success' });
+            if (trackPlayer.addNext(items)) {
+                showToast(i18n.t('playback.added_to_next'), { type: 'success' });
+            }
         },
     });
 
