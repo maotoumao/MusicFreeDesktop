@@ -591,12 +591,7 @@ class DownloadManager {
                             type: 'completed',
                         });
                     } catch (completeErr: any) {
-                        // 清理已 rename 的孤立文件，避免磁盘泄漏
-                        if (task.filePath) {
-                            await fsp.unlink(task.filePath).catch(() => {
-                                /* ignore */
-                            });
-                        }
+                        const renamedPath = task.filePath;
                         // 恢复原始无扩展名路径，避免 retry 时产生双重扩展名
                         task.filePath = baseFilePath;
                         task.status = 'error';
@@ -613,6 +608,12 @@ class DownloadManager {
                             task,
                             type: 'error',
                         });
+                        // 先更新状态再清理已 rename 的孤立文件：等待清理期间任务可能被删除，之后不能再广播失败
+                        if (renamedPath) {
+                            await fsp.unlink(renamedPath).catch(() => {
+                                /* ignore */
+                            });
+                        }
                     }
                 },
                 // onError
