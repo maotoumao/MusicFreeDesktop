@@ -66,6 +66,16 @@ export function createQueries(db: Database.Database) {
                 raw = COALESCE(excluded.raw, raw)
         `),
 
+        /** 只补库里缺的字段，已有内容保持不变 */
+        fillMusicItem: db.prepare(`
+            INSERT INTO music_items (platform, id, title, artist, album, duration, artwork, raw)
+            VALUES (@platform, @id, @title, @artist, @album, @duration, @artwork, @raw)
+            ON CONFLICT(platform, id) DO UPDATE SET
+                duration = COALESCE(duration, excluded.duration),
+                artwork = COALESCE(artwork, excluded.artwork),
+                raw = COALESCE(raw, excluded.raw)
+        `),
+
         /** 读取库里歌曲的封面 */
         getMusicItemArtwork: db.prepare(`
             SELECT artwork FROM music_items WHERE platform = ? AND id = ?

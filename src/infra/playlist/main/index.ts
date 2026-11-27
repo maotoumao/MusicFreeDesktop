@@ -71,8 +71,9 @@ class PlaylistManager {
     // ─── 主进程内部公开方法（供 downloadManager 等模块通过 DI 调用） ───
 
     /**
-     * 将歌曲添加到指定歌单（upsert music_items + 插入 relation）。
+     * 将歌曲添加到指定歌单（插入 relation；music_items 只补缺，不覆盖已有内容）。
      * 主进程内部调用，不通过 IPC。
+     * 调用方（下载完成登记）传入的是任务开始时的快照，覆盖会把期间别处更新的资料和封面改回旧值。
      */
     public addMusicToPlaylist(
         musicItem: IMusic.IMusicItem | IMusicItemSlim,
@@ -84,7 +85,7 @@ class PlaylistManager {
             const sid = String(musicItem.id);
             const now = Date.now();
 
-            this.queries.upsertMusicItem.run(toMusicItemRow(musicItem));
+            this.queries.fillMusicItem.run(toMusicItemRow(musicItem));
             this.queries.insertRelation.run({
                 sheetId: playlistId,
                 platform: musicItem.platform,
