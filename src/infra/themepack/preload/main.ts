@@ -20,6 +20,8 @@ import crypto from 'crypto';
 import { contextBridge, ipcRenderer } from 'electron';
 import yauzl from 'yauzl';
 import { nanoid } from 'nanoid';
+// 须静态导入：preload 中的动态 import 会以 <script> 加载进页面上下文，隔离环境拿不到模块
+import { decode } from 'blurhash';
 
 import type { IThemePack, IThemePackConfig, IThemePackCache } from '@appTypes/infra/themepack';
 import {
@@ -334,30 +336,24 @@ function renderBlurHash(blurHashStr: string): void {
         (body) => body.prepend(container),
     );
 
-    // 异步解码并渲染（通常在 < 5ms 内完成）
-    import('blurhash')
-        .then(({ decode }) => {
-            const width = 32;
-            const height = 32;
-            try {
-                const pixels = decode(blurHashStr, width, height);
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                canvas.style.cssText = 'width:100%;height:100%;';
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    const imageData = new ImageData(new Uint8ClampedArray(pixels), width, height);
-                    ctx.putImageData(imageData, 0, 0);
-                    container.appendChild(canvas);
-                }
-            } catch {
-                // blurHash 无效，忽略
-            }
-        })
-        .catch(() => {
-            // blurhash 模块加载失败，忽略
-        });
+    // 32×32 解码不到 1ms，直接同步绘制
+    const width = 32;
+    const height = 32;
+    try {
+        const pixels = decode(blurHashStr, width, height);
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.cssText = 'width:100%;height:100%;';
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            const imageData = new ImageData(new Uint8ClampedArray(pixels), width, height);
+            ctx.putImageData(imageData, 0, 0);
+            container.appendChild(canvas);
+        }
+    } catch {
+        // blurHash 无效，忽略
+    }
 }
 
 /** 淡出并移除 blurHash 占位层 */
