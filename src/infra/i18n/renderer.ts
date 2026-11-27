@@ -7,7 +7,7 @@
  * - 提供 React Hook（useLangNames）
  */
 import { createInstance } from 'i18next';
-import { atom, getDefaultStore , useAtomValue } from 'jotai';
+import { atom, getDefaultStore, useAtomValue } from 'jotai';
 import { initReactI18next } from 'react-i18next';
 import type { ILanguageContent, ILanguageContentWithAllLangs } from '@appTypes/infra/i18n';
 import { CONTEXT_BRIDGE_KEY } from './common/constant';

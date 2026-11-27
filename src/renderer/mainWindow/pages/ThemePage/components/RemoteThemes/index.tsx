@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Download, Palette } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
-import { atom, getDefaultStore , useAtomValue } from 'jotai';
+import { atom, getDefaultStore, useAtomValue } from 'jotai';
 import themePack, { useCurrentThemePack, useInstalledThemePacks } from '@infra/themepack/renderer';
 import type { IThemePack } from '@appTypes/infra/themepack';
 import { RequestStatus } from '@common/constant';
