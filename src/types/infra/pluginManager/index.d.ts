@@ -55,10 +55,14 @@ export interface IPluginCacheData {
 }
 
 /** 单个插件更新结果；upToDate 表示没有可用的新版本，其余失败（下载、解析等）不带此标记 */
-/** 安装插件的结果；upToDate 表示没有安装是因为已装有相同或更高版本 */
+/**
+ * 安装插件的结果。upToDate 表示没有安装是因为已装有相同或更高版本；
+ * failed 为插件列表（.json）中真正安装失败的数量（不含已是最新）。
+ */
 export interface IInstallPluginResult {
     success: boolean;
     upToDate?: boolean;
+    failed?: number;
     message?: string;
 }
 

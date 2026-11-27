@@ -144,8 +144,8 @@ export default function PluginSubscriptionModal({ close }: PluginSubscriptionMod
         for (const sub of valid) {
             try {
                 const result = await pluginManager.installPlugin(sub.srcUrl.trim());
-                // 已是最新版本也算更新成功
-                if (result.success || result.upToDate) {
+                // 已是最新版本也算更新成功；插件列表里有任何一个安装失败则算失败
+                if ((result.success || result.upToDate) && !result.failed) {
                     successCount++;
                 } else {
                     failCount++;

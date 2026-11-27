@@ -461,6 +461,7 @@ class PluginManager {
             return {
                 success: installed > 0,
                 upToDate: upToDate === pluginUrls.length,
+                failed: failed - upToDate,
                 message: `Installed: ${installed}, Failed: ${failed}`,
             };
         } catch (err: any) {
