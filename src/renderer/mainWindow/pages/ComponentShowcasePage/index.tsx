@@ -93,7 +93,7 @@ const MOCK_SONGS: IMusic.IMusicItemBase[] = Array.from(
             artist: `歌手 ${String.fromCharCode(65 + (i % 26))}`,
             album: `专辑 ${Math.floor(i / 3) + 1}`,
             duration: 180 + Math.floor(Math.random() * 180),
-            platform: ['酷狗', 'QQ', '网易'][i % 3],
+            platform: ['示例平台 A', '示例平台 B', '示例平台 C'][i % 3],
             // 状态列 mock 数据
             liked: i % 3 === 0,
             downloaded: i % 2 === 0,
@@ -482,7 +482,7 @@ export default function ComponentShowcasePage() {
                     <div className="p-component-showcase__group-label">带前缀 / 后缀</div>
                     <div className="p-component-showcase__row">
                         <Chip label="默认" active suffix={<ChevronDown size={14} />} />
-                        <Chip label="网易云" prefix={<Music2 size={14} />} />
+                        <Chip label="示例平台" prefix={<Music2 size={14} />} />
                         <Chip
                             label="可删除"
                             suffix={<X size={14} style={{ cursor: 'pointer' }} />}
@@ -799,8 +799,8 @@ export default function ComponentShowcasePage() {
                 <MusicSheetHeader
                     musicSheet={{
                         id: 'sheet-1',
-                        platform: '网易云',
-                        title: '每日推荐歌单',
+                        platform: '示例平台',
+                        title: '示例歌单标题',
                         description:
                             '根据你的听歌习惯，每日为你推荐30首歌曲。支持多种音乐平台，自动匹配最佳音质。',
                         worksNum: 30,
