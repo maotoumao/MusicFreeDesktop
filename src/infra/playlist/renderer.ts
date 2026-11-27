@@ -188,6 +188,13 @@ function mergeDisplayFields(current: IMusicItemSlim, next: IMusicItemSlim): IMus
     };
 }
 
+/** 重排传入的是当前列表里这些对象的完整重新排列（拖拽排序的情况），可直接作为新列表 */
+function isPermutationOf(op: IListOp, list: IMusicItemSlim[]): op is IListOp & { kind: 'order' } {
+    if (op.kind !== 'order' || op.items.length !== list.length) return false;
+    const present = new Set(list);
+    return op.items.every((m) => present.has(m));
+}
+
 /** 作用到收藏键集合，返回是否有变化 */
 function applyToSet(set: Set<string>, op: IListOp): boolean {
     const before = set.size;
@@ -509,7 +516,8 @@ class PlaylistRenderer {
     ): Promise<T> {
         this.pendingOps.push(op);
         if (this.hasCurrentSnapshot() && opTargets(op, this.currentPlaylistId!)) {
-            store.set(musicListAtom, applyToList(store.get(musicListAtom), op));
+            const list = store.get(musicListAtom);
+            store.set(musicListAtom, isPermutationOf(op, list) ? op.items : applyToList(list, op));
         }
         if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID) && applyToSet(this.favoriteIdSet, op)) {
             this.events.emit('favoriteChange');
@@ -558,8 +566,10 @@ class PlaylistRenderer {
      */
     private refreshIfPartialOrder(op: Extract<IListOp, { kind: 'order' }>) {
         if (!this.hasCurrentSnapshot() || this.currentPlaylistId !== op.playlistId) return;
+        const base = this.compactListBase();
+        if (base === op.items) return;
         const covered = new Set(op.items.map(keyOf));
-        if (this.compactListBase().every((m) => covered.has(keyOf(m)))) return;
+        if (base.every((m) => covered.has(keyOf(m)))) return;
         this.refreshCurrentList().catch((e) =>
             this.events.emit('error', e instanceof Error ? e : new Error(String(e))),
         );
