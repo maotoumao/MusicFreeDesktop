@@ -96,7 +96,7 @@ class DownloadManager {
     private taskGeneration = new Map<string, number>();
     /** 下载进度缓存（用于节流广播） */
     private progressCache = new Map<string, IDownloadProgress>();
-    /** 歌单条目的封面：完整数据缺封面时只用于写文件标签，不写回库（避免覆盖期间更新的封面） */
+    /** 歌单条目的列表封面：完整数据缺封面时只用于写文件标签，不写回库（写回会覆盖下载过程中别处写入的新封面） */
     private shownArtworks = new Map<string, unknown>();
     /** 下一个任务允许启动的最早时间戳（启动间隔闸门） */
     private nextAllowedStart = 0;
