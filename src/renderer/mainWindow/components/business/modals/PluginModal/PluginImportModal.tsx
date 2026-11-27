@@ -20,7 +20,7 @@ interface PluginImportModalProps {
 /**
  * PluginImportModal — 导入单曲/歌单弹窗
  *
- * 单步流程：输入 URL → 加载 → 成功后链式打开 AddMusicToSheetModal
+ * 单步流程：输入 URL → 加载 → 成功后链式打开 AddMusicToPlaylistModal
  */
 export default function PluginImportModal({ close, plugin, type }: PluginImportModalProps) {
     const { t } = useTranslation();
@@ -54,7 +54,7 @@ export default function PluginImportModal({ close, plugin, type }: PluginImportM
                     return;
                 }
                 close();
-                showModal('AddMusicToSheetModal', { musicItems: items });
+                showModal('AddMusicToPlaylistModal', { musicItems: items });
             } else {
                 showToast(t('plugin.import_invalid_link'), { type: 'warn' });
             }

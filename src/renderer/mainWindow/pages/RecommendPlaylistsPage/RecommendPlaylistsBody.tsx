@@ -7,14 +7,14 @@ import { StatusPlaceholder } from '../../components/ui/StatusPlaceholder';
 import { playlistRoute } from '../../routes';
 import { TagFilter, DEFAULT_TAG } from './TagFilter';
 import { useRecommendTags } from './useRecommendTags';
-import { useRecommendPlaylists } from './useRecommendSheets';
+import { useRecommendPlaylists } from './useRecommendPlaylists';
 
 interface RecommendPlaylistsBodyProps {
     pluginHash: string;
 }
 
 /**
- * RecommendSheetsBody — 单个插件的推荐歌单内容
+ * RecommendPlaylistsBody — 单个插件的推荐歌单内容
  *
  * 标签筛选栏 + MediaGrid 歌单卡片网格 + 分页加载
  */

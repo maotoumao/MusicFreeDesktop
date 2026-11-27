@@ -24,8 +24,8 @@ import systemUtil from '@infra/systemUtil/renderer';
 import { showModal } from '../../ui/Modal/modalManager';
 import { RoutePaths } from '../../../routes';
 import type { RoutePath } from '../../../routes';
-import LocalPlaylistNavItem from './LocalSheetNavItem';
-import StarredPlaylistNavItem from './StarredSheetNavItem';
+import LocalPlaylistNavItem from './LocalPlaylistNavItem';
+import StarredPlaylistNavItem from './StarredPlaylistNavItem';
 import './index.scss';
 
 // 底部工具按钮: icon + route + i18n key
@@ -46,7 +46,7 @@ export default function Sidebar() {
     const activeSegment = location.pathname.split('/')[1] ?? '';
 
     const handleCreatePlaylist = useCallback(() => {
-        showModal('CreateSheetModal');
+        showModal('CreatePlaylistModal');
     }, []);
 
     return (

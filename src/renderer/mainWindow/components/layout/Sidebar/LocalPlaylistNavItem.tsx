@@ -32,7 +32,7 @@ export default function LocalPlaylistNavItem({
             if (isFavorite) return;
             e.preventDefault();
             showContextMenu(
-                'LocalSheetMenu',
+                'LocalPlaylistMenu',
                 { x: e.clientX, y: e.clientY },
                 {
                     sheetId: playlist.id,

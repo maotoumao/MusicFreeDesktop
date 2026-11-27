@@ -15,9 +15,9 @@ import PluginUserVariableModal from './PluginModal/PluginUserVariableModal';
 import PluginDescriptionModal from './PluginModal/PluginDescriptionModal';
 import PluginSubscriptionModal from './PluginModal/PluginSubscriptionModal';
 import PluginSourceRedirectModal from './PluginModal/PluginSourceRedirectModal';
-import AddMusicToPlaylistModal from './AddMusicToSheetModal';
-import CreatePlaylistModal from './CreateSheetModal';
-import RenamePlaylistModal from './RenameSheetModal';
+import AddMusicToPlaylistModal from './AddMusicToPlaylistModal';
+import CreatePlaylistModal from './CreatePlaylistModal';
+import RenamePlaylistModal from './RenamePlaylistModal';
 import TextModal from './TextModal';
 import SearchLyricModal from './SearchLyricModal';
 import ScanFolderModal from './ScanFolderModal';
@@ -37,9 +37,9 @@ export const modalRegistry = {
     PluginDescriptionModal,
     PluginSubscriptionModal,
     PluginSourceRedirectModal,
-    AddMusicToSheetModal: AddMusicToPlaylistModal,
-    CreateSheetModal: CreatePlaylistModal,
-    RenameSheetModal: RenamePlaylistModal,
+    AddMusicToPlaylistModal: AddMusicToPlaylistModal,
+    CreatePlaylistModal: CreatePlaylistModal,
+    RenamePlaylistModal: RenamePlaylistModal,
     TextModal,
     SearchLyricModal,
     ScanFolderModal,

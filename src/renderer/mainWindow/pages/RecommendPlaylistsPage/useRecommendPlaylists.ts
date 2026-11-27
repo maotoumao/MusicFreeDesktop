@@ -3,7 +3,7 @@ import { RequestStatus } from '@common/constant';
 import pluginManager from '@infra/pluginManager/renderer';
 
 /**
- * useRecommendSheets — 获取推荐歌单列表 hook
+ * useRecommendPlaylists — 获取推荐歌单列表 hook
  *
  * 支持分页加载。当 tag 变更时，自动重置并加载首页。
  */

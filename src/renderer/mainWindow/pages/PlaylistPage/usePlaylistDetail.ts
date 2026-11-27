@@ -4,7 +4,7 @@ import { compositeKey } from '@common/mediaKey';
 import pluginManager from '@infra/pluginManager/renderer';
 
 /**
- * useSheetDetail — 远程歌单详情 hook
+ * usePlaylistDetail — 远程歌单详情 hook
  *
  * 分页加载歌单内歌曲列表，自动合并插件返回的歌单元数据。
  * 首次 mount 立即触发第一页加载。

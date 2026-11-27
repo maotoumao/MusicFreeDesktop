@@ -19,7 +19,7 @@ export interface RenamePlaylistModalProps {
 }
 
 /**
- * RenameSheetModal — 重命名歌单弹窗（业务组件）
+ * RenamePlaylistModal — 重命名歌单弹窗（业务组件）
  */
 export default function RenamePlaylistModal({
     close,

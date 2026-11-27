@@ -36,7 +36,7 @@ export default function StarredPlaylistNavItem({
         (e: MouseEvent) => {
             e.preventDefault();
             showContextMenu(
-                'StarredSheetMenu',
+                'StarredPlaylistMenu',
                 { x: e.clientX, y: e.clientY },
                 {
                     sheetItem: { platform: item.platform, id: item.id },

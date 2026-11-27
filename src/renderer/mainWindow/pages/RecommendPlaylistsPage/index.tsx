@@ -1,5 +1,5 @@
 /**
- * RecommendSheetsPage — 热门歌单页
+ * RecommendPlaylistsPage — 热门歌单页
  *
  * 路由: /recommend-sheets
  *
@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useSortedSupportedPlugins } from '@infra/pluginManager/renderer/hooks';
 import { PluginFeatureUnavailable } from '../../components/business/PluginFeatureUnavailable';
 import { TabBar } from '../../components/ui/TabBar';
-import { RecommendPlaylistsBody } from './RecommendSheetsBody';
+import { RecommendPlaylistsBody } from './RecommendPlaylistsBody';
 import './index.scss';
 
 export default function RecommendPlaylistsPage() {

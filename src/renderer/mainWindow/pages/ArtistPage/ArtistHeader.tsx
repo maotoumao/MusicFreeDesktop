@@ -27,7 +27,7 @@ const DESC_CLAMP_THRESHOLD = 60;
 /**
  * ArtistHeader — 作者详情页头部
  *
- * 布局与 MusicSheetHeader 同级视觉重量：
+ * 布局与 PlaylistHeader 同级视觉重量：
  *   左侧 200×200 圆形头像 + 右侧（名称 + 描述 + 元信息）
  */
 export function ArtistHeader({ artist, className }: ArtistHeaderProps) {

@@ -8,7 +8,7 @@ export interface StarredPlaylistMenuContext {
 }
 
 /**
- * StarredSheetMenu — 收藏歌单右键菜单模板
+ * StarredPlaylistMenu — 收藏歌单右键菜单模板
  *
  * 在 Sidebar 的收藏歌单列表上右键触发，提供取消收藏操作。
  */

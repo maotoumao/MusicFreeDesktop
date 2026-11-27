@@ -23,7 +23,7 @@ import { Chip } from '../../components/ui/Chip';
 import { MusicResult } from './components/MusicResult';
 import { AlbumResult } from './components/AlbumResult';
 import { ArtistResult } from './components/ArtistResult';
-import { PlaylistResult } from './components/SheetResult';
+import { PlaylistResult } from './components/PlaylistResult';
 import {
     SEARCH_MEDIA_TYPES,
     SEARCH_TAB_LABEL_KEYS,

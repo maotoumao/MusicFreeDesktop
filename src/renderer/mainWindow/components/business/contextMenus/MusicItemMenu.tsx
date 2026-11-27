@@ -115,7 +115,7 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
         icon: <ListPlus />,
         label: i18n.t('playlist.add_to_sheet_menu'),
         onClick: () => {
-            showModal('AddMusicToSheetModal', { musicItems: items });
+            showModal('AddMusicToPlaylistModal', { musicItems: items });
         },
     });
 

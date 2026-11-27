@@ -17,10 +17,10 @@ export interface AddMusicToPlaylistModalProps {
 }
 
 /**
- * AddMusicToSheetModal — 添加歌曲到歌单
+ * AddMusicToPlaylistModal — 添加歌曲到歌单
  *
  * 列出所有用户歌单（含"我喜欢"），点击即添加并关闭。
- * 顶部"新建歌单"入口：关闭当前弹窗，打开 CreateSheetModal。
+ * 顶部"新建歌单"入口：关闭当前弹窗，打开 CreatePlaylistModal。
  */
 export default function AddMusicToPlaylistModal({
     close,
@@ -40,7 +40,7 @@ export default function AddMusicToPlaylistModal({
 
     const handleCreatePlaylist = useCallback(() => {
         close();
-        showModal('CreateSheetModal', { initMusicItems: musicItems });
+        showModal('CreatePlaylistModal', { initMusicItems: musicItems });
     }, [close, musicItems]);
 
     return (

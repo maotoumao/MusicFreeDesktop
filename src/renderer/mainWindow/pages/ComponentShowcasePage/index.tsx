@@ -25,7 +25,7 @@ import { showModal } from '../../components/ui/Modal/modalManager';
 import { showContextMenu } from '../../components/ui/ContextMenu/contextMenuManager';
 import { Drawer } from '../../components/ui/Drawer';
 import { toggleQueueDrawer } from '../../components/layout/QueueDrawer/queueDrawerState';
-import { PlaylistHeader } from '../../components/ui/MusicSheetHeader';
+import { PlaylistHeader } from '../../components/ui/PlaylistHeader';
 import { SongToolbar } from '../../components/ui/SongToolbar';
 import { SongTable } from '../../components/business/SongTable';
 import { FavoriteButton } from '../../components/business/FavoriteButton';
@@ -795,7 +795,7 @@ export default function ComponentShowcasePage() {
                 MusicHeader
                ══════════════════════════════════════════════════════════════ */}
             <section className="p-component-showcase__section">
-                <h2 className="p-component-showcase__section-title">MusicSheetHeader</h2>
+                <h2 className="p-component-showcase__section-title">PlaylistHeader</h2>
                 <PlaylistHeader
                     playlist={{
                         id: 'sheet-1',

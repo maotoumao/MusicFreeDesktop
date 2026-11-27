@@ -21,7 +21,7 @@ import playlistManager, {
 import { DEFAULT_FAVORITE_PLAYLIST_ID } from '@infra/playlist/common/constant';
 import { localPlaylistRoute } from '../../routes';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
-import { PlaylistHeader } from '../../components/ui/MusicSheetHeader';
+import { PlaylistHeader } from '../../components/ui/PlaylistHeader';
 import { SongTable, type RowInteractionDetail } from '../../components/business/SongTable';
 import { FavoriteButton } from '../../components/business/FavoriteButton';
 import { DownloadButton } from '../../components/business/DownloadButton';
@@ -34,12 +34,12 @@ import { showContextMenu } from '../../components/ui/ContextMenu/contextMenuMana
 import './index.scss';
 
 /**
- * LocalSheetPage — 本地歌单详情页
+ * LocalPlaylistPage — 本地歌单详情页
  *
  * 路由: /local-sheet/:id
  *
  * 功能：
- *   - MusicSheetHeader：封面 + 标题 + 描述 + 元信息
+ *   - PlaylistHeader：封面 + 标题 + 描述 + 元信息
  *   - SongToolbar：播放全部 + 添加到歌单 + 搜索
  *   - SongTable：虚拟滚动表格，支持拖拽排序 + 多选 + 右键菜单
  *   - 收藏夹特殊处理：标题 i18n、Heart 占位图标
@@ -130,7 +130,7 @@ export default function LocalPlaylistPage() {
     const handleAddToPlaylist = useCallback(() => {
         if (filteredList.length === 0) return;
         // slim 对象可安全传入：upsert 使用 COALESCE 保护已有 raw 数据
-        showModal('AddMusicToSheetModal', {
+        showModal('AddMusicToPlaylistModal', {
             musicItems: filteredList as IMusic.IMusicItem[],
         });
     }, [filteredList]);
@@ -206,7 +206,7 @@ export default function LocalPlaylistPage() {
         [id, isSearching],
     );
 
-    // ── 构造 MusicSheetHeader 所需数据 ──
+    // ── 构造 PlaylistHeader 所需数据 ──
     const headerPlaylist = useMemo((): IMusic.IPlaylistItem => {
         const base = {
             id: id ?? '',

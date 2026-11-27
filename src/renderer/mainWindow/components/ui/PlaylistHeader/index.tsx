@@ -23,11 +23,11 @@ export interface PlaylistHeaderProps {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// MusicSheetHeader Component
+// PlaylistHeader Component
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * MusicSheetHeader — 组合组件
+ * PlaylistHeader — 组合组件
  *
  * 歌单 / 排行榜 / 专辑详情页的头部区域：
  * 左侧 200×200 封面 + 右侧（标题 + 描述 + 元信息）。

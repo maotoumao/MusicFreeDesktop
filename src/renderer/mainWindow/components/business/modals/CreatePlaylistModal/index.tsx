@@ -17,7 +17,7 @@ export interface CreatePlaylistModalProps {
 }
 
 /**
- * CreateSheetModal — 新建歌单弹窗（业务组件）
+ * CreatePlaylistModal — 新建歌单弹窗（业务组件）
  */
 export default function CreatePlaylistModal({ close, initMusicItems }: CreatePlaylistModalProps) {
     const { t } = useTranslation();

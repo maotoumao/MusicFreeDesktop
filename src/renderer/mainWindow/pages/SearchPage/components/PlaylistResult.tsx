@@ -1,5 +1,5 @@
 /**
- * SheetResult — 搜索结果：歌单 Tab
+ * PlaylistResult — 搜索结果：歌单 Tab
  *
  * 使用 ui/MediaGrid 展示歌单卡片网格。
  * IMusicSheetItem 与 MediaGrid 的数据类型完全匹配。

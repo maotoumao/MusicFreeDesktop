@@ -10,7 +10,7 @@ export interface LocalPlaylistMenuContext {
 }
 
 /**
- * LocalSheetMenu — 本地歌单右键菜单模板
+ * LocalPlaylistMenu — 本地歌单右键菜单模板
  *
  * 在 Sidebar 的「创建的歌单」列表上右键触发（仅非默认歌单）。
  * 提供重命名和删除操作。
@@ -24,7 +24,7 @@ export function LocalPlaylistMenu(ctx: LocalPlaylistMenuContext): ContextMenuEnt
             icon: <Pencil />,
             label: i18n.t('playlist.rename_sheet'),
             onClick() {
-                showModal('RenameSheetModal', {
+                showModal('RenamePlaylistModal', {
                     sheetId: playlistId,
                     currentTitle: playlistTitle,
                 });

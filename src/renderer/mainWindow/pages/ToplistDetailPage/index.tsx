@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { FolderPlus } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
-import { PlaylistHeader } from '../../components/ui/MusicSheetHeader';
+import { PlaylistHeader } from '../../components/ui/PlaylistHeader';
 import { SongTable, type RowInteractionDetail } from '../../components/business/SongTable';
 import { FavoriteButton } from '../../components/business/FavoriteButton';
 import { DownloadButton } from '../../components/business/DownloadButton';
@@ -86,7 +86,7 @@ export default function ToplistDetailPage() {
 
     const handleAddToPlaylist = useCallback(() => {
         if (musicList.length === 0) return;
-        showModal('AddMusicToSheetModal', { musicItems: musicList });
+        showModal('AddMusicToPlaylistModal', { musicItems: musicList });
     }, [musicList]);
 
     if (!topListItem) {

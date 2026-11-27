@@ -5,7 +5,7 @@ import { Heart, FolderPlus } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import playlistManager, { useIsPlaylistStarred } from '@infra/playlist/renderer';
-import { PlaylistHeader } from '../../components/ui/MusicSheetHeader';
+import { PlaylistHeader } from '../../components/ui/PlaylistHeader';
 import { SongTable, type RowInteractionDetail } from '../../components/business/SongTable';
 import { FavoriteButton } from '../../components/business/FavoriteButton';
 import { DownloadButton } from '../../components/business/DownloadButton';
@@ -14,11 +14,11 @@ import { ListFooter } from '../../components/ui/ListFooter';
 import { Button } from '../../components/ui/Button';
 import { showContextMenu } from '../../components/ui/ContextMenu/contextMenuManager';
 import { showModal } from '../../components/ui/Modal/modalManager';
-import { usePlaylistDetail } from './useSheetDetail';
+import { usePlaylistDetail } from './usePlaylistDetail';
 import './index.scss';
 
 /**
- * SheetPage — 远程歌单详情页
+ * PlaylistPage — 远程歌单详情页
  *
  * 路由: /musicsheet/:platform/:id
  * state: { sheetItem: IMusic.IMusicSheetItem }
@@ -84,7 +84,7 @@ export default function PlaylistPage() {
 
     const handleAddToPlaylist = useCallback(() => {
         if (musicList.length === 0) return;
-        showModal('AddMusicToSheetModal', { musicItems: musicList });
+        showModal('AddMusicToPlaylistModal', { musicItems: musicList });
     }, [musicList]);
 
     const isStarred = useIsPlaylistStarred(playlistItem);
