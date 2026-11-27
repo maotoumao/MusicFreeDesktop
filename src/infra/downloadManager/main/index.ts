@@ -35,6 +35,7 @@ import type {
 import type { IMusicItemSlim, IMusicItemProvider } from '@appTypes/infra/playlist';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 import type { IAudioTagWriter } from '@appTypes/infra/audioTag';
+import { withoutInvalidArtwork } from '@common/musicItemToSlim';
 import { FILE_NAME_TEMPLATES, IPC } from '../common/constant';
 import { DownloadTask } from './downloadTask';
 import { fetchCover } from './fetchCover';
@@ -368,7 +369,8 @@ class DownloadManager {
             totalBytes: 0,
             downloadedBytes: 0,
             mediaSource: null,
-            musicItemRaw: safeStringify(musicItem),
+            // 去掉不认的封面，避免含 BigInt 等的封面让完整数据无法序列化
+            musicItemRaw: safeStringify(withoutInvalidArtwork(musicItem)),
             error: null,
             createdAt: now,
             updatedAt: now,
