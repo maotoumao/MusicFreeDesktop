@@ -35,7 +35,7 @@ import type {
 import type { IMusicItemSlim, IMusicItemProvider } from '@appTypes/infra/playlist';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 import type { IAudioTagWriter } from '@appTypes/infra/audioTag';
-import { withoutInvalidArtwork } from '@common/musicItemToSlim';
+import { withShownArtwork, withoutInvalidArtwork } from '@common/musicItemToSlim';
 import { FILE_NAME_TEMPLATES, IPC } from '../common/constant';
 import { DownloadTask } from './downloadTask';
 import { fetchCover } from './fetchCover';
@@ -463,8 +463,8 @@ class DownloadManager {
                         String(musicItem.id),
                     );
                     if (full) {
-                        musicItem = full;
-                        task.musicItemRaw = safeStringify(full);
+                        musicItem = withShownArtwork(full, musicItem.artwork);
+                        task.musicItemRaw = safeStringify(musicItem);
                     }
                 }
 

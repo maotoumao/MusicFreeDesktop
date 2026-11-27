@@ -43,3 +43,16 @@ export function withoutInvalidArtwork<T extends { artwork?: unknown }>(item: T):
         ? item
         : { ...item, artwork: undefined };
 }
+
+/**
+ * 完整数据里没有可用封面、而展示列（列表里看到的）有封面时，用展示列的封面补上。
+ * 库里会出现这种状态：以没有封面的资料再次写入同一首歌时，展示列保留原封面，完整数据整条替换。
+ */
+export function withShownArtwork<T extends { artwork?: unknown }>(
+    full: T,
+    shownArtwork: unknown,
+): T {
+    return typeof full.artwork !== 'string' && typeof shownArtwork === 'string'
+        ? { ...full, artwork: shownArtwork }
+        : full;
+}
