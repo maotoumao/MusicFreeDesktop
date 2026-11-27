@@ -108,12 +108,26 @@ interface IRendererEvents {
  * 写完后并入快照，写入失败或被清出队列时丢弃。
  */
 type IListOp =
-    | { kind: 'add'; playlistId: string; items: IMusicItemSlim[]; deferred: boolean }
+    | {
+          kind: 'add';
+          playlistId: string;
+          items: IMusicItemSlim[];
+          deferred: boolean;
+          /** 延迟添加写完后实际写入的歌曲 */
+          accepted?: IMusicItemSlim[];
+      }
     /** playlistId 为 null 表示从所有歌单移除 */
     | { kind: 'remove'; playlistId: string | null; keys: Set<string> }
     | { kind: 'clear'; playlistId: string }
-    /** full：发起时是当前完整列表（不含还没显示的延迟添加）的重新排列 */
-    | { kind: 'order'; playlistId: string; items: IMusicItemSlim[]; full: boolean };
+    | {
+          kind: 'order';
+          playlistId: string;
+          items: IMusicItemSlim[];
+          /** 发起时是当前界面列表的完整重新排列，可直接作为新列表 */
+          direct: boolean;
+          /** 发起时还没显示的延迟添加：写完后若收下了不在这次重排里的歌，需要重读实际顺序 */
+          hiddenAdds: IListOp[];
+      };
 
 const keyOf = (m: IMedia.IMediaBase) => compositeKey(m.platform, String(m.id));
 
@@ -357,6 +371,7 @@ class PlaylistRenderer {
                 if (truncated <= 0 && !deferred) return op;
                 // 主进程按输入顺序写入前 length - truncated 首
                 const accepted = slimItems.slice(0, slimItems.length - truncated);
+                if (deferred) op.accepted = added > 0 ? accepted : [];
                 return {
                     op: { ...op, items: accepted, deferred: false },
                     changed: truncated > 0 ? !deferred || added > 0 : added > 0,
@@ -402,14 +417,14 @@ class PlaylistRenderer {
     updateMusicOrder(playlistId: string, orderedMusicList: IMusicItemSlim[]): void {
         const keys = orderedMusicList.map((m) => ({ platform: m.platform, id: m.id }));
         const items = [...orderedMusicList];
-        const full =
+        const direct =
             this.hasCurrentSnapshot() &&
             this.currentPlaylistId === playlistId &&
-            isPermutationOf(items, store.get(musicListAtom)) &&
-            !this.pendingOps.some(
-                (p) => p.kind === 'add' && p.deferred && opTargets(p, playlistId),
-            );
-        void this.commit({ kind: 'order', playlistId, items, full }, () =>
+            isPermutationOf(items, store.get(musicListAtom));
+        const hiddenAdds = this.pendingOps.filter(
+            (p) => p.kind === 'add' && p.deferred && opTargets(p, playlistId),
+        );
+        void this.commit({ kind: 'order', playlistId, items, direct, hiddenAdds }, () =>
             mod.updateMusicOrder(playlistId, keys),
         );
     }
@@ -538,7 +553,7 @@ class PlaylistRenderer {
             const list = store.get(musicListAtom);
             store.set(
                 musicListAtom,
-                op.kind === 'order' && op.full ? op.items : applyToList(list, op),
+                op.kind === 'order' && op.direct ? op.items : applyToList(list, op),
             );
         }
         if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID) && applyToSet(this.favoriteIdSet, op)) {
@@ -584,11 +599,15 @@ class PlaylistRenderer {
 
     /**
      * 主进程重排只给传入的歌依次设序号，其余歌保留原序号、可能落在中间：
-     * 发起时不是当前完整列表的重新排列（如还有没显示的延迟添加）的重排，写完后按队列顺序重新读取实际顺序。
+     * 发起时不是当前界面列表的完整重新排列，或之前的延迟添加收下了不在这次重排里的歌时，写完后按队列顺序重新读取实际顺序。
      */
     private refreshIfPartialOrder(op: Extract<IListOp, { kind: 'order' }>) {
-        if (op.full || !this.hasCurrentSnapshot() || this.currentPlaylistId !== op.playlistId) {
-            return;
+        if (!this.hasCurrentSnapshot() || this.currentPlaylistId !== op.playlistId) return;
+        if (op.direct) {
+            const accepted = op.hiddenAdds.flatMap((a) => (a.kind === 'add' && a.accepted) || []);
+            if (accepted.length === 0) return;
+            const ordered = new Set(op.items.map(keyOf));
+            if (accepted.every((m) => ordered.has(keyOf(m)))) return;
         }
         this.refreshCurrentList().catch((e) =>
             this.events.emit('error', e instanceof Error ? e : new Error(String(e))),
