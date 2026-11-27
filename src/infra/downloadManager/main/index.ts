@@ -97,6 +97,8 @@ class DownloadManager {
     private activeTasks = new Map<string, DownloadTask>();
     /** 任务世代号（每次 pause/remove 递增，用于拦截过时的 p-queue 回调） */
     private taskGeneration = new Map<string, number>();
+    /** 退出时中止写标签用的封面下载，收尾中的下载只写文字标签，尽快完成登记 */
+    private coverAbort = new AbortController();
     /** 每个任务最近一次执行（含改名、写标签、登记），结束后移除 */
     private runs = new Map<string, Promise<void>>();
     /** 下载进度缓存（用于节流广播） */
@@ -183,6 +185,7 @@ class DownloadManager {
         this.activeTasks.clear();
         this.queue.clear();
 
+        this.coverAbort.abort();
         const running = Array.from(this.runs.values());
         if (running.length > 0) {
             await Promise.race([Promise.allSettled(running), delay(DISPOSE_WAIT_MS)]);
@@ -587,7 +590,7 @@ class DownloadManager {
                     } catch (completeErr: any) {
                         // 清理已 rename 的孤立文件，避免磁盘泄漏
                         if (task.filePath) {
-                            fsp.unlink(task.filePath).catch(() => {
+                            await fsp.unlink(task.filePath).catch(() => {
                                 /* ignore */
                             });
                         }
@@ -917,7 +920,9 @@ class DownloadManager {
     /** 把歌曲信息和封面写入下载的文件；失败只记录日志，不影响下载结果 */
     private async writeTags(filePath: string, musicItem: IMusic.IMusicItem): Promise<void> {
         if (!this.audioTag.canWrite(filePath)) return;
-        const cover = await fetchCover(musicItem.artwork).catch((): undefined => undefined);
+        const cover = await fetchCover(musicItem.artwork, this.coverAbort.signal).catch(
+            (): undefined => undefined,
+        );
         try {
             await this.audioTag.write(filePath, {
                 title: musicItem.title,

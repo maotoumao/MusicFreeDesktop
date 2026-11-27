@@ -13,8 +13,11 @@ function detectImageMime(data: Uint8Array): string | null {
     return null;
 }
 
-/** 取歌曲封面（http(s) 地址或 data URL）；取不到或不是 JPEG / PNG 时返回 undefined */
-export async function fetchCover(artwork: string | undefined): Promise<IAudioTags['cover']> {
+/** 取歌曲封面（http(s) 地址或 data URL）；取不到或不是 JPEG / PNG 时返回 undefined，signal 中止时抛错 */
+export async function fetchCover(
+    artwork: string | undefined,
+    signal?: AbortSignal,
+): Promise<IAudioTags['cover']> {
     if (!artwork) return undefined;
     let data: Uint8Array;
     if (artwork.startsWith('data:')) {
@@ -24,6 +27,7 @@ export async function fetchCover(artwork: string | undefined): Promise<IAudioTag
             responseType: 'arraybuffer',
             timeout: 10_000,
             maxContentLength: MAX_COVER_BYTES,
+            signal,
         });
         data = new Uint8Array(response.data);
     } else {
