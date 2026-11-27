@@ -120,21 +120,34 @@ function opTargets(op: IListOp, playlistId: string): boolean {
     return op.playlistId === null || op.playlistId === playlistId;
 }
 
-/** 与主进程写入语义一致：新歌插到最前（已有的保持原位、同一批只插一次）；重排后才加入的歌在最前 */
+/** 与主进程写入语义一致：新歌插到最前（已有的保持原位并更新资料、同一批只插一次）；重排后才加入的歌在最前 */
 function applyToList(list: IMusicItemSlim[], op: IListOp): IMusicItemSlim[] {
     switch (op.kind) {
         case 'add': {
             if (op.deferred) return list;
+            // 同一首歌以最后一次出现的资料为准（主进程逐条 upsert），位置取第一次出现
+            const incoming = new Map<string, IMusicItemSlim>();
+            for (const m of op.items) incoming.set(keyOf(m), m);
             const seen = new Set(list.map(keyOf));
             const fresh: IMusicItemSlim[] = [];
+            let overlaps = false;
             for (const m of op.items) {
                 const k = keyOf(m);
-                if (!seen.has(k)) {
-                    seen.add(k);
-                    fresh.push(m);
+                if (seen.has(k)) {
+                    overlaps = true;
+                    continue;
                 }
+                seen.add(k);
+                fresh.push(incoming.get(k)!);
             }
-            return fresh.length > 0 ? [...fresh, ...list] : list;
+            // 已在歌单里的歌保持原位，展示资料按主进程 upsert 更新
+            const base = overlaps
+                ? list.map((m) => {
+                      const next = incoming.get(keyOf(m));
+                      return next ? mergeDisplayFields(m, next) : m;
+                  })
+                : list;
+            return fresh.length > 0 ? [...fresh, ...base] : base;
         }
         case 'remove': {
             const next = list.filter((m) => !op.keys.has(keyOf(m)));
@@ -151,6 +164,28 @@ function applyToList(list: IMusicItemSlim[], op: IListOp): IMusicItemSlim[] {
             ];
         }
     }
+}
+
+/** 与主进程 upsertMusicItem 一致：标题、歌手、专辑、时长覆盖，封面为空时保留原值 */
+function mergeDisplayFields(current: IMusicItemSlim, next: IMusicItemSlim): IMusicItemSlim {
+    const artwork = next.artwork ?? current.artwork;
+    if (
+        current.title === next.title &&
+        current.artist === next.artist &&
+        current.album === next.album &&
+        current.duration === next.duration &&
+        current.artwork === artwork
+    ) {
+        return current;
+    }
+    return {
+        ...current,
+        title: next.title,
+        artist: next.artist,
+        album: next.album,
+        duration: next.duration,
+        artwork,
+    };
 }
 
 /** 作用到收藏键集合，返回是否有变化 */
