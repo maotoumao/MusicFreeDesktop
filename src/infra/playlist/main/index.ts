@@ -736,7 +736,7 @@ interface IStoredMusicRow {
 /**
  * 恢复备份时一首歌最终写库的数据，展示列与完整数据都用这一份：
  * 以库里已有的完整数据为底，叠加备份曲目的字段；标题、歌手、专辑、时长、封面
- * 依次取备份、已有展示列、已有完整数据中第一个可用的值；都没有时展示列写空串，完整数据里标题写空串、歌手和专辑不写。
+ * 依次取备份、已有展示列、已有完整数据中第一个可用的值（备份里的空标题不算可用）；都没有时展示列写空串，完整数据里标题写空串、歌手和专辑不写。
  */
 function mergeRestoredItem(item: IMusic.IMusicItem, existing?: IStoredMusicRow): IMusic.IMusicItem {
     const backup = item as unknown as Record<string, unknown>;
