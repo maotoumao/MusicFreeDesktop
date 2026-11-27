@@ -714,7 +714,6 @@ class DownloadManager {
         // 文件名与建任务时等长，能建任务的文件名重试时不会超长
         const oldTempPath = task.tempPath;
         task.tempPath = `${task.filePath}.${nanoid(task.id.length)}.downloading`;
-        this.queries.setTempPath.run(task.tempPath, task.id);
 
         // 清空 mediaSource 强制延迟到 enqueueTask 中重新获取
         task.mediaSource = null;
@@ -723,7 +722,11 @@ class DownloadManager {
         task.downloadedBytes = 0;
         task.totalBytes = 0;
         task.updatedAt = Date.now();
-        this.updateTaskStatus(task);
+        // 新路径与重试状态一起写入：写入失败时任务行仍指向旧临时文件
+        this.db.getDatabase().transaction(() => {
+            this.queries.setTempPath.run(task.tempPath, task.id);
+            this.updateTaskStatus(task);
+        })();
         // 旧临时文件在上一次执行结束后删除，删不掉只会留下一个不再使用的文件
         this.enqueueTask(task, async () => {
             if (oldTempPath) await fsp.unlink(oldTempPath).catch(() => {});
