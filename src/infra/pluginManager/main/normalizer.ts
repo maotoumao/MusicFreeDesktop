@@ -8,6 +8,47 @@
 import { cleanMediaInput, resetMediaItem, resetMediaItems } from '../common/mediaUtil';
 
 /**
+ * 歌单相关方法的新旧名称：手机端起插件协议改用 playlist 命名（旧名仍兼容）。
+ * 桌面端内部沿用旧名调用；插件实现了新名时优先调用新名，否则调用旧名。
+ */
+export const PLAYLIST_METHOD_ALIASES = {
+    getMusicSheetInfo: 'getPlaylistInfo',
+    importMusicSheet: 'importPlaylist',
+    getRecommendSheetTags: 'getRecommendPlaylistTags',
+    getRecommendSheetsByTag: 'getRecommendPlaylistsByTag',
+} as const;
+
+const ALIAS_TO_INTERNAL: Record<string, string> = Object.fromEntries(
+    Object.entries(PLAYLIST_METHOD_ALIASES).map(([internal, alias]) => [alias, internal]),
+);
+
+/** 插件方法名 → 桌面端内部方法名（新名换成对应旧名，其余不变） */
+export function toInternalMethodName(name: string): string {
+    return ALIAS_TO_INTERNAL[name] ?? name;
+}
+
+/** 插件声明的搜索类型 → 桌面端内部类型（'playlist' 记作 'sheet'），去重 */
+export function toInternalSearchTypes(types: unknown): string[] | undefined {
+    if (!Array.isArray(types)) return undefined;
+    const out: string[] = [];
+    for (const type of types) {
+        if (typeof type !== 'string') continue;
+        const internal = type === 'playlist' ? 'sheet' : type;
+        if (!out.includes(internal)) out.push(internal);
+    }
+    return out;
+}
+
+/**
+ * 搜索歌单时发给插件的类型：只声明了 'playlist' 的新版插件收到 'playlist'；
+ * 其余（声明了 'sheet' 或未声明）照旧收到 'sheet'
+ */
+export function toPluginSearchType(type: unknown, declared: unknown): unknown {
+    if (type !== 'sheet' || !Array.isArray(declared)) return type;
+    return declared.includes('playlist') && !declared.includes('sheet') ? 'playlist' : type;
+}
+
+/**
  * 方法标准化器定义。
  * - beforeCall: 在调用插件方法前对参数进行清洗/转换。接收原始 args 数组，返回新 args。
  * - afterCall: 在调用插件方法后对返回值进行标准化。接收原始返回值、平台名及原始调用参数。
@@ -162,7 +203,11 @@ export const methodNormalizers: Partial<
 
             if (page <= 1) {
                 return {
-                    sheetItem: { ...sheetItem, ...(result?.sheetItem ?? {}) },
+                    // 新版插件返回 playlistItem，旧插件返回 sheetItem
+                    sheetItem: {
+                        ...sheetItem,
+                        ...(result?.playlistItem ?? result?.sheetItem ?? {}),
+                    },
                     isEnd: result.isEnd === false ? false : true,
                     musicList: result.musicList,
                 };

@@ -10,6 +10,7 @@ import vm from 'vm';
 import crypto from 'crypto';
 import { createPluginRequire } from './pluginPolyfill';
 import type { PluginStorage } from './pluginStorage';
+import { toInternalMethodName, toInternalSearchTypes } from './normalizer';
 
 /**
  * 沙箱环境配置选项。
@@ -263,11 +264,12 @@ export function extractPluginDelegate(
     instance: IPlugin.IPluginInstance,
     hash: string,
 ): IPlugin.IPluginDelegate {
-    // 提取支持的方法名列表
+    // 提取支持的方法名列表（新版插件的 playlist 方法名换成桌面端内部名）
     const supportedMethod: string[] = [];
     for (const key of Object.keys(instance)) {
-        if (typeof (instance as any)[key] === 'function') {
-            supportedMethod.push(key);
+        const name = toInternalMethodName(key);
+        if (typeof (instance as any)[key] === 'function' && !supportedMethod.includes(name)) {
+            supportedMethod.push(name);
         }
     }
 
@@ -281,6 +283,7 @@ export function extractPluginDelegate(
 
     const delegate: IPlugin.IPluginDelegate = {
         ...JSON.parse(JSON.stringify(raw)),
+        supportedSearchType: toInternalSearchTypes(raw.supportedSearchType),
         supportedMethod,
         hash,
         path: instance._path,

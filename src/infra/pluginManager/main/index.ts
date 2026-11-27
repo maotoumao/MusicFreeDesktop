@@ -48,7 +48,7 @@ import {
     type ISandboxOptions,
 } from './pluginSandbox';
 import { PluginStorage } from './pluginStorage';
-import { methodNormalizers } from './normalizer';
+import { methodNormalizers, PLAYLIST_METHOD_ALIASES, toPluginSearchType } from './normalizer';
 import type { IAppConfigReader } from '@appTypes/infra/appConfig';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 import type { IMusicItemProvider } from '@appTypes/infra/musicSheet';
@@ -372,8 +372,10 @@ class PluginManager {
         const pluginPlatform = instance.platform;
         const normalizer = methodNormalizers[method];
 
-        // 检查插件是否实现了该方法
-        const methodFn = (instance as any)[method];
+        // 检查插件是否实现了该方法（歌单相关方法优先用新名）
+        const alias = PLAYLIST_METHOD_ALIASES[method as keyof typeof PLAYLIST_METHOD_ALIASES];
+        const aliasFn = alias ? (instance as any)[alias] : undefined;
+        const methodFn = typeof aliasFn === 'function' ? aliasFn : (instance as any)[method];
         if (typeof methodFn !== 'function') {
             // 使用默认返回值（如有）
             if (normalizer?.defaultResult) {
@@ -388,6 +390,9 @@ class PluginManager {
         let processedArgs: any[] = [...args];
         if (normalizer?.beforeCall) {
             processedArgs = normalizer.beforeCall(processedArgs);
+        }
+        if (method === 'search') {
+            processedArgs[2] = toPluginSearchType(processedArgs[2], instance.supportedSearchType);
         }
 
         // 调用插件方法

@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### 新增
 
+- 支持手机端新版插件协议的歌单命名：插件实现 getPlaylistInfo、importPlaylist、getRecommendPlaylistTags、getRecommendPlaylistsByTag 或声明搜索类型 playlist 时也能正常使用；只实现旧名称的插件行为不变。
 - 下载设置新增「下载间隔」与「随机抖动」：可设置两次下载任务启动之间的最小间隔（秒），并在其基础上叠加随机浮动，默认关闭。
 - 引入 Issue / PR 治理工作流：长期无活动的 Issue 会被自动标记 `stale` 并关闭；本项目暂不接受 Pull Request，收到的 PR 会附上说明后自动关闭。
 - 本地音乐列表会记住上次的排序方式，重新进入后保持。
@@ -89,6 +90,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Added
 
+- Support the playlist naming of the mobile app's newer plugin protocol: plugins implementing getPlaylistInfo, importPlaylist, getRecommendPlaylistTags or getRecommendPlaylistsByTag, or declaring the playlist search type, now work too; plugins that only implement the old names behave as before.
 - Add "Download interval" and "Random jitter" download settings: configure the minimum interval (seconds) between starting two download tasks, with an optional random variation on top. Disabled by default.
 - Add issue/PR governance workflows: inactive issues are automatically marked `stale` and closed; pull requests are not accepted at the moment and are closed automatically with an explanation.
 - The local music list remembers its last sort order when you come back to it.

@@ -46,6 +46,8 @@ declare namespace IPlugin {
     interface ISheetInfoResult {
         isEnd?: boolean;
         sheetItem?: IMusic.IMusicSheetItem;
+        /** 新版插件（playlist 协议）返回的歌单信息，与 sheetItem 含义相同 */
+        playlistItem?: IMusic.IMusicSheetItem;
         musicList?: IMusic.IMusicItem[];
     }
 
@@ -133,6 +135,11 @@ declare namespace IPlugin {
             tag: ICommon.IUnique,
             page?: number,
         ) => Promise<ICommon.PaginationResponse<IMusic.IMusicSheetItem>>;
+        /** 以下四个是 playlist 协议的新名，与对应的旧名含义相同；插件实现了新名时优先调用 */
+        getPlaylistInfo?: IPluginDefine['getMusicSheetInfo'];
+        importPlaylist?: IPluginDefine['importMusicSheet'];
+        getRecommendPlaylistTags?: IPluginDefine['getRecommendSheetTags'];
+        getRecommendPlaylistsByTag?: IPluginDefine['getRecommendSheetsByTag'];
         /** 歌曲评论 */
         getMusicComments?: (
             musicItem: IMusic.IMusicItem,
