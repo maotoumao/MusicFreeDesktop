@@ -112,7 +112,8 @@ type IListOp =
     /** playlistId 为 null 表示从所有歌单移除 */
     | { kind: 'remove'; playlistId: string | null; keys: Set<string> }
     | { kind: 'clear'; playlistId: string }
-    | { kind: 'order'; playlistId: string; items: IMusicItemSlim[] };
+    /** full：发起时是当前完整列表（不含还没显示的延迟添加）的重新排列 */
+    | { kind: 'order'; playlistId: string; items: IMusicItemSlim[]; full: boolean };
 
 const keyOf = (m: IMedia.IMediaBase) => compositeKey(m.platform, String(m.id));
 
@@ -195,11 +196,11 @@ function mergeDisplayFields(current: IMusicItemSlim, next: IMusicItemSlim): IMus
     };
 }
 
-/** 重排传入的是当前列表里这些对象的完整重新排列（拖拽排序的情况），可直接作为新列表 */
-function isPermutationOf(op: IListOp, list: IMusicItemSlim[]): op is IListOp & { kind: 'order' } {
-    if (op.kind !== 'order' || op.items.length !== list.length) return false;
+/** items 是 list 里这些对象的完整重新排列（拖拽排序的情况） */
+function isPermutationOf(items: IMusicItemSlim[], list: IMusicItemSlim[]): boolean {
+    if (items.length !== list.length) return false;
     const present = new Set(list);
-    return op.items.every((m) => present.has(m));
+    return items.every((m) => present.has(m));
 }
 
 /** 作用到收藏键集合，返回是否有变化 */
@@ -221,9 +222,6 @@ function applyToSet(set: Set<string>, op: IListOp): boolean {
     return set.size !== before;
 }
 
-/** 一直有写入排队、无法直接采用界面列表时，已写完的操作攒到这个数量才并入快照 */
-const SETTLED_COMPACT_LIMIT = 512;
-
 type IReadOutcome =
     { detail: ILocalPlaylistDetail | null } | { error: unknown } | { skipped: true };
 
@@ -240,6 +238,7 @@ class PlaylistRenderer {
     /** 当前歌单的数据库快照，以及快照之后已写完、尚未并入快照的操作 */
     private listBase: { playlistId: string; items: IMusicItemSlim[]; settled: IListOp[] } | null =
         null;
+    private compactTimer: ReturnType<typeof setTimeout> | null = null;
     /** 写入失败后等待合并重算的操作 */
     private droppedOps: IListOp[] = [];
     /** 「我喜欢」的数据库快照（键集合） */
@@ -397,7 +396,15 @@ class PlaylistRenderer {
 
     updateMusicOrder(playlistId: string, orderedMusicList: IMusicItemSlim[]): void {
         const keys = orderedMusicList.map((m) => ({ platform: m.platform, id: m.id }));
-        void this.commit({ kind: 'order', playlistId, items: [...orderedMusicList] }, () =>
+        const items = [...orderedMusicList];
+        const full =
+            this.hasCurrentSnapshot() &&
+            this.currentPlaylistId === playlistId &&
+            isPermutationOf(items, store.get(musicListAtom)) &&
+            !this.pendingOps.some(
+                (p) => p.kind === 'add' && p.deferred && opTargets(p, playlistId),
+            );
+        void this.commit({ kind: 'order', playlistId, items, full }, () =>
             mod.updateMusicOrder(playlistId, keys),
         );
     }
@@ -524,7 +531,10 @@ class PlaylistRenderer {
         this.pendingOps.push(op);
         if (this.hasCurrentSnapshot() && opTargets(op, this.currentPlaylistId!)) {
             const list = store.get(musicListAtom);
-            store.set(musicListAtom, isPermutationOf(op, list) ? op.items : applyToList(list, op));
+            store.set(
+                musicListAtom,
+                op.kind === 'order' && op.full ? op.items : applyToList(list, op),
+            );
         }
         if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID) && applyToSet(this.favoriteIdSet, op)) {
             this.events.emit('favoriteChange');
@@ -549,7 +559,7 @@ class PlaylistRenderer {
                         base.settled = [];
                     } else {
                         base.settled.push(final);
-                        if (base.settled.length >= SETTLED_COMPACT_LIMIT) this.compactListBase();
+                        this.scheduleCompaction();
                     }
                 }
                 if (opTargets(final, DEFAULT_FAVORITE_PLAYLIST_ID)) {
@@ -569,14 +579,12 @@ class PlaylistRenderer {
 
     /**
      * 主进程重排只给传入的歌依次设序号，其余歌保留原序号、可能落在中间：
-     * 重排没覆盖快照里的全部歌曲时，按队列顺序重新读取实际顺序。
+     * 发起时不是当前完整列表的重新排列（如还有没显示的延迟添加）的重排，写完后按队列顺序重新读取实际顺序。
      */
     private refreshIfPartialOrder(op: Extract<IListOp, { kind: 'order' }>) {
-        if (!this.hasCurrentSnapshot() || this.currentPlaylistId !== op.playlistId) return;
-        const base = this.compactListBase();
-        if (base === op.items) return;
-        const covered = new Set(op.items.map(keyOf));
-        if (base.every((m) => covered.has(keyOf(m)))) return;
+        if (op.full || !this.hasCurrentSnapshot() || this.currentPlaylistId !== op.playlistId) {
+            return;
+        }
         this.refreshCurrentList().catch((e) =>
             this.events.emit('error', e instanceof Error ? e : new Error(String(e))),
         );
@@ -590,6 +598,18 @@ class PlaylistRenderer {
     private removePending(op: IListOp) {
         const index = this.pendingOps.indexOf(op);
         if (index !== -1) this.pendingOps.splice(index, 1);
+    }
+
+    /** 一直有写入排队时，已写完的操作在之后的空闲时逐个并入快照，每次只处理一个，避免集中占用界面线程 */
+    private scheduleCompaction() {
+        if (this.compactTimer) return;
+        this.compactTimer = setTimeout(() => {
+            this.compactTimer = null;
+            const base = this.listBase;
+            if (!base || base.settled.length === 0) return;
+            base.items = applyToList(base.items, base.settled.shift()!);
+            if (base.settled.length > 0) this.scheduleCompaction();
+        }, 0);
     }
 
     private compactListBase(): IMusicItemSlim[] {
