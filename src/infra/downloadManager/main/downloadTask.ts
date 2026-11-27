@@ -8,6 +8,7 @@
  */
 import fs from 'fs';
 import fsp from 'fs/promises';
+import { pipeline } from 'stream/promises';
 import path from 'path';
 import axios from 'axios';
 import { safeParse } from '@common/safeSerialize';
@@ -149,13 +150,8 @@ export class DownloadTask {
                 onProgress(this.task.downloadedBytes, this.task.totalBytes, this.speed);
             });
 
-            dataStream.pipe(this.writeStream);
-
-            await new Promise<void>((resolve, reject) => {
-                this.writeStream!.on('finish', resolve);
-                this.writeStream!.on('error', reject);
-                dataStream.on('error', reject);
-            });
+            // 写入流在写完前被中止（abort 会 destroy 它）时以错误结束，不会一直等下去
+            await pipeline(dataStream, this.writeStream);
 
             // 7. 推断文件扩展名：Content-Type 不可靠，优先按文件内容识别，兜底 .mp3
             const mime = String(response.headers['content-type'] ?? '')
