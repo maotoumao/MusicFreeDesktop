@@ -226,6 +226,8 @@ class PlaylistRenderer {
     /** 当前歌单的数据库快照，以及快照之后已写完、尚未并入快照的操作 */
     private listBase: { playlistId: string; items: IMusicItemSlim[]; settled: IListOp[] } | null =
         null;
+    /** 写入失败后等待合并重算的操作 */
+    private droppedOps: IListOp[] = [];
     /** 「我喜欢」的数据库快照（键集合） */
     private favoriteBase = new Set<string>();
     /** 每次打开歌单递增；读取结果只在没有被更晚的打开取代时采用 */
@@ -542,9 +544,9 @@ class PlaylistRenderer {
                 if (final.kind === 'order') this.refreshIfPartialOrder(final);
             },
             () => {
-                // 写入失败或被清出队列：界面去掉这次操作的效果
+                // 写入失败或被清出队列：界面去掉这次操作的效果（同一轮清出的操作合并成一次重算）
                 this.removePending(op);
-                this.recompute(op);
+                this.scheduleRecompute(op);
             },
         );
         return result;
@@ -589,12 +591,31 @@ class PlaylistRenderer {
     }
 
     /** 按快照与还没写完的操作重算受 op 影响的界面状态 */
+    private scheduleRecompute(op: IListOp) {
+        const first = this.droppedOps.length === 0;
+        this.droppedOps.push(op);
+        if (!first) return;
+        queueMicrotask(() => {
+            const dropped = this.droppedOps;
+            this.droppedOps = [];
+            const current = this.currentPlaylistId;
+            if (current && dropped.some((d) => opTargets(d, current))) this.recomputeList();
+            if (dropped.some((d) => opTargets(d, DEFAULT_FAVORITE_PLAYLIST_ID))) {
+                this.recomputeFavorites();
+            }
+        });
+    }
+
     private recompute(op: IListOp) {
         const current = this.currentPlaylistId;
-        if (current && this.hasCurrentSnapshot() && opTargets(op, current)) {
-            store.set(musicListAtom, this.replayPendingOnList(current, this.compactListBase()));
-        }
+        if (current && opTargets(op, current)) this.recomputeList();
         if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID)) this.recomputeFavorites();
+    }
+
+    private recomputeList() {
+        const current = this.currentPlaylistId;
+        if (!current || !this.hasCurrentSnapshot()) return;
+        store.set(musicListAtom, this.replayPendingOnList(current, this.compactListBase()));
     }
 
     private recomputeFavorites() {
