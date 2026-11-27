@@ -731,28 +731,36 @@ interface IRestoreBaseRow {
 /**
  * 恢复备份时一首歌最终写库的数据，展示列与完整数据都用这一份：
  * 以库里已有的完整数据为底，叠加备份曲目的字段；标题、歌手、专辑、时长、封面
- * 依次取备份、已有完整数据、已有展示列中第一个可用的值，都没有时文本字段为空串。
+ * 依次取备份、已有展示列、已有完整数据中第一个可用的值，都没有时文本字段为空串。
  */
 function mergeRestoredItem(item: IMusic.IMusicItem, existing?: IRestoreBaseRow): IMusic.IMusicItem {
     const backup = item as unknown as Record<string, unknown>;
     const raw = existing ? parseRaw(existing.raw) : {};
     const columns = existing ? (existing as unknown as Record<string, unknown>) : {};
     const merged: Record<string, unknown> = { ...raw, ...backup };
-    // 逐字段取第一个可用的值：备份 → 已有完整数据 → 已有展示列
-    const sources = [backup, raw, columns];
+    // 逐字段取第一个可用的值：备份 → 已有展示列（每次写入都会更新）→ 已有完整数据；库里的空值视为没有
+    const existingSources = [columns, raw];
     for (const key of ['title', 'artist', 'album'] as const) {
-        merged[key] = firstOf(sources, key, toRestorableText) ?? '';
+        merged[key] =
+            toRestorableText(backup[key]) ??
+            firstOf(existingSources, key, (v) => nonEmpty(toRestorableText(v))) ??
+            '';
     }
-    const duration = firstOf(sources, 'duration', toRestorableDuration);
+    const duration =
+        toRestorableDuration(backup.duration) ??
+        firstOf(existingSources, 'duration', toRestorableDuration);
     if (duration === null) delete merged.duration;
     else merged.duration = duration;
-    // 空串表示没有封面，继续往后找
-    const artwork = firstOf(sources, 'artwork', (v) =>
-        typeof v === 'string' && v.trim() !== '' ? v : null,
+    const artwork = firstOf([backup, ...existingSources], 'artwork', (v) =>
+        typeof v === 'string' ? nonEmpty(v) : null,
     );
     if (artwork === null) delete merged.artwork;
     else merged.artwork = artwork;
     return merged as unknown as IMusic.IMusicItem;
+}
+
+function nonEmpty(value: string | null): string | null {
+    return value !== null && value.trim() !== '' ? value : null;
 }
 
 function firstOf<T>(
