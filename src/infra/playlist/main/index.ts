@@ -736,7 +736,7 @@ interface IStoredMusicRow {
 /**
  * 恢复备份时一首歌最终写库的数据，展示列与完整数据都用这一份：
  * 以库里已有的完整数据为底，叠加备份曲目的字段；标题、歌手、专辑、时长、封面
- * 依次取备份、已有展示列、已有完整数据中第一个可用的值；文本字段都没有时展示列写空串，完整数据里不写该字段。
+ * 依次取备份、已有展示列、已有完整数据中第一个可用的值；都没有时展示列写空串，完整数据里标题写空串、歌手和专辑不写。
  */
 function mergeRestoredItem(item: IMusic.IMusicItem, existing?: IStoredMusicRow): IMusic.IMusicItem {
     const backup = item as unknown as Record<string, unknown>;
@@ -749,8 +749,10 @@ function mergeRestoredItem(item: IMusic.IMusicItem, existing?: IStoredMusicRow):
         const value =
             toRestorableText(backup[key]) ??
             firstOf(existingSources, key, (v) => nonEmpty(toRestorableText(v)));
-        if (value === null) delete merged[key];
-        else merged[key] = value;
+        // 标题是歌曲条目的必填字段，取不到时写空串
+        if (value !== null) merged[key] = value;
+        else if (key === 'title') merged[key] = '';
+        else delete merged[key];
     }
     const duration =
         toRestorableDuration(backup.duration) ??
@@ -804,7 +806,7 @@ function toMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim) {
     return {
         platform: item.platform,
         id: String(item.id),
-        title: item.title,
+        title: item.title ?? '',
         artist: item.artist ?? '',
         album: item.album ?? '',
         duration: item.duration ?? null,
