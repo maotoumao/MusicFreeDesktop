@@ -207,8 +207,8 @@ function applyToSet(set: Set<string>, op: IListOp): boolean {
     return set.size !== before;
 }
 
-/** 快照之后已写完的操作攒到这个数量就并入快照 */
-const SETTLED_COMPACT_LIMIT = 32;
+/** 一直有写入排队、无法直接采用界面列表时，已写完的操作攒到这个数量才并入快照 */
+const SETTLED_COMPACT_LIMIT = 512;
 
 type IReadOutcome =
     { detail: ILocalPlaylistDetail | null } | { error: unknown } | { skipped: true };
@@ -520,10 +520,20 @@ class PlaylistRenderer {
                 const final = 'kind' in settled ? settled : settled.op;
                 const changed = 'kind' in settled ? false : settled.changed;
                 this.removePending(op);
-                if (this.listBase && opTargets(final, this.listBase.playlistId)) {
-                    this.listBase.settled.push(final);
-                    if (this.listBase.settled.length >= SETTLED_COMPACT_LIMIT)
-                        this.compactListBase();
+                const base = this.listBase;
+                if (base && opTargets(final, base.playlistId)) {
+                    if (
+                        !changed &&
+                        this.hasCurrentSnapshot() &&
+                        !this.pendingOps.some((p) => opTargets(p, base.playlistId))
+                    ) {
+                        // 没有还没写完的操作时，界面就是「快照 + 已写完的操作」，直接作为新快照
+                        base.items = store.get(musicListAtom);
+                        base.settled = [];
+                    } else {
+                        base.settled.push(final);
+                        if (base.settled.length >= SETTLED_COMPACT_LIMIT) this.compactListBase();
+                    }
                 }
                 if (opTargets(final, DEFAULT_FAVORITE_PLAYLIST_ID)) {
                     applyToSet(this.favoriteBase, final);
