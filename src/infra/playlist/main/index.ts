@@ -814,21 +814,24 @@ function toMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim) {
 
 /**
  * 下载完成登记时写库的一行：库里已有的内容都保留，只用传入的快照补缺。
- * 展示列为空（文本为空串、时长或封面为 NULL）时取快照；完整数据逐字段补，已有的字段（含空值）不动，
+ * 展示列为空（文本为空串且完整数据里没有该字段、时长或封面为 NULL）时取快照；完整数据逐字段补，已有的字段（含空值）不动，
  * 缺少的标题、歌手、专辑、时长、封面取补缺后的展示列，与列表显示一致（展示列的空串只表示没有，不写入），其余取快照。
  */
 function fillMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim, existing?: IStoredMusicRow) {
     const row = toMusicItemRow(item);
     if (!existing) return row;
+    const base = parseRaw(existing.raw);
+    // 完整数据里有该字段时，展示列的空串是清空后的结果
+    const text = (key: 'title' | 'artist' | 'album') =>
+        nonEmpty(existing[key]) ?? (key in base ? existing[key] : row[key]);
     const filled = {
         ...row,
-        title: nonEmpty(existing.title) ?? row.title,
-        artist: nonEmpty(existing.artist) ?? row.artist,
-        album: nonEmpty(existing.album) ?? row.album,
+        title: text('title'),
+        artist: text('artist'),
+        album: text('album'),
         duration: existing.duration ?? row.duration,
         artwork: existing.artwork ?? row.artwork,
     };
-    const base = parseRaw(existing.raw);
     if (!row.raw && Object.keys(base).length === 0) return { ...filled, raw: existing.raw };
     const merged: Record<string, unknown> = { ...parseRaw(row.raw), ...base };
     for (const key of ['title', 'artist', 'album', 'duration', 'artwork'] as const) {
