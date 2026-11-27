@@ -19,6 +19,7 @@ import type {
     ILocalPlaylistDetail,
     IMusicItemSlim,
     IAddMusicResult,
+    IAddMusicOptions,
 } from '@appTypes/infra/playlist';
 import {
     IPC,
@@ -350,6 +351,7 @@ class PlaylistManager {
                 _evt,
                 playlistId: string,
                 musicItems: Array<IMusic.IMusicItem | IMusicItemSlim>,
+                options?: IAddMusicOptions,
             ): IAddMusicResult => {
                 const currentCount = (this.queries.getPlaylistMusicCount.get(playlistId) as any)
                     .count;
@@ -365,7 +367,7 @@ class PlaylistManager {
                 const keyOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
                     `${item.platform}\0${String(item.id)}`;
                 const artworkCandidates = new Map<string, { platform: string; id: string }>();
-                for (const item of toAdd) {
+                for (const item of options?.reportArtworks ? toAdd : []) {
                     if (!item.artwork) {
                         artworkCandidates.set(keyOf(item), {
                             platform: item.platform,

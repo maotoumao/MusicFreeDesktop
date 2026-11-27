@@ -20,6 +20,7 @@ import type {
     IUpdatePlaylistParams,
     IStarredPlaylistItem,
     IAddMusicResult,
+    IAddMusicOptions,
 } from '@appTypes/infra/playlist';
 
 import { compositeKey } from '@common/mediaKey';
@@ -41,7 +42,11 @@ interface IMod {
     deletePlaylist(playlistId: string): Promise<void>;
     updatePlaylist(params: IUpdatePlaylistParams): Promise<void>;
     clearPlaylist(playlistId: string): Promise<void>;
-    addMusic(playlistId: string, musicItems: IMusic.IMusicItem[]): Promise<IAddMusicResult>;
+    addMusic(
+        playlistId: string,
+        musicItems: IMusic.IMusicItem[],
+        options?: IAddMusicOptions,
+    ): Promise<IAddMusicResult>;
     removeMusic(playlistId: string, musicBases: IMedia.IMediaBase[]): Promise<void>;
     removeFromAllPlaylists(musicBases: IMedia.IMediaBase[]): Promise<void>;
     updateMusicOrder(playlistId: string, orderedKeys: IMedia.IMediaBase[]): Promise<void>;
@@ -398,7 +403,11 @@ class PlaylistRenderer {
 
         return this.commit(
             op,
-            () => mod.addMusic(playlistId, items),
+            // 写入真正发出时目标歌单正显示在界面上，才需要库里保留的封面来纠正显示
+            () =>
+                mod.addMusic(playlistId, items, {
+                    reportArtworks: this.currentPlaylistId === playlistId,
+                }),
             ({ added, truncated, keptArtworks }) => {
                 if (truncated <= 0 && !deferred && !keptArtworks) return op;
                 // 主进程按输入顺序写入前 length - truncated 首

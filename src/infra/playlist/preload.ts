@@ -10,6 +10,7 @@ import type {
     ICreatePlaylistParams,
     IUpdatePlaylistParams,
     IMusicItemSlim,
+    IAddMusicOptions,
 } from '@appTypes/infra/playlist';
 import { IPC, CONTEXT_BRIDGE_KEY, type IPlaylistEvent } from './common/constant';
 
@@ -26,8 +27,11 @@ const mod = {
     clearPlaylist: (playlistId: string) => ipcRenderer.invoke(IPC.CLEAR_PLAYLIST, playlistId),
 
     // ─── 歌曲 ───
-    addMusic: (playlistId: string, musicItems: Array<IMusic.IMusicItem | IMusicItemSlim>) =>
-        ipcRenderer.invoke(IPC.ADD_MUSIC, playlistId, musicItems),
+    addMusic: (
+        playlistId: string,
+        musicItems: Array<IMusic.IMusicItem | IMusicItemSlim>,
+        options?: IAddMusicOptions,
+    ) => ipcRenderer.invoke(IPC.ADD_MUSIC, playlistId, musicItems, options),
     removeMusic: (playlistId: string, musicBases: IMedia.IMediaBase[]) =>
         ipcRenderer.invoke(IPC.REMOVE_MUSIC, playlistId, musicBases),
     removeFromAllPlaylists: (musicBases: IMedia.IMediaBase[]) =>

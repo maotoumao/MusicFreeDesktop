@@ -49,6 +49,12 @@ export interface ILocalPlaylistDetail extends ILocalPlaylistMeta {
     musicList: IMusicItemSlim[];
 }
 
+/** 向歌单添加歌曲的选项 */
+export interface IAddMusicOptions {
+    /** 返回库里保留的封面（keptArtworks）；目标歌单正显示在界面上时才需要 */
+    reportArtworks?: boolean;
+}
+
 /** 向歌单添加歌曲的结果 */
 export interface IAddMusicResult {
     added: number;
@@ -56,7 +62,7 @@ export interface IAddMusicResult {
     truncated: number;
     /**
      * 同一批里都没带封面、库里保留了封面的歌曲（upsert 时封面为空不覆盖），
-     * 包括已在歌单里的；渲染层据此纠正显示的封面
+     * 包括已在歌单里的；只在 reportArtworks 时返回，渲染层据此纠正显示的封面
      */
     keptArtworks?: Array<{ platform: string; id: string; artwork: string }>;
 }
