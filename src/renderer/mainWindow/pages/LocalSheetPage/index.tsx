@@ -6,7 +6,7 @@ import {
     useEffect,
     type MouseEvent,
 } from 'react';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Heart, ListMusic, FolderPlus } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
@@ -15,9 +15,11 @@ import appConfig from '@infra/appConfig/renderer';
 import musicSheet, {
     useCurrentMusicList,
     useIsLoadingSheet,
+    useMusicSheetList,
     useMusicSheetMeta,
 } from '@infra/musicSheet/renderer';
 import { DEFAULT_FAVORITE_SHEET_ID } from '@infra/musicSheet/common/constant';
+import { localSheetRoute } from '../../routes';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import { MusicSheetHeader } from '../../components/ui/MusicSheetHeader';
 import { SongTable, type RowInteractionDetail } from '../../components/business/SongTable';
@@ -54,6 +56,16 @@ export default function LocalSheetPage() {
     const sheetMeta = useMusicSheetMeta(id);
 
     const isFavorite = id === DEFAULT_FAVORITE_SHEET_ID;
+
+    // 正在查看的歌单被删除后回到「我喜欢」；列表为空说明尚未加载（「我喜欢」总在列表中）
+    const navigate = useNavigate();
+    const sheets = useMusicSheetList();
+    useEffect(() => {
+        if (!id || isFavorite || sheets.length === 0) return;
+        if (!sheets.some((sheet) => sheet.id === id)) {
+            navigate(localSheetRoute(DEFAULT_FAVORITE_SHEET_ID), { replace: true });
+        }
+    }, [id, isFavorite, sheets, navigate]);
 
     // ── 歌曲列表 ──
     const musicList = useCurrentMusicList();
