@@ -710,9 +710,10 @@ class DownloadManager {
         if (!row || row.status !== 'error') return;
 
         const task = rowToTask(row);
-        // 重试换用新的临时文件：旧文件里的内容不会再被任何一次执行续传（新 URL 可能来自不同 CDN）
+        // 重试换用新的临时文件：旧文件里的内容不会再被任何一次执行续传（新 URL 可能来自不同 CDN）。
+        // 文件名与建任务时等长，能建任务的文件名重试时不会超长
         const oldTempPath = task.tempPath;
-        task.tempPath = `${task.filePath}.${task.id}-${nanoid(8)}.downloading`;
+        task.tempPath = `${task.filePath}.${nanoid(task.id.length)}.downloading`;
         this.queries.setTempPath.run(task.tempPath, task.id);
 
         // 清空 mediaSource 强制延迟到 enqueueTask 中重新获取
