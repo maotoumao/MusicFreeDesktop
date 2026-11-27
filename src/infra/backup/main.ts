@@ -370,7 +370,7 @@ function parseBackupData(raw: string): IBackupData {
 /**
  * 手机端 v2 备份（规则见手机端仓库 docs/跨端备份协议.md），桌面端只恢复 sections.musicSheets：
  * - 歌单段须恰有一个「我喜欢」，否则按缺段处理；缺段时报错而不是按空歌单导入，否则覆盖模式会清空现有歌单
- * - 歌单与曲目按 normalizeSheets 的规则检查
+ * - 歌单与曲目按 normalizePlaylists 的规则检查
  * - 本地歌曲与其他格式一样，由 gateLocalSongs 按安装标识决定是否恢复
  */
 function parseEnvelopeV2(data: any): IBackupData {

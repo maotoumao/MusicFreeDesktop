@@ -18,7 +18,7 @@ interface ToplistBodyProps {
 /**
  * ToplistBody — 单个插件的排行榜卡片网格
  *
- * 按分组（IMusicSheetGroupItem）展示榜单卡片；
+ * 按分组（IPlaylistGroupItem）展示榜单卡片；
  * 卡片采用纵向布局：封面 + 标题 header + 预览占位文字。
  * 点击卡片跳转到排行榜详情页。
  */

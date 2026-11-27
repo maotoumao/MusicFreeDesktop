@@ -2,7 +2,7 @@
  * ToplistDetailPage — 排行榜详情页
  *
  * 路由: /toplist-detail/:platform
- * state: { topListItem: IMusic.IMusicSheetItem }
+ * state: { topListItem: IMusic.IPlaylistItem }
  *
  * 展示榜单封面信息 + 歌曲列表，支持分页加载。
  */

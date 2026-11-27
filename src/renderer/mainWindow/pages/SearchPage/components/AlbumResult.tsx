@@ -2,7 +2,7 @@
  * AlbumResult — 搜索结果：专辑 Tab
  *
  * 使用 ui/MediaGrid 展示专辑卡片网格。
- * IAlbumItem 与 IMusicSheetItem 结构兼容，直接传入 MediaGrid。
+ * IAlbumItem 与 IPlaylistItem 结构兼容，直接传入 MediaGrid。
  */
 
 import { useCallback } from 'react';
@@ -41,7 +41,7 @@ export function AlbumResult({ pluginHash }: AlbumResultProps) {
         loadMore(type, pluginHash);
     }, [loadMore, pluginHash]);
 
-    // IAlbumItem extends IMusicSheetItem — direct assignment is safe
+    // IAlbumItem extends IPlaylistItem — direct assignment is safe
     const gridData = data as IMusic.IPlaylistItem[];
 
     const handleItemClick = useCallback(

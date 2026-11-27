@@ -119,7 +119,7 @@ class PlaylistManager {
 
     /**
      * 返回 downloadManager 所需的 DI 适配器。
-     * 封装了对 __downloaded__ 歌单的 addMusicToSheet / removeMusicFromSheet 调用。
+     * 封装了对 __downloaded__ 歌单的 addMusicToPlaylist / removeMusicFromPlaylist 调用。
      */
     public getDownloadedPlaylistProvider() {
         return {

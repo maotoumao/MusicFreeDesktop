@@ -364,18 +364,18 @@ class TrackPlayer {
      * 替换队列并播放。统一接口，不区分本地/远程歌单。
      * @param list       歌曲列表（IMusicItem 或 IMusicItemSlim）
      * @param options.startItem    起始播放歌曲
-     * @param options.fromSheetId  可选性能优化提示：若来自某本地歌单，主进程用 INSERT...SELECT
+     * @param options.fromPlaylistId  可选性能优化提示：若来自某本地歌单，主进程用 INSERT...SELECT
      */
     async playMusicWithReplaceQueue(
         list: (IMusic.IMusicItem | IMusicItemSlim)[],
-        options?: { startItem?: IMedia.IMediaBase; fromSheetId?: string },
+        options?: { startItem?: IMedia.IMediaBase; fromPlaylistId?: string },
     ): Promise<void> {
         const startItem = options?.startItem;
         const startIndex = startItem ? list.findIndex((it) => isSameMedia(it, startItem)) : 0;
 
         this.playQueue.setQueue(list, {
             playIndex: Math.max(startIndex, 0),
-            fromSheetId: options?.fromSheetId,
+            fromPlaylistId: options?.fromPlaylistId,
         });
         await this.playIndex(Math.max(startIndex, 0));
     }

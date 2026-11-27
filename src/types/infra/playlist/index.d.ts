@@ -25,9 +25,9 @@ export interface IMusicItemSlim {
 /**
  * 本地歌单元数据（不含歌曲列表）。
  *
- * 与 `IMusic.IMusicSheetItem`（插件返回的远程歌单）的区别：
- * - IMusicSheetItem：插件侧的歌单结构，字段松散（含 musicList / playCount 等）
- * - ILocalSheetMeta：本地 SQLite 存储的歌单结构，字段严格固定
+ * 与 `IMusic.IPlaylistItem`（插件返回的远程歌单）的区别：
+ * - IPlaylistItem：插件侧的歌单结构，字段松散（含 musicList / playCount 等）
+ * - ILocalPlaylistMeta：本地 SQLite 存储的歌单结构，字段严格固定
  */
 export interface ILocalPlaylistMeta {
     id: string;

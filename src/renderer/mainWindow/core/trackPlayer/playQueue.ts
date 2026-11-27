@@ -77,11 +77,11 @@ class PlayQueue {
      * 替换整个队列。
      * @param items   歌曲列表（IMusicItem 或 IMusicItemSlim 均可）
      * @param options.playIndex    起始播放位置
-     * @param options.fromSheetId  可选性能优化提示：若来自某本地歌单，主进程用 INSERT...SELECT
+     * @param options.fromPlaylistId  可选性能优化提示：若来自某本地歌单，主进程用 INSERT...SELECT
      */
     setQueue(
         items: (IMusic.IMusicItem | IMusicItemSlim)[],
-        options?: { playIndex?: number; fromSheetId?: string },
+        options?: { playIndex?: number; fromPlaylistId?: string },
     ): void {
         const slims = items.map(musicItemToSlim);
         this.slimList = slims;
@@ -91,7 +91,7 @@ class PlayQueue {
         this.syncAtom();
 
         this.mutationQueue.enqueue(() =>
-            playQueueBridge.set(items as IMusic.IMusicItem[], options?.fromSheetId),
+            playQueueBridge.set(items as IMusic.IMusicItem[], options?.fromPlaylistId),
         );
     }
 

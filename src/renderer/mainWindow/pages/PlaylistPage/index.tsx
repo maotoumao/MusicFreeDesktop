@@ -21,7 +21,7 @@ import './index.scss';
  * PlaylistPage — 远程歌单详情页
  *
  * 路由: /musicsheet/:platform/:id
- * state: { sheetItem: IMusic.IMusicSheetItem }
+ * state: { sheetItem: IMusic.IPlaylistItem }
  */
 export default function PlaylistPage() {
     const { platform, id } = useParams<{ platform: string; id: string }>();

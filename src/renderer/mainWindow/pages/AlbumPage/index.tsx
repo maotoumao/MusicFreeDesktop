@@ -104,7 +104,7 @@ export default function AlbumPage() {
         );
     }
 
-    // IAlbumItem extends IMusicSheetItem，可直接传给 PlaylistHeader
+    // IAlbumItem extends IPlaylistItem，可直接传给 PlaylistHeader
     return (
         <div className="p-album">
             <PlaylistHeader playlist={albumItem} />

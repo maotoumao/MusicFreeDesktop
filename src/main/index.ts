@@ -130,7 +130,7 @@ async function bootstrapInfra(windowManager: IWindowManager) {
         windowManager,
         pluginManager,
         mediaMeta: mediaMetaProvider,
-        downloadedSheet: playlistManager.getDownloadedPlaylistProvider(),
+        downloadedPlaylist: playlistManager.getDownloadedPlaylistProvider(),
         musicItemProvider,
         audioTag,
     });

@@ -263,7 +263,7 @@ function getLegacyDownloadData(item: IMusic.IMusicItem): IMediaMeta['downloadDat
  *
  * 1. 读取旧版 musicSheetDB 的歌单 + 歌曲
  * 2. 组装 IBackupData JSON → 写入临时文件 → 调用 backup.restoreFromFile → 删除临时文件
- * 3. 迁移星标歌单（通过 musicSheet.starMusicSheet IPC）
+ * 3. 迁移星标歌单（通过 musicSheet.starPlaylist IPC）
  * 4. 迁移播放队列（通过 playQueueBridge.set）
  * 5. 迁移最近播放（通过 asyncKV）
  */
@@ -313,7 +313,7 @@ export async function executeMigration(): Promise<MigrationResult> {
                 }
             }
 
-            // 组装 IBackupSheet[]
+            // 组装 IBackupPlaylist[]
             for (const sheet of sheets) {
                 const musicList: IMusic.IMusicItem[] = [];
                 for (const ref of sheet.musicList ?? []) {
@@ -399,13 +399,13 @@ export async function executeMigration(): Promise<MigrationResult> {
         const prefDB = await openLegacyDB(LEGACY_USER_PREF_DB);
         if (prefDB) {
             try {
-                // 星标歌单（旧版存储了完整 IMusicSheetItem 对象）
-                const starredSheets = await readPrefValue<IMusic.IPlaylistItem[]>(
+                // 星标歌单（旧版存储了完整 IPlaylistItem 对象）
+                const starredPlaylists = await readPrefValue<IMusic.IPlaylistItem[]>(
                     prefDB,
                     'starredMusicSheets',
                 );
-                if (starredSheets?.length) {
-                    for (const sheet of starredSheets) {
+                if (starredPlaylists?.length) {
+                    for (const sheet of starredPlaylists) {
                         if (sheet?.platform && sheet?.id != null) {
                             try {
                                 await playlistManager.starPlaylist({

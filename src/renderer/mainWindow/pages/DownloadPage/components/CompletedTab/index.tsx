@@ -72,7 +72,7 @@ export function CompletedTab() {
     const handlePlayAll = useCallback(() => {
         if (filteredList.length === 0) return;
         trackPlayer.playMusicWithReplaceQueue(filteredList, {
-            fromSheetId: DOWNLOADED_PLAYLIST_ID,
+            fromPlaylistId: DOWNLOADED_PLAYLIST_ID,
         });
     }, [filteredList]);
 
@@ -90,7 +90,7 @@ export function CompletedTab() {
                     const list = playlistManager.getCurrentMusicList();
                     trackPlayer.playMusicWithReplaceQueue(list, {
                         startItem: item,
-                        fromSheetId: DOWNLOADED_PLAYLIST_ID,
+                        fromPlaylistId: DOWNLOADED_PLAYLIST_ID,
                     });
                 }
             } else {

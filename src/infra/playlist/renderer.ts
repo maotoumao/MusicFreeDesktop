@@ -93,7 +93,7 @@ const musicListAtom = atom<IMusicItemSlim[]>([]);
 const isLoadingPlaylistAtom = atom(false);
 
 // ═══════════════════════════════════════════════════════
-// MusicSheetRenderer
+// PlaylistRenderer
 // ═══════════════════════════════════════════════════════
 
 interface IRendererEvents {
@@ -137,7 +137,7 @@ class PlaylistRenderer {
 
         mod.onPlaylistEvent(async (event) => {
             try {
-                // sheetsAtom 始终刷新（轻量 getAllSheets 查询，同步 worksNum 等元数据）
+                // sheetsAtom 始终刷新（轻量 getAllPlaylists 查询，同步 worksNum 等元数据）
                 store.set(playlistsAtom, await mod.getAllPlaylists());
 
                 // internal 事件：main 侧内部模块主动变更了歌曲列表，renderer 无乐观更新，需拉取
@@ -174,7 +174,7 @@ class PlaylistRenderer {
     }
 
     // NOTE: IPC 完成后手动刷新 sheetsAtom，保证调用者 resolve 时数据已是最新。
-    // main 侧广播会再触发一次 getAllSheets（双重拉取），但开销可忽略。
+    // main 侧广播会再触发一次 getAllPlaylists（双重拉取），但开销可忽略。
 
     async addPlaylist(title: string): Promise<ILocalPlaylistMeta> {
         const playlist = await mod.createPlaylist({ title });
@@ -312,7 +312,7 @@ class PlaylistRenderer {
     }
 
     // ─── 星标远程歌单 ───
-    // TODO [P2]: 乐观更新 — 先同步更新 starredIdSet + starredSheetsAtom，再异步写 DB，
+    // TODO [P2]: 乐观更新 — 先同步更新 starredIdSet + starredPlaylistsAtom，再异步写 DB，
     //            失败时回滚（与 favorite 路径一致）。当前实现等待两次 IPC 后才更新 UI。
 
     getAllStarredPlaylists(): IStarredPlaylistItem[] {
@@ -421,7 +421,7 @@ class PlaylistRenderer {
             }
         }
         // 若 internal 事件影响了 favorite 歌单，同步刷新本地缓存
-        // TODO [P3]: 当 sheetId === FAVORITE 且等于 currentSheetId 时，上面 getSheetDetail
+        // TODO [P3]: 当 sheetId === FAVORITE 且等于 currentPlaylistId 时，上面 getPlaylistDetail
         //  已拉取过同一歌单，可复用 detail 构建 favoriteIdSet，省去 refreshFavoriteCache 的重复 IPC。
         if (!playlistId || playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             await this.refreshFavoriteCache();

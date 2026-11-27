@@ -118,7 +118,7 @@ class DownloadManager {
         windowManager: IWindowManager;
         pluginManager: IPluginManagerForDownload;
         mediaMeta: IMediaMetaProvider;
-        downloadedSheet: IDownloadedPlaylistProvider;
+        downloadedPlaylist: IDownloadedPlaylistProvider;
         musicItemProvider: IMusicItemProvider;
         audioTag: IAudioTagWriter;
     }): void {
@@ -129,7 +129,7 @@ class DownloadManager {
         this.windowManager = deps.windowManager;
         this.pluginManager = deps.pluginManager;
         this.mediaMeta = deps.mediaMeta;
-        this.downloadedPlaylist = deps.downloadedSheet;
+        this.downloadedPlaylist = deps.downloadedPlaylist;
         this.musicItemProvider = deps.musicItemProvider;
         this.audioTag = deps.audioTag;
 

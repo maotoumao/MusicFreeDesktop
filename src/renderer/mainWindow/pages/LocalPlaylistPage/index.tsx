@@ -122,7 +122,7 @@ export default function LocalPlaylistPage() {
     const handlePlayAll = useCallback(() => {
         if (filteredList.length === 0) return;
         trackPlayer.playMusicWithReplaceQueue(filteredList, {
-            fromSheetId: isSearching ? undefined : id,
+            fromPlaylistId: isSearching ? undefined : id,
         });
     }, [filteredList, id, isSearching]);
 
@@ -148,7 +148,7 @@ export default function LocalPlaylistPage() {
                     const list = playlistManager.getCurrentMusicList();
                     trackPlayer.playMusicWithReplaceQueue(list, {
                         startItem: item,
-                        fromSheetId: id,
+                        fromPlaylistId: id,
                     });
                 }
             } else {

@@ -34,7 +34,7 @@ export interface MusicItemMenuContext {
     /**
      * 当前所在歌单 ID，控制"删除"菜单项的显隐：
      *   - undefined → 不在歌单内，不显示删除
-     *   - PLAY_QUEUE_SHEET_ID → 播放队列，显示"从播放队列移除"
+     *   - PLAY_QUEUE_PLAYLIST_ID → 播放队列，显示"从播放队列移除"
      *   - 其他 → 用户歌单，显示"从歌单内删除"
      */
     sheetId?: string;
