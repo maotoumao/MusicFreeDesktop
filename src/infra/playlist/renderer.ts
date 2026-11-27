@@ -529,6 +529,7 @@ class PlaylistRenderer {
                     applyToSet(this.favoriteBase, final);
                 }
                 if (changed) this.recompute(final);
+                if (final.kind === 'order') this.refreshIfPartialOrder(final);
             },
             () => {
                 // 写入失败或被清出队列：界面去掉这次操作的效果
@@ -537,6 +538,19 @@ class PlaylistRenderer {
             },
         );
         return result;
+    }
+
+    /**
+     * 主进程重排只给传入的歌依次设序号，其余歌保留原序号、可能落在中间：
+     * 重排没覆盖快照里的全部歌曲时，按队列顺序重新读取实际顺序。
+     */
+    private refreshIfPartialOrder(op: Extract<IListOp, { kind: 'order' }>) {
+        if (!this.hasCurrentSnapshot() || this.currentPlaylistId !== op.playlistId) return;
+        const covered = new Set(op.items.map(keyOf));
+        if (this.compactListBase().every((m) => covered.has(keyOf(m)))) return;
+        this.refreshCurrentList().catch((e) =>
+            this.events.emit('error', e instanceof Error ? e : new Error(String(e))),
+        );
     }
 
     /** 当前歌单已读到快照（没有在首次加载中） */
