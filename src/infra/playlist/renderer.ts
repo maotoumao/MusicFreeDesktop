@@ -668,9 +668,15 @@ class PlaylistRenderer {
     /** 当前显示的歌单里，是否有歌曲的封面与库里保留的不同 */
     private shownArtworkDiffers(playlistId: string, kept: Map<string, string>): boolean {
         if (this.currentPlaylistId !== playlistId || !this.hasCurrentSnapshot()) return false;
+        // 还没写完的添加已经给了封面的歌，当前显示的是那次添加的封面，不用为这次结果重算
+        const overridden = new Set<string>();
+        for (const op of this.pendingOps) {
+            if (op.kind !== 'add' || !opTargets(op, playlistId)) continue;
+            for (const m of op.items) if (m.artwork && kept.has(keyOf(m))) overridden.add(keyOf(m));
+        }
         return store.get(musicListAtom).some((m) => {
             const artwork = kept.get(keyOf(m));
-            return artwork !== undefined && m.artwork !== artwork;
+            return artwork !== undefined && m.artwork !== artwork && !overridden.has(keyOf(m));
         });
     }
 
