@@ -746,8 +746,10 @@ function mergeRestoredItem(item: IMusic.IMusicItem, existing?: IStoredMusicRow):
     // 逐字段取第一个可用的值：备份 → 已有展示列（每次写入都会更新）→ 已有完整数据；库里的空值视为没有
     const existingSources = [columns, raw];
     for (const key of ['title', 'artist', 'album'] as const) {
+        // 标题没有「已清空」的含义，备份里的空标题按没有处理
+        const fromBackup = toRestorableText(backup[key]);
         const value =
-            toRestorableText(backup[key]) ??
+            (key === 'title' && fromBackup !== null ? nonEmpty(fromBackup) : fromBackup) ??
             firstOf(existingSources, key, (v) => nonEmpty(toRestorableText(v)));
         // 标题是歌曲条目的必填字段，取不到时写空串
         if (value !== null) merged[key] = value;
