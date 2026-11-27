@@ -102,6 +102,12 @@ interface IRendererEvents {
     starredChange: () => void;
 }
 
+interface IListLoad {
+    playlistId: string;
+    removed: Set<string>;
+    cleared: boolean;
+}
+
 class PlaylistRenderer {
     static instance: PlaylistRenderer | null = null;
 
@@ -110,6 +116,8 @@ class PlaylistRenderer {
     private starredIdSet = new Set<string>();
     private currentPlaylistId: string | null = null;
     private mutationQueue = new MutationQueue();
+    /** 进行中的歌单读取，记录读取排队后对该歌单的删除与清空（这些写入排在读取之后） */
+    private listLoads = new Set<IListLoad>();
 
     constructor() {
         this.mutationQueue.onError(async (e) => {
@@ -198,6 +206,9 @@ class PlaylistRenderer {
         // 乐观更新
         if (this.currentPlaylistId === playlistId) {
             store.set(musicListAtom, []);
+        }
+        for (const load of this.listLoads) {
+            if (load.playlistId === playlistId) load.cleared = true;
         }
         if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             this.favoriteIdSet.clear();
@@ -294,6 +305,9 @@ class PlaylistRenderer {
                 prev.filter((m) => !removeSet.has(compositeKey(m.platform, m.id))),
             );
         }
+        for (const load of this.listLoads) {
+            if (load.playlistId === playlistId) for (const k of removeSet) load.removed.add(k);
+        }
 
         if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             for (const it of items) {
@@ -321,6 +335,9 @@ class PlaylistRenderer {
         store.set(musicListAtom, (prev) =>
             prev.filter((m) => !removeSet.has(compositeKey(m.platform, m.id))),
         );
+        for (const load of this.listLoads) {
+            for (const k of removeSet) load.removed.add(k);
+        }
 
         for (const it of items) {
             this.favoriteIdSet.delete(compositeKey(it.platform, it.id));
@@ -391,10 +408,10 @@ class PlaylistRenderer {
         store.set(musicListAtom, []);
         store.set(isLoadingPlaylistAtom, true);
 
-        const detail = await mod.getPlaylistDetail(playlistId);
+        const { detail, load } = await this.loadAfterQueuedWrites(playlistId);
         // 用户在等待期间切换了歌单 → 丢弃旧结果
         if (this.currentPlaylistId !== playlistId) return null;
-        store.set(musicListAtom, detail?.musicList ?? []);
+        store.set(musicListAtom, this.mergeLoadedList(detail?.musicList ?? [], load));
         store.set(isLoadingPlaylistAtom, false);
         return detail;
     }
@@ -444,6 +461,45 @@ class PlaylistRenderer {
     }
 
     // ─── 内部方法 ───
+
+    /**
+     * 排在已入队的写入之后读取歌单，读到的列表已包含这些写入。
+     * 读取失败不影响队列里的其他写入；前面的写入失败、读取被清出队列时直接读取。
+     */
+    private async loadAfterQueuedWrites(
+        playlistId: string,
+    ): Promise<{ detail: ILocalPlaylistDetail | null; load: IListLoad }> {
+        const load: IListLoad = { playlistId, removed: new Set(), cleared: false };
+        this.listLoads.add(load);
+        try {
+            const outcome = await this.mutationQueue
+                .enqueue(async () => {
+                    try {
+                        return { detail: await mod.getPlaylistDetail(playlistId) };
+                    } catch (error) {
+                        return { error };
+                    }
+                })
+                .catch(async () => ({ detail: await mod.getPlaylistDetail(playlistId) }));
+            if ('error' in outcome) throw outcome.error;
+            return { detail: outcome.detail, load };
+        } finally {
+            this.listLoads.delete(load);
+        }
+    }
+
+    /**
+     * 读取排队之后对当前列表的乐观修改（写入排在读取之后，读到的列表里还没有）叠加到读到的列表上：
+     * 当前列表里有、读到的没有的歌曲是之后加入的，放在最前；之后删除的从读到的列表中去掉；之后清空的只保留清空后加入的。
+     */
+    private mergeLoadedList(loaded: IMusicItemSlim[], load: IListLoad): IMusicItemSlim[] {
+        const current = store.get(musicListAtom);
+        if (load.cleared) return current;
+        const loadedKeys = new Set(loaded.map((m) => compositeKey(m.platform, m.id)));
+        const addedLater = current.filter((m) => !loadedKeys.has(compositeKey(m.platform, m.id)));
+        const kept = loaded.filter((m) => !load.removed.has(compositeKey(m.platform, m.id)));
+        return addedLater.length > 0 ? [...addedLater, ...kept] : kept;
+    }
 
     /**
      * 处理 main 侧内部变更：按需刷新 musicListAtom + favoriteIdSet（在主进程更新了某个歌单的内容）。
