@@ -95,6 +95,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复向已达上限（10 万首）的歌单添加歌曲时仍提示「已添加」、列表里短暂出现没有保存的歌曲的问题；现在会提示歌单已达上限，写入失败时提示「添加到歌单失败」。
 - 修复提示文字中插入的内容（如文件路径、错误信息）里的引号等符号显示成 &#39; 之类转义字符的问题。
 - 修复向歌单添加歌曲后立即打开该歌单（或打开时还有其他歌单写入在进行）时，列表里缺少刚添加的歌曲、要重新进入才出现的问题。
+- 修复把已在歌单里的歌曲再次添加（例如歌曲信息有更新）后，当前列表仍显示旧的标题、歌手、专辑或封面，要重新打开歌单才更新的问题。
 
 ### Added
 
@@ -179,6 +180,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix adding songs to a playlist that has reached its 100,000-song limit still showing "Added" and briefly listing songs that were not saved; it now says the playlist is full, and shows "Failed to add to playlist" when the write fails.
 - Fix quotes and similar characters in inserted values (such as file paths and error messages) showing as escape sequences like &#39; in messages.
 - Fix a playlist opened right after adding songs to it (or while other playlist writes were still in progress) missing the songs just added until it was reopened.
+- Fix re-adding a song already in a playlist (for example with updated info) leaving the old title, artist, album or artwork in the open list until the playlist was reopened.
 
 ---
 
