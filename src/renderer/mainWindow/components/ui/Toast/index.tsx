@@ -17,7 +17,7 @@ import { cn } from '@common/cn';
 import i18n from '@infra/i18n/renderer';
 import { useCurrentThemePack } from '@infra/themepack/renderer';
 import { duration as motionDuration, easing } from '@common/motionTokens';
-import { measureToastScrim, type ToastScrim } from './contrast';
+import { measureToastScrim, SECONDARY_FROM_TITLE, type ToastScrim } from './contrast';
 import './index.scss';
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -382,10 +382,7 @@ export function ToastContainer() {
                       '--_toast-scrim': `${Math.round(scrim.amount * 100)}%`,
                       '--_toast-anti': scrim.anti,
                   }),
-                  ...(scrim.secondaryFromTitle && {
-                      '--_toast-secondary':
-                          'color-mix(in srgb, var(--color-text-primary) 70%, transparent)',
-                  }),
+                  ...(scrim.secondaryFromTitle && { '--_toast-secondary': SECONDARY_FROM_TITLE }),
               } as CSSProperties)
             : undefined;
 
@@ -412,6 +409,15 @@ export function ToastContainer() {
                         <span className="toast__icon" />
                     </div>
                 ))}
+                <div
+                    className="toast-probe__alt"
+                    style={{ '--_toast-secondary': SECONDARY_FROM_TITLE } as CSSProperties}
+                >
+                    <div className="toast toast--info">
+                        <span className="toast__desc" />
+                        <span className="toast__icon" />
+                    </div>
+                </div>
             </div>
             {/* 常驻的读屏播报区：内容追加时才会被朗读 */}
             {(['polite', 'assertive'] as const).map((level) => (

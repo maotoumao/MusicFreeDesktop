@@ -4,8 +4,8 @@
  * 卡片底色取自主题的浮层色。部分主题包的浮层色与文字、状态色过于接近，
  * 这里读取实际生效的颜色，求出把底色往黑或白方向压多少才能达标：
  * 标题 ≥ 4.5:1，说明文字与图标 ≥ 3:1；比例从小到大尝试（最多 60%），同一比例先试标题的反色。
- * 都达不到时（如标题与说明一深一浅），说明文字与 info 图标改用标题色（70% 不透明度）再算一次，
- * 取两种方案中各项离要求最近的一档，可能是不调整。
+ * 都达不到时（如标题与说明一深一浅），按「说明色改用 70% 不透明度的标题色」后实际生效的
+ * 说明文字与 info 图标颜色再算一次，取两种方案中各项离要求最近的一档，可能是不调整。
  * 已达标的主题不做任何改动。
  */
 
@@ -27,8 +27,9 @@ export interface ToastScrim {
     secondaryFromTitle: boolean;
 }
 
-/** 标题色淡化后作为说明文字的后备色 */
-const SECONDARY_FROM_TITLE_ALPHA = 0.7;
+/** 说明文字的后备色（写到 --_toast-secondary） */
+export const SECONDARY_FROM_TITLE =
+    'color-mix(in srgb, var(--color-text-primary) 70%, transparent)';
 
 let ctx: CanvasRenderingContext2D | null = null;
 
@@ -89,20 +90,18 @@ export interface ToastPalette {
     desc: RGBA;
     /** 依次为 info / success / warn / error 图标 */
     icons: RGBA[];
-    /** info 图标与说明文字同色（都取主题的次要文字色） */
-    infoUsesSecondary: boolean;
+    /** 设置后备说明色后，实际生效的说明文字与 info 图标颜色 */
+    alt: { desc: RGBA; infoIcon: RGBA };
 }
 
 export function chooseScrim(palette: ToastPalette): ToastScrim {
     const plain = searchScrim(palette);
     if (plain.score >= 1) return { ...plain.scrim, secondaryFromTitle: false };
 
-    const { title, icons, infoUsesSecondary } = palette;
-    const fadedTitle: RGBA = [title[0], title[1], title[2], title[3] * SECONDARY_FROM_TITLE_ALPHA];
     const alt = searchScrim({
         ...palette,
-        desc: fadedTitle,
-        icons: infoUsesSecondary ? [fadedTitle, ...icons.slice(1)] : icons,
+        desc: palette.alt.desc,
+        icons: [palette.alt.infoIcon, ...palette.icons.slice(1)],
     });
     return alt.score > plain.score
         ? { ...alt.scrim, secondaryFromTitle: true }
@@ -149,24 +148,29 @@ function searchScrim({ base, surface, title, desc, icons }: ToastPalette): {
 /**
  * 从探针元素读取当前主题下的实际颜色并计算所需的压暗/提亮比例。
  * 探针结构见 ToastContainer：.toast-probe__base 的 color 为窗口底色，
- * 每个 .toast 探针内含 .toast__title / .toast__desc / .toast__icon。
+ * 每个 .toast 探针内含 .toast__title / .toast__desc / .toast__icon；
+ * .toast-probe__alt 内是设置了后备说明色的 info 卡片。
  */
 export function measureToastScrim(probe: HTMLElement): ToastScrim {
     const read = (el: Element | null, prop: 'color' | 'backgroundColor') =>
         toRGBA(el ? getComputedStyle(el)[prop] : 'transparent');
 
     const base = over(read(probe.querySelector('.toast-probe__base'), 'color'), BLACK);
-    const cards = Array.from(probe.querySelectorAll<HTMLElement>('.toast'));
-    if (cards.length === 0) return { amount: 0, anti: 'black', secondaryFromTitle: false };
+    const cards = Array.from(probe.querySelectorAll<HTMLElement>(':scope > .toast'));
+    const altCard = probe.querySelector('.toast-probe__alt .toast');
+    if (cards.length === 0 || !altCard) {
+        return { amount: 0, anti: 'black', secondaryFromTitle: false };
+    }
 
-    const desc = read(cards[0].querySelector('.toast__desc'), 'color');
-    const icons = cards.map((card) => read(card.querySelector('.toast__icon'), 'color'));
     return chooseScrim({
         base,
         surface: read(cards[0], 'backgroundColor'),
         title: read(cards[0].querySelector('.toast__title'), 'color'),
-        desc,
-        icons,
-        infoUsesSecondary: icons[0].every((v, i) => v === desc[i]),
+        desc: read(cards[0].querySelector('.toast__desc'), 'color'),
+        icons: cards.map((card) => read(card.querySelector('.toast__icon'), 'color')),
+        alt: {
+            desc: read(altCard.querySelector('.toast__desc'), 'color'),
+            infoIcon: read(altCard.querySelector('.toast__icon'), 'color'),
+        },
     });
 }
