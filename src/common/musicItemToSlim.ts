@@ -14,7 +14,8 @@ export default function musicItemToSlim(item: IMusic.IMusicItem | IMusicItemSlim
         artist: item.artist ?? '',
         album: item.album ?? '',
         duration: item.duration ?? null,
-        artwork: item.artwork ?? null,
+        // 只认字符串封面（含空串），其他值按没有封面处理
+        artwork: typeof item.artwork === 'string' ? item.artwork : null,
         [INTERNAL_SLIM_KEY]: true,
     };
 }

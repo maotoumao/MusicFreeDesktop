@@ -366,9 +366,12 @@ class PlaylistManager {
                 // 同一批里每一条都没传封面的歌：封面为 null 时 upsert 保留库里的值，写完后查出来告诉渲染层
                 const keyOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
                     `${item.platform}\0${String(item.id)}`;
+                // 封面只认字符串（含空串）；其他值（如插件给的 NaN）按没传处理，与 musicItemToSlim 一致
+                const artworkOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
+                    typeof item.artwork === 'string' ? item.artwork : null;
                 const artworkCandidates = new Map<string, { platform: string; id: string }>();
                 for (const item of options?.reportArtworks ? toAdd : []) {
-                    if (item.artwork == null) {
+                    if (artworkOf(item) === null) {
                         artworkCandidates.set(keyOf(item), {
                             platform: item.platform,
                             id: String(item.id),
@@ -378,7 +381,7 @@ class PlaylistManager {
                 if (artworkCandidates.size > 0) {
                     for (const item of toAdd) {
                         // 显式传入的封面（含空串）会写入库里，渲染层已知
-                        if (item.artwork != null) artworkCandidates.delete(keyOf(item));
+                        if (artworkOf(item) !== null) artworkCandidates.delete(keyOf(item));
                     }
                 }
                 const keptArtworks: NonNullable<IAddMusicResult['keptArtworks']> = [];
@@ -398,7 +401,7 @@ class PlaylistManager {
                                 artist: item.artist ?? '',
                                 album: item.album ?? '',
                                 duration: item.duration ?? null,
-                                artwork: item.artwork ?? null,
+                                artwork: artworkOf(item),
                                 raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
                             });
                             this.queries.insertRelation.run({
