@@ -156,12 +156,15 @@ function applyToList(list: IMusicItemSlim[], op: IListOp): IMusicItemSlim[] {
         case 'clear':
             return list.length > 0 ? [] : list;
         case 'order': {
+            // 重排只决定顺序，歌曲资料取当前列表里的（可能已按后续写入更新）
+            const byKey = new Map(list.map((m) => [keyOf(m), m]));
             const ordered = new Set(op.items.map(keyOf));
-            const present = new Set(list.map(keyOf));
-            return [
-                ...list.filter((m) => !ordered.has(keyOf(m))),
-                ...op.items.filter((m) => present.has(keyOf(m))),
-            ];
+            const reordered: IMusicItemSlim[] = [];
+            for (const m of op.items) {
+                const current = byKey.get(keyOf(m));
+                if (current) reordered.push(current);
+            }
+            return [...list.filter((m) => !ordered.has(keyOf(m))), ...reordered];
         }
     }
 }
