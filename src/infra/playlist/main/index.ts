@@ -363,12 +363,12 @@ class PlaylistManager {
                 const toAdd = musicItems.slice(0, remaining);
 
                 const db = this.db.getDatabase();
-                // 同一批里没有任何一条带封面的歌：封面为 null 时 upsert 保留库里的值，写完后查出来告诉渲染层
+                // 同一批里每一条都没传封面的歌：封面为 null 时 upsert 保留库里的值，写完后查出来告诉渲染层
                 const keyOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
                     `${item.platform}\0${String(item.id)}`;
                 const artworkCandidates = new Map<string, { platform: string; id: string }>();
                 for (const item of options?.reportArtworks ? toAdd : []) {
-                    if (!item.artwork) {
+                    if (item.artwork == null) {
                         artworkCandidates.set(keyOf(item), {
                             platform: item.platform,
                             id: String(item.id),
@@ -377,7 +377,8 @@ class PlaylistManager {
                 }
                 if (artworkCandidates.size > 0) {
                     for (const item of toAdd) {
-                        if (item.artwork) artworkCandidates.delete(keyOf(item));
+                        // 显式传入的封面（含空串）会写入库里，渲染层已知
+                        if (item.artwork != null) artworkCandidates.delete(keyOf(item));
                     }
                 }
                 const keptArtworks: NonNullable<IAddMusicResult['keptArtworks']> = [];

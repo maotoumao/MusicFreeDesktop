@@ -422,7 +422,7 @@ class PlaylistRenderer {
                 if (keptArtworks) {
                     const kept = new Map(keptArtworks.map((a) => [keyOf(a), a.artwork]));
                     accepted = accepted.map((m) =>
-                        !m.artwork && kept.has(keyOf(m))
+                        m.artwork == null && kept.has(keyOf(m))
                             ? { ...m, artwork: kept.get(keyOf(m))! }
                             : m,
                     );
