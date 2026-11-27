@@ -401,8 +401,9 @@ class PlaylistRenderer {
     async openPlaylist(playlistId: string): Promise<ILocalPlaylistDetail | null> {
         const token = ++this.openToken;
         this.currentPlaylistId = playlistId;
+        // 读到快照之前保持空列表，期间的操作在快照到达后重放（避免把部分歌曲当作完整列表）
         this.listBase = null;
-        store.set(musicListAtom, this.replayPendingOnList(playlistId, []));
+        store.set(musicListAtom, []);
         store.set(isLoadingPlaylistAtom, true);
 
         const outcome = await this.readInQueue(playlistId, () => token === this.openToken);
@@ -470,7 +471,7 @@ class PlaylistRenderer {
         settle: (result: T) => IListOp | { op: IListOp; changed: boolean } = () => op,
     ): Promise<T> {
         this.pendingOps.push(op);
-        if (this.currentPlaylistId && opTargets(op, this.currentPlaylistId)) {
+        if (this.hasCurrentSnapshot() && opTargets(op, this.currentPlaylistId!)) {
             store.set(musicListAtom, applyToList(store.get(musicListAtom), op));
         }
         if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID) && applyToSet(this.favoriteIdSet, op)) {
@@ -503,6 +504,11 @@ class PlaylistRenderer {
         return result;
     }
 
+    /** 当前歌单已读到快照（没有在首次加载中） */
+    private hasCurrentSnapshot(): boolean {
+        return !!this.currentPlaylistId && this.listBase?.playlistId === this.currentPlaylistId;
+    }
+
     private removePending(op: IListOp) {
         const index = this.pendingOps.indexOf(op);
         if (index !== -1) this.pendingOps.splice(index, 1);
@@ -526,9 +532,8 @@ class PlaylistRenderer {
     /** 按快照与还没写完的操作重算受 op 影响的界面状态 */
     private recompute(op: IListOp) {
         const current = this.currentPlaylistId;
-        if (current && opTargets(op, current)) {
-            const base = this.listBase?.playlistId === current ? this.compactListBase() : [];
-            store.set(musicListAtom, this.replayPendingOnList(current, base));
+        if (current && this.hasCurrentSnapshot() && opTargets(op, current)) {
+            store.set(musicListAtom, this.replayPendingOnList(current, this.compactListBase()));
         }
         if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID)) this.recomputeFavorites();
     }
