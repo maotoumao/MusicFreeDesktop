@@ -554,9 +554,9 @@ class DownloadManager {
                         );
                     }
 
-                    // 写标签期间被删除：不登记，删掉已改名的文件
+                    // 写标签期间被删除（删除入口先递增世代号，稍后才删任务行）：不登记，删掉已改名的文件
                     const freshRow = this.queries.getTaskById.get(task.id);
-                    if (!freshRow) {
+                    if (!freshRow || (this.taskGeneration.get(task.id) ?? 0) !== generation) {
                         await fsp.unlink(task.filePath!).catch(() => {});
                         return;
                     }
