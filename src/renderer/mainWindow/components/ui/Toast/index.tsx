@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, type FocusEvent } from 'react';
 import { atom, getDefaultStore, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useIsPresent, useReducedMotion } from 'framer-motion';
 import { AlertTriangle, CircleCheck, CircleX, Info, X, type LucideIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { cn } from '@common/cn';
@@ -237,8 +237,11 @@ const ToastCard = forwardRef<HTMLDivElement, { toast: ToastItem; reduceMotion: b
         const { t } = useTranslation();
         const Icon = ICONS[toast.type];
         const offset = reduceMotion ? 0 : 16;
+        // 已移出队列、正在退场的卡片不再响应操作
+        const isPresent = useIsPresent();
 
         const handleAction = () => {
+            if (!store.get(toastQueueAtom).some((item) => item.id === toast.id)) return;
             toast.onAction?.();
             removeToast(toast.id);
         };
@@ -266,6 +269,7 @@ const ToastCard = forwardRef<HTMLDivElement, { toast: ToastItem; reduceMotion: b
                 }}
                 transition={{ duration: motionDuration.normal, ease: easing.standard }}
                 className={cn('toast', `toast--${toast.type}`)}
+                inert={!isPresent}
                 onMouseEnter={() => pauseTimer(toast.id, 'hover')}
                 onMouseLeave={() => resumeTimer(toast.id, 'hover')}
                 onFocus={() => pauseTimer(toast.id, 'focus')}
