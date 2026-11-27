@@ -394,7 +394,8 @@ class PlaylistRenderer {
                 // 主进程按输入顺序写入前 length - truncated 首
                 let accepted = slimItems.slice(0, slimItems.length - truncated);
                 if (deferred) op.accepted = added > 0 ? accepted : [];
-                // 传入时没有封面、库里保留了原封面的歌，按库里的封面显示
+                let changed = deferred ? added > 0 : truncated > 0;
+                // 传入时没有封面、库里保留了封面的歌，按库里的封面显示；当前显示的已是这个封面就不用重算
                 if (keptArtworks) {
                     const kept = new Map(keptArtworks.map((a) => [keyOf(a), a.artwork]));
                     accepted = accepted.map((m) =>
@@ -402,11 +403,9 @@ class PlaylistRenderer {
                             ? { ...m, artwork: kept.get(keyOf(m))! }
                             : m,
                     );
+                    if (!changed && !deferred) changed = this.shownArtworkDiffers(playlistId, kept);
                 }
-                return {
-                    op: { ...op, items: accepted, deferred: false },
-                    changed: truncated > 0 || !!keptArtworks ? !deferred || added > 0 : added > 0,
-                };
+                return { op: { ...op, items: accepted, deferred: false }, changed };
             },
         );
     }
@@ -645,6 +644,15 @@ class PlaylistRenderer {
         this.refreshCurrentList().catch((e) =>
             this.events.emit('error', e instanceof Error ? e : new Error(String(e))),
         );
+    }
+
+    /** 当前显示的歌单里，是否有歌曲的封面与库里保留的不同 */
+    private shownArtworkDiffers(playlistId: string, kept: Map<string, string>): boolean {
+        if (this.currentPlaylistId !== playlistId || !this.hasCurrentSnapshot()) return false;
+        return store.get(musicListAtom).some((m) => {
+            const artwork = kept.get(keyOf(m));
+            return artwork !== undefined && m.artwork !== artwork;
+        });
     }
 
     /** 当前歌单已读到快照（没有在首次加载中） */

@@ -66,18 +66,9 @@ export function createQueries(db: Database.Database) {
                 raw = COALESCE(excluded.raw, raw)
         `),
 
-        /** 同 upsertMusicItem，返回写入后的封面 */
-        upsertMusicItemReturningArtwork: db.prepare(`
-            INSERT INTO music_items (platform, id, title, artist, album, duration, artwork, raw)
-            VALUES (@platform, @id, @title, @artist, @album, @duration, @artwork, @raw)
-            ON CONFLICT(platform, id) DO UPDATE SET
-                title = excluded.title,
-                artist = excluded.artist,
-                album = excluded.album,
-                duration = excluded.duration,
-                artwork = COALESCE(excluded.artwork, artwork),
-                raw = COALESCE(excluded.raw, raw)
-            RETURNING artwork
+        /** 读取库里歌曲的封面 */
+        getMusicItemArtwork: db.prepare(`
+            SELECT artwork FROM music_items WHERE platform = ? AND id = ?
         `),
 
         /** 恢复备份时读取库里已有的同一首歌（展示列与完整数据） */

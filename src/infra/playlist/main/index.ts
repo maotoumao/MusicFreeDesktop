@@ -361,19 +361,24 @@ class PlaylistManager {
                 const toAdd = musicItems.slice(0, remaining);
 
                 const db = this.db.getDatabase();
-                // 每首歌：同一批里是否有一条带封面、写入后的封面、是否新加进了这个歌单
-                const artworkState = new Map<
-                    string,
-                    {
-                        platform: string;
-                        id: string;
-                        given: boolean;
-                        stored: string | null;
-                        inserted: boolean;
+                // 同一批里没有任何一条带封面的歌：upsert 不覆盖封面，库里可能保留着封面，写完后查出来告诉渲染层
+                const keyOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
+                    `${item.platform}\0${String(item.id)}`;
+                const artworkCandidates = new Map<string, { platform: string; id: string }>();
+                for (const item of toAdd) {
+                    if (!item.artwork) {
+                        artworkCandidates.set(keyOf(item), {
+                            platform: item.platform,
+                            id: String(item.id),
+                        });
                     }
-                >();
-                // 这批里全都带封面时，库里的封面就是传入的，不用跟踪
-                const trackArtwork = toAdd.some((item) => !item.artwork);
+                }
+                if (artworkCandidates.size > 0) {
+                    for (const item of toAdd) {
+                        if (item.artwork) artworkCandidates.delete(keyOf(item));
+                    }
+                }
+                const keptArtworks: NonNullable<IAddMusicResult['keptArtworks']> = [];
                 const addMany = db.transaction(
                     (items: Array<IMusic.IMusicItem | IMusicItemSlim>) => {
                         const minOrder = (this.queries.getMinSortOrder.get(playlistId) as any)
@@ -383,7 +388,7 @@ class PlaylistManager {
                         for (let i = 0; i < items.length; i++) {
                             const item = items[i];
                             const sid = String(item.id);
-                            const fields = {
+                            this.queries.upsertMusicItem.run({
                                 platform: item.platform,
                                 id: sid,
                                 title: item.title,
@@ -392,49 +397,26 @@ class PlaylistManager {
                                 duration: item.duration ?? null,
                                 artwork: item.artwork ?? null,
                                 raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
-                            };
-                            // 只有没带封面的歌才需要知道库里最终保留的封面
-                            const row = item.artwork
-                                ? (this.queries.upsertMusicItem.run(fields), undefined)
-                                : (this.queries.upsertMusicItemReturningArtwork.get(fields) as
-                                      { artwork: string | null } | undefined);
-                            const { changes } = this.queries.insertRelation.run({
+                            });
+                            this.queries.insertRelation.run({
                                 sheetId: playlistId,
                                 platform: item.platform,
                                 musicId: sid,
                                 sortOrder: startOrder + i,
                                 addedAt: now,
                             });
-                            if (!trackArtwork) continue;
-                            const key = `${item.platform}\0${sid}`;
-                            const state = artworkState.get(key) ?? {
-                                platform: item.platform,
-                                id: sid,
-                                given: false,
-                                stored: null,
-                                inserted: false,
-                            };
-                            state.given ||= !!item.artwork;
-                            state.stored = row?.artwork ?? null;
-                            state.inserted ||= changes > 0;
-                            artworkState.set(key, state);
+                        }
+                        for (const { platform, id } of artworkCandidates.values()) {
+                            const row = this.queries.getMusicItemArtwork.get(platform, id) as
+                                { artwork: string | null } | undefined;
+                            if (row?.artwork)
+                                keptArtworks.push({ platform, id, artwork: row.artwork });
                         }
                     },
                 );
                 addMany(toAdd);
                 this.broadcastPlaylistEvent({ origin: 'user', sheetId: playlistId });
 
-                // 新加进歌单、同一批里都没带封面、库里却保留了封面的歌：渲染层只知道传入的空封面，需要告诉它
-                const keptArtworks: NonNullable<IAddMusicResult['keptArtworks']> = [];
-                for (const state of artworkState.values()) {
-                    if (state.inserted && !state.given && state.stored) {
-                        keptArtworks.push({
-                            platform: state.platform,
-                            id: state.id,
-                            artwork: state.stored,
-                        });
-                    }
-                }
                 return {
                     added: toAdd.length,
                     truncated: musicItems.length - toAdd.length,
