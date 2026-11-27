@@ -168,7 +168,11 @@ class PlaylistManager {
                 >;
                 return rows.map(({ raw, ...slim }) => {
                     const full = raw ? safeParse<IMusic.IMusicItem>(raw) : null;
-                    return full ?? slimToMusicItem(slim);
+                    if (!full) return slimToMusicItem(slim);
+                    // 完整数据里没有可用封面（写入时去掉了不认的封面）时，用库里展示列的封面补上
+                    return typeof full.artwork !== 'string' && typeof slim.artwork === 'string'
+                        ? { ...full, artwork: slim.artwork }
+                        : full;
                 });
             },
 

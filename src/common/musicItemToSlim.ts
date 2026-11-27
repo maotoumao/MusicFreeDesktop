@@ -30,13 +30,16 @@ export function musicItemArtwork(item: { artwork?: unknown }): string | null {
  */
 export function musicItemRaw(item: IMusic.IMusicItem | IMusicItemSlim): string | null {
     if ((item as any)[INTERNAL_SLIM_KEY]) return null;
-    const source =
-        item.artwork === undefined || typeof item.artwork === 'string'
-            ? item
-            : { ...item, artwork: undefined };
     try {
-        return JSON.stringify(source) ?? null;
+        return JSON.stringify(withoutInvalidArtwork(item)) ?? null;
     } catch {
         return null;
     }
+}
+
+/** 去掉不认的封面（非字符串且不是 undefined）后的歌曲；封面可用时返回原对象 */
+export function withoutInvalidArtwork<T extends { artwork?: unknown }>(item: T): T {
+    return item.artwork === undefined || typeof item.artwork === 'string'
+        ? item
+        : { ...item, artwork: undefined };
 }
