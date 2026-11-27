@@ -6,7 +6,8 @@
  *  状态: 只体现在图标颜色上（info 中性 / success / warn / error）
  *
  *  主题包可覆盖（均为可选）:
- *    --toast-bg / --toast-border / --toast-shadow / --toast-radius
+ *    --toast-bg：卡片底色，只能是颜色值（可带透明度），不支持渐变或图片
+ *    --toast-border / --toast-shadow / --toast-radius
  *    --toast-accent：图标颜色，写在根上时所有类型统一用这一种颜色；
  *                    按类型分别设置时写在 .toast--info / --success / --warn / --error 上
  * ============================================================ */
