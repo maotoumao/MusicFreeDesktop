@@ -48,6 +48,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### 修复
 
+- 修复插件返回的歌单信息带有不同的平台或 ID 时，歌单详情翻到第二页一直处于加载中的问题。
 - 修复删除正在查看的歌单后，页面停留在已删除歌单的空白页的问题；现在会回到「我喜欢」。
 - 修复恢复备份时，只要有一首歌的信息不完整（如缺标题、歌手不是文字）就整体失败并提示「SQLite3 can only bind ...」的问题；现在缺少平台或 ID 的歌曲会被跳过，其余字段不合法时新歌曲按空值恢复、库里已有的歌曲保留原有信息；歌单结构损坏的备份会整体拒绝，不会在覆盖恢复时清空现有歌单 ([#393](https://github.com/maotoumao/MusicFreeDesktop/issues/393))。
 - 修复 Windows 上显示缩放不是 100% 时，拖动桌面歌词或迷你模式窗口会一顿一顿、跟不上鼠标，缩放较高时甚至被甩出屏幕的问题。
@@ -124,6 +125,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Fixed
 
+- Fix playlist details loading forever on the second page when a plugin returned playlist info with a different platform or ID.
 - Fix the page staying on a blank, deleted playlist after deleting the playlist being viewed; it now returns to My Favorites.
 - Fix restoring a backup failing entirely with "SQLite3 can only bind ..." when a single song had incomplete info, such as a missing title or a non-text artist; songs without a platform or ID are now skipped, other invalid fields are restored as empty for new songs while songs already in the library keep their info, and backups with damaged playlists are rejected as a whole instead of clearing existing playlists in overwrite mode ([#393](https://github.com/maotoumao/MusicFreeDesktop/issues/393)).
 - Fix dragging the desktop lyric or mini mode window on Windows with display scaling other than 100%, where the window stuttered behind the cursor or, at higher scaling, was thrown off-screen.

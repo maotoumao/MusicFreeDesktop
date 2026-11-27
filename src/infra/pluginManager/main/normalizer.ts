@@ -205,10 +205,12 @@ export const methodNormalizers: Partial<
 
             if (page <= 1) {
                 return {
-                    // 新版插件返回 playlistItem，旧插件返回 sheetItem
+                    // 新版插件返回 playlistItem，旧插件返回 sheetItem；平台与 id 保持原歌单的，翻页按同一歌单请求
                     playlistItem: {
                         ...playlistItem,
                         ...(result?.playlistItem ?? result?.sheetItem ?? {}),
+                        platform: playlistItem.platform,
+                        id: playlistItem.id,
                     },
                     isEnd: result.isEnd === false ? false : true,
                     musicList: result.musicList,
