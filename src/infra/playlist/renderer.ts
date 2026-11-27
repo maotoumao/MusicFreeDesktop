@@ -191,6 +191,27 @@ function applyToList(list: IMusicItemSlim[], op: IListOp): IMusicItemSlim[] {
     }
 }
 
+/** 依次作用多个操作；连续的删除合并成一次过滤，避免大歌单上逐个扫描 */
+function applyOps(list: IMusicItemSlim[], ops: IListOp[]): IMusicItemSlim[] {
+    let out = list;
+    let removing: Set<string> | null = null;
+    const flush = () => {
+        if (removing) out = applyToList(out, { kind: 'remove', playlistId: null, keys: removing });
+        removing = null;
+    };
+    for (const op of ops) {
+        if (op.kind === 'remove') {
+            removing ??= new Set();
+            for (const k of op.keys) removing.add(k);
+            continue;
+        }
+        flush();
+        out = applyToList(out, op);
+    }
+    flush();
+    return out;
+}
+
 /** 与主进程 upsertMusicItem 一致：标题、歌手、专辑、时长覆盖，封面为空时保留原值 */
 function mergeDisplayFields(current: IMusicItemSlim, next: IMusicItemSlim): IMusicItemSlim {
     const artwork = next.artwork ?? current.artwork;
@@ -653,17 +674,16 @@ class PlaylistRenderer {
 
     private compactListBase(): IMusicItemSlim[] {
         const base = this.listBase!;
-        for (const op of base.settled) base.items = applyToList(base.items, op);
+        base.items = applyOps(base.items, base.settled);
         base.settled = [];
         return base.items;
     }
 
     private replayPendingOnList(playlistId: string, list: IMusicItemSlim[]): IMusicItemSlim[] {
-        let out = list;
-        for (const op of this.pendingOps) {
-            if (opTargets(op, playlistId)) out = applyToList(out, op);
-        }
-        return out;
+        return applyOps(
+            list,
+            this.pendingOps.filter((op) => opTargets(op, playlistId)),
+        );
     }
 
     /** 按快照与还没写完的操作重算受 op 影响的界面状态 */
