@@ -20,6 +20,7 @@ import axios from 'axios';
 import type { IWindowManager } from '@appTypes/main/windowManager';
 import type {
     ICallPluginMethodParams,
+    IInstallPluginResult,
     IPluginMetaAll,
     IPluginUpdateResult,
 } from '@appTypes/infra/pluginManager';
@@ -204,7 +205,7 @@ class PluginManager {
      * 安装插件：支持 URL（http/https）、本地 .js 文件、或包含 plugins 数组的 .json 文件。
      * JSON 格式：{ plugins: [{ url: "https://..." }, ...] }
      */
-    public async installPlugin(urlOrPath: string): Promise<{ success: boolean; message?: string }> {
+    public async installPlugin(urlOrPath: string): Promise<IInstallPluginResult> {
         // JSON 批量安装支持
         if (urlOrPath.endsWith('.json')) {
             return this.installPluginsFromJson(urlOrPath);
@@ -416,9 +417,7 @@ class PluginManager {
     }
 
     /** JSON 批量安装 */
-    private async installPluginsFromJson(
-        jsonUrlOrPath: string,
-    ): Promise<{ success: boolean; message?: string }> {
+    private async installPluginsFromJson(jsonUrlOrPath: string): Promise<IInstallPluginResult> {
         try {
             let jsonText: string;
             const isRemote = isHttpUrl(jsonUrlOrPath);
@@ -448,17 +447,20 @@ class PluginManager {
 
             let installed = 0;
             let failed = 0;
+            let upToDate = 0;
             for (const url of pluginUrls) {
                 const result = await this.installSinglePlugin(url);
                 if (result.success) {
                     installed++;
                 } else {
                     failed++;
+                    if (result.upToDate) upToDate++;
                 }
             }
 
             return {
                 success: installed > 0,
+                upToDate: upToDate === pluginUrls.length,
                 message: `Installed: ${installed}, Failed: ${failed}`,
             };
         } catch (err: any) {
@@ -467,9 +469,7 @@ class PluginManager {
     }
 
     /** 安装单个插件 */
-    private async installSinglePlugin(
-        urlOrPath: string,
-    ): Promise<{ success: boolean; message?: string }> {
+    private async installSinglePlugin(urlOrPath: string): Promise<IInstallPluginResult> {
         try {
             let code: string;
 
@@ -492,7 +492,7 @@ class PluginManager {
 
             // 检查是否已安装相同哈希的插件
             if (this.plugins.has(hash)) {
-                return { success: false, message: 'Plugin already installed' };
+                return { success: false, upToDate: true, message: 'Plugin already installed' };
             }
 
             // 写入文件
@@ -538,6 +538,7 @@ class PluginManager {
                     }
                     return {
                         success: false,
+                        upToDate: true,
                         message: `Existing version ${existingEntry.instance.version} >= ${instance.version}`,
                     };
                 }

@@ -143,8 +143,13 @@ export default function PluginSubscriptionModal({ close }: PluginSubscriptionMod
         let failCount = 0;
         for (const sub of valid) {
             try {
-                await pluginManager.installPlugin(sub.srcUrl.trim());
-                successCount++;
+                const result = await pluginManager.installPlugin(sub.srcUrl.trim());
+                // 已是最新版本也算更新成功
+                if (result.success || result.upToDate) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
             } catch {
                 failCount++;
             }

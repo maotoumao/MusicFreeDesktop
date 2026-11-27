@@ -89,6 +89,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复切歌后新歌词加载出来之前，桌面歌词和歌词页按新歌的进度显示上一首歌词的问题。
 - 修复 macOS 上设置页把 Cmd 组合键显示成 Ctrl 的问题（实际生效的是 Cmd），用户照着按 Ctrl 无效；Option 键也不再显示成 Alt。
 - 修复提示文字中路径、网址里的「/」显示成 `&#x2F;` 的问题（例如添加扫描文件夹时的路径重叠提示）。
+- 修复插件订阅「全部更新」时，插件下载或解析失败仍提示「更新成功」的问题；已是最新版本的插件仍算作更新成功。
 
 ### Added
 
@@ -167,6 +168,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix the desktop lyrics and the lyrics page showing the previous song's lyrics, following the new song's progress, until the new lyrics finished loading.
 - Fix the settings page on macOS showing Cmd shortcuts as Ctrl (Cmd is what actually works), so pressing Ctrl as shown did nothing; the Option key is no longer shown as Alt either.
 - Fix `/` in paths and URLs showing up as `&#x2F;` in messages (for example the overlap warning when adding a scan folder).
+- Fixed "Update all" in plugin subscriptions reporting success when a plugin failed to download or parse; plugins that are already up to date still count as updated.
 
 ---
 

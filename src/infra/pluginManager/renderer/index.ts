@@ -13,6 +13,7 @@ import type {
     ICallPluginMethodParams,
     IGetMediaSourceParams,
     IGetMediaSourceResult,
+    IInstallPluginResult,
     IPluginMetaAll,
     IPluginUpdateResult,
 } from '@appTypes/infra/pluginManager';
@@ -24,7 +25,7 @@ import { store, pluginsAtom, pluginMetaAtom } from './store';
 
 interface IMod {
     callPluginMethod(params: ICallPluginMethodParams): Promise<any>;
-    installPlugin(urlOrPath: string): Promise<{ success: boolean; message?: string }>;
+    installPlugin(urlOrPath: string): Promise<IInstallPluginResult>;
     uninstallPlugin(hash: string): Promise<{ success: boolean; message?: string }>;
     updatePlugin(hash: string): Promise<IPluginUpdateResult>;
     updateAllPlugins(): Promise<{ updated: number; failed: number }>;
@@ -108,7 +109,7 @@ async function callPluginMethod<
 }
 
 /** 安装插件 */
-async function installPlugin(urlOrPath: string): Promise<{ success: boolean; message?: string }> {
+async function installPlugin(urlOrPath: string): Promise<IInstallPluginResult> {
     return mod.installPlugin(urlOrPath);
 }
 

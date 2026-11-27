@@ -13,6 +13,7 @@ import type {
     ICallPluginMethodParams,
     IGetMediaSourceParams,
     IGetMediaSourceResult,
+    IInstallPluginResult,
     IPluginCacheData,
     IPluginMetaAll,
     IPluginUpdateResult,
@@ -60,7 +61,7 @@ async function callPluginMethod(params: ICallPluginMethodParams): Promise<any> {
     return ipcRenderer.invoke(IPC_CALL_PLUGIN_METHOD, params);
 }
 
-async function installPlugin(urlOrPath: string): Promise<{ success: boolean; message?: string }> {
+async function installPlugin(urlOrPath: string): Promise<IInstallPluginResult> {
     return ipcRenderer.invoke(IPC_INSTALL_PLUGIN, urlOrPath);
 }
 
