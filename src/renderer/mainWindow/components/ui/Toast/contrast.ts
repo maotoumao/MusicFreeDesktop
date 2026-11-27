@@ -2,8 +2,9 @@
  * Toast 对比度保护
  *
  * 卡片底色取自主题的浮层色。部分主题包的浮层色与文字、状态色过于接近，
- * 这里读取实际生效的颜色，求出把底色往文字反色（黑或白）方向压多少才能达标：
- * 标题 ≥ 4.5:1，说明文字与图标 ≥ 3:1；最多压 60%，达不到时取 60%。
+ * 这里读取实际生效的颜色，求出把底色往黑或白方向压多少才能达标：
+ * 标题 ≥ 4.5:1，说明文字与图标 ≥ 3:1；比例从小到大尝试（最多 60%），同一比例先试标题的反色。
+ * 都达不到时（如标题与说明一深一浅），取各项离要求最近的一档，可能是不调整。
  * 已达标的主题不做任何改动。
  */
 
@@ -73,6 +74,50 @@ function contrast(a: RGBA, b: RGBA): number {
     return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
+export interface ToastPalette {
+    /** 窗口底色（不透明） */
+    base: RGBA;
+    /** 卡片底色 */
+    surface: RGBA;
+    title: RGBA;
+    desc: RGBA;
+    icons: RGBA[];
+}
+
+export function chooseScrim({ base, surface, title, desc, icons }: ToastPalette): ToastScrim {
+    // 各项对比度与要求之比的最小值，≥ 1 即全部达标
+    const score = (p: number, anti: RGBA) => {
+        const bg = over(mixToward(surface, anti, p), base);
+        return Math.min(
+            contrast(over(title, bg), bg) / TITLE_MIN,
+            contrast(over(desc, bg), bg) / SECONDARY_MIN,
+            ...icons.map((icon) => contrast(over(icon, bg), bg) / SECONDARY_MIN),
+        );
+    };
+    const name = (anti: RGBA) => (anti === BLACK ? 'black' : 'white') as ToastScrim['anti'];
+
+    const opaqueTitle = over(title, over(surface, base));
+    const preferred = contrast(opaqueTitle, BLACK) >= contrast(opaqueTitle, WHITE) ? BLACK : WHITE;
+    const order = [preferred, preferred === BLACK ? WHITE : BLACK];
+
+    let best: ToastScrim = { amount: 0, anti: name(preferred) };
+    let bestScore = score(0, preferred);
+    if (bestScore >= 1) return best;
+    const steps = Math.round(SCRIM_MAX / SCRIM_STEP);
+    for (let i = 1; i <= steps; i++) {
+        const p = Math.round(i * SCRIM_STEP * 100) / 100;
+        for (const anti of order) {
+            const s = score(p, anti);
+            if (s >= 1) return { amount: p, anti: name(anti) };
+            if (s > bestScore) {
+                bestScore = s;
+                best = { amount: p, anti: name(anti) };
+            }
+        }
+    }
+    return best;
+}
+
 /**
  * 从探针元素读取当前主题下的实际颜色并计算所需的压暗/提亮比例。
  * 探针结构见 ToastContainer：.toast-probe__base 的 color 为窗口底色，
@@ -86,22 +131,11 @@ export function measureToastScrim(probe: HTMLElement): ToastScrim {
     const cards = Array.from(probe.querySelectorAll<HTMLElement>('.toast'));
     if (cards.length === 0) return { amount: 0, anti: 'black' };
 
-    const surface = read(cards[0], 'backgroundColor');
-    const title = read(cards[0].querySelector('.toast__title'), 'color');
-    const desc = read(cards[0].querySelector('.toast__desc'), 'color');
-    const icons = cards.map((card) => read(card.querySelector('.toast__icon'), 'color'));
-
-    const opaqueTitle = over(title, over(surface, base));
-    const antiColor = contrast(opaqueTitle, BLACK) >= contrast(opaqueTitle, WHITE) ? BLACK : WHITE;
-    const anti = antiColor === BLACK ? 'black' : 'white';
-
-    for (let p = 0; p <= SCRIM_MAX + 1e-9; p += SCRIM_STEP) {
-        const bg = over(mixToward(surface, antiColor, p), base);
-        const ok =
-            contrast(over(title, bg), bg) >= TITLE_MIN &&
-            contrast(over(desc, bg), bg) >= SECONDARY_MIN &&
-            icons.every((icon) => contrast(over(icon, bg), bg) >= SECONDARY_MIN);
-        if (ok) return { amount: Math.round(p * 100) / 100, anti };
-    }
-    return { amount: SCRIM_MAX, anti };
+    return chooseScrim({
+        base,
+        surface: read(cards[0], 'backgroundColor'),
+        title: read(cards[0].querySelector('.toast__title'), 'color'),
+        desc: read(cards[0].querySelector('.toast__desc'), 'color'),
+        icons: cards.map((card) => read(card.querySelector('.toast__icon'), 'color')),
+    });
 }
