@@ -35,6 +35,7 @@
         "retry": "重試",
         "select_hint": "請選擇",
         "copied": "已複製",
+        "copy_failed": "複製失敗",
         "saved": "已儲存",
         "expand": "展開",
         "collapse": "收起",

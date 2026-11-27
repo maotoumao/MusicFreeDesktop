@@ -35,6 +35,7 @@
         "retry": "Retry",
         "select_hint": "Select",
         "copied": "Copied",
+        "copy_failed": "Copy failed",
         "saved": "Saved",
         "expand": "Expand",
         "collapse": "Collapse",
