@@ -38,6 +38,8 @@ function makeWin32WindowFullyDraggable(
     const { height, width, getWindowSize, onDragEnd } = options;
 
     const initialPos = { x: 0, y: 0, height, width };
+    /** 按下时光标相对窗口左上角的偏移（DIP） */
+    const grabOffset = { x: 0, y: 0 };
     let dragging = false;
     let pastThreshold = false;
     let cachePosition: IPoint | null = null;
@@ -81,6 +83,11 @@ function makeWin32WindowFullyDraggable(
             initialPos.y = y;
             initialPos.height = initHeight;
             initialPos.width = initWidth;
+
+            const cursor = screen.getCursorScreenPoint();
+            const [winX, winY] = browserWindow.getPosition();
+            grabOffset.x = cursor.x - winX;
+            grabOffset.y = cursor.y - winY;
             return;
         }
 
@@ -93,9 +100,11 @@ function makeWin32WindowFullyDraggable(
             draggingSet.add(browserWindow);
         }
 
+        // 消息里的坐标是物理像素，窗口位置是 DIP：按光标的 DIP 坐标定位，跨缩放比例不同的显示器时抓取点不变
+        const cursor = screen.getCursorScreenPoint();
         cachePosition = {
-            x: x + browserWindow.getPosition()[0] - initialPos.x,
-            y: y + browserWindow.getPosition()[1] - initialPos.y,
+            x: cursor.x - grabOffset.x,
+            y: cursor.y - grabOffset.y,
         };
 
         browserWindow.setBounds({

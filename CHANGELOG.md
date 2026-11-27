@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### 修复
 
+- 修复 Windows 上显示缩放不是 100% 时，拖动桌面歌词或迷你模式窗口会一顿一顿、跟不上鼠标，缩放较高时甚至被甩出屏幕的问题。
 - 修复安全问题：插件或主题包提供的链接可以用 file: 等协议打开本机文件或程序；现在外部链接只允许 http(s) 和邮件链接，「打开下载目录」只会打开文件夹。
 - 修复安全问题：网页或其他应用通过 musicfree://install 链接可以不经确认直接安装插件（包括本机文件）；现在只接受 http(s) 地址（网络上的插件列表也只安装其中的网络地址），并会先弹框列出来源地址，确认后才安装。
 - 修复安全问题：页面中运行的脚本可以创建带完整 Node 能力的 Worker、使用 webview 标签；现在各窗口的页面只能通过预加载暴露的接口访问系统能力。
@@ -119,6 +120,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Fixed
 
+- Fix dragging the desktop lyric or mini mode window on Windows with display scaling other than 100%, where the window stuttered behind the cursor or, at higher scaling, was thrown off-screen.
 - Fix a security issue where links provided by plugins or theme packs could open local files or programs through protocols such as file:; external links are now limited to http(s) and mailto, and opening the download folder only opens folders.
 - Fix a security issue where a web page or another app could install plugins through a musicfree://install link without asking, including local files; only http(s) addresses are accepted now (plugin lists from the network only install network addresses), and a dialog listing them asks for confirmation first.
 - Fix a security issue where scripts running in the page could start Workers with full Node access and use the webview tag; window pages can now reach system features only through the interfaces exposed by the preload scripts.
