@@ -572,7 +572,7 @@ class DownloadManager {
                         );
                     }
 
-                    // 写标签期间被删除（删除入口先递增世代号，稍后才删任务行）：不登记，删掉已改名的文件
+                    // 写标签期间被删除：不登记，删掉已改名的文件
                     const freshRow = this.queries.getTaskById.get(task.id);
                     if (!freshRow || (this.taskGeneration.get(task.id) ?? 0) !== generation) {
                         await fsp.unlink(task.filePath!).catch(() => {});
@@ -711,7 +711,7 @@ class DownloadManager {
 
         const task = rowToTask(row);
         // 重试换用新的临时文件：旧文件里的内容不会再被任何一次执行续传（新 URL 可能来自不同 CDN）。
-        // 文件名与建任务时等长，能建任务的文件名重试时不会超长
+        // 文件名与建任务时的临时文件等长：首次下载能创建临时文件的，重试时也不会超长
         const oldTempPath = task.tempPath;
         task.tempPath = `${task.filePath}.${nanoid(task.id.length)}.downloading`;
 
@@ -736,7 +736,7 @@ class DownloadManager {
 
     /**
      * 删除活跃下载任务（pending/downloading/paused/error）。
-     * - 中止活跃下载 + 删除临时文件 + 从 DB 删除
+     * - 中止活跃下载 + 从 DB 删除并通知 + 清理临时文件
      */
     private async removeTask(taskId: string): Promise<void> {
         // 先中止活跃下载
