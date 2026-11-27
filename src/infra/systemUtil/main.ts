@@ -25,6 +25,15 @@ const LAUNCHED_AT_LOGIN_ARG = '--launched-at-login';
 /** 多选文件「打开方式」时系统逐个传入，在此时间内到达的合并为一次播放 */
 const OPEN_FILES_BATCH_MS = 100;
 
+/** 是否为 http(s) 或 mailto 链接 */
+function isWebOrMailUrl(url: string): boolean {
+    try {
+        return ['http:', 'https:', 'mailto:'].includes(new URL(url).protocol);
+    } catch {
+        return false;
+    }
+}
+
 class SystemUtil {
     private windowManager!: IWindowManager;
     private isSetup = false;
@@ -235,12 +244,33 @@ class SystemUtil {
     // ─── Shell ───
 
     private setupShellHandlers() {
+        // 链接可能来自插件或主题包：只放行网页和邮件链接，避免借 file: 等协议启动本机程序
         ipcMain.on(IPC.OPEN_EXTERNAL, (_, url: string) => {
-            shell.openExternal(url);
+            if (!isWebOrMailUrl(url)) {
+                console.warn('[systemUtil] Blocked openExternal:', url);
+                return;
+            }
+            shell.openExternal(url).catch((e) => {
+                console.warn('[systemUtil] openExternal failed:', url, e);
+            });
         });
 
-        ipcMain.on(IPC.OPEN_PATH, (_, path: string) => {
-            shell.openPath(path);
+        // 调用方只打开下载目录：只允许目录，避免用默认程序运行任意文件；macOS 的 .app 也是目录，打开即启动应用
+        ipcMain.on(IPC.OPEN_PATH, async (_, path: string) => {
+            try {
+                if (process.platform === 'darwin' && /\.app$/i.test(await fsp.realpath(path))) {
+                    console.warn('[systemUtil] Blocked openPath (application bundle):', path);
+                    return;
+                }
+                if (!(await fsp.stat(path)).isDirectory()) {
+                    console.warn('[systemUtil] Blocked openPath (not a directory):', path);
+                    return;
+                }
+                const error = await shell.openPath(path);
+                if (error) console.warn('[systemUtil] openPath failed:', path, error);
+            } catch {
+                console.warn('[systemUtil] openPath: path not accessible:', path);
+            }
         });
 
         ipcMain.handle(IPC.SHOW_ITEM_IN_FOLDER, async (_, path: string) => {
