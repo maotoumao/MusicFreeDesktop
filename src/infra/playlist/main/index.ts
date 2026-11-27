@@ -372,6 +372,8 @@ class PlaylistManager {
                         inserted: boolean;
                     }
                 >();
+                // 这批里全都带封面时，库里的封面就是传入的，不用跟踪
+                const trackArtwork = toAdd.some((item) => !item.artwork);
                 const addMany = db.transaction(
                     (items: Array<IMusic.IMusicItem | IMusicItemSlim>) => {
                         const minOrder = (this.queries.getMinSortOrder.get(playlistId) as any)
@@ -381,7 +383,7 @@ class PlaylistManager {
                         for (let i = 0; i < items.length; i++) {
                             const item = items[i];
                             const sid = String(item.id);
-                            const row = this.queries.upsertMusicItemReturningArtwork.get({
+                            const fields = {
                                 platform: item.platform,
                                 id: sid,
                                 title: item.title,
@@ -390,7 +392,12 @@ class PlaylistManager {
                                 duration: item.duration ?? null,
                                 artwork: item.artwork ?? null,
                                 raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
-                            }) as { artwork: string | null } | undefined;
+                            };
+                            // 只有没带封面的歌才需要知道库里最终保留的封面
+                            const row = item.artwork
+                                ? (this.queries.upsertMusicItem.run(fields), undefined)
+                                : (this.queries.upsertMusicItemReturningArtwork.get(fields) as
+                                      { artwork: string | null } | undefined);
                             const { changes } = this.queries.insertRelation.run({
                                 sheetId: playlistId,
                                 platform: item.platform,
@@ -398,6 +405,7 @@ class PlaylistManager {
                                 sortOrder: startOrder + i,
                                 addedAt: now,
                             });
+                            if (!trackArtwork) continue;
                             const key = `${item.platform}\0${sid}`;
                             const state = artworkState.get(key) ?? {
                                 platform: item.platform,
