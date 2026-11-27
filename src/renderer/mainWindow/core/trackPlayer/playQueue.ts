@@ -2,7 +2,7 @@
  * PlayQueue — 播放队列管理
  *
  * 内存中维护 slim 列表供 UI 渲染，
- * 通过 MutationQueue + musicSheet preload IPC 持久化到 SQLite 虚拟歌单。
+ * 通过 MutationQueue + playlist preload IPC 持久化到 SQLite 虚拟歌单。
  * 乐观更新：先改内存 → 再异步落库。
  */
 import type { IMusicItemSlim } from '@appTypes/infra/playlist';

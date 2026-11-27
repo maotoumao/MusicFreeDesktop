@@ -2,7 +2,7 @@
  * MutationQueue — 串行异步任务队列
  *
  * 用于将多个异步写操作按顺序执行（FIFO），保证并发安全。
- * 典型场景：乐观更新后的持久化回写（musicSheet、playQueue 等）。
+ * 典型场景：乐观更新后的持久化回写（playlist、playQueue 等）。
  *
  * 当某个任务失败时，清空剩余队列并调用 `onError` 回调，
  * 由上层决定如何恢复状态（如从 DB 重新拉取）。

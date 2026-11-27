@@ -138,7 +138,7 @@ src/
 │   ├── themepack/     #   主题包 | Theme packs
 │   ├── database/      #   数据库 | Database
 │   ├── downloadManager/#  下载管理 | Downloads
-│   ├── musicSheet/    #   歌单管理 | Music sheets
+│   ├── playlist/      #   歌单管理 | Playlists
 │   ├── i18n/          #   国际化 | i18n
 │   └── ...            #   其他模块 | Other modules
 ├── common/            # 跨进程共享代码 | Shared utilities

@@ -62,7 +62,7 @@ function getLocalPath(musicItem: IMusic.IMusicItem, mediaMeta: IMediaMetaProvide
  * @param params 请求参数
  * @param callPluginMethod 调用插件方法的函数
  * @param mediaMeta mediaMeta DI 接口
- * @param musicItemProvider musicSheet DI 接口
+ * @param musicItemProvider playlist DI 接口
  * @returns 歌词源结果，或 null
  */
 export async function getLyricAdapter(

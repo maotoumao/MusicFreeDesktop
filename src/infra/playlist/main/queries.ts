@@ -1,7 +1,7 @@
 /**
- * musicSheet — Prepared Statements
+ * playlist — Prepared Statements
  *
- * 封装所有 musicSheet 模块的预编译 SQL 语句。
+ * 封装所有 playlist 模块的预编译 SQL 语句。
  */
 import type Database from 'better-sqlite3';
 

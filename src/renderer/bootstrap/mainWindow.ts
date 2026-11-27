@@ -68,7 +68,7 @@ export default async function bootstrapMainWindow(): Promise<void> {
         appSync,
     });
 
-    // Phase 4: trackPlayer 依赖 pluginManager + musicSheet（恢复状态时需要获取音源）
+    // Phase 4: trackPlayer 依赖 pluginManager + playlist（恢复状态时需要获取音源）
     await trackPlayer.setup();
 
     // Phase 5: 非播放器相关的 command handler

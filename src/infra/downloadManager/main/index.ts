@@ -708,7 +708,7 @@ class DownloadManager {
 
     /**
      * 删除已完成的下载（歌单 + mediaMeta，可选删除本地文件）。
-     * C1: 完成后 download_tasks 中已无记录，操作对象是 mediaMeta + musicSheet。
+     * C1: 完成后 download_tasks 中已无记录，操作对象是 mediaMeta + playlist。
      * @param deleteFile 是否同时删除本地文件，默认 true
      */
     private async removeDownload(

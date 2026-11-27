@@ -1,9 +1,9 @@
 /**
- * musicSheet — Preload 层
+ * playlist — Preload 层
  *
  * 职责：纯桥接，通过 contextBridge 暴露歌单管理接口。
  *
- * 暴露名称：'@infra/music-sheet'
+ * 暴露名称：'@infra/playlist'
  */
 import { contextBridge, ipcRenderer } from 'electron';
 import type {

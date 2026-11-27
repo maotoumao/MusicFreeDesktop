@@ -263,7 +263,7 @@ function getLegacyDownloadData(item: IMusic.IMusicItem): IMediaMeta['downloadDat
  *
  * 1. 读取旧版 musicSheetDB 的歌单 + 歌曲
  * 2. 组装 IBackupData JSON → 写入临时文件 → 调用 backup.restoreFromFile → 删除临时文件
- * 3. 迁移星标歌单（通过 musicSheet.starPlaylist IPC）
+ * 3. 迁移星标歌单（通过 playlistManager.starPlaylist IPC）
  * 4. 迁移播放队列（通过 playQueueBridge.set）
  * 5. 迁移最近播放（通过 asyncKV）
  */

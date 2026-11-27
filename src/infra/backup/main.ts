@@ -396,7 +396,7 @@ function parseEnvelopeV2(data: any): IBackupData {
 /**
  * 备份里的歌单结构必须完整：任一歌单不是对象或曲目列表不是数组时按格式错误处理，
  * 避免覆盖恢复先清空现有歌单、再恢复不出内容。缺 platform / id 的曲目无法入库，丢弃；
- * 其余字段在写库时处理（见 musicSheet 的 mergeRestoredItem）。
+ * 其余字段在写库时处理（见 playlist 的 mergeRestoredItem）。
  */
 function normalizePlaylists(playlists: any[]): IBackupPlaylist[] {
     if (!playlists.every((playlist) => Array.isArray(playlist?.musicList))) {

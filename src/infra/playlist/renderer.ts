@@ -1,5 +1,5 @@
 /**
- * musicSheet — Renderer 层
+ * playlist — Renderer 层
  *
  * 职责：
  * - 管理歌单/歌曲的内存缓存，提供同步读取 API

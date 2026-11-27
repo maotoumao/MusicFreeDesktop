@@ -20,7 +20,7 @@ class DatabaseInfra implements IDatabaseProvider {
 
     /**
      * 初始化数据库连接并执行 schema 迁移。
-     * 应在 appConfig 之后、musicSheet / downloadManager 之前调用。
+     * 应在 appConfig 之后、playlist / downloadManager 之前调用。
      */
     public setup() {
         if (this.isSetup) return;
@@ -64,7 +64,7 @@ class DatabaseInfra implements IDatabaseProvider {
         const migrations: Array<(db: Database.Database) => void> = [
             // ─── v0 → v1: 初始 schema ───
             (db) => {
-                // musicSheet 模块的表
+                // playlist 模块的表
                 db.exec(`
                     CREATE TABLE IF NOT EXISTS music_sheets (
                         id          TEXT PRIMARY KEY,

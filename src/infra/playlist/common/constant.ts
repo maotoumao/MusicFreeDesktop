@@ -17,7 +17,7 @@ export const PLAY_QUEUE_PLAYLIST_ID = '__play_queue__';
 export const DOWNLOADED_PLAYLIST_ID = '__downloaded__';
 
 /**
- * musicSheet 模块广播事件的 payload。
+ * playlist 模块广播事件的 payload。
  *
  * @property origin 事件来源：
  *   - 'user'：renderer 用户操作通过 IPC 触发，renderer 已通过乐观更新处理了 musicList，

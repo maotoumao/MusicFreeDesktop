@@ -1,5 +1,5 @@
 /**
- * musicSheet — 主进程层
+ * playlist — 主进程层
  *
  * 职责：
  * - 歌单 CRUD、歌曲增删排序、星标远程歌单
@@ -698,7 +698,7 @@ class PlaylistManager {
     }
 
     /**
-     * 广播 musicSheet 事件。
+     * 广播 playlist 事件。
      * - origin: 'user' 表示 renderer 用户操作触发，乐观更新已处理 musicList；
      * - origin: 'internal' 表示 main 内部模块触发，renderer 需拉取 musicList。
      */
