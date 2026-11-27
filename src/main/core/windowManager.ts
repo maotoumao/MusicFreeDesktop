@@ -375,11 +375,9 @@ class WindowManager implements IWindowManager {
             show,
             webPreferences: {
                 preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true,
-                nodeIntegrationInWorker: true,
+                nodeIntegration: false,
                 webSecurity: false,
                 sandbox: false,
-                webviewTag: true,
             },
             frame: false,
             roundedCorners: FRAMELESS_ROUNDED_CORNERS,
@@ -480,7 +478,7 @@ class WindowManager implements IWindowManager {
             transparent: true,
             webPreferences: {
                 preload: LYRIC_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true,
+                nodeIntegration: false,
                 webSecurity: false,
                 sandbox: false,
             },
@@ -623,7 +621,7 @@ class WindowManager implements IWindowManager {
             y: initPosition?.y,
             webPreferences: {
                 preload: MINIMODE_WINDOW_PRELOAD_WEBPACK_ENTRY,
-                nodeIntegration: true,
+                nodeIntegration: false,
                 webSecurity: false,
                 sandbox: false,
             },
