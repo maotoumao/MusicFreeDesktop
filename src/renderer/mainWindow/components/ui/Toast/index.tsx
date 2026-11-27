@@ -1,7 +1,7 @@
-import { forwardRef, useEffect, type FocusEvent } from 'react';
+import { forwardRef, useEffect, useSyncExternalStore, type FocusEvent } from 'react';
 import { atom, getDefaultStore, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence, motion, useIsPresent, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
 import { AlertTriangle, CircleCheck, CircleX, Info, X, type LucideIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { cn } from '@common/cn';
@@ -221,6 +221,19 @@ export function showToast(title: string, options?: ToastOptions): void {
     announce(item);
 }
 
+// ── 系统「减少动态效果」设置：运行中切换也会生效 ──
+
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function subscribeReducedMotion(onChange: () => void) {
+    reducedMotionQuery.addEventListener('change', onChange);
+    return () => reducedMotionQuery.removeEventListener('change', onChange);
+}
+
+function getReducedMotion() {
+    return reducedMotionQuery.matches;
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Toast Card
 // ────────────────────────────────────────────────────────────────────────────
@@ -326,7 +339,7 @@ const ToastCard = forwardRef<HTMLDivElement, { toast: ToastItem; reduceMotion: b
 export function ToastContainer() {
     const toasts = useAtomValue(toastQueueAtom);
     const announcements = useAtomValue(announcementAtom);
-    const reduceMotion = useReducedMotion() ?? false;
+    const reduceMotion = useSyncExternalStore(subscribeReducedMotion, getReducedMotion);
 
     useEffect(() => {
         const onBlur = () => resumeAll(['hover', 'focus']);
