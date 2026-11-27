@@ -100,7 +100,7 @@ class DownloadManager {
     private taskGeneration = new Map<string, number>();
     /** 退出时中止写标签用的封面下载，收尾中的下载只写文字标签，尽快完成登记 */
     private coverAbort = new AbortController();
-    /** 每个任务最近一次执行（含改名、写标签、登记），结束后移除 */
+    /** 每个任务最近一次执行（含改名、写标签、登记），或在队列外等上一次执行结束（及重试前删除旧临时文件）的过程；结束后移除 */
     private runs = new Map<string, Promise<void>>();
     /** 下载进度缓存（用于节流广播） */
     private progressCache = new Map<string, IDownloadProgress>();
