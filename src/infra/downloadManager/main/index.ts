@@ -70,6 +70,7 @@ interface IQueries {
     insertTask: Database.Statement;
     updateStatus: Database.Statement;
     getTaskById: Database.Statement;
+    setTempPath: Database.Statement;
     getTasksPaginated: Database.Statement;
     getAllTasksUnpaginated: Database.Statement;
     getTaskCount: Database.Statement;
@@ -223,6 +224,8 @@ class DownloadManager {
             `),
 
             getTaskById: db.prepare('SELECT * FROM download_tasks WHERE id = ?'),
+
+            setTempPath: db.prepare('UPDATE download_tasks SET temp_path = ? WHERE id = ?'),
 
             getTasksPaginated: db.prepare(
                 'SELECT * FROM download_tasks ORDER BY created_at DESC LIMIT ? OFFSET ?',
@@ -452,9 +455,9 @@ class DownloadManager {
     }
 
     /**
-     * @param prepare 上一次执行结束后、入队前要做的准备（如重试前删除临时文件），返回 false 时不再入队
+     * @param prepare 上一次执行结束后、入队前要做的准备（如重试时删除旧临时文件）
      */
-    private enqueueTask(task: IDownloadTask, prepare?: () => Promise<boolean>): void {
+    private enqueueTask(task: IDownloadTask, prepare?: () => Promise<void>): void {
         // 捕获当前世代号，回调执行时比对——若不一致说明中间发生过 pause/remove
         const generation = this.taskGeneration.get(task.id) ?? 0;
 
@@ -640,15 +643,14 @@ class DownloadManager {
         }
         // 上一次执行可能还在改名或收尾，结束前不能使用同一个临时文件：在队列外等（不占并发名额），
         // 等待本身也记入 runs，之后再次入队的执行会排在它后面
-        const ready = (async () => {
+        const waiting = (async () => {
             await previous?.catch(() => {});
-            return prepare ? prepare().catch(() => true) : true;
+            await prepare?.().catch(() => {});
         })();
-        const waiting = ready.then(() => {});
         this.runs.set(task.id, waiting);
-        void ready.then((ok) => {
+        void waiting.then(() => {
             if (this.runs.get(task.id) === waiting) this.runs.delete(task.id);
-            if (ok) this.queue.add(job);
+            this.queue.add(job);
         });
     }
 
@@ -707,8 +709,10 @@ class DownloadManager {
         if (!row || row.status !== 'error') return;
 
         const task = rowToTask(row);
-        const tempPath = task.tempPath;
-        const generation = this.taskGeneration.get(taskId) ?? 0;
+        // 重试换用新的临时文件：旧文件里的内容不会再被任何一次执行续传（新 URL 可能来自不同 CDN）
+        const oldTempPath = task.tempPath;
+        task.tempPath = `${task.filePath}.${task.id}-${nanoid(8)}.downloading`;
+        this.queries.setTempPath.run(task.tempPath, task.id);
 
         // 清空 mediaSource 强制延迟到 enqueueTask 中重新获取
         task.mediaSource = null;
@@ -718,23 +722,9 @@ class DownloadManager {
         task.totalBytes = 0;
         task.updatedAt = Date.now();
         this.updateTaskStatus(task);
-        // 删除旧临时文件，确保干净重试（新 URL 可能来自不同 CDN）；上一次执行结束后、读取临时文件前进行。
-        // 删不掉时不能在旧内容后续写，任务标记为失败
+        // 旧临时文件在上一次执行结束后删除，删不掉只会留下一个不再使用的文件
         this.enqueueTask(task, async () => {
-            if (!tempPath) return true;
-            try {
-                await fsp.unlink(tempPath);
-                return true;
-            } catch (err: any) {
-                if (err?.code === 'ENOENT') return true;
-                if ((this.taskGeneration.get(taskId) ?? 0) !== generation) return false;
-                task.status = 'error';
-                task.error = err?.message ?? String(err);
-                task.updatedAt = Date.now();
-                this.updateTaskStatus(task);
-                this.windowManager.broadcast(IPC.TASK_EVENT, { task, type: 'error' });
-                return false;
-            }
+            if (oldTempPath) await fsp.unlink(oldTempPath).catch(() => {});
         });
         this.windowManager.broadcast(IPC.TASK_EVENT, { task, type: 'status-changed' });
     }
