@@ -4,7 +4,8 @@
  * 卡片底色取自主题的浮层色。部分主题包的浮层色与文字、状态色过于接近，
  * 这里读取实际生效的颜色，求出把底色往黑或白方向压多少才能达标：
  * 标题 ≥ 4.5:1，说明文字与图标 ≥ 3:1；比例从小到大尝试（最多 60%），同一比例先试标题的反色。
- * 都达不到时（如标题与说明一深一浅），取各项离要求最近的一档，可能是不调整。
+ * 都达不到时（如标题与说明一深一浅），说明文字与 info 图标改用标题色（70% 不透明度）再算一次，
+ * 取两种方案中各项离要求最近的一档，可能是不调整。
  * 已达标的主题不做任何改动。
  */
 
@@ -22,7 +23,12 @@ export interface ToastScrim {
     /** 底色向 anti 混合的比例，0–SCRIM_MAX */
     amount: number;
     anti: 'black' | 'white';
+    /** 说明文字与 info 图标改用 70% 不透明度的标题色 */
+    secondaryFromTitle: boolean;
 }
+
+/** 标题色淡化后作为说明文字的后备色 */
+const SECONDARY_FROM_TITLE_ALPHA = 0.7;
 
 let ctx: CanvasRenderingContext2D | null = null;
 
@@ -81,10 +87,32 @@ export interface ToastPalette {
     surface: RGBA;
     title: RGBA;
     desc: RGBA;
+    /** 依次为 info / success / warn / error 图标 */
     icons: RGBA[];
+    /** info 图标与说明文字同色（都取主题的次要文字色） */
+    infoUsesSecondary: boolean;
 }
 
-export function chooseScrim({ base, surface, title, desc, icons }: ToastPalette): ToastScrim {
+export function chooseScrim(palette: ToastPalette): ToastScrim {
+    const plain = searchScrim(palette);
+    if (plain.score >= 1) return { ...plain.scrim, secondaryFromTitle: false };
+
+    const { title, icons, infoUsesSecondary } = palette;
+    const fadedTitle: RGBA = [title[0], title[1], title[2], title[3] * SECONDARY_FROM_TITLE_ALPHA];
+    const alt = searchScrim({
+        ...palette,
+        desc: fadedTitle,
+        icons: infoUsesSecondary ? [fadedTitle, ...icons.slice(1)] : icons,
+    });
+    return alt.score > plain.score
+        ? { ...alt.scrim, secondaryFromTitle: true }
+        : { ...plain.scrim, secondaryFromTitle: false };
+}
+
+function searchScrim({ base, surface, title, desc, icons }: ToastPalette): {
+    scrim: Omit<ToastScrim, 'secondaryFromTitle'>;
+    score: number;
+} {
     // 各项对比度与要求之比的最小值，≥ 1 即全部达标
     const score = (p: number, anti: RGBA) => {
         const bg = over(mixToward(surface, anti, p), base);
@@ -100,22 +128,22 @@ export function chooseScrim({ base, surface, title, desc, icons }: ToastPalette)
     const preferred = contrast(opaqueTitle, BLACK) >= contrast(opaqueTitle, WHITE) ? BLACK : WHITE;
     const order = [preferred, preferred === BLACK ? WHITE : BLACK];
 
-    let best: ToastScrim = { amount: 0, anti: name(preferred) };
+    let best: Omit<ToastScrim, 'secondaryFromTitle'> = { amount: 0, anti: name(preferred) };
     let bestScore = score(0, preferred);
-    if (bestScore >= 1) return best;
+    if (bestScore >= 1) return { scrim: best, score: bestScore };
     const steps = Math.round(SCRIM_MAX / SCRIM_STEP);
     for (let i = 1; i <= steps; i++) {
         const p = Math.round(i * SCRIM_STEP * 100) / 100;
         for (const anti of order) {
             const s = score(p, anti);
-            if (s >= 1) return { amount: p, anti: name(anti) };
+            if (s >= 1) return { scrim: { amount: p, anti: name(anti) }, score: s };
             if (s > bestScore) {
                 bestScore = s;
                 best = { amount: p, anti: name(anti) };
             }
         }
     }
-    return best;
+    return { scrim: best, score: bestScore };
 }
 
 /**
@@ -129,13 +157,16 @@ export function measureToastScrim(probe: HTMLElement): ToastScrim {
 
     const base = over(read(probe.querySelector('.toast-probe__base'), 'color'), BLACK);
     const cards = Array.from(probe.querySelectorAll<HTMLElement>('.toast'));
-    if (cards.length === 0) return { amount: 0, anti: 'black' };
+    if (cards.length === 0) return { amount: 0, anti: 'black', secondaryFromTitle: false };
 
+    const desc = read(cards[0].querySelector('.toast__desc'), 'color');
+    const icons = cards.map((card) => read(card.querySelector('.toast__icon'), 'color'));
     return chooseScrim({
         base,
         surface: read(cards[0], 'backgroundColor'),
         title: read(cards[0].querySelector('.toast__title'), 'color'),
-        desc: read(cards[0].querySelector('.toast__desc'), 'color'),
-        icons: cards.map((card) => read(card.querySelector('.toast__icon'), 'color')),
+        desc,
+        icons,
+        infoUsesSecondary: icons[0].every((v, i) => v === desc[i]),
     });
 }

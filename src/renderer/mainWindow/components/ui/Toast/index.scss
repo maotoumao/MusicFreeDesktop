@@ -28,6 +28,7 @@
 // 对比度探针：不参与布局与绘制
 .toast-probe {
     --_toast-scrim: 0%;
+    --_toast-secondary: initial;
 
     position: fixed;
     width: 0;
@@ -62,7 +63,7 @@
 // ── Card ─────────────────────────────────────────────────────
 
 .toast {
-    --_toast-accent: var(--toast-accent, var(--color-text-secondary));
+    --_toast-accent: var(--toast-accent, var(--_toast-secondary, var(--color-text-secondary)));
 
     width: 100%;
     border-radius: var(--toast-radius, var(--radius-card));
@@ -145,7 +146,8 @@
     margin-top: 2px;
     font-size: var(--text-caption-size);
     line-height: 18px;
-    color: var(--color-text-secondary);
+    // --_toast-secondary 由 contrast.ts 在底色无法兼顾标题与说明时设置
+    color: var(--_toast-secondary, var(--color-text-secondary));
     overflow-wrap: anywhere;
 }
 

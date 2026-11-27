@@ -359,17 +359,33 @@ export function ToastContainer() {
     // 主题切换后重新检查卡片配色的对比度
     const themePack = useCurrentThemePack();
     const probeRef = useRef<HTMLDivElement>(null);
-    const [scrim, setScrim] = useState<ToastScrim>({ amount: 0, anti: 'black' });
+    const [scrim, setScrim] = useState<ToastScrim>({
+        amount: 0,
+        anti: 'black',
+        secondaryFromTitle: false,
+    });
     useLayoutEffect(() => {
         if (!probeRef.current) return;
         const next = measureToastScrim(probeRef.current);
-        setScrim((prev) => (prev.amount === next.amount && prev.anti === next.anti ? prev : next));
+        setScrim((prev) =>
+            prev.amount === next.amount &&
+            prev.anti === next.anti &&
+            prev.secondaryFromTitle === next.secondaryFromTitle
+                ? prev
+                : next,
+        );
     }, [themePack]);
     const containerStyle =
-        scrim.amount > 0
+        scrim.amount > 0 || scrim.secondaryFromTitle
             ? ({
-                  '--_toast-scrim': `${Math.round(scrim.amount * 100)}%`,
-                  '--_toast-anti': scrim.anti,
+                  ...(scrim.amount > 0 && {
+                      '--_toast-scrim': `${Math.round(scrim.amount * 100)}%`,
+                      '--_toast-anti': scrim.anti,
+                  }),
+                  ...(scrim.secondaryFromTitle && {
+                      '--_toast-secondary':
+                          'color-mix(in srgb, var(--color-text-primary) 70%, transparent)',
+                  }),
               } as CSSProperties)
             : undefined;
 
