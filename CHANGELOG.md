@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### 修复
 
+- 修复恢复备份时，只要有一首歌的信息不完整（如缺标题、歌手不是文字）就整体失败并提示「SQLite3 can only bind ...」的问题；现在缺少平台或 ID 的歌曲会被跳过，其余字段不合法时新歌曲按空值恢复、库里已有的歌曲保留原有信息；歌单结构损坏的备份会整体拒绝，不会在覆盖恢复时清空现有歌单 ([#393](https://github.com/maotoumao/MusicFreeDesktop/issues/393))。
 - 修复 Windows 上显示缩放不是 100% 时，拖动桌面歌词或迷你模式窗口会一顿一顿、跟不上鼠标，缩放较高时甚至被甩出屏幕的问题。
 - 修复安全问题：插件或主题包提供的链接可以用 file: 等协议打开本机文件或程序；现在外部链接只允许 http(s) 和邮件链接，「打开下载目录」只会打开文件夹。
 - 修复安全问题：网页或其他应用通过 musicfree://install 链接可以不经确认直接安装插件（包括本机文件）；现在只接受 http(s) 地址（网络上的插件列表也只安装其中的网络地址），并会先弹框列出来源地址，确认后才安装。
@@ -120,6 +121,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Fixed
 
+- Fix restoring a backup failing entirely with "SQLite3 can only bind ..." when a single song had incomplete info, such as a missing title or a non-text artist; songs without a platform or ID are now skipped, other invalid fields are restored as empty for new songs while songs already in the library keep their info, and backups with damaged playlists are rejected as a whole instead of clearing existing playlists in overwrite mode ([#393](https://github.com/maotoumao/MusicFreeDesktop/issues/393)).
 - Fix dragging the desktop lyric or mini mode window on Windows with display scaling other than 100%, where the window stuttered behind the cursor or, at higher scaling, was thrown off-screen.
 - Fix a security issue where links provided by plugins or theme packs could open local files or programs through protocols such as file:; external links are now limited to http(s) and mailto, and opening the download folder only opens folders.
 - Fix a security issue where a web page or another app could install plugins through a musicfree://install link without asking, including local files; only http(s) addresses are accepted now (plugin lists from the network only install network addresses), and a dialog listing them asks for confirmation first.

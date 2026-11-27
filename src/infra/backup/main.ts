@@ -23,6 +23,7 @@ import type {
     IBackupOrigin,
     IBackupProvider,
     IBackupResult,
+    IBackupSheet,
     RestoreMode,
     IBackupProgress,
 } from '@appTypes/infra/backup';
@@ -340,12 +341,16 @@ function parseBackupData(raw: string): IBackupData {
         return {
             version: 1,
             createdAt: Date.now(),
-            musicSheets: data.musicSheets,
+            musicSheets: normalizeSheets(data.musicSheets),
         };
     }
 
     if (data.version === 1 && Array.isArray(data.musicSheets)) {
-        return { ...(data as IBackupData), origin: parseOrigin(data.origin) };
+        return {
+            ...(data as IBackupData),
+            origin: parseOrigin(data.origin),
+            musicSheets: normalizeSheets(data.musicSheets),
+        };
     }
 
     // 更高版本按跨端备份协议尽力读取已知段
@@ -363,7 +368,7 @@ function parseBackupData(raw: string): IBackupData {
 /**
  * 手机端 v2 备份（规则见手机端仓库 docs/跨端备份协议.md），桌面端只恢复 sections.musicSheets：
  * - 歌单段须恰有一个「我喜欢」，否则按缺段处理；缺段时报错而不是按空歌单导入，否则覆盖模式会清空现有歌单
- * - 曲目缺 platform / id 时丢弃，缺标题补空串
+ * - 歌单与曲目按 normalizeSheets 的规则检查
  * - 本地歌曲与其他格式一样，由 gateLocalSongs 按安装标识决定是否恢复
  */
 function parseEnvelopeV2(data: any): IBackupData {
@@ -379,18 +384,33 @@ function parseEnvelopeV2(data: any): IBackupData {
         version: 1,
         createdAt: typeof data.createdAt === 'number' ? data.createdAt : Date.now(),
         origin: parseOrigin(data.origin),
-        musicSheets: sheets
-            .filter((sheet) => typeof sheet?.id === 'string' && Array.isArray(sheet.musicList))
-            .map((sheet) => ({
-                id: sheet.id,
-                title: typeof sheet.title === 'string' ? sheet.title : '',
-                musicList: sheet.musicList.filter(isImportableMusicItem).map((item: any) => ({
-                    ...item,
-                    id: String(item.id),
-                    title: typeof item.title === 'string' ? item.title : '',
-                })),
-            })),
+        // 先检查全部歌单的结构，再按协议跳过 id 不是文本的歌单
+        musicSheets: normalizeSheets(sheets).filter((_, i) => typeof sheets[i].id === 'string'),
     };
+}
+
+/**
+ * 备份里的歌单结构必须完整：任一歌单不是对象或曲目列表不是数组时按格式错误处理，
+ * 避免覆盖恢复先清空现有歌单、再恢复不出内容。缺 platform / id 的曲目无法入库，丢弃；
+ * 其余字段在写库时处理（见 musicSheet 的 mergeRestoredItem）。
+ */
+function normalizeSheets(sheets: any[]): IBackupSheet[] {
+    if (!sheets.every((sheet) => Array.isArray(sheet?.musicList))) {
+        throw new Error('unsupported_backup_format');
+    }
+    return sheets.map((sheet) => ({
+        id: typeof sheet.id === 'string' ? sheet.id : '',
+        title: toText(sheet.title),
+        musicList: sheet.musicList.filter(isImportableMusicItem).map((item: any) => ({
+            ...item,
+            id: String(item.id),
+        })),
+    }));
+}
+
+function toText(value: unknown): string {
+    if (typeof value === 'string') return value;
+    return Number.isFinite(value) ? String(value) : '';
 }
 
 function isImportableMusicItem(item: any): boolean {

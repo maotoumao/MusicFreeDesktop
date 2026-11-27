@@ -66,6 +66,12 @@ export function createQueries(db: Database.Database) {
                 raw = COALESCE(excluded.raw, raw)
         `),
 
+        /** 恢复备份时读取库里已有的同一首歌（展示列与完整数据） */
+        getMusicItemForRestore: db.prepare(`
+            SELECT platform, CAST(id AS TEXT) AS id, title, artist, album, duration, artwork, raw
+            FROM music_items WHERE platform = ? AND id = ?
+        `),
+
         /** 全量加载歌单内歌曲（slim 列，不含 raw；含 $slim 标记供 upsert 判断） */
         getSheetMusicSlim: db.prepare(`
             SELECT m.platform, CAST(m.id AS TEXT) AS id, m.title, m.artist, m.album, m.duration, m.artwork,

@@ -225,15 +225,20 @@ class MusicSheetManager {
                         const now = Date.now();
                         for (const item of sheet.musicList) {
                             const sid = String(item.id);
+                            const merged = mergeRestoredItem(
+                                { ...item, id: sid },
+                                this.queries.getMusicItemForRestore.get(item.platform, sid) as
+                                    IRestoreBaseRow | undefined,
+                            );
                             this.queries.upsertMusicItem.run({
                                 platform: item.platform,
                                 id: sid,
-                                title: item.title,
-                                artist: item.artist ?? '',
-                                album: item.album ?? '',
-                                duration: item.duration ?? null,
-                                artwork: item.artwork ?? null,
-                                raw: safeStringify(item),
+                                title: merged.title,
+                                artist: merged.artist,
+                                album: merged.album,
+                                duration: merged.duration ?? null,
+                                artwork: merged.artwork ?? null,
+                                raw: safeStringify(merged),
                             });
                             this.queries.insertRelation.run({
                                 sheetId: targetSheetId,
@@ -696,6 +701,75 @@ class MusicSheetManager {
             this.orphanCleanupTimer = null;
         }, 5000);
     }
+}
+
+/** 库里已有歌曲的一行（恢复备份时作为合并的底） */
+interface IRestoreBaseRow {
+    platform: string;
+    id: string;
+    title: string;
+    artist: string;
+    album: string;
+    duration: number | null;
+    artwork: string | null;
+    raw: string | null;
+}
+
+/**
+ * 恢复备份时一首歌最终写库的数据，展示列与完整数据都用这一份：
+ * 以库里已有的完整数据为底，叠加备份曲目的字段；标题、歌手、专辑、时长、封面
+ * 依次取备份、已有完整数据、已有展示列中第一个可用的值，都没有时文本字段为空串。
+ */
+function mergeRestoredItem(item: IMusic.IMusicItem, existing?: IRestoreBaseRow): IMusic.IMusicItem {
+    const backup = item as unknown as Record<string, unknown>;
+    const raw = existing ? parseRaw(existing.raw) : {};
+    const columns = existing ? (existing as unknown as Record<string, unknown>) : {};
+    const merged: Record<string, unknown> = { ...raw, ...backup };
+    // 逐字段取第一个可用的值：备份 → 已有完整数据 → 已有展示列
+    const sources = [backup, raw, columns];
+    for (const key of ['title', 'artist', 'album'] as const) {
+        merged[key] = firstOf(sources, key, toRestorableText) ?? '';
+    }
+    const duration = firstOf(sources, 'duration', toRestorableDuration);
+    if (duration === null) delete merged.duration;
+    else merged.duration = duration;
+    // 空串表示没有封面，继续往后找
+    const artwork = firstOf(sources, 'artwork', (v) =>
+        typeof v === 'string' && v.trim() !== '' ? v : null,
+    );
+    if (artwork === null) delete merged.artwork;
+    else merged.artwork = artwork;
+    return merged as unknown as IMusic.IMusicItem;
+}
+
+function firstOf<T>(
+    sources: Record<string, unknown>[],
+    key: string,
+    convert: (value: unknown) => T | null,
+): T | null {
+    for (const source of sources) {
+        const value = convert(source[key]);
+        if (value !== null) return value;
+    }
+    return null;
+}
+
+/** 已有歌曲的完整数据；没有或无法解析为对象时为空 */
+function parseRaw(raw: string | null): Record<string, unknown> {
+    const parsed = raw ? safeParse<unknown>(raw) : null;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : {};
+}
+
+function toRestorableText(value: unknown): string | null {
+    if (typeof value === 'string') return value;
+    return Number.isFinite(value) ? String(value) : null;
+}
+
+function toRestorableDuration(value: unknown): number | null {
+    const duration = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+    return Number.isFinite(duration) ? (duration as number) : null;
 }
 
 /** slim 展示列 → 歌曲条目（空值字段省略） */
