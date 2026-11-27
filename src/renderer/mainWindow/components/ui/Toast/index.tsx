@@ -1,11 +1,22 @@
-import { forwardRef, useEffect, useSyncExternalStore, type FocusEvent } from 'react';
+import {
+    forwardRef,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState,
+    useSyncExternalStore,
+    type CSSProperties,
+    type FocusEvent,
+} from 'react';
 import { atom, getDefaultStore, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
 import { AlertTriangle, CircleCheck, CircleX, Info, X, type LucideIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { cn } from '@common/cn';
+import { useCurrentThemePack } from '@infra/themepack/renderer';
 import { duration as motionDuration, easing } from '@common/motionTokens';
+import { measureToastScrim, type ToastScrim } from './contrast';
 import './index.scss';
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -341,6 +352,23 @@ export function ToastContainer() {
     const announcements = useAtomValue(announcementAtom);
     const reduceMotion = useSyncExternalStore(subscribeReducedMotion, getReducedMotion);
 
+    // 主题切换后重新检查卡片配色的对比度
+    const themePack = useCurrentThemePack();
+    const probeRef = useRef<HTMLDivElement>(null);
+    const [scrim, setScrim] = useState<ToastScrim>({ amount: 0, anti: 'black' });
+    useLayoutEffect(() => {
+        if (!probeRef.current) return;
+        const next = measureToastScrim(probeRef.current);
+        setScrim((prev) => (prev.amount === next.amount && prev.anti === next.anti ? prev : next));
+    }, [themePack]);
+    const containerStyle =
+        scrim.amount > 0
+            ? ({
+                  '--_toast-scrim': `${Math.round(scrim.amount * 100)}%`,
+                  '--_toast-anti': scrim.anti,
+              } as CSSProperties)
+            : undefined;
+
     useEffect(() => {
         const onBlur = () => resumeAll(['hover', 'focus']);
         const onLeave = () => resumeAll(['hover']);
@@ -353,7 +381,18 @@ export function ToastContainer() {
     }, []);
 
     return (
-        <div className="toast-container">
+        <div className="toast-container" style={containerStyle}>
+            {/* 对比度探针：不可见，只用于读取当前主题下的实际颜色 */}
+            <div ref={probeRef} className="toast-probe" aria-hidden="true">
+                <span className="toast-probe__base" />
+                {(Object.keys(ICONS) as ToastType[]).map((type) => (
+                    <div key={type} className={cn('toast', `toast--${type}`)}>
+                        <span className="toast__title" />
+                        <span className="toast__desc" />
+                        <span className="toast__icon" />
+                    </div>
+                ))}
+            </div>
             {/* 常驻的读屏播报区：内容追加时才会被朗读 */}
             {(['polite', 'assertive'] as const).map((level) => (
                 <div

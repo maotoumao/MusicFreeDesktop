@@ -24,6 +24,27 @@
     pointer-events: none;
 }
 
+// 对比度探针：不参与布局与绘制
+.toast-probe {
+    --_toast-scrim: 0%;
+
+    position: fixed;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+
+    .toast {
+        backdrop-filter: none;
+        box-shadow: none;
+    }
+}
+
+.toast-probe__base {
+    color: var(--color-bg-base);
+}
+
 // 读屏播报区：视觉上隐藏
 .toast-announcer {
     position: absolute;
@@ -45,7 +66,12 @@
     width: 100%;
     border-radius: var(--toast-radius, var(--radius-card));
     border: 1px solid var(--toast-border, var(--color-border-default));
-    background: var(--toast-bg, var(--color-bg-popover));
+    // --_toast-scrim / --_toast-anti 由 contrast.ts 按主题计算：底色与文字对比度不足时往黑或白方向压
+    background: color-mix(
+        in srgb,
+        var(--toast-bg, var(--color-bg-popover)),
+        var(--_toast-anti, black) var(--_toast-scrim, 0%)
+    );
     box-shadow: var(--toast-shadow, var(--shadow-sm));
     backdrop-filter: blur(var(--blur-md));
     pointer-events: auto;
