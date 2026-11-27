@@ -54,10 +54,9 @@ export interface IPluginCacheData {
     plugins: IPlugin.IPluginDelegate[];
 }
 
-/** 单个插件更新结果；upToDate 表示没有可用的新版本，其余失败（下载、解析等）不带此标记 */
 /**
- * 安装插件的结果。upToDate 表示没有安装是因为已装有相同或更高版本；
- * failed 为插件列表（.json）中真正安装失败的数量（不含已是最新）。
+ * 安装插件的结果。upToDate 表示没有安装是因为已装有内容完全相同的插件，或已装版本高于新版本
+ * （版本相同但内容不同时照常安装）；failed 为插件列表（.json）中真正安装失败的数量（不含 upToDate）。
  */
 export interface IInstallPluginResult {
     success: boolean;
@@ -66,6 +65,7 @@ export interface IInstallPluginResult {
     message?: string;
 }
 
+/** 单个插件更新结果；upToDate 表示没有可用的新版本，其余失败（下载、解析等）不带此标记 */
 export interface IPluginUpdateResult {
     success: boolean;
     upToDate?: boolean;
