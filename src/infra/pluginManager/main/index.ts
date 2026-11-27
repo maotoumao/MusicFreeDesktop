@@ -443,7 +443,11 @@ class PluginManager {
                 );
 
             if (pluginUrls.length === 0) {
-                return { success: false, message: 'No plugin URLs found in JSON' };
+                return {
+                    success: false,
+                    failed: entries.length,
+                    message: 'No plugin URLs found in JSON',
+                };
             }
 
             let installed = 0;
@@ -459,13 +463,13 @@ class PluginManager {
                 }
             }
 
-            // 地址为空或不允许的条目没有安装，也算失败
-            const skipped = entries.length - pluginUrls.length;
+            // 地址为空或不允许的条目没有安装，也算失败；已是最新的不算
+            const realFailed = failed - upToDate + (entries.length - pluginUrls.length);
             return {
                 success: installed > 0,
-                upToDate: skipped === 0 && upToDate === pluginUrls.length,
-                failed: failed - upToDate + skipped,
-                message: `Installed: ${installed}, Failed: ${failed + skipped}`,
+                upToDate: realFailed === 0 && upToDate === pluginUrls.length,
+                failed: realFailed,
+                message: `Installed: ${installed}, Up to date: ${upToDate}, Failed: ${realFailed}`,
             };
         } catch (err: any) {
             return { success: false, message: err?.message ?? 'Failed to parse JSON' };
