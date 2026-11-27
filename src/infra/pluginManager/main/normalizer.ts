@@ -27,6 +27,17 @@ export function toInternalMethodName(name: string): string {
     return FALLBACK_TO_METHOD[name] ?? name;
 }
 
+/** 插件按方法名提供的提示文案：旧方法名的键换成新名（插件已提供新名的键时不覆盖） */
+export function toInternalHints(hints: unknown): Record<string, string[]> | undefined {
+    if (!hints || typeof hints !== 'object' || Array.isArray(hints)) return undefined;
+    const out: Record<string, string[]> = {};
+    for (const [key, value] of Object.entries(hints)) {
+        const name = toInternalMethodName(key);
+        if (name === key || !(name in hints)) out[name] = value as string[];
+    }
+    return out;
+}
+
 /** 插件声明的搜索类型 → 桌面端使用的类型（旧插件的 'sheet' 记作 'playlist'），去重 */
 export function toInternalSearchTypes(types: unknown): string[] | undefined {
     if (!Array.isArray(types)) return undefined;

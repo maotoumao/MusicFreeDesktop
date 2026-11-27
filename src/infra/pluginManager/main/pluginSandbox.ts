@@ -10,7 +10,7 @@ import vm from 'vm';
 import crypto from 'crypto';
 import { createPluginRequire } from './pluginPolyfill';
 import type { PluginStorage } from './pluginStorage';
-import { toInternalMethodName, toInternalSearchTypes } from './normalizer';
+import { toInternalHints, toInternalMethodName, toInternalSearchTypes } from './normalizer';
 
 /**
  * 沙箱环境配置选项。
@@ -281,8 +281,10 @@ export function extractPluginDelegate(
         }
     }
 
+    const data = JSON.parse(JSON.stringify(raw));
     const delegate: IPlugin.IPluginDelegate = {
-        ...JSON.parse(JSON.stringify(raw)),
+        ...data,
+        hints: toInternalHints(data.hints),
         supportedSearchType: toInternalSearchTypes(raw.supportedSearchType),
         supportedMethod,
         hash,
