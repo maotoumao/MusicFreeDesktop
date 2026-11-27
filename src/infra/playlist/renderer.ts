@@ -241,6 +241,9 @@ function applyToSet(set: Set<string>, op: IListOp): boolean {
     return set.size !== before;
 }
 
+/** 快照之后已写完、但因还有写入排队而没能直接采用界面列表的操作，攒到这个数量开始在空闲时逐个并入 */
+const COMPACT_BACKLOG = 32;
+
 type IReadOutcome =
     { detail: ILocalPlaylistDetail | null } | { error: unknown } | { skipped: true };
 
@@ -568,7 +571,9 @@ class PlaylistRenderer {
                 const changed = 'kind' in settled ? false : settled.changed;
                 this.removePending(op);
                 const base = this.listBase;
-                if (base && opTargets(final, base.playlistId)) {
+                // 一首都没写入的添加没有效果，不用并入快照
+                const noEffect = final.kind === 'add' && final.items.length === 0;
+                if (base && !noEffect && opTargets(final, base.playlistId)) {
                     if (
                         !changed &&
                         this.hasCurrentSnapshot() &&
@@ -579,7 +584,7 @@ class PlaylistRenderer {
                         base.settled = [];
                     } else {
                         base.settled.push(final);
-                        this.scheduleCompaction();
+                        if (base.settled.length >= COMPACT_BACKLOG) this.scheduleCompaction();
                     }
                 }
                 if (opTargets(final, DEFAULT_FAVORITE_PLAYLIST_ID)) {
@@ -624,7 +629,10 @@ class PlaylistRenderer {
         if (index !== -1) this.pendingOps.splice(index, 1);
     }
 
-    /** 一直有写入排队时，已写完的操作在之后的空闲时逐个并入快照，每次只处理一个，避免集中占用界面线程 */
+    /**
+     * 写入积压到 COMPACT_BACKLOG 个时，已写完的操作在之后的空闲时逐个并入快照，每次只处理一个，
+     * 避免集中占用界面线程；积压较少时等写完后直接采用界面列表。
+     */
     private scheduleCompaction() {
         if (this.compactTimer) return;
         this.compactTimer = setTimeout(() => {
