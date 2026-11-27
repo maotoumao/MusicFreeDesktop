@@ -54,7 +54,10 @@ export interface IAddMusicResult {
     added: number;
     /** 超出歌单上限、没有写入的末尾歌曲数 */
     truncated: number;
-    /** 传入时没有封面、库里保留了原封面的歌曲（upsert 时封面为空不覆盖） */
+    /**
+     * 同一批里都没带封面、库里保留了封面的歌曲（upsert 时封面为空不覆盖），
+     * 包括已在歌单里的；渲染层据此纠正显示的封面
+     */
     keptArtworks?: Array<{ platform: string; id: string; artwork: string }>;
 }
 
