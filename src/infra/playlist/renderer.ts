@@ -125,9 +125,13 @@ function applyToList(list: IMusicItemSlim[], op: IListOp): IMusicItemSlim[] {
     switch (op.kind) {
         case 'add': {
             if (op.deferred) return list;
-            // 同一首歌以最后一次出现的资料为准（主进程逐条 upsert），位置取第一次出现
+            // 同一首歌按主进程逐条 upsert 的规则合并资料（封面取最后一个非空值），位置取第一次出现
             const incoming = new Map<string, IMusicItemSlim>();
-            for (const m of op.items) incoming.set(keyOf(m), m);
+            for (const m of op.items) {
+                const k = keyOf(m);
+                const prev = incoming.get(k);
+                incoming.set(k, prev ? mergeDisplayFields(prev, m) : m);
+            }
             const seen = new Set(list.map(keyOf));
             const fresh: IMusicItemSlim[] = [];
             let overlaps = false;
