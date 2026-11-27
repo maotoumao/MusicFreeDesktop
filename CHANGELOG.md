@@ -169,7 +169,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix the desktop lyrics and the lyrics page showing the previous song's lyrics, following the new song's progress, until the new lyrics finished loading.
 - Fix the settings page on macOS showing Cmd shortcuts as Ctrl (Cmd is what actually works), so pressing Ctrl as shown did nothing; the Option key is no longer shown as Alt either.
 - Fix `/` in paths and URLs showing up as `&#x2F;` in messages (for example the overlap warning when adding a scan folder).
-- Fixed "Update all" in plugin subscriptions reporting success when a plugin failed to download or parse; plugins that are already up to date still count as updated.
+- Fix "Update all" in plugin subscriptions reporting success when a plugin failed to download or parse; plugins that are already up to date still count as updated.
 - Fix "Play next" on the song that is currently playing showing "Added to play next" although the queue did not change.
 
 ---
