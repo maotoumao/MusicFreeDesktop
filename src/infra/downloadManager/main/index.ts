@@ -749,6 +749,9 @@ class DownloadManager {
         // 递增世代号使对应的 p-queue 回调失效
         this.taskGeneration.set(taskId, (this.taskGeneration.get(taskId) ?? 0) + 1);
 
+        // 先删任务记录再清理临时文件：清理期间重试、继续读不到任务，不会再开始新的执行
+        this.queries.deleteTask.run(taskId);
+
         // 清理临时文件
         if (row?.temp_path) {
             try {
@@ -757,9 +760,6 @@ class DownloadManager {
                 // 文件不存在等情况忽略
             }
         }
-
-        // 从 DB 删除任务记录
-        this.queries.deleteTask.run(taskId);
 
         if (row) {
             this.windowManager.broadcast(IPC.TASK_EVENT, {
