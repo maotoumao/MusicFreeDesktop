@@ -194,15 +194,25 @@ function applyToList(list: IMusicItemSlim[], op: IListOp): IMusicItemSlim[] {
 /** 依次作用多个操作；连续的删除合并成一次过滤，避免大歌单上逐个扫描 */
 function applyOps(list: IMusicItemSlim[], ops: IListOp[]): IMusicItemSlim[] {
     let out = list;
+    // 只有一个删除时直接用它的键集合，遇到第二个连续删除才合并
     let removing: Set<string> | null = null;
+    let merged = false;
     const flush = () => {
         if (removing) out = applyToList(out, { kind: 'remove', playlistId: null, keys: removing });
         removing = null;
+        merged = false;
     };
     for (const op of ops) {
         if (op.kind === 'remove') {
-            removing ??= new Set();
-            for (const k of op.keys) removing.add(k);
+            if (!removing) {
+                removing = op.keys;
+            } else {
+                if (!merged) {
+                    removing = new Set(removing);
+                    merged = true;
+                }
+                for (const k of op.keys) removing.add(k);
+            }
             continue;
         }
         flush();
