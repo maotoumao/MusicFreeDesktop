@@ -88,6 +88,7 @@ export default function LocalPlaylistPage() {
         });
         return () => {
             aborted = true;
+            playlistManager.leavePlaylist(id);
         };
     }, [id]);
 

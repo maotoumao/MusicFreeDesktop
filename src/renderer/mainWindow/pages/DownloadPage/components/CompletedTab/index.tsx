@@ -50,6 +50,7 @@ export function CompletedTab() {
         });
         return () => {
             aborted = true;
+            playlistManager.leavePlaylist(DOWNLOADED_PLAYLIST_ID);
         };
     }, []);
 

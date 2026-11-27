@@ -288,6 +288,8 @@ class PlaylistRenderer {
     private favoriteIdSet = new Set<string>();
     private starredIdSet = new Set<string>();
     private currentPlaylistId: string | null = null;
+    /** 正显示在页面上的歌单（页面卸载时由 leavePlaylist 清除） */
+    private shownPlaylistId: string | null = null;
     private mutationQueue = new MutationQueue();
     /** 已入队、还没写完的歌曲操作（按入队顺序） */
     private pendingOps: IListOp[] = [];
@@ -406,7 +408,9 @@ class PlaylistRenderer {
             // 写入真正发出时目标歌单正显示在界面上，才需要库里保留的封面来纠正显示
             () =>
                 mod.addMusic(playlistId, items, {
-                    reportArtworks: this.currentPlaylistId === playlistId,
+                    reportArtworks:
+                        this.shownPlaylistId === playlistId &&
+                        this.currentPlaylistId === playlistId,
                 }),
             ({ added, truncated, keptArtworks }) => {
                 if (truncated <= 0 && !deferred && !keptArtworks) return op;
@@ -528,6 +532,7 @@ class PlaylistRenderer {
     async openPlaylist(playlistId: string): Promise<ILocalPlaylistDetail | null> {
         const token = ++this.openToken;
         this.currentPlaylistId = playlistId;
+        this.shownPlaylistId = playlistId;
         // 读到快照之前保持空列表，期间的操作在快照到达后重放（避免把部分歌曲当作完整列表）
         this.listBase = null;
         store.set(musicListAtom, []);
@@ -540,6 +545,11 @@ class PlaylistRenderer {
         this.applyListSnapshot(playlistId, outcome.detail?.musicList ?? []);
         store.set(isLoadingPlaylistAtom, false);
         return outcome.detail;
+    }
+
+    /** 歌单页面卸载时调用：此后向该歌单写入不再为界面取回库里的封面 */
+    leavePlaylist(playlistId: string): void {
+        if (this.shownPlaylistId === playlistId) this.shownPlaylistId = null;
     }
 
     getCurrentMusicList(): IMusicItemSlim[] {
