@@ -44,7 +44,7 @@ export interface MusicItemMenuContext {
 function copyToClipboard(text: string): void {
     navigator.clipboard.writeText(text).then(
         () => showToast(i18n.t('common.copied'), { type: 'success' }),
-        () => showToast(i18n.t('common.copy_failed'), { type: 'error' }),
+        () => showToast(i18n.t('media.copy_failed'), { type: 'error' }),
     );
 }
 

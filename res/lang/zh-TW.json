@@ -35,7 +35,6 @@
         "retry": "重試",
         "select_hint": "請選擇",
         "copied": "已複製",
-        "copy_failed": "複製失敗",
         "saved": "已儲存",
         "expand": "展開",
         "collapse": "收起",
@@ -204,7 +203,8 @@
         "artist_load_error": "獲取音樂列表失敗",
         "artist_empty_albums": "暫無專輯",
         "fans": "粉絲",
-        "works_count": "{{count}} 首歌曲"
+        "works_count": "{{count}} 首歌曲",
+        "copy_failed": "複製失敗"
     },
     "plugin": {
         "prop_user_variable": "用戶變量",

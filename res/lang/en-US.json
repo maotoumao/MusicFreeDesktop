@@ -35,7 +35,6 @@
         "retry": "Retry",
         "select_hint": "Select",
         "copied": "Copied",
-        "copy_failed": "Copy failed",
         "saved": "Saved",
         "expand": "Expand",
         "collapse": "Collapse",
@@ -204,7 +203,8 @@
         "artist_load_error": "Failed to load music list",
         "artist_empty_albums": "No albums",
         "fans": "fans",
-        "works_count": "{{count}} songs"
+        "works_count": "{{count}} songs",
+        "copy_failed": "Copy failed"
     },
     "plugin": {
         "prop_user_variable": "User Variable",
