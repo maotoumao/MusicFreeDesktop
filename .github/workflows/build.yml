@@ -74,7 +74,12 @@ jobs:
               with:
                   node-version: 22
                   cache: pnpm
-            - run: pnpm install
+            # 先改版本再一次性安装：在已装好的依赖上 pnpm add 会沿用之前跳过的可选包，
+            # pump 在 Windows 上被当作 macOS 专用依赖跳过后，Electron 22 的安装脚本会找不到它
+            # better-sqlite3 13 起基于 Node-API 10 且要求 Node 22，Electron 22 (Node 16) 继续用 12.x
+            - name: Use Electron 22 and better-sqlite3 12
+              run: npm pkg set 'devDependencies.electron=^22.3.27' 'dependencies.better-sqlite3=12.11.1'
+            - run: pnpm install --no-frozen-lockfile
             - name: Read version
               run: |
                   $version = node -p "require('./package.json').version"
@@ -86,11 +91,6 @@ jobs:
                     Write-Host "Overriding: $target"
                     Copy-Item $_.FullName $target -Force
                   }
-            - name: Install Electron 22
-              run: pnpm add electron@22 --save-dev
-            # better-sqlite3 13 起基于 Node-API 10 且要求 Node 22，Electron 22 (Node 16) 继续用 12.x
-            - name: Install better-sqlite3 for Electron 22
-              run: pnpm add better-sqlite3@12.11.1
             - run: pnpm run package
             - uses: maotoumao/inno-setup-action-cli@main
               with:
