@@ -150,14 +150,14 @@ export default function PluginSubscriptionModal({ close }: PluginSubscriptionMod
             }
         }
         if (failCount === 0) {
-            showToast(t('plugin.update_successfully'));
+            showToast(t('plugin.update_successfully'), { type: 'success' });
         } else {
             showToast(
                 t('plugin.subscription_update_summary', {
                     success: successCount,
                     fail: failCount,
                 }),
-                { type: failCount > 0 && successCount === 0 ? 'warn' : undefined },
+                { type: successCount === 0 ? 'error' : 'warn' },
             );
         }
         setUpdating(false);

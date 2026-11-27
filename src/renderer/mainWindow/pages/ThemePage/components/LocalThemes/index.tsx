@@ -35,10 +35,12 @@ export default function LocalThemes() {
                 onConfirm: async () => {
                     try {
                         await themePack.uninstallThemePack(pack);
-                        showToast(t('theme.uninstall_theme_success', { name: pack.name }));
+                        showToast(t('theme.uninstall_theme_success', { name: pack.name }), {
+                            type: 'success',
+                        });
                     } catch {
                         showToast(t('theme.uninstall_theme_fail', { reason: 'unknown' }), {
-                            type: 'warn',
+                            type: 'error',
                         });
                     }
                 },

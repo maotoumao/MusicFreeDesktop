@@ -33,7 +33,9 @@ export default function PluginManagerPage() {
             confirmDanger: true,
             onConfirm: async () => {
                 const count = await pluginManager.uninstallAllPlugins();
-                showToast(t('plugin.uninstall_all_success', { count }));
+                showToast(t('plugin.uninstall_all_success', { count }), {
+                    type: count > 0 ? 'success' : 'info',
+                });
             },
         });
     }, [pluginCount, t]);

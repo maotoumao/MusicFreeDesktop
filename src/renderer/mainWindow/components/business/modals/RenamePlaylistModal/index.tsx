@@ -43,7 +43,7 @@ export default function RenamePlaylistModal({
             await playlistManager.updatePlaylist(playlistId, { title: trimmedName });
             close();
         } catch {
-            showToast(t('playlist.rename_failed'));
+            showToast(t('playlist.rename_failed'), { type: 'error' });
         } finally {
             submittingRef.current = false;
             setLoading(false);

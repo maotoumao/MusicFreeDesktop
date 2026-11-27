@@ -42,7 +42,7 @@ export default function CreatePlaylistModal({ close, initMusicItems }: CreatePla
 
             close();
         } catch {
-            showToast(t('playlist.create_failed'));
+            showToast(t('playlist.create_failed'), { type: 'error' });
         } finally {
             submittingRef.current = false;
             setLoading(false);

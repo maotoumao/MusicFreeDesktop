@@ -130,9 +130,9 @@ export default memo(function LyricSettingsPopover({
 
             try {
                 await fsUtil.writeFile(result.filePath, content, { encoding: 'utf-8' });
-                showToast(t('lyric.lyric_saved'));
+                showToast(t('lyric.lyric_saved'), { type: 'success' });
             } catch {
-                showToast(t('lyric.save_failed'), { type: 'warn' });
+                showToast(t('lyric.save_failed'), { type: 'error' });
             }
         },
         [lyricState],
@@ -151,7 +151,7 @@ export default memo(function LyricSettingsPopover({
             associatedLyric: null,
         });
         await trackPlayer.refreshLyric();
-        showToast(t('lyric.unlinked'));
+        showToast(t('lyric.unlinked'), { type: 'success' });
     }, [currentMusic]);
 
     if (!open) return null;

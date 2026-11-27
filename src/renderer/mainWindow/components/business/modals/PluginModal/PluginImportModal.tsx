@@ -60,7 +60,7 @@ export default function PluginImportModal({ close, plugin, type }: PluginImportM
             }
         } catch (e: any) {
             showToast(t('plugin.import_error', { reason: e?.message ?? '' }), {
-                type: 'warn',
+                type: 'error',
             });
         } finally {
             setLoading(false);

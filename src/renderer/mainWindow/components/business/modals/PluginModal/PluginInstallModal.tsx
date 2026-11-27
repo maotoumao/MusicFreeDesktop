@@ -36,18 +36,18 @@ export default function PluginInstallModal({ close }: PluginInstallModalProps) {
             try {
                 const installResult = await pluginManager.installPlugin(filePath);
                 if (installResult.success) {
-                    showToast(t('plugin.install_successfully'));
+                    showToast(t('plugin.install_successfully'), { type: 'success' });
                     close();
                 } else {
                     showToast(
                         `${t('plugin.install_failed')}: ${installResult.message ?? t('plugin.invalid_plugin')}`,
-                        { type: 'warn' },
+                        { type: 'error' },
                     );
                 }
             } catch (e: any) {
                 showToast(
                     `${t('plugin.install_failed')}: ${e?.message ?? t('plugin.invalid_plugin')}`,
-                    { type: 'warn' },
+                    { type: 'error' },
                 );
             } finally {
                 setInstalling(false);
@@ -75,7 +75,7 @@ export default function PluginInstallModal({ close }: PluginInstallModalProps) {
         } catch (e: any) {
             showToast(
                 `${t('plugin.install_failed')}: ${e?.message ?? t('plugin.invalid_plugin')}`,
-                { type: 'warn' },
+                { type: 'error' },
             );
         }
     }, [installFromPath, t]);
@@ -152,18 +152,18 @@ export default function PluginInstallModal({ close }: PluginInstallModalProps) {
         try {
             const result = await pluginManager.installPlugin(trimmed);
             if (result.success) {
-                showToast(t('plugin.install_successfully'));
+                showToast(t('plugin.install_successfully'), { type: 'success' });
                 close();
             } else {
                 showToast(
                     `${t('plugin.install_failed')}: ${result.message ?? t('plugin.invalid_plugin')}`,
-                    { type: 'warn' },
+                    { type: 'error' },
                 );
             }
         } catch (e: any) {
             showToast(
                 `${t('plugin.install_failed')}: ${e?.message ?? t('plugin.invalid_plugin')}`,
-                { type: 'warn' },
+                { type: 'error' },
             );
         } finally {
             setInstalling(false);

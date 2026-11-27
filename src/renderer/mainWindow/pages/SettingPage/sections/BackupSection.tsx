@@ -41,14 +41,14 @@ export function BackupSection() {
                               count: result.localIgnored,
                           })
                         : t('settings.backup.resume_success'),
-                    { type: 'info' },
+                    { type: result.localIgnored ? 'warn' : 'success' },
                 );
             } else if (result.error) {
                 showToast(
                     t('settings.backup.resume_fail', {
                         reason: t(`settings.backup.${result.error}`, result.error),
                     }),
-                    { type: 'warn' },
+                    { type: 'error' },
                 );
             }
         },
@@ -72,7 +72,7 @@ export function BackupSection() {
                         t('settings.backup.resume_fail', {
                             reason: e instanceof Error ? e.message : String(e),
                         }),
-                        { type: 'warn' },
+                        { type: 'error' },
                     );
                 } finally {
                     setOperating(false);
@@ -112,10 +112,10 @@ export function BackupSection() {
         try {
             const result = await backup.backupToFile(dialogResult.filePath);
             if (result.success) {
-                showToast(t('settings.backup.backup_success'), { type: 'info' });
+                showToast(t('settings.backup.backup_success'), { type: 'success' });
             } else if (result.error) {
                 showToast(t('settings.backup.backup_fail', { reason: result.error }), {
-                    type: 'warn',
+                    type: 'error',
                 });
             }
         } catch (e) {
@@ -123,7 +123,7 @@ export function BackupSection() {
                 t('settings.backup.backup_fail', {
                     reason: e instanceof Error ? e.message : String(e),
                 }),
-                { type: 'warn' },
+                { type: 'error' },
             );
         } finally {
             setOperating(false);
@@ -154,15 +154,15 @@ export function BackupSection() {
         try {
             const result = await backup.testWebDAV();
             if (result.success) {
-                showToast(t('settings.backup.webdav_connect_success'), { type: 'info' });
+                showToast(t('settings.backup.webdav_connect_success'), { type: 'success' });
             } else {
                 showToast(t('settings.backup.webdav_connect_fail'), {
-                    type: 'warn',
+                    type: 'error',
                     description: result.error,
                 });
             }
         } catch {
-            showToast(t('settings.backup.webdav_connect_fail'), { type: 'warn' });
+            showToast(t('settings.backup.webdav_connect_fail'), { type: 'error' });
         } finally {
             setOperating(false);
         }
@@ -173,13 +173,13 @@ export function BackupSection() {
         try {
             const result = await backup.backupToWebDAV();
             if (result.success) {
-                showToast(t('settings.backup.backup_success'), { type: 'info' });
+                showToast(t('settings.backup.backup_success'), { type: 'success' });
             } else if (result.error) {
                 showToast(
                     t('settings.backup.backup_fail', {
                         reason: t(`settings.backup.${result.error}`, result.error),
                     }),
-                    { type: 'warn' },
+                    { type: 'error' },
                 );
             }
         } catch (e) {
@@ -187,7 +187,7 @@ export function BackupSection() {
                 t('settings.backup.backup_fail', {
                     reason: e instanceof Error ? e.message : String(e),
                 }),
-                { type: 'warn' },
+                { type: 'error' },
             );
         } finally {
             setOperating(false);

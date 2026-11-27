@@ -207,7 +207,9 @@ const PluginItemActions = memo(function PluginItemActions({
         try {
             const result = await pluginManager.updatePlugin(plugin.hash);
             if (result.success) {
-                showToast(t('plugin.toast_plugin_updated', { plugin: plugin.platform }));
+                showToast(t('plugin.toast_plugin_updated', { plugin: plugin.platform }), {
+                    type: 'success',
+                });
             } else if (result.upToDate) {
                 showToast(
                     t('plugin.toast_plugin_already_latest', {
@@ -215,10 +217,10 @@ const PluginItemActions = memo(function PluginItemActions({
                     }),
                 );
             } else {
-                showToast(t('plugin.update_failed'), { type: 'warn' });
+                showToast(t('plugin.update_failed'), { type: 'error' });
             }
         } catch {
-            showToast(t('plugin.update_failed'), { type: 'warn' });
+            showToast(t('plugin.update_failed'), { type: 'error' });
         } finally {
             setUpdating(false);
         }
@@ -240,10 +242,11 @@ const PluginItemActions = memo(function PluginItemActions({
                         t('plugin.uninstall_successfully', {
                             plugin: plugin.platform,
                         }),
+                        { type: 'success' },
                     );
                 } else {
                     showToast(result.message ?? t('plugin.uninstall_failed'), {
-                        type: 'warn',
+                        type: 'error',
                     });
                     throw new Error('uninstall failed');
                 }

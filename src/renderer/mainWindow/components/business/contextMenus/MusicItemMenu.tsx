@@ -43,7 +43,7 @@ export interface MusicItemMenuContext {
 /** 复制文本到剪贴板并弹出 toast */
 function copyToClipboard(text: string): void {
     navigator.clipboard.writeText(text).then(
-        () => showToast(i18n.t('common.copied')),
+        () => showToast(i18n.t('common.copied'), { type: 'success' }),
         () => showToast(i18n.t('common.copied')),
     );
 }
@@ -105,7 +105,7 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
         label: i18n.t('playback.next_play'),
         onClick: () => {
             trackPlayer.addNext(items);
-            showToast(i18n.t('playback.added_to_next'));
+            showToast(i18n.t('playback.added_to_next'), { type: 'success' });
         },
     });
 
@@ -206,13 +206,13 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
                         if (localFilePath) {
                             const ok = await systemUtil.showItemInFolder(localFilePath);
                             if (!ok) {
-                                showToast(i18n.t('local_music.reveal_fail'));
+                                showToast(i18n.t('local_music.reveal_fail'), { type: 'error' });
                             }
                         } else {
                             throw new Error('No local file path found');
                         }
                     } catch {
-                        showToast(i18n.t('local_music.reveal_fail'));
+                        showToast(i18n.t('local_music.reveal_fail'), { type: 'error' });
                     }
                 },
             });

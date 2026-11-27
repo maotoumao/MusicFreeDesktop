@@ -75,13 +75,14 @@ export function LocalThemeMenu(ctx: LocalThemeMenuContext): ContextMenuEntry[] {
                                 i18n.t('theme.uninstall_theme_success', {
                                     name: pack.name,
                                 }),
+                                { type: 'success' },
                             );
                         } catch {
                             showToast(
                                 i18n.t('theme.uninstall_theme_fail', {
                                     reason: 'unknown',
                                 }),
-                                { type: 'warn' },
+                                { type: 'error' },
                             );
                         }
                     },

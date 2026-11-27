@@ -43,10 +43,10 @@ export default function PluginUserVariableModal({ close, plugin }: PluginUserVar
         setSaving(true);
         try {
             await pluginManager.setPluginMeta(plugin.hash, { userVariables: values });
-            showToast(t('plugin.user_variable_success'));
+            showToast(t('plugin.user_variable_success'), { type: 'success' });
             close();
         } catch {
-            showToast(t('plugin.update_failed'), { type: 'warn' });
+            showToast(t('plugin.update_failed'), { type: 'error' });
         } finally {
             setSaving(false);
         }

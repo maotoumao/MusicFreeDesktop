@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Download, Palette } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
-import { atom, getDefaultStore } from 'jotai';
-import { useAtomValue } from 'jotai/react';
+import { atom, getDefaultStore , useAtomValue } from 'jotai';
 import themePack, { useCurrentThemePack, useInstalledThemePacks } from '@infra/themepack/renderer';
 import type { IThemePack } from '@appTypes/infra/themepack';
 import { RequestStatus } from '@common/constant';
@@ -160,19 +159,21 @@ export default function RemoteThemes() {
                 );
                 const tp = await themePack.installRemoteThemePack(vm.srcUrl, existingLocal?.hash);
                 if (tp) {
-                    showToast(t('theme.install_theme_success', { name: tp.name }));
+                    showToast(t('theme.install_theme_success', { name: tp.name }), {
+                        type: 'success',
+                    });
                     if (useAfterInstall) {
                         await themePack.selectTheme(tp);
                     }
                 } else {
                     showToast(t('theme.install_theme_fail', { reason: 'unknown' }), {
-                        type: 'warn',
+                        type: 'error',
                     });
                     throw new Error('install returned null');
                 }
             } catch (err) {
                 showToast(t('theme.install_theme_fail', { reason: 'network' }), {
-                    type: 'warn',
+                    type: 'error',
                 });
                 throw err;
             } finally {

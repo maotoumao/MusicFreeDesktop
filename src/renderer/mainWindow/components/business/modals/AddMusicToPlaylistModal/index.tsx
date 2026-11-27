@@ -32,7 +32,7 @@ export default function AddMusicToPlaylistModal({
     const handleSelectPlaylist = useCallback(
         (playlistId: string, playlistTitle: string) => {
             playlistManager.addMusicToPlaylist(musicItems, playlistId);
-            showToast(t('playlist.added_to_sheet', { sheet: playlistTitle }));
+            showToast(t('playlist.added_to_sheet', { sheet: playlistTitle }), { type: 'success' });
             close();
         },
         [musicItems, close, t],

@@ -158,10 +158,10 @@ export default function SearchLyricModal({ close }: SearchLyricModalProps) {
                 // 刷新当前歌词
                 await trackPlayer.refreshLyric();
 
-                showToast(t('lyric.link_success'));
+                showToast(t('lyric.link_success'), { type: 'success' });
                 close();
             } catch {
-                showToast(t('lyric.link_failed'), { type: 'warn' });
+                showToast(t('lyric.link_failed'), { type: 'error' });
             } finally {
                 setLinking(false);
             }

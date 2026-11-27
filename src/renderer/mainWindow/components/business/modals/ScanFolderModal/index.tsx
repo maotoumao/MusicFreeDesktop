@@ -122,7 +122,7 @@ export default function ScanFolderModal({ close }: ScanFolderModalProps) {
         });
         localMusic.syncScanFolders(folderPaths).catch((e) => {
             console.error('[ScanFolderModal] sync scan error:', e);
-            showToast(t('local_music.scan_failed'), { type: 'warn' });
+            showToast(t('local_music.scan_failed'), { type: 'error' });
         });
         close();
     }, [folderPaths, filterShort, close, t]);

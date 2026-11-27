@@ -52,14 +52,16 @@ export default function ThemePage() {
             try {
                 const tp = await themePack.installThemePack(filePath);
                 if (tp) {
-                    showToast(t('theme.install_theme_success', { name: tp.name }));
+                    showToast(t('theme.install_theme_success', { name: tp.name }), {
+                        type: 'success',
+                    });
                 } else {
                     showToast(t('theme.install_theme_fail', { reason: 'invalid' }), {
-                        type: 'warn',
+                        type: 'error',
                     });
                 }
             } catch {
-                showToast(t('theme.install_theme_fail', { reason: 'unknown' }), { type: 'warn' });
+                showToast(t('theme.install_theme_fail', { reason: 'unknown' }), { type: 'error' });
             }
         }
     }, [t]);

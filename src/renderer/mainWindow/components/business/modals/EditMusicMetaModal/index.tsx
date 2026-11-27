@@ -93,11 +93,12 @@ export default function EditMusicMetaModal({
 
             showToast(
                 result.fileTagWritten ? t('local_music.metadata_saved_to_file') : t('common.saved'),
+                { type: 'success' },
             );
 
             close();
         } catch {
-            showToast(t('common.save_failed'));
+            showToast(t('common.save_failed'), { type: 'error' });
         } finally {
             submittingRef.current = false;
             setLoading(false);

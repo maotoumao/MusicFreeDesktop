@@ -51,9 +51,10 @@ export default function LegacyMigrationModal({ close, detectResult }: LegacyMigr
                     sheets: result.sheetsImported,
                     songs: result.songsImported,
                 }),
+                { type: 'success' },
             );
         } else {
-            showToast(t('migration.fail', { reason: result.error ?? '' }), { type: 'warn' });
+            showToast(t('migration.fail', { reason: result.error ?? '' }), { type: 'error' });
         }
 
         close();
