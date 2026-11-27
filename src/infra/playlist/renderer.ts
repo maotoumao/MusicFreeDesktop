@@ -103,11 +103,80 @@ interface IRendererEvents {
     starredChange: () => void;
 }
 
-interface IListLoad {
-    playlistId: string;
-    removed: Set<string>;
-    cleared: boolean;
+/**
+ * 一次歌曲写入在界面上的效果。界面状态 = 数据库快照 + 依次重放还没写完的操作；
+ * 写完后并入快照，写入失败或被清出队列时丢弃。
+ */
+type IListOp =
+    | { kind: 'add'; playlistId: string; items: IMusicItemSlim[]; deferred: boolean }
+    /** playlistId 为 null 表示从所有歌单移除 */
+    | { kind: 'remove'; playlistId: string | null; keys: Set<string> }
+    | { kind: 'clear'; playlistId: string }
+    | { kind: 'order'; playlistId: string; items: IMusicItemSlim[] };
+
+const keyOf = (m: IMedia.IMediaBase) => compositeKey(m.platform, String(m.id));
+
+function opTargets(op: IListOp, playlistId: string): boolean {
+    return op.playlistId === null || op.playlistId === playlistId;
 }
+
+/** 与主进程写入语义一致：新歌插到最前（已有的保持原位、同一批只插一次）；重排后才加入的歌在最前 */
+function applyToList(list: IMusicItemSlim[], op: IListOp): IMusicItemSlim[] {
+    switch (op.kind) {
+        case 'add': {
+            if (op.deferred) return list;
+            const seen = new Set(list.map(keyOf));
+            const fresh: IMusicItemSlim[] = [];
+            for (const m of op.items) {
+                const k = keyOf(m);
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    fresh.push(m);
+                }
+            }
+            return fresh.length > 0 ? [...fresh, ...list] : list;
+        }
+        case 'remove': {
+            const next = list.filter((m) => !op.keys.has(keyOf(m)));
+            return next.length === list.length ? list : next;
+        }
+        case 'clear':
+            return list.length > 0 ? [] : list;
+        case 'order': {
+            const ordered = new Set(op.items.map(keyOf));
+            const present = new Set(list.map(keyOf));
+            return [
+                ...list.filter((m) => !ordered.has(keyOf(m))),
+                ...op.items.filter((m) => present.has(keyOf(m))),
+            ];
+        }
+    }
+}
+
+/** 作用到收藏键集合，返回是否有变化 */
+function applyToSet(set: Set<string>, op: IListOp): boolean {
+    const before = set.size;
+    switch (op.kind) {
+        case 'add':
+            if (!op.deferred) for (const m of op.items) set.add(keyOf(m));
+            break;
+        case 'remove':
+            for (const k of op.keys) set.delete(k);
+            break;
+        case 'clear':
+            set.clear();
+            break;
+        case 'order':
+            return false;
+    }
+    return set.size !== before;
+}
+
+/** 快照之后已写完的操作攒到这个数量就并入快照 */
+const SETTLED_COMPACT_LIMIT = 32;
+
+type IReadOutcome =
+    { detail: ILocalPlaylistDetail | null } | { error: unknown } | { skipped: true };
 
 class PlaylistRenderer {
     static instance: PlaylistRenderer | null = null;
@@ -117,12 +186,19 @@ class PlaylistRenderer {
     private starredIdSet = new Set<string>();
     private currentPlaylistId: string | null = null;
     private mutationQueue = new MutationQueue();
-    /** 进行中的歌单读取，记录读取排队后对该歌单的删除与清空（这些写入排在读取之后） */
-    private listLoads = new Set<IListLoad>();
+    /** 已入队、还没写完的歌曲操作（按入队顺序） */
+    private pendingOps: IListOp[] = [];
+    /** 当前歌单的数据库快照，以及快照之后已写完、尚未并入快照的操作 */
+    private listBase: { playlistId: string; items: IMusicItemSlim[]; settled: IListOp[] } | null =
+        null;
+    /** 「我喜欢」的数据库快照（键集合） */
+    private favoriteBase = new Set<string>();
+    /** 每次打开歌单递增；读取结果只在没有被更晚的打开取代时采用 */
+    private openToken = 0;
 
     constructor() {
         this.mutationQueue.onError(async (e) => {
-            await this.reloadState();
+            await this.reloadState().catch(() => {});
             this.events.emit('error', e);
         });
     }
@@ -169,10 +245,7 @@ class PlaylistRenderer {
     // ─── 内部恢复 ───
 
     async reloadState() {
-        if (this.currentPlaylistId) {
-            const detail = await mod.getPlaylistDetail(this.currentPlaylistId);
-            if (detail) store.set(musicListAtom, detail.musicList);
-        }
+        await this.refreshCurrentList();
         await this.refreshFavoriteCache();
     }
 
@@ -204,18 +277,7 @@ class PlaylistRenderer {
     }
 
     clearPlaylist(playlistId: string): void {
-        // 乐观更新
-        if (this.currentPlaylistId === playlistId) {
-            store.set(musicListAtom, []);
-        }
-        for (const load of this.listLoads) {
-            if (load.playlistId === playlistId) load.cleared = true;
-        }
-        if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
-            this.favoriteIdSet.clear();
-            this.events.emit('favoriteChange');
-        }
-        this.mutationQueue.enqueue(() => mod.clearPlaylist(playlistId));
+        void this.commit({ kind: 'clear', playlistId }, () => mod.clearPlaylist(playlistId));
     }
 
     // ─── 歌曲操作（乐观更新 + 队列写入） ───
@@ -227,79 +289,31 @@ class PlaylistRenderer {
     ): Promise<{ added: number; truncated: number }> {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
         const slimItems = items.map(musicItemToSlim);
-        // 缓存显示歌单已满时不做乐观更新，免得先插入整批再撤回；是否真满以写入结果为准
-        const likelyFull =
+        // 缓存显示歌单已满时不做乐观更新，免得先插入整批再撤回；写完后按实际写入的部分更新
+        const deferred =
             (store.get(playlistsAtom).find((p) => p.id === playlistId)?.worksNum ?? 0) >=
             MAX_MUSIC_PER_PLAYLIST;
+        const op: IListOp = { kind: 'add', playlistId, items: slimItems, deferred };
 
-        // 乐观更新：本地数组
-        const insertedToList = new Set<string>();
-        if (!likelyFull && this.currentPlaylistId === playlistId) {
-            const list = store.get(musicListAtom);
-            const existingKeys = new Set(list.map((m) => compositeKey(m.platform, m.id)));
-            const newSlims = slimItems.filter(
-                (m) => !existingKeys.has(compositeKey(m.platform, m.id)),
-            );
-            if (newSlims.length > 0) {
-                for (const m of newSlims) insertedToList.add(compositeKey(m.platform, m.id));
-                store.set(musicListAtom, [...newSlims, ...list]);
-            }
-        }
-
-        // 乐观更新：favorite Set
-        const insertedToFavorite = new Set<string>();
-        if (!likelyFull && playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
-            for (const m of slimItems) {
-                const key = compositeKey(m.platform, m.id);
-                if (!this.favoriteIdSet.has(key)) insertedToFavorite.add(key);
-                this.favoriteIdSet.add(key);
-            }
-            this.events.emit('favoriteChange');
-        }
-
-        const result = this.mutationQueue.enqueue(() => mod.addMusic(playlistId, items));
-        // 超出上限、没有写入的末尾几首：撤回这次乐观加入的部分
-        result.then(
+        return this.commit(
+            op,
+            () => mod.addMusic(playlistId, items),
             ({ added, truncated }) => {
-                if (likelyFull) {
-                    if (added > 0) void this.syncAccepted(playlistId, slimItems, truncated);
-                    return;
-                }
-                if (truncated <= 0) return;
-                // 输入里重复的歌曲只要前面有一次写入，就不算没写入
-                const kept = new Set(
-                    slimItems
-                        .slice(0, slimItems.length - truncated)
-                        .map((m) => compositeKey(m.platform, m.id)),
-                );
-                const dropped = new Set(
-                    slimItems
-                        .slice(-truncated)
-                        .map((m) => compositeKey(m.platform, m.id))
-                        .filter((k) => !kept.has(k)),
-                );
-                const fromList = [...dropped].filter((k) => insertedToList.has(k));
-                if (fromList.length > 0 && this.currentPlaylistId === playlistId) {
-                    const drop = new Set(fromList);
-                    store.set(musicListAtom, (list) =>
-                        list.filter((m) => !drop.has(compositeKey(m.platform, m.id))),
-                    );
-                }
-                const fromFavorite = [...dropped].filter((k) => insertedToFavorite.has(k));
-                if (fromFavorite.length > 0) {
-                    for (const k of fromFavorite) this.favoriteIdSet.delete(k);
-                    this.events.emit('favoriteChange');
-                }
+                if (truncated <= 0 && !deferred) return op;
+                // 主进程按输入顺序写入前 length - truncated 首
+                const accepted = slimItems.slice(0, slimItems.length - truncated);
+                return {
+                    op: { ...op, items: accepted, deferred: false },
+                    changed: truncated > 0 ? !deferred || added > 0 : added > 0,
+                };
             },
-            () => {},
         );
-        return result;
     }
 
     addMusicToFavorite(
         musicItems: IMusic.IMusicItem | IMusicItemSlim | Array<IMusic.IMusicItem | IMusicItemSlim>,
     ): void {
-        this.addMusicToPlaylist(musicItems, DEFAULT_FAVORITE_PLAYLIST_ID);
+        void this.addMusicToPlaylist(musicItems, DEFAULT_FAVORITE_PLAYLIST_ID);
     }
 
     removeMusicFromPlaylist(
@@ -307,26 +321,10 @@ class PlaylistRenderer {
         playlistId: string,
     ): void {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
-        const removeSet = new Set(items.map((it) => compositeKey(it.platform, it.id)));
-
-        if (this.currentPlaylistId === playlistId) {
-            store.set(musicListAtom, (prev) =>
-                prev.filter((m) => !removeSet.has(compositeKey(m.platform, m.id))),
-            );
-        }
-        for (const load of this.listLoads) {
-            if (load.playlistId === playlistId) for (const k of removeSet) load.removed.add(k);
-        }
-
-        if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
-            for (const it of items) {
-                this.favoriteIdSet.delete(compositeKey(it.platform, it.id));
-            }
-            this.events.emit('favoriteChange');
-        }
-
         const bases = items.map((it) => ({ platform: it.platform, id: it.id }));
-        this.mutationQueue.enqueue(() => mod.removeMusic(playlistId, bases));
+        void this.commit({ kind: 'remove', playlistId, keys: new Set(items.map(keyOf)) }, () =>
+            mod.removeMusic(playlistId, bases),
+        );
     }
 
     removeMusicFromFavorite(musicItems: IMedia.IMediaBase | IMedia.IMediaBase[]): void {
@@ -339,30 +337,18 @@ class PlaylistRenderer {
      */
     removeFromAllPlaylists(musicItems: IMedia.IMediaBase | IMedia.IMediaBase[]): void {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
-        const removeSet = new Set(items.map((it) => compositeKey(it.platform, it.id)));
-
-        store.set(musicListAtom, (prev) =>
-            prev.filter((m) => !removeSet.has(compositeKey(m.platform, m.id))),
-        );
-        for (const load of this.listLoads) {
-            for (const k of removeSet) load.removed.add(k);
-        }
-
-        for (const it of items) {
-            this.favoriteIdSet.delete(compositeKey(it.platform, it.id));
-        }
-        this.events.emit('favoriteChange');
-
         const bases = items.map((it) => ({ platform: it.platform, id: it.id }));
-        this.mutationQueue.enqueue(() => mod.removeFromAllPlaylists(bases));
+        void this.commit(
+            { kind: 'remove', playlistId: null, keys: new Set(items.map(keyOf)) },
+            () => mod.removeFromAllPlaylists(bases),
+        );
     }
 
     updateMusicOrder(playlistId: string, orderedMusicList: IMusicItemSlim[]): void {
-        if (this.currentPlaylistId === playlistId) {
-            store.set(musicListAtom, [...orderedMusicList]);
-        }
         const keys = orderedMusicList.map((m) => ({ platform: m.platform, id: m.id }));
-        this.mutationQueue.enqueue(() => mod.updateMusicOrder(playlistId, keys));
+        void this.commit({ kind: 'order', playlistId, items: [...orderedMusicList] }, () =>
+            mod.updateMusicOrder(playlistId, keys),
+        );
     }
 
     // ─── 原始数据读取 ───
@@ -413,16 +399,19 @@ class PlaylistRenderer {
     // ─── 歌单详情（全量加载） ───
 
     async openPlaylist(playlistId: string): Promise<ILocalPlaylistDetail | null> {
+        const token = ++this.openToken;
         this.currentPlaylistId = playlistId;
-        store.set(musicListAtom, []);
+        this.listBase = null;
+        store.set(musicListAtom, this.replayPendingOnList(playlistId, []));
         store.set(isLoadingPlaylistAtom, true);
 
-        const { detail, load } = await this.loadAfterQueuedWrites(playlistId);
+        const outcome = await this.readInQueue(playlistId, () => token === this.openToken);
         // 用户在等待期间切换了歌单 → 丢弃旧结果
-        if (this.currentPlaylistId !== playlistId) return null;
-        store.set(musicListAtom, this.mergeLoadedList(detail?.musicList ?? [], load));
+        if (token !== this.openToken || 'skipped' in outcome) return null;
+        if ('error' in outcome) throw outcome.error;
+        this.applyListSnapshot(playlistId, outcome.detail?.musicList ?? []);
         store.set(isLoadingPlaylistAtom, false);
-        return detail;
+        return outcome.detail;
     }
 
     getCurrentMusicList(): IMusicItemSlim[] {
@@ -471,57 +460,129 @@ class PlaylistRenderer {
 
     // ─── 内部方法 ───
 
-    /** 没有乐观更新的添加写入后，把实际写入的歌曲同步到收藏缓存与当前列表 */
-    private async syncAccepted(playlistId: string, slimItems: IMusicItemSlim[], truncated: number) {
-        if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
-            for (const m of slimItems.slice(0, slimItems.length - truncated)) {
-                this.favoriteIdSet.add(compositeKey(m.platform, m.id));
-            }
+    /**
+     * 乐观执行一次歌曲操作并排队写入。settle 根据写入结果给出实际生效的操作
+     * （如截断后只保留写入的部分），changed 表示与乐观执行的效果不同、需要重算界面。
+     */
+    private commit<T>(
+        op: IListOp,
+        write: () => Promise<T>,
+        settle: (result: T) => IListOp | { op: IListOp; changed: boolean } = () => op,
+    ): Promise<T> {
+        this.pendingOps.push(op);
+        if (this.currentPlaylistId && opTargets(op, this.currentPlaylistId)) {
+            store.set(musicListAtom, applyToList(store.get(musicListAtom), op));
+        }
+        if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID) && applyToSet(this.favoriteIdSet, op)) {
             this.events.emit('favoriteChange');
         }
-        if (this.currentPlaylistId !== playlistId) return;
-        const { detail, load } = await this.loadAfterQueuedWrites(playlistId);
-        if (this.currentPlaylistId !== playlistId || !detail) return;
-        store.set(musicListAtom, this.mergeLoadedList(detail.musicList, load));
+
+        const result = this.mutationQueue.enqueue(write);
+        result.then(
+            (value) => {
+                const settled = settle(value);
+                const final = 'kind' in settled ? settled : settled.op;
+                const changed = 'kind' in settled ? false : settled.changed;
+                this.removePending(op);
+                if (this.listBase && opTargets(final, this.listBase.playlistId)) {
+                    this.listBase.settled.push(final);
+                    if (this.listBase.settled.length >= SETTLED_COMPACT_LIMIT)
+                        this.compactListBase();
+                }
+                if (opTargets(final, DEFAULT_FAVORITE_PLAYLIST_ID)) {
+                    applyToSet(this.favoriteBase, final);
+                }
+                if (changed) this.recompute(final);
+            },
+            () => {
+                // 写入失败或被清出队列：界面去掉这次操作的效果
+                this.removePending(op);
+                this.recompute(op);
+            },
+        );
+        return result;
+    }
+
+    private removePending(op: IListOp) {
+        const index = this.pendingOps.indexOf(op);
+        if (index !== -1) this.pendingOps.splice(index, 1);
+    }
+
+    private compactListBase(): IMusicItemSlim[] {
+        const base = this.listBase!;
+        for (const op of base.settled) base.items = applyToList(base.items, op);
+        base.settled = [];
+        return base.items;
+    }
+
+    private replayPendingOnList(playlistId: string, list: IMusicItemSlim[]): IMusicItemSlim[] {
+        let out = list;
+        for (const op of this.pendingOps) {
+            if (opTargets(op, playlistId)) out = applyToList(out, op);
+        }
+        return out;
+    }
+
+    /** 按快照与还没写完的操作重算受 op 影响的界面状态 */
+    private recompute(op: IListOp) {
+        const current = this.currentPlaylistId;
+        if (current && opTargets(op, current)) {
+            const base = this.listBase?.playlistId === current ? this.compactListBase() : [];
+            store.set(musicListAtom, this.replayPendingOnList(current, base));
+        }
+        if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID)) this.recomputeFavorites();
+    }
+
+    private recomputeFavorites() {
+        const next = new Set(this.favoriteBase);
+        for (const op of this.pendingOps) {
+            if (opTargets(op, DEFAULT_FAVORITE_PLAYLIST_ID)) applyToSet(next, op);
+        }
+        const changed =
+            next.size !== this.favoriteIdSet.size ||
+            [...next].some((k) => !this.favoriteIdSet.has(k));
+        this.favoriteIdSet = next;
+        if (changed) this.events.emit('favoriteChange');
+    }
+
+    /** 读到的列表成为新的快照，再重放读取之后入队、还没写完的操作 */
+    private applyListSnapshot(playlistId: string, loaded: IMusicItemSlim[]) {
+        this.listBase = { playlistId, items: loaded, settled: [] };
+        store.set(musicListAtom, this.replayPendingOnList(playlistId, loaded));
     }
 
     /**
-     * 排在已入队的写入之后读取歌单，读到的列表已包含这些写入。
+     * 排在已入队的写入之后读取歌单，读到的列表已包含这些写入；轮到时已不需要（wanted 为 false）就跳过。
      * 读取失败不影响队列里的其他写入；前面的写入失败、读取被清出队列时直接读取。
      */
-    private async loadAfterQueuedWrites(
-        playlistId: string,
-    ): Promise<{ detail: ILocalPlaylistDetail | null; load: IListLoad }> {
-        const load: IListLoad = { playlistId, removed: new Set(), cleared: false };
-        this.listLoads.add(load);
-        try {
-            const outcome = await this.mutationQueue
-                .enqueue(async () => {
-                    try {
-                        return { detail: await mod.getPlaylistDetail(playlistId) };
-                    } catch (error) {
-                        return { error };
-                    }
-                })
-                .catch(async () => ({ detail: await mod.getPlaylistDetail(playlistId) }));
-            if ('error' in outcome) throw outcome.error;
-            return { detail: outcome.detail, load };
-        } finally {
-            this.listLoads.delete(load);
-        }
+    private readInQueue(playlistId: string, wanted: () => boolean): Promise<IReadOutcome> {
+        return this.mutationQueue
+            .enqueue<IReadOutcome>(async () => {
+                if (!wanted()) return { skipped: true };
+                try {
+                    return { detail: await mod.getPlaylistDetail(playlistId) };
+                } catch (error) {
+                    return { error };
+                }
+            })
+            .catch(async () => {
+                try {
+                    return { detail: await mod.getPlaylistDetail(playlistId) };
+                } catch (error) {
+                    return { error };
+                }
+            });
     }
 
-    /**
-     * 读取排队之后对当前列表的乐观修改（写入排在读取之后，读到的列表里还没有）叠加到读到的列表上：
-     * 当前列表里有、读到的没有的歌曲是之后加入的，放在最前；之后删除的从读到的列表中去掉；之后清空的只保留清空后加入的。
-     */
-    private mergeLoadedList(loaded: IMusicItemSlim[], load: IListLoad): IMusicItemSlim[] {
-        const current = store.get(musicListAtom);
-        if (load.cleared) return current;
-        const loadedKeys = new Set(loaded.map((m) => compositeKey(m.platform, m.id)));
-        const addedLater = current.filter((m) => !loadedKeys.has(compositeKey(m.platform, m.id)));
-        const kept = loaded.filter((m) => !load.removed.has(compositeKey(m.platform, m.id)));
-        return addedLater.length > 0 ? [...addedLater, ...kept] : kept;
+    /** 重新读取当前歌单（主进程内部改动、写入失败后的恢复） */
+    private async refreshCurrentList() {
+        const current = this.currentPlaylistId;
+        if (!current) return;
+        const token = this.openToken;
+        const outcome = await this.readInQueue(current, () => token === this.openToken);
+        if (token !== this.openToken || 'skipped' in outcome) return;
+        if ('error' in outcome) throw outcome.error;
+        if (outcome.detail) this.applyListSnapshot(current, outcome.detail.musicList);
     }
 
     /**
@@ -531,40 +592,22 @@ class PlaylistRenderer {
     private async syncInternalChange(playlistId?: string) {
         const current = this.currentPlaylistId;
         if (current && (!playlistId || playlistId === current)) {
-            const detail = await mod.getPlaylistDetail(current);
-            // 异步竞态守卫：异步期间可能已切换歌单
-            if (this.currentPlaylistId === current && detail) {
-                store.set(musicListAtom, detail.musicList);
-            }
+            await this.refreshCurrentList();
         }
         // 若 internal 事件影响了 favorite 歌单，同步刷新本地缓存
-        // TODO [P3]: 当 sheetId === FAVORITE 且等于 currentPlaylistId 时，上面 getPlaylistDetail
-        //  已拉取过同一歌单，可复用 detail 构建 favoriteIdSet，省去 refreshFavoriteCache 的重复 IPC。
+        // TODO [P3]: 当 sheetId === FAVORITE 且等于 currentPlaylistId 时，上面已拉取过同一歌单，
+        //  可复用结果构建 favoriteIdSet，省去 refreshFavoriteCache 的重复 IPC。
         if (!playlistId || playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             await this.refreshFavoriteCache();
         }
     }
 
     private async refreshFavoriteCache() {
-        const detail = await mod.getPlaylistDetail(DEFAULT_FAVORITE_PLAYLIST_ID);
-        if (!detail) return;
-
-        const newSet = new Set<string>();
-        let hasNewKey = false;
-
-        for (const m of detail.musicList) {
-            const key = compositeKey(m.platform, m.id);
-            newSet.add(key);
-            if (!hasNewKey && !this.favoriteIdSet.has(key)) {
-                hasNewKey = true;
-            }
-        }
-
-        const changed = hasNewKey || newSet.size !== this.favoriteIdSet.size;
-        this.favoriteIdSet = newSet;
-        if (changed) {
-            this.events.emit('favoriteChange');
-        }
+        const outcome = await this.readInQueue(DEFAULT_FAVORITE_PLAYLIST_ID, () => true);
+        if ('error' in outcome) throw outcome.error;
+        if (!('detail' in outcome) || !outcome.detail) return;
+        this.favoriteBase = new Set(outcome.detail.musicList.map(keyOf));
+        this.recomputeFavorites();
     }
 }
 
