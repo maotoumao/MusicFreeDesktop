@@ -35,7 +35,7 @@ import type {
 import type { IMusicItemSlim, IMusicItemProvider } from '@appTypes/infra/playlist';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 import type { IAudioTagWriter } from '@appTypes/infra/audioTag';
-import { withoutInvalidArtwork } from '@common/musicItemToSlim';
+import { musicItemText, withoutInvalidArtwork } from '@common/musicItemToSlim';
 import { FILE_NAME_TEMPLATES, IPC } from '../common/constant';
 import { DownloadTask } from './downloadTask';
 import { fetchCover } from './fetchCover';
@@ -359,9 +359,9 @@ class DownloadManager {
             id,
             platform,
             musicId,
-            title: musicItem.title,
-            artist: musicItem.artist ?? '',
-            album: musicItem.album ?? '',
+            title: musicItemText(musicItem.title),
+            artist: musicItemText(musicItem.artist),
+            album: musicItemText(musicItem.album),
             quality: targetQuality,
             status: 'pending',
             filePath,

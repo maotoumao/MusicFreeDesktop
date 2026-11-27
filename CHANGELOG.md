@@ -99,6 +99,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复一次添加的歌曲里有重复（如导入的歌单里同一首歌出现两次）时，当前列表把这首歌显示两份、重新打开歌单才恢复的问题。
 - 修复删除歌曲后再把它（不带封面的版本）加回歌单时，列表里不显示封面、要重新打开歌单才出现的问题。
 - 修复插件返回的歌曲封面不是文字（如 false、数字、对象）时，添加到歌单或播放队列失败、下载完成后文件被删除，或库里原有封面被改写的问题；这类封面现在按没有封面处理。
+- 修复插件返回的歌曲缺少标题，或歌手、专辑、时长的格式不对（如对象、数组、布尔值）时，添加到歌单、播放队列或下载失败的问题；这类字段现在按空值保存。
 
 ### Added
 
@@ -187,6 +188,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix a song appearing twice in the open list, until the playlist was reopened, when the songs added at once contained duplicates (for example the same song listed twice in an imported playlist).
 - Fix a song removed and then added back to a playlist without artwork showing no cover in the open list until the playlist was reopened.
 - Fix songs whose plugin-provided artwork is not text (such as false, a number or an object) failing to be added to playlists or the play queue, getting their downloaded file deleted after download, or overwriting the stored cover; such artwork is now treated as missing.
+- Fix adding songs to playlists, the play queue or downloads failing when the plugin left out the title or gave the artist, album or duration in the wrong form (such as an object, array or boolean); such fields are now saved as empty.
 
 ---
 
