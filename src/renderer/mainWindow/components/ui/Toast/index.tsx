@@ -14,6 +14,7 @@ import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
 import { AlertTriangle, CircleCheck, CircleX, Info, X, type LucideIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { cn } from '@common/cn';
+import i18n from '@infra/i18n/renderer';
 import { useCurrentThemePack } from '@infra/themepack/renderer';
 import { duration as motionDuration, easing } from '@common/motionTokens';
 import { measureToastScrim, type ToastScrim } from './contrast';
@@ -156,7 +157,10 @@ function resumeAll(reasons: PauseReason[]) {
 function announce(item: ToastItem) {
     const announcement: Announcement = {
         id: item.id,
-        text: item.description ? `${item.title}。${item.description}` : item.title,
+        // 标题与说明之间用当前语言的句号断开，读屏软件会在此停顿
+        text: item.description
+            ? `${item.title}${i18n.getLanguage().startsWith('zh') ? '。' : '. '}${item.description}`
+            : item.title,
         assertive: item.type === 'error',
     };
     store.set(announcementAtom, (prev) => [...prev, announcement]);

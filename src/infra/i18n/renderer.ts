@@ -71,6 +71,11 @@ class I18n {
     public isCN() {
         return i18nInstance.language.includes('zh-CN');
     }
+
+    /** 当前界面语言，如 zh-CN、en-US */
+    public getLanguage(): string {
+        return i18nInstance.language ?? '';
+    }
 }
 
 const i18n = new I18n();
