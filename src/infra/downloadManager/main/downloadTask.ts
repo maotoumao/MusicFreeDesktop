@@ -102,7 +102,8 @@ export class DownloadTask {
                 headers['Range'] = `bytes=${existingBytes}-`;
             }
 
-            // 3. 发起请求
+            // 3. 发起请求（读取临时文件期间被中止时不再发起）
+            if (this.isAborted) return;
             this.abortController = new AbortController();
             const response = await axios.get(url, {
                 headers,
@@ -127,6 +128,11 @@ export class DownloadTask {
 
             // 5. 创建写入流
             await fsp.mkdir(path.dirname(this.task.tempPath!), { recursive: true });
+            // 创建目录期间被中止：不再创建临时文件
+            if (this.isAborted) {
+                response.data.destroy();
+                return;
+            }
             this.writeStream = fs.createWriteStream(this.task.tempPath!, {
                 flags: isPartial ? 'a' : 'w',
             });
