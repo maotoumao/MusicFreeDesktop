@@ -16,7 +16,7 @@ import path from 'path';
 import axios from 'axios';
 import { isSameMedia } from '@common/mediaKey';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
-import type { IMusicItemProvider } from '@appTypes/infra/musicSheet';
+import type { IMusicItemProvider } from '@appTypes/infra/playlist';
 
 /** getLyric 适配器所需的参数 */
 export interface IGetLyricParams {

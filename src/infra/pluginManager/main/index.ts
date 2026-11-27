@@ -56,7 +56,7 @@ import {
 } from './normalizer';
 import type { IAppConfigReader } from '@appTypes/infra/appConfig';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
-import type { IMusicItemProvider } from '@appTypes/infra/musicSheet';
+import type { IMusicItemProvider } from '@appTypes/infra/playlist';
 import { getLyricAdapter, type IGetLyricParams } from './getLyricAdapter';
 import { getMediaSourceAdapter, type IGetMediaSourceAdapterParams } from './getMediaSourceAdapter';
 

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FolderPlus } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
-import { MusicSheetHeader } from '../../components/ui/MusicSheetHeader';
+import { PlaylistHeader } from '../../components/ui/MusicSheetHeader';
 import { SongTable, type RowInteractionDetail } from '../../components/business/SongTable';
 import { FavoriteButton } from '../../components/business/FavoriteButton';
 import { DownloadButton } from '../../components/business/DownloadButton';
@@ -75,7 +75,7 @@ export default function AlbumPage() {
         [],
     );
 
-    const handleAddToSheet = useCallback(() => {
+    const handleAddToPlaylist = useCallback(() => {
         if (musicList.length === 0) return;
         showModal('AddMusicToSheetModal', { musicItems: musicList });
     }, [musicList]);
@@ -107,7 +107,7 @@ export default function AlbumPage() {
     // IAlbumItem extends IMusicSheetItem，可直接传给 MusicSheetHeader
     return (
         <div className="p-album">
-            <MusicSheetHeader musicSheet={albumItem} />
+            <PlaylistHeader playlist={albumItem} />
 
             <div className="p-album__toolbar">
                 <SongToolbar
@@ -121,7 +121,7 @@ export default function AlbumPage() {
                         variant="secondary"
                         size="md"
                         icon={<FolderPlus size={16} />}
-                        onClick={handleAddToSheet}
+                        onClick={handleAddToPlaylist}
                     >
                         {t('playlist.add_to_sheet_menu')}
                     </Button>

@@ -52,18 +52,18 @@ export interface IBackupResult {
  */
 export interface IBackupProvider {
     /** 获取所有可导出歌单的元数据（排除 system 类型） */
-    getExportableSheets(): Array<{ id: string; title: string }>;
+    getExportablePlaylists(): Array<{ id: string; title: string }>;
     /** 获取指定歌单内全量 raw 数据 */
-    getSheetMusicRaw(sheetId: string): IMusic.IMusicItem[];
+    getPlaylistMusicRaw(playlistId: string): IMusic.IMusicItem[];
     /**
      * 导入歌单数据。
-     * @param sheets - 待导入的歌单数组
+     * @param playlists - 待导入的歌单数组
      * @param mode - 'append' | 'overwrite'
      * @param onProgress - 进度回调（按歌单粒度）
      */
-    importSheets(
-        sheets: IBackupPlaylist[],
+    importPlaylists(
+        playlists: IBackupPlaylist[],
         mode: RestoreMode,
-        onProgress?: (current: number, total: number, sheetTitle: string) => void,
+        onProgress?: (current: number, total: number, playlistTitle: string) => void,
     ): { sheetsCount: number; songsCount: number };
 }

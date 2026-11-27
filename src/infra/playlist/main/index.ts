@@ -18,14 +18,14 @@ import type {
     ILocalPlaylistMeta,
     ILocalPlaylistDetail,
     IMusicItemSlim,
-} from '@appTypes/infra/musicSheet';
+} from '@appTypes/infra/playlist';
 import {
     IPC,
-    MAX_MUSIC_PER_SHEET,
+    MAX_MUSIC_PER_PLAYLIST,
     MAX_QUEUE_SIZE,
-    DEFAULT_FAVORITE_SHEET_ID,
-    PLAY_QUEUE_SHEET_ID,
-    DOWNLOADED_SHEET_ID,
+    DEFAULT_FAVORITE_PLAYLIST_ID,
+    PLAY_QUEUE_PLAYLIST_ID,
+    DOWNLOADED_PLAYLIST_ID,
     type IPlaylistEvent,
 } from '../common/constant';
 import { createQueries, type IPlaylistQueries } from './queries';
@@ -48,9 +48,9 @@ class PlaylistManager {
         this.queries = createQueries(db);
         this.windowManager = deps.windowManager;
 
-        this.ensureDefaultSheet();
-        this.ensurePlayQueueSheet();
-        this.ensureDownloadedSheet();
+        this.ensureDefaultPlaylist();
+        this.ensurePlayQueuePlaylist();
+        this.ensureDownloadedPlaylist();
 
         this.registerIpcHandlers();
 
@@ -72,10 +72,13 @@ class PlaylistManager {
      * 将歌曲添加到指定歌单（upsert music_items + 插入 relation）。
      * 主进程内部调用，不通过 IPC。
      */
-    public addMusicToSheet(musicItem: IMusic.IMusicItem | IMusicItemSlim, sheetId: string): void {
+    public addMusicToPlaylist(
+        musicItem: IMusic.IMusicItem | IMusicItemSlim,
+        playlistId: string,
+    ): void {
         const db = this.db.getDatabase();
         db.transaction(() => {
-            const minOrder = (this.queries.getMinSortOrder.get(sheetId) as any).minOrder;
+            const minOrder = (this.queries.getMinSortOrder.get(playlistId) as any).minOrder;
             const sid = String(musicItem.id);
             const now = Date.now();
 
@@ -90,41 +93,41 @@ class PlaylistManager {
                 raw: (musicItem as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(musicItem),
             });
             this.queries.insertRelation.run({
-                sheetId,
+                sheetId: playlistId,
                 platform: musicItem.platform,
                 musicId: sid,
                 sortOrder: minOrder - 1,
                 addedAt: now,
             });
         })();
-        this.broadcastMusicSheetEvent({ origin: 'internal', sheetId });
+        this.broadcastPlaylistEvent({ origin: 'internal', sheetId: playlistId });
     }
 
     /**
      * 从指定歌单移除歌曲。
      * 主进程内部调用，不通过 IPC。
      */
-    public removeMusicFromSheet(platform: string, musicId: string, sheetId: string): void {
+    public removeMusicFromPlaylist(platform: string, musicId: string, playlistId: string): void {
         this.queries.removeRelation.run({
-            sheetId,
+            sheetId: playlistId,
             platform,
             musicId: String(musicId),
         });
         this.scheduleOrphanCleanup();
-        this.broadcastMusicSheetEvent({ origin: 'internal', sheetId });
+        this.broadcastPlaylistEvent({ origin: 'internal', sheetId: playlistId });
     }
 
     /**
      * 返回 downloadManager 所需的 DI 适配器。
      * 封装了对 __downloaded__ 歌单的 addMusicToSheet / removeMusicFromSheet 调用。
      */
-    public getDownloadedSheetProvider() {
+    public getDownloadedPlaylistProvider() {
         return {
             addMusicToDownloaded: (musicItem: IMusic.IMusicItem) => {
-                this.addMusicToSheet(musicItem, DOWNLOADED_SHEET_ID);
+                this.addMusicToPlaylist(musicItem, DOWNLOADED_PLAYLIST_ID);
             },
             removeFromDownloaded: (platform: string, musicId: string) => {
-                this.removeMusicFromSheet(platform, musicId, DOWNLOADED_SHEET_ID);
+                this.removeMusicFromPlaylist(platform, musicId, DOWNLOADED_PLAYLIST_ID);
             },
         };
     }
@@ -150,15 +153,15 @@ class PlaylistManager {
     public getBackupProvider(): IBackupProvider {
         return {
             /** 获取所有可导出歌单的元数据（排除 system 类型） */
-            getExportableSheets: (): Array<{ id: string; title: string }> => {
-                return (this.queries.getAllSheets.all() as ILocalPlaylistMeta[]).filter(
+            getExportablePlaylists: (): Array<{ id: string; title: string }> => {
+                return (this.queries.getAllPlaylists.all() as ILocalPlaylistMeta[]).filter(
                     (s) => s.type !== 'system',
                 );
             },
 
             /** 获取指定歌单内全量数据；没有完整数据的 slim 条目用展示字段导出，不丢歌 */
-            getSheetMusicRaw: (sheetId: string): IMusic.IMusicItem[] => {
-                const rows = this.queries.getSheetMusicRaw.all(sheetId) as Array<
+            getPlaylistMusicRaw: (playlistId: string): IMusic.IMusicItem[] => {
+                const rows = this.queries.getPlaylistMusicRaw.all(playlistId) as Array<
                     IMusicItemSlim & { raw: string | null }
                 >;
                 return rows.map(({ raw, ...slim }) => {
@@ -169,14 +172,14 @@ class PlaylistManager {
 
             /**
              * 导入歌单数据。整个操作在单一 SQLite 事务中完成。
-             * @param sheets - 待导入的歌单数组
+             * @param playlists - 待导入的歌单数组
              * @param mode - 'append' | 'overwrite'
              * @param onProgress - 进度回调（按歌单粒度）
              */
-            importSheets: (
-                sheets: IBackupPlaylist[],
+            importPlaylists: (
+                playlists: IBackupPlaylist[],
                 mode: RestoreMode,
-                onProgress?: (current: number, total: number, sheetTitle: string) => void,
+                onProgress?: (current: number, total: number, playlistTitle: string) => void,
             ): { sheetsCount: number; songsCount: number } => {
                 const db = this.db.getDatabase();
                 let totalSongs = 0;
@@ -184,32 +187,34 @@ class PlaylistManager {
                 // overwrite 清理在单独事务中执行
                 if (mode === 'overwrite') {
                     db.transaction(() => {
-                        const userSheets = (
-                            this.queries.getAllSheets.all() as ILocalPlaylistMeta[]
-                        ).filter((s) => s.type !== 'system' && s.id !== DEFAULT_FAVORITE_SHEET_ID);
-                        for (const sheet of userSheets) {
-                            this.queries.clearSheetRelations.run(sheet.id);
-                            this.queries.deleteSheet.run(sheet.id);
+                        const userPlaylists = (
+                            this.queries.getAllPlaylists.all() as ILocalPlaylistMeta[]
+                        ).filter(
+                            (s) => s.type !== 'system' && s.id !== DEFAULT_FAVORITE_PLAYLIST_ID,
+                        );
+                        for (const playlist of userPlaylists) {
+                            this.queries.clearPlaylistRelations.run(playlist.id);
+                            this.queries.deletePlaylist.run(playlist.id);
                         }
-                        this.queries.clearSheetRelations.run(DEFAULT_FAVORITE_SHEET_ID);
+                        this.queries.clearPlaylistRelations.run(DEFAULT_FAVORITE_PLAYLIST_ID);
                     })();
                 }
 
                 // 按歌单粒度拆分事务，让进度事件能实时到达 renderer
-                for (let i = 0; i < sheets.length; i++) {
-                    const sheet = sheets[i];
-                    onProgress?.(i + 1, sheets.length, sheet.title);
+                for (let i = 0; i < playlists.length; i++) {
+                    const playlist = playlists[i];
+                    onProgress?.(i + 1, playlists.length, playlist.title);
 
                     db.transaction(() => {
-                        let targetSheetId: string;
+                        let targetPlaylistId: string;
 
-                        if (sheet.id === DEFAULT_FAVORITE_SHEET_ID) {
-                            targetSheetId = DEFAULT_FAVORITE_SHEET_ID;
+                        if (playlist.id === DEFAULT_FAVORITE_PLAYLIST_ID) {
+                            targetPlaylistId = DEFAULT_FAVORITE_PLAYLIST_ID;
                         } else {
-                            targetSheetId = nanoid();
-                            this.queries.insertSheet.run({
-                                id: targetSheetId,
-                                title: sheet.title,
+                            targetPlaylistId = nanoid();
+                            this.queries.insertPlaylist.run({
+                                id: targetPlaylistId,
+                                title: playlist.title,
                                 artwork: null,
                                 description: null,
                                 type: 'user',
@@ -220,10 +225,10 @@ class PlaylistManager {
                             });
                         }
 
-                        let maxOrder = (this.queries.getMaxSortOrder.get(targetSheetId) as any)
+                        let maxOrder = (this.queries.getMaxSortOrder.get(targetPlaylistId) as any)
                             .maxOrder;
                         const now = Date.now();
-                        for (const item of sheet.musicList) {
+                        for (const item of playlist.musicList) {
                             const sid = String(item.id);
                             const merged = mergeRestoredItem(
                                 { ...item, id: sid },
@@ -241,21 +246,21 @@ class PlaylistManager {
                                 raw: safeStringify(merged),
                             });
                             this.queries.insertRelation.run({
-                                sheetId: targetSheetId,
+                                sheetId: targetPlaylistId,
                                 platform: item.platform,
                                 musicId: sid,
                                 sortOrder: ++maxOrder,
                                 addedAt: now,
                             });
                         }
-                        totalSongs += sheet.musicList.length;
+                        totalSongs += playlist.musicList.length;
                     })();
                 }
 
                 this.scheduleOrphanCleanup();
-                this.broadcastMusicSheetEvent({ origin: 'internal' });
+                this.broadcastPlaylistEvent({ origin: 'internal' });
 
-                return { sheetsCount: sheets.length, songsCount: totalSongs };
+                return { sheetsCount: playlists.length, songsCount: totalSongs };
             },
         };
     }
@@ -263,28 +268,28 @@ class PlaylistManager {
     private registerIpcHandlers() {
         // ─── 歌单 CRUD ────────────────────────
 
-        ipcMain.handle(IPC.GET_ALL_SHEETS, (): ILocalPlaylistMeta[] => {
-            return (this.queries.getAllSheets.all() as ILocalPlaylistMeta[]).filter(
+        ipcMain.handle(IPC.GET_ALL_PLAYLISTS, (): ILocalPlaylistMeta[] => {
+            return (this.queries.getAllPlaylists.all() as ILocalPlaylistMeta[]).filter(
                 (s) => s.type !== 'system',
             );
         });
 
         ipcMain.handle(
-            IPC.GET_SHEET_DETAIL,
-            (_evt, sheetId: string): ILocalPlaylistDetail | null => {
-                const sheet = this.queries.getSheetById.get(sheetId) as
+            IPC.GET_PLAYLIST_DETAIL,
+            (_evt, playlistId: string): ILocalPlaylistDetail | null => {
+                const playlist = this.queries.getPlaylistById.get(playlistId) as
                     ILocalPlaylistMeta | undefined;
-                if (!sheet) return null;
-                const musicList = this.queries.getSheetMusicSlim.all(sheetId);
-                return { ...sheet, musicList } as ILocalPlaylistDetail;
+                if (!playlist) return null;
+                const musicList = this.queries.getPlaylistMusicSlim.all(playlistId);
+                return { ...playlist, musicList } as ILocalPlaylistDetail;
             },
         );
 
         ipcMain.handle(
-            IPC.CREATE_SHEET,
+            IPC.CREATE_PLAYLIST,
             (_evt, params: ICreatePlaylistParams): ILocalPlaylistMeta => {
                 const now = Date.now();
-                const sheet = {
+                const playlist = {
                     id: nanoid(),
                     title: params.title,
                     artwork: params.artwork ?? null,
@@ -295,31 +300,31 @@ class PlaylistManager {
                     createdAt: now,
                     updatedAt: now,
                 };
-                this.queries.insertSheet.run(sheet);
-                this.broadcastMusicSheetEvent({ origin: 'user' });
-                return { ...sheet, worksNum: 0, latestArtwork: null } as ILocalPlaylistMeta;
+                this.queries.insertPlaylist.run(playlist);
+                this.broadcastPlaylistEvent({ origin: 'user' });
+                return { ...playlist, worksNum: 0, latestArtwork: null } as ILocalPlaylistMeta;
             },
         );
 
-        ipcMain.handle(IPC.DELETE_SHEET, (_evt, sheetId: string) => {
-            if (sheetId === DEFAULT_FAVORITE_SHEET_ID) {
+        ipcMain.handle(IPC.DELETE_PLAYLIST, (_evt, playlistId: string) => {
+            if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
                 throw new Error(i18n.t('playlist.cannot_delete_favorite'));
             }
-            if (sheetId === PLAY_QUEUE_SHEET_ID) {
+            if (playlistId === PLAY_QUEUE_PLAYLIST_ID) {
                 throw new Error(i18n.t('playlist.cannot_delete_system'));
             }
-            this.queries.clearSheetRelations.run(sheetId);
-            this.queries.deleteSheet.run(sheetId);
+            this.queries.clearPlaylistRelations.run(playlistId);
+            this.queries.deletePlaylist.run(playlistId);
             this.scheduleOrphanCleanup();
-            this.broadcastMusicSheetEvent({ origin: 'user' });
+            this.broadcastPlaylistEvent({ origin: 'user' });
         });
 
-        ipcMain.handle(IPC.UPDATE_SHEET, (_evt, params: IUpdatePlaylistParams) => {
-            const existing = this.queries.getSheetById.get(params.id) as
+        ipcMain.handle(IPC.UPDATE_PLAYLIST, (_evt, params: IUpdatePlaylistParams) => {
+            const existing = this.queries.getPlaylistById.get(params.id) as
                 Record<string, unknown> | undefined;
             if (!existing) return;
 
-            this.queries.updateSheet.run({
+            this.queries.updatePlaylist.run({
                 id: params.id,
                 title: params.title ?? existing.title,
                 artwork: params.artwork ?? existing.artwork,
@@ -327,13 +332,13 @@ class PlaylistManager {
                 sortOrder: params.sortOrder ?? existing.sort_order,
                 updatedAt: Date.now(),
             });
-            this.broadcastMusicSheetEvent({ origin: 'user' });
+            this.broadcastPlaylistEvent({ origin: 'user' });
         });
 
-        ipcMain.handle(IPC.CLEAR_SHEET, (_evt, sheetId: string) => {
-            this.queries.clearSheetRelations.run(sheetId);
+        ipcMain.handle(IPC.CLEAR_PLAYLIST, (_evt, playlistId: string) => {
+            this.queries.clearPlaylistRelations.run(playlistId);
             this.scheduleOrphanCleanup();
-            this.broadcastMusicSheetEvent({ origin: 'user', sheetId });
+            this.broadcastPlaylistEvent({ origin: 'user', sheetId: playlistId });
         });
 
         // ─── 歌曲操作 ────────────────────────
@@ -342,14 +347,15 @@ class PlaylistManager {
             IPC.ADD_MUSIC,
             (
                 _evt,
-                sheetId: string,
+                playlistId: string,
                 musicItems: Array<IMusic.IMusicItem | IMusicItemSlim>,
             ): { added: number; truncated: number } => {
-                const currentCount = (this.queries.getSheetMusicCount.get(sheetId) as any).count;
-                const remaining = MAX_MUSIC_PER_SHEET - currentCount;
+                const currentCount = (this.queries.getPlaylistMusicCount.get(playlistId) as any)
+                    .count;
+                const remaining = MAX_MUSIC_PER_PLAYLIST - currentCount;
                 if (remaining <= 0) {
                     throw new Error(
-                        i18n.t('playlist.limit_reached', { count: MAX_MUSIC_PER_SHEET }),
+                        i18n.t('playlist.limit_reached', { count: MAX_MUSIC_PER_PLAYLIST }),
                     );
                 }
                 const toAdd = musicItems.slice(0, remaining);
@@ -357,7 +363,7 @@ class PlaylistManager {
                 const db = this.db.getDatabase();
                 const addMany = db.transaction(
                     (items: Array<IMusic.IMusicItem | IMusicItemSlim>) => {
-                        const minOrder = (this.queries.getMinSortOrder.get(sheetId) as any)
+                        const minOrder = (this.queries.getMinSortOrder.get(playlistId) as any)
                             .minOrder;
                         const startOrder = minOrder - items.length;
                         const now = Date.now();
@@ -375,7 +381,7 @@ class PlaylistManager {
                                 raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
                             });
                             this.queries.insertRelation.run({
-                                sheetId,
+                                sheetId: playlistId,
                                 platform: item.platform,
                                 musicId: sid,
                                 sortOrder: startOrder + i,
@@ -385,19 +391,19 @@ class PlaylistManager {
                     },
                 );
                 addMany(toAdd);
-                this.broadcastMusicSheetEvent({ origin: 'user', sheetId });
+                this.broadcastPlaylistEvent({ origin: 'user', sheetId: playlistId });
                 return { added: toAdd.length, truncated: musicItems.length - toAdd.length };
             },
         );
 
         ipcMain.handle(
             IPC.REMOVE_MUSIC,
-            (_evt, sheetId: string, musicBases: IMedia.IMediaBase[]) => {
+            (_evt, playlistId: string, musicBases: IMedia.IMediaBase[]) => {
                 const db = this.db.getDatabase();
                 const removeMany = db.transaction((items: IMedia.IMediaBase[]) => {
                     for (const item of items) {
                         this.queries.removeRelation.run({
-                            sheetId,
+                            sheetId: playlistId,
                             platform: item.platform,
                             musicId: String(item.id),
                         });
@@ -405,33 +411,33 @@ class PlaylistManager {
                 });
                 removeMany(musicBases);
                 this.scheduleOrphanCleanup();
-                this.broadcastMusicSheetEvent({ origin: 'user', sheetId });
+                this.broadcastPlaylistEvent({ origin: 'user', sheetId: playlistId });
             },
         );
 
-        ipcMain.handle(IPC.REMOVE_FROM_ALL_SHEETS, (_evt, musicBases: IMedia.IMediaBase[]) => {
+        ipcMain.handle(IPC.REMOVE_FROM_ALL_PLAYLISTS, (_evt, musicBases: IMedia.IMediaBase[]) => {
             const db = this.db.getDatabase();
             db.transaction(() => {
                 for (const item of musicBases) {
-                    this.queries.removeFromAllSheets.run({
+                    this.queries.removeFromAllPlaylists.run({
                         platform: item.platform,
                         musicId: String(item.id),
-                        excludeSheetId: PLAY_QUEUE_SHEET_ID,
+                        excludeSheetId: PLAY_QUEUE_PLAYLIST_ID,
                     });
                 }
             })();
             this.scheduleOrphanCleanup();
-            this.broadcastMusicSheetEvent({ origin: 'user' });
+            this.broadcastPlaylistEvent({ origin: 'user' });
         });
 
         ipcMain.handle(
             IPC.UPDATE_MUSIC_ORDER,
-            (_evt, sheetId: string, orderedKeys: IMedia.IMediaBase[]) => {
+            (_evt, playlistId: string, orderedKeys: IMedia.IMediaBase[]) => {
                 const db = this.db.getDatabase();
                 const reorder = db.transaction((keys: IMedia.IMediaBase[]) => {
                     for (let i = 0; i < keys.length; i++) {
                         this.queries.updateRelationOrder.run({
-                            sheetId,
+                            sheetId: playlistId,
                             platform: keys[i].platform,
                             musicId: String(keys[i].id),
                             sortOrder: i,
@@ -468,24 +474,24 @@ class PlaylistManager {
 
         // ─── 星标远程歌单 ────────────────────
 
-        ipcMain.handle(IPC.GET_STARRED_SHEETS, () => {
-            return this.queries.getAllStarredSheets.all();
+        ipcMain.handle(IPC.GET_STARRED_PLAYLISTS, () => {
+            return this.queries.getAllStarredPlaylists.all();
         });
 
-        ipcMain.handle(IPC.STAR_SHEET, (_evt, sheet: IMusic.IPlaylistItem) => {
-            this.queries.insertStarredSheet.run({
-                platform: sheet.platform,
-                id: String(sheet.id),
-                title: sheet.title ?? null,
-                artwork: sheet.artwork ?? null,
-                raw: JSON.stringify(sheet),
+        ipcMain.handle(IPC.STAR_PLAYLIST, (_evt, playlist: IMusic.IPlaylistItem) => {
+            this.queries.insertStarredPlaylist.run({
+                platform: playlist.platform,
+                id: String(playlist.id),
+                title: playlist.title ?? null,
+                artwork: playlist.artwork ?? null,
+                raw: JSON.stringify(playlist),
                 sortOrder: 0,
                 starredAt: Date.now(),
             });
         });
 
-        ipcMain.handle(IPC.UNSTAR_SHEET, (_evt, platform: string, id: string) => {
-            this.queries.deleteStarredSheet.run({ platform, id });
+        ipcMain.handle(IPC.UNSTAR_PLAYLIST, (_evt, platform: string, id: string) => {
+            this.queries.deleteStarredPlaylist.run({ platform, id });
         });
 
         ipcMain.handle(IPC.SET_STARRED_ORDER, (_evt, orderedKeys: IMedia.IMediaBase[]) => {
@@ -505,21 +511,21 @@ class PlaylistManager {
         // ─── 播放队列 ────────────────────────
 
         ipcMain.handle(IPC.PLAY_QUEUE_GET_ALL, () => {
-            return this.queries.getSheetMusicSlim.all(PLAY_QUEUE_SHEET_ID);
+            return this.queries.getPlaylistMusicSlim.all(PLAY_QUEUE_PLAYLIST_ID);
         });
 
         ipcMain.handle(
             IPC.PLAY_QUEUE_SET,
-            (_evt, items: IMusic.IMusicItem[], fromSheetId?: string) => {
+            (_evt, items: IMusic.IMusicItem[], fromPlaylistId?: string) => {
                 const db = this.db.getDatabase();
                 db.transaction(() => {
-                    this.queries.clearSheetRelations.run(PLAY_QUEUE_SHEET_ID);
+                    this.queries.clearPlaylistRelations.run(PLAY_QUEUE_PLAYLIST_ID);
 
-                    if (fromSheetId) {
+                    if (fromPlaylistId) {
                         // 性能优化：直接从源歌单复制 relation
                         this.queries.copyRelationsToQueue.run({
-                            queueId: PLAY_QUEUE_SHEET_ID,
-                            fromSheetId,
+                            queueId: PLAY_QUEUE_PLAYLIST_ID,
+                            fromSheetId: fromPlaylistId,
                             addedAt: Date.now(),
                         });
                     } else {
@@ -539,7 +545,7 @@ class PlaylistManager {
                                 raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
                             });
                             this.queries.insertRelation.run({
-                                sheetId: PLAY_QUEUE_SHEET_ID,
+                                sheetId: PLAY_QUEUE_PLAYLIST_ID,
                                 platform: item.platform,
                                 musicId: sid,
                                 sortOrder: i,
@@ -563,7 +569,7 @@ class PlaylistManager {
                     // 1. 去重：移除队列中已存在的同名歌曲（与 renderer 内存去重一致）
                     for (const item of items) {
                         this.queries.removeRelation.run({
-                            sheetId: PLAY_QUEUE_SHEET_ID,
+                            sheetId: PLAY_QUEUE_PLAYLIST_ID,
                             platform: item.platform,
                             musicId: String(item.id),
                         });
@@ -571,7 +577,7 @@ class PlaylistManager {
 
                     // 2. 确定插入点：afterIndex 是去重后数组中的位置
                     const pivot = this.queries.getSortOrderAtPosition.get(
-                        PLAY_QUEUE_SHEET_ID,
+                        PLAY_QUEUE_PLAYLIST_ID,
                         afterIndex,
                     ) as { sortOrder: number } | undefined;
 
@@ -579,7 +585,7 @@ class PlaylistManager {
                     if (pivot) {
                         // 将 afterIndex 及之后的歌曲后移 count 个位置，腾出空间
                         this.queries.shiftRelationsAfter.run({
-                            sheetId: PLAY_QUEUE_SHEET_ID,
+                            sheetId: PLAY_QUEUE_PLAYLIST_ID,
                             pivotOrder: pivot.sortOrder,
                             count,
                         });
@@ -587,7 +593,7 @@ class PlaylistManager {
                     } else {
                         // afterIndex 超出范围 → 追加到末尾
                         startOrder =
-                            (this.queries.getMaxSortOrder.get(PLAY_QUEUE_SHEET_ID) as any)
+                            (this.queries.getMaxSortOrder.get(PLAY_QUEUE_PLAYLIST_ID) as any)
                                 .maxOrder + 1;
                     }
 
@@ -606,7 +612,7 @@ class PlaylistManager {
                             raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
                         });
                         this.queries.insertRelation.run({
-                            sheetId: PLAY_QUEUE_SHEET_ID,
+                            sheetId: PLAY_QUEUE_PLAYLIST_ID,
                             platform: item.platform,
                             musicId: sid,
                             sortOrder: startOrder + i,
@@ -622,7 +628,7 @@ class PlaylistManager {
             db.transaction(() => {
                 for (const item of musicBases) {
                     this.queries.removeRelation.run({
-                        sheetId: PLAY_QUEUE_SHEET_ID,
+                        sheetId: PLAY_QUEUE_PLAYLIST_ID,
                         platform: item.platform,
                         musicId: String(item.id),
                     });
@@ -632,17 +638,17 @@ class PlaylistManager {
         });
 
         ipcMain.handle(IPC.PLAY_QUEUE_CLEAR, () => {
-            this.queries.clearSheetRelations.run(PLAY_QUEUE_SHEET_ID);
+            this.queries.clearPlaylistRelations.run(PLAY_QUEUE_PLAYLIST_ID);
             this.scheduleOrphanCleanup();
         });
     }
 
     /** 确保 __downloaded__ 系统歌单存在 */
-    private ensureDownloadedSheet() {
-        const exists = this.queries.getSheetById.get(DOWNLOADED_SHEET_ID);
+    private ensureDownloadedPlaylist() {
+        const exists = this.queries.getPlaylistById.get(DOWNLOADED_PLAYLIST_ID);
         if (!exists) {
-            this.queries.insertSheet.run({
-                id: DOWNLOADED_SHEET_ID,
+            this.queries.insertPlaylist.run({
+                id: DOWNLOADED_PLAYLIST_ID,
                 title: i18n.t('common.downloaded'),
                 artwork: null,
                 description: null,
@@ -656,11 +662,11 @@ class PlaylistManager {
     }
 
     /** 确保默认收藏歌单存在 */
-    private ensureDefaultSheet() {
-        const exists = this.queries.getSheetById.get(DEFAULT_FAVORITE_SHEET_ID);
+    private ensureDefaultPlaylist() {
+        const exists = this.queries.getPlaylistById.get(DEFAULT_FAVORITE_PLAYLIST_ID);
         if (!exists) {
-            this.queries.insertSheet.run({
-                id: DEFAULT_FAVORITE_SHEET_ID,
+            this.queries.insertPlaylist.run({
+                id: DEFAULT_FAVORITE_PLAYLIST_ID,
                 title: i18n.t('media.default_favorite_sheet_name'),
                 artwork: null,
                 description: null,
@@ -674,11 +680,11 @@ class PlaylistManager {
     }
 
     /** 确保播放队列虚拟歌单存在 */
-    private ensurePlayQueueSheet() {
-        const exists = this.queries.getSheetById.get(PLAY_QUEUE_SHEET_ID);
+    private ensurePlayQueuePlaylist() {
+        const exists = this.queries.getPlaylistById.get(PLAY_QUEUE_PLAYLIST_ID);
         if (!exists) {
-            this.queries.insertSheet.run({
-                id: PLAY_QUEUE_SHEET_ID,
+            this.queries.insertPlaylist.run({
+                id: PLAY_QUEUE_PLAYLIST_ID,
                 title: i18n.t('playback.queue_title'),
                 artwork: null,
                 description: null,
@@ -696,8 +702,8 @@ class PlaylistManager {
      * - origin: 'user' 表示 renderer 用户操作触发，乐观更新已处理 musicList；
      * - origin: 'internal' 表示 main 内部模块触发，renderer 需拉取 musicList。
      */
-    private broadcastMusicSheetEvent(event: IPlaylistEvent) {
-        this.windowManager.broadcast(IPC.MUSIC_SHEET_EVENT, event);
+    private broadcastPlaylistEvent(event: IPlaylistEvent) {
+        this.windowManager.broadcast(IPC.PLAYLIST_EVENT, event);
     }
 
     /** 延迟清理不被任何歌单引用的歌曲（避免频繁执行） */
@@ -789,5 +795,5 @@ function slimToMusicItem(slim: IMusicItemSlim): IMusic.IMusicItem {
     } as IMusic.IMusicItem;
 }
 
-const musicSheet = new PlaylistManager();
-export default musicSheet;
+const playlistManager = new PlaylistManager();
+export default playlistManager;

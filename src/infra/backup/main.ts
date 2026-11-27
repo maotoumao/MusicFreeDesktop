@@ -90,11 +90,11 @@ class BackupManager {
                     const raw = await fsp.readFile(filePath, 'utf-8');
                     const { musicSheets, localIgnored } = gateLocalSongs(parseBackupData(raw));
 
-                    const importResult = this.backupProvider.importSheets(
+                    const importResult = this.backupProvider.importPlaylists(
                         musicSheets,
                         mode,
-                        (current, total, sheetTitle) => {
-                            this.sendProgress({ current, total, sheetTitle });
+                        (current, total, playlistTitle) => {
+                            this.sendProgress({ current, total, sheetTitle: playlistTitle });
                         },
                     );
 
@@ -164,11 +164,11 @@ class BackupManager {
                     })) as string;
                     const { musicSheets, localIgnored } = gateLocalSongs(parseBackupData(raw));
 
-                    const importResult = this.backupProvider.importSheets(
+                    const importResult = this.backupProvider.importPlaylists(
                         musicSheets,
                         mode,
-                        (current, total, sheetTitle) => {
-                            this.sendProgress({ current, total, sheetTitle });
+                        (current, total, playlistTitle) => {
+                            this.sendProgress({ current, total, sheetTitle: playlistTitle });
                         },
                     );
 
@@ -205,7 +205,7 @@ class BackupManager {
 
     /** 组装备份数据（主进程内直接调用 provider，不经 IPC） */
     private buildBackupData(): IBackupData {
-        const sheets = this.backupProvider.getExportableSheets();
+        const playlists = this.backupProvider.getExportablePlaylists();
         return {
             version: 1,
             createdAt: Date.now(),
@@ -214,10 +214,12 @@ class BackupManager {
                 appVersion: globalContext.appVersion,
                 installationId: getInstallationId(),
             },
-            musicSheets: sheets.map((sheet) => ({
-                id: sheet.id,
-                title: sheet.title,
-                musicList: this.backupProvider.getSheetMusicRaw(sheet.id).map(withoutEmbeddedCover),
+            musicSheets: playlists.map((playlist) => ({
+                id: playlist.id,
+                title: playlist.title,
+                musicList: this.backupProvider
+                    .getPlaylistMusicRaw(playlist.id)
+                    .map(withoutEmbeddedCover),
             })),
         };
     }
@@ -297,9 +299,9 @@ function gateLocalSongs(data: IBackupData): {
         backupInstallationId !== '' &&
         backupInstallationId === getInstallationId();
     const ignored = new Set<string>();
-    const musicSheets = data.musicSheets.map((sheet) => ({
-        ...sheet,
-        musicList: sheet.musicList.filter((item) => {
+    const musicSheets = data.musicSheets.map((playlist) => ({
+        ...playlist,
+        musicList: playlist.musicList.filter((item) => {
             if (item?.platform !== LOCAL_PLUGIN_NAME || sameInstallation) return true;
             const keep = !backupInstallationId && localFileExists(item);
             if (!keep) ignored.add(String(item.id));
@@ -330,7 +332,7 @@ function localFileExists(item: IMusic.IMusicItem): boolean {
 /** 手机端 1.0 起的备份信封标识 */
 const BACKUP_ENVELOPE_FORMAT = 'musicfree-backup';
 /** 「我喜欢」歌单 id：跨端备份协议冻结的 wire 值 */
-const FAVORITE_SHEET_ID = 'favorite';
+const FAVORITE_PLAYLIST_ID = 'favorite';
 
 /** 解析备份数据（兼容旧版无 version 字段的格式与手机端 v2 信封） */
 function parseBackupData(raw: string): IBackupData {
@@ -341,7 +343,7 @@ function parseBackupData(raw: string): IBackupData {
         return {
             version: 1,
             createdAt: Date.now(),
-            musicSheets: normalizeSheets(data.musicSheets),
+            musicSheets: normalizePlaylists(data.musicSheets),
         };
     }
 
@@ -349,7 +351,7 @@ function parseBackupData(raw: string): IBackupData {
         return {
             ...(data as IBackupData),
             origin: parseOrigin(data.origin),
-            musicSheets: normalizeSheets(data.musicSheets),
+            musicSheets: normalizePlaylists(data.musicSheets),
         };
     }
 
@@ -372,10 +374,10 @@ function parseBackupData(raw: string): IBackupData {
  * - 本地歌曲与其他格式一样，由 gateLocalSongs 按安装标识决定是否恢复
  */
 function parseEnvelopeV2(data: any): IBackupData {
-    const sheets = data.sections?.musicSheets;
+    const playlists = data.sections?.musicSheets;
     if (
-        !Array.isArray(sheets) ||
-        sheets.filter((sheet) => sheet?.id === FAVORITE_SHEET_ID).length !== 1
+        !Array.isArray(playlists) ||
+        playlists.filter((playlist) => playlist?.id === FAVORITE_PLAYLIST_ID).length !== 1
     ) {
         throw new Error('no_playlists_in_backup');
     }
@@ -385,7 +387,9 @@ function parseEnvelopeV2(data: any): IBackupData {
         createdAt: typeof data.createdAt === 'number' ? data.createdAt : Date.now(),
         origin: parseOrigin(data.origin),
         // 先检查全部歌单的结构，再按协议跳过 id 不是文本的歌单
-        musicSheets: normalizeSheets(sheets).filter((_, i) => typeof sheets[i].id === 'string'),
+        musicSheets: normalizePlaylists(playlists).filter(
+            (_, i) => typeof playlists[i].id === 'string',
+        ),
     };
 }
 
@@ -394,14 +398,14 @@ function parseEnvelopeV2(data: any): IBackupData {
  * 避免覆盖恢复先清空现有歌单、再恢复不出内容。缺 platform / id 的曲目无法入库，丢弃；
  * 其余字段在写库时处理（见 musicSheet 的 mergeRestoredItem）。
  */
-function normalizeSheets(sheets: any[]): IBackupPlaylist[] {
-    if (!sheets.every((sheet) => Array.isArray(sheet?.musicList))) {
+function normalizePlaylists(playlists: any[]): IBackupPlaylist[] {
+    if (!playlists.every((playlist) => Array.isArray(playlist?.musicList))) {
         throw new Error('unsupported_backup_format');
     }
-    return sheets.map((sheet) => ({
-        id: typeof sheet.id === 'string' ? sheet.id : '',
-        title: toText(sheet.title),
-        musicList: sheet.musicList.filter(isImportableMusicItem).map((item: any) => ({
+    return playlists.map((playlist) => ({
+        id: typeof playlist.id === 'string' ? playlist.id : '',
+        title: toText(playlist.title),
+        musicList: playlist.musicList.filter(isImportableMusicItem).map((item: any) => ({
             ...item,
             id: String(item.id),
         })),

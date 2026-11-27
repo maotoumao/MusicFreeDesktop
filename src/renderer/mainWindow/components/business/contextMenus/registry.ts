@@ -20,16 +20,16 @@
  */
 import { ExampleMenu } from './ExampleMenu';
 import { MusicItemMenu } from './MusicItemMenu';
-import { StarredSheetMenu } from './StarredSheetMenu';
-import { LocalSheetMenu } from './LocalSheetMenu';
+import { StarredPlaylistMenu } from './StarredSheetMenu';
+import { LocalPlaylistMenu } from './LocalSheetMenu';
 import { LocalThemeMenu } from './LocalThemeMenu';
 import { RemoteThemeMenu } from './RemoteThemeMenu';
 
 export const contextMenuRegistry = {
     ExampleMenu,
     MusicItemMenu,
-    StarredSheetMenu,
-    LocalSheetMenu,
+    StarredSheetMenu: StarredPlaylistMenu,
+    LocalSheetMenu: LocalPlaylistMenu,
     LocalThemeMenu,
     RemoteThemeMenu,
 } as const;

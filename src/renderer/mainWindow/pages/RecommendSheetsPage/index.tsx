@@ -17,10 +17,10 @@ import { useTranslation } from 'react-i18next';
 import { useSortedSupportedPlugins } from '@infra/pluginManager/renderer/hooks';
 import { PluginFeatureUnavailable } from '../../components/business/PluginFeatureUnavailable';
 import { TabBar } from '../../components/ui/TabBar';
-import { RecommendSheetsBody } from './RecommendSheetsBody';
+import { RecommendPlaylistsBody } from './RecommendSheetsBody';
 import './index.scss';
 
-export default function RecommendSheetsPage() {
+export default function RecommendPlaylistsPage() {
     const { t } = useTranslation();
     const availablePlugins = useSortedSupportedPlugins('getRecommendPlaylistsByTag');
     const [activeHash, setActiveHash] = useState('');
@@ -63,7 +63,7 @@ export default function RecommendSheetsPage() {
                 <TabBar items={tabItems} activeKey={currentHash} onChange={handleTabChange} />
             </div>
 
-            <RecommendSheetsBody pluginHash={currentHash} />
+            <RecommendPlaylistsBody pluginHash={currentHash} />
         </div>
     );
 }

@@ -1,14 +1,14 @@
 import { createHashRouter, Navigate } from 'react-router';
 import App from './App';
-import { localSheetRoute, RoutePaths } from './routes';
-import { DEFAULT_FAVORITE_SHEET_ID } from '@infra/musicSheet/common/constant';
+import { localPlaylistRoute, RoutePaths } from './routes';
+import { DEFAULT_FAVORITE_PLAYLIST_ID } from '@infra/playlist/common/constant';
 
 import SearchPage from './pages/SearchPage';
 import ToplistPage from './pages/ToplistPage';
 import ToplistDetailPage from './pages/ToplistDetailPage';
-import RecommendSheetsPage from './pages/RecommendSheetsPage';
-import LocalSheetPage from './pages/LocalSheetPage';
-import SheetPage from './pages/SheetPage';
+import RecommendPlaylistsPage from './pages/RecommendSheetsPage';
+import LocalPlaylistPage from './pages/LocalSheetPage';
+import PlaylistPage from './pages/SheetPage';
 import AlbumPage from './pages/AlbumPage';
 import ArtistPage from './pages/ArtistPage';
 import LocalMusicPage from './pages/LocalMusicPage';
@@ -27,7 +27,7 @@ const router = createHashRouter([
             // ── 首屏：跳转到「我喜欢」歌单 ──
             {
                 index: true,
-                element: <Navigate to={localSheetRoute(DEFAULT_FAVORITE_SHEET_ID)} replace />,
+                element: <Navigate to={localPlaylistRoute(DEFAULT_FAVORITE_PLAYLIST_ID)} replace />,
             },
 
             // ── 搜索 ──
@@ -46,18 +46,18 @@ const router = createHashRouter([
                 Component: ToplistDetailPage,
             },
             {
-                path: RoutePaths.RecommendSheets,
-                Component: RecommendSheetsPage,
+                path: RoutePaths.RecommendPlaylists,
+                Component: RecommendPlaylistsPage,
             },
 
             // ── 详情页 ──
             {
-                path: `${RoutePaths.LocalSheet}/:id`,
-                Component: LocalSheetPage,
+                path: `${RoutePaths.LocalPlaylist}/:id`,
+                Component: LocalPlaylistPage,
             },
             {
-                path: `${RoutePaths.MusicSheet}/:platform/:id`,
-                Component: SheetPage,
+                path: `${RoutePaths.Playlist}/:platform/:id`,
+                Component: PlaylistPage,
             },
             {
                 path: `${RoutePaths.Album}/:platform/:id`,

@@ -9,7 +9,7 @@
  */
 
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import { atom, getDefaultStore , useAtomValue } from 'jotai';
+import { atom, getDefaultStore, useAtomValue } from 'jotai';
 import EventEmitter from 'eventemitter3';
 
 import type {
@@ -19,47 +19,47 @@ import type {
     ICreatePlaylistParams,
     IUpdatePlaylistParams,
     IStarredPlaylistItem,
-} from '@appTypes/infra/musicSheet';
+} from '@appTypes/infra/playlist';
 
 import { compositeKey } from '@common/mediaKey';
 import musicItemToSlim from '@common/musicItemToSlim';
 import MutationQueue from '@common/mutationQueue';
 import {
     CONTEXT_BRIDGE_KEY,
-    DEFAULT_FAVORITE_SHEET_ID,
+    DEFAULT_FAVORITE_PLAYLIST_ID,
     type IPlaylistEvent,
 } from './common/constant';
 
 // ─── Preload Bridge ───
 
 interface IMod {
-    getAllSheets(): Promise<ILocalPlaylistMeta[]>;
-    getSheetDetail(sheetId: string): Promise<ILocalPlaylistDetail | null>;
-    createSheet(params: ICreatePlaylistParams): Promise<ILocalPlaylistMeta>;
-    deleteSheet(sheetId: string): Promise<void>;
-    updateSheet(params: IUpdatePlaylistParams): Promise<void>;
-    clearSheet(sheetId: string): Promise<void>;
+    getAllPlaylists(): Promise<ILocalPlaylistMeta[]>;
+    getPlaylistDetail(playlistId: string): Promise<ILocalPlaylistDetail | null>;
+    createPlaylist(params: ICreatePlaylistParams): Promise<ILocalPlaylistMeta>;
+    deletePlaylist(playlistId: string): Promise<void>;
+    updatePlaylist(params: IUpdatePlaylistParams): Promise<void>;
+    clearPlaylist(playlistId: string): Promise<void>;
     addMusic(
-        sheetId: string,
+        playlistId: string,
         musicItems: IMusic.IMusicItem[],
     ): Promise<{ added: number; truncated: number }>;
-    removeMusic(sheetId: string, musicBases: IMedia.IMediaBase[]): Promise<void>;
-    removeFromAllSheets(musicBases: IMedia.IMediaBase[]): Promise<void>;
-    updateMusicOrder(sheetId: string, orderedKeys: IMedia.IMediaBase[]): Promise<void>;
+    removeMusic(playlistId: string, musicBases: IMedia.IMediaBase[]): Promise<void>;
+    removeFromAllPlaylists(musicBases: IMedia.IMediaBase[]): Promise<void>;
+    updateMusicOrder(playlistId: string, orderedKeys: IMedia.IMediaBase[]): Promise<void>;
     getRawMusicItem(platform: string, id: string): Promise<IMusic.IMusicItem | null>;
     getRawMusicItems(keys: IMedia.IMediaBase[]): Promise<IMusic.IMusicItem[]>;
-    getStarredSheets(): Promise<IStarredPlaylistItem[]>;
-    starSheet(sheet: IMusic.IPlaylistItem): Promise<void>;
-    unstarSheet(platform: string, id: string): Promise<void>;
+    getStarredPlaylists(): Promise<IStarredPlaylistItem[]>;
+    starPlaylist(playlist: IMusic.IPlaylistItem): Promise<void>;
+    unstarPlaylist(platform: string, id: string): Promise<void>;
     setStarredOrder(orderedKeys: IMedia.IMediaBase[]): Promise<void>;
     // ─── 播放队列 ───
     playQueueGetAll(): Promise<IMusicItemSlim[]>;
-    playQueueSet(items: IMusic.IMusicItem[], fromSheetId?: string): Promise<void>;
+    playQueueSet(items: IMusic.IMusicItem[], fromPlaylistId?: string): Promise<void>;
     playQueueAdd(items: IMusic.IMusicItem[], afterIndex: number): Promise<void>;
     playQueueRemove(musicBases: IMedia.IMediaBase[]): Promise<void>;
     playQueueClear(): Promise<void>;
     // ─── 事件 ───
-    onMusicSheetEvent(cb: (event: IPlaylistEvent) => void): () => void;
+    onPlaylistEvent(cb: (event: IPlaylistEvent) => void): () => void;
 }
 
 const mod = window[CONTEXT_BRIDGE_KEY as any] as unknown as IMod;
@@ -81,16 +81,16 @@ export type IPlayQueueBridge = typeof playQueueBridge;
 const store = getDefaultStore();
 
 /** 歌单列表 */
-const sheetsAtom = atom<ILocalPlaylistMeta[]>([]);
+const playlistsAtom = atom<ILocalPlaylistMeta[]>([]);
 
 /** 星标远程歌单 */
-const starredSheetsAtom = atom<IStarredPlaylistItem[]>([]);
+const starredPlaylistsAtom = atom<IStarredPlaylistItem[]>([]);
 
 /** 当前歌曲列表 */
 const musicListAtom = atom<IMusicItemSlim[]>([]);
 
 /** 正在加载歌单详情 */
-const isLoadingSheetAtom = atom(false);
+const isLoadingPlaylistAtom = atom(false);
 
 // ═══════════════════════════════════════════════════════
 // MusicSheetRenderer
@@ -108,7 +108,7 @@ class PlaylistRenderer {
     public readonly events = new EventEmitter<IRendererEvents>();
     private favoriteIdSet = new Set<string>();
     private starredIdSet = new Set<string>();
-    private currentSheetId: string | null = null;
+    private currentPlaylistId: string | null = null;
     private mutationQueue = new MutationQueue();
 
     constructor() {
@@ -124,18 +124,21 @@ class PlaylistRenderer {
         if (PlaylistRenderer.instance) return;
         PlaylistRenderer.instance = this;
 
-        const [sheets, starred] = await Promise.all([mod.getAllSheets(), mod.getStarredSheets()]);
-        store.set(sheetsAtom, sheets);
-        store.set(starredSheetsAtom, starred);
+        const [playlists, starred] = await Promise.all([
+            mod.getAllPlaylists(),
+            mod.getStarredPlaylists(),
+        ]);
+        store.set(playlistsAtom, playlists);
+        store.set(starredPlaylistsAtom, starred);
 
         this.starredIdSet = new Set(starred.map((s) => compositeKey(s.platform, s.id)));
 
         await this.refreshFavoriteCache();
 
-        mod.onMusicSheetEvent(async (event) => {
+        mod.onPlaylistEvent(async (event) => {
             try {
                 // sheetsAtom 始终刷新（轻量 getAllSheets 查询，同步 worksNum 等元数据）
-                store.set(sheetsAtom, await mod.getAllSheets());
+                store.set(playlistsAtom, await mod.getAllPlaylists());
 
                 // internal 事件：main 侧内部模块主动变更了歌曲列表，renderer 无乐观更新，需拉取
                 // user 事件：renderer 自己发起的操作，乐观更新已处理，跳过
@@ -157,8 +160,8 @@ class PlaylistRenderer {
     // ─── 内部恢复 ───
 
     async reloadState() {
-        if (this.currentSheetId) {
-            const detail = await mod.getSheetDetail(this.currentSheetId);
+        if (this.currentPlaylistId) {
+            const detail = await mod.getPlaylistDetail(this.currentPlaylistId);
             if (detail) store.set(musicListAtom, detail.musicList);
         }
         await this.refreshFavoriteCache();
@@ -166,54 +169,54 @@ class PlaylistRenderer {
 
     // ─── 歌单列表 ───
 
-    getAllSheets(): ILocalPlaylistMeta[] {
-        return store.get(sheetsAtom);
+    getAllPlaylists(): ILocalPlaylistMeta[] {
+        return store.get(playlistsAtom);
     }
 
     // NOTE: IPC 完成后手动刷新 sheetsAtom，保证调用者 resolve 时数据已是最新。
     // main 侧广播会再触发一次 getAllSheets（双重拉取），但开销可忽略。
 
-    async addSheet(title: string): Promise<ILocalPlaylistMeta> {
-        const sheet = await mod.createSheet({ title });
-        store.set(sheetsAtom, await mod.getAllSheets());
-        return sheet;
+    async addPlaylist(title: string): Promise<ILocalPlaylistMeta> {
+        const playlist = await mod.createPlaylist({ title });
+        store.set(playlistsAtom, await mod.getAllPlaylists());
+        return playlist;
     }
 
     // NOTE: 双重拉取，见 addSheet 注释
-    async removeSheet(sheetId: string): Promise<void> {
-        await mod.deleteSheet(sheetId);
-        store.set(sheetsAtom, await mod.getAllSheets());
+    async removePlaylist(playlistId: string): Promise<void> {
+        await mod.deletePlaylist(playlistId);
+        store.set(playlistsAtom, await mod.getAllPlaylists());
     }
 
     // NOTE: 双重拉取，见 addSheet 注释
-    async updateSheet(sheetId: string, data: Partial<IUpdatePlaylistParams>): Promise<void> {
-        await mod.updateSheet({ id: sheetId, ...data });
-        store.set(sheetsAtom, await mod.getAllSheets());
+    async updatePlaylist(playlistId: string, data: Partial<IUpdatePlaylistParams>): Promise<void> {
+        await mod.updatePlaylist({ id: playlistId, ...data });
+        store.set(playlistsAtom, await mod.getAllPlaylists());
     }
 
-    clearSheet(sheetId: string): void {
+    clearPlaylist(playlistId: string): void {
         // 乐观更新
-        if (this.currentSheetId === sheetId) {
+        if (this.currentPlaylistId === playlistId) {
             store.set(musicListAtom, []);
         }
-        if (sheetId === DEFAULT_FAVORITE_SHEET_ID) {
+        if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             this.favoriteIdSet.clear();
             this.events.emit('favoriteChange');
         }
-        this.mutationQueue.enqueue(() => mod.clearSheet(sheetId));
+        this.mutationQueue.enqueue(() => mod.clearPlaylist(playlistId));
     }
 
     // ─── 歌曲操作（乐观更新 + 队列写入） ───
 
-    addMusicToSheet(
+    addMusicToPlaylist(
         musicItems: IMusic.IMusicItem | IMusicItemSlim | Array<IMusic.IMusicItem | IMusicItemSlim>,
-        sheetId: string,
+        playlistId: string,
     ): void {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
         const slimItems = items.map(musicItemToSlim);
 
         // 乐观更新：本地数组
-        if (this.currentSheetId === sheetId) {
+        if (this.currentPlaylistId === playlistId) {
             const list = store.get(musicListAtom);
             const existingKeys = new Set(list.map((m) => compositeKey(m.platform, m.id)));
             const newSlims = slimItems.filter(
@@ -225,36 +228,36 @@ class PlaylistRenderer {
         }
 
         // 乐观更新：favorite Set
-        if (sheetId === DEFAULT_FAVORITE_SHEET_ID) {
+        if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             for (const m of slimItems) {
                 this.favoriteIdSet.add(compositeKey(m.platform, m.id));
             }
             this.events.emit('favoriteChange');
         }
 
-        this.mutationQueue.enqueue(() => mod.addMusic(sheetId, items).then(() => {}));
+        this.mutationQueue.enqueue(() => mod.addMusic(playlistId, items).then(() => {}));
     }
 
     addMusicToFavorite(
         musicItems: IMusic.IMusicItem | IMusicItemSlim | Array<IMusic.IMusicItem | IMusicItemSlim>,
     ): void {
-        this.addMusicToSheet(musicItems, DEFAULT_FAVORITE_SHEET_ID);
+        this.addMusicToPlaylist(musicItems, DEFAULT_FAVORITE_PLAYLIST_ID);
     }
 
-    removeMusicFromSheet(
+    removeMusicFromPlaylist(
         musicItems: IMedia.IMediaBase | IMedia.IMediaBase[],
-        sheetId: string,
+        playlistId: string,
     ): void {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
         const removeSet = new Set(items.map((it) => compositeKey(it.platform, it.id)));
 
-        if (this.currentSheetId === sheetId) {
+        if (this.currentPlaylistId === playlistId) {
             store.set(musicListAtom, (prev) =>
                 prev.filter((m) => !removeSet.has(compositeKey(m.platform, m.id))),
             );
         }
 
-        if (sheetId === DEFAULT_FAVORITE_SHEET_ID) {
+        if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             for (const it of items) {
                 this.favoriteIdSet.delete(compositeKey(it.platform, it.id));
             }
@@ -262,18 +265,18 @@ class PlaylistRenderer {
         }
 
         const bases = items.map((it) => ({ platform: it.platform, id: it.id }));
-        this.mutationQueue.enqueue(() => mod.removeMusic(sheetId, bases));
+        this.mutationQueue.enqueue(() => mod.removeMusic(playlistId, bases));
     }
 
     removeMusicFromFavorite(musicItems: IMedia.IMediaBase | IMedia.IMediaBase[]): void {
-        this.removeMusicFromSheet(musicItems, DEFAULT_FAVORITE_SHEET_ID);
+        this.removeMusicFromPlaylist(musicItems, DEFAULT_FAVORITE_PLAYLIST_ID);
     }
 
     /**
      * 从所有歌单中移除歌曲（排除播放队列，由 trackPlayer 自行管理）。
      * 乐观更新当前 musicListAtom + favoriteIdSet。
      */
-    removeFromAllSheets(musicItems: IMedia.IMediaBase | IMedia.IMediaBase[]): void {
+    removeFromAllPlaylists(musicItems: IMedia.IMediaBase | IMedia.IMediaBase[]): void {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
         const removeSet = new Set(items.map((it) => compositeKey(it.platform, it.id)));
 
@@ -287,15 +290,15 @@ class PlaylistRenderer {
         this.events.emit('favoriteChange');
 
         const bases = items.map((it) => ({ platform: it.platform, id: it.id }));
-        this.mutationQueue.enqueue(() => mod.removeFromAllSheets(bases));
+        this.mutationQueue.enqueue(() => mod.removeFromAllPlaylists(bases));
     }
 
-    updateMusicOrder(sheetId: string, orderedMusicList: IMusicItemSlim[]): void {
-        if (this.currentSheetId === sheetId) {
+    updateMusicOrder(playlistId: string, orderedMusicList: IMusicItemSlim[]): void {
+        if (this.currentPlaylistId === playlistId) {
             store.set(musicListAtom, [...orderedMusicList]);
         }
         const keys = orderedMusicList.map((m) => ({ platform: m.platform, id: m.id }));
-        this.mutationQueue.enqueue(() => mod.updateMusicOrder(sheetId, keys));
+        this.mutationQueue.enqueue(() => mod.updateMusicOrder(playlistId, keys));
     }
 
     // ─── 原始数据读取 ───
@@ -312,49 +315,49 @@ class PlaylistRenderer {
     // TODO [P2]: 乐观更新 — 先同步更新 starredIdSet + starredSheetsAtom，再异步写 DB，
     //            失败时回滚（与 favorite 路径一致）。当前实现等待两次 IPC 后才更新 UI。
 
-    getAllStarredSheets(): IStarredPlaylistItem[] {
-        return store.get(starredSheetsAtom);
+    getAllStarredPlaylists(): IStarredPlaylistItem[] {
+        return store.get(starredPlaylistsAtom);
     }
 
-    async starMusicSheet(sheet: IMusic.IPlaylistItem): Promise<void> {
+    async starPlaylist(playlist: IMusic.IPlaylistItem): Promise<void> {
         try {
-            await mod.starSheet(sheet);
-            store.set(starredSheetsAtom, await mod.getStarredSheets());
-            this.starredIdSet.add(compositeKey(sheet.platform, String(sheet.id)));
+            await mod.starPlaylist(playlist);
+            store.set(starredPlaylistsAtom, await mod.getStarredPlaylists());
+            this.starredIdSet.add(compositeKey(playlist.platform, String(playlist.id)));
             this.events.emit('starredChange');
         } catch (e) {
             this.events.emit('error', e instanceof Error ? e : new Error(String(e)));
         }
     }
 
-    async unstarMusicSheet(sheet: IMedia.IMediaBase): Promise<void> {
+    async unstarPlaylist(playlist: IMedia.IMediaBase): Promise<void> {
         try {
-            await mod.unstarSheet(sheet.platform, String(sheet.id));
-            store.set(starredSheetsAtom, await mod.getStarredSheets());
-            this.starredIdSet.delete(compositeKey(sheet.platform, String(sheet.id)));
+            await mod.unstarPlaylist(playlist.platform, String(playlist.id));
+            store.set(starredPlaylistsAtom, await mod.getStarredPlaylists());
+            this.starredIdSet.delete(compositeKey(playlist.platform, String(playlist.id)));
             this.events.emit('starredChange');
         } catch (e) {
             this.events.emit('error', e instanceof Error ? e : new Error(String(e)));
         }
     }
 
-    async setStarredMusicSheets(orderedKeys: IMedia.IMediaBase[]): Promise<void> {
+    async setStarredPlaylists(orderedKeys: IMedia.IMediaBase[]): Promise<void> {
         await mod.setStarredOrder(orderedKeys);
-        store.set(starredSheetsAtom, await mod.getStarredSheets());
+        store.set(starredPlaylistsAtom, await mod.getStarredPlaylists());
     }
 
     // ─── 歌单详情（全量加载） ───
 
-    async openSheet(sheetId: string): Promise<ILocalPlaylistDetail | null> {
-        this.currentSheetId = sheetId;
+    async openPlaylist(playlistId: string): Promise<ILocalPlaylistDetail | null> {
+        this.currentPlaylistId = playlistId;
         store.set(musicListAtom, []);
-        store.set(isLoadingSheetAtom, true);
+        store.set(isLoadingPlaylistAtom, true);
 
-        const detail = await mod.getSheetDetail(sheetId);
+        const detail = await mod.getPlaylistDetail(playlistId);
         // 用户在等待期间切换了歌单 → 丢弃旧结果
-        if (this.currentSheetId !== sheetId) return null;
+        if (this.currentPlaylistId !== playlistId) return null;
         store.set(musicListAtom, detail?.musicList ?? []);
-        store.set(isLoadingSheetAtom, false);
+        store.set(isLoadingPlaylistAtom, false);
         return detail;
     }
 
@@ -381,7 +384,7 @@ class PlaylistRenderer {
 
     // ─── Starred（同步 O(1)） ───
 
-    isSheetStarred(item: { platform: string; id: string }): boolean {
+    isPlaylistStarred(item: { platform: string; id: string }): boolean {
         return this.starredIdSet.has(compositeKey(item.platform, String(item.id)));
     }
 
@@ -393,7 +396,7 @@ class PlaylistRenderer {
 
     // ─── 歌单内搜索（renderer 侧 filter） ───
 
-    searchInCurrentSheet(keyword: string): IMusicItemSlim[] {
+    searchInCurrentPlaylist(keyword: string): IMusicItemSlim[] {
         const list = store.get(musicListAtom);
         if (!keyword) return list;
         const lower = keyword.toLowerCase();
@@ -408,25 +411,25 @@ class PlaylistRenderer {
      * 处理 main 侧内部变更：按需刷新 musicListAtom + favoriteIdSet（在主进程更新了某个歌单的内容）。
      * 仅在 sheetId 匹配当前打开歌单时拉取 musicList，避免无关歌单变更触发多余 IPC。
      */
-    private async syncInternalChange(sheetId?: string) {
-        const current = this.currentSheetId;
-        if (current && (!sheetId || sheetId === current)) {
-            const detail = await mod.getSheetDetail(current);
+    private async syncInternalChange(playlistId?: string) {
+        const current = this.currentPlaylistId;
+        if (current && (!playlistId || playlistId === current)) {
+            const detail = await mod.getPlaylistDetail(current);
             // 异步竞态守卫：异步期间可能已切换歌单
-            if (this.currentSheetId === current && detail) {
+            if (this.currentPlaylistId === current && detail) {
                 store.set(musicListAtom, detail.musicList);
             }
         }
         // 若 internal 事件影响了 favorite 歌单，同步刷新本地缓存
         // TODO [P3]: 当 sheetId === FAVORITE 且等于 currentSheetId 时，上面 getSheetDetail
         //  已拉取过同一歌单，可复用 detail 构建 favoriteIdSet，省去 refreshFavoriteCache 的重复 IPC。
-        if (!sheetId || sheetId === DEFAULT_FAVORITE_SHEET_ID) {
+        if (!playlistId || playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             await this.refreshFavoriteCache();
         }
     }
 
     private async refreshFavoriteCache() {
-        const detail = await mod.getSheetDetail(DEFAULT_FAVORITE_SHEET_ID);
+        const detail = await mod.getPlaylistDetail(DEFAULT_FAVORITE_PLAYLIST_ID);
         if (!detail) return;
 
         const newSet = new Set<string>();
@@ -450,8 +453,8 @@ class PlaylistRenderer {
 
 // ─── 模块单例 ───
 
-const musicSheet = new PlaylistRenderer();
-export default musicSheet;
+const playlistManager = new PlaylistRenderer();
+export default playlistManager;
 
 // ═══════════════════════════════════════════════════════
 // React Hooks
@@ -466,35 +469,41 @@ export function useCurrentMusicList(): IMusicItemSlim[] {
 export function useMusicIsFavorite(musicItem: { platform: string; id: string }): boolean {
     const key = musicItem ? compositeKey(musicItem.platform, String(musicItem.id)) : null;
 
-    const getSnapshot = useCallback(() => (key ? musicSheet.isFavoriteByKey(key) : false), [key]);
+    const getSnapshot = useCallback(
+        () => (key ? playlistManager.isFavoriteByKey(key) : false),
+        [key],
+    );
 
-    return useSyncExternalStore(musicSheet.subscribeFavoriteChange, getSnapshot);
+    return useSyncExternalStore(playlistManager.subscribeFavoriteChange, getSnapshot);
 }
 
 /** 监听歌单列表变更 */
-export function useMusicSheetList(): ILocalPlaylistMeta[] {
-    return useAtomValue(sheetsAtom);
+export function usePlaylistList(): ILocalPlaylistMeta[] {
+    return useAtomValue(playlistsAtom);
 }
 
 /** 按 ID 获取单个歌单的元数据（响应式） */
-export function useMusicSheetMeta(sheetId: string | undefined): ILocalPlaylistMeta | null {
-    const sheets = useAtomValue(sheetsAtom);
-    return useMemo(() => sheets.find((s) => s.id === sheetId) ?? null, [sheets, sheetId]);
+export function usePlaylistMeta(playlistId: string | undefined): ILocalPlaylistMeta | null {
+    const playlists = useAtomValue(playlistsAtom);
+    return useMemo(
+        () => playlists.find((s) => s.id === playlistId) ?? null,
+        [playlists, playlistId],
+    );
 }
 
 /** 监听 sheet loading 状态 */
-export function useIsLoadingSheet(): boolean {
-    return useAtomValue(isLoadingSheetAtom);
+export function useIsLoadingPlaylist(): boolean {
+    return useAtomValue(isLoadingPlaylistAtom);
 }
 
 /** 监听星标歌单列表 */
-export function useStarredSheets(): IStarredPlaylistItem[] {
-    return useAtomValue(starredSheetsAtom);
+export function useStarredPlaylists(): IStarredPlaylistItem[] {
+    return useAtomValue(starredPlaylistsAtom);
 }
 
 /** 某个远程歌单是否已收藏 — 同步 O(1)，仅在 starred 状态变化时 re-render */
-export function useIsSheetStarred(item: { platform: string; id: string }): boolean {
-    return useSyncExternalStore(musicSheet.subscribeStarredChange, () =>
-        musicSheet.isSheetStarred(item),
+export function useIsPlaylistStarred(item: { platform: string; id: string }): boolean {
+    return useSyncExternalStore(playlistManager.subscribeStarredChange, () =>
+        playlistManager.isPlaylistStarred(item),
     );
 }

@@ -255,7 +255,7 @@ const PluginItemActions = memo(function PluginItemActions({
         showModal('PluginImportModal', { plugin, type: 'importMusicItem' });
     }, [plugin]);
 
-    const handleImportSheet = useCallback(() => {
+    const handleImportPlaylist = useCallback(() => {
         showModal('PluginImportModal', { plugin, type: 'importPlaylist' });
     }, [plugin]);
 
@@ -305,7 +305,7 @@ const PluginItemActions = memo(function PluginItemActions({
                     variant="secondary"
                     size="sm"
                     icon={<ListPlus size={14} />}
-                    onClick={handleImportSheet}
+                    onClick={handleImportPlaylist}
                 >
                     {t('plugin.method_import_music_sheet')}
                 </Button>

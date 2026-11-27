@@ -2,7 +2,7 @@
  * TrackPlayer — jotai atoms + AppSync 桥接
  */
 import { atom, getDefaultStore, type PrimitiveAtom } from 'jotai';
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import { PlayerState, RepeatMode } from '@common/constant';
 import type { ICurrentLyric } from './types';
 

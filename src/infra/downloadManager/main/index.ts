@@ -32,7 +32,7 @@ import type {
     IDownloadedPlaylistProvider,
     IAddDownloadParams,
 } from '@appTypes/infra/downloadManager';
-import type { IMusicItemSlim, IMusicItemProvider } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim, IMusicItemProvider } from '@appTypes/infra/playlist';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 import type { IAudioTagWriter } from '@appTypes/infra/audioTag';
 import { FILE_NAME_TEMPLATES, IPC } from '../common/constant';
@@ -85,7 +85,7 @@ class DownloadManager {
     private db!: IDatabaseProvider;
     private pluginManager!: IPluginManagerForDownload;
     private mediaMeta!: IMediaMetaProvider;
-    private downloadedSheet!: IDownloadedPlaylistProvider;
+    private downloadedPlaylist!: IDownloadedPlaylistProvider;
     private musicItemProvider!: IMusicItemProvider;
     private audioTag!: IAudioTagWriter;
 
@@ -129,7 +129,7 @@ class DownloadManager {
         this.windowManager = deps.windowManager;
         this.pluginManager = deps.pluginManager;
         this.mediaMeta = deps.mediaMeta;
-        this.downloadedSheet = deps.downloadedSheet;
+        this.downloadedPlaylist = deps.downloadedSheet;
         this.musicItemProvider = deps.musicItemProvider;
         this.audioTag = deps.audioTag;
 
@@ -242,7 +242,7 @@ class DownloadManager {
             (task: IDownloadTask, musicItem: IMusic.IMusicItem | null) => {
                 // 1. 写入 music_items + __downloaded__ 歌单
                 if (musicItem) {
-                    this.downloadedSheet.addMusicToDownloaded(musicItem);
+                    this.downloadedPlaylist.addMusicToDownloaded(musicItem);
                 }
 
                 // 2. 写入 mediaMeta（下载路径 + 音质）
@@ -732,7 +732,7 @@ class DownloadManager {
         // 从 __downloaded__ 歌单移除 + 清除 mediaMeta（原子事务）
         const db = this.db.getDatabase();
         db.transaction(() => {
-            this.downloadedSheet.removeFromDownloaded(platform, musicId);
+            this.downloadedPlaylist.removeFromDownloaded(platform, musicId);
             this.mediaMeta.setMeta(platform, musicId, {
                 downloadData: null,
             });

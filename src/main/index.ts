@@ -14,7 +14,7 @@ import systemUtil from '@infra/systemUtil/main';
 import logger from '@infra/logger/main';
 import database from '@infra/database/main';
 import audioTag from '@infra/audioTag/main';
-import musicSheet from '@infra/musicSheet/main';
+import playlistManager from '@infra/playlist/main';
 import mediaMeta from '@infra/mediaMeta/main';
 import downloadManager from '@infra/downloadManager/main';
 import localMusic from '@infra/localMusic/main';
@@ -111,11 +111,11 @@ async function bootstrapInfra(windowManager: IWindowManager) {
     });
 
     database.setup();
-    musicSheet.setup({ db: database, windowManager });
+    playlistManager.setup({ db: database, windowManager });
     mediaMeta.setup({ db: database, windowManager });
 
     const mediaMetaProvider = mediaMeta.getProvider();
-    const musicItemProvider = musicSheet.getMusicItemProvider();
+    const musicItemProvider = playlistManager.getMusicItemProvider();
 
     pluginManager.setup({
         appConfigReader: appConfig,
@@ -130,7 +130,7 @@ async function bootstrapInfra(windowManager: IWindowManager) {
         windowManager,
         pluginManager,
         mediaMeta: mediaMetaProvider,
-        downloadedSheet: musicSheet.getDownloadedSheetProvider(),
+        downloadedSheet: playlistManager.getDownloadedPlaylistProvider(),
         musicItemProvider,
         audioTag,
     });
@@ -146,7 +146,7 @@ async function bootstrapInfra(windowManager: IWindowManager) {
     backup.setup({
         windowManager,
         appConfig,
-        backupProvider: musicSheet.getBackupProvider(),
+        backupProvider: playlistManager.getBackupProvider(),
     });
 
     // 注册内建插件
@@ -220,7 +220,7 @@ app.on('will-quit', async (event) => {
     isCleaningUp = true;
 
     appTray.dispose();
-    musicSheet.dispose();
+    playlistManager.dispose();
     downloadManager.dispose();
     requestForwarder.dispose();
     shortCut.dispose();

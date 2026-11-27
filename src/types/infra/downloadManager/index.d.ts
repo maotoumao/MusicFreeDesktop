@@ -1,4 +1,4 @@
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import type { IGetMediaSourceResult } from '@appTypes/infra/pluginManager';
 
 /** 下载任务状态 */

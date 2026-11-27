@@ -4,13 +4,13 @@
  * 协调 AudioController、PlayQueue、LyricManager 三大子模块，
  * 通过 jotai atoms 驱动 UI，通过 AppSync 同步状态到辅助窗口和主进程。
  */
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import { PlayerState, RepeatMode, QUALITY_KEYS } from '@common/constant';
 import { isSameMedia } from '@common/mediaKey';
 import musicItemToSlim from '@common/musicItemToSlim';
 import delay from '@common/delay';
 import throttle from '@common/throttle';
-import musicSheet from '@infra/musicSheet/renderer';
+import playlistManager from '@infra/playlist/renderer';
 import pluginManager from '@infra/pluginManager/renderer';
 import appConfig from '@infra/appConfig/renderer';
 import downloadManager from '@infra/downloadManager/renderer';
@@ -54,7 +54,7 @@ function setupAppSyncBridge(): void {
     // 计算当前歌曲是否已收藏
     const getIsFavorite = () => {
         const music = store.get(currentMusicAtom);
-        return music ? musicSheet.isFavoriteMusic(music) : false;
+        return music ? playlistManager.isFavoriteMusic(music) : false;
     };
 
     store.sub(currentMusicAtom, () => {
@@ -78,7 +78,7 @@ function setupAppSyncBridge(): void {
     });
 
     // 收藏状态变化时同步
-    musicSheet.subscribeFavoriteChange(() => {
+    playlistManager.subscribeFavoriteChange(() => {
         appSync.syncAppState({ isFavorite: getIsFavorite() });
     });
 
@@ -181,7 +181,10 @@ class TrackPlayer {
             this.audioController.setMetadata(savedMusic);
 
             // 获取完整数据并加载音源（不自动播放）
-            const fullItem = await musicSheet.getRawMusicItem(savedMusic.platform, savedMusic.id);
+            const fullItem = await playlistManager.getRawMusicItem(
+                savedMusic.platform,
+                savedMusic.id,
+            );
             const musicItem = fullItem ?? savedMusic;
 
             try {
@@ -291,7 +294,10 @@ class TrackPlayer {
         this.loadingSeq = seq;
         try {
             // 从 SQLite 获取完整数据（一首，一次 IPC）
-            const fullItem = await musicSheet.getRawMusicItem(targetSlim.platform, targetSlim.id);
+            const fullItem = await playlistManager.getRawMusicItem(
+                targetSlim.platform,
+                targetSlim.id,
+            );
             const knownItem =
                 options.musicItem && isSameMedia(options.musicItem, targetSlim)
                     ? options.musicItem
@@ -482,7 +488,7 @@ class TrackPlayer {
         try {
             store.set(playerStateAtom, PlayerState.Buffering);
 
-            const fullItem = await musicSheet.getRawMusicItem(current.platform, current.id);
+            const fullItem = await playlistManager.getRawMusicItem(current.platform, current.id);
             const musicItem = fullItem ?? (current as IMusic.IMusicItem);
 
             // 切换音质：仅在音质匹配时使用本地文件
@@ -644,10 +650,10 @@ class TrackPlayer {
         appSync.onCommand('like/dislike', () => {
             const music = store.get(currentMusicAtom);
             if (!music) return;
-            if (musicSheet.isFavoriteMusic(music)) {
-                musicSheet.removeMusicFromFavorite(music);
+            if (playlistManager.isFavoriteMusic(music)) {
+                playlistManager.removeMusicFromFavorite(music);
             } else {
-                musicSheet.addMusicToFavorite(music);
+                playlistManager.addMusicToFavorite(music);
             }
         });
     }
@@ -720,7 +726,7 @@ class TrackPlayer {
         store.set(playerStateAtom, PlayerState.Buffering);
         const seq = this.loadSeq;
         try {
-            const fullItem = await musicSheet.getRawMusicItem(target.platform, target.id);
+            const fullItem = await playlistManager.getRawMusicItem(target.platform, target.id);
             const musicItem = fullItem ?? (target as IMusic.IMusicItem);
             const result = await this.resolveSource(musicItem, store.get(qualityAtom));
 

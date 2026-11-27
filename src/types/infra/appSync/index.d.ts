@@ -17,7 +17,7 @@
  *   Any window / Main Process  ──→  Main Window Renderer
  */
 
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import type { PlayerState, RepeatMode } from '@common/constant';
 import type { IParsedLrcItem } from '@common/lyricParser';
 

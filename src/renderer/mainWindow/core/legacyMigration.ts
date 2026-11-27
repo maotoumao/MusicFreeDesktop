@@ -16,7 +16,7 @@
 import { syncKV, asyncKV } from '@renderer/common/kvStore';
 import { showModal } from '@renderer/mainWindow/components/ui/Modal/modalManager';
 import type { IBackupData, IBackupPlaylist } from '@appTypes/infra/backup';
-import { DOWNLOADED_SHEET_ID } from '@infra/musicSheet/common/constant';
+import { DOWNLOADED_PLAYLIST_ID } from '@infra/playlist/common/constant';
 import type { IMediaMeta } from '@appTypes/infra/mediaMeta';
 
 // ─── 常量 ───
@@ -271,7 +271,7 @@ export async function executeMigration(): Promise<MigrationResult> {
     // 延迟导入避免循环依赖
     const { default: backup } = await import('@infra/backup/renderer');
     const { default: mediaMeta } = await import('@infra/mediaMeta/renderer');
-    const { default: musicSheet, playQueueBridge } = await import('@infra/musicSheet/renderer');
+    const { default: playlistManager, playQueueBridge } = await import('@infra/playlist/renderer');
     const { default: fsUtil } = await import('@infra/fsUtil/renderer');
 
     try {
@@ -385,9 +385,9 @@ export async function executeMigration(): Promise<MigrationResult> {
                     });
                 }
 
-                musicSheet.addMusicToSheet(
+                playlistManager.addMusicToPlaylist(
                     downloadedItems.map(({ item }) => item),
-                    DOWNLOADED_SHEET_ID,
+                    DOWNLOADED_PLAYLIST_ID,
                 );
             }
         } catch (e) {
@@ -408,7 +408,7 @@ export async function executeMigration(): Promise<MigrationResult> {
                     for (const sheet of starredSheets) {
                         if (sheet?.platform && sheet?.id != null) {
                             try {
-                                await musicSheet.starMusicSheet({
+                                await playlistManager.starPlaylist({
                                     ...sheet,
                                     id: String(sheet.id),
                                 } as IMusic.IPlaylistItem);

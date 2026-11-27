@@ -9,7 +9,7 @@ import pluginManager from '@infra/pluginManager/renderer';
  * 首次 mount 立即触发第一页加载。
  */
 export function useTopListDetail(topListItem: IMusic.IPlaylistItem | null, platform: string) {
-    const [sheetItem, setSheetItem] = useState<IMusic.IPlaylistItem>(
+    const [playlistItem, setPlaylistItem] = useState<IMusic.IPlaylistItem>(
         topListItem ?? { id: '', platform, title: '' },
     );
     const [musicList, setMusicList] = useState<IMusic.IMusicItem[]>([]);
@@ -36,7 +36,7 @@ export function useTopListDetail(topListItem: IMusic.IPlaylistItem | null, platf
                 const resIsEnd = result?.isEnd ?? true;
 
                 if (result?.topListItem) {
-                    setSheetItem((prev) => ({ ...prev, ...result.topListItem }));
+                    setPlaylistItem((prev) => ({ ...prev, ...result.topListItem }));
                 }
 
                 setMusicList((prev) => (isFirstPage ? resMusicList : [...prev, ...resMusicList]));
@@ -73,5 +73,5 @@ export function useTopListDetail(topListItem: IMusic.IPlaylistItem | null, platf
         fetchPage(isFirstPage ? 1 : pageRef.current + 1, isFirstPage);
     }, [musicList.length, fetchPage]);
 
-    return { sheetItem, musicList, requestStatus, isEnd, loadMore, retry };
+    return { sheetItem: playlistItem, musicList, requestStatus, isEnd, loadMore, retry };
 }

@@ -9,7 +9,7 @@ export function createQueries(db: Database.Database) {
     return {
         // ─── 歌单 ────────────────────────────
 
-        getAllSheets: db.prepare(`
+        getAllPlaylists: db.prepare(`
             SELECT s.*,
                    (SELECT COUNT(*) FROM sheet_music_relation r WHERE r.sheet_id = s.id) AS worksNum,
                    CASE WHEN s.artwork IS NOT NULL THEN NULL ELSE (
@@ -24,7 +24,7 @@ export function createQueries(db: Database.Database) {
             ORDER BY s.sort_order ASC, s.created_at DESC
         `),
 
-        getSheetById: db.prepare(`
+        getPlaylistById: db.prepare(`
             SELECT s.*,
                    (SELECT COUNT(*) FROM sheet_music_relation r WHERE r.sheet_id = s.id) AS worksNum,
                    CASE WHEN s.artwork IS NOT NULL THEN NULL ELSE (
@@ -39,14 +39,14 @@ export function createQueries(db: Database.Database) {
             WHERE s.id = ?
         `),
 
-        insertSheet: db.prepare(`
+        insertPlaylist: db.prepare(`
             INSERT INTO music_sheets (id, title, artwork, description, type, folder_path, sort_order, created_at, updated_at)
             VALUES (@id, @title, @artwork, @description, @type, @folderPath, @sortOrder, @createdAt, @updatedAt)
         `),
 
-        deleteSheet: db.prepare(`DELETE FROM music_sheets WHERE id = ?`),
+        deletePlaylist: db.prepare(`DELETE FROM music_sheets WHERE id = ?`),
 
-        updateSheet: db.prepare(`
+        updatePlaylist: db.prepare(`
             UPDATE music_sheets SET title = @title, artwork = @artwork, description = @description,
                 sort_order = @sortOrder, updated_at = @updatedAt
             WHERE id = @id
@@ -73,7 +73,7 @@ export function createQueries(db: Database.Database) {
         `),
 
         /** 全量加载歌单内歌曲（slim 列，不含 raw；含 $slim 标记供 upsert 判断） */
-        getSheetMusicSlim: db.prepare(`
+        getPlaylistMusicSlim: db.prepare(`
             SELECT m.platform, CAST(m.id AS TEXT) AS id, m.title, m.artist, m.album, m.duration, m.artwork,
                    1 AS "$slim"
             FROM music_items m
@@ -87,7 +87,7 @@ export function createQueries(db: Database.Database) {
             SELECT raw FROM music_items WHERE platform = ? AND id = ?
         `),
 
-        getSheetMusicCount: db.prepare(`
+        getPlaylistMusicCount: db.prepare(`
             SELECT COUNT(*) AS count FROM sheet_music_relation WHERE sheet_id = ?
         `),
 
@@ -103,7 +103,7 @@ export function createQueries(db: Database.Database) {
             WHERE sheet_id = @sheetId AND platform = @platform AND music_id = @musicId
         `),
 
-        clearSheetRelations: db.prepare(`
+        clearPlaylistRelations: db.prepare(`
             DELETE FROM sheet_music_relation WHERE sheet_id = ?
         `),
 
@@ -125,16 +125,16 @@ export function createQueries(db: Database.Database) {
 
         // ─── 星标远程歌单 ────────────────────
 
-        getAllStarredSheets: db.prepare(`
+        getAllStarredPlaylists: db.prepare(`
             SELECT * FROM starred_sheets ORDER BY sort_order ASC, starred_at DESC
         `),
 
-        insertStarredSheet: db.prepare(`
+        insertStarredPlaylist: db.prepare(`
             INSERT OR REPLACE INTO starred_sheets (platform, id, title, artwork, raw, sort_order, starred_at)
             VALUES (@platform, @id, @title, @artwork, @raw, @sortOrder, @starredAt)
         `),
 
-        deleteStarredSheet: db.prepare(`
+        deleteStarredPlaylist: db.prepare(`
             DELETE FROM starred_sheets WHERE platform = @platform AND id = @id
         `),
 
@@ -145,7 +145,7 @@ export function createQueries(db: Database.Database) {
         // ─── 导出 ────────────────────────────
 
         /** 某歌单内全量歌曲（导出用）：raw 为空的 slim 条目带上展示列，由调用方补全 */
-        getSheetMusicRaw: db.prepare(`
+        getPlaylistMusicRaw: db.prepare(`
             SELECT m.raw, m.platform, CAST(m.id AS TEXT) AS id, m.title, m.artist, m.album,
                    m.duration, m.artwork
             FROM music_items m
@@ -192,7 +192,7 @@ export function createQueries(db: Database.Database) {
         `),
 
         /** 从所有歌单中移除歌曲（排除播放队列，由 trackPlayer 自行管理） */
-        removeFromAllSheets: db.prepare(`
+        removeFromAllPlaylists: db.prepare(`
             DELETE FROM sheet_music_relation
             WHERE platform = @platform AND music_id = @musicId
               AND sheet_id != @excludeSheetId

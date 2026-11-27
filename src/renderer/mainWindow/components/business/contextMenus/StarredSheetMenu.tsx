@@ -1,5 +1,5 @@
 import type { ContextMenuEntry } from '../../ui/ContextMenu';
-import musicSheet from '@infra/musicSheet/renderer';
+import playlistManager from '@infra/playlist/renderer';
 import i18n from '@infra/i18n/renderer';
 import { Trash2 } from 'lucide-react';
 
@@ -12,8 +12,8 @@ export interface StarredPlaylistMenuContext {
  *
  * 在 Sidebar 的收藏歌单列表上右键触发，提供取消收藏操作。
  */
-export function StarredSheetMenu(ctx: StarredPlaylistMenuContext): ContextMenuEntry[] {
-    const { sheetItem } = ctx;
+export function StarredPlaylistMenu(ctx: StarredPlaylistMenuContext): ContextMenuEntry[] {
+    const { sheetItem: playlistItem } = ctx;
 
     return [
         {
@@ -22,7 +22,7 @@ export function StarredSheetMenu(ctx: StarredPlaylistMenuContext): ContextMenuEn
             label: i18n.t('playlist.unstar'),
             danger: true,
             onClick() {
-                musicSheet.unstarMusicSheet(sheetItem);
+                playlistManager.unstarPlaylist(playlistItem);
             },
         },
     ];

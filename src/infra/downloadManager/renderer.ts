@@ -20,7 +20,7 @@ import type {
     IAddDownloadParams,
     ActiveDownloadStatus,
 } from '@appTypes/infra/downloadManager';
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 
 // ─── Preload Bridge ───
 

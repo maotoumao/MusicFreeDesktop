@@ -10,7 +10,7 @@ import '@infra/requestForwarder/preload';
 import '@infra/shortCut/preload';
 import '@infra/systemUtil/preload';
 import '@infra/themepack/preload/main';
-import '@infra/musicSheet/preload';
+import '@infra/playlist/preload';
 import '@infra/mediaMeta/preload';
 import '@infra/downloadManager/preload';
 import '@infra/localMusic/preload';

@@ -23,7 +23,7 @@ import { Chip } from '../../components/ui/Chip';
 import { MusicResult } from './components/MusicResult';
 import { AlbumResult } from './components/AlbumResult';
 import { ArtistResult } from './components/ArtistResult';
-import { SheetResult } from './components/SheetResult';
+import { PlaylistResult } from './components/SheetResult';
 import {
     SEARCH_MEDIA_TYPES,
     SEARCH_TAB_LABEL_KEYS,
@@ -44,7 +44,7 @@ const RESULT_COMPONENTS: Record<SearchMediaType, React.ComponentType<{ pluginHas
     music: MusicResult,
     album: AlbumResult,
     artist: ArtistResult,
-    playlist: SheetResult,
+    playlist: PlaylistResult,
 };
 
 // ── SearchPage ──

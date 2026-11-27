@@ -6,8 +6,8 @@ import { ScrollArea } from '@renderer/mainWindow/components/ui/ScrollArea';
 import { Artwork } from '@renderer/mainWindow/components/ui/Artwork';
 import { showToast } from '@renderer/mainWindow/components/ui/Toast';
 import { showModal } from '@renderer/mainWindow/components/ui/Modal/modalManager';
-import musicSheet, { useMusicSheetList } from '@infra/musicSheet/renderer';
-import { DEFAULT_FAVORITE_SHEET_ID } from '@infra/musicSheet/common/constant';
+import playlistManager, { usePlaylistList } from '@infra/playlist/renderer';
+import { DEFAULT_FAVORITE_PLAYLIST_ID } from '@infra/playlist/common/constant';
 import './index.scss';
 
 export interface AddMusicToPlaylistModalProps {
@@ -22,20 +22,23 @@ export interface AddMusicToPlaylistModalProps {
  * 列出所有用户歌单（含"我喜欢"），点击即添加并关闭。
  * 顶部"新建歌单"入口：关闭当前弹窗，打开 CreateSheetModal。
  */
-export default function AddMusicToSheetModal({ close, musicItems }: AddMusicToPlaylistModalProps) {
+export default function AddMusicToPlaylistModal({
+    close,
+    musicItems,
+}: AddMusicToPlaylistModalProps) {
     const { t } = useTranslation();
-    const sheets = useMusicSheetList();
+    const playlists = usePlaylistList();
 
-    const handleSelectSheet = useCallback(
-        (sheetId: string, sheetTitle: string) => {
-            musicSheet.addMusicToSheet(musicItems, sheetId);
-            showToast(t('playlist.added_to_sheet', { sheet: sheetTitle }));
+    const handleSelectPlaylist = useCallback(
+        (playlistId: string, playlistTitle: string) => {
+            playlistManager.addMusicToPlaylist(musicItems, playlistId);
+            showToast(t('playlist.added_to_sheet', { sheet: playlistTitle }));
             close();
         },
         [musicItems, close, t],
     );
 
-    const handleCreateSheet = useCallback(() => {
+    const handleCreatePlaylist = useCallback(() => {
         close();
         showModal('CreateSheetModal', { initMusicItems: musicItems });
     }, [close, musicItems]);
@@ -54,7 +57,7 @@ export default function AddMusicToSheetModal({ close, musicItems }: AddMusicToPl
                     <button
                         type="button"
                         className="add-music-to-sheet-modal__item add-music-to-sheet-modal__item--create"
-                        onClick={handleCreateSheet}
+                        onClick={handleCreatePlaylist}
                     >
                         <div className="add-music-to-sheet-modal__item-artwork add-music-to-sheet-modal__item-artwork--create">
                             <Plus size={18} />
@@ -65,22 +68,22 @@ export default function AddMusicToSheetModal({ close, musicItems }: AddMusicToPl
                     </button>
 
                     {/* ── 歌单列表 ── */}
-                    {sheets.map((sheet) => {
-                        const isFavorite = sheet.id === DEFAULT_FAVORITE_SHEET_ID;
+                    {playlists.map((playlist) => {
+                        const isFavorite = playlist.id === DEFAULT_FAVORITE_PLAYLIST_ID;
                         const displayTitle = isFavorite
                             ? t('media.default_favorite_sheet_name')
-                            : sheet.title;
+                            : playlist.title;
 
                         return (
                             <button
-                                key={sheet.id}
+                                key={playlist.id}
                                 type="button"
                                 className="add-music-to-sheet-modal__item"
-                                onClick={() => handleSelectSheet(sheet.id, displayTitle)}
+                                onClick={() => handleSelectPlaylist(playlist.id, displayTitle)}
                             >
                                 <Artwork
                                     className="add-music-to-sheet-modal__item-artwork"
-                                    src={sheet.artwork ?? sheet.latestArtwork ?? undefined}
+                                    src={playlist.artwork ?? playlist.latestArtwork ?? undefined}
                                     rounded="sm"
                                     size="sm"
                                     style={{ width: 36, height: 36 }}
@@ -89,14 +92,14 @@ export default function AddMusicToSheetModal({ close, musicItems }: AddMusicToPl
                                     {displayTitle}
                                 </span>
                                 <span className="add-music-to-sheet-modal__item-count">
-                                    {sheet.worksNum ?? 0}
+                                    {playlist.worksNum ?? 0}
                                     <Music size={12} />
                                 </span>
                             </button>
                         );
                     })}
 
-                    {sheets.length === 0 && (
+                    {playlists.length === 0 && (
                         <div className="add-music-to-sheet-modal__empty">
                             {t('status.hint_empty')}
                         </div>

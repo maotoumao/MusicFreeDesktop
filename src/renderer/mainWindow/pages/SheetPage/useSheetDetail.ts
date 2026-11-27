@@ -9,8 +9,8 @@ import pluginManager from '@infra/pluginManager/renderer';
  * 分页加载歌单内歌曲列表，自动合并插件返回的歌单元数据。
  * 首次 mount 立即触发第一页加载。
  */
-export function useSheetDetail(originalItem: IMusic.IPlaylistItem) {
-    const [sheetItem, setSheetItem] = useState<IMusic.IPlaylistItem>(originalItem);
+export function usePlaylistDetail(originalItem: IMusic.IPlaylistItem) {
+    const [playlistItem, setPlaylistItem] = useState<IMusic.IPlaylistItem>(originalItem);
     const [musicList, setMusicList] = useState<IMusic.IMusicItem[]>([]);
     const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.Idle);
     const [isEnd, setIsEnd] = useState(false);
@@ -40,7 +40,7 @@ export function useSheetDetail(originalItem: IMusic.IPlaylistItem) {
                 const resIsEnd = result?.isEnd ?? true;
 
                 if (result?.playlistItem) {
-                    setSheetItem((prev) => ({ ...prev, ...result.playlistItem }));
+                    setPlaylistItem((prev) => ({ ...prev, ...result.playlistItem }));
                 }
 
                 setMusicList((prev) => (isFirstPage ? resMusicList : [...prev, ...resMusicList]));
@@ -60,7 +60,7 @@ export function useSheetDetail(originalItem: IMusic.IPlaylistItem) {
     useEffect(() => {
         itemKeyRef.current = compositeKey(originalItem.platform, originalItem.id);
         pendingRef.current = false;
-        setSheetItem(originalItem);
+        setPlaylistItem(originalItem);
         setMusicList([]);
         setIsEnd(false);
         pageRef.current = 1;
@@ -69,13 +69,13 @@ export function useSheetDetail(originalItem: IMusic.IPlaylistItem) {
 
     const loadMore = useCallback(() => {
         if (isEnd || pendingRef.current) return;
-        fetchPage(sheetItem, pageRef.current + 1, false);
-    }, [isEnd, sheetItem, fetchPage]);
+        fetchPage(playlistItem, pageRef.current + 1, false);
+    }, [isEnd, playlistItem, fetchPage]);
 
     const retry = useCallback(() => {
         const isFirstPage = pageRef.current <= 1 && musicList.length === 0;
-        fetchPage(sheetItem, isFirstPage ? 1 : pageRef.current + 1, isFirstPage);
-    }, [sheetItem, musicList.length, fetchPage]);
+        fetchPage(playlistItem, isFirstPage ? 1 : pageRef.current + 1, isFirstPage);
+    }, [playlistItem, musicList.length, fetchPage]);
 
-    return { sheetItem, musicList, requestStatus, isEnd, loadMore, retry };
+    return { sheetItem: playlistItem, musicList, requestStatus, isEnd, loadMore, retry };
 }

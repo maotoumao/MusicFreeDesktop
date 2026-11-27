@@ -12,16 +12,16 @@ import { Heart, ListMusic, FolderPlus } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import { isSameMedia } from '@common/mediaKey';
 import appConfig from '@infra/appConfig/renderer';
-import musicSheet, {
+import playlistManager, {
     useCurrentMusicList,
-    useIsLoadingSheet,
-    useMusicSheetList,
-    useMusicSheetMeta,
-} from '@infra/musicSheet/renderer';
-import { DEFAULT_FAVORITE_SHEET_ID } from '@infra/musicSheet/common/constant';
-import { localSheetRoute } from '../../routes';
+    useIsLoadingPlaylist,
+    usePlaylistList,
+    usePlaylistMeta,
+} from '@infra/playlist/renderer';
+import { DEFAULT_FAVORITE_PLAYLIST_ID } from '@infra/playlist/common/constant';
+import { localPlaylistRoute } from '../../routes';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
-import { MusicSheetHeader } from '../../components/ui/MusicSheetHeader';
+import { PlaylistHeader } from '../../components/ui/MusicSheetHeader';
 import { SongTable, type RowInteractionDetail } from '../../components/business/SongTable';
 import { FavoriteButton } from '../../components/business/FavoriteButton';
 import { DownloadButton } from '../../components/business/DownloadButton';
@@ -48,28 +48,28 @@ import './index.scss';
  *   页面: pt --space-4, pb player-h + --space-5
  *   工具栏: mt --space-2
  */
-export default function LocalSheetPage() {
+export default function LocalPlaylistPage() {
     const { id } = useParams<{ id: string }>();
     const { t } = useTranslation();
 
     // ── 歌单元数据 ──
-    const sheetMeta = useMusicSheetMeta(id);
+    const playlistMeta = usePlaylistMeta(id);
 
-    const isFavorite = id === DEFAULT_FAVORITE_SHEET_ID;
+    const isFavorite = id === DEFAULT_FAVORITE_PLAYLIST_ID;
 
     // 正在查看的歌单被删除后回到「我喜欢」；列表为空说明尚未加载（「我喜欢」总在列表中）
     const navigate = useNavigate();
-    const sheets = useMusicSheetList();
+    const playlists = usePlaylistList();
     useEffect(() => {
-        if (!id || isFavorite || sheets.length === 0) return;
-        if (!sheets.some((sheet) => sheet.id === id)) {
-            navigate(localSheetRoute(DEFAULT_FAVORITE_SHEET_ID), { replace: true });
+        if (!id || isFavorite || playlists.length === 0) return;
+        if (!playlists.some((playlist) => playlist.id === id)) {
+            navigate(localPlaylistRoute(DEFAULT_FAVORITE_PLAYLIST_ID), { replace: true });
         }
-    }, [id, isFavorite, sheets, navigate]);
+    }, [id, isFavorite, playlists, navigate]);
 
     // ── 歌曲列表 ──
     const musicList = useCurrentMusicList();
-    const isLoading = useIsLoadingSheet();
+    const isLoading = useIsLoadingPlaylist();
 
     // ── 页内搜索 ──
     const [searchValue, setSearchValue] = useState('');
@@ -83,7 +83,7 @@ export default function LocalSheetPage() {
         let aborted = false;
         setLoadError(false);
         setSearchValue('');
-        musicSheet.openSheet(id).catch(() => {
+        playlistManager.openPlaylist(id).catch(() => {
             if (!aborted) setLoadError(true);
         });
         return () => {
@@ -127,7 +127,7 @@ export default function LocalSheetPage() {
     }, [filteredList, id, isSearching]);
 
     // ── 添加到歌单 ──
-    const handleAddToSheet = useCallback(() => {
+    const handleAddToPlaylist = useCallback(() => {
         if (filteredList.length === 0) return;
         // slim 对象可安全传入：upsert 使用 COALESCE 保护已有 raw 数据
         showModal('AddMusicToSheetModal', {
@@ -145,7 +145,7 @@ export default function LocalSheetPage() {
                         startItem: item,
                     });
                 } else {
-                    const list = musicSheet.getCurrentMusicList();
+                    const list = playlistManager.getCurrentMusicList();
                     trackPlayer.playMusicWithReplaceQueue(list, {
                         startItem: item,
                         fromSheetId: id,
@@ -179,7 +179,7 @@ export default function LocalSheetPage() {
         (fromIndices: number[], toIndex: number) => {
             if (!id || isSearching) return;
 
-            const list = [...musicSheet.getCurrentMusicList()];
+            const list = [...playlistManager.getCurrentMusicList()];
             const overItem = list[toIndex];
             // 提取被拖拽的项
             const draggedItems = fromIndices.map((i) => list[i]);
@@ -201,23 +201,25 @@ export default function LocalSheetPage() {
                 list.splice(insertAt, 0, ...draggedItems);
             }
 
-            musicSheet.updateMusicOrder(id, list);
+            playlistManager.updateMusicOrder(id, list);
         },
         [id, isSearching],
     );
 
     // ── 构造 MusicSheetHeader 所需数据 ──
-    const headerSheet = useMemo((): IMusic.IPlaylistItem => {
+    const headerPlaylist = useMemo((): IMusic.IPlaylistItem => {
         const base = {
             id: id ?? '',
             platform: 'local',
-            title: isFavorite ? t('media.default_favorite_sheet_name') : (sheetMeta?.title ?? ''),
-            artwork: sheetMeta?.artwork ?? sheetMeta?.latestArtwork ?? undefined,
-            description: sheetMeta?.description ?? undefined,
+            title: isFavorite
+                ? t('media.default_favorite_sheet_name')
+                : (playlistMeta?.title ?? ''),
+            artwork: playlistMeta?.artwork ?? playlistMeta?.latestArtwork ?? undefined,
+            description: playlistMeta?.description ?? undefined,
             worksNum: musicList.length,
         };
         return base;
-    }, [sheetMeta, id, isFavorite, musicList.length, t]);
+    }, [playlistMeta, id, isFavorite, musicList.length, t]);
 
     // ── 状态判断 ──
     const requestStatus = loadError
@@ -232,13 +234,13 @@ export default function LocalSheetPage() {
     const handleRetry = useCallback(() => {
         if (!id) return;
         setLoadError(false);
-        musicSheet.openSheet(id).catch(() => setLoadError(true));
+        playlistManager.openPlaylist(id).catch(() => setLoadError(true));
     }, [id]);
 
     return (
         <div className="p-local-sheet">
             {/* ── 页头 ── */}
-            <MusicSheetHeader musicSheet={headerSheet} hideSourceBadge />
+            <PlaylistHeader playlist={headerPlaylist} hideSourceBadge />
 
             {/* ── 工具栏（始终显示，避免切换歌单时闪烁） ── */}
             <div className="p-local-sheet__toolbar">
@@ -253,7 +255,7 @@ export default function LocalSheetPage() {
                         variant="secondary"
                         size="md"
                         icon={<FolderPlus size={16} />}
-                        onClick={handleAddToSheet}
+                        onClick={handleAddToPlaylist}
                     >
                         {t('playlist.add_to_sheet_menu')}
                     </Button>

@@ -23,14 +23,14 @@ export default function BackupProgressModal({ action }: BackupProgressModalProps
     const { t } = useTranslation();
     const [current, setCurrent] = useState(0);
     const [total, setTotal] = useState(0);
-    const [sheetTitle, setSheetTitle] = useState('');
+    const [playlistTitle, setPlaylistTitle] = useState('');
 
     useEffect(() => {
         const unsubscribe = backup.onProgress((progress: IBackupProgress) => {
             setCurrent(progress.current);
             setTotal(progress.total);
             if (progress.sheetTitle) {
-                setSheetTitle(progress.sheetTitle);
+                setPlaylistTitle(progress.sheetTitle);
             }
         });
         return unsubscribe;
@@ -43,7 +43,7 @@ export default function BackupProgressModal({ action }: BackupProgressModalProps
 
     const progressText =
         total > 0
-            ? `${current} / ${total}${sheetTitle ? ` — ${sheetTitle}` : ''}`
+            ? `${current} / ${total}${playlistTitle ? ` — ${playlistTitle}` : ''}`
             : t('common.loading');
 
     const progressValue = total > 0 ? (current / total) * 100 : 0;

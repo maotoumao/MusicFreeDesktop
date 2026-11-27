@@ -2,8 +2,8 @@ import { useCallback, useRef, type HTMLAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Heart } from 'lucide-react';
 import { cn } from '@common/cn';
-import musicSheet, { useMusicIsFavorite } from '@infra/musicSheet/renderer';
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import playlistManager, { useMusicIsFavorite } from '@infra/playlist/renderer';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import './index.scss';
 
 /** FavoriteButton 尺寸预设 */
@@ -50,9 +50,9 @@ export function FavoriteButton({
             lockRef.current = true;
 
             if (isFavorite) {
-                musicSheet.removeMusicFromFavorite(musicItem);
+                playlistManager.removeMusicFromFavorite(musicItem);
             } else {
-                musicSheet.addMusicToFavorite(musicItem);
+                playlistManager.addMusicToFavorite(musicItem);
             }
 
             setTimeout(() => {

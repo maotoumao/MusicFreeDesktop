@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Heart, FolderPlus } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
-import musicSheet, { useIsSheetStarred } from '@infra/musicSheet/renderer';
-import { MusicSheetHeader } from '../../components/ui/MusicSheetHeader';
+import playlistManager, { useIsPlaylistStarred } from '@infra/playlist/renderer';
+import { PlaylistHeader } from '../../components/ui/MusicSheetHeader';
 import { SongTable, type RowInteractionDetail } from '../../components/business/SongTable';
 import { FavoriteButton } from '../../components/business/FavoriteButton';
 import { DownloadButton } from '../../components/business/DownloadButton';
@@ -14,7 +14,7 @@ import { ListFooter } from '../../components/ui/ListFooter';
 import { Button } from '../../components/ui/Button';
 import { showContextMenu } from '../../components/ui/ContextMenu/contextMenuManager';
 import { showModal } from '../../components/ui/Modal/modalManager';
-import { useSheetDetail } from './useSheetDetail';
+import { usePlaylistDetail } from './useSheetDetail';
 import './index.scss';
 
 /**
@@ -23,7 +23,7 @@ import './index.scss';
  * 路由: /musicsheet/:platform/:id
  * state: { sheetItem: IMusic.IMusicSheetItem }
  */
-export default function SheetPage() {
+export default function PlaylistPage() {
     const { platform, id } = useParams<{ platform: string; id: string }>();
     const location = useLocation();
     const { t } = useTranslation();
@@ -39,8 +39,14 @@ export default function SheetPage() {
         };
     }, [platform, id, location.state]);
 
-    const { sheetItem, musicList, requestStatus, isEnd, loadMore, retry } =
-        useSheetDetail(originalItem);
+    const {
+        sheetItem: playlistItem,
+        musicList,
+        requestStatus,
+        isEnd,
+        loadMore,
+        retry,
+    } = usePlaylistDetail(originalItem);
 
     // ── 本地搜索 ──
     const [searchValue, setSearchValue] = useState('');
@@ -76,24 +82,24 @@ export default function SheetPage() {
         [],
     );
 
-    const handleAddToSheet = useCallback(() => {
+    const handleAddToPlaylist = useCallback(() => {
         if (musicList.length === 0) return;
         showModal('AddMusicToSheetModal', { musicItems: musicList });
     }, [musicList]);
 
-    const isStarred = useIsSheetStarred(sheetItem);
+    const isStarred = useIsPlaylistStarred(playlistItem);
 
     const handleToggleStar = useCallback(() => {
         if (isStarred) {
-            musicSheet.unstarMusicSheet(sheetItem);
+            playlistManager.unstarPlaylist(playlistItem);
         } else {
-            musicSheet.starMusicSheet(sheetItem);
+            playlistManager.starPlaylist(playlistItem);
         }
-    }, [isStarred, sheetItem]);
+    }, [isStarred, playlistItem]);
 
     return (
         <div className="p-sheet">
-            <MusicSheetHeader musicSheet={sheetItem} />
+            <PlaylistHeader playlist={playlistItem} />
 
             <div className="p-sheet__toolbar">
                 <SongToolbar
@@ -107,7 +113,7 @@ export default function SheetPage() {
                         variant="secondary"
                         size="md"
                         icon={<FolderPlus size={16} />}
-                        onClick={handleAddToSheet}
+                        onClick={handleAddToPlaylist}
                     >
                         {t('playlist.add_to_sheet_menu')}
                     </Button>

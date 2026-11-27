@@ -1,4 +1,4 @@
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 
 /** 本地音频文件的编码参数（缺失项表示未知） */
 export interface IAudioFormat {

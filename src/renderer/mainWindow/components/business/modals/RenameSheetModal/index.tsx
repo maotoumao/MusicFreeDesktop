@@ -4,11 +4,11 @@ import Modal from '@renderer/mainWindow/components/ui/Modal';
 import { Button } from '@renderer/mainWindow/components/ui/Button';
 import { Input } from '@renderer/mainWindow/components/ui/Input';
 import { showToast } from '@renderer/mainWindow/components/ui/Toast';
-import musicSheet from '@infra/musicSheet/renderer';
+import playlistManager from '@infra/playlist/renderer';
 import './index.scss';
 
 /** 歌单名称最大长度 */
-const SHEET_NAME_MAX_LENGTH = 120;
+const PLAYLIST_NAME_MAX_LENGTH = 120;
 
 export interface RenamePlaylistModalProps {
     close: () => void;
@@ -21,9 +21,9 @@ export interface RenamePlaylistModalProps {
 /**
  * RenameSheetModal — 重命名歌单弹窗（业务组件）
  */
-export default function RenameSheetModal({
+export default function RenamePlaylistModal({
     close,
-    sheetId,
+    sheetId: playlistId,
     currentTitle,
 }: RenamePlaylistModalProps) {
     const { t } = useTranslation();
@@ -40,7 +40,7 @@ export default function RenameSheetModal({
 
         setLoading(true);
         try {
-            await musicSheet.updateSheet(sheetId, { title: trimmedName });
+            await playlistManager.updatePlaylist(playlistId, { title: trimmedName });
             close();
         } catch {
             showToast(t('playlist.rename_failed'));
@@ -48,7 +48,7 @@ export default function RenameSheetModal({
             submittingRef.current = false;
             setLoading(false);
         }
-    }, [canSubmit, sheetId, trimmedName, close, t]);
+    }, [canSubmit, playlistId, trimmedName, close, t]);
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
@@ -86,7 +86,7 @@ export default function RenameSheetModal({
                 className="rename-sheet-modal__input"
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={handleKeyDown}
-                maxLength={SHEET_NAME_MAX_LENGTH}
+                maxLength={PLAYLIST_NAME_MAX_LENGTH}
                 placeholder={t('playlist.rename_sheet')}
                 autoFocus
             />

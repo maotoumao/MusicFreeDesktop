@@ -17,7 +17,7 @@ import requestForwarder from '@infra/requestForwarder/renderer';
 import pluginManager from '@infra/pluginManager/renderer';
 import shortCut from '@infra/shortCut/renderer';
 import appSync from '@infra/appSync/renderer/main';
-import musicSheet from '@infra/musicSheet/renderer';
+import playlistManager from '@infra/playlist/renderer';
 import mediaMeta from '@infra/mediaMeta/renderer';
 import downloadManager from '@infra/downloadManager/renderer';
 import localMusic from '@infra/localMusic/renderer';
@@ -56,7 +56,7 @@ export default async function bootstrapMainWindow(): Promise<void> {
         themePack.setup(),
         requestForwarder.setup(),
         pluginManager.setup(),
-        musicSheet.setup(),
+        playlistManager.setup(),
         mediaMeta.setup(),
         downloadManager.setup(),
         localMusic.setup(),

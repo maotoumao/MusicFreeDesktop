@@ -2,10 +2,10 @@ import { useCallback, type MouseEvent } from 'react';
 import { ListMusic, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { NavigateFunction } from 'react-router';
-import { DEFAULT_FAVORITE_SHEET_ID } from '@infra/musicSheet/common/constant';
+import { DEFAULT_FAVORITE_PLAYLIST_ID } from '@infra/playlist/common/constant';
 import { showContextMenu } from '../../ui/ContextMenu/contextMenuManager';
-import { localSheetRoute } from '../../../routes';
-import type { ILocalPlaylistMeta } from '@appTypes/infra/musicSheet';
+import { localPlaylistRoute } from '../../../routes';
+import type { ILocalPlaylistMeta } from '@appTypes/infra/playlist';
 
 interface LocalPlaylistNavItemProps {
     sheet: ILocalPlaylistMeta;
@@ -13,19 +13,19 @@ interface LocalPlaylistNavItemProps {
     navigate: NavigateFunction;
 }
 
-export default function LocalSheetNavItem({
-    sheet,
+export default function LocalPlaylistNavItem({
+    sheet: playlist,
     pathname,
     navigate,
 }: LocalPlaylistNavItemProps) {
     const { t } = useTranslation();
-    const isFavorite = sheet.id === DEFAULT_FAVORITE_SHEET_ID;
+    const isFavorite = playlist.id === DEFAULT_FAVORITE_PLAYLIST_ID;
     const Icon = isFavorite ? Heart : ListMusic;
-    const sheetPath = localSheetRoute(sheet.id);
+    const playlistPath = localPlaylistRoute(playlist.id);
 
     const handleClick = useCallback(() => {
-        navigate(sheetPath);
-    }, [navigate, sheetPath]);
+        navigate(playlistPath);
+    }, [navigate, playlistPath]);
 
     const handleContextMenu = useCallback(
         (e: MouseEvent) => {
@@ -35,17 +35,17 @@ export default function LocalSheetNavItem({
                 'LocalSheetMenu',
                 { x: e.clientX, y: e.clientY },
                 {
-                    sheetId: sheet.id,
-                    sheetTitle: sheet.title,
+                    sheetId: playlist.id,
+                    sheetTitle: playlist.title,
                 },
             );
         },
-        [isFavorite, sheet.id, sheet.title],
+        [isFavorite, playlist.id, playlist.title],
     );
 
     return (
         <button
-            className={`l-sidebar__nav-item${pathname === sheetPath ? ' is-active' : ''}`}
+            className={`l-sidebar__nav-item${pathname === playlistPath ? ' is-active' : ''}`}
             type="button"
             onClick={handleClick}
             onContextMenu={handleContextMenu}
@@ -55,7 +55,7 @@ export default function LocalSheetNavItem({
                 className={`l-sidebar__nav-icon${isFavorite ? '' : ' l-sidebar__nav-icon--muted'}`}
             />
             <span className="l-sidebar__nav-label">
-                {isFavorite ? t('media.default_favorite_sheet_name') : sheet.title}
+                {isFavorite ? t('media.default_favorite_sheet_name') : playlist.title}
             </span>
         </button>
     );

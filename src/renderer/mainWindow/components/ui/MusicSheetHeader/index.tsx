@@ -11,7 +11,7 @@ import './index.scss';
 
 export interface PlaylistHeaderProps {
     /** 歌单 / 专辑 / 排行榜数据 */
-    musicSheet: IMusic.IPlaylistItem;
+    playlist: IMusic.IPlaylistItem;
     /** 无封面时的自定义占位内容（默认显示 album-cover.jpg） */
     placeholderIcon?: ReactNode;
     /** 封面右侧、标题下方的自定义操作区（如按钮组） */
@@ -40,15 +40,15 @@ export interface PlaylistHeaderProps {
  *   描述: label(13px), text-muted, line-clamp-3, 溢出时显示"阅读更多"弹窗
  *   元信息: label(13px), text-secondary, · 分隔
  */
-export function MusicSheetHeader({
-    musicSheet,
+export function PlaylistHeader({
+    playlist: playlist,
     placeholderIcon,
     actions,
     hideSourceBadge,
     className,
 }: PlaylistHeaderProps) {
     const { t } = useTranslation();
-    const { artwork, title, description, artist, platform, worksNum } = musicSheet;
+    const { artwork, title, description, artist, platform, worksNum } = playlist;
 
     // ── 描述溢出检测 ──
     const descRef = useRef<HTMLParagraphElement>(null);
@@ -140,4 +140,4 @@ export function MusicSheetHeader({
     );
 }
 
-export default MusicSheetHeader;
+export default PlaylistHeader;

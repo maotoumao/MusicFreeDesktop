@@ -7,7 +7,7 @@ import downloadManager, {
     useMusicDownloaded,
     useMusicDownloadTask,
 } from '@infra/downloadManager/renderer';
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import './index.scss';
 
 /** DownloadButton 尺寸预设 */

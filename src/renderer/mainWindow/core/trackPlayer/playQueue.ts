@@ -5,13 +5,13 @@
  * 通过 MutationQueue + musicSheet preload IPC 持久化到 SQLite 虚拟歌单。
  * 乐观更新：先改内存 → 再异步落库。
  */
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import { compositeKey, isSameMedia } from '@common/mediaKey';
 import { createIndexMap, type IIndexMap } from '@common/indexMap';
 import musicItemToSlim from '@common/musicItemToSlim';
 import MutationQueue from '@common/mutationQueue';
 import { syncKV } from '@renderer/common/kvStore';
-import { playQueueBridge } from '@infra/musicSheet/renderer';
+import { playQueueBridge } from '@infra/playlist/renderer';
 import { store, musicQueueAtom } from './store';
 
 // ─── PlayQueue ───

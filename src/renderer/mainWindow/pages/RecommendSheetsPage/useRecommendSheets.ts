@@ -7,8 +7,8 @@ import pluginManager from '@infra/pluginManager/renderer';
  *
  * 支持分页加载。当 tag 变更时，自动重置并加载首页。
  */
-export function useRecommendSheets(pluginHash: string, tag: IMedia.IUnique | null) {
-    const [sheets, setSheets] = useState<IMusic.IPlaylistItem[]>([]);
+export function useRecommendPlaylists(pluginHash: string, tag: IMedia.IUnique | null) {
+    const [playlists, setPlaylists] = useState<IMusic.IPlaylistItem[]>([]);
     const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.Idle);
     const [isEnd, setIsEnd] = useState(false);
 
@@ -35,7 +35,7 @@ export function useRecommendSheets(pluginHash: string, tag: IMedia.IUnique | nul
                 const resData = result?.data ?? [];
                 const resIsEnd = result?.isEnd ?? true;
 
-                setSheets((prev) => (isFirstPage ? resData : [...prev, ...resData]));
+                setPlaylists((prev) => (isFirstPage ? resData : [...prev, ...resData]));
                 setIsEnd(resIsEnd);
                 setRequestStatus(RequestStatus.Done);
                 pageRef.current = page;
@@ -54,7 +54,7 @@ export function useRecommendSheets(pluginHash: string, tag: IMedia.IUnique | nul
         if (!tag) return;
         tagIdRef.current = tag.id;
         pendingRef.current = false;
-        setSheets([]);
+        setPlaylists([]);
         setIsEnd(false);
         pageRef.current = 1;
         fetchPage(tag, 1, true);
@@ -67,9 +67,9 @@ export function useRecommendSheets(pluginHash: string, tag: IMedia.IUnique | nul
 
     const retry = useCallback(() => {
         if (!tag) return;
-        const isFirstPage = pageRef.current <= 1 && sheets.length === 0;
+        const isFirstPage = pageRef.current <= 1 && playlists.length === 0;
         fetchPage(tag, isFirstPage ? 1 : pageRef.current + 1, isFirstPage);
-    }, [tag, sheets.length, fetchPage]);
+    }, [tag, playlists.length, fetchPage]);
 
-    return { sheets, requestStatus, isEnd, loadMore, retry };
+    return { sheets: playlists, requestStatus, isEnd, loadMore, retry };
 }

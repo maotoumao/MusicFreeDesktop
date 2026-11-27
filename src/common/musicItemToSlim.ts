@@ -1,4 +1,4 @@
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import { INTERNAL_SLIM_KEY } from './constant';
 
 /**

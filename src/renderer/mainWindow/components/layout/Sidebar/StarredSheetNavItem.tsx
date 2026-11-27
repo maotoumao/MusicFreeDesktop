@@ -3,8 +3,8 @@ import { ListMusic } from 'lucide-react';
 import type { NavigateFunction } from 'react-router';
 import { safeParse } from '@common/safeSerialize';
 import { showContextMenu } from '../../ui/ContextMenu/contextMenuManager';
-import { musicSheetRoute } from '../../../routes';
-import type { IStarredPlaylistItem } from '@appTypes/infra/musicSheet';
+import { playlistRoute } from '../../../routes';
+import type { IStarredPlaylistItem } from '@appTypes/infra/playlist';
 
 interface StarredPlaylistNavItemProps {
     item: IStarredPlaylistItem;
@@ -12,12 +12,12 @@ interface StarredPlaylistNavItemProps {
     navigate: NavigateFunction;
 }
 
-export default function StarredSheetNavItem({
+export default function StarredPlaylistNavItem({
     item,
     pathname,
     navigate,
 }: StarredPlaylistNavItemProps) {
-    const sheetPath = musicSheetRoute(item.platform, item.id);
+    const playlistPath = playlistRoute(item.platform, item.id);
     const fullItem = useMemo(
         () =>
             safeParse<IMusic.IPlaylistItem>(item.raw) ?? {
@@ -29,8 +29,8 @@ export default function StarredSheetNavItem({
     );
 
     const handleClick = useCallback(() => {
-        navigate(sheetPath, { state: { sheetItem: fullItem } });
-    }, [navigate, sheetPath, fullItem]);
+        navigate(playlistPath, { state: { sheetItem: fullItem } });
+    }, [navigate, playlistPath, fullItem]);
 
     const handleContextMenu = useCallback(
         (e: MouseEvent) => {
@@ -48,7 +48,7 @@ export default function StarredSheetNavItem({
 
     return (
         <button
-            className={`l-sidebar__nav-item${pathname === sheetPath ? ' is-active' : ''}`}
+            className={`l-sidebar__nav-item${pathname === playlistPath ? ' is-active' : ''}`}
             type="button"
             onClick={handleClick}
             onContextMenu={handleContextMenu}

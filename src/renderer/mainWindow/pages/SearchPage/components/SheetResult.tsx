@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { RequestStatus } from '@common/constant';
 import { MediaGrid } from '../../../components/ui/MediaGrid';
-import { musicSheetRoute } from '../../../routes';
+import { playlistRoute } from '../../../routes';
 import { searchResultsAtom, type SearchMediaType } from '../store';
 import { useSearch } from '../useSearch';
 
@@ -19,7 +19,7 @@ interface PlaylistResultProps {
     pluginHash: string;
 }
 
-export function SheetResult({ pluginHash }: PlaylistResultProps) {
+export function PlaylistResult({ pluginHash }: PlaylistResultProps) {
     const results = useAtomValue(searchResultsAtom);
     const type: SearchMediaType = 'playlist';
     const record = results[type][pluginHash];
@@ -43,7 +43,7 @@ export function SheetResult({ pluginHash }: PlaylistResultProps) {
 
     const handleItemClick = useCallback(
         (item: IMusic.IPlaylistItem) => {
-            navigate(musicSheetRoute(item.platform, item.id), {
+            navigate(playlistRoute(item.platform, item.id), {
                 state: { sheetItem: item },
             });
         },

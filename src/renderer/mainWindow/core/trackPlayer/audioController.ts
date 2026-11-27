@@ -7,7 +7,7 @@
  */
 import EventEmitter from 'eventemitter3';
 import Hls from 'hls.js';
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import { PlayerState, ErrorReason } from '@common/constant';
 import requestForwarder from '@infra/requestForwarder/renderer';
 

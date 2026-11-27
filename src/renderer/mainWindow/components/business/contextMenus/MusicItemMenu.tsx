@@ -6,14 +6,14 @@ import {
     RECENTLY_PLAYED_ID,
     removeFromRecentlyPlayed,
 } from '@renderer/mainWindow/core/recentlyPlayed';
-import musicSheet from '@infra/musicSheet/renderer';
+import playlistManager from '@infra/playlist/renderer';
 import downloadManager from '@infra/downloadManager/renderer';
 import localMusic from '@infra/localMusic/renderer';
 import fsUtil from '@infra/fsUtil/renderer';
 import systemUtil from '@infra/systemUtil/renderer';
 import i18n from '@infra/i18n/renderer';
 import { LOCAL_PLUGIN_NAME } from '@common/constant';
-import { PLAY_QUEUE_SHEET_ID, DOWNLOADED_SHEET_ID } from '@infra/musicSheet/common/constant';
+import { PLAY_QUEUE_PLAYLIST_ID, DOWNLOADED_PLAYLIST_ID } from '@infra/playlist/common/constant';
 import {
     Fingerprint,
     User,
@@ -56,7 +56,7 @@ function copyToClipboard(text: string): void {
  *   - 多选：仅显示操作项（批量操作）
  */
 export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
-    const { musicItems, sheetId } = ctx;
+    const { musicItems, sheetId: playlistId } = ctx;
     const items = Array.isArray(musicItems) ? musicItems : [musicItems];
     const isSingle = items.length === 1;
 
@@ -121,10 +121,10 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
 
     // ── 从歌单内删除（仅在用户歌单内，排除特殊歌单） ──
     if (
-        sheetId &&
-        sheetId !== PLAY_QUEUE_SHEET_ID &&
-        sheetId !== RECENTLY_PLAYED_ID &&
-        sheetId !== DOWNLOADED_SHEET_ID
+        playlistId &&
+        playlistId !== PLAY_QUEUE_PLAYLIST_ID &&
+        playlistId !== RECENTLY_PLAYED_ID &&
+        playlistId !== DOWNLOADED_PLAYLIST_ID
     ) {
         entries.push({
             id: 'remove-from-sheet',
@@ -132,13 +132,13 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
             label: i18n.t('playlist.remove_from_sheet'),
             danger: true,
             onClick: () => {
-                musicSheet.removeMusicFromSheet(items, sheetId);
+                playlistManager.removeMusicFromPlaylist(items, playlistId);
             },
         });
     }
 
     // ── 从播放队列移除 ──
-    if (sheetId === PLAY_QUEUE_SHEET_ID) {
+    if (playlistId === PLAY_QUEUE_PLAYLIST_ID) {
         entries.push({
             id: 'remove-from-queue',
             icon: <Trash2 />,
@@ -151,7 +151,7 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
     }
 
     // ── 从最近播放移除 ──
-    if (sheetId === RECENTLY_PLAYED_ID) {
+    if (playlistId === RECENTLY_PLAYED_ID) {
         entries.push({
             id: 'remove-from-recently-played',
             icon: <Trash2 />,
@@ -189,7 +189,7 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
                             ) {
                                 localFilePath = fsUtil.fileUrlToPath(singleItem.url);
                             } else {
-                                const rawItem = await musicSheet.getRawMusicItem(
+                                const rawItem = await playlistManager.getRawMusicItem(
                                     singleItem.platform,
                                     singleItem.id,
                                 );
@@ -243,7 +243,7 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
             }
         }
 
-        if (downloaded && sheetId === DOWNLOADED_SHEET_ID) {
+        if (downloaded && playlistId === DOWNLOADED_PLAYLIST_ID) {
             // 删除下载记录（保留本地文件）—— 仅在下载歌单中显示
             entries.push({
                 id: 'remove-download-record',
@@ -310,7 +310,7 @@ export function MusicItemMenu(ctx: MusicItemMenuContext): ContextMenuEntry[] {
                         confirmDanger: true,
                         onConfirm: async () => {
                             await localMusic.deleteItems(items);
-                            musicSheet.removeFromAllSheets(items);
+                            playlistManager.removeFromAllPlaylists(items);
                             trackPlayer.removeMusic(items);
                         },
                     });

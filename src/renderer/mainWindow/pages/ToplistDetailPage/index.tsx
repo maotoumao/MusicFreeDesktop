@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { FolderPlus } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
-import { MusicSheetHeader } from '../../components/ui/MusicSheetHeader';
+import { PlaylistHeader } from '../../components/ui/MusicSheetHeader';
 import { SongTable, type RowInteractionDetail } from '../../components/business/SongTable';
 import { FavoriteButton } from '../../components/business/FavoriteButton';
 import { DownloadButton } from '../../components/business/DownloadButton';
@@ -41,10 +41,14 @@ export default function ToplistDetailPage() {
         };
     }, [platform, location.state]);
 
-    const { sheetItem, musicList, requestStatus, isEnd, loadMore, retry } = useTopListDetail(
-        topListItem,
-        platform,
-    );
+    const {
+        sheetItem: playlistItem,
+        musicList,
+        requestStatus,
+        isEnd,
+        loadMore,
+        retry,
+    } = useTopListDetail(topListItem, platform);
 
     // ── 本地搜索 ──
     const [searchValue, setSearchValue] = useState('');
@@ -80,7 +84,7 @@ export default function ToplistDetailPage() {
         [],
     );
 
-    const handleAddToSheet = useCallback(() => {
+    const handleAddToPlaylist = useCallback(() => {
         if (musicList.length === 0) return;
         showModal('AddMusicToSheetModal', { musicItems: musicList });
     }, [musicList]);
@@ -99,7 +103,7 @@ export default function ToplistDetailPage() {
 
     return (
         <div className="p-toplist-detail">
-            <MusicSheetHeader musicSheet={sheetItem} />
+            <PlaylistHeader playlist={playlistItem} />
 
             <div className="p-toplist-detail__toolbar">
                 <SongToolbar
@@ -113,7 +117,7 @@ export default function ToplistDetailPage() {
                         variant="secondary"
                         size="md"
                         icon={<FolderPlus size={16} />}
-                        onClick={handleAddToSheet}
+                        onClick={handleAddToPlaylist}
                     >
                         {t('playlist.add_to_sheet_menu')}
                     </Button>

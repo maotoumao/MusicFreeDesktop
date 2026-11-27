@@ -19,13 +19,13 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
-import { useMusicSheetList, useStarredSheets } from '@infra/musicSheet/renderer';
+import { usePlaylistList, useStarredPlaylists } from '@infra/playlist/renderer';
 import systemUtil from '@infra/systemUtil/renderer';
 import { showModal } from '../../ui/Modal/modalManager';
 import { RoutePaths } from '../../../routes';
 import type { RoutePath } from '../../../routes';
-import LocalSheetNavItem from './LocalSheetNavItem';
-import StarredSheetNavItem from './StarredSheetNavItem';
+import LocalPlaylistNavItem from './LocalSheetNavItem';
+import StarredPlaylistNavItem from './StarredSheetNavItem';
 import './index.scss';
 
 // 底部工具按钮: icon + route + i18n key
@@ -39,13 +39,13 @@ export default function Sidebar() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
-    const sheets = useMusicSheetList();
-    const starredSheets = useStarredSheets();
+    const playlists = usePlaylistList();
+    const starredPlaylists = useStarredPlaylists();
 
     /** 当前路径的第一段，用于匹配静态导航项高亮 */
     const activeSegment = location.pathname.split('/')[1] ?? '';
 
-    const handleCreateSheet = useCallback(() => {
+    const handleCreatePlaylist = useCallback(() => {
         showModal('CreateSheetModal');
     }, []);
 
@@ -80,7 +80,7 @@ export default function Sidebar() {
                         navigate={navigate}
                     />
                     <NavItem
-                        route={RoutePaths.RecommendSheets}
+                        route={RoutePaths.RecommendPlaylists}
                         icon={Flame}
                         text={t('playlist.recommend')}
                         activeSegment={activeSegment}
@@ -122,17 +122,17 @@ export default function Sidebar() {
                                 className="l-sidebar__group-action"
                                 type="button"
                                 title={t('playlist.create_sheet')}
-                                onClick={handleCreateSheet}
+                                onClick={handleCreatePlaylist}
                             >
                                 <Plus size={14} />
                             </button>
                         </div>
                     </div>
-                    {sheets.length > 0 ? (
-                        sheets.map((sheet) => (
-                            <LocalSheetNavItem
-                                key={sheet.id}
-                                sheet={sheet}
+                    {playlists.length > 0 ? (
+                        playlists.map((playlist) => (
+                            <LocalPlaylistNavItem
+                                key={playlist.id}
+                                sheet={playlist}
                                 pathname={location.pathname}
                                 navigate={navigate}
                             />
@@ -145,9 +145,9 @@ export default function Sidebar() {
                 {/* ── 收藏的歌单 ── */}
                 <div className="l-sidebar__group">
                     <div className="l-sidebar__group-title">{t('playlist.starred_sheets')}</div>
-                    {starredSheets.length > 0 ? (
-                        starredSheets.map((item) => (
-                            <StarredSheetNavItem
+                    {starredPlaylists.length > 0 ? (
+                        starredPlaylists.map((item) => (
+                            <StarredPlaylistNavItem
                                 key={`${item.platform}\0${item.id}`}
                                 item={item}
                                 pathname={location.pathname}

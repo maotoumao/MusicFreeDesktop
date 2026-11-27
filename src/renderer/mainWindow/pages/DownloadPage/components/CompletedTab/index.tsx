@@ -10,8 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { Download } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import appConfig from '@infra/appConfig/renderer';
-import musicSheet, { useCurrentMusicList, useIsLoadingSheet } from '@infra/musicSheet/renderer';
-import { DOWNLOADED_SHEET_ID } from '@infra/musicSheet/common/constant';
+import playlistManager, {
+    useCurrentMusicList,
+    useIsLoadingPlaylist,
+} from '@infra/playlist/renderer';
+import { DOWNLOADED_PLAYLIST_ID } from '@infra/playlist/common/constant';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import { SongTable, type RowInteractionDetail } from '../../../../components/business/SongTable';
 import { FavoriteButton } from '../../../../components/business/FavoriteButton';
@@ -31,7 +34,7 @@ export function CompletedTab() {
     const { t } = useTranslation();
 
     const musicList = useCurrentMusicList();
-    const isLoading = useIsLoadingSheet();
+    const isLoading = useIsLoadingPlaylist();
 
     const [searchValue, setSearchValue] = useState('');
     const deferredSearchValue = useDeferredValue(searchValue);
@@ -42,7 +45,7 @@ export function CompletedTab() {
         let aborted = false;
         setLoadError(false);
         setSearchValue('');
-        musicSheet.openSheet(DOWNLOADED_SHEET_ID).catch(() => {
+        playlistManager.openPlaylist(DOWNLOADED_PLAYLIST_ID).catch(() => {
             if (!aborted) setLoadError(true);
         });
         return () => {
@@ -69,7 +72,7 @@ export function CompletedTab() {
     const handlePlayAll = useCallback(() => {
         if (filteredList.length === 0) return;
         trackPlayer.playMusicWithReplaceQueue(filteredList, {
-            fromSheetId: DOWNLOADED_SHEET_ID,
+            fromSheetId: DOWNLOADED_PLAYLIST_ID,
         });
     }, [filteredList]);
 
@@ -84,10 +87,10 @@ export function CompletedTab() {
                         startItem: item,
                     });
                 } else {
-                    const list = musicSheet.getCurrentMusicList();
+                    const list = playlistManager.getCurrentMusicList();
                     trackPlayer.playMusicWithReplaceQueue(list, {
                         startItem: item,
-                        fromSheetId: DOWNLOADED_SHEET_ID,
+                        fromSheetId: DOWNLOADED_PLAYLIST_ID,
                     });
                 }
             } else {
@@ -104,7 +107,7 @@ export function CompletedTab() {
                 { x: e.clientX, y: e.clientY },
                 {
                     musicItems: selectedItems as IMusic.IMusicItem[],
-                    sheetId: DOWNLOADED_SHEET_ID,
+                    sheetId: DOWNLOADED_PLAYLIST_ID,
                 },
             );
         },
@@ -121,7 +124,7 @@ export function CompletedTab() {
 
     const handleRetry = useCallback(() => {
         setLoadError(false);
-        musicSheet.openSheet(DOWNLOADED_SHEET_ID).catch(() => setLoadError(true));
+        playlistManager.openPlaylist(DOWNLOADED_PLAYLIST_ID).catch(() => setLoadError(true));
     }, []);
 
     return (

@@ -16,14 +16,14 @@ import { Virtuoso } from 'react-virtuoso';
 import { X, Play, ListMusic } from 'lucide-react';
 import { cn } from '@common/cn';
 import { isSameMedia } from '@common/mediaKey';
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import trackPlayer from '@renderer/mainWindow/core/trackPlayer';
 import { useCurrentMusic, useMusicQueue } from '@renderer/mainWindow/core/trackPlayer/hooks';
 import Drawer from '../../ui/Drawer';
 import { queueDrawerOpenAtom, closeQueueDrawer } from './queueDrawerState';
 import './index.scss';
 import { showContextMenu } from '../../ui/ContextMenu/contextMenuManager';
-import { PLAY_QUEUE_SHEET_ID } from '@infra/musicSheet/common/constant';
+import { PLAY_QUEUE_PLAYLIST_ID } from '@infra/playlist/common/constant';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -200,7 +200,7 @@ export default function QueueDrawer() {
             },
             {
                 musicItems: item,
-                sheetId: PLAY_QUEUE_SHEET_ID,
+                sheetId: PLAY_QUEUE_PLAYLIST_ID,
             },
         );
     }, []);

@@ -22,7 +22,7 @@ import axios from 'axios';
 import { nativeImage } from 'electron';
 
 import type { IWindowManager } from '@appTypes/main/windowManager';
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 import appConfig from '@infra/appConfig/main';
 import appSync from '@infra/appSync/main';
 import i18n from '@infra/i18n/main';

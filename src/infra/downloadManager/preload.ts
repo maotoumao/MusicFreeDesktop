@@ -12,7 +12,7 @@ import type {
     IDownloadProgress,
     IDownloadTaskEvent,
 } from '@appTypes/infra/downloadManager';
-import type { IMusicItemSlim } from '@appTypes/infra/musicSheet';
+import type { IMusicItemSlim } from '@appTypes/infra/playlist';
 
 const mod = {
     addTask: (params: IAddDownloadParams) => ipcRenderer.invoke(IPC.ADD_TASK, params),

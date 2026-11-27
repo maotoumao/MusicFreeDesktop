@@ -12,13 +12,13 @@ export const RoutePaths = {
     /** 排行榜详情 — 需 :platform */
     ToplistDetail: 'toplist-detail',
     /** 热门歌单推荐 */
-    RecommendSheets: 'recommend-sheets',
+    RecommendPlaylists: 'recommend-sheets',
     /** 搜索 — 需 :query */
     Search: 'search',
     /** 歌单详情（远程） — 需 :platform/:id */
-    MusicSheet: 'musicsheet',
+    Playlist: 'musicsheet',
     /** 本地歌单详情 — 需 :id */
-    LocalSheet: 'local-sheet',
+    LocalPlaylist: 'local-sheet',
     /** 专辑详情 — 需 :platform/:id */
     Album: 'album',
     /** 艺术家详情 — 需 :platform/:id */
@@ -47,12 +47,12 @@ export function searchRoute(query: string) {
     return `/${RoutePaths.Search}/${encodeURIComponent(query)}`;
 }
 
-export function musicSheetRoute(platform: string, id: string) {
-    return `/${RoutePaths.MusicSheet}/${encodeURIComponent(platform)}/${encodeURIComponent(id)}`;
+export function playlistRoute(platform: string, id: string) {
+    return `/${RoutePaths.Playlist}/${encodeURIComponent(platform)}/${encodeURIComponent(id)}`;
 }
 
-export function localSheetRoute(id: string) {
-    return `/${RoutePaths.LocalSheet}/${encodeURIComponent(id)}`;
+export function localPlaylistRoute(id: string) {
+    return `/${RoutePaths.LocalPlaylist}/${encodeURIComponent(id)}`;
 }
 
 export function albumRoute(platform: string, id: string) {

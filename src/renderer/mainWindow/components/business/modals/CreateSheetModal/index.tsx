@@ -4,11 +4,11 @@ import Modal from '@renderer/mainWindow/components/ui/Modal';
 import { Button } from '@renderer/mainWindow/components/ui/Button';
 import { Input } from '@renderer/mainWindow/components/ui/Input';
 import { showToast } from '@renderer/mainWindow/components/ui/Toast';
-import musicSheet from '@infra/musicSheet/renderer';
+import playlistManager from '@infra/playlist/renderer';
 import './index.scss';
 
 /** 歌单名称最大长度 */
-const SHEET_NAME_MAX_LENGTH = 120;
+const PLAYLIST_NAME_MAX_LENGTH = 120;
 
 export interface CreatePlaylistModalProps {
     close: () => void;
@@ -19,7 +19,7 @@ export interface CreatePlaylistModalProps {
 /**
  * CreateSheetModal — 新建歌单弹窗（业务组件）
  */
-export default function CreateSheetModal({ close, initMusicItems }: CreatePlaylistModalProps) {
+export default function CreatePlaylistModal({ close, initMusicItems }: CreatePlaylistModalProps) {
     const { t } = useTranslation();
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
@@ -34,10 +34,10 @@ export default function CreateSheetModal({ close, initMusicItems }: CreatePlayli
 
         setLoading(true);
         try {
-            const sheet = await musicSheet.addSheet(trimmedName);
+            const playlist = await playlistManager.addPlaylist(trimmedName);
 
             if (initMusicItems?.length) {
-                musicSheet.addMusicToSheet(initMusicItems, sheet.id);
+                playlistManager.addMusicToPlaylist(initMusicItems, playlist.id);
             }
 
             close();
@@ -86,7 +86,7 @@ export default function CreateSheetModal({ close, initMusicItems }: CreatePlayli
                 className="create-sheet-modal__input"
                 autoFocus
                 placeholder={t('playlist.create_placeholder')}
-                maxLength={SHEET_NAME_MAX_LENGTH}
+                maxLength={PLAYLIST_NAME_MAX_LENGTH}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={handleKeyDown}
