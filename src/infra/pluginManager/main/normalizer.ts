@@ -27,13 +27,19 @@ export function toInternalMethodName(name: string): string {
     return FALLBACK_TO_METHOD[name] ?? name;
 }
 
-/** 插件按方法名提供的提示文案：旧方法名的键换成新名（插件已提供新名的键时不覆盖） */
+/**
+ * 插件按方法名提供的提示文案：只保留字符串数组；旧方法名的键换成新名（插件已提供有效的新名键时不覆盖）
+ */
 export function toInternalHints(hints: unknown): Record<string, string[]> | undefined {
     if (!hints || typeof hints !== 'object' || Array.isArray(hints)) return undefined;
+    const isTextList = (value: unknown): value is string[] =>
+        Array.isArray(value) && value.every((item) => typeof item === 'string');
+    const source = hints as Record<string, unknown>;
     const out: Record<string, string[]> = {};
-    for (const [key, value] of Object.entries(hints)) {
+    for (const [key, value] of Object.entries(source)) {
+        if (!isTextList(value)) continue;
         const name = toInternalMethodName(key);
-        if (name === key || !(name in hints)) out[name] = value as string[];
+        if (name === key || !isTextList(source[name])) out[name] = value;
     }
     return out;
 }
