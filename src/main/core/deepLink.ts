@@ -6,15 +6,29 @@
  * - musicfree://install?plugin=<pluginUrl> — 同上（query 参数形式）
  */
 
+import { dialog } from 'electron';
 import pluginManager from '@infra/pluginManager/main';
+import i18n from '@infra/i18n/main';
 import logger from '@infra/logger/main';
+import windowManager from '@main/core/windowManager';
 
-/**
- * 处理 deep link URL。
- * 应在窗口创建完成、infra 初始化完毕后调用。
- */
+/** 初始化完成前到达的链接（macOS 冷启动的 open-url、启动期间的二次启动）先暂存 */
+let isReady = false;
+const pendingUrls: string[] = [];
+
+/** 窗口创建、infra 初始化完成后调用，处理暂存的链接 */
+export function setDeepLinkReady(): void {
+    isReady = true;
+    for (const url of pendingUrls.splice(0)) handleDeepLink(url);
+}
+
+/** 处理 deep link URL；初始化完成前到达的先暂存 */
 export function handleDeepLink(url: string): void {
     if (!url) return;
+    if (!isReady) {
+        pendingUrls.push(url);
+        return;
+    }
 
     try {
         const urlObj = new URL(url);
@@ -40,7 +54,21 @@ async function handleInstall(url: URL): Promise<void> {
             return;
         }
 
-        const pluginUrls = raw.split(',').map(decodeURIComponent).filter(Boolean);
+        // 链接可由任意网页或应用触发：只接受 http(s) 地址，安装前需用户确认
+        const pluginUrls = raw
+            .split(',')
+            .map((part) => toHttpUrl(decodeURIComponent(part).trim()))
+            .filter((u): u is string => u !== null);
+        if (pluginUrls.length === 0) {
+            logger.warn('[DeepLink] install: no http(s) plugin URL');
+            return;
+        }
+        if (!(await confirmInstall(pluginUrls))) {
+            logger.info('[DeepLink] install cancelled by user');
+            return;
+        }
+        // 与界面安装一致：等已安装插件加载完，才能正确判断重复与版本
+        await pluginManager.whenReady();
 
         const results = await Promise.allSettled(
             pluginUrls.map((pluginUrl) => pluginManager.installPlugin(pluginUrl)),
@@ -58,4 +86,41 @@ async function handleInstall(url: URL): Promise<void> {
     } catch (e) {
         logger.error('[DeepLink] install error:', e);
     }
+}
+
+/** 规范化为 http(s) 地址，其他协议、本地路径和非法地址返回 null */
+function toHttpUrl(value: string): string | null {
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+            ? parsed.toString()
+            : null;
+    } catch {
+        return null;
+    }
+}
+
+/** 弹出系统确认框，列出来源地址；默认按钮为取消 */
+async function confirmInstall(pluginUrls: string[]): Promise<boolean> {
+    const options: Electron.MessageBoxOptions = {
+        type: 'warning',
+        title: i18n.t('plugin.install_confirm_title'),
+        message: i18n.t('plugin.install_confirm_title'),
+        // 原生对话框显示纯文本，地址不做 HTML 转义
+        detail: i18n.t('plugin.install_confirm_detail', {
+            urls: pluginUrls.join('\n'),
+            interpolation: { escapeValue: false },
+        }),
+        buttons: [i18n.t('common.cancel'), i18n.t('common.install')],
+        defaultId: 0,
+        cancelId: 0,
+        noLink: true,
+    };
+    // 主窗口隐藏时（开机自启收在托盘、迷你模式）不挂在它上面，否则 macOS 上对话框跟着隐藏
+    const main = windowManager.__getWindowUnsafe('main');
+    const parent = main?.isVisible() ? main : null;
+    const { response } = parent
+        ? await dialog.showMessageBox(parent, options)
+        : await dialog.showMessageBox(options);
+    return response === 1;
 }

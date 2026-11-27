@@ -217,6 +217,8 @@
         "choose_plugin": "Choose Plugin",
         "install": "Install",
         "musicfree_plugin": "MusicFree Plugin",
+        "install_confirm_title": "Install plugin?",
+        "install_confirm_detail": "A link is asking to install plugins from:\n\n{{urls}}\n\nPlugins run code on this computer and access the network. Only install plugins from sources you trust.",
         "install_successfully": "Plugin Installed Successfully",
         "install_failed": "Install Failed",
         "invalid_plugin": "Invalid Plugin",

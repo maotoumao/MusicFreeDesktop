@@ -22,7 +22,7 @@ import backup from '@infra/backup/main';
 import appTray from '@main/core/appTray';
 import appThumbar from '@main/core/appThumbar';
 import proxyManager from '@main/core/proxyManager';
-import { handleDeepLink } from '@main/core/deepLink';
+import { handleDeepLink, setDeepLinkReady } from '@main/core/deepLink';
 import localPluginDefine from './core/builtinPlugins/localPlugin';
 import windowDrag from '@infra/windowDrag/main';
 import { LOCAL_PLUGIN_HASH } from '@common/constant';
@@ -167,13 +167,14 @@ app.on('ready', async () => {
     } else {
         windowManager.showWindow('main');
     }
-    restoreWindowState();
-
+    // 主窗口创建后即可处理深链，不受后面恢复桌面歌词窗口的结果影响
+    setDeepLinkReady();
     // 处理启动时传入的 deep link（Windows: 命令行参数）
     const launchUrl = process.argv.find((arg) => arg.startsWith('musicfree:'));
     if (launchUrl) {
         handleDeepLink(launchUrl);
     }
+    restoreWindowState();
     systemUtil.openFilesFromArgv(process.argv);
 });
 

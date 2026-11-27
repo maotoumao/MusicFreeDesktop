@@ -217,6 +217,8 @@
         "choose_plugin": "選擇插件",
         "install": "安裝",
         "musicfree_plugin": "MusicFree 插件",
+        "install_confirm_title": "安裝插件？",
+        "install_confirm_detail": "有連結請求從以下位址安裝插件：\n\n{{urls}}\n\n插件會在本機執行程式碼並存取網路，請只安裝你信任的來源。",
         "install_successfully": "插件安裝成功",
         "install_failed": "安裝失敗",
         "invalid_plugin": "無效的插件",

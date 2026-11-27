@@ -65,6 +65,11 @@ interface ILoadedPlugin {
     delegate: IPlugin.IPluginDelegate;
 }
 
+/** 是否为 http(s) 地址（与安装时判断远程地址的方式一致） */
+function isHttpUrl(value: string): boolean {
+    return value.startsWith('http://') || value.startsWith('https://');
+}
+
 class PluginManager {
     private isSetup = false;
     private windowManager: IWindowManager | null = null;
@@ -402,8 +407,9 @@ class PluginManager {
     ): Promise<{ success: boolean; message?: string }> {
         try {
             let jsonText: string;
+            const isRemote = isHttpUrl(jsonUrlOrPath);
 
-            if (jsonUrlOrPath.startsWith('http://') || jsonUrlOrPath.startsWith('https://')) {
+            if (isRemote) {
                 const resp = await axios.get(this.addRandomHash(jsonUrlOrPath), {
                     timeout: 15000,
                     responseType: 'text',
@@ -414,9 +420,13 @@ class PluginManager {
             }
 
             const jsonData = JSON.parse(jsonText);
+            // 网络上的插件列表只能指向网络地址，不能借它读取本机文件
             const pluginUrls: string[] = (jsonData?.plugins ?? [])
                 .map((p: any) => p?.url)
-                .filter(Boolean);
+                .filter(
+                    (url: unknown): url is string =>
+                        typeof url === 'string' && url !== '' && (!isRemote || isHttpUrl(url)),
+                );
 
             if (pluginUrls.length === 0) {
                 return { success: false, message: 'No plugin URLs found in JSON' };

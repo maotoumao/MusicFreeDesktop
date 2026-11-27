@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### 修复
 
+- 修复安全问题：网页或其他应用通过 musicfree://install 链接可以不经确认直接安装插件（包括本机文件）；现在只接受 http(s) 地址（网络上的插件列表也只安装其中的网络地址），并会先弹框列出来源地址，确认后才安装。
 - 修复安全问题：页面中运行的脚本可以创建带完整 Node 能力的 Worker、使用 webview 标签；现在各窗口的页面只能通过预加载暴露的接口访问系统能力。
 - 修复动态主题包配置的模糊占位图（blurHash）从不显示的问题：切换或启动时，背景加载完成前会先显示与背景相近的模糊色块。
 - 修复备份文件过大的问题：本地歌曲内嵌的封面图片不再写入备份（播放时仍会从文件读取），在线歌曲不受影响。
@@ -117,6 +118,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Fixed
 
+- Fix a security issue where a web page or another app could install plugins through a musicfree://install link without asking, including local files; only http(s) addresses are accepted now (plugin lists from the network only install network addresses), and a dialog listing them asks for confirmation first.
 - Fix a security issue where scripts running in the page could start Workers with full Node access and use the webview tag; window pages can now reach system features only through the interfaces exposed by the preload scripts.
 - Fix dynamic theme packs' blur placeholder (blurHash) never showing: a blurred preview close to the background now appears while the background loads, on switching and at startup.
 - Fix oversized backups: covers embedded in local songs are no longer written into the backup (they are still read from the file when playing); online songs are unaffected.
