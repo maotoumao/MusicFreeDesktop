@@ -14,8 +14,29 @@ export default function musicItemToSlim(item: IMusic.IMusicItem | IMusicItemSlim
         artist: item.artist ?? '',
         album: item.album ?? '',
         duration: item.duration ?? null,
-        // 只认字符串封面（含空串），其他值按没有封面处理
-        artwork: typeof item.artwork === 'string' ? item.artwork : null,
+        artwork: musicItemArtwork(item),
         [INTERNAL_SLIM_KEY]: true,
     };
+}
+
+/** 歌曲的封面：只认字符串（含空串），其他值（如插件给的 NaN、false、对象）按没有封面处理 */
+export function musicItemArtwork(item: { artwork?: unknown }): string | null {
+    return typeof item.artwork === 'string' ? item.artwork : null;
+}
+
+/**
+ * 写入数据库的完整歌曲数据：精简条目没有完整数据，返回 null；
+ * 去掉不认的封面再序列化，序列化失败时返回 null（upsert 保留库里原有的完整数据）。
+ */
+export function musicItemRaw(item: IMusic.IMusicItem | IMusicItemSlim): string | null {
+    if ((item as any)[INTERNAL_SLIM_KEY]) return null;
+    const source =
+        item.artwork === undefined || typeof item.artwork === 'string'
+            ? item
+            : { ...item, artwork: undefined };
+    try {
+        return JSON.stringify(source) ?? null;
+    } catch {
+        return null;
+    }
 }

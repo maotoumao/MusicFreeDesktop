@@ -31,7 +31,7 @@ import {
     type IPlaylistEvent,
 } from '../common/constant';
 import { createQueries, type IPlaylistQueries } from './queries';
-import { INTERNAL_SLIM_KEY } from '@common/constant';
+import { musicItemArtwork, musicItemRaw } from '@common/musicItemToSlim';
 import { safeStringify, safeParse } from '@common/safeSerialize';
 import type { IBackupProvider, IBackupPlaylist, RestoreMode } from '@appTypes/infra/backup';
 
@@ -91,8 +91,8 @@ class PlaylistManager {
                 artist: musicItem.artist ?? '',
                 album: musicItem.album ?? '',
                 duration: musicItem.duration ?? null,
-                artwork: musicItem.artwork ?? null,
-                raw: (musicItem as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(musicItem),
+                artwork: musicItemArtwork(musicItem),
+                raw: musicItemRaw(musicItem),
             });
             this.queries.insertRelation.run({
                 sheetId: playlistId,
@@ -366,25 +366,9 @@ class PlaylistManager {
                 // 同一批里每一条都没传封面的歌：封面为 null 时 upsert 保留库里的值，写完后查出来告诉渲染层
                 const keyOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
                     `${item.platform}\0${String(item.id)}`;
-                // 封面只认字符串（含空串）；其他值（如插件给的 NaN）按没传处理，与 musicItemToSlim 一致
-                const artworkOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
-                    typeof item.artwork === 'string' ? item.artwork : null;
-                // 完整数据：去掉不认的封面再序列化；序列化失败时写 null，upsert 保留库里原有的完整数据
-                const rawOf = (item: IMusic.IMusicItem | IMusicItemSlim): string | null => {
-                    if ((item as any)[INTERNAL_SLIM_KEY]) return null;
-                    const source =
-                        item.artwork === undefined || typeof item.artwork === 'string'
-                            ? item
-                            : { ...item, artwork: undefined };
-                    try {
-                        return JSON.stringify(source) ?? null;
-                    } catch {
-                        return null;
-                    }
-                };
                 const artworkCandidates = new Map<string, { platform: string; id: string }>();
                 for (const item of options?.reportArtworks ? toAdd : []) {
-                    if (artworkOf(item) === null) {
+                    if (musicItemArtwork(item) === null) {
                         artworkCandidates.set(keyOf(item), {
                             platform: item.platform,
                             id: String(item.id),
@@ -394,7 +378,7 @@ class PlaylistManager {
                 if (artworkCandidates.size > 0) {
                     for (const item of toAdd) {
                         // 显式传入的封面（含空串）会写入库里，渲染层已知
-                        if (artworkOf(item) !== null) artworkCandidates.delete(keyOf(item));
+                        if (musicItemArtwork(item) !== null) artworkCandidates.delete(keyOf(item));
                     }
                 }
                 const keptArtworks: NonNullable<IAddMusicResult['keptArtworks']> = [];
@@ -414,8 +398,8 @@ class PlaylistManager {
                                 artist: item.artist ?? '',
                                 album: item.album ?? '',
                                 duration: item.duration ?? null,
-                                artwork: artworkOf(item),
-                                raw: rawOf(item),
+                                artwork: musicItemArtwork(item),
+                                raw: musicItemRaw(item),
                             });
                             this.queries.insertRelation.run({
                                 sheetId: playlistId,
@@ -591,8 +575,8 @@ class PlaylistManager {
                                 artist: item.artist ?? '',
                                 album: item.album ?? '',
                                 duration: item.duration ?? null,
-                                artwork: item.artwork ?? null,
-                                raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
+                                artwork: musicItemArtwork(item),
+                                raw: musicItemRaw(item),
                             });
                             this.queries.insertRelation.run({
                                 sheetId: PLAY_QUEUE_PLAYLIST_ID,
@@ -658,8 +642,8 @@ class PlaylistManager {
                             artist: item.artist ?? '',
                             album: item.album ?? '',
                             duration: item.duration ?? null,
-                            artwork: item.artwork ?? null,
-                            raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
+                            artwork: musicItemArtwork(item),
+                            raw: musicItemRaw(item),
                         });
                         this.queries.insertRelation.run({
                             sheetId: PLAY_QUEUE_PLAYLIST_ID,
