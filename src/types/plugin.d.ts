@@ -153,7 +153,13 @@ declare namespace IPlugin {
         _path: string;
     }
 
-    type R = Required<IPluginInstance>;
+    /** 旧插件的歌单方法名：只作为调用回退，应用内一律按新名调用和判断能力 */
+    type ISheetMethodFallback =
+        | 'getMusicSheetInfo'
+        | 'importMusicSheet'
+        | 'getRecommendSheetTags'
+        | 'getRecommendSheetsByTag';
+    type R = Required<Omit<IPluginInstance, ISheetMethodFallback>>;
     export type IPluginInstanceMethods = {
         [K in keyof R as R[K] extends (...args: any) => any ? K : never]: R[K];
     };
