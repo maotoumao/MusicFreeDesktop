@@ -94,6 +94,8 @@ class DownloadManager {
     private activeTasks = new Map<string, DownloadTask>();
     /** 任务世代号（每次 pause/remove 递增，用于拦截过时的 p-queue 回调） */
     private taskGeneration = new Map<string, number>();
+    /** 每个任务最近一次执行（含改名、写标签、登记），结束后移除 */
+    private runs = new Map<string, Promise<void>>();
     /** 下载进度缓存（用于节流广播） */
     private progressCache = new Map<string, IDownloadProgress>();
     /** 下一个任务允许启动的最早时间戳（启动间隔闸门） */
@@ -449,6 +451,9 @@ class DownloadManager {
             // 启动间隔闸门：在获取媒体源之前等待到允许的启动时隙
             await this.acquireLaunchSlot();
 
+            // 上一次执行可能还在改名或收尾，结束前不能使用同一个临时文件
+            await this.runs.get(task.id)?.catch(() => {});
+
             // 等待期间可能被 pause/remove/dispose
             if ((this.taskGeneration.get(task.id) ?? 0) !== generation) return;
             if (this.disposed) return;
@@ -520,7 +525,7 @@ class DownloadManager {
             // 保存原始 filePath（不含扩展名），以便 completeTransaction 失败时恢复
             const baseFilePath = task.filePath;
 
-            await dt.execute(
+            const run = dt.execute(
                 // onProgress
                 (downloadedBytes, totalBytes, speed) => {
                     this.progressCache.set(task.id, {
@@ -608,6 +613,9 @@ class DownloadManager {
                     });
                 },
             );
+            this.runs.set(task.id, run);
+            await run;
+            if (this.runs.get(task.id) === run) this.runs.delete(task.id);
         });
     }
 
