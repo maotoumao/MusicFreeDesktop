@@ -208,10 +208,11 @@ class PlaylistRenderer {
 
     // ─── 歌曲操作（乐观更新 + 队列写入） ───
 
+    /** 返回写入结果；超出歌单上限的部分不会写入（truncated），写入失败时 reject */
     addMusicToPlaylist(
         musicItems: IMusic.IMusicItem | IMusicItemSlim | Array<IMusic.IMusicItem | IMusicItemSlim>,
         playlistId: string,
-    ): void {
+    ): Promise<{ added: number; truncated: number }> {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
         const slimItems = items.map(musicItemToSlim);
 
@@ -235,7 +236,15 @@ class PlaylistRenderer {
             this.events.emit('favoriteChange');
         }
 
-        this.mutationQueue.enqueue(() => mod.addMusic(playlistId, items).then(() => {}));
+        const result = this.mutationQueue.enqueue(() => mod.addMusic(playlistId, items));
+        // 超出上限的歌曲没有写入，撤回乐观更新
+        result.then(
+            ({ truncated }) => {
+                if (truncated > 0) void this.reloadState();
+            },
+            () => {},
+        );
+        return result;
     }
 
     addMusicToFavorite(

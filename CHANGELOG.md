@@ -92,6 +92,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复插件订阅「全部更新」时，插件下载或解析失败仍提示「更新成功」的问题；已是最新版本的插件仍算作更新成功。
 - 修复对正在播放的歌曲选择「下一首播放」时，队列没有变化却提示「已添加到下一首播放」的问题。
 - 修复歌曲右键菜单复制信息失败时仍提示「已复制」的问题；现在提示「复制失败」。
+- 修复向已达上限（10 万首）的歌单添加歌曲时仍提示「已添加」、列表里短暂出现没有保存的歌曲的问题；现在会提示歌单已达上限，写入失败时提示「添加到歌单失败」。
 
 ### Added
 
@@ -173,6 +174,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix "Update all" in plugin subscriptions reporting success when a plugin failed to download or parse; plugins that are already up to date still count as updated.
 - Fix "Play next" on the song that is currently playing showing "Added to play next" although the queue did not change.
 - Fix copying song info from the context menu showing "Copied" when the copy failed; it now shows "Copy failed".
+- Fix adding songs to a playlist that has reached its 100,000-song limit still showing "Added" and briefly listing songs that were not saved; it now says the playlist is full, and shows "Failed to add to playlist" when the write fails.
 
 ---
 

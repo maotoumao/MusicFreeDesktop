@@ -89,6 +89,7 @@
         "added_to_sheet": "已添加到「{{sheet}}」",
         "selected_count": "已选 {{count}} 首",
         "create_failed": "创建歌单失败",
+        "add_music_failed": "添加到歌单失败",
         "recommend": "热门歌单",
         "delete_sheet": "删除歌单",
         "rename_sheet": "重命名歌单",

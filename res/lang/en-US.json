@@ -89,6 +89,7 @@
         "added_to_sheet": "Added to \"{{sheet}}\"",
         "selected_count": "{{count}} selected",
         "create_failed": "Failed to create playlist",
+        "add_music_failed": "Failed to add to playlist",
         "recommend": "Popular Playlists",
         "delete_sheet": "Delete",
         "rename_sheet": "Rename",

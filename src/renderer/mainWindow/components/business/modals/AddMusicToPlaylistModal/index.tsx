@@ -7,7 +7,10 @@ import { Artwork } from '@renderer/mainWindow/components/ui/Artwork';
 import { showToast } from '@renderer/mainWindow/components/ui/Toast';
 import { showModal } from '@renderer/mainWindow/components/ui/Modal/modalManager';
 import playlistManager, { usePlaylistList } from '@infra/playlist/renderer';
-import { DEFAULT_FAVORITE_PLAYLIST_ID } from '@infra/playlist/common/constant';
+import {
+    DEFAULT_FAVORITE_PLAYLIST_ID,
+    MAX_MUSIC_PER_PLAYLIST,
+} from '@infra/playlist/common/constant';
 import './index.scss';
 
 export interface AddMusicToPlaylistModalProps {
@@ -30,10 +33,28 @@ export default function AddMusicToPlaylistModal({
     const playlists = usePlaylistList();
 
     const handleSelectPlaylist = useCallback(
-        (playlistId: string, playlistTitle: string) => {
-            playlistManager.addMusicToPlaylist(musicItems, playlistId);
-            showToast(t('playlist.added_to_sheet', { sheet: playlistTitle }), { type: 'success' });
+        (playlistId: string, playlistTitle: string, worksNum: number) => {
             close();
+            const limitReached = () =>
+                showToast(t('playlist.limit_reached', { count: MAX_MUSIC_PER_PLAYLIST }), {
+                    type: 'warn',
+                });
+            if (worksNum >= MAX_MUSIC_PER_PLAYLIST) {
+                limitReached();
+                return;
+            }
+            playlistManager.addMusicToPlaylist(musicItems, playlistId).then(
+                ({ truncated }) => {
+                    if (truncated > 0) {
+                        limitReached();
+                    } else {
+                        showToast(t('playlist.added_to_sheet', { sheet: playlistTitle }), {
+                            type: 'success',
+                        });
+                    }
+                },
+                () => showToast(t('playlist.add_music_failed'), { type: 'error' }),
+            );
         },
         [musicItems, close, t],
     );
@@ -79,7 +100,13 @@ export default function AddMusicToPlaylistModal({
                                 key={playlist.id}
                                 type="button"
                                 className="add-music-to-sheet-modal__item"
-                                onClick={() => handleSelectPlaylist(playlist.id, displayTitle)}
+                                onClick={() =>
+                                    handleSelectPlaylist(
+                                        playlist.id,
+                                        displayTitle,
+                                        playlist.worksNum ?? 0,
+                                    )
+                                }
                             >
                                 <Artwork
                                     className="add-music-to-sheet-modal__item-artwork"
