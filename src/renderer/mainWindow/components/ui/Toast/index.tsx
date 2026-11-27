@@ -1,24 +1,31 @@
-import { atom, getDefaultStore } from 'jotai';
-import { useAtomValue } from 'jotai/react';
+import { forwardRef, type FocusEvent } from 'react';
+import { atom, getDefaultStore , useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
-import { AlertTriangle, Info, X } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AlertTriangle, CircleCheck, CircleX, Info, X, type LucideIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { cn } from '@common/cn';
+import { duration as motionDuration, easing } from '@common/motionTokens';
 import './index.scss';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
 // ────────────────────────────────────────────────────────────────────────────
 
-export type ToastType = 'info' | 'warn';
+/**
+ * - info：状态提示
+ * - success：用户发起的操作已完成
+ * - warn：前置条件不满足或输入有误，用户可自行处理
+ * - error：操作失败
+ */
+export type ToastType = 'info' | 'success' | 'warn' | 'error';
 
 export interface ToastOptions {
     /** 变体 @default "info" */
     type?: ToastType;
     /** 辅助说明文案 */
     description?: string;
-    /** 自动关闭延时（ms） @default 3200 */
+    /** 自动关闭延时（ms），≤ 0 表示不自动关闭；默认 info / success 3200，warn / error 5000，带操作按钮 6000 */
     duration?: number;
     /** 是否显示关闭按钮 @default true */
     closable?: boolean;
@@ -46,15 +53,67 @@ const store = getDefaultStore();
 /** 同时可见的最大 toast 数量 */
 const MAX_VISIBLE = 5;
 
-// ── 活跃计时器 ──
-const timerMap = new Map<string, ReturnType<typeof setTimeout>>();
+function defaultDuration(type: ToastType, hasAction: boolean): number {
+    if (hasAction) return 6000;
+    return type === 'warn' || type === 'error' ? 5000 : 3200;
+}
+
+// ── 自动关闭计时：悬停或键盘焦点在卡片上时暂停，离开后按剩余时间继续 ──
+
+type PauseReason = 'hover' | 'focus';
+
+interface ToastTimer {
+    handle: ReturnType<typeof setTimeout> | null;
+    deadline: number;
+    remaining: number;
+    pauses: Set<PauseReason>;
+}
+
+const timerMap = new Map<string, ToastTimer>();
+
+function startTimer(id: string, ms: number) {
+    const timer = timerMap.get(id) ?? {
+        handle: null,
+        deadline: 0,
+        remaining: ms,
+        pauses: new Set(),
+    };
+    if (timer.handle) clearTimeout(timer.handle);
+    timer.remaining = ms;
+    timer.deadline = performance.now() + ms;
+    timer.handle = timer.pauses.size > 0 ? null : setTimeout(() => removeToast(id), ms);
+    timerMap.set(id, timer);
+}
+
+function pauseTimer(id: string, reason: PauseReason) {
+    const timer = timerMap.get(id);
+    if (!timer) return;
+    timer.pauses.add(reason);
+    if (timer.handle) {
+        clearTimeout(timer.handle);
+        timer.handle = null;
+        timer.remaining = Math.max(0, timer.deadline - performance.now());
+    }
+}
+
+function resumeTimer(id: string, reason: PauseReason) {
+    const timer = timerMap.get(id);
+    if (!timer) return;
+    timer.pauses.delete(reason);
+    if (timer.pauses.size === 0 && !timer.handle) {
+        timer.deadline = performance.now() + timer.remaining;
+        timer.handle = setTimeout(() => removeToast(id), timer.remaining);
+    }
+}
+
+function clearTimer(id: string) {
+    const timer = timerMap.get(id);
+    if (timer?.handle) clearTimeout(timer.handle);
+    timerMap.delete(id);
+}
 
 function removeToast(id: string) {
-    const timer = timerMap.get(id);
-    if (timer) {
-        clearTimeout(timer);
-        timerMap.delete(id);
-    }
+    clearTimer(id);
     store.set(toastQueueAtom, (prev) => prev.filter((t) => t.id !== id));
 }
 
@@ -63,48 +122,56 @@ function removeToast(id: string) {
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * 显示一条 toast 通知。
+ * 显示一条 toast 通知。与正在显示的某条内容完全相同时，不再重复显示，只重新计时。
  *
  * @example
  * ```ts
- * showToast("操作成功");
- * showToast("连接失败", { type: "warn", description: "请检查网络" });
- * showToast("已复制", { actionLabel: "撤销", onAction: () => undo() });
+ * showToast("已添加到歌单", { type: "success" });
+ * showToast("连接失败", { type: "error", description: "请检查网络" });
+ * showToast("已删除", { actionLabel: "撤销", onAction: () => undo() });
  * ```
  */
 export function showToast(title: string, options?: ToastOptions): void {
-    const id = nanoid(8);
+    const type = options?.type ?? 'info';
+    const hasAction = Boolean(options?.actionLabel && options?.onAction);
     const item: ToastItem = {
-        id,
+        id: nanoid(8),
         title,
-        type: options?.type ?? 'info',
+        type,
         description: options?.description,
-        duration: options?.duration ?? 3200,
+        duration: options?.duration ?? defaultDuration(type, hasAction),
         closable: options?.closable ?? true,
         actionLabel: options?.actionLabel,
         onAction: options?.onAction,
     };
 
+    const same = store
+        .get(toastQueueAtom)
+        .find(
+            (t) =>
+                t.title === item.title &&
+                t.type === item.type &&
+                t.description === item.description &&
+                t.actionLabel === item.actionLabel &&
+                !t.onAction &&
+                !item.onAction,
+        );
+    if (same) {
+        if (same.duration > 0) startTimer(same.id, same.duration);
+        return;
+    }
+
     store.set(toastQueueAtom, (prev) => {
         const next = [...prev, item];
         // 超限：移除最早的，直到 <= MAX_VISIBLE
         while (next.length > MAX_VISIBLE) {
-            const oldest = next.shift()!;
-            const timer = timerMap.get(oldest.id);
-            if (timer) {
-                clearTimeout(timer);
-                timerMap.delete(oldest.id);
-            }
+            clearTimer(next.shift()!.id);
         }
         return next;
     });
 
-    // 自动关闭
     if (item.duration > 0) {
-        const timer = setTimeout(() => {
-            removeToast(id);
-        }, item.duration);
-        timerMap.set(id, timer);
+        startTimer(item.id, item.duration);
     }
 }
 
@@ -112,55 +179,90 @@ export function showToast(title: string, options?: ToastOptions): void {
 // Toast Card
 // ────────────────────────────────────────────────────────────────────────────
 
-function ToastCard({ toast }: { toast: ToastItem }) {
-    const { t } = useTranslation();
-    const Icon = toast.type === 'warn' ? AlertTriangle : Info;
+const ICONS: Record<ToastType, LucideIcon> = {
+    info: Info,
+    success: CircleCheck,
+    warn: AlertTriangle,
+    error: CircleX,
+};
 
-    const handleAction = () => {
-        toast.onAction?.();
-        removeToast(toast.id);
-    };
+const ToastCard = forwardRef<HTMLDivElement, { toast: ToastItem; reduceMotion: boolean }>(
+    function ToastCard({ toast, reduceMotion }, ref) {
+        const { t } = useTranslation();
+        const Icon = ICONS[toast.type];
+        const offset = reduceMotion ? 0 : 16;
 
-    return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, x: 40, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className={cn('toast', `toast--${toast.type}`)}
-        >
-            <div className="toast__body">
-                {/* 图标 */}
-                <div className="toast__icon-wrapper">
-                    <Icon className="toast__icon" />
-                </div>
+        const handleAction = () => {
+            toast.onAction?.();
+            removeToast(toast.id);
+        };
 
-                {/* 内容 */}
-                <div className="toast__content">
-                    <div className="toast__title">{toast.title}</div>
-                    {toast.description && <div className="toast__desc">{toast.description}</div>}
+        const handleBlur = (e: FocusEvent<HTMLDivElement>) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                resumeTimer(toast.id, 'focus');
+            }
+        };
+
+        return (
+            <motion.div
+                ref={ref}
+                layout={reduceMotion ? false : 'position'}
+                initial={{ opacity: 0, x: offset }}
+                animate={{
+                    opacity: 1,
+                    x: 0,
+                    transition: { duration: motionDuration.normal, ease: easing.popup },
+                }}
+                exit={{
+                    opacity: 0,
+                    x: offset,
+                    transition: { duration: motionDuration.fast, ease: easing.accelerate },
+                }}
+                transition={{ duration: motionDuration.normal, ease: easing.standard }}
+                className={cn('toast', `toast--${toast.type}`)}
+                role={toast.type === 'error' ? 'alert' : 'status'}
+                onMouseEnter={() => pauseTimer(toast.id, 'hover')}
+                onMouseLeave={() => resumeTimer(toast.id, 'hover')}
+                onFocus={() => pauseTimer(toast.id, 'focus')}
+                onBlur={handleBlur}
+            >
+                <div className="toast__body">
+                    {/* 图标 */}
+                    <div className="toast__icon-wrapper" aria-hidden="true">
+                        <Icon className="toast__icon" />
+                    </div>
+
+                    {/* 内容 */}
+                    <div className="toast__content">
+                        <div className="toast__title">{toast.title}</div>
+                        {toast.description && (
+                            <div className="toast__desc">{toast.description}</div>
+                        )}
+                    </div>
+
+                    {/* 操作 */}
                     {toast.actionLabel && toast.onAction && (
                         <button type="button" className="toast__action" onClick={handleAction}>
                             {toast.actionLabel}
                         </button>
                     )}
-                </div>
 
-                {/* 关闭 */}
-                {toast.closable && (
-                    <button
-                        type="button"
-                        className="toast__close"
-                        onClick={() => removeToast(toast.id)}
-                        aria-label={t('common.close')}
-                    >
-                        <X className="toast__close-icon" />
-                    </button>
-                )}
-            </div>
-        </motion.div>
-    );
-}
+                    {/* 关闭 */}
+                    {toast.closable && (
+                        <button
+                            type="button"
+                            className="toast__close"
+                            onClick={() => removeToast(toast.id)}
+                            aria-label={t('common.close')}
+                        >
+                            <X className="toast__close-icon" aria-hidden="true" />
+                        </button>
+                    )}
+                </div>
+            </motion.div>
+        );
+    },
+);
 
 // ────────────────────────────────────────────────────────────────────────────
 // Toast Container （挂载在 App 顶层）
@@ -169,27 +271,20 @@ function ToastCard({ toast }: { toast: ToastItem }) {
 /**
  * ToastContainer — 模式组件
  *
- * Toast 通知容器，固定在窗口右上角 TopBar 下方。
- * 由 showToast() 命令式驱动，通过 jotai atom 管理队列。
- *
- * 设计稿还原（像素级）：
- *   容器: fixed, top-72 right-24, z-toast(1100), flex-col, gap-12
- *   卡片: min-w-260 max-w-320, rounded-modal(20px), shadow-lg,
- *          backdrop-blur-xl(40px)
- *   Info: bg status-info-bg, border status-info-border
- *   Warn: bg status-warn-bg, border status-warn-border
- *   图标: 28×28 圆形, bg *-text/20
- *   标题: 13px, color text-primary, font-medium
- *   描述: 12px, color text-muted
+ * Toast 通知容器，固定在窗口右上角 TopBar 下方，由 showToast() 命令式驱动。
+ * 卡片为随主题变化的中性浮层，状态只体现在图标颜色上；样式见 index.scss。
  */
 export function ToastContainer() {
     const toasts = useAtomValue(toastQueueAtom);
+    const reduceMotion = useReducedMotion() ?? false;
 
     return (
         <div className="toast-container">
-            {toasts.map((toast) => (
-                <ToastCard key={toast.id} toast={toast} />
-            ))}
+            <AnimatePresence mode="popLayout" initial={false}>
+                {toasts.map((toast) => (
+                    <ToastCard key={toast.id} toast={toast} reduceMotion={reduceMotion} />
+                ))}
+            </AnimatePresence>
         </div>
     );
 }
