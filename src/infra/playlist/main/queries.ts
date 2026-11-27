@@ -71,7 +71,7 @@ export function createQueries(db: Database.Database) {
             SELECT artwork FROM music_items WHERE platform = ? AND id = ?
         `),
 
-        /** 恢复备份时读取库里已有的同一首歌（展示列与完整数据） */
+        /** 读取库里已有的同一首歌（展示列与完整数据），用于备份恢复与下载登记时的合并 */
         getMusicItemRow: db.prepare(`
             SELECT platform, CAST(id AS TEXT) AS id, title, artist, album, duration, artwork, raw
             FROM music_items WHERE platform = ? AND id = ?
