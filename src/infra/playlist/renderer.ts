@@ -27,6 +27,7 @@ import MutationQueue from '@common/mutationQueue';
 import {
     CONTEXT_BRIDGE_KEY,
     DEFAULT_FAVORITE_PLAYLIST_ID,
+    MAX_MUSIC_PER_PLAYLIST,
     type IPlaylistEvent,
 } from './common/constant';
 
@@ -226,10 +227,14 @@ class PlaylistRenderer {
     ): Promise<{ added: number; truncated: number }> {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
         const slimItems = items.map(musicItemToSlim);
+        // 缓存显示歌单已满时不做乐观更新，免得先插入整批再撤回；是否真满以写入结果为准
+        const likelyFull =
+            (store.get(playlistsAtom).find((p) => p.id === playlistId)?.worksNum ?? 0) >=
+            MAX_MUSIC_PER_PLAYLIST;
 
         // 乐观更新：本地数组
         const insertedToList = new Set<string>();
-        if (this.currentPlaylistId === playlistId) {
+        if (!likelyFull && this.currentPlaylistId === playlistId) {
             const list = store.get(musicListAtom);
             const existingKeys = new Set(list.map((m) => compositeKey(m.platform, m.id)));
             const newSlims = slimItems.filter(
@@ -243,7 +248,7 @@ class PlaylistRenderer {
 
         // 乐观更新：favorite Set
         const insertedToFavorite = new Set<string>();
-        if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
+        if (!likelyFull && playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
             for (const m of slimItems) {
                 const key = compositeKey(m.platform, m.id);
                 if (!this.favoriteIdSet.has(key)) insertedToFavorite.add(key);
@@ -255,7 +260,11 @@ class PlaylistRenderer {
         const result = this.mutationQueue.enqueue(() => mod.addMusic(playlistId, items));
         // 超出上限、没有写入的末尾几首：撤回这次乐观加入的部分
         result.then(
-            ({ truncated }) => {
+            ({ added, truncated }) => {
+                if (likelyFull) {
+                    if (added > 0) void this.syncAccepted(playlistId, slimItems, truncated);
+                    return;
+                }
                 if (truncated <= 0) return;
                 // 输入里重复的歌曲只要前面有一次写入，就不算没写入
                 const kept = new Set(
@@ -461,6 +470,20 @@ class PlaylistRenderer {
     }
 
     // ─── 内部方法 ───
+
+    /** 没有乐观更新的添加写入后，把实际写入的歌曲同步到收藏缓存与当前列表 */
+    private async syncAccepted(playlistId: string, slimItems: IMusicItemSlim[], truncated: number) {
+        if (playlistId === DEFAULT_FAVORITE_PLAYLIST_ID) {
+            for (const m of slimItems.slice(0, slimItems.length - truncated)) {
+                this.favoriteIdSet.add(compositeKey(m.platform, m.id));
+            }
+            this.events.emit('favoriteChange');
+        }
+        if (this.currentPlaylistId !== playlistId) return;
+        const { detail, load } = await this.loadAfterQueuedWrites(playlistId);
+        if (this.currentPlaylistId !== playlistId || !detail) return;
+        store.set(musicListAtom, this.mergeLoadedList(detail.musicList, load));
+    }
 
     /**
      * 排在已入队的写入之后读取歌单，读到的列表已包含这些写入。
