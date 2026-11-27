@@ -752,8 +752,15 @@ class DownloadManager {
         // 递增世代号使对应的 p-queue 回调失效
         this.taskGeneration.set(taskId, (this.taskGeneration.get(taskId) ?? 0) + 1);
 
-        // 先删任务记录再清理临时文件：清理期间重试、继续读不到任务，不会再开始新的执行
+        // 先删任务记录并通知，再清理临时文件：清理期间重试、继续读不到任务，
+        // 同一首歌新建的下载也不会被迟到的删除通知清掉状态
         this.queries.deleteTask.run(taskId);
+        if (row) {
+            this.windowManager.broadcast(IPC.TASK_EVENT, {
+                task: rowToTask(row),
+                type: 'removed',
+            });
+        }
 
         // 清理临时文件
         if (row?.temp_path) {
@@ -762,13 +769,6 @@ class DownloadManager {
             } catch {
                 // 文件不存在等情况忽略
             }
-        }
-
-        if (row) {
-            this.windowManager.broadcast(IPC.TASK_EVENT, {
-                task: rowToTask(row),
-                type: 'removed',
-            });
         }
     }
 
