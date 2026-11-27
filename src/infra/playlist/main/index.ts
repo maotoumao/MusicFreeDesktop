@@ -71,7 +71,7 @@ class PlaylistManager {
     // ─── 主进程内部公开方法（供 downloadManager 等模块通过 DI 调用） ───
 
     /**
-     * 将歌曲添加到指定歌单（插入 relation；music_items 只补缺，不覆盖已有内容）。
+     * 将歌曲添加到指定歌单（插入 relation；music_items 只补缺，规则见 fillMusicItemRow）。
      * 主进程内部调用，不通过 IPC。
      * 调用方（下载完成登记）传入的是任务开始时的快照，覆盖会把期间别处更新的资料和封面改回旧值。
      */
@@ -85,7 +85,13 @@ class PlaylistManager {
             const sid = String(musicItem.id);
             const now = Date.now();
 
-            this.queries.fillMusicItem.run(toMusicItemRow(musicItem));
+            this.queries.upsertMusicItem.run(
+                fillMusicItemRow(
+                    musicItem,
+                    this.queries.getMusicItemRow.get(musicItem.platform, sid) as
+                        IStoredMusicRow | undefined,
+                ),
+            );
             this.queries.insertRelation.run({
                 sheetId: playlistId,
                 platform: musicItem.platform,
@@ -226,8 +232,8 @@ class PlaylistManager {
                             const sid = String(item.id);
                             const merged = mergeRestoredItem(
                                 { ...item, id: sid },
-                                this.queries.getMusicItemForRestore.get(item.platform, sid) as
-                                    IRestoreBaseRow | undefined,
+                                this.queries.getMusicItemRow.get(item.platform, sid) as
+                                    IStoredMusicRow | undefined,
                             );
                             this.queries.upsertMusicItem.run({
                                 platform: item.platform,
@@ -715,8 +721,8 @@ class PlaylistManager {
     }
 }
 
-/** 库里已有歌曲的一行（恢复备份时作为合并的底） */
-interface IRestoreBaseRow {
+/** 库里已有歌曲的一行 */
+interface IStoredMusicRow {
     platform: string;
     id: string;
     title: string;
@@ -732,7 +738,7 @@ interface IRestoreBaseRow {
  * 以库里已有的完整数据为底，叠加备份曲目的字段；标题、歌手、专辑、时长、封面
  * 依次取备份、已有展示列、已有完整数据中第一个可用的值，都没有时文本字段为空串。
  */
-function mergeRestoredItem(item: IMusic.IMusicItem, existing?: IRestoreBaseRow): IMusic.IMusicItem {
+function mergeRestoredItem(item: IMusic.IMusicItem, existing?: IStoredMusicRow): IMusic.IMusicItem {
     const backup = item as unknown as Record<string, unknown>;
     const raw = existing ? parseRaw(existing.raw) : {};
     const columns = existing ? (existing as unknown as Record<string, unknown>) : {};
@@ -804,6 +810,31 @@ function toMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim) {
         artwork: musicItemArtwork(item),
         raw: musicItemRaw(item),
     };
+}
+
+/**
+ * 下载完成登记时写库的一行：库里已有的内容都保留，只用传入的快照补缺。
+ * 展示列为空（文本为空串、时长或封面为 NULL）时取快照；完整数据逐字段补，已有的字段（含空值）不动，
+ * 缺少的标题、歌手、专辑、时长、封面取补缺后的展示列，与列表显示一致，其余取快照。
+ */
+function fillMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim, existing?: IStoredMusicRow) {
+    const row = toMusicItemRow(item);
+    if (!existing) return row;
+    const filled = {
+        ...row,
+        title: nonEmpty(existing.title) ?? row.title,
+        artist: nonEmpty(existing.artist) ?? row.artist,
+        album: nonEmpty(existing.album) ?? row.album,
+        duration: existing.duration ?? row.duration,
+        artwork: existing.artwork ?? row.artwork,
+    };
+    const base = parseRaw(existing.raw);
+    if (!row.raw && Object.keys(base).length === 0) return { ...filled, raw: existing.raw };
+    const merged: Record<string, unknown> = { ...parseRaw(row.raw), ...base };
+    for (const key of ['title', 'artist', 'album', 'duration', 'artwork'] as const) {
+        if (!(key in base) && filled[key] !== null) merged[key] = filled[key];
+    }
+    return { ...filled, raw: safeStringify(merged) };
 }
 
 /** slim 展示列 → 歌曲条目（空值字段省略） */

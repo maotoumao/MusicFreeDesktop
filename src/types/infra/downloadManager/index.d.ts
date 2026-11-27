@@ -104,7 +104,7 @@ export interface IPluginManagerForDownload {
 
 /** 已下载歌单操作接口 */
 export interface IDownloadedPlaylistProvider {
-    /** 下载完成 → upsert music_items + 加入 __downloaded__ 歌单 */
+    /** 下载完成 → music_items 只补缺 + 加入 __downloaded__ 歌单 */
     addMusicToDownloaded(musicItem: IMusic.IMusicItem): void;
     /** 删除下载(含文件) → 从 __downloaded__ 歌单移除 */
     removeFromDownloaded(platform: string, musicId: string): void;
