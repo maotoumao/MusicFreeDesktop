@@ -533,6 +533,11 @@ class DownloadManager {
                 },
                 // onCompleted
                 async () => {
+                    // 改名期间被暂停或删除：这次的结果作废，删掉已改名的文件（恢复后重新下载）
+                    if (dt.isAborted) {
+                        await fsp.unlink(task.filePath!).catch(() => {});
+                        return;
+                    }
                     this.activeTasks.delete(task.id);
                     this.progressCache.delete(task.id);
 
@@ -544,9 +549,12 @@ class DownloadManager {
                         );
                     }
 
-                    // 任务可能在 rename 或写标签期间被 removeTask 删除
+                    // 写标签期间被删除：不登记，删掉已改名的文件
                     const freshRow = this.queries.getTaskById.get(task.id);
-                    if (!freshRow) return;
+                    if (!freshRow) {
+                        await fsp.unlink(task.filePath!).catch(() => {});
+                        return;
+                    }
 
                     try {
                         task.status = 'completed';
