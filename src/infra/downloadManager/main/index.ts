@@ -704,13 +704,8 @@ class DownloadManager {
         if (!row || row.status !== 'error') return;
 
         const task = rowToTask(row);
-
-        // 删除旧临时文件，确保干净重试（新 URL 可能来自不同 CDN）
-        if (task.tempPath) {
-            fsp.unlink(task.tempPath).catch(() => {
-                /* ignore */
-            });
-        }
+        const tempPath = task.tempPath;
+        const generation = this.taskGeneration.get(taskId) ?? 0;
 
         // 清空 mediaSource 强制延迟到 enqueueTask 中重新获取
         task.mediaSource = null;
@@ -720,7 +715,24 @@ class DownloadManager {
         task.totalBytes = 0;
         task.updatedAt = Date.now();
         this.updateTaskStatus(task);
-        this.enqueueTask(task);
+        // 删除旧临时文件，确保干净重试（新 URL 可能来自不同 CDN）；上一次执行结束后、读取临时文件前进行。
+        // 删不掉时不能在旧内容后续写，任务标记为失败
+        this.enqueueTask(task, async () => {
+            if (!tempPath) return true;
+            try {
+                await fsp.unlink(tempPath);
+                return true;
+            } catch (err: any) {
+                if (err?.code === 'ENOENT') return true;
+                if ((this.taskGeneration.get(taskId) ?? 0) !== generation) return false;
+                task.status = 'error';
+                task.error = err?.message ?? String(err);
+                task.updatedAt = Date.now();
+                this.updateTaskStatus(task);
+                this.windowManager.broadcast(IPC.TASK_EVENT, { task, type: 'error' });
+                return false;
+            }
+        });
         this.windowManager.broadcast(IPC.TASK_EVENT, { task, type: 'status-changed' });
     }
 
