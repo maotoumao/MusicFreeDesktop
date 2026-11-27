@@ -172,7 +172,9 @@ jobs:
                   retention-days: 30
 
     build-linux:
-        runs-on: ubuntu-latest
+        # ubuntu-latest 已是 26.04，自带 rpm 6；electron-installer-redhat 生成的 spec 在 rpm 4.20+ 上找不到待打包文件
+        # （electron-userland/electron-installer-redhat#343），固定 24.04 与 arm64 任务一致
+        runs-on: ubuntu-24.04
         steps:
             - uses: actions/checkout@v5
             - name: Install system dependencies
