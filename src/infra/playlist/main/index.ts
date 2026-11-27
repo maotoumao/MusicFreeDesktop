@@ -84,16 +84,7 @@ class PlaylistManager {
             const sid = String(musicItem.id);
             const now = Date.now();
 
-            this.queries.upsertMusicItem.run({
-                platform: musicItem.platform,
-                id: sid,
-                title: musicItem.title,
-                artist: musicItem.artist ?? '',
-                album: musicItem.album ?? '',
-                duration: musicItem.duration ?? null,
-                artwork: musicItemArtwork(musicItem),
-                raw: musicItemRaw(musicItem),
-            });
+            this.queries.upsertMusicItem.run(toMusicItemRow(musicItem));
             this.queries.insertRelation.run({
                 sheetId: playlistId,
                 platform: musicItem.platform,
@@ -395,16 +386,7 @@ class PlaylistManager {
                         for (let i = 0; i < items.length; i++) {
                             const item = items[i];
                             const sid = String(item.id);
-                            this.queries.upsertMusicItem.run({
-                                platform: item.platform,
-                                id: sid,
-                                title: item.title,
-                                artist: item.artist ?? '',
-                                album: item.album ?? '',
-                                duration: item.duration ?? null,
-                                artwork: musicItemArtwork(item),
-                                raw: musicItemRaw(item),
-                            });
+                            this.queries.upsertMusicItem.run(toMusicItemRow(item));
                             this.queries.insertRelation.run({
                                 sheetId: playlistId,
                                 platform: item.platform,
@@ -572,16 +554,7 @@ class PlaylistManager {
                         for (let i = 0; i < toAdd.length; i++) {
                             const item = toAdd[i];
                             const sid = String(item.id);
-                            this.queries.upsertMusicItem.run({
-                                platform: item.platform,
-                                id: sid,
-                                title: item.title,
-                                artist: item.artist ?? '',
-                                album: item.album ?? '',
-                                duration: item.duration ?? null,
-                                artwork: musicItemArtwork(item),
-                                raw: musicItemRaw(item),
-                            });
+                            this.queries.upsertMusicItem.run(toMusicItemRow(item));
                             this.queries.insertRelation.run({
                                 sheetId: PLAY_QUEUE_PLAYLIST_ID,
                                 platform: item.platform,
@@ -639,16 +612,7 @@ class PlaylistManager {
                     for (let i = 0; i < count; i++) {
                         const item = items[i];
                         const sid = String(item.id);
-                        this.queries.upsertMusicItem.run({
-                            platform: item.platform,
-                            id: sid,
-                            title: item.title,
-                            artist: item.artist ?? '',
-                            album: item.album ?? '',
-                            duration: item.duration ?? null,
-                            artwork: musicItemArtwork(item),
-                            raw: musicItemRaw(item),
-                        });
+                        this.queries.upsertMusicItem.run(toMusicItemRow(item));
                         this.queries.insertRelation.run({
                             sheetId: PLAY_QUEUE_PLAYLIST_ID,
                             platform: item.platform,
@@ -829,6 +793,20 @@ function toRestorableText(value: unknown): string | null {
 function toRestorableDuration(value: unknown): number | null {
     const duration = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
     return Number.isFinite(duration) ? (duration as number) : null;
+}
+
+/** 写入 music_items 的一行（四处常规写入共用；备份恢复写的是合并后的数据，另行处理） */
+function toMusicItemRow(item: IMusic.IMusicItem | IMusicItemSlim) {
+    return {
+        platform: item.platform,
+        id: String(item.id),
+        title: item.title,
+        artist: item.artist ?? '',
+        album: item.album ?? '',
+        duration: item.duration ?? null,
+        artwork: musicItemArtwork(item),
+        raw: musicItemRaw(item),
+    };
 }
 
 /** slim 展示列 → 歌曲条目（空值字段省略） */
