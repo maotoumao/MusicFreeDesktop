@@ -1,5 +1,5 @@
 import { forwardRef, type FocusEvent } from 'react';
-import { atom, getDefaultStore , useAtomValue } from 'jotai';
+import { atom, getDefaultStore, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AlertTriangle, CircleCheck, CircleX, Info, X, type LucideIcon } from 'lucide-react';
@@ -48,6 +48,15 @@ interface ToastItem extends Required<Pick<ToastOptions, 'type' | 'duration' | 'c
 // ────────────────────────────────────────────────────────────────────────────
 
 const toastQueueAtom = atom<ToastItem[]>([]);
+
+/** 读屏播报：写入常驻的播报区（失败用 assertive，其余用 polite），过一段时间移除 */
+interface Announcement {
+    id: string;
+    text: string;
+    assertive: boolean;
+}
+const announcementAtom = atom<Announcement[]>([]);
+const ANNOUNCEMENT_TTL = 7000;
 const store = getDefaultStore();
 
 /** 同时可见的最大 toast 数量 */
@@ -112,6 +121,18 @@ function clearTimer(id: string) {
     timerMap.delete(id);
 }
 
+function announce(item: ToastItem) {
+    const announcement: Announcement = {
+        id: item.id,
+        text: item.description ? `${item.title}。${item.description}` : item.title,
+        assertive: item.type === 'error',
+    };
+    store.set(announcementAtom, (prev) => [...prev, announcement]);
+    setTimeout(() => {
+        store.set(announcementAtom, (prev) => prev.filter((a) => a.id !== announcement.id));
+    }, ANNOUNCEMENT_TTL);
+}
+
 function removeToast(id: string) {
     clearTimer(id);
     store.set(toastQueueAtom, (prev) => prev.filter((t) => t.id !== id));
@@ -158,6 +179,7 @@ export function showToast(title: string, options?: ToastOptions): void {
         );
     if (same) {
         if (same.duration > 0) startTimer(same.id, same.duration);
+        announce(item);
         return;
     }
 
@@ -173,6 +195,7 @@ export function showToast(title: string, options?: ToastOptions): void {
     if (item.duration > 0) {
         startTimer(item.id, item.duration);
     }
+    announce(item);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -220,7 +243,6 @@ const ToastCard = forwardRef<HTMLDivElement, { toast: ToastItem; reduceMotion: b
                 }}
                 transition={{ duration: motionDuration.normal, ease: easing.standard }}
                 className={cn('toast', `toast--${toast.type}`)}
-                role={toast.type === 'error' ? 'alert' : 'status'}
                 onMouseEnter={() => pauseTimer(toast.id, 'hover')}
                 onMouseLeave={() => resumeTimer(toast.id, 'hover')}
                 onFocus={() => pauseTimer(toast.id, 'focus')}
@@ -276,10 +298,26 @@ const ToastCard = forwardRef<HTMLDivElement, { toast: ToastItem; reduceMotion: b
  */
 export function ToastContainer() {
     const toasts = useAtomValue(toastQueueAtom);
+    const announcements = useAtomValue(announcementAtom);
     const reduceMotion = useReducedMotion() ?? false;
 
     return (
         <div className="toast-container">
+            {/* 常驻的读屏播报区：内容追加时才会被朗读 */}
+            {(['polite', 'assertive'] as const).map((level) => (
+                <div
+                    key={level}
+                    className="toast-announcer"
+                    aria-live={level}
+                    aria-relevant="additions"
+                >
+                    {announcements
+                        .filter((a) => a.assertive === (level === 'assertive'))
+                        .map((a) => (
+                            <span key={a.id}>{a.text}</span>
+                        ))}
+                </div>
+            ))}
             <AnimatePresence mode="popLayout" initial={false}>
                 {toasts.map((toast) => (
                     <ToastCard key={toast.id} toast={toast} reduceMotion={reduceMotion} />
