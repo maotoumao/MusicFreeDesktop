@@ -369,6 +369,19 @@ class PlaylistManager {
                 // 封面只认字符串（含空串）；其他值（如插件给的 NaN）按没传处理，与 musicItemToSlim 一致
                 const artworkOf = (item: IMusic.IMusicItem | IMusicItemSlim) =>
                     typeof item.artwork === 'string' ? item.artwork : null;
+                // 完整数据：去掉不认的封面再序列化；序列化失败时写 null，upsert 保留库里原有的完整数据
+                const rawOf = (item: IMusic.IMusicItem | IMusicItemSlim): string | null => {
+                    if ((item as any)[INTERNAL_SLIM_KEY]) return null;
+                    const source =
+                        item.artwork === undefined || typeof item.artwork === 'string'
+                            ? item
+                            : { ...item, artwork: undefined };
+                    try {
+                        return JSON.stringify(source) ?? null;
+                    } catch {
+                        return null;
+                    }
+                };
                 const artworkCandidates = new Map<string, { platform: string; id: string }>();
                 for (const item of options?.reportArtworks ? toAdd : []) {
                     if (artworkOf(item) === null) {
@@ -402,7 +415,7 @@ class PlaylistManager {
                                 album: item.album ?? '',
                                 duration: item.duration ?? null,
                                 artwork: artworkOf(item),
-                                raw: (item as any)[INTERNAL_SLIM_KEY] ? null : safeStringify(item),
+                                raw: rawOf(item),
                             });
                             this.queries.insertRelation.run({
                                 sheetId: playlistId,
