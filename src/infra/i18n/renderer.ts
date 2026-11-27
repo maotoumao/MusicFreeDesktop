@@ -7,8 +7,7 @@
  * - 提供 React Hook（useLangNames）
  */
 import { createInstance } from 'i18next';
-import { atom, getDefaultStore } from 'jotai';
-import { useAtomValue } from 'jotai/react';
+import { atom, getDefaultStore , useAtomValue } from 'jotai';
 import { initReactI18next } from 'react-i18next';
 import type { ILanguageContent, ILanguageContentWithAllLangs } from '@appTypes/infra/i18n';
 import { CONTEXT_BRIDGE_KEY } from './common/constant';
@@ -44,6 +43,8 @@ class I18n {
                 },
             },
             lng: lang,
+            // 文案由 React 渲染或交给系统原生控件显示，不需要 HTML 转义
+            interpolation: { escapeValue: false },
         });
     }
 

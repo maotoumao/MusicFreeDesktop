@@ -54,6 +54,8 @@ class I18n {
         try {
             await i18nInstance.init({
                 resources: {},
+                // 文案用于原生对话框、菜单、通知和发给渲染进程的消息，不需要 HTML 转义
+                interpolation: { escapeValue: false },
             });
 
             await this.loadAllLangNames();

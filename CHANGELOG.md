@@ -93,6 +93,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复对正在播放的歌曲选择「下一首播放」时，队列没有变化却提示「已添加到下一首播放」的问题。
 - 修复歌曲右键菜单复制信息失败时仍提示「已复制」的问题；现在提示「复制失败」。
 - 修复向已达上限（10 万首）的歌单添加歌曲时仍提示「已添加」、列表里短暂出现没有保存的歌曲的问题；现在会提示歌单已达上限，写入失败时提示「添加到歌单失败」。
+- 修复提示文字中插入的内容（如文件路径、错误信息）里的引号等符号显示成 &#39; 之类转义字符的问题。
 
 ### Added
 
@@ -175,6 +176,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix "Play next" on the song that is currently playing showing "Added to play next" although the queue did not change.
 - Fix copying song info from the context menu showing "Copied" when the copy failed; it now shows "Copy failed".
 - Fix adding songs to a playlist that has reached its 100,000-song limit still showing "Added" and briefly listing songs that were not saved; it now says the playlist is full, and shows "Failed to add to playlist" when the write fails.
+- Fix quotes and similar characters in inserted values (such as file paths and error messages) showing as escape sequences like &#39; in messages.
 
 ---
 
