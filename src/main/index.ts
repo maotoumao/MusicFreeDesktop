@@ -221,10 +221,11 @@ app.on('will-quit', async (event) => {
 
     appTray.dispose();
     playlistManager.dispose();
-    downloadManager.dispose();
+    const downloadsSettled = downloadManager.dispose();
     requestForwarder.dispose();
     shortCut.dispose();
     pluginManager.dispose();
+    await downloadsSettled;
     await logger.dispose();
     database.dispose(); // 最后关闭 DB
 

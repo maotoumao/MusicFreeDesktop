@@ -40,6 +40,9 @@ import { FILE_NAME_TEMPLATES, IPC } from '../common/constant';
 import { DownloadTask } from './downloadTask';
 import { fetchCover } from './fetchCover';
 
+/** 退出时等待收尾中的下载的最长时间（毫秒） */
+const DISPOSE_WAIT_MS = 3000;
+
 /** DB 行 snake_case → 业务对象 camelCase */
 function rowToTask(row: IDownloadTaskRow): IDownloadTask {
     return {
@@ -162,7 +165,11 @@ class DownloadManager {
         this.isSetup = true;
     }
 
-    public dispose(): void {
+    /**
+     * 退出前调用：暂停活跃任务；正在改名、写标签或登记的执行要等它登记或清理完
+     * （否则退出后留下未登记的文件，下次继续时另存为带编号的新文件），最多等 DISPOSE_WAIT_MS。
+     */
+    public async dispose(): Promise<void> {
         this.disposed = true;
         this.broadcastProgress.cancel();
 
@@ -175,6 +182,11 @@ class DownloadManager {
         }
         this.activeTasks.clear();
         this.queue.clear();
+
+        const running = Array.from(this.runs.values());
+        if (running.length > 0) {
+            await Promise.race([Promise.allSettled(running), delay(DISPOSE_WAIT_MS)]);
+        }
     }
 
     // ─── 初始化 ────────────────────────
