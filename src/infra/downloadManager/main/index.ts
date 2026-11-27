@@ -96,6 +96,8 @@ class DownloadManager {
     private taskGeneration = new Map<string, number>();
     /** 下载进度缓存（用于节流广播） */
     private progressCache = new Map<string, IDownloadProgress>();
+    /** 歌单条目的封面：完整数据缺封面时只用于写文件标签，不写回库（避免覆盖期间更新的封面） */
+    private shownArtworks = new Map<string, unknown>();
     /** 下一个任务允许启动的最早时间戳（启动间隔闸门） */
     private nextAllowedStart = 0;
     /** 预编译 SQL */
@@ -463,8 +465,9 @@ class DownloadManager {
                         String(musicItem.id),
                     );
                     if (full) {
-                        musicItem = withShownArtwork(full, musicItem.artwork);
-                        task.musicItemRaw = safeStringify(musicItem);
+                        this.shownArtworks.set(task.id, musicItem.artwork);
+                        musicItem = full;
+                        task.musicItemRaw = safeStringify(full);
                     }
                 }
 
@@ -534,7 +537,14 @@ class DownloadManager {
                     this.progressCache.delete(task.id);
 
                     const musicItem = safeParse<IMusic.IMusicItem>(task.musicItemRaw ?? '');
-                    if (musicItem) await this.writeTags(task.filePath!, musicItem);
+                    const shownArtwork = this.shownArtworks.get(task.id);
+                    this.shownArtworks.delete(task.id);
+                    if (musicItem) {
+                        await this.writeTags(
+                            task.filePath!,
+                            withShownArtwork(musicItem, shownArtwork),
+                        );
+                    }
 
                     // 任务可能在 rename 或写标签期间被 removeTask 删除
                     const freshRow = this.queries.getTaskById.get(task.id);
@@ -687,6 +697,7 @@ class DownloadManager {
 
         // 递增世代号使对应的 p-queue 回调失效
         this.taskGeneration.set(taskId, (this.taskGeneration.get(taskId) ?? 0) + 1);
+        this.shownArtworks.delete(taskId);
 
         // 清理临时文件
         if (row?.temp_path) {
