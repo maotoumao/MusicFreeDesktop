@@ -1,4 +1,4 @@
-import { forwardRef, type FocusEvent } from 'react';
+import { forwardRef, useEffect, type FocusEvent } from 'react';
 import { atom, getDefaultStore, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
@@ -76,7 +76,12 @@ interface ToastTimer {
     deadline: number;
     remaining: number;
     pauses: Set<PauseReason>;
+    /** 悬停暂停的上限计时：收不到 mouseleave（如鼠标直接移进标题栏拖拽区）时也会恢复 */
+    hoverLimit: ReturnType<typeof setTimeout> | null;
 }
+
+/** 悬停暂停最长时间 */
+const HOVER_PAUSE_LIMIT = 30000;
 
 const timerMap = new Map<string, ToastTimer>();
 
@@ -85,7 +90,8 @@ function startTimer(id: string, ms: number) {
         handle: null,
         deadline: 0,
         remaining: ms,
-        pauses: new Set(),
+        pauses: new Set<PauseReason>(),
+        hoverLimit: null,
     };
     if (timer.handle) clearTimeout(timer.handle);
     timer.remaining = ms;
@@ -98,6 +104,9 @@ function pauseTimer(id: string, reason: PauseReason) {
     const timer = timerMap.get(id);
     if (!timer) return;
     timer.pauses.add(reason);
+    if (reason === 'hover' && !timer.hoverLimit) {
+        timer.hoverLimit = setTimeout(() => resumeTimer(id, 'hover'), HOVER_PAUSE_LIMIT);
+    }
     if (timer.handle) {
         clearTimeout(timer.handle);
         timer.handle = null;
@@ -109,6 +118,10 @@ function resumeTimer(id: string, reason: PauseReason) {
     const timer = timerMap.get(id);
     if (!timer) return;
     timer.pauses.delete(reason);
+    if (reason === 'hover' && timer.hoverLimit) {
+        clearTimeout(timer.hoverLimit);
+        timer.hoverLimit = null;
+    }
     if (timer.pauses.size === 0 && !timer.handle) {
         timer.deadline = performance.now() + timer.remaining;
         timer.handle = setTimeout(() => removeToast(id), timer.remaining);
@@ -118,7 +131,15 @@ function resumeTimer(id: string, reason: PauseReason) {
 function clearTimer(id: string) {
     const timer = timerMap.get(id);
     if (timer?.handle) clearTimeout(timer.handle);
+    if (timer?.hoverLimit) clearTimeout(timer.hoverLimit);
     timerMap.delete(id);
+}
+
+/** 窗口失焦或鼠标离开页面时，解除所有卡片的暂停 */
+function resumeAll(reasons: PauseReason[]) {
+    for (const id of [...timerMap.keys()]) {
+        for (const reason of reasons) resumeTimer(id, reason);
+    }
 }
 
 function announce(item: ToastItem) {
@@ -300,6 +321,17 @@ export function ToastContainer() {
     const toasts = useAtomValue(toastQueueAtom);
     const announcements = useAtomValue(announcementAtom);
     const reduceMotion = useReducedMotion() ?? false;
+
+    useEffect(() => {
+        const onBlur = () => resumeAll(['hover', 'focus']);
+        const onLeave = () => resumeAll(['hover']);
+        window.addEventListener('blur', onBlur);
+        document.documentElement.addEventListener('mouseleave', onLeave);
+        return () => {
+            window.removeEventListener('blur', onBlur);
+            document.documentElement.removeEventListener('mouseleave', onLeave);
+        };
+    }, []);
 
     return (
         <div className="toast-container">
