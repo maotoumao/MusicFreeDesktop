@@ -25,7 +25,7 @@ export function useRecommendSheets(pluginHash: string, tag: IMedia.IUnique | nul
             try {
                 const result = await pluginManager.callPluginMethod({
                     hash: pluginHash,
-                    method: 'getRecommendSheetsByTag',
+                    method: 'getRecommendPlaylistsByTag',
                     args: [fetchTag, page],
                 });
 

@@ -21,7 +21,7 @@ interface SheetResultProps {
 
 export function SheetResult({ pluginHash }: SheetResultProps) {
     const results = useAtomValue(searchResultsAtom);
-    const type: SearchMediaType = 'sheet';
+    const type: SearchMediaType = 'playlist';
     const record = results[type][pluginHash];
     const { search, loadMore } = useSearch();
     const navigate = useNavigate();

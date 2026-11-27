@@ -44,7 +44,7 @@ const RESULT_COMPONENTS: Record<SearchMediaType, React.ComponentType<{ pluginHas
     music: MusicResult,
     album: AlbumResult,
     artist: ArtistResult,
-    sheet: SheetResult,
+    playlist: SheetResult,
 };
 
 // ── SearchPage ──

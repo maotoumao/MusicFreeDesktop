@@ -6,7 +6,7 @@ import pluginManager from '@infra/pluginManager/renderer';
 /**
  * useSheetDetail — 远程歌单详情 hook
  *
- * 分页加载歌单内歌曲列表，自动合并插件返回的 sheetItem 元数据。
+ * 分页加载歌单内歌曲列表，自动合并插件返回的歌单元数据。
  * 首次 mount 立即触发第一页加载。
  */
 export function useSheetDetail(originalItem: IMusic.IMusicSheetItem) {
@@ -30,7 +30,7 @@ export function useSheetDetail(originalItem: IMusic.IMusicSheetItem) {
             try {
                 const result = await pluginManager.callPluginMethod({
                     platform: item.platform,
-                    method: 'getMusicSheetInfo',
+                    method: 'getPlaylistInfo',
                     args: [item, page],
                 });
 
@@ -39,8 +39,8 @@ export function useSheetDetail(originalItem: IMusic.IMusicSheetItem) {
                 const resMusicList = result?.musicList ?? [];
                 const resIsEnd = result?.isEnd ?? true;
 
-                if (result?.sheetItem) {
-                    setSheetItem((prev) => ({ ...prev, ...result.sheetItem }));
+                if (result?.playlistItem) {
+                    setSheetItem((prev) => ({ ...prev, ...result.playlistItem }));
                 }
 
                 setMusicList((prev) => (isFirstPage ? resMusicList : [...prev, ...resMusicList]));

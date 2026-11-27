@@ -135,7 +135,7 @@ declare namespace IPlugin {
             tag: ICommon.IUnique,
             page?: number,
         ) => Promise<ICommon.PaginationResponse<IMusic.IMusicSheetItem>>;
-        /** 以下四个是 playlist 协议的新名，与对应的旧名含义相同；插件实现了新名时优先调用 */
+        /** playlist 协议的新名，与上面对应的旧名含义相同；插件实现了新名时优先调用 */
         getPlaylistInfo?: IPluginDefine['getMusicSheetInfo'];
         importPlaylist?: IPluginDefine['importMusicSheet'];
         getRecommendPlaylistTags?: IPluginDefine['getRecommendSheetTags'];

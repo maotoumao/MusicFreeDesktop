@@ -5,7 +5,7 @@
  *
  * 布局：
  *   标题  "热门歌单"
- *   TabBar  支持 getRecommendSheetsByTag 的插件列表
+ *   TabBar  支持 getRecommendPlaylistsByTag 的插件列表
  *   TagFilter  标签筛选栏（默认 + pinned + 下拉面板）
  *   MediaGrid  歌单卡片网格（支持分页加载）
  *
@@ -22,7 +22,7 @@ import './index.scss';
 
 export default function RecommendSheetsPage() {
     const { t } = useTranslation();
-    const availablePlugins = useSortedSupportedPlugins('getRecommendSheetsByTag');
+    const availablePlugins = useSortedSupportedPlugins('getRecommendPlaylistsByTag');
     const [activeHash, setActiveHash] = useState('');
 
     const currentHash = useMemo(() => {

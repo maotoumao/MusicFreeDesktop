@@ -90,7 +90,7 @@ const localPluginDefine: IPlugin.IPluginInstance = {
     async importMusicItem(filePath) {
         return parseLocalMusicItem(filePath);
     },
-    async importMusicSheet(folderPath) {
+    async importPlaylist(folderPath) {
         return parseLocalMusicItemFolder(folderPath);
     },
     async getMusicInfo(musicItem) {

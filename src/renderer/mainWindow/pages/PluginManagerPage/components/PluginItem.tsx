@@ -25,10 +25,10 @@ import { cn } from '@common/cn';
 const METHOD_LABEL_MAP: Record<string, string> = {
     search: 'plugin.method_search',
     importMusicItem: 'plugin.method_import_music_item',
-    importMusicSheet: 'plugin.method_import_music_sheet',
+    importPlaylist: 'plugin.method_import_music_sheet',
     getTopLists: 'plugin.method_get_top_lists',
     getLyric: 'plugin.method_get_lyric',
-    getRecommendSheetTags: 'plugin.method_get_recommend_sheet_tags',
+    getRecommendPlaylistTags: 'plugin.method_get_recommend_sheet_tags',
 };
 
 /** 提取为模块常量，避免每次渲染创建新的函数引用 */
@@ -256,7 +256,7 @@ const PluginItemActions = memo(function PluginItemActions({
     }, [plugin]);
 
     const handleImportSheet = useCallback(() => {
-        showModal('PluginImportModal', { plugin, type: 'importMusicSheet' });
+        showModal('PluginImportModal', { plugin, type: 'importPlaylist' });
     }, [plugin]);
 
     const handleUserVariables = useCallback(() => {
@@ -300,7 +300,7 @@ const PluginItemActions = memo(function PluginItemActions({
                     {t('plugin.method_import_music_item')}
                 </Button>
             )}
-            {plugin.supportedMethod.includes('importMusicSheet') && (
+            {plugin.supportedMethod.includes('importPlaylist') && (
                 <Button
                     variant="secondary"
                     size="sm"

@@ -5,7 +5,7 @@ import pluginManager from '@infra/pluginManager/renderer';
 /**
  * useRecommendTags — 获取热门歌单标签 hook
  *
- * 调用插件 getRecommendSheetTags，缓存按 pluginHash 隔离。
+ * 调用插件 getRecommendPlaylistTags，缓存按 pluginHash 隔离。
  */
 export function useRecommendTags(pluginHash: string) {
     const [tags, setTags] = useState<IPlugin.IGetRecommendSheetTagsResult | null>(null);
@@ -16,7 +16,7 @@ export function useRecommendTags(pluginHash: string) {
         try {
             const result = await pluginManager.callPluginMethod({
                 hash: pluginHash,
-                method: 'getRecommendSheetTags',
+                method: 'getRecommendPlaylistTags',
                 args: [],
             });
             setTags(result ?? { pinned: [], data: [] });

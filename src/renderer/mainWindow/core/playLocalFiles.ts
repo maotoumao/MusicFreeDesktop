@@ -30,7 +30,7 @@ export async function playLocalFiles(paths: string[]): Promise<void> {
         } else if (await fsUtil.isFolder(filePath)) {
             const folderItems = await pluginManager.callPluginMethod({
                 platform: LOCAL_PLUGIN_NAME,
-                method: 'importMusicSheet',
+                method: 'importPlaylist',
                 args: [filePath],
             });
             if (Array.isArray(folderItems)) items.push(...folderItems);

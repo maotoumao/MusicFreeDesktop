@@ -264,7 +264,7 @@ export function extractPluginDelegate(
     instance: IPlugin.IPluginInstance,
     hash: string,
 ): IPlugin.IPluginDelegate {
-    // 提取支持的方法名列表（新版插件的 playlist 方法名换成桌面端内部名）
+    // 提取支持的方法名列表（旧插件的歌单方法名换成对应的新名）
     const supportedMethod: string[] = [];
     for (const key of Object.keys(instance)) {
         const name = toInternalMethodName(key);

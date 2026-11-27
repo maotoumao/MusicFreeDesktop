@@ -61,7 +61,7 @@ export function useSortedSupportedPlugins(
 /**
  * 获取支持搜索功能的插件列表（按 meta.order 排序）。
  *
- * @param supportedSearchType - 可选，限定搜索类型（music / album / artist / sheet）
+ * @param supportedSearchType - 可选，限定搜索类型（music / album / artist / playlist）
  * @param enabledOnly - 仅返回已启用的插件（默认 true）
  */
 export function useSortedSearchablePlugins(

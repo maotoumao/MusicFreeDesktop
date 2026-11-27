@@ -16,14 +16,14 @@ import { RequestStatus } from '@common/constant';
 // ── 外部常量 ──
 
 /** 搜索页支持的 4 种媒体类型（排除 lyric） */
-export const SEARCH_MEDIA_TYPES = ['music', 'album', 'artist', 'sheet'] as const;
+export const SEARCH_MEDIA_TYPES = ['music', 'album', 'artist', 'playlist'] as const;
 export type SearchMediaType = (typeof SEARCH_MEDIA_TYPES)[number];
 
 export const SEARCH_TAB_LABEL_KEYS: Record<SearchMediaType, string> = {
     music: 'media.type_music',
     album: 'media.type_album',
     artist: 'media.type_artist',
-    sheet: 'media.type_sheet',
+    playlist: 'media.type_sheet',
 };
 
 // ── 单条搜索记录 ──
@@ -55,7 +55,7 @@ function emptyResultMap(): SearchResultMap {
         music: {},
         album: {},
         artist: {},
-        sheet: {},
+        playlist: {},
     };
 }
 
@@ -78,7 +78,7 @@ export const activePluginPerTypeAtom = atom<Record<SearchMediaType, string>>({
     music: '',
     album: '',
     artist: '',
-    sheet: '',
+    playlist: '',
 });
 
 // ── Store 实例 ──

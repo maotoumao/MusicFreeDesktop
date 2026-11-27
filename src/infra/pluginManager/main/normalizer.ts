@@ -8,32 +8,32 @@
 import { cleanMediaInput, resetMediaItem, resetMediaItems } from '../common/mediaUtil';
 
 /**
- * 歌单相关方法的新旧名称：手机端起插件协议改用 playlist 命名（旧名仍兼容）。
- * 桌面端内部沿用旧名调用；插件实现了新名时优先调用新名，否则调用旧名。
+ * 歌单相关方法的旧名称：手机端起插件协议改用 playlist 命名，旧插件只实现旧名。
+ * 桌面端按新名调用；插件没有实现新名时改调对应的旧名。
  */
-export const PLAYLIST_METHOD_ALIASES = {
-    getMusicSheetInfo: 'getPlaylistInfo',
-    importMusicSheet: 'importPlaylist',
-    getRecommendSheetTags: 'getRecommendPlaylistTags',
-    getRecommendSheetsByTag: 'getRecommendPlaylistsByTag',
+export const PLAYLIST_METHOD_FALLBACKS = {
+    getPlaylistInfo: 'getMusicSheetInfo',
+    importPlaylist: 'importMusicSheet',
+    getRecommendPlaylistTags: 'getRecommendSheetTags',
+    getRecommendPlaylistsByTag: 'getRecommendSheetsByTag',
 } as const;
 
-const ALIAS_TO_INTERNAL: Record<string, string> = Object.fromEntries(
-    Object.entries(PLAYLIST_METHOD_ALIASES).map(([internal, alias]) => [alias, internal]),
+const FALLBACK_TO_METHOD: Record<string, string> = Object.fromEntries(
+    Object.entries(PLAYLIST_METHOD_FALLBACKS).map(([method, fallback]) => [fallback, method]),
 );
 
-/** 插件方法名 → 桌面端内部方法名（新名换成对应旧名，其余不变） */
+/** 插件方法名 → 桌面端使用的方法名（旧名换成对应新名，其余不变） */
 export function toInternalMethodName(name: string): string {
-    return ALIAS_TO_INTERNAL[name] ?? name;
+    return FALLBACK_TO_METHOD[name] ?? name;
 }
 
-/** 插件声明的搜索类型 → 桌面端内部类型（'playlist' 记作 'sheet'），去重 */
+/** 插件声明的搜索类型 → 桌面端使用的类型（旧插件的 'sheet' 记作 'playlist'），去重 */
 export function toInternalSearchTypes(types: unknown): string[] | undefined {
     if (!Array.isArray(types)) return undefined;
     const out: string[] = [];
     for (const type of types) {
         if (typeof type !== 'string') continue;
-        const internal = type === 'playlist' ? 'sheet' : type;
+        const internal = type === 'sheet' ? 'playlist' : type;
         if (!out.includes(internal)) out.push(internal);
     }
     return out;
@@ -41,11 +41,13 @@ export function toInternalSearchTypes(types: unknown): string[] | undefined {
 
 /**
  * 搜索歌单时发给插件的类型：只声明了 'playlist' 的新版插件收到 'playlist'；
- * 其余（声明了 'sheet' 或未声明）照旧收到 'sheet'
+ * 其余（声明了 'sheet' 或未声明搜索类型）收到旧插件使用的 'sheet'
  */
 export function toPluginSearchType(type: unknown, declared: unknown): unknown {
-    if (type !== 'sheet' || !Array.isArray(declared)) return type;
-    return declared.includes('playlist') && !declared.includes('sheet') ? 'playlist' : type;
+    if (type !== 'playlist') return type;
+    return Array.isArray(declared) && declared.includes('playlist') && !declared.includes('sheet')
+        ? 'playlist'
+        : 'sheet';
 }
 
 /**
@@ -186,15 +188,15 @@ export const methodNormalizers: Partial<
         },
     },
 
-    // ─── getMusicSheetInfo ───
-    getMusicSheetInfo: {
+    // ─── getPlaylistInfo ───
+    getPlaylistInfo: {
         beforeCall(args) {
             return [cleanMediaInput(args[0]), args[1]];
         },
         afterCall(result, platform, args) {
             if (!result) throw new Error();
 
-            const sheetItem = args[0] as IMusic.IMusicSheetItem;
+            const playlistItem = args[0] as IMusic.IMusicSheetItem;
             const page = args[1] as number;
 
             result?.musicList?.forEach((_: any) => {
@@ -204,8 +206,8 @@ export const methodNormalizers: Partial<
             if (page <= 1) {
                 return {
                     // 新版插件返回 playlistItem，旧插件返回 sheetItem
-                    sheetItem: {
-                        ...sheetItem,
+                    playlistItem: {
+                        ...playlistItem,
                         ...(result?.playlistItem ?? result?.sheetItem ?? {}),
                     },
                     isEnd: result.isEnd === false ? false : true,
@@ -219,10 +221,10 @@ export const methodNormalizers: Partial<
             }
         },
         defaultResult(args) {
-            const sheetItem = args[0] as IMusic.IMusicSheetItem;
+            const playlistItem = args[0] as IMusic.IMusicSheetItem;
             return {
-                sheetItem,
-                musicList: sheetItem?.musicList ?? [],
+                playlistItem,
+                musicList: playlistItem?.musicList ?? [],
                 isEnd: true,
             };
         },
@@ -244,8 +246,8 @@ export const methodNormalizers: Partial<
         defaultResult: () => ({ isEnd: true, data: [] }),
     },
 
-    // ─── importMusicSheet ───
-    importMusicSheet: {
+    // ─── importPlaylist ───
+    importPlaylist: {
         afterCall(result, platform) {
             return resetMediaItems(result, platform);
         },
@@ -286,9 +288,9 @@ export const methodNormalizers: Partial<
         defaultResult: (args) => ({ isEnd: true, topListItem: args[0], musicList: [] }),
     },
 
-    // ─── getRecommendSheetTags ───
-    // 旧版不对 getRecommendSheetTags 结果做 resetMediaItem，保持一致
-    getRecommendSheetTags: {
+    // ─── getRecommendPlaylistTags ───
+    // 旧版不对推荐歌单标签结果做 resetMediaItem，保持一致
+    getRecommendPlaylistTags: {
         afterCall(result) {
             if (!result) return { data: [] };
             return result;
@@ -296,8 +298,8 @@ export const methodNormalizers: Partial<
         defaultResult: () => ({ data: [] }),
     },
 
-    // ─── getRecommendSheetsByTag ───
-    getRecommendSheetsByTag: {
+    // ─── getRecommendPlaylistsByTag ───
+    getRecommendPlaylistsByTag: {
         afterCall(result, platform) {
             if (!result) return { isEnd: true, data: [] };
             return {

@@ -9,7 +9,7 @@ import { showModal } from '@renderer/mainWindow/components/ui/Modal/modalManager
 import pluginManager from '@infra/pluginManager/renderer';
 import './index.scss';
 
-type ImportType = 'importMusicItem' | 'importMusicSheet';
+type ImportType = 'importMusicItem' | 'importPlaylist';
 
 interface PluginImportModalProps {
     close: () => void;

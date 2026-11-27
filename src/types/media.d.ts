@@ -3,7 +3,7 @@ declare namespace IMedia {
         music: IMusic.IMusicItem;
         album: IAlbum.IAlbumItem;
         artist: IArtist.IArtistItem;
-        sheet: IMusic.IMusicSheetItem;
+        playlist: IMusic.IMusicSheetItem;
         lyric: ILyric.ILyricItem;
     };
 

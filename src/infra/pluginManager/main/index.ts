@@ -48,7 +48,12 @@ import {
     type ISandboxOptions,
 } from './pluginSandbox';
 import { PluginStorage } from './pluginStorage';
-import { methodNormalizers, PLAYLIST_METHOD_ALIASES, toPluginSearchType } from './normalizer';
+import {
+    methodNormalizers,
+    PLAYLIST_METHOD_FALLBACKS,
+    toInternalMethodName,
+    toPluginSearchType,
+} from './normalizer';
 import type { IAppConfigReader } from '@appTypes/infra/appConfig';
 import type { IMediaMetaProvider } from '@appTypes/infra/mediaMeta';
 import type { IMusicItemProvider } from '@appTypes/infra/musicSheet';
@@ -354,7 +359,9 @@ class PluginManager {
      * 4. afterCall 标准化返回值
      */
     private async callPluginMethod(params: ICallPluginMethodParams): Promise<any> {
-        const { hash, platform, method, args } = params;
+        const { hash, platform, args } = params;
+        // 按旧方法名调用时换成对应的新名
+        const method = toInternalMethodName(params.method) as ICallPluginMethodParams['method'];
 
         // 支持通过 hash 或 platform 查找
         let loaded: ILoadedPlugin | undefined;
@@ -372,10 +379,12 @@ class PluginManager {
         const pluginPlatform = instance.platform;
         const normalizer = methodNormalizers[method];
 
-        // 检查插件是否实现了该方法（歌单相关方法优先用新名）
-        const alias = PLAYLIST_METHOD_ALIASES[method as keyof typeof PLAYLIST_METHOD_ALIASES];
-        const aliasFn = alias ? (instance as any)[alias] : undefined;
-        const methodFn = typeof aliasFn === 'function' ? aliasFn : (instance as any)[method];
+        // 检查插件是否实现了该方法（歌单相关方法没有新名时改调旧名）
+        const fallback =
+            PLAYLIST_METHOD_FALLBACKS[method as keyof typeof PLAYLIST_METHOD_FALLBACKS];
+        const ownFn = (instance as any)[method];
+        const methodFn =
+            typeof ownFn === 'function' || !fallback ? ownFn : (instance as any)[fallback];
         if (typeof methodFn !== 'function') {
             // 使用默认返回值（如有）
             if (normalizer?.defaultResult) {
