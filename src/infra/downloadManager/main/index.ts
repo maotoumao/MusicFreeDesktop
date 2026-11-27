@@ -96,8 +96,6 @@ class DownloadManager {
     private taskGeneration = new Map<string, number>();
     /** 下载进度缓存（用于节流广播） */
     private progressCache = new Map<string, IDownloadProgress>();
-    /** 歌单条目的列表封面：完整数据缺封面时只用于写文件标签，不写回库（写回会覆盖下载过程中别处写入的新封面） */
-    private shownArtworks = new Map<string, unknown>();
     /** 下一个任务允许启动的最早时间戳（启动间隔闸门） */
     private nextAllowedStart = 0;
     /** 预编译 SQL */
@@ -457,6 +455,8 @@ class DownloadManager {
 
             // 延迟获取媒体源：在任务真正开始执行时才获取，避免 resumeAll 过早批量请求
             let musicItem = safeParse<IMusic.IMusicItem>(task.musicItemRaw ?? '');
+            // 歌单条目的列表封面：完整数据缺封面时只用于写文件标签，不写回库（写回会覆盖下载过程中别处写入的新封面）
+            let shownArtwork: unknown;
             if (musicItem && !task.mediaSource) {
                 // slim 对象解析：插件 getMediaSource 可能依赖完整字段，从 DB 查询 raw JSON
                 if ((musicItem as any)[INTERNAL_SLIM_KEY]) {
@@ -465,7 +465,7 @@ class DownloadManager {
                         String(musicItem.id),
                     );
                     if (full) {
-                        this.shownArtworks.set(task.id, musicItem.artwork);
+                        shownArtwork = musicItem.artwork;
                         musicItem = full;
                         task.musicItemRaw = safeStringify(full);
                     }
@@ -537,8 +537,6 @@ class DownloadManager {
                     this.progressCache.delete(task.id);
 
                     const musicItem = safeParse<IMusic.IMusicItem>(task.musicItemRaw ?? '');
-                    const shownArtwork = this.shownArtworks.get(task.id);
-                    this.shownArtworks.delete(task.id);
                     if (musicItem) {
                         await this.writeTags(
                             task.filePath!,
@@ -697,7 +695,6 @@ class DownloadManager {
 
         // 递增世代号使对应的 p-queue 回调失效
         this.taskGeneration.set(taskId, (this.taskGeneration.get(taskId) ?? 0) + 1);
-        this.shownArtworks.delete(taskId);
 
         // 清理临时文件
         if (row?.temp_path) {
