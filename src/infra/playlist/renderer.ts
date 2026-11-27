@@ -246,8 +246,17 @@ class PlaylistRenderer {
         result.then(
             ({ truncated }) => {
                 if (truncated <= 0) return;
+                // 输入里重复的歌曲只要前面有一次写入，就不算没写入
+                const kept = new Set(
+                    slimItems
+                        .slice(0, slimItems.length - truncated)
+                        .map((m) => compositeKey(m.platform, m.id)),
+                );
                 const dropped = new Set(
-                    slimItems.slice(-truncated).map((m) => compositeKey(m.platform, m.id)),
+                    slimItems
+                        .slice(-truncated)
+                        .map((m) => compositeKey(m.platform, m.id))
+                        .filter((k) => !kept.has(k)),
                 );
                 const fromList = [...dropped].filter((k) => insertedToList.has(k));
                 if (fromList.length > 0 && this.currentPlaylistId === playlistId) {
