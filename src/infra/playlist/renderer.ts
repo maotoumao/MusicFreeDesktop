@@ -629,7 +629,8 @@ class PlaylistRenderer {
                     return { error };
                 }
             })
-            .catch(async () => {
+            .catch(async (): Promise<IReadOutcome> => {
+                if (!wanted()) return { skipped: true };
                 try {
                     return { detail: await mod.getPlaylistDetail(playlistId) };
                 } catch (error) {
