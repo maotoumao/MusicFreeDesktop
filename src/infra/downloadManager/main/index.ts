@@ -448,11 +448,14 @@ class DownloadManager {
         if (waitMs > 0) await delay(waitMs);
     }
 
-    private enqueueTask(task: IDownloadTask): void {
+    /**
+     * @param prepare 上一次执行结束后、入队前要做的准备（如重试前删除临时文件），返回 false 时不再入队
+     */
+    private enqueueTask(task: IDownloadTask, prepare?: () => Promise<boolean>): void {
         // 捕获当前世代号，回调执行时比对——若不一致说明中间发生过 pause/remove
         const generation = this.taskGeneration.get(task.id) ?? 0;
 
-        this.queue.add(async () => {
+        const job = async () => {
             // 世代号不匹配 → 入队后发生过 pause/remove，跳过执行
             if ((this.taskGeneration.get(task.id) ?? 0) !== generation) return;
 
@@ -462,9 +465,6 @@ class DownloadManager {
 
             // 启动间隔闸门：在获取媒体源之前等待到允许的启动时隙
             await this.acquireLaunchSlot();
-
-            // 上一次执行可能还在改名或收尾，结束前不能使用同一个临时文件
-            await this.runs.get(task.id)?.catch(() => {});
 
             // 等待期间可能被 pause/remove/dispose
             if ((this.taskGeneration.get(task.id) ?? 0) !== generation) return;
@@ -628,6 +628,24 @@ class DownloadManager {
             this.runs.set(task.id, run);
             await run;
             if (this.runs.get(task.id) === run) this.runs.delete(task.id);
+        };
+
+        const previous = this.runs.get(task.id);
+        if (!previous && !prepare) {
+            this.queue.add(job);
+            return;
+        }
+        // 上一次执行可能还在改名或收尾，结束前不能使用同一个临时文件：在队列外等（不占并发名额），
+        // 等待本身也记入 runs，之后再次入队的执行会排在它后面
+        const ready = (async () => {
+            await previous?.catch(() => {});
+            return prepare ? prepare().catch(() => true) : true;
+        })();
+        const waiting = ready.then(() => {});
+        this.runs.set(task.id, waiting);
+        void ready.then((ok) => {
+            if (this.runs.get(task.id) === waiting) this.runs.delete(task.id);
+            if (ok) this.queue.add(job);
         });
     }
 
