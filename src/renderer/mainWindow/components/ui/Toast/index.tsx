@@ -164,7 +164,7 @@ function removeToast(id: string) {
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * 显示一条 toast 通知。与正在显示的某条内容完全相同时，不再重复显示，只重新计时。
+ * 显示一条 toast 通知。与正在显示的某条内容和选项完全相同（且都没有操作回调）时，不再重复显示，只重新计时。
  *
  * @example
  * ```ts
@@ -195,6 +195,8 @@ export function showToast(title: string, options?: ToastOptions): void {
                 t.type === item.type &&
                 t.description === item.description &&
                 t.actionLabel === item.actionLabel &&
+                t.duration === item.duration &&
+                t.closable === item.closable &&
                 !t.onAction &&
                 !item.onAction,
         );
