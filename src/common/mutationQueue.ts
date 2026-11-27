@@ -53,5 +53,9 @@ export default class MutationQueue {
             }
         }
         this.flushing = false;
+        // 错误回调里入队的任务（如恢复读取）在本轮之后执行
+        if (this.queue.length > 0) {
+            this.flush();
+        }
     }
 }
