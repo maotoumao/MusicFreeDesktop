@@ -405,12 +405,14 @@ class PlaylistRenderer {
 
         return this.commit(
             op,
-            // 写入真正发出时目标歌单正显示在界面上，才需要库里保留的封面来纠正显示
+            // 写入真正发出时目标歌单正显示在界面上、且已读到快照，才需要库里保留的封面来纠正显示
+            // （还在加载时，读取排在这次写入之后，会读到库里的最终值）
             () =>
                 mod.addMusic(playlistId, items, {
                     reportArtworks:
                         this.shownPlaylistId === playlistId &&
-                        this.currentPlaylistId === playlistId,
+                        this.currentPlaylistId === playlistId &&
+                        this.hasCurrentSnapshot(),
                 }),
             ({ added, truncated, keptArtworks }) => {
                 if (truncated <= 0 && !deferred && !keptArtworks) return op;
