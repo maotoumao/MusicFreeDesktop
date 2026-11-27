@@ -173,9 +173,14 @@ export const methodNormalizers: Partial<
             });
 
             if (page <= 1) {
-                // 合并信息
+                // 合并信息；平台与 id 保持原专辑的，翻页按同一专辑请求
                 return {
-                    albumItem: { ...albumItem, ...(result?.albumItem ?? {}) },
+                    albumItem: {
+                        ...albumItem,
+                        ...(result?.albumItem ?? {}),
+                        platform: albumItem.platform,
+                        id: albumItem.id,
+                    },
                     isEnd: result.isEnd === false ? false : true,
                     musicList: result.musicList,
                 };
