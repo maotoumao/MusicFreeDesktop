@@ -66,6 +66,11 @@ export function createQueries(db: Database.Database) {
                 raw = COALESCE(excluded.raw, raw)
         `),
 
+        /** 读取库里歌曲的封面 */
+        getMusicItemArtwork: db.prepare(`
+            SELECT artwork FROM music_items WHERE platform = ? AND id = ?
+        `),
+
         /** 恢复备份时读取库里已有的同一首歌（展示列与完整数据） */
         getMusicItemForRestore: db.prepare(`
             SELECT platform, CAST(id AS TEXT) AS id, title, artist, album, duration, artwork, raw

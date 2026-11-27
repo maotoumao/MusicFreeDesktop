@@ -29,6 +29,15 @@ export interface IMusicItemSlim {
  * - IPlaylistItem：插件侧的歌单结构，字段松散（含 musicList / playCount 等）
  * - ILocalPlaylistMeta：本地 SQLite 存储的歌单结构，字段严格固定
  */
+/** 向歌单添加歌曲的结果 */
+export interface IAddMusicResult {
+    added: number;
+    /** 超出歌单上限、没有写入的末尾歌曲数 */
+    truncated: number;
+    /** 传入时没有封面、库里保留了原封面的歌曲（upsert 时封面为空不覆盖） */
+    keptArtworks?: Array<{ platform: string; id: string; artwork: string }>;
+}
+
 export interface ILocalPlaylistMeta {
     id: string;
     title: string;

@@ -97,6 +97,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复向歌单添加歌曲后立即打开该歌单（或打开时还有其他歌单写入在进行）时，列表里缺少刚添加的歌曲、要重新进入才出现的问题。
 - 修复把已在歌单里的歌曲再次添加（例如歌曲信息有更新）后，当前列表仍显示旧的标题、歌手、专辑或封面，要重新打开歌单才更新的问题。
 - 修复一次添加的歌曲里有重复（如导入的歌单里同一首歌出现两次）时，当前列表把这首歌显示两份、重新打开歌单才恢复的问题。
+- 修复删除歌曲后再把它（不带封面的版本）加回歌单时，列表里不显示封面、要重新打开歌单才出现的问题。
 
 ### Added
 
@@ -183,6 +184,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix a playlist opened right after adding songs to it (or while other playlist writes were still in progress) missing the songs just added until it was reopened.
 - Fix re-adding a song already in a playlist (for example with updated info) leaving the old title, artist, album or artwork in the open list until the playlist was reopened.
 - Fix a song appearing twice in the open list, until the playlist was reopened, when the songs added at once contained duplicates (for example the same song listed twice in an imported playlist).
+- Fix a song removed and then added back to a playlist without artwork showing no cover in the open list until the playlist was reopened.
 
 ---
 

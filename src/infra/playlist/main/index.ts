@@ -18,6 +18,7 @@ import type {
     ILocalPlaylistMeta,
     ILocalPlaylistDetail,
     IMusicItemSlim,
+    IAddMusicResult,
 } from '@appTypes/infra/playlist';
 import {
     IPC,
@@ -349,7 +350,7 @@ class PlaylistManager {
                 _evt,
                 playlistId: string,
                 musicItems: Array<IMusic.IMusicItem | IMusicItemSlim>,
-            ): { added: number; truncated: number } => {
+            ): IAddMusicResult => {
                 const currentCount = (this.queries.getPlaylistMusicCount.get(playlistId) as any)
                     .count;
                 const remaining = MAX_MUSIC_PER_PLAYLIST - currentCount;
@@ -391,7 +392,30 @@ class PlaylistManager {
                 );
                 addMany(toAdd);
                 this.broadcastPlaylistEvent({ origin: 'user', sheetId: playlistId });
-                return { added: toAdd.length, truncated: musicItems.length - toAdd.length };
+
+                // 传入时没有封面的歌，库里可能保留了原封面，返回给渲染层显示
+                const keptArtworks: NonNullable<IAddMusicResult['keptArtworks']> = [];
+                const checked = new Set<string>();
+                for (const item of toAdd) {
+                    const sid = String(item.id);
+                    const key = `${item.platform}\0${sid}`;
+                    if (item.artwork || checked.has(key)) continue;
+                    checked.add(key);
+                    const row = this.queries.getMusicItemArtwork.get(item.platform, sid) as
+                        { artwork: string | null } | undefined;
+                    if (row?.artwork) {
+                        keptArtworks.push({
+                            platform: item.platform,
+                            id: sid,
+                            artwork: row.artwork,
+                        });
+                    }
+                }
+                return {
+                    added: toAdd.length,
+                    truncated: musicItems.length - toAdd.length,
+                    ...(keptArtworks.length > 0 && { keptArtworks }),
+                };
             },
         );
 

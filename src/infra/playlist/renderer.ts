@@ -19,6 +19,7 @@ import type {
     ICreatePlaylistParams,
     IUpdatePlaylistParams,
     IStarredPlaylistItem,
+    IAddMusicResult,
 } from '@appTypes/infra/playlist';
 
 import { compositeKey } from '@common/mediaKey';
@@ -40,10 +41,7 @@ interface IMod {
     deletePlaylist(playlistId: string): Promise<void>;
     updatePlaylist(params: IUpdatePlaylistParams): Promise<void>;
     clearPlaylist(playlistId: string): Promise<void>;
-    addMusic(
-        playlistId: string,
-        musicItems: IMusic.IMusicItem[],
-    ): Promise<{ added: number; truncated: number }>;
+    addMusic(playlistId: string, musicItems: IMusic.IMusicItem[]): Promise<IAddMusicResult>;
     removeMusic(playlistId: string, musicBases: IMedia.IMediaBase[]): Promise<void>;
     removeFromAllPlaylists(musicBases: IMedia.IMediaBase[]): Promise<void>;
     updateMusicOrder(playlistId: string, orderedKeys: IMedia.IMediaBase[]): Promise<void>;
@@ -358,7 +356,7 @@ class PlaylistRenderer {
     addMusicToPlaylist(
         musicItems: IMusic.IMusicItem | IMusicItemSlim | Array<IMusic.IMusicItem | IMusicItemSlim>,
         playlistId: string,
-    ): Promise<{ added: number; truncated: number }> {
+    ): Promise<IAddMusicResult> {
         const items = Array.isArray(musicItems) ? musicItems : [musicItems];
         const slimItems = items.map(musicItemToSlim);
         // 缓存显示歌单已满时不做乐观更新，免得先插入整批再撤回；写完后按实际写入的部分更新
@@ -370,14 +368,23 @@ class PlaylistRenderer {
         return this.commit(
             op,
             () => mod.addMusic(playlistId, items),
-            ({ added, truncated }) => {
-                if (truncated <= 0 && !deferred) return op;
+            ({ added, truncated, keptArtworks }) => {
+                if (truncated <= 0 && !deferred && !keptArtworks) return op;
                 // 主进程按输入顺序写入前 length - truncated 首
-                const accepted = slimItems.slice(0, slimItems.length - truncated);
+                let accepted = slimItems.slice(0, slimItems.length - truncated);
                 if (deferred) op.accepted = added > 0 ? accepted : [];
+                // 传入时没有封面、库里保留了原封面的歌，按库里的封面显示
+                if (keptArtworks) {
+                    const kept = new Map(keptArtworks.map((a) => [keyOf(a), a.artwork]));
+                    accepted = accepted.map((m) =>
+                        !m.artwork && kept.has(keyOf(m))
+                            ? { ...m, artwork: kept.get(keyOf(m))! }
+                            : m,
+                    );
+                }
                 return {
                     op: { ...op, items: accepted, deferred: false },
-                    changed: truncated > 0 ? !deferred || added > 0 : added > 0,
+                    changed: truncated > 0 || !!keptArtworks ? !deferred || added > 0 : added > 0,
                 };
             },
         );
