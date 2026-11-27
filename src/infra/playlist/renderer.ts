@@ -580,7 +580,7 @@ class PlaylistRenderer {
                 const base = this.listBase;
                 // 一首都没写入的添加没有效果，不用并入快照
                 const noEffect = final.kind === 'add' && final.items.length === 0;
-                if (base && !noEffect && opTargets(final, base.playlistId)) {
+                if (base && opTargets(final, base.playlistId)) {
                     if (
                         !changed &&
                         this.hasCurrentSnapshot() &&
@@ -589,7 +589,7 @@ class PlaylistRenderer {
                         // 没有还没写完的操作时，界面就是「快照 + 已写完的操作」，直接作为新快照
                         base.items = store.get(musicListAtom);
                         base.settled = [];
-                    } else {
+                    } else if (!noEffect) {
                         base.settled.push(final);
                         if (base.settled.length >= COMPACT_BACKLOG) this.scheduleCompaction();
                     }
