@@ -4,7 +4,7 @@ export interface IBackupData {
     createdAt: number;
     /** 产出端信息（跨端备份协议 origin 字段）；旧备份没有 */
     origin?: IBackupOrigin;
-    musicSheets: IBackupSheet[];
+    musicSheets: IBackupPlaylist[];
 }
 
 /** 备份产出端信息 */
@@ -17,7 +17,7 @@ export interface IBackupOrigin {
 }
 
 /** 备份中的单个歌单 */
-export interface IBackupSheet {
+export interface IBackupPlaylist {
     id: string;
     title: string;
     musicList: IMusic.IMusicItem[];
@@ -62,7 +62,7 @@ export interface IBackupProvider {
      * @param onProgress - 进度回调（按歌单粒度）
      */
     importSheets(
-        sheets: IBackupSheet[],
+        sheets: IBackupPlaylist[],
         mode: RestoreMode,
         onProgress?: (current: number, total: number, sheetTitle: string) => void,
     ): { sheetsCount: number; songsCount: number };

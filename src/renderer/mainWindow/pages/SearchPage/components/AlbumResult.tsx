@@ -42,10 +42,10 @@ export function AlbumResult({ pluginHash }: AlbumResultProps) {
     }, [loadMore, pluginHash]);
 
     // IAlbumItem extends IMusicSheetItem — direct assignment is safe
-    const gridData = data as IMusic.IMusicSheetItem[];
+    const gridData = data as IMusic.IPlaylistItem[];
 
     const handleItemClick = useCallback(
-        (item: IMusic.IMusicSheetItem) => {
+        (item: IMusic.IPlaylistItem) => {
             const albumItem = item as IAlbum.IAlbumItem;
             navigate(albumRoute(albumItem.platform, albumItem.id), {
                 state: { albumItem },

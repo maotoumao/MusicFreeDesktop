@@ -32,8 +32,8 @@ export default function ToplistDetailPage() {
     const platform = rawPlatform ? decodeURIComponent(rawPlatform) : '';
     const location = useLocation();
 
-    const topListItem = useMemo<IMusic.IMusicSheetItem | null>(() => {
-        const stateItem = (location.state as { topListItem?: IMusic.IMusicSheetItem })?.topListItem;
+    const topListItem = useMemo<IMusic.IPlaylistItem | null>(() => {
+        const stateItem = (location.state as { topListItem?: IMusic.IPlaylistItem })?.topListItem;
         if (!stateItem) return null;
         return {
             ...stateItem,

@@ -9,17 +9,16 @@
  */
 
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import { atom, getDefaultStore } from 'jotai';
-import { useAtomValue } from 'jotai/react';
+import { atom, getDefaultStore , useAtomValue } from 'jotai';
 import EventEmitter from 'eventemitter3';
 
 import type {
-    ILocalSheetMeta,
-    ILocalSheetDetail,
+    ILocalPlaylistMeta,
+    ILocalPlaylistDetail,
     IMusicItemSlim,
-    ICreateSheetParams,
-    IUpdateSheetParams,
-    IStarredSheetItem,
+    ICreatePlaylistParams,
+    IUpdatePlaylistParams,
+    IStarredPlaylistItem,
 } from '@appTypes/infra/musicSheet';
 
 import { compositeKey } from '@common/mediaKey';
@@ -28,17 +27,17 @@ import MutationQueue from '@common/mutationQueue';
 import {
     CONTEXT_BRIDGE_KEY,
     DEFAULT_FAVORITE_SHEET_ID,
-    type IMusicSheetEvent,
+    type IPlaylistEvent,
 } from './common/constant';
 
 // ─── Preload Bridge ───
 
 interface IMod {
-    getAllSheets(): Promise<ILocalSheetMeta[]>;
-    getSheetDetail(sheetId: string): Promise<ILocalSheetDetail | null>;
-    createSheet(params: ICreateSheetParams): Promise<ILocalSheetMeta>;
+    getAllSheets(): Promise<ILocalPlaylistMeta[]>;
+    getSheetDetail(sheetId: string): Promise<ILocalPlaylistDetail | null>;
+    createSheet(params: ICreatePlaylistParams): Promise<ILocalPlaylistMeta>;
     deleteSheet(sheetId: string): Promise<void>;
-    updateSheet(params: IUpdateSheetParams): Promise<void>;
+    updateSheet(params: IUpdatePlaylistParams): Promise<void>;
     clearSheet(sheetId: string): Promise<void>;
     addMusic(
         sheetId: string,
@@ -49,8 +48,8 @@ interface IMod {
     updateMusicOrder(sheetId: string, orderedKeys: IMedia.IMediaBase[]): Promise<void>;
     getRawMusicItem(platform: string, id: string): Promise<IMusic.IMusicItem | null>;
     getRawMusicItems(keys: IMedia.IMediaBase[]): Promise<IMusic.IMusicItem[]>;
-    getStarredSheets(): Promise<IStarredSheetItem[]>;
-    starSheet(sheet: IMusic.IMusicSheetItem): Promise<void>;
+    getStarredSheets(): Promise<IStarredPlaylistItem[]>;
+    starSheet(sheet: IMusic.IPlaylistItem): Promise<void>;
     unstarSheet(platform: string, id: string): Promise<void>;
     setStarredOrder(orderedKeys: IMedia.IMediaBase[]): Promise<void>;
     // ─── 播放队列 ───
@@ -60,7 +59,7 @@ interface IMod {
     playQueueRemove(musicBases: IMedia.IMediaBase[]): Promise<void>;
     playQueueClear(): Promise<void>;
     // ─── 事件 ───
-    onMusicSheetEvent(cb: (event: IMusicSheetEvent) => void): () => void;
+    onMusicSheetEvent(cb: (event: IPlaylistEvent) => void): () => void;
 }
 
 const mod = window[CONTEXT_BRIDGE_KEY as any] as unknown as IMod;
@@ -82,10 +81,10 @@ export type IPlayQueueBridge = typeof playQueueBridge;
 const store = getDefaultStore();
 
 /** 歌单列表 */
-const sheetsAtom = atom<ILocalSheetMeta[]>([]);
+const sheetsAtom = atom<ILocalPlaylistMeta[]>([]);
 
 /** 星标远程歌单 */
-const starredSheetsAtom = atom<IStarredSheetItem[]>([]);
+const starredSheetsAtom = atom<IStarredPlaylistItem[]>([]);
 
 /** 当前歌曲列表 */
 const musicListAtom = atom<IMusicItemSlim[]>([]);
@@ -103,8 +102,8 @@ interface IRendererEvents {
     starredChange: () => void;
 }
 
-class MusicSheetRenderer {
-    static instance: MusicSheetRenderer | null = null;
+class PlaylistRenderer {
+    static instance: PlaylistRenderer | null = null;
 
     public readonly events = new EventEmitter<IRendererEvents>();
     private favoriteIdSet = new Set<string>();
@@ -122,8 +121,8 @@ class MusicSheetRenderer {
     // ─── 初始化 ───
 
     async setup() {
-        if (MusicSheetRenderer.instance) return;
-        MusicSheetRenderer.instance = this;
+        if (PlaylistRenderer.instance) return;
+        PlaylistRenderer.instance = this;
 
         const [sheets, starred] = await Promise.all([mod.getAllSheets(), mod.getStarredSheets()]);
         store.set(sheetsAtom, sheets);
@@ -167,14 +166,14 @@ class MusicSheetRenderer {
 
     // ─── 歌单列表 ───
 
-    getAllSheets(): ILocalSheetMeta[] {
+    getAllSheets(): ILocalPlaylistMeta[] {
         return store.get(sheetsAtom);
     }
 
     // NOTE: IPC 完成后手动刷新 sheetsAtom，保证调用者 resolve 时数据已是最新。
     // main 侧广播会再触发一次 getAllSheets（双重拉取），但开销可忽略。
 
-    async addSheet(title: string): Promise<ILocalSheetMeta> {
+    async addSheet(title: string): Promise<ILocalPlaylistMeta> {
         const sheet = await mod.createSheet({ title });
         store.set(sheetsAtom, await mod.getAllSheets());
         return sheet;
@@ -187,7 +186,7 @@ class MusicSheetRenderer {
     }
 
     // NOTE: 双重拉取，见 addSheet 注释
-    async updateSheet(sheetId: string, data: Partial<IUpdateSheetParams>): Promise<void> {
+    async updateSheet(sheetId: string, data: Partial<IUpdatePlaylistParams>): Promise<void> {
         await mod.updateSheet({ id: sheetId, ...data });
         store.set(sheetsAtom, await mod.getAllSheets());
     }
@@ -313,11 +312,11 @@ class MusicSheetRenderer {
     // TODO [P2]: 乐观更新 — 先同步更新 starredIdSet + starredSheetsAtom，再异步写 DB，
     //            失败时回滚（与 favorite 路径一致）。当前实现等待两次 IPC 后才更新 UI。
 
-    getAllStarredSheets(): IStarredSheetItem[] {
+    getAllStarredSheets(): IStarredPlaylistItem[] {
         return store.get(starredSheetsAtom);
     }
 
-    async starMusicSheet(sheet: IMusic.IMusicSheetItem): Promise<void> {
+    async starMusicSheet(sheet: IMusic.IPlaylistItem): Promise<void> {
         try {
             await mod.starSheet(sheet);
             store.set(starredSheetsAtom, await mod.getStarredSheets());
@@ -346,7 +345,7 @@ class MusicSheetRenderer {
 
     // ─── 歌单详情（全量加载） ───
 
-    async openSheet(sheetId: string): Promise<ILocalSheetDetail | null> {
+    async openSheet(sheetId: string): Promise<ILocalPlaylistDetail | null> {
         this.currentSheetId = sheetId;
         store.set(musicListAtom, []);
         store.set(isLoadingSheetAtom, true);
@@ -451,7 +450,7 @@ class MusicSheetRenderer {
 
 // ─── 模块单例 ───
 
-const musicSheet = new MusicSheetRenderer();
+const musicSheet = new PlaylistRenderer();
 export default musicSheet;
 
 // ═══════════════════════════════════════════════════════
@@ -473,12 +472,12 @@ export function useMusicIsFavorite(musicItem: { platform: string; id: string }):
 }
 
 /** 监听歌单列表变更 */
-export function useMusicSheetList(): ILocalSheetMeta[] {
+export function useMusicSheetList(): ILocalPlaylistMeta[] {
     return useAtomValue(sheetsAtom);
 }
 
 /** 按 ID 获取单个歌单的元数据（响应式） */
-export function useMusicSheetMeta(sheetId: string | undefined): ILocalSheetMeta | null {
+export function useMusicSheetMeta(sheetId: string | undefined): ILocalPlaylistMeta | null {
     const sheets = useAtomValue(sheetsAtom);
     return useMemo(() => sheets.find((s) => s.id === sheetId) ?? null, [sheets, sheetId]);
 }
@@ -489,7 +488,7 @@ export function useIsLoadingSheet(): boolean {
 }
 
 /** 监听星标歌单列表 */
-export function useStarredSheets(): IStarredSheetItem[] {
+export function useStarredSheets(): IStarredPlaylistItem[] {
     return useAtomValue(starredSheetsAtom);
 }
 

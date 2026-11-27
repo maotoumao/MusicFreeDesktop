@@ -10,7 +10,7 @@ import musicSheet, { useMusicSheetList } from '@infra/musicSheet/renderer';
 import { DEFAULT_FAVORITE_SHEET_ID } from '@infra/musicSheet/common/constant';
 import './index.scss';
 
-export interface AddMusicToSheetModalProps {
+export interface AddMusicToPlaylistModalProps {
     close: () => void;
     /** 要添加的歌曲（支持单曲与多曲） */
     musicItems: IMusic.IMusicItem[];
@@ -22,7 +22,7 @@ export interface AddMusicToSheetModalProps {
  * 列出所有用户歌单（含"我喜欢"），点击即添加并关闭。
  * 顶部"新建歌单"入口：关闭当前弹窗，打开 CreateSheetModal。
  */
-export default function AddMusicToSheetModal({ close, musicItems }: AddMusicToSheetModalProps) {
+export default function AddMusicToSheetModal({ close, musicItems }: AddMusicToPlaylistModalProps) {
     const { t } = useTranslation();
     const sheets = useMusicSheetList();
 

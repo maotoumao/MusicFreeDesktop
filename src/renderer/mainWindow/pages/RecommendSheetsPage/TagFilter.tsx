@@ -9,7 +9,7 @@ const DEFAULT_TAG: IMedia.IUnique = { id: '', title: '' };
 
 export interface TagFilterProps {
     /** 标签数据 */
-    tags: IPlugin.IGetRecommendSheetTagsResult | null;
+    tags: IPlugin.IGetRecommendPlaylistTagsResult | null;
     /** 当前选中的标签 */
     selectedTag: IMedia.IUnique;
     /** 选中标签变更回调 */

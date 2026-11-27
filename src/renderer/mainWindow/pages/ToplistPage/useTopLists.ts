@@ -4,7 +4,7 @@ import pluginManager from '@infra/pluginManager/renderer';
 
 interface ITopListCache {
     status: RequestStatus;
-    data: IMusic.IMusicSheetGroupItem[];
+    data: IMusic.IPlaylistGroupItem[];
 }
 
 /**
@@ -18,7 +18,7 @@ export function useTopLists(pluginHash: string) {
     const [status, setStatus] = useState<RequestStatus>(() => {
         return cacheRef.current[pluginHash]?.status ?? RequestStatus.Idle;
     });
-    const [data, setData] = useState<IMusic.IMusicSheetGroupItem[]>(() => {
+    const [data, setData] = useState<IMusic.IPlaylistGroupItem[]>(() => {
         return cacheRef.current[pluginHash]?.data ?? [];
     });
 

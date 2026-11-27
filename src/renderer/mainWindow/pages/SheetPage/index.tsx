@@ -29,8 +29,8 @@ export default function SheetPage() {
     const { t } = useTranslation();
 
     // 从 route state 获取完整 item，fallback 到 URL params 构造最小对象
-    const originalItem = useMemo<IMusic.IMusicSheetItem>(() => {
-        const stateItem = (location.state as { sheetItem?: IMusic.IMusicSheetItem })?.sheetItem;
+    const originalItem = useMemo<IMusic.IPlaylistItem>(() => {
+        const stateItem = (location.state as { sheetItem?: IMusic.IPlaylistItem })?.sheetItem;
         return {
             ...stateItem,
             platform: platform ? decodeURIComponent(platform) : (stateItem?.platform ?? ''),

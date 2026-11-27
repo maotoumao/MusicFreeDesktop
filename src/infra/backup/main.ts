@@ -23,7 +23,7 @@ import type {
     IBackupOrigin,
     IBackupProvider,
     IBackupResult,
-    IBackupSheet,
+    IBackupPlaylist,
     RestoreMode,
     IBackupProgress,
 } from '@appTypes/infra/backup';
@@ -394,7 +394,7 @@ function parseEnvelopeV2(data: any): IBackupData {
  * 避免覆盖恢复先清空现有歌单、再恢复不出内容。缺 platform / id 的曲目无法入库，丢弃；
  * 其余字段在写库时处理（见 musicSheet 的 mergeRestoredItem）。
  */
-function normalizeSheets(sheets: any[]): IBackupSheet[] {
+function normalizeSheets(sheets: any[]): IBackupPlaylist[] {
     if (!sheets.every((sheet) => Array.isArray(sheet?.musicList))) {
         throw new Error('unsupported_backup_format');
     }

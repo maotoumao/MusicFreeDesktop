@@ -9,7 +9,7 @@ import { TagFilter, DEFAULT_TAG } from './TagFilter';
 import { useRecommendTags } from './useRecommendTags';
 import { useRecommendSheets } from './useRecommendSheets';
 
-interface RecommendSheetsBodyProps {
+interface RecommendPlaylistsBodyProps {
     pluginHash: string;
 }
 
@@ -18,7 +18,7 @@ interface RecommendSheetsBodyProps {
  *
  * 标签筛选栏 + MediaGrid 歌单卡片网格 + 分页加载
  */
-export function RecommendSheetsBody({ pluginHash }: RecommendSheetsBodyProps) {
+export function RecommendSheetsBody({ pluginHash }: RecommendPlaylistsBodyProps) {
     const { t } = useTranslation();
     const { tags, status: tagsStatus } = useRecommendTags(pluginHash);
     const [selectedTag, setSelectedTag] = useState<IMedia.IUnique>(DEFAULT_TAG);
@@ -39,7 +39,7 @@ export function RecommendSheetsBody({ pluginHash }: RecommendSheetsBodyProps) {
     }, []);
 
     const handleItemClick = useCallback(
-        (item: IMusic.IMusicSheetItem) => {
+        (item: IMusic.IPlaylistItem) => {
             navigate(musicSheetRoute(item.platform, item.id), {
                 state: { sheetItem: item },
             });

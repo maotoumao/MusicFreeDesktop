@@ -4,10 +4,10 @@ import type { NavigateFunction } from 'react-router';
 import { safeParse } from '@common/safeSerialize';
 import { showContextMenu } from '../../ui/ContextMenu/contextMenuManager';
 import { musicSheetRoute } from '../../../routes';
-import type { IStarredSheetItem } from '@appTypes/infra/musicSheet';
+import type { IStarredPlaylistItem } from '@appTypes/infra/musicSheet';
 
-interface StarredSheetNavItemProps {
-    item: IStarredSheetItem;
+interface StarredPlaylistNavItemProps {
+    item: IStarredPlaylistItem;
     pathname: string;
     navigate: NavigateFunction;
 }
@@ -16,11 +16,11 @@ export default function StarredSheetNavItem({
     item,
     pathname,
     navigate,
-}: StarredSheetNavItemProps) {
+}: StarredPlaylistNavItemProps) {
     const sheetPath = musicSheetRoute(item.platform, item.id);
     const fullItem = useMemo(
         () =>
-            safeParse<IMusic.IMusicSheetItem>(item.raw) ?? {
+            safeParse<IMusic.IPlaylistItem>(item.raw) ?? {
                 platform: item.platform,
                 id: item.id,
                 title: item.title ?? '',
@@ -35,9 +35,13 @@ export default function StarredSheetNavItem({
     const handleContextMenu = useCallback(
         (e: MouseEvent) => {
             e.preventDefault();
-            showContextMenu('StarredSheetMenu', { x: e.clientX, y: e.clientY }, {
-                sheetItem: { platform: item.platform, id: item.id },
-            });
+            showContextMenu(
+                'StarredSheetMenu',
+                { x: e.clientX, y: e.clientY },
+                {
+                    sheetItem: { platform: item.platform, id: item.id },
+                },
+            );
         },
         [item.platform, item.id],
     );

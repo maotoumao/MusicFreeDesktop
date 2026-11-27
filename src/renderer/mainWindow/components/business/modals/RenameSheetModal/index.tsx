@@ -10,7 +10,7 @@ import './index.scss';
 /** 歌单名称最大长度 */
 const SHEET_NAME_MAX_LENGTH = 120;
 
-export interface RenameSheetModalProps {
+export interface RenamePlaylistModalProps {
     close: () => void;
     /** 歌单 ID */
     sheetId: string;
@@ -21,7 +21,11 @@ export interface RenameSheetModalProps {
 /**
  * RenameSheetModal — 重命名歌单弹窗（业务组件）
  */
-export default function RenameSheetModal({ close, sheetId, currentTitle }: RenameSheetModalProps) {
+export default function RenameSheetModal({
+    close,
+    sheetId,
+    currentTitle,
+}: RenamePlaylistModalProps) {
     const { t } = useTranslation();
     const [name, setName] = useState(currentTitle);
     const [loading, setLoading] = useState(false);

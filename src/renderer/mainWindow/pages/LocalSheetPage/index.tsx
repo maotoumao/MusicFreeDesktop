@@ -207,7 +207,7 @@ export default function LocalSheetPage() {
     );
 
     // ── 构造 MusicSheetHeader 所需数据 ──
-    const headerSheet = useMemo((): IMusic.IMusicSheetItem => {
+    const headerSheet = useMemo((): IMusic.IPlaylistItem => {
         const base = {
             id: id ?? '',
             platform: 'local',

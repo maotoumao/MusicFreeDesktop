@@ -43,24 +43,24 @@ declare namespace IPlugin {
         musicList?: IMusic.IMusicItem[];
     }
 
-    interface ISheetInfoResult {
+    interface IPlaylistInfoResult {
         isEnd?: boolean;
-        sheetItem?: IMusic.IMusicSheetItem;
+        sheetItem?: IMusic.IPlaylistItem;
         /** 新版插件（playlist 协议）返回的歌单信息，与 sheetItem 含义相同 */
-        playlistItem?: IMusic.IMusicSheetItem;
+        playlistItem?: IMusic.IPlaylistItem;
         musicList?: IMusic.IMusicItem[];
     }
 
     interface ITopListInfoResult {
         isEnd?: boolean;
-        topListItem?: IMusic.IMusicSheetItem;
+        topListItem?: IMusic.IPlaylistItem;
         musicList?: IMusic.IMusicItem[];
     }
 
-    interface IGetRecommendSheetTagsResult {
+    interface IGetRecommendPlaylistTagsResult {
         // 固定的tag
-        pinned?: IMusic.IMusicSheetItem[];
-        data?: IMusic.IMusicSheetGroupItem[];
+        pinned?: IMusic.IPlaylistItem[];
+        data?: IMusic.IPlaylistGroupItem[];
     }
 
     interface IGetCommentResult {
@@ -111,9 +111,9 @@ declare namespace IPlugin {
         ) => Promise<IAlbumInfoResult | null>;
         /** 获取歌单信息，有分页 */
         getMusicSheetInfo?: (
-            sheetItem: IMusic.IMusicSheetItem,
+            sheetItem: IMusic.IPlaylistItem,
             page: number,
-        ) => Promise<ISheetInfoResult | null>;
+        ) => Promise<IPlaylistInfoResult | null>;
         /** 获取作品，有分页 */
         getArtistWorks?: IGetArtistWorksFunc;
         /** 导入歌单 */
@@ -122,19 +122,19 @@ declare namespace IPlugin {
         /** 导入单曲 */
         importMusicItem?: (urlLike: string) => Promise<IMusic.IMusicItem | null>;
         /** 获取榜单 */
-        getTopLists?: () => Promise<IMusic.IMusicSheetGroupItem[]>;
+        getTopLists?: () => Promise<IMusic.IPlaylistGroupItem[]>;
         /** 获取榜单详情 */
         getTopListDetail?: (
-            topListItem: IMusic.IMusicSheetItem,
+            topListItem: IMusic.IPlaylistItem,
             page: number,
         ) => Promise<ITopListInfoResult>;
         /** 获取热门歌单tag */
-        getRecommendSheetTags?: () => Promise<IGetRecommendSheetTagsResult>;
+        getRecommendSheetTags?: () => Promise<IGetRecommendPlaylistTagsResult>;
         /** 歌单列表 */
         getRecommendSheetsByTag?: (
             tag: ICommon.IUnique,
             page?: number,
-        ) => Promise<ICommon.PaginationResponse<IMusic.IMusicSheetItem>>;
+        ) => Promise<ICommon.PaginationResponse<IMusic.IPlaylistItem>>;
         /** playlist 协议的新名，与上面对应的旧名含义相同；插件实现了新名时优先调用 */
         getPlaylistInfo?: IPluginDefine['getMusicSheetInfo'];
         importPlaylist?: IPluginDefine['importMusicSheet'];

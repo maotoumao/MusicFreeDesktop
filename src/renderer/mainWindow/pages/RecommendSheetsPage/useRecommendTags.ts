@@ -8,7 +8,7 @@ import pluginManager from '@infra/pluginManager/renderer';
  * 调用插件 getRecommendPlaylistTags，缓存按 pluginHash 隔离。
  */
 export function useRecommendTags(pluginHash: string) {
-    const [tags, setTags] = useState<IPlugin.IGetRecommendSheetTagsResult | null>(null);
+    const [tags, setTags] = useState<IPlugin.IGetRecommendPlaylistTagsResult | null>(null);
     const [status, setStatus] = useState<RequestStatus>(RequestStatus.Idle);
 
     const fetch = useCallback(async () => {

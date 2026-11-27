@@ -7,19 +7,19 @@
  */
 import { contextBridge, ipcRenderer } from 'electron';
 import type {
-    ICreateSheetParams,
-    IUpdateSheetParams,
+    ICreatePlaylistParams,
+    IUpdatePlaylistParams,
     IMusicItemSlim,
 } from '@appTypes/infra/musicSheet';
-import { IPC, CONTEXT_BRIDGE_KEY, type IMusicSheetEvent } from './common/constant';
+import { IPC, CONTEXT_BRIDGE_KEY, type IPlaylistEvent } from './common/constant';
 
 const mod = {
     // ─── 歌单 ───
     getAllSheets: () => ipcRenderer.invoke(IPC.GET_ALL_SHEETS),
     getSheetDetail: (sheetId: string) => ipcRenderer.invoke(IPC.GET_SHEET_DETAIL, sheetId),
-    createSheet: (params: ICreateSheetParams) => ipcRenderer.invoke(IPC.CREATE_SHEET, params),
+    createSheet: (params: ICreatePlaylistParams) => ipcRenderer.invoke(IPC.CREATE_SHEET, params),
     deleteSheet: (sheetId: string) => ipcRenderer.invoke(IPC.DELETE_SHEET, sheetId),
-    updateSheet: (params: IUpdateSheetParams) => ipcRenderer.invoke(IPC.UPDATE_SHEET, params),
+    updateSheet: (params: IUpdatePlaylistParams) => ipcRenderer.invoke(IPC.UPDATE_SHEET, params),
     clearSheet: (sheetId: string) => ipcRenderer.invoke(IPC.CLEAR_SHEET, sheetId),
 
     // ─── 歌曲 ───
@@ -38,7 +38,7 @@ const mod = {
 
     // ─── 星标远程歌单 ───
     getStarredSheets: () => ipcRenderer.invoke(IPC.GET_STARRED_SHEETS),
-    starSheet: (sheet: IMusic.IMusicSheetItem) => ipcRenderer.invoke(IPC.STAR_SHEET, sheet),
+    starSheet: (sheet: IMusic.IPlaylistItem) => ipcRenderer.invoke(IPC.STAR_SHEET, sheet),
     unstarSheet: (platform: string, id: string) =>
         ipcRenderer.invoke(IPC.UNSTAR_SHEET, platform, id),
     setStarredOrder: (orderedKeys: IMedia.IMediaBase[]) =>
@@ -55,8 +55,8 @@ const mod = {
     playQueueClear: () => ipcRenderer.invoke(IPC.PLAY_QUEUE_CLEAR),
 
     // ─── 事件 ───
-    onMusicSheetEvent: (cb: (event: IMusicSheetEvent) => void): (() => void) => {
-        const handler = (_ipcEvt: unknown, event: IMusicSheetEvent) => cb(event);
+    onMusicSheetEvent: (cb: (event: IPlaylistEvent) => void): (() => void) => {
+        const handler = (_ipcEvt: unknown, event: IPlaylistEvent) => cb(event);
         ipcRenderer.on(IPC.MUSIC_SHEET_EVENT, handler);
         return () => {
             ipcRenderer.removeListener(IPC.MUSIC_SHEET_EVENT, handler);

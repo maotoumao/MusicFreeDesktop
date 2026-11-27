@@ -5,15 +5,19 @@ import type { NavigateFunction } from 'react-router';
 import { DEFAULT_FAVORITE_SHEET_ID } from '@infra/musicSheet/common/constant';
 import { showContextMenu } from '../../ui/ContextMenu/contextMenuManager';
 import { localSheetRoute } from '../../../routes';
-import type { ILocalSheetMeta } from '@appTypes/infra/musicSheet';
+import type { ILocalPlaylistMeta } from '@appTypes/infra/musicSheet';
 
-interface LocalSheetNavItemProps {
-    sheet: ILocalSheetMeta;
+interface LocalPlaylistNavItemProps {
+    sheet: ILocalPlaylistMeta;
     pathname: string;
     navigate: NavigateFunction;
 }
 
-export default function LocalSheetNavItem({ sheet, pathname, navigate }: LocalSheetNavItemProps) {
+export default function LocalSheetNavItem({
+    sheet,
+    pathname,
+    navigate,
+}: LocalPlaylistNavItemProps) {
     const { t } = useTranslation();
     const isFavorite = sheet.id === DEFAULT_FAVORITE_SHEET_ID;
     const Icon = isFavorite ? Heart : ListMusic;

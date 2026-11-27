@@ -15,7 +15,7 @@
 
 import { syncKV, asyncKV } from '@renderer/common/kvStore';
 import { showModal } from '@renderer/mainWindow/components/ui/Modal/modalManager';
-import type { IBackupData, IBackupSheet } from '@appTypes/infra/backup';
+import type { IBackupData, IBackupPlaylist } from '@appTypes/infra/backup';
 import { DOWNLOADED_SHEET_ID } from '@infra/musicSheet/common/constant';
 import type { IMediaMeta } from '@appTypes/infra/mediaMeta';
 
@@ -282,7 +282,7 @@ export async function executeMigration(): Promise<MigrationResult> {
             return { success: true, sheetsImported: 0, songsImported: 0 };
         }
 
-        const backupSheets: IBackupSheet[] = [];
+        const backupSheets: IBackupPlaylist[] = [];
         const musicPool = new Map<string, IMusic.IMusicItem>();
         let totalSongs = 0;
 
@@ -400,7 +400,7 @@ export async function executeMigration(): Promise<MigrationResult> {
         if (prefDB) {
             try {
                 // 星标歌单（旧版存储了完整 IMusicSheetItem 对象）
-                const starredSheets = await readPrefValue<IMusic.IMusicSheetItem[]>(
+                const starredSheets = await readPrefValue<IMusic.IPlaylistItem[]>(
                     prefDB,
                     'starredMusicSheets',
                 );
@@ -411,7 +411,7 @@ export async function executeMigration(): Promise<MigrationResult> {
                                 await musicSheet.starMusicSheet({
                                     ...sheet,
                                     id: String(sheet.id),
-                                } as IMusic.IMusicSheetItem);
+                                } as IMusic.IPlaylistItem);
                             } catch {
                                 // 单条失败不中断
                             }

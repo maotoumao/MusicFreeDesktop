@@ -33,7 +33,7 @@ export function ToplistBody({ pluginHash, pluginPlatform }: ToplistBodyProps) {
     }, [pluginHash]);
 
     const handleCardClick = useCallback(
-        (item: IMusic.IMusicSheetItem) => {
+        (item: IMusic.IPlaylistItem) => {
             navigate(toplistDetailRoute(pluginPlatform), {
                 state: {
                     topListItem: {

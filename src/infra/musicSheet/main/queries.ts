@@ -200,4 +200,4 @@ export function createQueries(db: Database.Database) {
     };
 }
 
-export type IMusicSheetQueries = ReturnType<typeof createQueries>;
+export type IPlaylistQueries = ReturnType<typeof createQueries>;

@@ -13,10 +13,10 @@ import i18n from '@infra/i18n/main';
 import type { IWindowManager } from '@appTypes/main/windowManager';
 import type { IDatabaseProvider } from '@appTypes/infra/database';
 import type {
-    ICreateSheetParams,
-    IUpdateSheetParams,
-    ILocalSheetMeta,
-    ILocalSheetDetail,
+    ICreatePlaylistParams,
+    IUpdatePlaylistParams,
+    ILocalPlaylistMeta,
+    ILocalPlaylistDetail,
     IMusicItemSlim,
 } from '@appTypes/infra/musicSheet';
 import {
@@ -26,17 +26,17 @@ import {
     DEFAULT_FAVORITE_SHEET_ID,
     PLAY_QUEUE_SHEET_ID,
     DOWNLOADED_SHEET_ID,
-    type IMusicSheetEvent,
+    type IPlaylistEvent,
 } from '../common/constant';
-import { createQueries, type IMusicSheetQueries } from './queries';
+import { createQueries, type IPlaylistQueries } from './queries';
 import { INTERNAL_SLIM_KEY } from '@common/constant';
 import { safeStringify, safeParse } from '@common/safeSerialize';
-import type { IBackupProvider, IBackupSheet, RestoreMode } from '@appTypes/infra/backup';
+import type { IBackupProvider, IBackupPlaylist, RestoreMode } from '@appTypes/infra/backup';
 
-class MusicSheetManager {
+class PlaylistManager {
     private isSetup = false;
     private db!: IDatabaseProvider;
-    private queries!: IMusicSheetQueries;
+    private queries!: IPlaylistQueries;
     private windowManager!: IWindowManager;
     private orphanCleanupTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -151,7 +151,7 @@ class MusicSheetManager {
         return {
             /** 获取所有可导出歌单的元数据（排除 system 类型） */
             getExportableSheets: (): Array<{ id: string; title: string }> => {
-                return (this.queries.getAllSheets.all() as ILocalSheetMeta[]).filter(
+                return (this.queries.getAllSheets.all() as ILocalPlaylistMeta[]).filter(
                     (s) => s.type !== 'system',
                 );
             },
@@ -174,7 +174,7 @@ class MusicSheetManager {
              * @param onProgress - 进度回调（按歌单粒度）
              */
             importSheets: (
-                sheets: IBackupSheet[],
+                sheets: IBackupPlaylist[],
                 mode: RestoreMode,
                 onProgress?: (current: number, total: number, sheetTitle: string) => void,
             ): { sheetsCount: number; songsCount: number } => {
@@ -185,7 +185,7 @@ class MusicSheetManager {
                 if (mode === 'overwrite') {
                     db.transaction(() => {
                         const userSheets = (
-                            this.queries.getAllSheets.all() as ILocalSheetMeta[]
+                            this.queries.getAllSheets.all() as ILocalPlaylistMeta[]
                         ).filter((s) => s.type !== 'system' && s.id !== DEFAULT_FAVORITE_SHEET_ID);
                         for (const sheet of userSheets) {
                             this.queries.clearSheetRelations.run(sheet.id);
@@ -263,36 +263,43 @@ class MusicSheetManager {
     private registerIpcHandlers() {
         // ─── 歌单 CRUD ────────────────────────
 
-        ipcMain.handle(IPC.GET_ALL_SHEETS, (): ILocalSheetMeta[] => {
-            return (this.queries.getAllSheets.all() as ILocalSheetMeta[]).filter(
+        ipcMain.handle(IPC.GET_ALL_SHEETS, (): ILocalPlaylistMeta[] => {
+            return (this.queries.getAllSheets.all() as ILocalPlaylistMeta[]).filter(
                 (s) => s.type !== 'system',
             );
         });
 
-        ipcMain.handle(IPC.GET_SHEET_DETAIL, (_evt, sheetId: string): ILocalSheetDetail | null => {
-            const sheet = this.queries.getSheetById.get(sheetId) as ILocalSheetMeta | undefined;
-            if (!sheet) return null;
-            const musicList = this.queries.getSheetMusicSlim.all(sheetId);
-            return { ...sheet, musicList } as ILocalSheetDetail;
-        });
+        ipcMain.handle(
+            IPC.GET_SHEET_DETAIL,
+            (_evt, sheetId: string): ILocalPlaylistDetail | null => {
+                const sheet = this.queries.getSheetById.get(sheetId) as
+                    ILocalPlaylistMeta | undefined;
+                if (!sheet) return null;
+                const musicList = this.queries.getSheetMusicSlim.all(sheetId);
+                return { ...sheet, musicList } as ILocalPlaylistDetail;
+            },
+        );
 
-        ipcMain.handle(IPC.CREATE_SHEET, (_evt, params: ICreateSheetParams): ILocalSheetMeta => {
-            const now = Date.now();
-            const sheet = {
-                id: nanoid(),
-                title: params.title,
-                artwork: params.artwork ?? null,
-                description: params.description ?? null,
-                type: params.type ?? 'user',
-                folderPath: params.folderPath ?? null,
-                sortOrder: 0,
-                createdAt: now,
-                updatedAt: now,
-            };
-            this.queries.insertSheet.run(sheet);
-            this.broadcastMusicSheetEvent({ origin: 'user' });
-            return { ...sheet, worksNum: 0, latestArtwork: null } as ILocalSheetMeta;
-        });
+        ipcMain.handle(
+            IPC.CREATE_SHEET,
+            (_evt, params: ICreatePlaylistParams): ILocalPlaylistMeta => {
+                const now = Date.now();
+                const sheet = {
+                    id: nanoid(),
+                    title: params.title,
+                    artwork: params.artwork ?? null,
+                    description: params.description ?? null,
+                    type: params.type ?? 'user',
+                    folderPath: params.folderPath ?? null,
+                    sortOrder: 0,
+                    createdAt: now,
+                    updatedAt: now,
+                };
+                this.queries.insertSheet.run(sheet);
+                this.broadcastMusicSheetEvent({ origin: 'user' });
+                return { ...sheet, worksNum: 0, latestArtwork: null } as ILocalPlaylistMeta;
+            },
+        );
 
         ipcMain.handle(IPC.DELETE_SHEET, (_evt, sheetId: string) => {
             if (sheetId === DEFAULT_FAVORITE_SHEET_ID) {
@@ -307,7 +314,7 @@ class MusicSheetManager {
             this.broadcastMusicSheetEvent({ origin: 'user' });
         });
 
-        ipcMain.handle(IPC.UPDATE_SHEET, (_evt, params: IUpdateSheetParams) => {
+        ipcMain.handle(IPC.UPDATE_SHEET, (_evt, params: IUpdatePlaylistParams) => {
             const existing = this.queries.getSheetById.get(params.id) as
                 Record<string, unknown> | undefined;
             if (!existing) return;
@@ -465,7 +472,7 @@ class MusicSheetManager {
             return this.queries.getAllStarredSheets.all();
         });
 
-        ipcMain.handle(IPC.STAR_SHEET, (_evt, sheet: IMusic.IMusicSheetItem) => {
+        ipcMain.handle(IPC.STAR_SHEET, (_evt, sheet: IMusic.IPlaylistItem) => {
             this.queries.insertStarredSheet.run({
                 platform: sheet.platform,
                 id: String(sheet.id),
@@ -689,7 +696,7 @@ class MusicSheetManager {
      * - origin: 'user' 表示 renderer 用户操作触发，乐观更新已处理 musicList；
      * - origin: 'internal' 表示 main 内部模块触发，renderer 需拉取 musicList。
      */
-    private broadcastMusicSheetEvent(event: IMusicSheetEvent) {
+    private broadcastMusicSheetEvent(event: IPlaylistEvent) {
         this.windowManager.broadcast(IPC.MUSIC_SHEET_EVENT, event);
     }
 
@@ -782,5 +789,5 @@ function slimToMusicItem(slim: IMusicItemSlim): IMusic.IMusicItem {
     } as IMusic.IMusicItem;
 }
 
-const musicSheet = new MusicSheetManager();
+const musicSheet = new PlaylistManager();
 export default musicSheet;

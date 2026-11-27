@@ -8,7 +8,7 @@ import pluginManager from '@infra/pluginManager/renderer';
  * 支持分页加载。当 tag 变更时，自动重置并加载首页。
  */
 export function useRecommendSheets(pluginHash: string, tag: IMedia.IUnique | null) {
-    const [sheets, setSheets] = useState<IMusic.IMusicSheetItem[]>([]);
+    const [sheets, setSheets] = useState<IMusic.IPlaylistItem[]>([]);
     const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.Idle);
     const [isEnd, setIsEnd] = useState(false);
 

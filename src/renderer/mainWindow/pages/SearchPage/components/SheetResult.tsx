@@ -15,11 +15,11 @@ import { musicSheetRoute } from '../../../routes';
 import { searchResultsAtom, type SearchMediaType } from '../store';
 import { useSearch } from '../useSearch';
 
-interface SheetResultProps {
+interface PlaylistResultProps {
     pluginHash: string;
 }
 
-export function SheetResult({ pluginHash }: SheetResultProps) {
+export function SheetResult({ pluginHash }: PlaylistResultProps) {
     const results = useAtomValue(searchResultsAtom);
     const type: SearchMediaType = 'playlist';
     const record = results[type][pluginHash];
@@ -42,7 +42,7 @@ export function SheetResult({ pluginHash }: SheetResultProps) {
     }, [loadMore, pluginHash]);
 
     const handleItemClick = useCallback(
-        (item: IMusic.IMusicSheetItem) => {
+        (item: IMusic.IPlaylistItem) => {
             navigate(musicSheetRoute(item.platform, item.id), {
                 state: { sheetItem: item },
             });

@@ -4,7 +4,7 @@ import musicSheet from '@infra/musicSheet/renderer';
 import i18n from '@infra/i18n/renderer';
 import { Pencil, Trash2 } from 'lucide-react';
 
-export interface LocalSheetMenuContext {
+export interface LocalPlaylistMenuContext {
     sheetId: string;
     sheetTitle: string;
 }
@@ -15,7 +15,7 @@ export interface LocalSheetMenuContext {
  * 在 Sidebar 的「创建的歌单」列表上右键触发（仅非默认歌单）。
  * 提供重命名和删除操作。
  */
-export function LocalSheetMenu(ctx: LocalSheetMenuContext): ContextMenuEntry[] {
+export function LocalSheetMenu(ctx: LocalPlaylistMenuContext): ContextMenuEntry[] {
     const { sheetId, sheetTitle } = ctx;
 
     return [

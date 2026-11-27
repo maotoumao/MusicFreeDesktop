@@ -29,7 +29,7 @@ import type {
     IDownloadProgress,
     DownloadStatus,
     IPluginManagerForDownload,
-    IDownloadedSheetProvider,
+    IDownloadedPlaylistProvider,
     IAddDownloadParams,
 } from '@appTypes/infra/downloadManager';
 import type { IMusicItemSlim, IMusicItemProvider } from '@appTypes/infra/musicSheet';
@@ -85,7 +85,7 @@ class DownloadManager {
     private db!: IDatabaseProvider;
     private pluginManager!: IPluginManagerForDownload;
     private mediaMeta!: IMediaMetaProvider;
-    private downloadedSheet!: IDownloadedSheetProvider;
+    private downloadedSheet!: IDownloadedPlaylistProvider;
     private musicItemProvider!: IMusicItemProvider;
     private audioTag!: IAudioTagWriter;
 
@@ -118,7 +118,7 @@ class DownloadManager {
         windowManager: IWindowManager;
         pluginManager: IPluginManagerForDownload;
         mediaMeta: IMediaMetaProvider;
-        downloadedSheet: IDownloadedSheetProvider;
+        downloadedSheet: IDownloadedPlaylistProvider;
         musicItemProvider: IMusicItemProvider;
         audioTag: IAudioTagWriter;
     }): void {

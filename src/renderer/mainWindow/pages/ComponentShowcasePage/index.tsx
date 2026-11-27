@@ -101,7 +101,7 @@ const MOCK_SONGS: IMusic.IMusicItemBase[] = Array.from(
 );
 
 // ── MediaGrid mock data ──
-const MOCK_ALBUMS: IMusic.IMusicSheetItem[] = Array.from({ length: 12 }, (_, i) => ({
+const MOCK_ALBUMS: IMusic.IPlaylistItem[] = Array.from({ length: 12 }, (_, i) => ({
     id: `album-${i}`,
     platform: '本地',
     title: `专辑名称 ${i + 1}`,

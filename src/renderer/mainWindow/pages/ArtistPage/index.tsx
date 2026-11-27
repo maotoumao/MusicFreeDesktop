@@ -79,7 +79,7 @@ export default function ArtistPage() {
     );
 
     const handleAlbumClick = useCallback(
-        (item: IMusic.IMusicSheetItem) => {
+        (item: IMusic.IPlaylistItem) => {
             const albumItem = item as IAlbum.IAlbumItem;
             navigate(albumRoute(albumItem.platform, albumItem.id), {
                 state: { albumItem },

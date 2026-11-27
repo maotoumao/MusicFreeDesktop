@@ -9,9 +9,9 @@ import './index.scss';
 // Types
 // ────────────────────────────────────────────────────────────────────────────
 
-export interface MusicSheetHeaderProps {
+export interface PlaylistHeaderProps {
     /** 歌单 / 专辑 / 排行榜数据 */
-    musicSheet: IMusic.IMusicSheetItem;
+    musicSheet: IMusic.IPlaylistItem;
     /** 无封面时的自定义占位内容（默认显示 album-cover.jpg） */
     placeholderIcon?: ReactNode;
     /** 封面右侧、标题下方的自定义操作区（如按钮组） */
@@ -46,7 +46,7 @@ export function MusicSheetHeader({
     actions,
     hideSourceBadge,
     className,
-}: MusicSheetHeaderProps) {
+}: PlaylistHeaderProps) {
     const { t } = useTranslation();
     const { artwork, title, description, artist, platform, worksNum } = musicSheet;
 

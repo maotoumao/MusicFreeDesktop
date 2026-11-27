@@ -3,7 +3,7 @@ import musicSheet from '@infra/musicSheet/renderer';
 import i18n from '@infra/i18n/renderer';
 import { Trash2 } from 'lucide-react';
 
-export interface StarredSheetMenuContext {
+export interface StarredPlaylistMenuContext {
     sheetItem: IMedia.IMediaBase;
 }
 
@@ -12,7 +12,7 @@ export interface StarredSheetMenuContext {
  *
  * 在 Sidebar 的收藏歌单列表上右键触发，提供取消收藏操作。
  */
-export function StarredSheetMenu(ctx: StarredSheetMenuContext): ContextMenuEntry[] {
+export function StarredSheetMenu(ctx: StarredPlaylistMenuContext): ContextMenuEntry[] {
     const { sheetItem } = ctx;
 
     return [

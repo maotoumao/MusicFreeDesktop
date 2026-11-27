@@ -20,13 +20,13 @@ import './index.scss';
 
 export interface MediaGridProps {
     /** 数据列表（歌单 / 专辑 / 排行榜等） */
-    data: IMusic.IMusicSheetItem[];
+    data: IMusic.IPlaylistItem[];
     /** 卡片点击 */
-    onItemClick?: (item: IMusic.IMusicSheetItem) => void;
+    onItemClick?: (item: IMusic.IPlaylistItem) => void;
     /** 卡片右键 */
-    onItemContextMenu?: (item: IMusic.IMusicSheetItem, e: ReactMouseEvent) => void;
+    onItemContextMenu?: (item: IMusic.IPlaylistItem, e: ReactMouseEvent) => void;
     /** 播放按钮点击（传入后显示播放 FAB） */
-    onPlayClick?: (item: IMusic.IMusicSheetItem) => void;
+    onPlayClick?: (item: IMusic.IPlaylistItem) => void;
 
     // ── 加载状态 ──
     /** 请求状态 */
@@ -179,10 +179,10 @@ const MediaCard = React.memo(function MediaCard({
     onPlayClick,
     placeholderIcon,
 }: {
-    item: IMusic.IMusicSheetItem;
-    onItemClick?: (item: IMusic.IMusicSheetItem) => void;
-    onItemContextMenu?: (item: IMusic.IMusicSheetItem, e: ReactMouseEvent) => void;
-    onPlayClick?: (item: IMusic.IMusicSheetItem) => void;
+    item: IMusic.IPlaylistItem;
+    onItemClick?: (item: IMusic.IPlaylistItem) => void;
+    onItemContextMenu?: (item: IMusic.IPlaylistItem, e: ReactMouseEvent) => void;
+    onPlayClick?: (item: IMusic.IPlaylistItem) => void;
     placeholderIcon?: ReactNode;
 }) {
     const handleClick = useCallback(() => {

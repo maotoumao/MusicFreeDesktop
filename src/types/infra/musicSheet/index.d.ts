@@ -1,5 +1,5 @@
 /** 歌单类型 */
-export type MusicSheetType = 'user' | 'system';
+export type PlaylistType = 'user' | 'system';
 
 /**
  * 歌曲精简信息（列表展示、播放队列）。
@@ -29,12 +29,12 @@ export interface IMusicItemSlim {
  * - IMusicSheetItem：插件侧的歌单结构，字段松散（含 musicList / playCount 等）
  * - ILocalSheetMeta：本地 SQLite 存储的歌单结构，字段严格固定
  */
-export interface ILocalSheetMeta {
+export interface ILocalPlaylistMeta {
     id: string;
     title: string;
     artwork: string | null;
     description: string | null;
-    type: MusicSheetType;
+    type: PlaylistType;
     folderPath: string | null;
     sortOrder: number;
     worksNum: number;
@@ -45,21 +45,21 @@ export interface ILocalSheetMeta {
 }
 
 /** 歌单详情（含全量歌曲列表，slim 模式） */
-export interface ILocalSheetDetail extends ILocalSheetMeta {
+export interface ILocalPlaylistDetail extends ILocalPlaylistMeta {
     musicList: IMusicItemSlim[];
 }
 
 /** 创建歌单参数 */
-export interface ICreateSheetParams {
+export interface ICreatePlaylistParams {
     title: string;
     artwork?: string;
     description?: string;
-    type?: MusicSheetType;
+    type?: PlaylistType;
     folderPath?: string;
 }
 
 /** 更新歌单参数（部分更新） */
-export interface IUpdateSheetParams {
+export interface IUpdatePlaylistParams {
     id: string;
     title?: string;
     artwork?: string;
@@ -68,7 +68,7 @@ export interface IUpdateSheetParams {
 }
 
 /** 星标远程歌单（本地存储） */
-export interface IStarredSheetItem {
+export interface IStarredPlaylistItem {
     platform: string;
     id: string;
     title: string | null;

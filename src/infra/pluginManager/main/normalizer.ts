@@ -196,7 +196,7 @@ export const methodNormalizers: Partial<
         afterCall(result, platform, args) {
             if (!result) throw new Error();
 
-            const playlistItem = args[0] as IMusic.IMusicSheetItem;
+            const playlistItem = args[0] as IMusic.IPlaylistItem;
             const page = args[1] as number;
 
             result?.musicList?.forEach((_: any) => {
@@ -221,7 +221,7 @@ export const methodNormalizers: Partial<
             }
         },
         defaultResult(args) {
-            const playlistItem = args[0] as IMusic.IMusicSheetItem;
+            const playlistItem = args[0] as IMusic.IPlaylistItem;
             return {
                 playlistItem,
                 musicList: playlistItem?.musicList ?? [],

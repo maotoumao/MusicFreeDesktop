@@ -8,8 +8,8 @@ import pluginManager from '@infra/pluginManager/renderer';
  * 加载指定榜单的歌曲列表，支持分页。
  * 首次 mount 立即触发第一页加载。
  */
-export function useTopListDetail(topListItem: IMusic.IMusicSheetItem | null, platform: string) {
-    const [sheetItem, setSheetItem] = useState<IMusic.IMusicSheetItem>(
+export function useTopListDetail(topListItem: IMusic.IPlaylistItem | null, platform: string) {
+    const [sheetItem, setSheetItem] = useState<IMusic.IPlaylistItem>(
         topListItem ?? { id: '', platform, title: '' },
     );
     const [musicList, setMusicList] = useState<IMusic.IMusicItem[]>([]);

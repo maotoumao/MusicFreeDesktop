@@ -3,7 +3,7 @@ declare namespace IMedia {
         music: IMusic.IMusicItem;
         album: IAlbum.IAlbumItem;
         artist: IArtist.IArtistItem;
-        playlist: IMusic.IMusicSheetItem;
+        playlist: IMusic.IPlaylistItem;
         lyric: ILyric.ILyricItem;
     };
 
@@ -68,7 +68,7 @@ declare namespace IMusic {
         };
     }
 
-    interface IMusicSheetItem extends IMedia.IMediaBase {
+    interface IPlaylistItem extends IMedia.IMediaBase {
         /** 封面图 */
         artwork?: string;
         /** 标题 */
@@ -93,9 +93,9 @@ declare namespace IMusic {
     }
 
     /** 歌单集合 */
-    export interface IMusicSheetGroupItem {
+    export interface IPlaylistGroupItem {
         title?: string;
-        data: Array<IMusicSheetItem>;
+        data: Array<IPlaylistItem>;
     }
 
     // 音质
@@ -105,7 +105,7 @@ declare namespace IMusic {
 }
 
 declare namespace IAlbum {
-    interface IAlbumItem extends IMusic.IMusicSheetItem {
+    interface IAlbumItem extends IMusic.IPlaylistItem {
         artwork?: string;
         title: string;
         date?: string;

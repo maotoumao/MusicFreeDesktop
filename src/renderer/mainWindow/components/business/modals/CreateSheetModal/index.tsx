@@ -10,7 +10,7 @@ import './index.scss';
 /** 歌单名称最大长度 */
 const SHEET_NAME_MAX_LENGTH = 120;
 
-export interface CreateSheetModalProps {
+export interface CreatePlaylistModalProps {
     close: () => void;
     /** 创建后自动添加到新歌单的歌曲（可选） */
     initMusicItems?: IMusic.IMusicItem[];
@@ -19,7 +19,7 @@ export interface CreateSheetModalProps {
 /**
  * CreateSheetModal — 新建歌单弹窗（业务组件）
  */
-export default function CreateSheetModal({ close, initMusicItems }: CreateSheetModalProps) {
+export default function CreateSheetModal({ close, initMusicItems }: CreatePlaylistModalProps) {
     const { t } = useTranslation();
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);

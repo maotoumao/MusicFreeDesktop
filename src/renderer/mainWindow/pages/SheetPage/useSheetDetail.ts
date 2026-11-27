@@ -9,8 +9,8 @@ import pluginManager from '@infra/pluginManager/renderer';
  * 分页加载歌单内歌曲列表，自动合并插件返回的歌单元数据。
  * 首次 mount 立即触发第一页加载。
  */
-export function useSheetDetail(originalItem: IMusic.IMusicSheetItem) {
-    const [sheetItem, setSheetItem] = useState<IMusic.IMusicSheetItem>(originalItem);
+export function useSheetDetail(originalItem: IMusic.IPlaylistItem) {
+    const [sheetItem, setSheetItem] = useState<IMusic.IPlaylistItem>(originalItem);
     const [musicList, setMusicList] = useState<IMusic.IMusicItem[]>([]);
     const [requestStatus, setRequestStatus] = useState<RequestStatus>(RequestStatus.Idle);
     const [isEnd, setIsEnd] = useState(false);
@@ -20,7 +20,7 @@ export function useSheetDetail(originalItem: IMusic.IMusicSheetItem) {
     const itemKeyRef = useRef(compositeKey(originalItem.platform, originalItem.id));
 
     const fetchPage = useCallback(
-        async (item: IMusic.IMusicSheetItem, page: number, isFirstPage: boolean) => {
+        async (item: IMusic.IPlaylistItem, page: number, isFirstPage: boolean) => {
             if (pendingRef.current) return;
             pendingRef.current = true;
             setRequestStatus(RequestStatus.Pending);

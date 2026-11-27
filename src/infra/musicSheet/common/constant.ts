@@ -26,7 +26,7 @@ export const DOWNLOADED_SHEET_ID = '__downloaded__';
  *              renderer 无感知，需要同时刷新 sheetsAtom 和 musicListAtom。
  * @property sheetId 受影响的歌单 ID，不传表示影响所有歌单。
  */
-export interface IMusicSheetEvent {
+export interface IPlaylistEvent {
     origin: 'user' | 'internal';
     sheetId?: string;
 }
