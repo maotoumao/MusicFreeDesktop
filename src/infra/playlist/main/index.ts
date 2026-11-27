@@ -31,12 +31,7 @@ import {
     type IPlaylistEvent,
 } from '../common/constant';
 import { createQueries, type IPlaylistQueries } from './queries';
-import {
-    musicItemArtwork,
-    musicItemDuration,
-    musicItemRaw,
-    musicItemText,
-} from '@common/musicItemToSlim';
+import { musicItemArtwork, musicItemRaw } from '@common/musicItemToSlim';
 import { safeStringify, safeParse } from '@common/safeSerialize';
 import type { IBackupProvider, IBackupPlaylist, RestoreMode } from '@appTypes/infra/backup';
 
@@ -92,10 +87,10 @@ class PlaylistManager {
             this.queries.upsertMusicItem.run({
                 platform: musicItem.platform,
                 id: sid,
-                title: musicItemText(musicItem.title),
-                artist: musicItemText(musicItem.artist),
-                album: musicItemText(musicItem.album),
-                duration: musicItemDuration(musicItem.duration),
+                title: musicItem.title,
+                artist: musicItem.artist ?? '',
+                album: musicItem.album ?? '',
+                duration: musicItem.duration ?? null,
                 artwork: musicItemArtwork(musicItem),
                 raw: musicItemRaw(musicItem),
             });
@@ -403,10 +398,10 @@ class PlaylistManager {
                             this.queries.upsertMusicItem.run({
                                 platform: item.platform,
                                 id: sid,
-                                title: musicItemText(item.title),
-                                artist: musicItemText(item.artist),
-                                album: musicItemText(item.album),
-                                duration: musicItemDuration(item.duration),
+                                title: item.title,
+                                artist: item.artist ?? '',
+                                album: item.album ?? '',
+                                duration: item.duration ?? null,
                                 artwork: musicItemArtwork(item),
                                 raw: musicItemRaw(item),
                             });
@@ -580,10 +575,10 @@ class PlaylistManager {
                             this.queries.upsertMusicItem.run({
                                 platform: item.platform,
                                 id: sid,
-                                title: musicItemText(item.title),
-                                artist: musicItemText(item.artist),
-                                album: musicItemText(item.album),
-                                duration: musicItemDuration(item.duration),
+                                title: item.title,
+                                artist: item.artist ?? '',
+                                album: item.album ?? '',
+                                duration: item.duration ?? null,
                                 artwork: musicItemArtwork(item),
                                 raw: musicItemRaw(item),
                             });
@@ -647,10 +642,10 @@ class PlaylistManager {
                         this.queries.upsertMusicItem.run({
                             platform: item.platform,
                             id: sid,
-                            title: musicItemText(item.title),
-                            artist: musicItemText(item.artist),
-                            album: musicItemText(item.album),
-                            duration: musicItemDuration(item.duration),
+                            title: item.title,
+                            artist: item.artist ?? '',
+                            album: item.album ?? '',
+                            duration: item.duration ?? null,
                             artwork: musicItemArtwork(item),
                             raw: musicItemRaw(item),
                         });

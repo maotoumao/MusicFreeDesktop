@@ -10,10 +10,10 @@ export default function musicItemToSlim(item: IMusic.IMusicItem | IMusicItemSlim
     return {
         platform: item.platform,
         id: String(item.id),
-        title: musicItemText(item.title),
-        artist: musicItemText(item.artist),
-        album: musicItemText(item.album),
-        duration: musicItemDuration(item.duration),
+        title: item.title ?? '',
+        artist: item.artist ?? '',
+        album: item.album ?? '',
+        duration: item.duration ?? null,
         artwork: musicItemArtwork(item),
         [INTERNAL_SLIM_KEY]: true,
     };
@@ -42,16 +42,4 @@ export function withoutInvalidArtwork<T extends { artwork?: unknown }>(item: T):
     return item.artwork === undefined || typeof item.artwork === 'string'
         ? item
         : { ...item, artwork: undefined };
-}
-
-/** 歌曲的文字字段（标题、歌手、专辑）：字符串原样，有限数字转成文字，其他值（缺失、对象、布尔等）为空串 */
-export function musicItemText(value: unknown): string {
-    if (typeof value === 'string') return value;
-    return Number.isFinite(value) ? String(value) : '';
-}
-
-/** 歌曲时长：有限数字，或能转成有限数字的非空字符串；其他值为 null */
-export function musicItemDuration(value: unknown): number | null {
-    const duration = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
-    return Number.isFinite(duration) ? (duration as number) : null;
 }
