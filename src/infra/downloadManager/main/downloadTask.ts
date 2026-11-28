@@ -52,6 +52,8 @@ async function detectAudioExt(filePath: string): Promise<string | null> {
     return null;
 }
 
+/** 能自行解压、且数据截断时解压会报错的压缩编码 */
+const DECODABLE_ENCODINGS = ['gzip', 'x-gzip', 'compress', 'x-compress', 'deflate', 'br'];
 /** 已登记的压缩编码中，无法确认解压后完整的几种 */
 const UNVERIFIABLE_ENCODINGS = ['zstd', 'dcb', 'dcz', 'aes128gcm', 'exi', 'pack200-gzip'];
 
@@ -129,20 +131,29 @@ export class DownloadTask {
             const encoding = String(response.headers['content-encoding'] ?? '')
                 .trim()
                 .toLowerCase();
-            // gzip 类与 br 自行解压（数据截断时解压会报错）；登记过、但解压后无法确认完整的压缩编码按失败处理；
-            // 其他取值（如错标的 none、binary）按原始数据保存，与 axios 原先的处理一致。
-            // 解压器在接入写入前才创建，提前出错或中止时不会留下未关闭的解压器
-            const createDecoder = ['gzip', 'x-gzip', 'compress', 'x-compress', 'deflate'].includes(
-                encoding,
-            )
-                ? () => zlib.createUnzip()
-                : encoding === 'br'
-                  ? () => zlib.createBrotliDecompress()
-                  : null;
-            if (UNVERIFIABLE_ENCODINGS.includes(encoding)) {
+            // 逐项判断编码：只有一层、且是能自行解压的压缩编码时解压（数据截断时解压会报错）；
+            // 含其他压缩编码或多层压缩时按失败处理；只有非压缩取值（如错标的 none、binary）时按原始数据保存，
+            // 与 axios 原先的处理一致。解压器在接入写入前才创建，提前出错或中止时不会留下未关闭的解压器
+            const codings = encoding
+                .split(',')
+                .map((c) => c.trim())
+                .filter((c) => c !== '' && c !== 'identity');
+            const compressed = codings.filter(
+                (c) => DECODABLE_ENCODINGS.includes(c) || UNVERIFIABLE_ENCODINGS.includes(c),
+            );
+            if (
+                compressed.length > 0 &&
+                (codings.length !== 1 || !DECODABLE_ENCODINGS.includes(codings[0]))
+            ) {
                 response.data.destroy();
                 throw new Error(`Unsupported content encoding: ${encoding}`);
             }
+            const createDecoder =
+                compressed.length === 0
+                    ? null
+                    : compressed[0] === 'br'
+                      ? () => zlib.createBrotliDecompress()
+                      : () => zlib.createUnzip();
             const contentLength = parseInt(String(response.headers['content-length'] ?? '0'), 10);
             const isPartial = response.status === 206;
             // 压缩响应的续传区间按压缩数据计，不能接在已解压的临时文件后面：按失败处理（重试从头下载）
