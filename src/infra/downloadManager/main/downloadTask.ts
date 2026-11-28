@@ -123,14 +123,18 @@ export class DownloadTask {
             const encoding = String(response.headers['content-encoding'] ?? '')
                 .trim()
                 .toLowerCase();
-            const decoder =
-                encoding === 'gzip' || encoding === 'x-gzip' || encoding === 'deflate'
-                    ? zlib.createUnzip()
-                    : encoding === 'br'
-                      ? zlib.createBrotliDecompress()
-                      : encoding === 'zstd' && typeof zlib.createZstdDecompress === 'function'
-                        ? zlib.createZstdDecompress()
-                        : null;
+            // 只接受解压后能确认完整的编码（数据截断时解压会报错）；其他编码不能当作音频保存，按失败处理
+            const decoder = ['gzip', 'x-gzip', 'compress', 'x-compress', 'deflate'].includes(
+                encoding,
+            )
+                ? zlib.createUnzip()
+                : encoding === 'br'
+                  ? zlib.createBrotliDecompress()
+                  : null;
+            if (!decoder && encoding !== '' && encoding !== 'identity') {
+                response.data.destroy();
+                throw new Error(`Unsupported content encoding: ${encoding}`);
+            }
             const contentLength = parseInt(String(response.headers['content-length'] ?? '0'), 10);
             const isPartial = response.status === 206;
             // 压缩响应的续传区间按压缩数据计，不能接在已解压的临时文件后面：按失败处理（重试从头下载）
