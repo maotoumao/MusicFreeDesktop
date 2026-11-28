@@ -3,11 +3,24 @@ import { useTranslation } from 'react-i18next';
 import { Download } from 'lucide-react';
 import { RequestStatus } from '@common/constant';
 import formatFileSize from '@common/formatFileSize';
+import { useDownloadProgress } from '@infra/downloadManager/renderer';
 import { StatusPlaceholder } from '../../../../components/ui/StatusPlaceholder';
 import { DownloadProgressCell } from '../DownloadProgressCell';
 import { TaskActions } from '../TaskActions';
 import type { IDownloadTask } from '@appTypes/infra/downloadManager';
 import './index.scss';
+
+// ─── 子组件：大小 ───
+
+function formatSize(totalBytes: number) {
+    return totalBytes > 0 ? formatFileSize(totalBytes) : '-';
+}
+
+/** 下载中、已暂停的任务有实时进度时用本次的总大小（与进度单元格同一规则），没有时用任务记录 */
+function LiveTaskSize({ task }: { task: IDownloadTask }) {
+    const progress = useDownloadProgress(task.id);
+    return <>{formatSize(progress ? progress.totalBytes : task.totalBytes)}</>;
+}
 
 // ─── 子组件：任务行 ───
 
@@ -25,7 +38,8 @@ const TaskRow = memo(function TaskRow({ task }: { task: IDownloadTask }) {
             <td className="p-download__cell p-download__cell--artist">{task.artist}</td>
             <td className="p-download__cell p-download__cell--album">{task.album}</td>
             <td className="p-download__cell p-download__cell--size">
-                {task.totalBytes > 0 ? formatFileSize(task.totalBytes) : '-'}
+                {/* 只有下载中、已暂停的任务有实时进度，其余行不订阅进度广播 */}
+                {isActive ? <LiveTaskSize task={task} /> : formatSize(task.totalBytes)}
             </td>
             <td className="p-download__cell p-download__cell--status">
                 {isActive ? (
