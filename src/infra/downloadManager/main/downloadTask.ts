@@ -132,6 +132,11 @@ export class DownloadTask {
                 Number.isSafeInteger(rangeSize)
                     ? rangeSize
                     : -1;
+            // 续传响应不是从已有字节处接着发：追加会拼错文件，按失败处理（重试换用新的临时文件从头下载）
+            if (isPartial && range && rangeStart !== existingBytes) {
+                response.data.destroy();
+                throw new Error(`Range mismatch: expected ${existingBytes}, got ${rangeStart}`);
+            }
             const startBytes = isPartial ? existingBytes : 0;
             const totalBytes = isPartial
                 ? rangeTotal > 0
@@ -179,6 +184,14 @@ export class DownloadTask {
 
             // 写入流在写完前被中止（abort 会 destroy 它）时以错误结束，不会一直等下去
             await pipeline(dataStream, this.writeStream);
+
+            // 已知总大小时核对文件是否完整：只收到部分内容不能登记为完成
+            if (totalBytes > 0) {
+                const { size } = await fsp.stat(this.task.tempPath!);
+                if (size !== totalBytes) {
+                    throw new Error(`Incomplete download: ${size} of ${totalBytes} bytes`);
+                }
+            }
 
             // 7. 推断文件扩展名：Content-Type 不可靠，优先按文件内容识别，兜底 .mp3
             const mime = String(response.headers['content-type'] ?? '')
