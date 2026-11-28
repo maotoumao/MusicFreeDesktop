@@ -124,14 +124,15 @@ export class DownloadTask {
                 .trim()
                 .toLowerCase();
             // 只接受解压后能确认完整的编码（数据截断时解压会报错）；其他编码不能当作音频保存，按失败处理
-            const decoder = ['gzip', 'x-gzip', 'compress', 'x-compress', 'deflate'].includes(
+            // 解压器在接入写入前才创建，提前出错或中止时不会留下未关闭的解压器
+            const createDecoder = ['gzip', 'x-gzip', 'compress', 'x-compress', 'deflate'].includes(
                 encoding,
             )
-                ? zlib.createUnzip()
+                ? () => zlib.createUnzip()
                 : encoding === 'br'
-                  ? zlib.createBrotliDecompress()
+                  ? () => zlib.createBrotliDecompress()
                   : null;
-            if (!decoder && encoding !== '' && encoding !== 'identity') {
+            if (!createDecoder && encoding !== '' && encoding !== 'identity') {
                 response.data.destroy();
                 throw new Error(`Unsupported content encoding: ${encoding}`);
             }
@@ -227,8 +228,8 @@ export class DownloadTask {
             });
 
             // 写入流在写完前被中止（abort 会 destroy 它）时以错误结束，不会一直等下去
-            if (decoder) {
-                await pipeline(dataStream, decoder, this.writeStream);
+            if (createDecoder) {
+                await pipeline(dataStream, createDecoder(), this.writeStream);
             } else {
                 await pipeline(dataStream, this.writeStream);
             }
@@ -244,7 +245,7 @@ export class DownloadTask {
                 }
             }
             if (totalBytes > 0) {
-                const size = decoder
+                const size = createDecoder
                     ? this.task.downloadedBytes
                     : (await fsp.stat(this.task.tempPath!)).size;
                 if (size !== totalBytes) {
