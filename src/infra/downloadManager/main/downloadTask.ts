@@ -138,7 +138,8 @@ export class DownloadTask {
             // 起点在写入流打开（从头下载时清空临时文件）后才生效，此前中止时任务记录保持上一次的进度
             // 续传时完整大小优先取 Content-Range 里的总长（格式完整、从已有字节处开始、区间合法时才采用），
             // 其次是已有字节加本次长度，都没有时未知
-            const range = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(
+            // 起点与总长分开取：总长写成 * 时起点照样核对
+            const range = /^bytes\s+(\d+)-(\d+)\/(\d+|\*)$/i.exec(
                 String(response.headers['content-range'] ?? '').trim(),
             );
             const [rangeStart, rangeEnd, rangeSize] = range ? range.slice(1).map(Number) : [];
