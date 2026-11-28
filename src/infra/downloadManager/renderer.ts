@@ -193,12 +193,20 @@ class DownloadManagerRenderer {
                 this.progressMap.delete(event.task.id);
             }
 
-            // 完成或删除的任务立即移出列表：进度已清除，留到防抖刷新会短暂显示任务记录里的旧进度
+            // 立即把事件里的任务状态写进列表：完成或删除的移出，失败的换成事件里的记录。
+            // 进度已清除，留到防抖刷新会短暂显示任务记录里的旧进度和状态
             if (event.type === 'completed' || event.type === 'removed') {
                 const rest = this.tasks.filter((t) => t.id !== event.task.id);
                 if (rest.length !== this.tasks.length) {
                     this.tasks = rest;
                     this.totalCount = rest.length;
+                    this.taskListVersion++;
+                    this.events.emit('taskListChange');
+                }
+            } else if (event.type === 'error') {
+                const index = this.tasks.findIndex((t) => t.id === event.task.id);
+                if (index !== -1) {
+                    this.tasks = this.tasks.map((t, i) => (i === index ? event.task : t));
                     this.taskListVersion++;
                     this.events.emit('taskListChange');
                 }
