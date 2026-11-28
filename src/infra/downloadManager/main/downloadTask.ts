@@ -134,7 +134,7 @@ export class DownloadTask {
             const encoding = String(response.headers['content-encoding'] ?? '')
                 .trim()
                 .toLowerCase();
-            // 逐项判断编码：只有一层、且是能自行解压的压缩编码时解压（数据截断时解压会报错）；
+            // 逐项判断编码：只有一层、且属于 DECODABLE_ENCODINGS 时解压；
             // 含其他压缩编码或多层压缩时按失败处理；只有非压缩取值（如错标的 none、binary）时按原始数据保存，
             // 与 axios 原先的处理一致。解压器在接入写入前才创建，提前出错或中止时不会留下未关闭的解压器
             const codings = encoding
