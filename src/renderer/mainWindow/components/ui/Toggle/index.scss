@@ -1,0 +1,73 @@
+// ============================================================================
+// Toggle — 组合组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   轨道: 48×24, rounded-full, border 1px
+//     off → bg neutral, border strong
+//     on  → bg brand, border brand
+//   旋钮: 20×20, bg white, rounded-full
+//     off → translateX(2px)
+//     on  → translateX(26px)
+//
+
+.toggle {
+    // ── 轨道 ──
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-fill-neutral);
+    cursor: pointer;
+    transition:
+        background-color var(--duration-normal) var(--ease-standard),
+        border-color var(--duration-normal) var(--ease-standard);
+
+    // ── 旋钮 ──
+    &__thumb {
+        display: block;
+        width: 20px;
+        height: 20px;
+        border-radius: var(--radius-pill);
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        transition: transform var(--duration-normal) var(--ease-standard);
+        // off 态位置
+        transform: translateX(2px);
+    }
+
+    // ── on 态 ──
+    &.is-on {
+        background: var(--color-fill-brand);
+        border-color: var(--color-fill-brand);
+
+        .toggle__thumb {
+            transform: translateX(26px);
+        }
+    }
+
+    // ── :active 反馈 ──
+    &:active:not(.is-disabled) {
+        .toggle__thumb {
+            width: 24px;
+        }
+    }
+
+    // ── focus-visible ──
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+
+    // ── disabled ──
+    &.is-disabled {
+        opacity: var(--opacity-disabled);
+        cursor: not-allowed;
+    }
+}

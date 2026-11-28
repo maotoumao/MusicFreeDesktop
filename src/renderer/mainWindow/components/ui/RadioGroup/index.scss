@@ -1,0 +1,84 @@
+// ============================================================================
+// RadioGroup — 组合组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: inline-flex, rounded-full, bg white/5
+//         border 1px white/10, padding 4px, gap 4px
+//   选项: px-12 py-4, rounded-full, text-xs(12px)
+//     默认 → color secondary, hover → color primary
+//     选中 → bg neutral-hover, color primary
+//
+
+.radio-group {
+    // ── 容器 ──
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--color-fill-subtle);
+    border: 1px solid var(--color-border-default);
+    padding: 4px;
+    gap: 4px;
+
+    // ── 选项 ──
+    &__option {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: var(--radius-pill);
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        white-space: nowrap;
+        user-select: none;
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            color var(--duration-normal) var(--ease-standard);
+
+        &:hover:not(.is-selected):not(.is-disabled) {
+            color: var(--color-text-primary);
+        }
+
+        // ── 选中态 ──
+        &.is-selected {
+            background: var(--color-fill-neutral-hover);
+            color: var(--color-text-primary);
+        }
+
+        // ── 禁用态 ──
+        &.is-disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+
+        // ── focus-visible ──
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+    }
+
+    // ── 图标 ──
+    &__option-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+
+        svg {
+            width: 14px;
+            height: 14px;
+        }
+    }
+
+    // ── 整组禁用 ──
+    &.is-disabled {
+        opacity: var(--opacity-disabled);
+        pointer-events: none;
+    }
+}

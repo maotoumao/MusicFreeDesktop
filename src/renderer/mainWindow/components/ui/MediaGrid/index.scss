@@ -1,0 +1,118 @@
+// ────────────────────────────────────────────────────────────────────────────
+// MediaGrid — 响应式媒体卡片网格
+//
+// 设计稿还原：
+//   网格: repeat(auto-fill, minmax(160px, 1fr)), gap 24px
+//   卡片: padding 12px, radius-card, bg 透明, hover bg-surface, transition moderate
+//   封面: aspect-ratio 1/1, radius-control(8px), shadow-sm
+//   标题: 13px semibold, truncate, mt 10px
+//   副标题: 12px secondary, truncate, mt 2px
+//   PlayFAB: 36×36, bg brand, pill, opacity 0→1 on hover, bottom-right
+// ────────────────────────────────────────────────────────────────────────────
+
+.media-grid__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--space-6); // 24px
+}
+
+.media-grid__sentinel {
+    height: 1px;
+    pointer-events: none;
+}
+
+// ── 卡片 ──
+
+.media-card {
+    padding: var(--space-3); // 12px
+    border-radius: var(--radius-card);
+    cursor: pointer;
+    transition: background-color var(--duration-moderate) var(--ease-standard);
+
+    &:hover {
+        background-color: var(--color-bg-surface);
+    }
+
+    &:hover .media-card__play-fab {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// ── 封面区域 ──
+
+.media-card__cover-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+}
+
+.media-card__cover {
+    // 覆盖 Artwork 的固定尺寸，让它跟随网格宽度
+    &.artwork {
+        width: 100%;
+        height: 100%;
+    }
+    border-radius: var(--radius-control);
+    box-shadow: var(--shadow-sm);
+}
+
+// ── 播放 FAB ──
+
+.media-card__play-fab {
+    position: absolute;
+    right: var(--space-2); // 8px
+    bottom: var(--space-2);
+    width: var(--size-control-md);
+    height: var(--size-control-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--color-fill-brand);
+    color: var(--color-text-on-brand);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+        opacity var(--duration-moderate) var(--ease-standard),
+        transform var(--duration-moderate) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    box-shadow: var(--shadow-md);
+
+    &:hover {
+        background-color: var(--color-fill-brand-hover);
+    }
+
+    &:active {
+        transform: translateY(0) scale(0.95);
+    }
+}
+
+// ── 信息区域 ──
+
+.media-card__info {
+    padding-top: var(--space-2); // 8px
+    min-width: 0; // 防止 flex 子项溢出
+}
+
+.media-card__title {
+    font-size: var(--text-label-size); // 13px
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: var(--text-label-leading);
+}
+
+.media-card__subtitle {
+    margin-top: var(--space-0-5); // 2px
+    font-size: var(--text-caption-size); // 12px
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: var(--text-caption-leading);
+}

@@ -1,0 +1,128 @@
+// ============================================================================
+// CheckboxGroup — 原子组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: inline-flex, gap 16px
+//   每项: label 包裹, inline-flex, gap 6px, cursor pointer
+//   勾选框: 16×16, rounded-badge(4px), border 1.5px
+//     off → border color-border-default, bg transparent
+//     on  → bg fill-brand, border fill-brand, color fill-white
+//   文本: text-caption-size / caption-leading, color-text-primary
+//   transition: duration-normal, ease standard
+//
+
+.checkbox-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+
+    // ── 单个选项 ──
+    &__item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+
+        &.is-disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+    }
+
+    // ── 勾选框（button） ──
+    &__box {
+        // 重置 button 默认样式
+        border: none;
+        background: none;
+        text-align: left;
+
+        // 布局
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+        padding: 0;
+        cursor: inherit;
+
+        // 默认外观
+        border-radius: var(--radius-badge);
+        border: 1.5px solid var(--color-border-default);
+        background: transparent;
+        color: transparent;
+
+        // 过渡
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            border-color var(--duration-normal) var(--ease-standard),
+            color var(--duration-normal) var(--ease-standard);
+
+        // hover
+        &:hover:not(:disabled) {
+            border-color: var(--color-border-strong);
+        }
+
+        // :active 反馈
+        &:active:not(:disabled) {
+            opacity: var(--opacity-pressed);
+        }
+
+        // 选中态 — brand 配色（与 Toggle on-state 一致）
+        .is-checked & {
+            background: var(--color-fill-brand);
+            border-color: var(--color-fill-brand);
+            color: var(--color-text-on-brand);
+        }
+
+        // 禁用态
+        &:disabled {
+            cursor: not-allowed;
+        }
+
+        // focus-visible
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+    }
+
+    // ── 勾选图标 ──
+    &__check {
+        width: 10px;
+        height: 10px;
+    }
+
+    // ── 图标插槽 ──
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    // ── 文本标签 ──
+    &__label {
+        font-size: var(--text-caption-size);
+        line-height: var(--text-caption-leading);
+        color: var(--color-text-primary);
+    }
+
+    // ── 整组禁用 ──
+    &.is-disabled {
+        opacity: var(--opacity-disabled);
+        cursor: not-allowed;
+    }
+}

@@ -1,0 +1,88 @@
+// ============================================================================
+// SearchLyricModal — 搜索歌词弹窗样式
+// ============================================================================
+
+.b-search-lyric-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-height: 0;
+
+    &__search-bar {
+        flex-shrink: 0;
+
+        // Input 组件默认 inline-flex，需撑满宽度
+        .input {
+            width: 100%;
+        }
+    }
+
+    &__tabs {
+        flex-shrink: 0;
+    }
+
+    &__results {
+        // 固定高度，内容滚动
+        height: 380px;
+        // 抵消 modal__body 水平 padding，使列表项与面板齐平
+        margin: 0 calc(-1 * var(--space-6));
+        padding: 0 var(--space-2);
+    }
+
+    // ── 结果列表项 ──
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        width: 100%;
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-control);
+        cursor: pointer;
+        transition: background-color var(--duration-fast) var(--ease-standard);
+
+        // 重置 button 样式
+        background: none;
+        border: none;
+        text-align: left;
+        color: inherit;
+        font: inherit;
+
+        &:hover {
+            background-color: var(--color-fill-subtle);
+        }
+
+        &:active {
+            opacity: var(--opacity-muted);
+        }
+
+        &:disabled {
+            opacity: var(--opacity-muted);
+            cursor: not-allowed;
+        }
+    }
+
+    &__item-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-0-5);
+    }
+
+    &__item-title {
+        font-size: var(--text-body-size);
+        color: var(--color-text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__item-artist {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

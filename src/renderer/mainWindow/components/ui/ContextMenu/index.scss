@@ -1,0 +1,121 @@
+// ============================================================================
+// ContextMenu — 模式组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: 180px 宽, bg-popover(zinc-800/95), backdrop-blur-xl
+//         border 1px white/10, rounded-lg(8px), padding 6px, shadow-2xl
+//   菜单项: px-12 py-8, rounded 4px, 13px 文字, gap 10px(图标+文字)
+//         hover → 品牌色填充 + 深色文字
+//   分隔线: 1px white/10, mx-4 my-4
+//
+
+.context-menu {
+    // ── 容器 ──
+    position: fixed;
+    z-index: var(--z-popover);
+    min-width: 220px;
+    max-width: 320px;
+    background: var(--color-bg-popover);
+    backdrop-filter: blur(var(--blur-lg));
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-control);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-1-5);
+    display: flex;
+    flex-direction: column;
+
+    // ── 入场动画 ──
+    animation: context-menu-in var(--duration-fast) var(--ease-popup) forwards;
+
+    // ── 菜单项 ──
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        width: 100%;
+        padding: var(--space-2) var(--space-3);
+        border: none;
+        background: none;
+        border-radius: var(--radius-badge);
+        font-size: var(--text-label-size);
+        color: var(--color-text-primary);
+        text-align: left;
+        cursor: pointer;
+        transition:
+            background-color var(--duration-fast) var(--ease-standard),
+            color var(--duration-fast) var(--ease-standard);
+        white-space: nowrap;
+        user-select: none;
+
+        &:hover:not(.is-disabled) {
+            background: var(--color-fill-brand);
+            color: var(--color-text-on-brand);
+
+            .context-menu__item-icon {
+                color: var(--color-text-on-brand);
+            }
+        }
+
+        // ── 危险项 ──
+        &--danger {
+            &:hover:not(.is-disabled) {
+                background: var(--color-status-danger-bg);
+                color: var(--color-status-danger-text);
+
+                .context-menu__item-icon {
+                    color: var(--color-status-danger-text);
+                }
+            }
+        }
+
+        // ── 禁用态 ──
+        &.is-disabled {
+            opacity: var(--opacity-disabled);
+            cursor: not-allowed;
+        }
+    }
+
+    // ── 图标 ──
+    &__item-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: var(--icon-sm);
+        height: var(--icon-sm);
+        color: var(--color-text-secondary);
+        transition: color var(--duration-fast) var(--ease-standard);
+
+        svg {
+            width: var(--icon-sm);
+            height: var(--icon-sm);
+        }
+    }
+
+    // ── 标签 ──
+    &__item-label {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // ── 分隔线 ──
+    &__divider {
+        height: 1px;
+        background: var(--color-fill-neutral);
+        margin: var(--space-1);
+    }
+}
+
+@keyframes context-menu-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

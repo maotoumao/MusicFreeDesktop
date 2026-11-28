@@ -1,0 +1,66 @@
+// ============================================================================
+// LyricText — 歌词文字样式
+// ============================================================================
+
+.lyric-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0 var(--space-4);
+    min-height: 0;
+
+    &.is-scrollable {
+        align-items: flex-start;
+    }
+
+    &__content {
+        white-space: nowrap;
+        user-select: none;
+        -webkit-text-stroke-width: 1px;
+        paint-order: stroke fill;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+    }
+
+    &--double {
+        align-items: stretch;
+    }
+
+    &__line {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        text-align: left;
+        user-select: none;
+        -webkit-text-stroke-width: 1px;
+        paint-order: stroke fill;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+        opacity: 0.55;
+        transition: opacity var(--duration-fast) var(--ease-standard);
+
+        &--end {
+            text-align: right;
+        }
+
+        &.is-current {
+            opacity: 1;
+        }
+    }
+
+    &__translation {
+        align-self: center;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        user-select: none;
+        -webkit-text-stroke-width: 1px;
+        paint-order: stroke fill;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+    }
+}

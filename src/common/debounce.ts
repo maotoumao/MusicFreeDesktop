@@ -1,16 +1,10 @@
-import debounce from "lodash.debounce";
-
-export default function (
-    ...args: Parameters<typeof debounce>
-): ReturnType<typeof debounce> {
-    const [
-        func,
-        wait = 500,
-        options = {
-            leading: true,
-            trailing: false,
-        },
-    ] = args;
-
-    return debounce(func, wait, options);
+/**
+ * 简易防抖函数：在最后一次调用后延迟 ms 毫秒执行。
+ */
+export default function debounce<T extends (...args: any[]) => void>(fn: T, ms: number): T {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    return ((...args: any[]) => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), ms);
+    }) as unknown as T;
 }

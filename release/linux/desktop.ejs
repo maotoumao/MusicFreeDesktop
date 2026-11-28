@@ -1,0 +1,19 @@
+[Desktop Entry]
+Name=<%= productName %>
+GenericName=<%= genericName %>
+GenericName[zh_CN]=音乐播放器
+GenericName[zh_TW]=音樂播放器
+Comment=<%= description %>
+Comment[zh_CN]=插件化的音乐播放器
+Comment[zh_TW]=插件化的音樂播放器
+Exec=<%= name %> %U
+Icon=<%= name %>
+Type=Application
+Terminal=false
+StartupNotify=true
+StartupWMClass=<%= productName %>
+Categories=<%= categories.join(';') %>;
+Keywords=music;player;audio;
+Keywords[zh_CN]=音乐;播放器;
+Keywords[zh_TW]=音樂;播放器;
+MimeType=<%= mimeType.join(';') %>;

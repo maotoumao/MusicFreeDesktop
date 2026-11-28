@@ -1,0 +1,64 @@
+// ============================================================================
+// ThemePage — 主题广场页面样式
+// ============================================================================
+//
+// BEM Block: p-theme
+//
+// 设计稿还原（像素级）：
+//   布局: flex column, height 100%
+//   标题: text-title (24px), font-bold, text-primary
+//   Grid（已安装）: repeat(auto-fill, minmax(220px, 1fr)), gap space-6
+//   Grid（在线）: repeat(auto-fill, minmax(200px, 1fr)), gap space-6
+
+.p-theme {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: fade-in var(--duration-normal) ease;
+
+    // ── 顶部非滚动区：标题 + TabBar ──
+
+    &__header {
+        flex-shrink: 0;
+        padding-top: var(--space-4);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+    }
+
+    &__title-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+
+    &__title {
+        font-size: var(--text-title-size);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+        line-height: var(--text-title-leading);
+    }
+
+    // ── 滚动内容 ──
+
+    &__body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-gutter: stable;
+        padding-top: var(--space-6);
+        padding-bottom: var(--space-20);
+        margin-right: calc(var(--space-8) * -1);
+        padding-right: var(--space-8);
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

@@ -1,0 +1,42 @@
+// ============================================================================
+// Marquee — 原子组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: overflow hidden, min-w-0
+//   内容: flex items-center, shrink-0
+//   滚动: marquee-scroll keyframes, 线性匀速循环
+//   交互: hover 暂停 (animationPlayState: paused)
+//
+
+.marquee {
+    overflow: hidden;
+    min-width: 0;
+}
+
+.marquee__track {
+    display: flex;
+    align-items: center;
+}
+
+.marquee__content {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.marquee__gap {
+    flex-shrink: 0;
+}
+
+// 滚动动画 — 将整个 track 向左位移一份内容 + gap 的宽度
+// 实际位移量通过 CSS 变量 --marquee-offset 由 JS 注入
+@keyframes marquee-scroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(var(--marquee-offset));
+    }
+}

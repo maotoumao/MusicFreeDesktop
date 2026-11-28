@@ -1,0 +1,71 @@
+// ============================================================================
+// ThemeDetailModal — 远程主题详情弹窗样式
+// ============================================================================
+//
+// BEM Block: theme-detail-modal
+
+.theme-detail-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+
+    // ── 预览区 ──
+    &__preview {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: var(--radius-control);
+        overflow: hidden;
+        background: var(--color-fill-neutral);
+    }
+
+    &__preview-color {
+        width: 100%;
+        height: 100%;
+
+        &--fallback {
+            background: var(--color-fill-neutral);
+        }
+    }
+
+    &__preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    &__preview-loading {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-fill-neutral);
+        transition: opacity var(--duration-normal) var(--ease-standard);
+    }
+
+    &__spinner {
+        width: 24px;
+        height: 24px;
+        color: var(--color-text-muted);
+        animation: theme-detail-spin 1s linear infinite;
+    }
+
+    // ── 描述 ──
+    &__description {
+        font-size: var(--text-body-size);
+        color: var(--color-text-secondary);
+        line-height: var(--text-body-leading);
+    }
+}
+
+@keyframes theme-detail-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,348 @@
+/**
+ * systemUtil — 主进程层
+ *
+ * 职责:
+ *  1. 应用控制（退出、缓存管理、版本检查）
+ *  2. 窗口控制（最小化、最大化、显示/隐藏、歌词/迷你模式窗口）
+ *  3. Shell 操作（打开 URL、打开路径、在文件管理器中定位）
+ *  4. 原生 Dialog（打开/保存文件对话框）
+ */
+import { app, BrowserWindow, dialog, ipcMain, screen, shell } from 'electron';
+import fs from 'fs';
+import fsp from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import axios from 'axios';
+import { compare } from 'compare-versions';
+import type { IWindowManager } from '@appTypes/main/windowManager';
+import type { IAppConfigReader } from '@appTypes/infra/appConfig';
+import type { IUpdateInfo } from '@appTypes/infra/systemUtil';
+import { SUPPORTED_AUDIO_EXTS } from '@common/constant';
+import { IPC, UPDATE_SOURCES } from './common/constant';
+
+/** Windows 登录项启动参数，用于识别开机自启 */
+const LAUNCHED_AT_LOGIN_ARG = '--launched-at-login';
+/** 多选文件「打开方式」时系统逐个传入，在此时间内到达的合并为一次播放 */
+const OPEN_FILES_BATCH_MS = 100;
+
+/** 是否为 http(s) 或 mailto 链接 */
+function isWebOrMailUrl(url: string): boolean {
+    try {
+        return ['http:', 'https:', 'mailto:'].includes(new URL(url).protocol);
+    } catch {
+        return false;
+    }
+}
+
+class SystemUtil {
+    private windowManager!: IWindowManager;
+    private isSetup = false;
+    /** 通过系统「打开方式」传入、尚未交给主窗口的文件 */
+    private pendingOpenFiles: string[] = [];
+    private openFilesTimer: ReturnType<typeof setTimeout> | null = null;
+    /** 主窗口渲染进程：starting 启动中（就绪后自行取走），ready 可直接推送，closed 已关闭（需重建） */
+    private openFilesReceiver: 'starting' | 'ready' | 'closed' = 'starting';
+    /** 本次运行中文件对话框最近一次选择的目录 */
+    private lastDialogDir: string | null = null;
+
+    public setup(windowManager: IWindowManager, appConfig: IAppConfigReader) {
+        if (this.isSetup) return;
+
+        this.windowManager = windowManager;
+        windowManager.on('close', ({ windowType }) => {
+            if (windowType === 'main') this.openFilesReceiver = 'closed';
+        });
+
+        this.setupLoginItem(appConfig);
+        this.setupAppHandlers();
+        this.setupWindowHandlers();
+        this.setupShellHandlers();
+        this.setupDialogHandlers();
+
+        this.isSetup = true;
+    }
+
+    // ─── 系统「打开方式」传入的文件 ───
+
+    /** 交给主窗口播放；主窗口就绪前先暂存，可在 setup 之前调用 */
+    public openFiles(paths: string[]): void {
+        if (paths.length === 0) return;
+        this.pendingOpenFiles.push(...paths);
+        this.openFilesTimer ??= setTimeout(() => this.deliverOpenFiles(), OPEN_FILES_BATCH_MS);
+    }
+
+    /** 从命令行参数中取出音频文件（Windows / Linux 的「打开方式」通过参数传入路径或 file:// URL） */
+    public openFilesFromArgv(argv: string[]): void {
+        const paths = argv
+            .filter((arg) => !arg.startsWith('-'))
+            .map((arg) => {
+                if (!arg.startsWith('file://')) return arg;
+                try {
+                    return fileURLToPath(arg);
+                } catch {
+                    return '';
+                }
+            })
+            .filter(
+                (p) =>
+                    SUPPORTED_AUDIO_EXTS.has(path.extname(p).toLowerCase()) &&
+                    fs.existsSync(p) &&
+                    fs.statSync(p).isFile(),
+            );
+        this.openFiles(paths);
+    }
+
+    // ─── 开机自启 ───
+
+    /** 本次是否由开机自启拉起 */
+    public wasLaunchedAtLogin(): boolean {
+        if (process.platform === 'darwin') {
+            return app.getLoginItemSettings().wasOpenedAtLogin;
+        }
+        return process.argv.includes(LAUNCHED_AT_LOGIN_ARG);
+    }
+
+    private deliverOpenFiles(): void {
+        this.openFilesTimer = null;
+        if (this.openFilesReceiver === 'starting' || this.pendingOpenFiles.length === 0) return;
+        // 主窗口已关闭时重建，新渲染进程就绪后取走暂存的文件
+        this.windowManager.showWindow('main');
+        if (this.openFilesReceiver === 'ready') {
+            this.windowManager.sendTo('main', IPC.OPEN_FILES, this.pendingOpenFiles.splice(0));
+        }
+    }
+
+    /**
+     * 使系统登录项与配置一致。仅 Windows / macOS 支持；
+     * 开发模式不注册，否则会把开发用的 Electron 可执行文件加入登录项。
+     */
+    private setupLoginItem(appConfig: IAppConfigReader) {
+        if (!app.isPackaged || (process.platform !== 'win32' && process.platform !== 'darwin')) {
+            return;
+        }
+        const apply = (openAtLogin: boolean) => {
+            app.setLoginItemSettings({ openAtLogin, args: [LAUNCHED_AT_LOGIN_ARG] });
+        };
+        apply(appConfig.getConfigByKey('normal.launchAtLogin') ?? false);
+        appConfig.onConfigUpdated((patch) => {
+            if ('normal.launchAtLogin' in patch) {
+                apply(patch['normal.launchAtLogin'] ?? false);
+            }
+        });
+    }
+
+    // ─── App ───
+
+    private setupAppHandlers() {
+        // 主窗口播放器就绪后取走暂存的文件，此后的文件直接推送
+        ipcMain.handle(IPC.TAKE_OPENED_FILES, () => {
+            this.openFilesReceiver = 'ready';
+            return this.pendingOpenFiles.splice(0);
+        });
+
+        ipcMain.on(IPC.EXIT_APP, () => {
+            app.quit();
+        });
+
+        ipcMain.handle(IPC.GET_CACHE_SIZE, async (evt) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (win) {
+                return win.webContents.session.getCacheSize?.();
+            }
+            return NaN;
+        });
+
+        ipcMain.on(IPC.CLEAR_CACHE, (evt) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (win) {
+                win.webContents.session.clearCache?.();
+            }
+        });
+
+        ipcMain.handle(IPC.CHECK_UPDATE, async () => {
+            return this.checkUpdate();
+        });
+    }
+
+    // ─── Window ───
+
+    private setupWindowHandlers() {
+        ipcMain.on(IPC.MINIMIZE_WINDOW, (evt, { skipTaskBar }) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (!win) return;
+
+            if (skipTaskBar) {
+                win.hide();
+                win.setSkipTaskbar(true);
+            } else {
+                win.minimize();
+            }
+        });
+
+        ipcMain.on(IPC.SHOW_MAIN_WINDOW, () => {
+            this.windowManager.showWindow('main');
+        });
+
+        // 在当前所在显示器的工作区内水平居中，保持垂直位置；返回新位置供调用方持久化
+        ipcMain.handle(IPC.CENTER_WINDOW_HORIZONTALLY, (evt) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (!win) return null;
+            const bounds = win.getBounds();
+            const { workArea } = screen.getDisplayMatching(bounds);
+            const x = workArea.x + Math.round((workArea.width - bounds.width) / 2);
+            win.setPosition(x, bounds.y);
+            return { x, y: bounds.y };
+        });
+
+        ipcMain.on(IPC.TOGGLE_MAXIMIZE, (evt) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (!win) return;
+
+            if (win.isMaximized()) {
+                win.unmaximize();
+            } else {
+                win.maximize();
+            }
+        });
+
+        ipcMain.on(IPC.TOGGLE_VISIBLE, (evt) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (!win) return;
+
+            if (win.isMinimized() || !win.isVisible()) {
+                win.show();
+            } else {
+                win.hide();
+                win.setSkipTaskbar(true);
+            }
+        });
+
+        ipcMain.on(IPC.IGNORE_MOUSE_EVENT, (evt, ignore: boolean) => {
+            const targetWindow = BrowserWindow.fromWebContents(evt.sender);
+            if (!targetWindow) return;
+
+            targetWindow.setIgnoreMouseEvents(ignore, { forward: true });
+        });
+
+        ipcMain.on(IPC.ENTER_MINIMODE, () => {
+            this.windowManager.enterMinimode();
+        });
+
+        ipcMain.on(IPC.EXIT_MINIMODE, () => {
+            this.windowManager.exitMinimode();
+        });
+
+        ipcMain.on(IPC.TOGGLE_MINIMODE, () => {
+            if (this.windowManager.isMinimode()) {
+                this.windowManager.exitMinimode();
+            } else {
+                this.windowManager.enterMinimode();
+            }
+        });
+    }
+
+    // ─── Shell ───
+
+    private setupShellHandlers() {
+        // 链接可能来自插件或主题包：只放行网页和邮件链接，避免借 file: 等协议启动本机程序
+        ipcMain.on(IPC.OPEN_EXTERNAL, (_, url: string) => {
+            if (!isWebOrMailUrl(url)) {
+                console.warn('[systemUtil] Blocked openExternal:', url);
+                return;
+            }
+            shell.openExternal(url).catch((e) => {
+                console.warn('[systemUtil] openExternal failed:', url, e);
+            });
+        });
+
+        // 调用方只打开下载目录：只允许目录，避免用默认程序运行任意文件；macOS 的 .app 也是目录，打开即启动应用
+        ipcMain.on(IPC.OPEN_PATH, async (_, path: string) => {
+            try {
+                if (process.platform === 'darwin' && /\.app$/i.test(await fsp.realpath(path))) {
+                    console.warn('[systemUtil] Blocked openPath (application bundle):', path);
+                    return;
+                }
+                if (!(await fsp.stat(path)).isDirectory()) {
+                    console.warn('[systemUtil] Blocked openPath (not a directory):', path);
+                    return;
+                }
+                const error = await shell.openPath(path);
+                if (error) console.warn('[systemUtil] openPath failed:', path, error);
+            } catch {
+                console.warn('[systemUtil] openPath: path not accessible:', path);
+            }
+        });
+
+        ipcMain.handle(IPC.SHOW_ITEM_IN_FOLDER, async (_, path: string) => {
+            try {
+                await fsp.stat(path);
+                shell.showItemInFolder(path);
+                return true;
+            } catch {
+                return false;
+            }
+        });
+    }
+
+    // ─── Dialog ───
+
+    private setupDialogHandlers() {
+        ipcMain.handle(IPC.SHOW_OPEN_DIALOG, async (evt, options: Electron.OpenDialogOptions) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (!win) {
+                throw new Error('No window available');
+            }
+            const result = await dialog.showOpenDialog(win, this.withLastDialogDir(options));
+            if (!result.canceled && result.filePaths.length > 0) {
+                this.lastDialogDir = path.dirname(result.filePaths[0]);
+            }
+            return result;
+        });
+
+        ipcMain.handle(IPC.SHOW_SAVE_DIALOG, async (evt, options: Electron.SaveDialogOptions) => {
+            const win = BrowserWindow.fromWebContents(evt.sender);
+            if (!win) {
+                throw new Error('No window available');
+            }
+            const result = await dialog.showSaveDialog(win, this.withLastDialogDir(options));
+            if (!result.canceled && result.filePath) {
+                this.lastDialogDir = path.dirname(result.filePath);
+            }
+            return result;
+        });
+    }
+
+    /** 未指定目录时从上次选择的目录打开（Electron 43 起默认打开「下载」，系统也不再记住上次位置） */
+    private withLastDialogDir<T extends { defaultPath?: string }>(options: T): T {
+        if (!this.lastDialogDir) return options;
+        if (!options.defaultPath) return { ...options, defaultPath: this.lastDialogDir };
+        if (!path.isAbsolute(options.defaultPath)) {
+            return { ...options, defaultPath: path.join(this.lastDialogDir, options.defaultPath) };
+        }
+        return options;
+    }
+
+    // ─── 内部方法 ───
+
+    private async checkUpdate(): Promise<IUpdateInfo> {
+        const currentVersion = app.getVersion();
+        const updateInfo: IUpdateInfo = { version: currentVersion };
+
+        for (const source of UPDATE_SOURCES) {
+            try {
+                const { data: rawInfo } = await axios.get(source, { timeout: 10000 });
+                if (rawInfo?.version && compare(rawInfo.version, currentVersion, '>')) {
+                    updateInfo.update = rawInfo;
+                    return updateInfo;
+                }
+            } catch {
+                // 当前源不可用，尝试下一个
+            }
+        }
+
+        return updateInfo;
+    }
+}
+
+const systemUtil = new SystemUtil();
+export default systemUtil;

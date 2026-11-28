@@ -1,0 +1,78 @@
+/*
+ * 浅色主题 (Light)
+ */
+:root {
+    /* ── Background ── */
+    --color-bg-base: rgb(248, 249, 250);
+    --color-bg-sidebar: rgba(241, 243, 245, 0.65);
+    --color-bg-player: rgba(255, 255, 255, 0.92);
+    --color-bg-surface: rgba(0, 0, 0, 0.03);
+    --color-bg-surface-raised: rgba(0, 0, 0, 0.06);
+    --color-bg-drawer: rgba(248, 249, 250, 0.97);
+    --color-bg-overlay: rgba(0, 0, 0, 0.4);
+    --color-bg-modal: rgb(255, 255, 255);
+    --color-bg-popover: rgba(255, 255, 255, 0.97);
+    --color-bg-fullscreen: rgb(248, 249, 250);
+    --color-bg-placeholder: rgb(233, 236, 239);
+
+    /* ── Fill ── */
+    --color-fill-brand: rgb(5, 150, 105);
+    --color-fill-brand-hover: rgba(5, 150, 105, 0.85);
+    --color-fill-brand-muted: rgba(16, 185, 129, 0.18);
+    --color-fill-neutral: rgba(0, 0, 0, 0.05);
+    --color-fill-neutral-hover: rgba(0, 0, 0, 0.1);
+    --color-fill-neutral-active: rgba(0, 0, 0, 0.14);
+    --color-fill-subtle: rgba(0, 0, 0, 0.03);
+    --color-fill-subtle-hover: rgba(0, 0, 0, 0.06);
+
+    /* ── Text ── */
+    --color-text-primary: rgb(32, 33, 36);
+    --color-text-secondary: rgb(95, 99, 104);
+    --color-text-muted: rgba(0, 0, 0, 0.6);
+    --color-text-placeholder: rgba(0, 0, 0, 0.4);
+    --color-text-disabled: rgba(0, 0, 0, 0.28);
+    --color-text-brand: rgb(4, 120, 87);
+    --color-text-on-brand: rgb(255, 255, 255);
+
+    /* ── Border ── */
+    --color-border-default: rgba(0, 0, 0, 0.13);
+    --color-border-subtle: rgba(0, 0, 0, 0.08);
+    --color-border-strong: rgba(0, 0, 0, 0.2);
+    --color-border-focus: rgba(0, 0, 0, 0.22);
+    --color-border-brand: rgba(52, 211, 153, 0.35);
+
+    /* ── Status ── */
+    --color-status-info-bg: rgba(224, 242, 254, 0.95);
+    --color-status-info-border: rgba(14, 165, 233, 0.3);
+    --color-status-info-text: rgb(2, 132, 199);
+    --color-status-warn-bg: rgba(254, 249, 195, 0.95);
+    --color-status-warn-border: rgba(245, 158, 11, 0.35);
+    --color-status-warn-text: rgb(180, 83, 9);
+    --color-status-warn-fill: rgb(180, 83, 9);
+    --color-status-danger-bg: rgba(254, 226, 226, 0.95);
+    --color-status-danger-border: rgba(239, 68, 68, 0.25);
+    --color-status-danger-text: rgb(220, 38, 38);
+    --color-status-danger-fill: rgb(220, 38, 38);
+    --color-status-success-text: rgb(21, 128, 61);
+    --color-favorite: rgb(239, 68, 68);
+
+    /* ── Background Image ── */
+    /* 使用 color-mix 引用品牌色，避免硬编码绿色 */
+    --bg-image:
+        radial-gradient(
+            at 0% 0%,
+            color-mix(in srgb, var(--color-fill-brand) 7%, transparent) 0px,
+            transparent 50%
+        ),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.05) 0px, transparent 50%);
+
+    /* ── Shadow ── */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    --shadow-up: 0 -8px 16px rgba(0, 0, 0, 0.06);
+    --shadow-left: -10px 0 30px rgba(0, 0, 0, 0.08);
+}

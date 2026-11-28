@@ -1,0 +1,18 @@
+// ============================================================================
+// ConfirmModal — 确认弹窗样式
+// ============================================================================
+
+.confirm-modal {
+    &__message {
+        font-size: var(--text-body-size);
+        color: var(--color-text-primary);
+        line-height: var(--text-body-leading);
+    }
+
+    &__description {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        line-height: var(--text-caption-leading);
+        margin-top: var(--space-2);
+    }
+}

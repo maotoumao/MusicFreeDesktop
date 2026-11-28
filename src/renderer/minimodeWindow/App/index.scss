@@ -1,0 +1,218 @@
+// ============================================================================
+// MiniMode — 迷你模式窗口样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: 420×120, rounded-[20px], glass(bg-popover, blur-xl, border-default, shadow-xl)
+//         px-16, flex, items-center, gap-16
+//   封面: 72×72, rounded-2xl(16px), bg fill-subtle, border, shadow, overflow hidden
+//   信息区: flex-1, min-w-0
+//     标题: text-sm(14px), font-semibold, text-primary, truncate
+//     副标题: text-xs(12px), text-secondary, truncate, mt-1(4px)
+//     进度条: mt-3(12px), h-6px, rounded-full, track fill-neutral, fill brand/80
+//   控制区: flex-col, items-end, gap-12
+//     播放行: flex, items-center, gap-4
+//       prev/next: 32×32, rounded-pill, text-secondary, hover: text-primary bg fill-subtle-hover
+//       play: 36×36, rounded-pill, bg brand, color on-brand, shadow-sm
+//     工具行: flex, items-center, gap-8, text-secondary
+//       btn: 32×32, rounded-pill, hover: bg fill-subtle-hover
+
+.l-minimode {
+    width: 420px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: 0 var(--space-4);
+
+    // 背景
+    background-color: var(--color-bg-popover);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-modal);
+    box-shadow: var(--shadow-xl);
+
+    user-select: none;
+
+    // ── 封面 ──
+
+    &__artwork {
+        // 重置 button 默认样式
+        background: none;
+        padding: 0;
+
+        position: relative;
+        width: 72px;
+        height: 72px;
+        flex-shrink: 0;
+        border-radius: var(--radius-panel);
+        background-color: var(--color-fill-subtle);
+        border: 1px solid var(--color-border-default);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    &__artwork-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    // hover 覆盖层：半透明遮罩 + 展开图标
+    &__artwork-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.45);
+        color: #fff;
+        opacity: 0;
+        transition: opacity var(--duration-fast) var(--ease-standard);
+        pointer-events: none;
+    }
+
+    &__artwork:hover &__artwork-overlay {
+        opacity: 1;
+    }
+
+    // ── 歌曲信息 ──
+
+    &__info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__title {
+        font-size: var(--text-body-size);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 1lh;
+    }
+
+    &__subtitle {
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: var(--space-1);
+        min-height: 1lh;
+    }
+
+    &__progress {
+        margin-top: var(--space-3);
+        height: 6px;
+        border-radius: var(--radius-pill);
+        background-color: var(--color-fill-neutral);
+        overflow: hidden;
+    }
+
+    &__progress-fill {
+        height: 100%;
+        border-radius: var(--radius-pill);
+        background-color: color-mix(in srgb, var(--color-fill-brand) 80%, transparent);
+        transition: width var(--duration-normal) linear;
+    }
+
+    // ── 控制区域 ──
+
+    &__controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    &__playback {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    // ── 播放控制按钮（通用） ──
+
+    &__ctrl-btn {
+        // 重置 button 默认样式
+        border: none;
+        background: transparent;
+        padding: 0;
+
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-pill);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition:
+            color var(--duration-fast) var(--ease-standard),
+            background-color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+            background-color: var(--color-fill-subtle-hover);
+        }
+
+        // ── 播放/暂停按钮 ──
+        &--play {
+            width: 36px;
+            height: 36px;
+            background-color: var(--color-fill-brand);
+            color: var(--color-text-on-brand);
+            box-shadow: var(--shadow-sm);
+
+            &:hover {
+                background-color: var(--color-fill-brand-hover);
+                color: var(--color-text-on-brand);
+            }
+        }
+    }
+
+    // ── 工具按钮 ──
+
+    &__utility {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1-5);
+    }
+
+    &__util-btn {
+        // 重置 button 默认样式
+        border: none;
+        background: transparent;
+        padding: 0;
+
+        width: 26px;
+        height: 26px;
+        border-radius: var(--radius-pill);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition:
+            color var(--duration-fast) var(--ease-standard),
+            background-color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            background-color: var(--color-fill-subtle-hover);
+            color: var(--color-text-primary);
+        }
+
+        // 收藏激活态（红色心）
+        &.is-favorite {
+            color: var(--color-favorite);
+        }
+
+        // 其他激活态（桌面歌词开启 / 循环模式）
+        &.is-active {
+            color: var(--color-fill-brand);
+        }
+    }
+}

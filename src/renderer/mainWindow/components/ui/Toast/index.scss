@@ -1,0 +1,217 @@
+/* ============================================================
+ *  Toast — 通知 toast 组件
+ *
+ *  容器: fixed 右上角, top: TopBar 高度 + 8px
+ *  卡片: 随主题变化的中性浮层（与弹出菜单同源），宽 320px，圆角 12px
+ *  状态: 只体现在图标颜色上（info 中性 / success / warn / error）
+ *
+ *  主题包可覆盖（均为可选）:
+ *    --toast-bg：卡片底色，只能是颜色值（可带透明度），不支持渐变或图片
+ *    --toast-border / --toast-shadow / --toast-radius
+ *    --toast-accent：图标颜色，写在根上时所有类型统一用这一种颜色；
+ *                    按类型分别设置时写在 .toast--info / --success / --warn / --error 上
+ * ============================================================ */
+
+.toast-container {
+    position: fixed;
+    top: calc(var(--size-topbar-h) + 8px);
+    right: 16px;
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    width: min(320px, calc(100vw - 32px));
+    pointer-events: none;
+}
+
+// 对比度探针：不参与布局与绘制
+.toast-probe {
+    --_toast-scrim: 0%;
+    --_toast-secondary: initial;
+
+    position: fixed;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+
+    .toast {
+        backdrop-filter: none;
+        box-shadow: none;
+    }
+}
+
+.toast-probe__base {
+    color: var(--color-bg-base);
+}
+
+// 读屏播报区：视觉上隐藏
+.toast-announcer {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+// ── Card ─────────────────────────────────────────────────────
+
+.toast {
+    --_toast-accent: var(--toast-accent, var(--_toast-secondary, var(--color-text-secondary)));
+
+    width: 100%;
+    border-radius: var(--toast-radius, var(--radius-card));
+    border: 1px solid var(--toast-border, var(--color-border-default));
+    // --_toast-scrim / --_toast-anti 由 contrast.ts 按主题计算：底色与文字对比度不足时往黑或白方向压
+    background: color-mix(
+        in srgb,
+        var(--toast-bg, var(--color-bg-popover)),
+        var(--_toast-anti, black) var(--_toast-scrim, 0%)
+    );
+    box-shadow: var(--toast-shadow, var(--shadow-sm));
+    backdrop-filter: blur(var(--blur-md));
+    pointer-events: auto;
+    overflow: hidden;
+
+    // 状态色向正文色靠拢 30%：中间色调的主题底色上也有足够对比度
+    &--success {
+        --_toast-accent: var(
+            --toast-accent,
+            color-mix(in srgb, var(--color-status-success-text) 70%, var(--color-text-primary))
+        );
+    }
+
+    &--warn {
+        --_toast-accent: var(
+            --toast-accent,
+            color-mix(in srgb, var(--color-status-warn-text) 70%, var(--color-text-primary))
+        );
+    }
+
+    &--error {
+        --_toast-accent: var(
+            --toast-accent,
+            color-mix(in srgb, var(--color-status-danger-fill) 70%, var(--color-text-primary))
+        );
+    }
+}
+
+// ── Body ─────────────────────────────────────────────────────
+
+.toast__body {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 12px 12px 14px;
+}
+
+// ── Icon ─────────────────────────────────────────────────────
+
+.toast__icon-wrapper {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+}
+
+.toast__icon {
+    width: 18px;
+    height: 18px;
+    color: var(--_toast-accent);
+}
+
+// ── Content ──────────────────────────────────────────────────
+
+.toast__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast__title {
+    font-size: 13px;
+    font-weight: var(--font-weight-medium);
+    line-height: 20px;
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+}
+
+.toast__desc {
+    margin-top: 2px;
+    font-size: var(--text-caption-size);
+    line-height: 18px;
+    // --_toast-secondary 由 contrast.ts 在底色无法兼顾标题与说明时设置
+    color: var(--_toast-secondary, var(--color-text-secondary));
+    overflow-wrap: anywhere;
+}
+
+// ── Action ───────────────────────────────────────────────────
+
+.toast__action {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    margin-top: -3px;
+    padding: 0 10px;
+    border: none;
+    border-radius: var(--radius-control);
+    background: var(--color-fill-neutral);
+    font-size: var(--text-caption-size);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+        background: var(--color-fill-neutral-hover);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+    }
+}
+
+// ── Close ────────────────────────────────────────────────────
+
+.toast__close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-top: -2px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+
+    &:hover {
+        background: var(--color-fill-neutral-hover);
+        color: var(--color-text-primary);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+    }
+}
+
+.toast__close-icon {
+    width: 14px;
+    height: 14px;
+}

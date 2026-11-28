@@ -1,0 +1,30 @@
+// ============================================================================
+// Avatar — 原子组件样式
+// ============================================================================
+
+.avatar {
+    position: relative;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    background-color: var(--color-bg-placeholder);
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+
+    &__img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    &__fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--text-label-size);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-secondary);
+    }
+}

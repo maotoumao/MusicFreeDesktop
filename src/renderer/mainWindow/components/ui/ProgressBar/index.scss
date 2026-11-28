@@ -1,0 +1,131 @@
+// ============================================================================
+// ProgressBar — 原子组件样式
+// ============================================================================
+//
+// 三种变体：slim | thick | labeled
+// 设计还原：
+//   slim    — 轨道 3px → hover 5px，brand 填充，白色 thumb（hover 显示）
+//   thick   — 轨道 6px，无 thumb
+//   labeled — 轨道 4px，无 thumb，附带百分比文字
+//
+
+.progress-bar {
+    // ── 基础容器 ──
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    // ── 轨道 ──
+    &__track {
+        position: relative;
+        flex: 1;
+        border-radius: var(--radius-pill);
+        background: var(--color-fill-neutral);
+    }
+
+    // ── 缓冲条（player 专属） ──
+    &__buffered {
+        position: absolute;
+        inset: 0;
+        border-radius: var(--radius-pill);
+        background: rgba(255, 255, 255, 0.06);
+        pointer-events: none;
+    }
+
+    // ── 填充条 ──
+    &__fill {
+        position: absolute;
+        inset: 0;
+        right: auto;
+        border-radius: var(--radius-pill);
+        background: var(--color-fill-brand);
+        pointer-events: none;
+    }
+
+    // ── Thumb（player 专属） ──
+    &__thumb {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 12px;
+        height: 12px;
+        border-radius: var(--radius-pill);
+        background: #fff;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+        transition: transform var(--duration-fast) var(--ease-standard);
+    }
+
+    // ── 百分比文字（download 专属） ──
+    &__text {
+        flex-shrink: 0;
+        margin-left: var(--space-2);
+        font-size: var(--text-caption-size);
+        color: var(--color-text-secondary);
+        font-variant-numeric: tabular-nums;
+        min-width: 3em;
+        text-align: right;
+    }
+
+    // ── 可交互状态 ──
+    &--interactive {
+        .progress-bar__track {
+            cursor: pointer;
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // Variant: Slim
+    // ════════════════════════════════════════════════════════════════════════
+    //
+    // 纤细轨道，轨道 3px → hover 5px，brand/80 填充，
+    // 白色 12px thumb hover 时从 scale(0) → scale(1)
+
+    &--slim {
+        // 扩大可点击区域：上下加 padding
+        padding: 6px 0;
+
+        .progress-bar__track {
+            height: 3px;
+            transition: height var(--duration-fast) var(--ease-standard);
+        }
+
+        .progress-bar__fill {
+            opacity: 0.8;
+        }
+
+        &:hover {
+            .progress-bar__track {
+                height: 5px;
+            }
+
+            .progress-bar__thumb {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // Variant: Thick
+    // ════════════════════════════════════════════════════════════════════════
+    //
+    // 粗轨道 6px，无 thumb，无 hover 放大效果
+
+    &--thick {
+        .progress-bar__track {
+            height: 6px;
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // Variant: Labeled
+    // ════════════════════════════════════════════════════════════════════════
+    //
+    // 中等轨道 4px，无 thumb，附带右侧百分比文字
+
+    &--labeled {
+        .progress-bar__track {
+            height: 4px;
+        }
+    }
+}

@@ -1,0 +1,118 @@
+// ============================================================================
+// StatusPlaceholder — 模式组件样式
+// ============================================================================
+//
+// 根据 RequestStatus 驱动的全区域占位组件。
+//
+// 设计稿还原（像素级）：
+//   容器: flex-col, items-center, justify-center, py-80, min-h-240
+//   图标: 48×48, strokeWidth 1.5, color white/15, mb-20
+//   标题: 15px, color white/50, font-weight medium
+//   描述: 13px, color white/25, mt-6, max-w-300, text-center, leading-relaxed
+//   按钮: mt-20, px-16 py-6, rounded-lg(8px), 13px,
+//          text white/60 hover white, bg white/5 hover white/10,
+//          border white/6 hover white/10
+//   Pending: Loader2 36×36 旋转, mb-16, "加载中…" 13px white/25
+//
+
+.status-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    min-height: 240px;
+
+    // ── 旋转图标（Pending 态） ──
+    &__spinner {
+        width: 36px;
+        height: 36px;
+        color: rgba(255, 255, 255, 0.15);
+        margin-bottom: 16px;
+        animation: status-placeholder-spin 1s linear infinite;
+    }
+
+    // ── 图标（Error / Empty 态） ──
+    &__icon {
+        width: 48px;
+        height: 48px;
+        color: rgba(255, 255, 255, 0.15);
+        margin-bottom: 20px;
+        flex-shrink: 0;
+    }
+
+    // ── 标题 ──
+    &__title {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: var(--font-weight-medium);
+    }
+
+    // Pending 态标题 — 更浅色
+    &--pending &__title {
+        font-size: var(--text-label-size);
+        color: rgba(255, 255, 255, 0.25);
+        font-weight: normal;
+    }
+
+    // ── 描述 ──
+    &__desc {
+        font-size: var(--text-label-size);
+        color: rgba(255, 255, 255, 0.25);
+        margin-top: 6px;
+        max-width: 300px;
+        text-align: center;
+        line-height: var(--text-label-leading);
+    }
+
+    // ── 操作按钮 ──
+    &__action {
+        // button 重置
+        border: none;
+        background: none;
+        text-align: left;
+
+        margin-top: 20px;
+        padding: 6px 16px;
+        border-radius: var(--radius-control);
+        font-size: var(--text-label-size);
+        color: rgba(255, 255, 255, 0.6);
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        cursor: pointer;
+        white-space: nowrap;
+
+        transition:
+            background-color var(--duration-normal) var(--ease-standard),
+            border-color var(--duration-normal) var(--ease-standard),
+            color var(--duration-normal) var(--ease-standard),
+            opacity var(--duration-instant) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-text-primary);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        &:active {
+            opacity: var(--opacity-pressed);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+                var(--focus-ring);
+        }
+    }
+}
+
+// ── spin 动画 ──
+@keyframes status-placeholder-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

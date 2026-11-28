@@ -1,0 +1,85 @@
+// ============================================================================
+// Drawer — 模式组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   位置: fixed, right 0, top 0, bottom 0
+//   宽度: --size-drawer-w (340px)
+//   背景: --color-bg-drawer rgba(24,24,27,0.95)
+//   backdrop: blur(--blur-lg)
+//   边框: 左 1px --color-border-default
+//   圆角: 左上左下 --radius-modal (20px)
+//   阴影: --shadow-left
+//   层级: --z-drawer (40)
+//
+
+// ── 遮罩 ──
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-drawer) - 1);
+    background: var(--color-bg-overlay);
+}
+
+// ── 面板 ──
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-drawer);
+    width: var(--size-drawer-w);
+    display: flex;
+    flex-direction: column;
+
+    background: var(--color-bg-drawer);
+    backdrop-filter: blur(var(--blur-lg));
+    border-left: 1px solid var(--color-border-default);
+    border-radius: var(--radius-modal) 0 0 var(--radius-modal);
+    box-shadow: var(--shadow-left);
+
+    // ── Header ──
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 20px 12px;
+        flex-shrink: 0;
+    }
+
+    &__title {
+        font-size: var(--text-heading-size);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        line-height: var(--text-heading-leading);
+    }
+
+    &__close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: var(--radius-pill);
+        background: none;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition:
+            background-color var(--duration-fast) var(--ease-standard),
+            color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            background: var(--color-fill-subtle-hover);
+            color: var(--color-text-primary);
+        }
+    }
+
+    // ── Body ──
+    &__body {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0 20px 20px;
+    }
+}

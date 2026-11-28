@@ -1,0 +1,37 @@
+// ============================================================================
+// WindowControls — 无边框窗口控制按钮
+// ============================================================================
+
+.l-window-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    -webkit-app-region: no-drag;
+    z-index: 1;
+
+    &__btn {
+        width: 46px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition:
+            background-color var(--duration-fast) var(--ease-standard),
+            color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            background-color: var(--color-fill-subtle-hover);
+            color: var(--color-text-primary);
+        }
+
+        &--close:hover {
+            background-color: #e81123;
+            color: #fff;
+        }
+    }
+}

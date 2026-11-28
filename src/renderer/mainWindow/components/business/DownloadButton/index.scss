@@ -1,0 +1,107 @@
+// ============================================================================
+// DownloadButton — 业务组件样式
+// ============================================================================
+//
+// 设计稿还原（像素级）：
+//   容器: inline-flex, items-center, justify-center, rounded-pill
+//   默认: bg transparent, color text-secondary
+//   hover: bg fill-subtle-hover, color text-primary
+//   已下载: color status-success-text, opacity disabled, cursor default
+//   下载中: color text-brand, icon spin
+//   active: opacity 0.6
+//   尺寸: sm(--icon-sm) md(--icon-md) lg(--icon-lg) xl(--icon-xl)
+//
+
+.download-btn {
+    // ── 重置 button 默认样式 ──
+    border: none;
+    background: none;
+    padding: 0;
+
+    // ── 布局 ──
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+
+    // ── 默认外观 ──
+    color: var(--color-text-secondary);
+
+    // ── 过渡 ──
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        opacity var(--duration-instant) var(--ease-standard);
+
+    // ── hover ──
+    &:hover:not(.is-completed):not(.is-downloading) {
+        color: var(--color-text-primary);
+    }
+
+    // ── :active ──
+    &:active:not(.is-completed):not(.is-downloading) {
+        opacity: var(--opacity-pressed);
+    }
+
+    // ── 下载中 ──
+    &.is-downloading {
+        color: var(--color-text-brand);
+        cursor: default;
+
+        > svg {
+            animation: download-btn-spin 1s linear infinite;
+        }
+    }
+
+    // ── 下载失败 ──
+    &.is-error {
+        color: var(--color-status-danger-text);
+    }
+
+    // ── 已下载 / 本地歌曲 ──
+    &.is-completed {
+        color: var(--color-status-success-text);
+        opacity: var(--opacity-disabled);
+        cursor: default;
+    }
+
+    // ── :focus-visible ──
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--focus-ring-offset) var(--color-bg-base),
+            var(--focus-ring);
+    }
+
+    // ── 尺寸 ──
+    &--sm {
+        width: var(--icon-sm);
+        height: var(--icon-sm);
+    }
+
+    &--md {
+        width: var(--icon-md);
+        height: var(--icon-md);
+    }
+
+    &--lg {
+        width: var(--icon-lg);
+        height: var(--icon-lg);
+    }
+
+    &--xl {
+        width: var(--icon-xl);
+        height: var(--icon-xl);
+    }
+}
+
+@keyframes download-btn-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
