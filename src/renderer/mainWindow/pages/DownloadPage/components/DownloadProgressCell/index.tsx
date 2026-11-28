@@ -10,8 +10,8 @@ function getDisplayProgress(
     task: IDownloadTask,
     progress: IDownloadProgress | undefined,
 ): { percent: number; speed: string } {
-    // 有实时进度时以它为准（0 也是有效值），总大小未知时才用任务记录里的值
-    const totalBytes = progress && progress.totalBytes > 0 ? progress.totalBytes : task.totalBytes;
+    // 有实时进度时以它为准（已下载 0 字节、总大小未知 -1 都是本次的有效值），没有时用任务记录
+    const totalBytes = progress ? progress.totalBytes : task.totalBytes;
     const downloadedBytes = progress ? progress.downloadedBytes : task.downloadedBytes;
     const percent =
         totalBytes > 0 ? Math.min(100, Math.round((downloadedBytes / totalBytes) * 100)) : 0;
