@@ -125,6 +125,8 @@ export class DownloadTask {
                 this.task.downloadedBytes = 0;
                 existingBytes = 0;
             }
+            // 先报告本次的起点：从头下载时界面不再沿用上一次的进度
+            onProgress(this.task.downloadedBytes, this.task.totalBytes, 0);
 
             // 5. 创建写入流
             await fsp.mkdir(path.dirname(this.task.tempPath!), { recursive: true });
