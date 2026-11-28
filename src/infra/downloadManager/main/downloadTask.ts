@@ -133,6 +133,11 @@ export class DownloadTask {
                         : null;
             const contentLength = parseInt(String(response.headers['content-length'] ?? '0'), 10);
             const isPartial = response.status === 206;
+            // 压缩响应的续传区间按压缩数据计，不能接在已解压的临时文件后面：按失败处理（重试从头下载）
+            if (isPartial && encoding !== '' && encoding !== 'identity') {
+                response.data.destroy();
+                throw new Error(`Cannot resume a ${encoding}-encoded response`);
+            }
 
             // 服务器不支持 Range 时从头下载；-1 表示总大小未知。
             // 起点在写入流打开（从头下载时清空临时文件）后才生效，此前中止时任务记录保持上一次的进度
