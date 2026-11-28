@@ -101,6 +101,9 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - 修复插件返回的歌曲封面不是文字（如 false、数字、对象）时，添加到歌单或播放队列失败、下载完成后文件被删除，或库里原有封面被改写的问题；这类封面现在按没有封面处理。
 - 修复下载完成后，歌曲在下载期间更新过的标题、歌手、专辑或封面被改回下载开始时的旧信息的问题；登记到「已下载」时只补上缺少的信息。
 - 修复下载即将完成时暂停又立即继续，会留下一份不在「已下载」里的重复文件、下载按钮可能一直显示「下载中」的问题（这种情况下会重新下载这首歌）；删除正在收尾的下载任务也不再留下文件；在下载收尾时退出应用，会稍等它完成登记（最多 3 秒，此时还没取到的封面不再写入文件），不再留下没有登记的文件。
+- 修复继续下载时，部分服务器的回复不带本次长度，进度一直显示 100% 的问题。
+- 修复继续下载时服务器只返回部分内容或从错误位置返回，文件不完整却被当作下载完成的问题；现在会显示下载失败，重试会从头下载。
+- 修复下载队列的「大小」列在首次下载时一直显示「-」、从头重新下载时显示上一次大小的问题。
 
 ### Added
 
@@ -191,6 +194,9 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Fix songs whose plugin-provided artwork is not text (such as false, a number or an object) failing to be added to playlists or the play queue, getting their downloaded file deleted after download, or overwriting the stored cover; such artwork is now treated as missing.
 - Fix a finished download reverting the song's title, artist, album or cover to what it was when the download started, discarding updates made in the meantime; registering a song as downloaded now only fills in missing information.
 - Fix pausing a download just as it finishes and resuming right away leaving a duplicate file outside "Downloaded" and possibly a download button stuck on "Downloading" (the song is downloaded again in this case); removing a download task while it is finishing no longer leaves its file behind; quitting the app at that moment now waits briefly for it to be registered (up to 3 seconds; a cover not yet fetched is skipped), so no unregistered file is left behind.
+- Fix resumed downloads showing 100% the whole time when the server's reply omits the length of the remaining part.
+- Fix a resumed download being treated as complete when the server returned only part of the file or resumed from the wrong position; it now shows as failed, and retrying downloads it from the beginning.
+- Fix the download queue's size column showing "-" throughout a first download, or the previous size when a download restarts from the beginning.
 
 ---
 
