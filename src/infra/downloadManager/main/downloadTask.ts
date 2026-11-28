@@ -9,6 +9,7 @@
 import fs from 'fs';
 import fsp from 'fs/promises';
 import { pipeline } from 'stream/promises';
+import zlib from 'zlib';
 import path from 'path';
 import axios from 'axios';
 import { safeParse } from '@common/safeSerialize';
@@ -101,6 +102,10 @@ export class DownloadTask {
             if (existingBytes > 0) {
                 headers['Range'] = `bytes=${existingBytes}-`;
             }
+            // 请求不压缩的原始数据（插件指定了就沿用）
+            if (!Object.keys(headers).some((k) => k.toLowerCase() === 'accept-encoding')) {
+                headers['Accept-Encoding'] = 'identity';
+            }
 
             // 3. 发起请求（读取临时文件期间被中止时不再发起）
             if (this.isAborted) return;
@@ -110,9 +115,22 @@ export class DownloadTask {
                 responseType: 'stream',
                 signal: this.abortController.signal,
                 timeout: 30_000,
+                // 自行解压：保留 Content-Encoding，接收字节数才能与 Content-Length 对照
+                decompress: false,
             });
 
-            // 4. 解析总大小
+            // 4. 解析总大小（压缩响应的长度、进度都按接收到的压缩字节计）
+            const encoding = String(response.headers['content-encoding'] ?? '')
+                .trim()
+                .toLowerCase();
+            const decoder =
+                encoding === 'gzip' || encoding === 'x-gzip' || encoding === 'deflate'
+                    ? zlib.createUnzip()
+                    : encoding === 'br'
+                      ? zlib.createBrotliDecompress()
+                      : encoding === 'zstd' && typeof zlib.createZstdDecompress === 'function'
+                        ? zlib.createZstdDecompress()
+                        : null;
             const contentLength = parseInt(String(response.headers['content-length'] ?? '0'), 10);
             const isPartial = response.status === 206;
 
@@ -199,11 +217,18 @@ export class DownloadTask {
             });
 
             // 写入流在写完前被中止（abort 会 destroy 它）时以错误结束，不会一直等下去
-            await pipeline(dataStream, this.writeStream);
+            if (decoder) {
+                await pipeline(dataStream, decoder, this.writeStream);
+            } else {
+                await pipeline(dataStream, this.writeStream);
+            }
 
-            // 已知总大小时核对文件是否完整：只收到部分内容不能登记为完成
+            // 已知总大小时核对是否收全：只收到部分内容不能登记为完成。
+            // 压缩响应核对接收到的字节数，未压缩的核对文件大小
             if (totalBytes > 0) {
-                const { size } = await fsp.stat(this.task.tempPath!);
+                const size = decoder
+                    ? this.task.downloadedBytes
+                    : (await fsp.stat(this.task.tempPath!)).size;
                 if (size !== totalBytes) {
                     throw new Error(`Incomplete download: ${size} of ${totalBytes} bytes`);
                 }
