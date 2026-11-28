@@ -193,6 +193,17 @@ class DownloadManagerRenderer {
                 this.progressMap.delete(event.task.id);
             }
 
+            // 完成或删除的任务立即移出列表：进度已清除，留到防抖刷新会短暂显示任务记录里的旧进度
+            if (event.type === 'completed' || event.type === 'removed') {
+                const rest = this.tasks.filter((t) => t.id !== event.task.id);
+                if (rest.length !== this.tasks.length) {
+                    this.tasks = rest;
+                    this.totalCount = rest.length;
+                    this.taskListVersion++;
+                    this.events.emit('taskListChange');
+                }
+            }
+
             // 刷新任务列表（防抖）
             this.debouncedRefresh();
         });
