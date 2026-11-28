@@ -155,9 +155,25 @@ export class DownloadTask {
                 response.data.destroy();
                 return;
             }
-            this.writeStream = fs.createWriteStream(this.task.tempPath!, {
+            const writeStream = fs.createWriteStream(this.task.tempPath!, {
                 flags: isPartial ? 'a' : 'w',
             });
+            this.writeStream = writeStream;
+            // 等文件真正打开（从头下载时此刻才清空）再生效起点；打开失败按出错处理，任务记录保持上一次的进度
+            try {
+                await new Promise<void>((resolve, reject) => {
+                    writeStream.once('open', () => resolve());
+                    writeStream.once('error', reject);
+                    writeStream.once('close', () => resolve());
+                });
+            } catch (err) {
+                response.data.destroy();
+                throw err;
+            }
+            if (this.isAborted) {
+                response.data.destroy();
+                return;
+            }
             this.task.totalBytes = totalBytes;
             this.task.downloadedBytes = startBytes;
             // 先报告本次的起点：从头下载时界面不再沿用上一次的进度
