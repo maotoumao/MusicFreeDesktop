@@ -52,6 +52,9 @@ async function detectAudioExt(filePath: string): Promise<string | null> {
     return null;
 }
 
+/** 已登记的压缩编码中，无法确认解压后完整的几种 */
+const UNVERIFIABLE_ENCODINGS = ['zstd', 'dcb', 'dcz', 'aes128gcm', 'exi', 'pack200-gzip'];
+
 export class DownloadTask {
     public task: IDownloadTask;
     public speed = 0;
@@ -123,7 +126,8 @@ export class DownloadTask {
             const encoding = String(response.headers['content-encoding'] ?? '')
                 .trim()
                 .toLowerCase();
-            // 只接受解压后能确认完整的编码（数据截断时解压会报错）；其他编码不能当作音频保存，按失败处理
+            // gzip 类与 br 自行解压（数据截断时解压会报错）；登记过、但解压后无法确认完整的压缩编码按失败处理；
+            // 其他取值（如错标的 none、binary）按原始数据保存，与 axios 原先的处理一致。
             // 解压器在接入写入前才创建，提前出错或中止时不会留下未关闭的解压器
             const createDecoder = ['gzip', 'x-gzip', 'compress', 'x-compress', 'deflate'].includes(
                 encoding,
@@ -132,14 +136,14 @@ export class DownloadTask {
                 : encoding === 'br'
                   ? () => zlib.createBrotliDecompress()
                   : null;
-            if (!createDecoder && encoding !== '' && encoding !== 'identity') {
+            if (UNVERIFIABLE_ENCODINGS.includes(encoding)) {
                 response.data.destroy();
                 throw new Error(`Unsupported content encoding: ${encoding}`);
             }
             const contentLength = parseInt(String(response.headers['content-length'] ?? '0'), 10);
             const isPartial = response.status === 206;
             // 压缩响应的续传区间按压缩数据计，不能接在已解压的临时文件后面：按失败处理（重试从头下载）
-            if (isPartial && encoding !== '' && encoding !== 'identity') {
+            if (isPartial && createDecoder) {
                 response.data.destroy();
                 throw new Error(`Cannot resume a ${encoding}-encoded response`);
             }
