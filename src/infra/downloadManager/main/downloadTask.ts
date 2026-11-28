@@ -52,7 +52,10 @@ async function detectAudioExt(filePath: string): Promise<string | null> {
     return null;
 }
 
-/** 能自行解压、且数据截断时解压会报错的压缩编码 */
+/**
+ * 自行解压的压缩编码，数据截断时解压会报错。compress / x-compress 只能解开实际是 gzip、zlib 的数据，
+ * 真正的 Unix .Z（LZW）数据解压时报错，按失败处理
+ */
 const DECODABLE_ENCODINGS = ['gzip', 'x-gzip', 'compress', 'x-compress', 'deflate', 'br'];
 /** 已登记的压缩编码中，无法确认解压后完整的几种 */
 const UNVERIFIABLE_ENCODINGS = ['zstd', 'dcb', 'dcz', 'aes128gcm', 'exi', 'pack200-gzip'];
