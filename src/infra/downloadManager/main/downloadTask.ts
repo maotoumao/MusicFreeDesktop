@@ -77,6 +77,8 @@ export class DownloadTask {
         onCompleted: () => void | Promise<void>,
         onError: (err: Error) => void,
     ): Promise<void> {
+        // 本次的响应流：任何出口都释放，提前出错时不占着连接
+        let responseData: { destroy(): void } | undefined;
         try {
             const mediaSource = safeParse<Record<string, any>>(this.task.mediaSource ?? '');
             if (!mediaSource) throw new Error('Invalid mediaSource');
@@ -121,6 +123,7 @@ export class DownloadTask {
                 // 自行解压：保留 Content-Encoding，接收字节数才能与 Content-Length 对照
                 decompress: false,
             });
+            responseData = response.data;
 
             // 4. 解析总大小（压缩响应的长度、进度都按接收到的压缩字节计）
             const encoding = String(response.headers['content-encoding'] ?? '')
@@ -276,9 +279,12 @@ export class DownloadTask {
 
             await onCompleted();
         } catch (err: any) {
+            // 状态码出错（如 416）时响应流在错误对象上
+            err?.response?.data?.destroy?.();
             if (axios.isCancel(err)) return;
             onError(err);
         } finally {
+            responseData?.destroy();
             // 确保 writeStream 被清理
             if (this.writeStream) {
                 this.writeStream.destroy();
