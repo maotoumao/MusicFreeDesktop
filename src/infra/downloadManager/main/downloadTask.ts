@@ -118,9 +118,17 @@ export class DownloadTask {
 
             // 服务器不支持 Range 时从头下载；-1 表示总大小未知。
             // 起点在写入流打开（从头下载时清空临时文件）后才生效，此前中止时任务记录保持上一次的进度
+            // 续传时完整大小优先取 Content-Range 里的总长，其次是已有字节加本次长度，都没有时未知
+            const rangeTotal = Number(
+                /\/(\d+)\s*$/.exec(String(response.headers['content-range'] ?? ''))?.[1],
+            );
             const startBytes = isPartial ? existingBytes : 0;
             const totalBytes = isPartial
-                ? existingBytes + contentLength
+                ? rangeTotal > 0
+                    ? rangeTotal
+                    : contentLength > 0
+                      ? existingBytes + contentLength
+                      : -1
                 : contentLength > 0
                   ? contentLength
                   : -1;
