@@ -116,17 +116,14 @@ export class DownloadTask {
             const contentLength = parseInt(String(response.headers['content-length'] ?? '0'), 10);
             const isPartial = response.status === 206;
 
-            if (isPartial) {
-                this.task.totalBytes = existingBytes + contentLength;
-                this.task.downloadedBytes = existingBytes;
-            } else {
-                // 服务器不支持 Range，从头下载；-1 表示总大小未知
-                this.task.totalBytes = contentLength > 0 ? contentLength : -1;
-                this.task.downloadedBytes = 0;
-                existingBytes = 0;
-            }
-            // 先报告本次的起点：从头下载时界面不再沿用上一次的进度
-            onProgress(this.task.downloadedBytes, this.task.totalBytes, 0);
+            // 服务器不支持 Range 时从头下载；-1 表示总大小未知。
+            // 起点在写入流打开（从头下载时清空临时文件）后才生效，此前中止时任务记录保持上一次的进度
+            const startBytes = isPartial ? existingBytes : 0;
+            const totalBytes = isPartial
+                ? existingBytes + contentLength
+                : contentLength > 0
+                  ? contentLength
+                  : -1;
 
             // 5. 创建写入流
             await fsp.mkdir(path.dirname(this.task.tempPath!), { recursive: true });
@@ -138,6 +135,10 @@ export class DownloadTask {
             this.writeStream = fs.createWriteStream(this.task.tempPath!, {
                 flags: isPartial ? 'a' : 'w',
             });
+            this.task.totalBytes = totalBytes;
+            this.task.downloadedBytes = startBytes;
+            // 先报告本次的起点：从头下载时界面不再沿用上一次的进度
+            onProgress(startBytes, totalBytes, 0);
 
             // 6. 流式下载
             this.lastSpeedCheckTime = Date.now();
