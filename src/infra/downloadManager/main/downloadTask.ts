@@ -235,6 +235,14 @@ export class DownloadTask {
 
             // 已知总大小时核对是否收全：只收到部分内容不能登记为完成。
             // 压缩响应核对接收到的字节数，未压缩的核对文件大小
+            // 续传响应还要收满 Content-Range 声明的区间（总长写成 * 时也核对）
+            if (isPartial && range && rangeEnd >= rangeStart) {
+                const received = this.task.downloadedBytes - startBytes;
+                const declared = rangeEnd - rangeStart + 1;
+                if (received !== declared) {
+                    throw new Error(`Incomplete range: ${received} of ${declared} bytes`);
+                }
+            }
             if (totalBytes > 0) {
                 const size = decoder
                     ? this.task.downloadedBytes
